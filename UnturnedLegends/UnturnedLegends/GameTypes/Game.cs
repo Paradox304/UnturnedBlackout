@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnturnedLegends.Enums;
+using UnturnedLegends.Models;
 
 namespace UnturnedLegends.GameTypes
 {
@@ -40,5 +41,7 @@ namespace UnturnedLegends.GameTypes
 
         public abstract void OnPlayerDying(Player player);
         public abstract void OnPlayerDead(Player player, CSteamID killer);
+        public abstract void AddPlayerToGame(GamePlayer player);
+        public abstract void RemovePlayerFromGame(GamePlayer player);
     }
 }
