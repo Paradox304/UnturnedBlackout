@@ -21,7 +21,7 @@ namespace UnturnedLegends.GameTypes
             SpawnPoints = Plugin.Instance.DataManager.Data.FFASpawnPoints.Where(k => k.LocationID == locationID).ToList();
             Utility.Debug($"Found {SpawnPoints.Count} positions for FFA");
 
-
+            d
         }
 
         public override void OnPlayerDying(Player player)
