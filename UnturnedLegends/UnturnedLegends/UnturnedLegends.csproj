@@ -124,9 +124,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Config.cs" />
+    <Compile Include="Database\PlayerData.cs" />
     <Compile Include="Enums\EGameType.cs" />
     <Compile Include="GameTypes\FFAGame.cs" />
     <Compile Include="GameTypes\Game.cs" />
+    <Compile Include="Managers\DatabaseManager.cs" />
     <Compile Include="Managers\DataManager.cs" />
     <Compile Include="Managers\GameManager.cs" />
     <Compile Include="Models\ArenaLocation.cs" />
