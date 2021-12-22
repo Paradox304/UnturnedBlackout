@@ -15,6 +15,8 @@ namespace UnturnedLegends.Structs
         public int MultipleKills { get; set; }
         public DateTime LastKill { get; set; }
 
+        public int XP { get; set; }
+
         public FFAPlayer(GamePlayer gamePlayer)
         {
             GamePlayer = gamePlayer;
