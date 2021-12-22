@@ -33,7 +33,10 @@ namespace UnturnedLegends.Managers
             U.Events.OnPlayerDisconnected += OnPlayerLeft;
         }
 
+        public void StartGame()
+        {
 
+        }
 
         private void OnPlayerJoined(UnturnedPlayer player)
         {
