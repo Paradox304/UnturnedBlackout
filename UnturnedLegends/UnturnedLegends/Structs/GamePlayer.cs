@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace UnturnedLegends.Models
+namespace UnturnedLegends.Structs
 {
     public class GamePlayer
     {

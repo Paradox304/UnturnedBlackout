@@ -15,6 +15,7 @@ namespace UnturnedLegends
         {
             Instance = this;
             DataManager = new DataManager();
+            GameManager = new GameManager();
 
             Logger.Log("Unturned Legends has been loaded");
         }
@@ -22,9 +23,12 @@ namespace UnturnedLegends
 
         protected override void Unload()
         {
+            GameManager.Destroy();
+
             Logger.Log("Unturned Legends has been unloaded");
         }
 
+        public GameManager GameManager { get; set; }
         public DataManager DataManager { get; set; }
         public static Plugin Instance { get; set; }
     }

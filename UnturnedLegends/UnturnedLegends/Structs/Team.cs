@@ -6,19 +6,19 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace UnturnedLegends.Models
+namespace UnturnedLegends.Structs
 {
     public class Team
     {
         public string TeamName { get; set; }
-        public List<CSteamID> Players { get; set; }
+        public HashSet<CSteamID> Players { get; set; }
 
         public CSteamID GroupID { get; set; }
 
         public Team(string teamName)
         {
             TeamName = teamName;
-            Players = new List<CSteamID>();
+            Players = new HashSet<CSteamID>();
         }
 
         public void AddPlayer(CSteamID steamID)
