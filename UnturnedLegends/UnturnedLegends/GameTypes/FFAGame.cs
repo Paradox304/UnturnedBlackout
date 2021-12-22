@@ -116,35 +116,20 @@ namespace UnturnedLegends.GameTypes
             Utility.Debug($"Killer found, killer name: {kPlayer.GamePlayer.Player.CharacterName}");
             kPlayer.Kills++;
 
-            var xpGained = 0;
-            if (limb == ELimb.SKULL)
-            {
-                xpGained += Config.FFA.XPPerKillHeadshot;
-            } else
-            {
-                xpGained += Config.FFA.XPPerKill;
-            }
+            var xpGained = limb == ELimb.SKULL ? Config.FFA.XPPerKillHeadshot : Config.FFA.XPPerKill;
 
-            if (kPlayer.KillStreak != 0)
-            {
+            if (kPlayer.KillStreak > 0)
+                xpGained += Config.FFA.BaseXPKS + (++kPlayer.KillStreak * Config.FFA.IncreaseXPPerKS);
+            else 
                 kPlayer.KillStreak++;
-                xpGained += Config.FFA.BaseXPKS + (kPlayer.KillStreak * Config.FFA.IncreaseXPPerKS);
-            }
 
             if (kPlayer.MultipleKills == 0)
-            {
                 kPlayer.MultipleKills++;
-            } else
-            {
-                if ((DateTime.UtcNow - kPlayer.LastKill).TotalSeconds <= 10)
-                {
-                    kPlayer.MultipleKills++;
-                    xpGained += Config.FFA.BaseXPMK + (kPlayer.MultipleKills * Config.FFA.IncreaseXPPerMK);
-                } else
-                {
-                    kPlayer.MultipleKills = 0;
-                }
-            }
+            else if ((DateTime.UtcNow - kPlayer.LastKill).TotalSeconds <= 10)
+                xpGained += Config.FFA.BaseXPMK + (++kPlayer.MultipleKills * Config.FFA.IncreaseXPPerMK);
+            else
+                kPlayer.MultipleKills = 0;
+
             kPlayer.LastKill = DateTime.UtcNow;
             kPlayer.XP += xpGained;
 
