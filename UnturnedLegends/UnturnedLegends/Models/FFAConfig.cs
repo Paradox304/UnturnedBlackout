@@ -19,7 +19,24 @@ namespace UnturnedLegends.Models
 
         public int BaseXPMK { get; set; }
         public int IncreaseXPPerMK { get; set; }
+        public int MKSeconds { get; set; }
 
+        public FFAConfig()
+        {
 
+        }
+
+        public FFAConfig(int startSeconds, int endSeconds, int xPPerKill, int xPPerKillHeadshot, int baseXPKS, int increaseXPPerKS, int baseXPMK, int increaseXPPerMK, int mKSeconds)
+        {
+            StartSeconds = startSeconds;
+            EndSeconds = endSeconds;
+            XPPerKill = xPPerKill;
+            XPPerKillHeadshot = xPPerKillHeadshot;
+            BaseXPKS = baseXPKS;
+            IncreaseXPPerKS = increaseXPPerKS;
+            BaseXPMK = baseXPMK;
+            IncreaseXPPerMK = increaseXPPerMK;
+            MKSeconds = mKSeconds;
+        }
     }
 }

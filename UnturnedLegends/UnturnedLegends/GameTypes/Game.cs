@@ -33,22 +33,7 @@ namespace UnturnedLegends.GameTypes
 
         private void OnPlayerPostDeath(PlayerLife sender, EDeathCause cause, ELimb limb, CSteamID instigator)
         {
-            OnPlayerDead(sender.player, instigator);
-        }
-
-        public GamePlayer GetGamePlayer(UnturnedPlayer player)
-        {
-            return Plugin.Instance.GameManager.Players.TryGetValue(player.CSteamID, out GamePlayer gPlayer) ? gPlayer : null;
-        }
-
-        public GamePlayer GetGamePlayer(Player player)
-        {
-            return Plugin.Instance.GameManager.Players.TryGetValue(player.channel.owner.playerID.steamID, out GamePlayer gPlayer) ? gPlayer : null;
-        }
-
-        public GamePlayer GetGamePlayer(CSteamID steamID)
-        {
-            return Plugin.Instance.GameManager.Players.TryGetValue(steamID, out GamePlayer gPlayer) ? gPlayer : null;
+            OnPlayerDead(sender.player, instigator, limb);
         }
 
         public void Destroy()
@@ -56,7 +41,7 @@ namespace UnturnedLegends.GameTypes
             PlayerLife.onPlayerDied -= OnPlayerPostDeath;
         }
 
-        public abstract void OnPlayerDead(Player player, CSteamID killer);
+        public abstract void OnPlayerDead(Player player, CSteamID killer, ELimb limb);
         public abstract void AddPlayerToGame(GamePlayer player);
         public abstract void RemovePlayerFromGame(GamePlayer player);
     }

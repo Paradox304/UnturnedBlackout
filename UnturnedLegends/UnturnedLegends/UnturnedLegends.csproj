@@ -131,6 +131,7 @@
     <Compile Include="Managers\GameManager.cs" />
     <Compile Include="Models\ArenaLocation.cs" />
     <Compile Include="Models\FFAConfig.cs" />
+    <Compile Include="Structs\FFAPlayer.cs" />
     <Compile Include="Structs\GamePlayer.cs" />
     <Compile Include="Models\PositionsData.cs" />
     <Compile Include="Structs\Team.cs" />
