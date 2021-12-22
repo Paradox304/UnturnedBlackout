@@ -113,8 +113,6 @@ namespace UnturnedLegends.GameTypes
                 }
             }
             kPlayer.LastKill = DateTime.UtcNow;
-
-            de
         }
 
         public void GiveLoadout(FFAPlayer player)
