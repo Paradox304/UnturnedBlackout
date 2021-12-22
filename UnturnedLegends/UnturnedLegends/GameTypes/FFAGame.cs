@@ -4,10 +4,13 @@ using Rocket.Unturned.Player;
 using SDG.Unturned;
 using Steamworks;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using UnityEngine;
 using UnturnedLegends.Enums;
 using UnturnedLegends.Models;
 using UnturnedLegends.SpawnPoints;
@@ -20,12 +23,41 @@ namespace UnturnedLegends.GameTypes
         public List<FFASpawnPoint> SpawnPoints { get; set; }
         public Dictionary<CSteamID, FFAPlayer> Players { get; set; }
 
+        public Coroutine GameStarter { get; set; }
+        public Coroutine GameEnder { get; set; }
+
         public FFAGame(int locationID) : base(EGameType.FFA, locationID)
         {
             Utility.Debug("Initializing FFA game");
             SpawnPoints = Plugin.Instance.DataManager.Data.FFASpawnPoints.Where(k => k.LocationID == locationID).ToList();
             Players = new Dictionary<CSteamID, FFAPlayer>();
             Utility.Debug($"Found {SpawnPoints.Count} positions for FFA");
+
+            GameStarter = Plugin.Instance.StartCoroutine(StartGame());
+        }
+
+        public IEnumerator StartGame()
+        {
+            for (int seconds = Config.FFA.StartSeconds; seconds >= 0; seconds--)
+            {
+                yield return new WaitForSeconds(1);
+                // Code to send the timer UI
+            }
+            HasStarted = true;
+
+            foreach (var player in Players.Values)
+            {
+                player.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1);
+            }
+
+            GameEnder = Plugin.Instance.StartCoroutine(EndGame());
+        }
+
+        public IEnumerator EndGame()
+        {
+            yield return new WaitForSeconds(Config.FFA.EndSeconds);
+            
+            // Code to give the credits, and send everyone to the lobby!
         }
 
         public override void AddPlayerToGame(GamePlayer player)
@@ -57,7 +89,7 @@ namespace UnturnedLegends.GameTypes
 
         public override void OnPlayerDead(Player player, CSteamID killer, ELimb limb)
         {
-            Utility.Debug($"Player died, getting the ffa player");
+            Utility.Debug("Player died, getting the ffa player");
             var fPlayer = GetFFAPlayer(player);
             if (fPlayer == null)
             {
@@ -81,6 +113,7 @@ namespace UnturnedLegends.GameTypes
                 return;
             }
 
+            Utility.Debug($"Killer found, killer name: {kPlayer.GamePlayer.Player.CharacterName}");
             kPlayer.Kills++;
 
             var xpGained = 0;
@@ -114,6 +147,14 @@ namespace UnturnedLegends.GameTypes
             }
             kPlayer.LastKill = DateTime.UtcNow;
             kPlayer.XP += xpGained;
+
+            Utility.Debug($"Killer's killstreak: {kPlayer.KillStreak}, Killer's XP gained: {xpGained}");
+            ThreadPool.QueueUserWorkItem(async (o) =>
+            {
+                await Plugin.Instance.DBManager.IncreasePlayerDeathsAsync(fPlayer.GamePlayer.SteamID, 1);
+                await Plugin.Instance.DBManager.IncreasePlayerKillsAsync(kPlayer.GamePlayer.SteamID, 1);
+                await Plugin.Instance.DBManager.IncreasePlayerXPAsync(kPlayer.GamePlayer.SteamID, (uint)xpGained);
+            });
         }
 
         public void GiveLoadout(FFAPlayer player)
@@ -133,6 +174,11 @@ namespace UnturnedLegends.GameTypes
 
             var spawnpoint = SpawnPoints[UnityEngine.Random.Range(0, SpawnPoints.Count)];
             player.GamePlayer.Player.Player.teleportToLocationUnsafe(spawnpoint.GetSpawnPoint(), 0);
+
+            if (!HasStarted)
+            {
+                player.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(0);
+            }
         }
 
         public FFAPlayer GetFFAPlayer(CSteamID steamID)

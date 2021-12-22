@@ -14,6 +14,8 @@ namespace UnturnedLegends
         protected override void Load()
         {
             Instance = this;
+
+            DBManager = new DatabaseManager();
             DataManager = new DataManager();
             GameManager = new GameManager();
 
@@ -30,6 +32,7 @@ namespace UnturnedLegends
 
         public GameManager GameManager { get; set; }
         public DataManager DataManager { get; set; }
+        public DatabaseManager DBManager { get; set; }
         public static Plugin Instance { get; set; }
     }
 }

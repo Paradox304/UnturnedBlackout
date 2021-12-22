@@ -21,6 +21,8 @@ namespace UnturnedLegends.Models
         public int IncreaseXPPerMK { get; set; }
         public int MKSeconds { get; set; }
 
+        public int KillsScore { get; set; }
+
         public FFAConfig()
         {
 

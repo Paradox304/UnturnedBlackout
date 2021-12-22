@@ -113,20 +113,23 @@ namespace UnturnedLegends.Managers
             }
         }
 
-        public async Task UpdatePlayerXPAsync(CSteamID steamID, uint newXP)
+        public async Task IncreasePlayerXPAsync(CSteamID steamID, uint xp)
         {
             using (MySqlConnection Conn = new MySqlConnection(ConnectionString))
             {
                 try
                 {
-                    await new MySqlCommand($"UPDATE `{Config.PlayersTableName}` SET `XP` = {newXP} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                    var obj = await new MySqlCommand($"UPDATE `{Config.PlayersTableName}` SET `XP` = `XP` + {xp} WHERE `SteamID` = {steamID}; Select `XP` FROM `{Config.PlayersTableName}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
                     if (PlayerCache.TryGetValue(steamID, out PlayerData data))
                     {
-                        data.XP = newXP;
+                        if (obj is uint newXp)
+                        {
+                            data.XP = newXp;
+                        }
                     }
                 } catch (Exception ex)
                 {
-                    Logger.Log($"Error changing player with steam id {steamID} xp to {newXP}");
+                    Logger.Log($"Error adding {xp} xp for player with steam id {steamID}");
                     Logger.Log(ex);
                 } finally
                 {
@@ -135,21 +138,24 @@ namespace UnturnedLegends.Managers
             }
         }
 
-        public async Task UpdatePlayerCreditsAsync(CSteamID steamID, uint newCredits)
+        public async Task IncreasePlayerCreditsAsync(CSteamID steamID, uint credits)
         {
             using (MySqlConnection Conn = new MySqlConnection(ConnectionString))
             {
                 try
                 {
-                    await new MySqlCommand($"UPDATE `{Config.PlayersTableName}` SET `Credits` = {newCredits} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                    var obj = await new MySqlCommand($"UPDATE `{Config.PlayersTableName}` SET `Credits` = `Credits` + {credits} WHERE `SteamID` = {steamID}; Select `Credits` FROM `{Config.PlayersTableName}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
                     if (PlayerCache.TryGetValue(steamID, out PlayerData data))
                     {
-                        data.Credits = newCredits;
+                        if (obj is uint newCredits)
+                        {
+                            data.Credits = newCredits;
+                        }
                     }
                 }
                 catch (Exception ex)
                 {
-                    Logger.Log($"Error changing player with steam id {steamID} credits to {newCredits}");
+                    Logger.Log($"Error adding {credits} credits for player with steam id {steamID}");
                     Logger.Log(ex);
                 }
                 finally
@@ -159,21 +165,24 @@ namespace UnturnedLegends.Managers
             }
         }
 
-        public async Task UpdatePlayerKillsAsync(CSteamID steamID, uint newKills)
+        public async Task IncreasePlayerKillsAsync(CSteamID steamID, uint kills)
         {
             using (MySqlConnection Conn = new MySqlConnection(ConnectionString))
             {
                 try
                 {
-                    await new MySqlCommand($"UPDATE `{Config.PlayersTableName}` SET `Kills` = {newKills} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                    var obj = await new MySqlCommand($"UPDATE `{Config.PlayersTableName}` SET `Kills` = `Kills` + {kills} WHERE `SteamID` = {steamID}; Select `Kills` FROM `{Config.PlayersTableName}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
                     if (PlayerCache.TryGetValue(steamID, out PlayerData data))
                     {
-                        data.Kills = newKills;
+                        if (obj is uint newKills)
+                        {
+                            data.Kills = newKills;
+                        }
                     }
                 }
                 catch (Exception ex)
                 {
-                    Logger.Log($"Error changing player with steam id {steamID} kills to {newKills}");
+                    Logger.Log($"Error adding {kills} kills for player with steam id {steamID}");
                     Logger.Log(ex);
                 }
                 finally
@@ -183,21 +192,24 @@ namespace UnturnedLegends.Managers
             }
         }
 
-        public async Task UpdatePlayerDeathsAsync(CSteamID steamID, uint newDeaths)
+        public async Task IncreasePlayerDeathsAsync(CSteamID steamID, uint deaths)
         {
             using (MySqlConnection Conn = new MySqlConnection(ConnectionString))
             {
                 try
                 {
-                    await new MySqlCommand($"UPDATE `{Config.PlayersTableName}` SET `Deaths` = {newDeaths} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                    var obj = await new MySqlCommand($"UPDATE `{Config.PlayersTableName}` SET `Deaths` = `Deaths` + {deaths} WHERE `SteamID` = {steamID}; Select `Deaths` FROM `{Config.PlayersTableName}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
                     if (PlayerCache.TryGetValue(steamID, out PlayerData data))
                     {
-                        data.Deaths = newDeaths;
+                        if (obj is uint newDeaths)
+                        {
+                            data.Deaths = newDeaths;
+                        }
                     }
                 }
                 catch (Exception ex)
                 {
-                    Logger.Log($"Error changing player with steam id {steamID} kills to {newDeaths}");
+                    Logger.Log($"Error adding {deaths} deaths for player with steam id {steamID}");
                     Logger.Log(ex);
                 }
                 finally
