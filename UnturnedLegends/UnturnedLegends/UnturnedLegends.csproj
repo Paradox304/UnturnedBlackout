@@ -126,6 +126,7 @@
     <Compile Include="Commands\FFASPCommand.cs" />
     <Compile Include="Commands\JoinCommand.cs" />
     <Compile Include="Commands\LeaveCommand.cs" />
+    <Compile Include="Commands\SetLobbyCommand.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Database\PlayerData.cs" />
     <Compile Include="Enums\EGameType.cs" />

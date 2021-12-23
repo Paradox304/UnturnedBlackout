@@ -110,9 +110,9 @@ namespace UnturnedLegends.GameTypes
             Utility.Debug($"Game player found, player name: {fPlayer.GamePlayer.Player.CharacterName}");
             Utility.Debug("Respawning the player");
             fPlayer.OnDeath();
-            player.life.sendRespawn(false);
             TaskDispatcher.QueueOnMainThread(() =>
             {
+                player.life.sendRespawn(false);
                 SpawnPlayer(fPlayer);
             });
 
@@ -122,6 +122,12 @@ namespace UnturnedLegends.GameTypes
             if (kPlayer == null)
             {
                 Utility.Debug("Could'nt find the killer, returning");
+                return;
+            }
+
+            if (kPlayer.GamePlayer.SteamID == fPlayer.GamePlayer.SteamID)
+            {
+                Utility.Debug("Player killed themselves, returning");
                 return;
             }
 

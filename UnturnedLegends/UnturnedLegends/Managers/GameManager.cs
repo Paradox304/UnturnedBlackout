@@ -27,6 +27,7 @@ namespace UnturnedLegends.Managers
 
         public GameManager()
         {
+            Config = Plugin.Instance.Configuration.Instance;
             Players = new Dictionary<CSteamID, GamePlayer>();
 
             PreviousLocation = new ArenaLocation(-1, "None");
@@ -34,6 +35,8 @@ namespace UnturnedLegends.Managers
 
             U.Events.OnPlayerConnected += OnPlayerJoined;
             U.Events.OnPlayerDisconnected += OnPlayerLeft;
+
+            StartGame();
         }
 
         public void StartGame()
@@ -94,6 +97,8 @@ namespace UnturnedLegends.Managers
             }
 
             CurrentGame.RemovePlayerFromGame(gPlayer);
+            Utility.Debug("Sending player to lobby");
+            SendPlayerToLobby(player);
         }
 
         private void OnPlayerJoined(UnturnedPlayer player)
@@ -108,8 +113,10 @@ namespace UnturnedLegends.Managers
             Utility.Debug($"{player.CharacterName} joined the server, creating a game player and sending them to lobby!");
             if (!Players.ContainsKey(player.CSteamID))
             {
-                Players.Add(player.CSteamID, new GamePlayer(player, player.Player.channel.GetOwnerTransportConnection()));
+                Players.Remove(player.CSteamID);   
             }
+
+            Players.Add(player.CSteamID, new GamePlayer(player, player.Player.channel.GetOwnerTransportConnection()));
             SendPlayerToLobby(player);
         }
 
@@ -118,13 +125,15 @@ namespace UnturnedLegends.Managers
             Utility.Debug($"{player.CharacterName} left the server, removing them from game and removing the game player");
             if (Players.TryGetValue(player.CSteamID, out GamePlayer gPlayer))
             {
-                CurrentGame.RemovePlayerFromGame(gPlayer);
+                if (CurrentGame != null)
+                    CurrentGame.RemovePlayerFromGame(gPlayer);
                 Players.Remove(player.CSteamID);
             }
         }
 
         public void SendPlayerToLobby(UnturnedPlayer player)
         {
+            Utility.Debug($"Sending {player.CharacterName} to the lobby");
             player.Player.inventory.ClearInventory();
             TaskDispatcher.QueueOnMainThread(() =>
             {

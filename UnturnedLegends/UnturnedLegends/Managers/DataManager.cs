@@ -21,7 +21,7 @@ namespace UnturnedLegends.Managers
             Data = new PositionsData();
 
             Utility.Debug("Initializing data manager");
-            ThreadPool.QueueUserWorkItem((o) => InitiateData());
+            InitiateData();
         }
 
         public void InitiateData()
@@ -49,7 +49,6 @@ namespace UnturnedLegends.Managers
         {
             Utility.Debug("Loading json file");
             var deserialized = JsonConvert.DeserializeObject<PositionsData>(File.ReadAllText(Path));
-            Utility.Debug($"Deserialized data: {deserialized}");
             Data = deserialized;
         }
 

@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using UnturnedLegends.Database;
 
@@ -20,9 +21,14 @@ namespace UnturnedLegends.Managers
         public DatabaseManager()
         {
             Config = Plugin.Instance.Configuration.Instance;
-            ConnectionString = ConnectionString = $"server={Config.DatabaseHost};user={Config.DatabaseUsername};database={Config.DatabaseName};port={Config.DatabasePort};password={Config.DatabasePassword}";
+            ConnectionString = $"server={Config.DatabaseHost};user={Config.DatabaseUsername};database={Config.DatabaseName};port={Config.DatabasePort};password={Config.DatabasePassword}";
 
             PlayerCache = new Dictionary<CSteamID, PlayerData>();
+
+            ThreadPool.QueueUserWorkItem(async (o) =>
+            {
+                await LoadDatabaseAsync();
+            });
         }
 
         public async Task LoadDatabaseAsync()
@@ -32,7 +38,7 @@ namespace UnturnedLegends.Managers
                 try
                 {
                     await Conn.OpenAsync();
-                    await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{Config.PlayersTableName}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `SteamName` VARCHAR(65) NOT NULL , `AvatarLink` VARCHAR(200) NOT NULL , `XP` INT UNSIGNED NOT NULL DEFAULT '0' , `Credits` INT UNSIGNED NOT NULL DEFAULT '0' , `Kills` INT UNSIGNED NOT NULL DEFAULT '0' , `Deaths` INT UNSIGNED NOT NULL DEFAULT '0' , PRIMARY KEY (`SteamID`));").ExecuteScalarAsync();
+                    await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{Config.PlayersTableName}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `SteamName` VARCHAR(65) NOT NULL , `AvatarLink` VARCHAR(200) NOT NULL , `XP` INT UNSIGNED NOT NULL DEFAULT '0' , `Credits` INT UNSIGNED NOT NULL DEFAULT '0' , `Kills` INT UNSIGNED NOT NULL DEFAULT '0' , `Deaths` INT UNSIGNED NOT NULL DEFAULT '0' , PRIMARY KEY (`SteamID`));", Conn).ExecuteScalarAsync();
                 } catch (Exception ex)
                 {
                     Logger.Log("Error loading database");
@@ -51,7 +57,7 @@ namespace UnturnedLegends.Managers
                 try
                 {
                     await Conn.OpenAsync();
-                    var cmd = new MySqlCommand($"INSERT INTO `{Config.PlayersTableName}` ( `SteamID` , `SteamName` , `AvatarLink` ) VALUES ({steamID}, @name, '{avatarLink}') ON DUPLICATE KEY UPDATE `SteamName` = @name AND `AvatarLink` = '{avatarLink}';", Conn);
+                    var cmd = new MySqlCommand($"INSERT INTO `{Config.PlayersTableName}` ( `SteamID` , `SteamName` , `AvatarLink` ) VALUES ({steamID}, @name, '{avatarLink}') ON DUPLICATE KEY UPDATE `SteamName` = @name, `AvatarLink` = '{avatarLink}';", Conn);
                     cmd.Parameters.AddWithValue("@name", steamName);
                     await cmd.ExecuteScalarAsync();
                 } catch (Exception ex)
@@ -119,7 +125,10 @@ namespace UnturnedLegends.Managers
             {
                 try
                 {
-                    var obj = await new MySqlCommand($"UPDATE `{Config.PlayersTableName}` SET `XP` = `XP` + {xp} WHERE `SteamID` = {steamID}; Select `XP` FROM `{Config.PlayersTableName}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                    await Conn.OpenAsync();
+
+                    await new MySqlCommand($"UPDATE `{Config.PlayersTableName}` SET `XP` = `XP` + {xp} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                    var obj = await new MySqlCommand($"Select `XP` FROM `{Config.PlayersTableName}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
                     if (PlayerCache.TryGetValue(steamID, out PlayerData data))
                     {
                         if (obj is uint newXp)
@@ -144,7 +153,10 @@ namespace UnturnedLegends.Managers
             {
                 try
                 {
-                    var obj = await new MySqlCommand($"UPDATE `{Config.PlayersTableName}` SET `Credits` = `Credits` + {credits} WHERE `SteamID` = {steamID}; Select `Credits` FROM `{Config.PlayersTableName}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                    await Conn.OpenAsync();
+
+                    await new MySqlCommand($"UPDATE `{Config.PlayersTableName}` SET `Credits` = `Credits` + {credits} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                    var obj = await new MySqlCommand($"Select `Credits` FROM `{Config.PlayersTableName}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
                     if (PlayerCache.TryGetValue(steamID, out PlayerData data))
                     {
                         if (obj is uint newCredits)
@@ -171,7 +183,11 @@ namespace UnturnedLegends.Managers
             {
                 try
                 {
-                    var obj = await new MySqlCommand($"UPDATE `{Config.PlayersTableName}` SET `Kills` = `Kills` + {kills} WHERE `SteamID` = {steamID}; Select `Kills` FROM `{Config.PlayersTableName}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                    await Conn.OpenAsync();
+
+                    await new MySqlCommand($"UPDATE `{Config.PlayersTableName}` SET `Kills` = `Kills` + {kills} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                    var obj = await new MySqlCommand($"Select `Kills` FROM `{Config.PlayersTableName}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+
                     if (PlayerCache.TryGetValue(steamID, out PlayerData data))
                     {
                         if (obj is uint newKills)
@@ -198,7 +214,10 @@ namespace UnturnedLegends.Managers
             {
                 try
                 {
-                    var obj = await new MySqlCommand($"UPDATE `{Config.PlayersTableName}` SET `Deaths` = `Deaths` + {deaths} WHERE `SteamID` = {steamID}; Select `Deaths` FROM `{Config.PlayersTableName}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                    await Conn.OpenAsync();
+
+                    await new MySqlCommand($"UPDATE `{Config.PlayersTableName}` SET `Deaths` = `Deaths` + {deaths} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                    var obj = await new MySqlCommand($"Select `Deaths` FROM `{Config.PlayersTableName}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
                     if (PlayerCache.TryGetValue(steamID, out PlayerData data))
                     {
                         if (obj is uint newDeaths)

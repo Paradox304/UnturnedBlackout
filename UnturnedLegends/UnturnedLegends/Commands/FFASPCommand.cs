@@ -29,7 +29,7 @@ namespace UnturnedLegends.Commands
 
             if (command.Length == 0)
             {
-                Utility.Say(caller, $"[color=red]Correct Usage: {Syntax}[/color]");
+                Utility.Say(caller, $"<color=red>Correct Usage: {Syntax}</color>");
                 return;
             }
 
