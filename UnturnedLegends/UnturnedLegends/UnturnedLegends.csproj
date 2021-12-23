@@ -123,6 +123,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Commands\FFASPCommand.cs" />
+    <Compile Include="Commands\JoinCommand.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Database\PlayerData.cs" />
     <Compile Include="Enums\EGameType.cs" />

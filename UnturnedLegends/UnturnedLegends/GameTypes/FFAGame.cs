@@ -21,7 +21,7 @@ namespace UnturnedLegends.GameTypes
     public class FFAGame : Game
     {
         public List<FFASpawnPoint> SpawnPoints { get; set; }
-        public Dictionary<CSteamID, FFAPlayer> Players { get; set; }
+        public List<FFAPlayer> Players { get; set; }
 
         public Coroutine GameStarter { get; set; }
         public Coroutine GameEnder { get; set; }
@@ -30,7 +30,7 @@ namespace UnturnedLegends.GameTypes
         {
             Utility.Debug("Initializing FFA game");
             SpawnPoints = Plugin.Instance.DataManager.Data.FFASpawnPoints.Where(k => k.LocationID == locationID).ToList();
-            Players = new Dictionary<CSteamID, FFAPlayer>();
+            Players = new List<FFAPlayer>();
             Utility.Debug($"Found {SpawnPoints.Count} positions for FFA");
 
             GameStarter = Plugin.Instance.StartCoroutine(StartGame());
@@ -41,13 +41,14 @@ namespace UnturnedLegends.GameTypes
             for (int seconds = Config.FFA.StartSeconds; seconds >= 0; seconds--)
             {
                 yield return new WaitForSeconds(1);
-                // Code to send the timer UI
+                // CODE TO SEND THE TIMER UI
             }
             HasStarted = true;
 
-            foreach (var player in Players.Values)
+            foreach (var player in Players)
             {
                 player.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1);
+                // CODE TO SEND THE WHOLE FFA UI
             }
 
             GameEnder = Plugin.Instance.StartCoroutine(EndGame());
@@ -56,35 +57,43 @@ namespace UnturnedLegends.GameTypes
         public IEnumerator EndGame()
         {
             yield return new WaitForSeconds(Config.FFA.EndSeconds);
-            
-            // Code to give the credits, and send everyone to the lobby!
+            foreach (var player in Players)
+            {
+                Plugin.Instance.GameManager.SendPlayerToLobby(player.GamePlayer.Player);
+
+                // CODE TO SEND THE UI REMOVAL
+            }
         }
 
         public override void AddPlayerToGame(GamePlayer player)
         {
             Utility.Debug($"Adding {player.Player.CharacterName} to FFA game");
-            if (Players.ContainsKey(player.SteamID))
+            if (Players.Exists(k => k.GamePlayer.SteamID == player.SteamID))
             {
                 Utility.Debug("Player is already in the game, returning");
                 return;
             }
 
             FFAPlayer fPlayer = new FFAPlayer(player);
-            Players.Add(player.SteamID, fPlayer);
+
+            Players.Add(fPlayer);
             GiveLoadout(fPlayer);
             SpawnPlayer(fPlayer);
+
+            // CODE TO SEND THE CODE FOR FFA UI
         }
 
         public override void RemovePlayerFromGame(GamePlayer player)
         {
             Utility.Debug($"Removing {player.Player.CharacterName} from FFA game");
-            if (!Players.ContainsKey(player.SteamID))
+            if (!Players.Exists(k => k.GamePlayer.SteamID == player.SteamID))
             {
                 Utility.Debug("Player is already not in the game, returning");
                 return;
             }
 
-            Players.Remove(player.SteamID);
+            // CODE TO SEND THE UI REMOVAL
+            Players.RemoveAll(k => k.GamePlayer.SteamID == player.SteamID);
         }
 
         public override void OnPlayerDead(Player player, CSteamID killer, ELimb limb)
@@ -133,7 +142,11 @@ namespace UnturnedLegends.GameTypes
             kPlayer.LastKill = DateTime.UtcNow;
             kPlayer.XP += xpGained;
 
-            Utility.Debug($"Killer's killstreak: {kPlayer.KillStreak}, Killer's XP gained: {xpGained}");
+            Players.Sort((x, y) => x.Kills - y.Kills);
+
+            // CODE TO UPDATE SHOW HOW MUCH XP PLAYER GAINED, ALSO CODE TO UPDATE THE KILLS FOR THE PLAYER AND TOP KILLS FOR ALL OTHER PLAYERS
+
+            Utility.Debug($"Killer's killstreak: {kPlayer.KillStreak}, Killer's XP gained: {xpGained}, Killer's Multiple Kills: {kPlayer.MultipleKills}");
             ThreadPool.QueueUserWorkItem(async (o) =>
             {
                 await Plugin.Instance.DBManager.IncreasePlayerDeathsAsync(fPlayer.GamePlayer.SteamID, 1);
@@ -168,17 +181,17 @@ namespace UnturnedLegends.GameTypes
 
         public FFAPlayer GetFFAPlayer(CSteamID steamID)
         {
-            return Players.TryGetValue(steamID, out FFAPlayer fPlayer) ? fPlayer : null;
+            return Players.FirstOrDefault(k => k.GamePlayer.SteamID == steamID);
         }
 
         public FFAPlayer GetFFAPlayer(UnturnedPlayer player)
         {
-            return Players.TryGetValue(player.CSteamID, out FFAPlayer fPlayer) ? fPlayer : null;
+            return Players.FirstOrDefault(k => k.GamePlayer.SteamID == player.CSteamID);
         }
 
         public FFAPlayer GetFFAPlayer(Player player)
         {
-            return Players.TryGetValue(player.channel.owner.playerID.steamID, out FFAPlayer fPlayer) ? fPlayer : null;
+            return Players.FirstOrDefault(k => k.GamePlayer.SteamID == player.channel.owner.playerID.steamID);
         }
     }
 }

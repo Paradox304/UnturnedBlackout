@@ -29,13 +29,71 @@ namespace UnturnedLegends.Managers
         {
             Players = new Dictionary<CSteamID, GamePlayer>();
 
+            PreviousLocation = new ArenaLocation(-1, "None");
+            PreviousGame = EGameType.None;
+
             U.Events.OnPlayerConnected += OnPlayerJoined;
             U.Events.OnPlayerDisconnected += OnPlayerLeft;
         }
 
         public void StartGame()
         {
+            Utility.Debug($"Starting game, finding a random arena location, previous location was {PreviousLocation.LocationName}");
+            var locations = Config.ArenaLocations.Where(k => k.LocationID != PreviousLocation.LocationID).ToList();
+            var randomLocation = locations[UnityEngine.Random.Range(0, locations.Count)];
+            Utility.Debug($"Found a random location, name is {randomLocation.LocationName}");
 
+            PreviousLocation = randomLocation;
+            PreviousGame = EGameType.FFA;
+
+            CurrentGame = new FFAGame(randomLocation.LocationID);
+            Utility.Debug($"Started a {PreviousGame} game");
+        }
+
+        public void EndGame()
+        {
+            Utility.Debug($"Ending the game, destroying the Current Game and starting the timer to start another game");
+            CurrentGame.Destroy();
+            CurrentGame = null;
+            StartGame();
+        }
+
+        public void AddPlayerToGame(UnturnedPlayer player)
+        {
+            Utility.Debug($"Trying to add {player.CharacterName} to game");
+            if (CurrentGame == null)
+            {
+                Utility.Debug("There's no game going on at the moment");
+                return;
+            }
+
+            var gPlayer = GetGamePlayer(player);
+            if (gPlayer == null)
+            {
+                Utility.Debug("Error finding game player of the player, returning");
+                return;
+            }
+
+            CurrentGame.AddPlayerToGame(gPlayer);
+        }
+
+        public void RemovePlayerFromGame(UnturnedPlayer player)
+        {
+            Utility.Debug($"Trying to remove {player.CharacterName} from game");
+            if (CurrentGame == null)
+            {
+                Utility.Debug("There's no game going on at the moment");
+                return;
+            }
+
+            var gPlayer = GetGamePlayer(player);
+            if (gPlayer == null)
+            {
+                Utility.Debug("Error finding game player of the player, returning");
+                return;
+            }
+
+            CurrentGame.RemovePlayerFromGame(gPlayer);
         }
 
         private void OnPlayerJoined(UnturnedPlayer player)
@@ -78,6 +136,11 @@ namespace UnturnedLegends.Managers
         {
             U.Events.OnPlayerConnected -= OnPlayerJoined;
             U.Events.OnPlayerDisconnected -= OnPlayerLeft;
+        }
+
+        public GamePlayer GetGamePlayer(UnturnedPlayer player)
+        {
+            return Players.TryGetValue(player.CSteamID, out GamePlayer gPlayer) ? gPlayer : null;
         }
     }
 }
