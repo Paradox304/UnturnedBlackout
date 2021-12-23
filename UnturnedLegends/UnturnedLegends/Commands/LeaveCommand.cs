@@ -8,15 +8,15 @@ using System.Threading.Tasks;
 
 namespace UnturnedLegends.Commands
 {
-    class JoinCommand : IRocketCommand
+    class LeaveCommand : IRocketCommand
     {
         public AllowedCaller AllowedCaller => AllowedCaller.Player;
 
-        public string Name => "join";
+        public string Name => "leave";
 
-        public string Help => "Join the game going on";
+        public string Help => "Leave the game going on";
 
-        public string Syntax => "/join";
+        public string Syntax => "/leave";
 
         public List<string> Aliases => new List<string>();
 
@@ -25,7 +25,7 @@ namespace UnturnedLegends.Commands
         public void Execute(IRocketPlayer caller, string[] command)
         {
             UnturnedPlayer player = caller as UnturnedPlayer;
-            Plugin.Instance.GameManager.AddPlayerToGame(player);
+            Plugin.Instance.GameManager.RemovePlayerFromGame(player);
         }
     }
 }

@@ -80,7 +80,7 @@ namespace UnturnedLegends.GameTypes
             GiveLoadout(fPlayer);
             SpawnPlayer(fPlayer);
 
-            // CODE TO SEND THE CODE FOR FFA UI
+            // CODE TO SEND THE WHOLE FFA UI
         }
 
         public override void RemovePlayerFromGame(GamePlayer player)
@@ -93,6 +93,7 @@ namespace UnturnedLegends.GameTypes
             }
 
             // CODE TO SEND THE UI REMOVAL
+
             Players.RemoveAll(k => k.GamePlayer.SteamID == player.SteamID);
         }
 
@@ -114,6 +115,8 @@ namespace UnturnedLegends.GameTypes
             {
                 SpawnPlayer(fPlayer);
             });
+
+            ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DBManager.IncreasePlayerDeathsAsync(fPlayer.GamePlayer.SteamID, 1));
 
             var kPlayer = GetFFAPlayer(killer);
             if (kPlayer == null)
@@ -149,7 +152,6 @@ namespace UnturnedLegends.GameTypes
             Utility.Debug($"Killer's killstreak: {kPlayer.KillStreak}, Killer's XP gained: {xpGained}, Killer's Multiple Kills: {kPlayer.MultipleKills}");
             ThreadPool.QueueUserWorkItem(async (o) =>
             {
-                await Plugin.Instance.DBManager.IncreasePlayerDeathsAsync(fPlayer.GamePlayer.SteamID, 1);
                 await Plugin.Instance.DBManager.IncreasePlayerKillsAsync(kPlayer.GamePlayer.SteamID, 1);
                 await Plugin.Instance.DBManager.IncreasePlayerXPAsync(kPlayer.GamePlayer.SteamID, (uint)xpGained);
             });
