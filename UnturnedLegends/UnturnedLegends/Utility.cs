@@ -80,5 +80,18 @@ namespace UnturnedLegends
             inv.player.equipment.sendSlot(0);
             inv.player.equipment.sendSlot(1);
         }
+
+        public static string GetOrdinal(int index)
+        {
+            switch (index)
+            {
+                case 2:
+                    return "2nd";
+                case 3:
+                    return "3rd";
+                default:
+                    return index + "th";
+            }
+        }
     }
 }
