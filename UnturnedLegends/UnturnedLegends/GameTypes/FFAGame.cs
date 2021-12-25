@@ -1,5 +1,4 @@
 ﻿using Rocket.Core;
-using Rocket.Core.Utils;
 using Rocket.Unturned.Player;
 using SDG.Unturned;
 using Steamworks;
@@ -8,12 +7,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnturnedLegends.Enums;
-using UnturnedLegends.Models;
 using UnturnedLegends.SpawnPoints;
 using UnturnedLegends.Structs;
 
@@ -114,12 +110,21 @@ namespace UnturnedLegends.GameTypes
             if (!HasStarted)
             {
                 EffectManager.sendUIEffectVisibility(Key, player.TransportConnection, true, "StartCountdown", true);
-            } else
+            }
+            else
             {
                 EffectManager.sendUIEffectVisibility(Key, player.TransportConnection, true, "ScoreCounter", true);
                 EffectManager.sendUIEffect(27610, 27610, player.TransportConnection, true, Plugin.Instance.Translate("FFA_Name").ToRich(), Plugin.Instance.Translate("FFA_Desc").ToRich());
                 EffectManager.sendUIEffectVisibility(Key, player.TransportConnection, true, "Timer", true);
                 ShowTopUI(fPlayer);
+            }
+
+            if (Players.Count == 2)
+            {
+                foreach (var ply in Players)
+                {
+                    ShowTopUI(ply);
+                }
             }
         }
 
@@ -176,24 +181,40 @@ namespace UnturnedLegends.GameTypes
             kPlayer.Kills++;
 
             var xpGained = limb == ELimb.SKULL ? Config.FFA.XPPerKillHeadshot : Config.FFA.XPPerKill;
+            string xpText = limb == ELimb.SKULL ? Plugin.Instance.Translate("Headshot_Kill").ToRich() : Plugin.Instance.Translate("Normal_Kill").ToRich();
+            xpText += "\n";
 
             if (kPlayer.KillStreak > 0)
+            {
                 xpGained += Config.FFA.BaseXPKS + (++kPlayer.KillStreak * Config.FFA.IncreaseXPPerKS);
+                xpText += Plugin.Instance.Translate("KillStreak_Show", kPlayer.KillStreak).ToRich() + "\n";
+            }
             else
+            {
                 kPlayer.KillStreak++;
+            }
 
             if (kPlayer.MultipleKills == 0)
+            {
                 kPlayer.MultipleKills++;
+            }
             else if ((DateTime.UtcNow - kPlayer.LastKill).TotalSeconds <= 10)
+            {
                 xpGained += Config.FFA.BaseXPMK + (++kPlayer.MultipleKills * Config.FFA.IncreaseXPPerMK);
+                xpText += Plugin.Instance.Translate("Multiple_Kills_Show", kPlayer.MultipleKills).ToRich() + "\n";
+            }
             else
+            {
                 kPlayer.MultipleKills = 0;
+            }
 
             kPlayer.LastKill = DateTime.UtcNow;
             kPlayer.XP += xpGained;
 
             Players.Sort((x, y) => y.Kills.CompareTo(x.Kills));
             Utility.Debug($"Killer's killstreak: {kPlayer.KillStreak}, Killer's XP gained: {xpGained}, Killer's Multiple Kills: {kPlayer.MultipleKills}");
+
+            EffectManager.sendUIEffect(27630, 27630, kPlayer.GamePlayer.TransportConnection, true, $"+{xpGained} XP", xpText);
 
             Stopwatch watch = new Stopwatch();
             watch.Start();
@@ -243,7 +264,8 @@ namespace UnturnedLegends.GameTypes
 
                 EffectManager.sendUIEffectVisibility(Key, player.GamePlayer.TransportConnection, true, "CounterWinning", true);
                 EffectManager.sendUIEffectVisibility(Key, player.GamePlayer.TransportConnection, true, "CounterLosing", false);
-            } else
+            }
+            else
             {
                 EffectManager.sendUIEffectVisibility(Key, player.GamePlayer.TransportConnection, true, "CounterWinning", false);
                 EffectManager.sendUIEffectVisibility(Key, player.GamePlayer.TransportConnection, true, "CounterLosing", true);
@@ -270,7 +292,7 @@ namespace UnturnedLegends.GameTypes
             {
                 Utility.Debug("No spawnpoints set for FFA, returning");
                 return;
-            } 
+            }
 
             var spawnpoint = SpawnPoints[UnityEngine.Random.Range(0, SpawnPoints.Count)];
             player.GamePlayer.Player.Player.teleportToLocationUnsafe(spawnpoint.GetSpawnPoint(), 0);
@@ -294,6 +316,21 @@ namespace UnturnedLegends.GameTypes
         public FFAPlayer GetFFAPlayer(Player player)
         {
             return Players.FirstOrDefault(k => k.GamePlayer.SteamID == player.channel.owner.playerID.steamID);
+        }
+
+        public override bool IsPlayerIngame(GamePlayer player)
+        {
+            return Players.Exists(k => k.GamePlayer.SteamID == player.SteamID);
+        }
+
+        public override bool IsPlayerIngame(CSteamID steamID)
+        {
+            return Players.Exists(k => k.GamePlayer.SteamID == steamID);
+        }
+
+        public override bool IsPlayerIngame(UnturnedPlayer player)
+        {
+            return Players.Exists(k => k.GamePlayer.SteamID == player.CSteamID);
         }
     }
 }

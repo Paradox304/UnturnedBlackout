@@ -1,11 +1,5 @@
 ﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using UnturnedLegends.Models;
 
 namespace UnturnedLegends.Managers
@@ -34,7 +28,8 @@ namespace UnturnedLegends.Managers
                 stream.Close();
                 Utility.Debug("Created a new file, save default data");
                 SaveJson();
-            } else
+            }
+            else
             {
                 LoadJson();
             }

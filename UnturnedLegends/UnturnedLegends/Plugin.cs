@@ -3,12 +3,8 @@ using Rocket.API.Collections;
 using Rocket.Core.Logging;
 using Rocket.Core.Plugins;
 using SDG.Unturned;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using UnturnedLegends.Managers;
 
 namespace UnturnedLegends
@@ -26,8 +22,6 @@ namespace UnturnedLegends
 
             DBManager = new DatabaseManager();
             DataManager = new DataManager();
-            GameManager = new GameManager();
-            HUDManager = new HUDManager();
 
             Level.onPostLevelLoaded += OnLevelLoaded;
 
@@ -41,16 +35,21 @@ namespace UnturnedLegends
             HUDManager.Destroy();
 
             Level.onPostLevelLoaded -= OnLevelLoaded;
+
             Logger.Log("Unturned Legends has been unloaded");
         }
 
         private void OnLevelLoaded(int level)
         {
-            var shouldFillAfterDetach = typeof(ItemMagazineAsset).GetField("shouldFillAfterDetach", BindingFlags.NonPublic | BindingFlags.Instance);
+            Utility.Debug("LEVEL LOADED, INITIALIZING GAME MANAGER AND HUD MANAGER");
+            GameManager = new GameManager();
+            HUDManager = new HUDManager();
+            Utility.Debug("CHANGING ALL MAGAZINES TO REFILL WHEN THE PLAYER DIES");
+            var shouldFillAfterDetach = typeof(ItemMagazineAsset).GetProperty("shouldFillAfterDetach", BindingFlags.Public | BindingFlags.Instance);
             var magazines = Assets.find(EAssetType.ITEM).OfType<ItemMagazineAsset>();
             foreach (var mag in magazines)
             {
-                shouldFillAfterDetach.SetValue(mag, true);
+                shouldFillAfterDetach.GetSetMethod(true).Invoke(mag, new object[] { true });
             }
         }
 
@@ -62,7 +61,11 @@ namespace UnturnedLegends
             { "No_Game_Going_On", "[color=red]There is no game going on at the moment[/color]" },
             { "FFA_Name", "Free-for-all" },
             { "FFA_Desc", "Eliminate other players." },
-            { "Arena_Name", "{0} Arena" }
+            { "Arena_Name", "{0} Arena" },
+            { "Headshot_Kill", "Headshot Kill" },
+            { "Normal_Kill", "Normal Kill" },
+            { "KillStreak_Show", "Killstreak x{0}" },
+            { "Multiple_Kills_Show", "Multiple Kills x{0}" }
         };
 
         public static Harmony Harmony { get; set; }

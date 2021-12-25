@@ -2,15 +2,10 @@
 using Rocket.Unturned.Events;
 using Rocket.Unturned.Player;
 using SDG.Unturned;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using UnityEngine;
 using UnturnedLegends.Database;
 using UnturnedLegends.Enums;
 using UnturnedLegends.Models;
-using UnturnedLegends.Structs;
 
 namespace UnturnedLegends.Managers
 {
@@ -23,6 +18,8 @@ namespace UnturnedLegends.Managers
         {
             UnturnedPlayerEvents.OnPlayerUpdateHealth += OnHealthChanged;
             UnturnedPlayerEvents.OnPlayerUpdateStamina += OnStaminaChanged;
+
+            UnturnedPlayerEvents.OnPlayerRevive += OnRevived;
 
             UseableGun.onChangeMagazineRequested += OnMagazineChanged;
             UseableGun.onBulletSpawned += OnBulletShot;
@@ -38,8 +35,12 @@ namespace UnturnedLegends.Managers
             EffectManager.sendUIEffect(ID, Key, player.Player.channel.GetOwnerTransportConnection(), true);
 
             OnHealthChanged(player, player.Player.life.health);
-            OnXPChanged(player);
             OnGamemodeChanged(player.Player, Plugin.Instance.GameManager.CurrentLocation, Plugin.Instance.GameManager.CurrentGame);
+        }
+
+        private void OnRevived(UnturnedPlayer player, Vector3 position, byte angle)
+        {
+            OnHealthChanged(player, player.Player.life.health);
         }
 
         private void OnHealthChanged(UnturnedPlayer player, byte health)
@@ -88,6 +89,8 @@ namespace UnturnedLegends.Managers
         {
             UnturnedPlayerEvents.OnPlayerUpdateHealth -= OnHealthChanged;
             UnturnedPlayerEvents.OnPlayerUpdateStamina -= OnStaminaChanged;
+
+            UnturnedPlayerEvents.OnPlayerRevive -= OnRevived;
 
             UseableGun.onChangeMagazineRequested -= OnMagazineChanged;
             UseableGun.onBulletSpawned -= OnBulletShot;

@@ -1,10 +1,5 @@
-﻿using SDG.Unturned;
-using Steamworks;
-using System;
+﻿using Steamworks;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace UnturnedLegends.Structs
 {

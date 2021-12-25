@@ -1,10 +1,10 @@
 ﻿using MySql.Data.MySqlClient;
 using Rocket.Core.Logging;
+using Rocket.Core.Utils;
+using Rocket.Unturned.Player;
 using Steamworks;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using UnturnedLegends.Database;
@@ -39,11 +39,13 @@ namespace UnturnedLegends.Managers
                 {
                     await Conn.OpenAsync();
                     await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{Config.PlayersTableName}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `SteamName` VARCHAR(65) NOT NULL , `AvatarLink` VARCHAR(200) NOT NULL , `XP` INT UNSIGNED NOT NULL DEFAULT '0' , `Credits` INT UNSIGNED NOT NULL DEFAULT '0' , `Kills` INT UNSIGNED NOT NULL DEFAULT '0' , `Deaths` INT UNSIGNED NOT NULL DEFAULT '0' , PRIMARY KEY (`SteamID`));", Conn).ExecuteScalarAsync();
-                } catch (Exception ex)
+                }
+                catch (Exception ex)
                 {
                     Logger.Log("Error loading database");
                     Logger.Log(ex);
-                } finally
+                }
+                finally
                 {
                     await Conn.CloseAsync();
                 }
@@ -60,11 +62,13 @@ namespace UnturnedLegends.Managers
                     var cmd = new MySqlCommand($"INSERT INTO `{Config.PlayersTableName}` ( `SteamID` , `SteamName` , `AvatarLink` ) VALUES ({steamID}, @name, '{avatarLink}') ON DUPLICATE KEY UPDATE `SteamName` = @name, `AvatarLink` = '{avatarLink}';", Conn);
                     cmd.Parameters.AddWithValue("@name", steamName);
                     await cmd.ExecuteScalarAsync();
-                } catch (Exception ex)
+                }
+                catch (Exception ex)
                 {
                     Logger.Log($"Error adding player with Steam ID {steamID}, Steam Name {steamName}, avatar link {avatarLink}");
                     Logger.Log(ex);
-                } finally
+                }
+                finally
                 {
                     await Conn.CloseAsync();
                 }
@@ -86,10 +90,25 @@ namespace UnturnedLegends.Managers
                         {
                             var steamName = rdr[1].ToString();
                             var avatarLink = rdr[2].ToString();
-                            if (!uint.TryParse(rdr[3].ToString(), out uint xp)) continue;
-                            if (!uint.TryParse(rdr[4].ToString(), out uint credits)) continue;
-                            if (!uint.TryParse(rdr[5].ToString(), out uint kills)) continue;
-                            if (!uint.TryParse(rdr[6].ToString(), out uint deaths)) continue;
+                            if (!uint.TryParse(rdr[3].ToString(), out uint xp))
+                            {
+                                continue;
+                            }
+
+                            if (!uint.TryParse(rdr[4].ToString(), out uint credits))
+                            {
+                                continue;
+                            }
+
+                            if (!uint.TryParse(rdr[5].ToString(), out uint kills))
+                            {
+                                continue;
+                            }
+
+                            if (!uint.TryParse(rdr[6].ToString(), out uint deaths))
+                            {
+                                continue;
+                            }
 
                             if (PlayerCache.ContainsKey(steamID))
                             {
@@ -98,11 +117,13 @@ namespace UnturnedLegends.Managers
 
                             PlayerCache.Add(steamID, new PlayerData(steamID, steamName, avatarLink, xp, credits, kills, deaths));
                         }
-                    } catch (Exception ex)
+                    }
+                    catch (Exception ex)
                     {
                         Logger.Log($"Getting player data with Steam ID {steamID}");
                         Logger.Log(ex);
-                    } finally
+                    }
+                    finally
                     {
                         rdr.Close();
                     }
@@ -136,11 +157,19 @@ namespace UnturnedLegends.Managers
                             data.XP = newXp;
                         }
                     }
-                } catch (Exception ex)
+
+                    TaskDispatcher.QueueOnMainThread(() =>
+                    {
+                        var player = UnturnedPlayer.FromCSteamID(steamID);
+                        if (player != null) Plugin.Instance.HUDManager.OnXPChanged(player);
+                    });
+                }
+                catch (Exception ex)
                 {
                     Logger.Log($"Error adding {xp} xp for player with steam id {steamID}");
                     Logger.Log(ex);
-                } finally
+                }
+                finally
                 {
                     await Conn.CloseAsync();
                 }

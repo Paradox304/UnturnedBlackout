@@ -1,11 +1,6 @@
 ﻿using Rocket.API;
 using Rocket.Unturned.Player;
 using SDG.Unturned;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 using Logger = Rocket.Core.Logging.Logger;
 
@@ -36,7 +31,11 @@ namespace UnturnedLegends
                     continue;
                 }
 
-                if (omit) continue;
+                if (omit)
+                {
+                    continue;
+                }
+
                 newString += c;
             }
             return newString;
@@ -45,8 +44,10 @@ namespace UnturnedLegends
         public static void Say(IRocketPlayer target, string message)
         {
             if (target is UnturnedPlayer player)
+            {
                 ChatManager.serverSendMessage(message, Color.green, toPlayer: player.SteamPlayer(),
                     useRichTextFormatting: true);
+            }
         }
 
         public static void Announce(string message)

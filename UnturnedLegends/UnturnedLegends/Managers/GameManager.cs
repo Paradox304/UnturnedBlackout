@@ -1,14 +1,14 @@
 ﻿using Rocket.Core.Utils;
 using Rocket.Unturned;
+using Rocket.Unturned.Events;
 using Rocket.Unturned.Player;
 using SDG.Unturned;
 using Steamworks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
+using UnityEngine;
 using UnturnedLegends.Enums;
 using UnturnedLegends.GameTypes;
 using UnturnedLegends.Models;
@@ -36,6 +36,7 @@ namespace UnturnedLegends.Managers
 
             U.Events.OnPlayerConnected += OnPlayerJoined;
             U.Events.OnPlayerDisconnected += OnPlayerLeft;
+            UnturnedPlayerEvents.OnPlayerRevive += OnPlayerRevived;
 
             StartGame();
         }
@@ -113,12 +114,17 @@ namespace UnturnedLegends.Managers
                 var profile = player.SteamProfile;
                 await Plugin.Instance.DBManager.AddOrUpdatePlayerAsync(player.CSteamID, profile.SteamID, profile.AvatarFull.ToString());
                 await Plugin.Instance.DBManager.GetPlayerDataAsync(player.CSteamID);
+
+                TaskDispatcher.QueueOnMainThread(() =>
+                {
+                    Plugin.Instance.HUDManager.OnXPChanged(player);
+                });
             });
 
             Utility.Debug($"{player.CharacterName} joined the server, creating a game player and sending them to lobby!");
             if (!Players.ContainsKey(player.CSteamID))
             {
-                Players.Remove(player.CSteamID);   
+                Players.Remove(player.CSteamID);
             }
 
             Players.Add(player.CSteamID, new GamePlayer(player, player.Player.channel.GetOwnerTransportConnection()));
@@ -131,8 +137,21 @@ namespace UnturnedLegends.Managers
             if (Players.TryGetValue(player.CSteamID, out GamePlayer gPlayer))
             {
                 if (Game != null)
+                {
                     Game.RemovePlayerFromGame(gPlayer);
+                }
+
                 Players.Remove(player.CSteamID);
+            }
+        }
+
+        private void OnPlayerRevived(UnturnedPlayer player, Vector3 position, byte angle)
+        {
+            Utility.Debug("Player revived, checking if the player is in a game");
+            if (Game == null || !Game.IsPlayerIngame(player))
+            {
+                Utility.Debug("Player is not in a game, spawning them in the lobby");
+                SendPlayerToLobby(player);
             }
         }
 
@@ -150,6 +169,8 @@ namespace UnturnedLegends.Managers
         {
             U.Events.OnPlayerConnected -= OnPlayerJoined;
             U.Events.OnPlayerDisconnected -= OnPlayerLeft;
+
+            UnturnedPlayerEvents.OnPlayerRevive -= OnPlayerRevived;
         }
 
         public GamePlayer GetGamePlayer(UnturnedPlayer player)

@@ -2,11 +2,7 @@
 using Rocket.Unturned.Player;
 using SDG.Unturned;
 using Steamworks;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnturnedLegends.Enums;
 using UnturnedLegends.Models;
@@ -49,6 +45,9 @@ namespace UnturnedLegends.GameTypes
             UnturnedPlayerEvents.OnPlayerRevive -= OnPlayerRevive;
         }
 
+        public abstract bool IsPlayerIngame(CSteamID steamID);
+        public abstract bool IsPlayerIngame(UnturnedPlayer player);
+        public abstract bool IsPlayerIngame(GamePlayer player);
         public abstract void OnPlayerRevived(UnturnedPlayer player);
         public abstract void OnPlayerDead(Player player, CSteamID killer, ELimb limb);
         public abstract void AddPlayerToGame(GamePlayer player);
