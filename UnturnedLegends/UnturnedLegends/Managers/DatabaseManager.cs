@@ -162,6 +162,19 @@ namespace UnturnedLegends.Managers
                         {
                             data.XP = newXp;
                         }
+
+                        var neededXP = data.GetNeededXP();
+                        if (data.XP >= neededXP)
+                        {
+                            var newXP = data.XP - neededXP;
+                            await new MySqlCommand($"UPDATE `{Config.PlayersTableName}` SET `XP` = {newXP}, `Level` = `Level` + 1 WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                            obj = await new MySqlCommand($"Select `Level` FROM `{Config.PlayersTableName}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                            if (obj is uint level)
+                            {
+                                data.Level = level;
+                            }
+                            data.XP = (uint)newXP;
+                        }
                     }
 
                     TaskDispatcher.QueueOnMainThread(() =>

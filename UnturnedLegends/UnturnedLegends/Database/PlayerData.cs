@@ -1,4 +1,5 @@
 ﻿using Steamworks;
+using System;
 
 namespace UnturnedLegends.Database
 {
@@ -23,6 +24,12 @@ namespace UnturnedLegends.Database
             Credits = credits;
             Kills = kills;
             Deaths = deaths;
+        }
+
+        public int GetNeededXP()
+        {
+            var config = Plugin.Instance.Configuration.Instance;
+            return (int)(config.BaseXP * Math.Pow(config.CommonRatio, Level));
         }
     }
 }

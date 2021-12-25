@@ -15,13 +15,16 @@ namespace UnturnedLegends
         public string PlayersTableName { get; set; }
         public int CacheRefreshSeconds { get; set; }
 
-
         public string MapName { get; set; }
         public string KitName { get; set; }
 
         public bool EnableDebugLogs { get; set; }
 
         public Vector3 LobbySpawn { get; set; }
+
+        public int BaseXP { get; set; }
+        public double CommonRatio { get; set; }
+
         public List<ArenaLocation> ArenaLocations { get; set; }
 
         public FFAConfig FFA { get; set; }
@@ -42,6 +45,10 @@ namespace UnturnedLegends
             EnableDebugLogs = true;
 
             LobbySpawn = Vector3.zero;
+
+            BaseXP = 200;
+            CommonRatio = 1.20;
+
             ArenaLocations = new List<ArenaLocation>
             {
                 new ArenaLocation(1, "Seattle"),

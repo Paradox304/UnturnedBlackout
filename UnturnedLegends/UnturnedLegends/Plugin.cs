@@ -65,7 +65,12 @@ namespace UnturnedLegends
             { "Headshot_Kill", "Headshot Kill" },
             { "Normal_Kill", "Normal Kill" },
             { "KillStreak_Show", "Killstreak x{0}" },
-            { "Multiple_Kills_Show", "Multiple Kills x{0}" }
+            { "Multiple_Kills_Show", "Multiple Kills x{0}" },
+            { "Level_Show", "LVL. {0}" },
+            { "SAFETY", "SAFETY" },
+            { "AUTO", "AUTO" },
+            { "BURST", "BURST" },
+            { "SEMI", "SEMI" }
         };
 
         public static Harmony Harmony { get; set; }
