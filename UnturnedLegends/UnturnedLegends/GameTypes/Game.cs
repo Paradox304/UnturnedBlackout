@@ -1,4 +1,5 @@
-﻿using Rocket.Unturned.Player;
+﻿using Rocket.Unturned.Events;
+using Rocket.Unturned.Player;
 using SDG.Unturned;
 using Steamworks;
 using System;
@@ -28,19 +29,27 @@ namespace UnturnedLegends.GameTypes
             CurrentLocation = Config.ArenaLocations.FirstOrDefault(k => k.LocationID == locationID);
             HasStarted = false;
 
-            PlayerLife.onPlayerDied += OnPlayerPostDeath;
+            PlayerLife.onPlayerDied += OnPlayerDied;
+            UnturnedPlayerEvents.OnPlayerRevive += OnPlayerRevive;
         }
 
-        private void OnPlayerPostDeath(PlayerLife sender, EDeathCause cause, ELimb limb, CSteamID instigator)
+        private void OnPlayerRevive(UnturnedPlayer player, Vector3 position, byte angle)
+        {
+            OnPlayerRevived(player);
+        }
+
+        private void OnPlayerDied(PlayerLife sender, EDeathCause cause, ELimb limb, CSteamID instigator)
         {
             OnPlayerDead(sender.player, instigator, limb);
         }
 
         public void Destroy()
         {
-            PlayerLife.onPlayerDied -= OnPlayerPostDeath;
+            PlayerLife.onPlayerDied -= OnPlayerDied;
+            UnturnedPlayerEvents.OnPlayerRevive -= OnPlayerRevive;
         }
 
+        public abstract void OnPlayerRevived(UnturnedPlayer player);
         public abstract void OnPlayerDead(Player player, CSteamID killer, ELimb limb);
         public abstract void AddPlayerToGame(GamePlayer player);
         public abstract void RemovePlayerFromGame(GamePlayer player);

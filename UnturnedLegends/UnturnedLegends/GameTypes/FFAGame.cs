@@ -58,9 +58,11 @@ namespace UnturnedLegends.GameTypes
             {
                 player.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1);
 
-                EffectManager.sendUIEffectVisibility(Key, player.GamePlayer.TransportConnection, true, "GamemodeFFA", true);
+                EffectManager.sendUIEffectVisibility(Key, player.GamePlayer.TransportConnection, true, "Timer", true);
+                EffectManager.sendUIEffect(27610, 27610, player.GamePlayer.TransportConnection, true, Plugin.Instance.Translate("FFA_Name").ToRich(), Plugin.Instance.Translate("FFA_Desc").ToRich());
                 EffectManager.sendUIEffectVisibility(Key, player.GamePlayer.TransportConnection, true, "StartCountdown", false);
                 EffectManager.sendUIEffectVisibility(Key, player.GamePlayer.TransportConnection, true, "ScoreCounter", true);
+                ShowTopUI(player);
             }
 
             GameEnder = Plugin.Instance.StartCoroutine(EndGame());
@@ -115,7 +117,8 @@ namespace UnturnedLegends.GameTypes
             } else
             {
                 EffectManager.sendUIEffectVisibility(Key, player.TransportConnection, true, "ScoreCounter", true);
-                EffectManager.sendUIEffectVisibility(Key, player.TransportConnection, true, "GamemodeFFA", true);
+                EffectManager.sendUIEffect(27610, 27610, player.TransportConnection, true, Plugin.Instance.Translate("FFA_Name").ToRich(), Plugin.Instance.Translate("FFA_Desc").ToRich());
+                EffectManager.sendUIEffectVisibility(Key, player.TransportConnection, true, "Timer", true);
                 ShowTopUI(fPlayer);
             }
         }
@@ -153,14 +156,7 @@ namespace UnturnedLegends.GameTypes
             }
 
             Utility.Debug($"Game player found, player name: {fPlayer.GamePlayer.Player.CharacterName}");
-            Utility.Debug("Respawning the player");
             fPlayer.OnDeath();
-            TaskDispatcher.QueueOnMainThread(() =>
-            {
-                player.life.sendRespawn(false);
-                SpawnPlayer(fPlayer);
-            });
-
             ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DBManager.IncreasePlayerDeathsAsync(fPlayer.GamePlayer.SteamID, 1));
 
             var kPlayer = GetFFAPlayer(killer);
@@ -183,7 +179,7 @@ namespace UnturnedLegends.GameTypes
 
             if (kPlayer.KillStreak > 0)
                 xpGained += Config.FFA.BaseXPKS + (++kPlayer.KillStreak * Config.FFA.IncreaseXPPerKS);
-            else 
+            else
                 kPlayer.KillStreak++;
 
             if (kPlayer.MultipleKills == 0)
@@ -196,7 +192,7 @@ namespace UnturnedLegends.GameTypes
             kPlayer.LastKill = DateTime.UtcNow;
             kPlayer.XP += xpGained;
 
-            Players.Sort((x, y) => x.Kills - y.Kills);
+            Players.Sort((x, y) => y.Kills.CompareTo(x.Kills));
             Utility.Debug($"Killer's killstreak: {kPlayer.KillStreak}, Killer's XP gained: {xpGained}, Killer's Multiple Kills: {kPlayer.MultipleKills}");
 
             Stopwatch watch = new Stopwatch();
@@ -215,6 +211,21 @@ namespace UnturnedLegends.GameTypes
             });
         }
 
+        public override void OnPlayerRevived(UnturnedPlayer player)
+        {
+            Utility.Debug("Player revived, getting the ffa player");
+            var fPlayer = GetFFAPlayer(player);
+            if (fPlayer == null)
+            {
+                Utility.Debug("Could'nt find the ffa player, returning");
+                return;
+            }
+
+            Utility.Debug($"Game player found, player name: {fPlayer.GamePlayer.Player.CharacterName}");
+            Utility.Debug("Reviving the player");
+            SpawnPlayer(fPlayer);
+        }
+
         public void ShowTopUI(FFAPlayer player)
         {
             Utility.Debug($"Showing FFA top UI for {player.GamePlayer.Player.CharacterName}");
@@ -228,7 +239,7 @@ namespace UnturnedLegends.GameTypes
             var secondPlayer = player;
             if (player.GamePlayer.SteamID == firstPlayer.GamePlayer.SteamID)
             {
-                secondPlayer = Players.Count > 1 ? Players[2] : null;
+                secondPlayer = Players.Count > 1 ? Players[1] : null;
 
                 EffectManager.sendUIEffectVisibility(Key, player.GamePlayer.TransportConnection, true, "CounterWinning", true);
                 EffectManager.sendUIEffectVisibility(Key, player.GamePlayer.TransportConnection, true, "CounterLosing", false);

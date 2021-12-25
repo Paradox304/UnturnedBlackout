@@ -29,23 +29,24 @@ namespace UnturnedLegends.Commands
 
             if (command.Length == 0)
             {
-                Utility.Say(caller, $"<color=red>Correct Usage: {Syntax}</color>");
+                Utility.Say(caller, Plugin.Instance.Translate("Correct_Usage", Syntax).ToRich());
                 return;
             }
 
             if (!int.TryParse(command[0], out int locationID))
             {
-                Utility.Say(caller, "<color=red>Could'nt find a location with that ID</color>");
+                Utility.Say(caller, Plugin.Instance.Translate("Location_Not_Found").ToRich());
                 return;
             }
 
             var location = Plugin.Instance.Configuration.Instance.ArenaLocations.FirstOrDefault(k => k.LocationID == locationID);
             if (location == null)
             {
-                Utility.Say(caller, "<color=red>Could'nt find a location with that ID</color>");
+                Utility.Say(caller, Plugin.Instance.Translate("Location_Not_Found").ToRich());
                 return;
             }
 
+            Utility.Say(caller, Plugin.Instance.Translate("FFA_Spawnpoint_Set", location.LocationName).ToRich());
             Plugin.Instance.DataManager.Data.FFASpawnPoints.Add(new FFASpawnPoint(locationID, player.Player.transform.position.x, player.Player.transform.position.y, player.Player.transform.position.z));
             Plugin.Instance.DataManager.SaveJson();
         }
