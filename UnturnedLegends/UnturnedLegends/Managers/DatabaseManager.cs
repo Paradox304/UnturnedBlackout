@@ -38,7 +38,7 @@ namespace UnturnedLegends.Managers
                 try
                 {
                     await Conn.OpenAsync();
-                    await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{Config.PlayersTableName}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `SteamName` VARCHAR(65) NOT NULL , `AvatarLink` VARCHAR(200) NOT NULL , `XP` INT UNSIGNED NOT NULL DEFAULT '0' , `Credits` INT UNSIGNED NOT NULL DEFAULT '0' , `Kills` INT UNSIGNED NOT NULL DEFAULT '0' , `Deaths` INT UNSIGNED NOT NULL DEFAULT '0' , PRIMARY KEY (`SteamID`));", Conn).ExecuteScalarAsync();
+                    await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{Config.PlayersTableName}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `SteamName` VARCHAR(65) NOT NULL , `AvatarLink` VARCHAR(200) NOT NULL , `XP` INT UNSIGNED NOT NULL DEFAULT '0' , `Level` INT UNSIGNED NOT NULL DEFAULT '0' , `Credits` INT UNSIGNED NOT NULL DEFAULT '0' , `Kills` INT UNSIGNED NOT NULL DEFAULT '0' , `Deaths` INT UNSIGNED NOT NULL DEFAULT '0' , PRIMARY KEY (`SteamID`));", Conn).ExecuteScalarAsync();
                 }
                 catch (Exception ex)
                 {
@@ -95,17 +95,22 @@ namespace UnturnedLegends.Managers
                                 continue;
                             }
 
-                            if (!uint.TryParse(rdr[4].ToString(), out uint credits))
+                            if (!uint.TryParse(rdr[4].ToString(), out uint level))
                             {
                                 continue;
                             }
 
-                            if (!uint.TryParse(rdr[5].ToString(), out uint kills))
+                            if (!uint.TryParse(rdr[5].ToString(), out uint credits))
                             {
                                 continue;
                             }
 
-                            if (!uint.TryParse(rdr[6].ToString(), out uint deaths))
+                            if (!uint.TryParse(rdr[6].ToString(), out uint kills))
+                            {
+                                continue;
+                            }
+
+                            if (!uint.TryParse(rdr[7].ToString(), out uint deaths))
                             {
                                 continue;
                             }
@@ -115,7 +120,7 @@ namespace UnturnedLegends.Managers
                                 PlayerCache.Remove(steamID);
                             }
 
-                            PlayerCache.Add(steamID, new PlayerData(steamID, steamName, avatarLink, xp, credits, kills, deaths));
+                            PlayerCache.Add(steamID, new PlayerData(steamID, steamName, avatarLink, xp, level, credits, kills, deaths));
                         }
                     }
                     catch (Exception ex)
@@ -150,6 +155,7 @@ namespace UnturnedLegends.Managers
 
                     await new MySqlCommand($"UPDATE `{Config.PlayersTableName}` SET `XP` = `XP` + {xp} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
                     var obj = await new MySqlCommand($"Select `XP` FROM `{Config.PlayersTableName}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+
                     if (PlayerCache.TryGetValue(steamID, out PlayerData data))
                     {
                         if (obj is uint newXp)
