@@ -302,7 +302,13 @@ namespace UnturnedLegends.GameTypes
 
             Utility.Debug($"Game player found, player name: {fPlayer.GamePlayer.Player.CharacterName}");
             Utility.Debug("Reviving the player");
-            GiveLoadout(fPlayer);
+
+            var item = player.Player.inventory.getItem(0, 0);
+            if (item != null)
+            {
+                player.Player.equipment.tryEquip(0, item.x, item.y);
+            }
+
             SpawnPlayer(fPlayer);
         }
 
