@@ -1,4 +1,5 @@
-﻿using Rocket.Core;
+﻿using Rocket.API;
+using Rocket.Core;
 using Rocket.Unturned.Player;
 using SDG.Unturned;
 using Steamworks;
@@ -67,6 +68,8 @@ namespace UnturnedLegends.GameTypes
         public IEnumerator EndGame()
         {
             Stopwatch watch = new Stopwatch();
+            var console = new ConsolePlayer();
+
             for (int seconds = Config.FFA.EndSeconds; seconds >= 0; seconds--)
             {
                 Utility.Debug($"Ending game in {seconds} seconds");
@@ -80,12 +83,29 @@ namespace UnturnedLegends.GameTypes
                 watch.Stop();
                 Utility.Debug($"Took {watch.ElapsedMilliseconds} ms to iterate through {Players.Count} players on sending the timer");
                 watch.Reset();
+
+                R.Commands.Execute(console, "/day");
             }
 
+            GameEnd();
+        }
+
+        public override void GameEnd()
+        {
             foreach (var player in Players)
             {
                 Plugin.Instance.GameManager.SendPlayerToLobby(player.GamePlayer.Player);
                 EffectManager.askEffectClearByID(ID, player.GamePlayer.TransportConnection);
+            }
+
+            if (GameEnder != null)
+            {
+                Plugin.Instance.StopCoroutine(GameEnder);
+            }
+            
+            if (GameStarter != null)
+            {
+                Plugin.Instance.StopCoroutine(GameStarter);
             }
 
             Plugin.Instance.GameManager.EndGame();
@@ -138,7 +158,12 @@ namespace UnturnedLegends.GameTypes
             }
 
             EffectManager.askEffectClearByID(ID, player.TransportConnection);
-            Players.RemoveAll(k => k.GamePlayer.SteamID == player.SteamID);
+            var fPlayer = GetFFAPlayer(player.Player);
+            if (fPlayer != null)
+            {
+                fPlayer.Destroy();
+                Players.Remove(fPlayer);
+            }
 
             Stopwatch watch = new Stopwatch();
             watch.Start();
@@ -209,7 +234,7 @@ namespace UnturnedLegends.GameTypes
             }
 
             kPlayer.LastKill = DateTime.UtcNow;
-            kPlayer.XP += xpGained;
+
 
             Players.Sort((x, y) => y.Kills.CompareTo(x.Kills));
             Utility.Debug($"Killer's killstreak: {kPlayer.KillStreak}, Killer's XP gained: {xpGained}, Killer's Multiple Kills: {kPlayer.MultipleKills}");
@@ -230,6 +255,25 @@ namespace UnturnedLegends.GameTypes
                 await Plugin.Instance.DBManager.IncreasePlayerKillsAsync(kPlayer.GamePlayer.SteamID, 1);
                 await Plugin.Instance.DBManager.IncreasePlayerXPAsync(kPlayer.GamePlayer.SteamID, (uint)xpGained);
             });
+        }
+
+        public override void OnPlayerDamage(ref DamagePlayerParameters parameters, ref bool shouldAllow)
+        {
+            Utility.Debug($"{parameters.player.channel.owner.playerID.characterName} got damaged, checking if the player is in game");
+            var player = GetFFAPlayer(parameters.player);
+            if (player == null)
+            {
+                Utility.Debug("Player isn't ingame, returning");
+                return;
+            }
+
+            if (!HasStarted)
+            {
+                shouldAllow = false;
+                return;
+            }
+
+            player.OnDamaged();
         }
 
         public override void OnPlayerRevived(UnturnedPlayer player)
@@ -331,6 +375,11 @@ namespace UnturnedLegends.GameTypes
         public override bool IsPlayerIngame(UnturnedPlayer player)
         {
             return Players.Exists(k => k.GamePlayer.SteamID == player.CSteamID);
+        }
+
+        public override bool IsPlayerIngame(Player player)
+        {
+            return Players.Exists(k => k.GamePlayer.SteamID == player.channel.owner.playerID.steamID);
         }
     }
 }

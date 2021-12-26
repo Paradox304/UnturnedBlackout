@@ -25,6 +25,9 @@ namespace UnturnedLegends
         public int BaseXP { get; set; }
         public double CommonRatio { get; set; }
 
+        public int LastDamageAfterHealSeconds { get; set; }
+        public float HealSeconds { get; set; }
+
         public List<ArenaLocation> ArenaLocations { get; set; }
 
         public FFAConfig FFA { get; set; }
@@ -48,6 +51,9 @@ namespace UnturnedLegends
 
             BaseXP = 200;
             CommonRatio = 1.20;
+
+            LastDamageAfterHealSeconds = 5;
+            HealSeconds = 0.075f;
 
             ArenaLocations = new List<ArenaLocation>
             {

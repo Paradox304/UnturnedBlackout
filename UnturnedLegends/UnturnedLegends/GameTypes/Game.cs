@@ -2,6 +2,7 @@
 using Rocket.Unturned.Player;
 using SDG.Unturned;
 using Steamworks;
+using System;
 using System.Linq;
 using UnityEngine;
 using UnturnedLegends.Enums;
@@ -27,6 +28,12 @@ namespace UnturnedLegends.GameTypes
 
             PlayerLife.onPlayerDied += OnPlayerDied;
             UnturnedPlayerEvents.OnPlayerRevive += OnPlayerRevive;
+            DamageTool.damagePlayerRequested += OnPlayerDamaged;
+        }
+
+        private void OnPlayerDamaged(ref DamagePlayerParameters parameters, ref bool shouldAllow)
+        {
+            OnPlayerDamage(ref parameters, ref shouldAllow);
         }
 
         private void OnPlayerRevive(UnturnedPlayer player, Vector3 position, byte angle)
@@ -43,13 +50,17 @@ namespace UnturnedLegends.GameTypes
         {
             PlayerLife.onPlayerDied -= OnPlayerDied;
             UnturnedPlayerEvents.OnPlayerRevive -= OnPlayerRevive;
+            DamageTool.damagePlayerRequested -= OnPlayerDamaged;
         }
 
+        public abstract void GameEnd();
+        public abstract bool IsPlayerIngame(Player player);
         public abstract bool IsPlayerIngame(CSteamID steamID);
         public abstract bool IsPlayerIngame(UnturnedPlayer player);
         public abstract bool IsPlayerIngame(GamePlayer player);
         public abstract void OnPlayerRevived(UnturnedPlayer player);
         public abstract void OnPlayerDead(Player player, CSteamID killer, ELimb limb);
+        public abstract void OnPlayerDamage(ref DamagePlayerParameters parameters, ref bool shouldAllow);
         public abstract void AddPlayerToGame(GamePlayer player);
         public abstract void RemovePlayerFromGame(GamePlayer player);
     }

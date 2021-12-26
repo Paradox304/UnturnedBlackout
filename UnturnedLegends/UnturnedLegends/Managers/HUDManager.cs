@@ -36,6 +36,7 @@ namespace UnturnedLegends.Managers
         {
             player.Player.disablePluginWidgetFlag(EPluginWidgetFlags.ShowLifeMeters);
             player.Player.disablePluginWidgetFlag(EPluginWidgetFlags.ShowStatusIcons);
+            player.Player.disablePluginWidgetFlag(EPluginWidgetFlags.ShowUseableGunStatus);
             player.Player.equipment.onEquipRequested += OnEquip;
 
             EffectManager.sendUIEffect(ID, Key, player.Player.channel.GetOwnerTransportConnection(), true);
@@ -105,13 +106,13 @@ namespace UnturnedLegends.Managers
                     EffectManager.sendUIEffectText(Key, connection, true, "WeaponName", gAsset.itemName);
                     EffectManager.sendUIEffectText(Key, connection, true, "WeaponMode", firemode);
                     EffectManager.sendUIEffectText(Key, connection, true, "AmmoNum", currentAmmo.ToString());
-                    EffectManager.sendUIEffectText(Key, connection, true, "ReserveNum", mAsset.amount.ToString());
+                    EffectManager.sendUIEffectText(Key, connection, true, "ReserveNum", $" / {mAsset.amount}");
                 }
                 else
                 {
                     EffectManager.sendUIEffectText(Key, connection, true, "WeaponName", asset.itemName);
                     EffectManager.sendUIEffectText(Key, connection, true, "AmmoNum", "1");
-                    EffectManager.sendUIEffectText(Key, connection, true, "ReserveNum", "0");
+                    EffectManager.sendUIEffectText(Key, connection, true, "ReserveNum", " / 0");
                 }
             });
         }
@@ -130,7 +131,7 @@ namespace UnturnedLegends.Managers
             var transportConnection = equipment.player.channel.GetOwnerTransportConnection();
 
             EffectManager.sendUIEffectText(Key, transportConnection, true, "AmmoNum", amount.ToString());
-            EffectManager.sendUIEffectText(Key, transportConnection, true, "ReserveNum", amount.ToString());
+            EffectManager.sendUIEffectText(Key, transportConnection, true, "ReserveNum", $" / {amount}");
         }
 
         private void OnBulletShot(UseableGun gun, BulletInfo bullet)
