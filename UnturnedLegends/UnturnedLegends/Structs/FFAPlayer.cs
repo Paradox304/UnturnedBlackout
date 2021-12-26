@@ -12,9 +12,12 @@ namespace UnturnedLegends.Structs
         public int KillStreak { get; set; }
         public int MultipleKills { get; set; }
 
+        public bool HasSpawnProtection { get; set; }
+
         public DateTime LastKill { get; set; }
         public DateTime LastDamage { get; set; }
 
+        public Coroutine ProtectionRemover { get; set; }
         public Coroutine DamageChecker { get; set; }
         public Coroutine Healer { get; set; }
 
@@ -35,6 +38,23 @@ namespace UnturnedLegends.Structs
             LastKill = DateTime.UtcNow;
         }
 
+        public void GiveSpawnProtection()
+        {
+            HasSpawnProtection = true;
+            if (ProtectionRemover != null)
+            {
+                Plugin.Instance.StopCoroutine(ProtectionRemover);
+            }
+            Plugin.Instance.StartCoroutine(RemoveSpawnProtection());
+        }
+
+        public IEnumerator RemoveSpawnProtection()
+        {
+            yield return new WaitForSeconds(Plugin.Instance.Configuration.Instance.FFA.SpawnProtectionSeconds);
+            HasSpawnProtection = false;
+        }
+
+        // Push this to the GamePlayer Class later on, but it doesn't do anything as of now.
         public void OnDamaged()
         {
             Utility.Debug($"{GamePlayer.Player.CharacterName} got damaged, setting the last damage to now and checking after some seconds to heal");
@@ -72,6 +92,7 @@ namespace UnturnedLegends.Structs
                 GamePlayer.Player.Player.life.serverModifyHealth(1);
             }
         }
+        //
 
         public void Destroy()
         {

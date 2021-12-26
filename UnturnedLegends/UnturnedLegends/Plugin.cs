@@ -1,11 +1,17 @@
 ﻿using HarmonyLib;
+using Rocket.API;
 using Rocket.API.Collections;
+using Rocket.Core;
 using Rocket.Core.Logging;
 using Rocket.Core.Plugins;
 using SDG.Unturned;
+using System;
+using System.Collections;
 using System.Linq;
 using System.Reflection;
+using UnityEngine;
 using UnturnedLegends.Managers;
+using Logger = Rocket.Core.Logging.Logger;
 
 namespace UnturnedLegends
 {
@@ -22,6 +28,7 @@ namespace UnturnedLegends
 
             DBManager = new DatabaseManager();
             DataManager = new DataManager();
+            StartCoroutine(Day());
 
             Level.onPostLevelLoaded += OnLevelLoaded;
 
@@ -35,8 +42,19 @@ namespace UnturnedLegends
             HUDManager.Destroy();
 
             Level.onPostLevelLoaded -= OnLevelLoaded;
+            StopAllCoroutines();
 
             Logger.Log("Unturned Legends has been unloaded");
+        }
+
+        public IEnumerator Day()
+        {
+            ConsolePlayer console = new ConsolePlayer();
+            while (true)
+            {
+                yield return new WaitForSeconds(60);
+                LightingManager.time = (uint)(LightingManager.cycle * LevelLighting.transition);
+            }
         }
 
         private void OnLevelLoaded(int level)

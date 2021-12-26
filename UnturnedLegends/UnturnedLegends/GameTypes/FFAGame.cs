@@ -1,5 +1,6 @@
 ﻿using Rocket.API;
 using Rocket.Core;
+using Rocket.Core.Utils;
 using Rocket.Unturned.Player;
 using SDG.Unturned;
 using Steamworks;
@@ -68,8 +69,6 @@ namespace UnturnedLegends.GameTypes
         public IEnumerator EndGame()
         {
             Stopwatch watch = new Stopwatch();
-            var console = new ConsolePlayer();
-
             for (int seconds = Config.FFA.EndSeconds; seconds >= 0; seconds--)
             {
                 Utility.Debug($"Ending game in {seconds} seconds");
@@ -83,10 +82,7 @@ namespace UnturnedLegends.GameTypes
                 watch.Stop();
                 Utility.Debug($"Took {watch.ElapsedMilliseconds} ms to iterate through {Players.Count} players on sending the timer");
                 watch.Reset();
-
-                R.Commands.Execute(console, "/day");
             }
-
             GameEnd();
         }
 
@@ -273,7 +269,25 @@ namespace UnturnedLegends.GameTypes
                 return;
             }
 
+            if (player.HasSpawnProtection)
+            {
+                shouldAllow = false;
+                return;
+            }
+
             player.OnDamaged();
+
+            var kPlayer = GetFFAPlayer(parameters.killer);
+            if (kPlayer == null)
+            {
+                Utility.Debug("Killer not found, returning");
+                return;
+            }
+
+            if (kPlayer.HasSpawnProtection)
+            {
+                kPlayer.HasSpawnProtection = false;
+            }
         }
 
         public override void OnPlayerRevived(UnturnedPlayer player)
@@ -288,6 +302,7 @@ namespace UnturnedLegends.GameTypes
 
             Utility.Debug($"Game player found, player name: {fPlayer.GamePlayer.Player.CharacterName}");
             Utility.Debug("Reviving the player");
+            GiveLoadout(fPlayer);
             SpawnPlayer(fPlayer);
         }
 
@@ -326,6 +341,8 @@ namespace UnturnedLegends.GameTypes
         public void GiveLoadout(FFAPlayer player)
         {
             Utility.Debug($"Giving loadout to {player.GamePlayer.Player.CharacterName}");
+
+            player.GamePlayer.Player.Player.inventory.ClearInventory();
             R.Commands.Execute(player.GamePlayer.Player, $"/kit {Config.KitName}");
         }
 
@@ -345,6 +362,8 @@ namespace UnturnedLegends.GameTypes
             {
                 player.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(0);
             }
+
+            player.GiveSpawnProtection();
         }
 
         public FFAPlayer GetFFAPlayer(CSteamID steamID)

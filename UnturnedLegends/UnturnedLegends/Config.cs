@@ -62,7 +62,7 @@ namespace UnturnedLegends
                 new ArenaLocation(3, "Military Base")
             };
 
-            FFA = new FFAConfig(10, 600, 10, 30, 10, 5, 10, 10, 10);
+            FFA = new FFAConfig(10, 600, 10, 30, 10, 5, 10, 10, 10, 5);
         }
     }
 }

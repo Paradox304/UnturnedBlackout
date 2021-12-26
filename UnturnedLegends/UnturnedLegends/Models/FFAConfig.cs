@@ -15,14 +15,14 @@
         public int IncreaseXPPerMK { get; set; }
         public int MKSeconds { get; set; }
 
-        public int KillsScore { get; set; }
+        public int SpawnProtectionSeconds { get; set; }
 
         public FFAConfig()
         {
 
         }
 
-        public FFAConfig(int startSeconds, int endSeconds, int xPPerKill, int xPPerKillHeadshot, int baseXPKS, int increaseXPPerKS, int baseXPMK, int increaseXPPerMK, int mKSeconds)
+        public FFAConfig(int startSeconds, int endSeconds, int xPPerKill, int xPPerKillHeadshot, int baseXPKS, int increaseXPPerKS, int baseXPMK, int increaseXPPerMK, int mKSeconds, int spawnProtectionSeconds)
         {
             StartSeconds = startSeconds;
             EndSeconds = endSeconds;
@@ -33,6 +33,7 @@
             BaseXPMK = baseXPMK;
             IncreaseXPPerMK = increaseXPPerMK;
             MKSeconds = mKSeconds;
+            SpawnProtectionSeconds = spawnProtectionSeconds;
         }
     }
 }
