@@ -28,9 +28,9 @@ namespace UnturnedLegends.GameTypes
         public const ushort ID = 27620;
         public const short Key = 27620;
 
-        public FFAGame(int locationID) : base(EGameType.FFA, locationID)
+        public FFAGame(int locationID, int arenaID, List<GamePlayer> players) : base(EGameType.FFA, locationID, arenaID)
         {
-            Utility.Debug("Initializing FFA game");
+            Utility.Debug($"Initializing FFA game for arena ID {arenaID} and location id {locationID}");
             SpawnPoints = Plugin.Instance.DataManager.Data.FFASpawnPoints.Where(k => k.LocationID == locationID).ToList();
             Players = new List<FFAPlayer>();
             Utility.Debug($"Found {SpawnPoints.Count} positions for FFA");
@@ -73,28 +73,13 @@ namespace UnturnedLegends.GameTypes
                     Plugin.Instance.UIManager.UpdateFFATimer(player.GamePlayer, timeSpan.ToString(@"m\:ss"));
                 }
             }
+
             GameEnd();
         }
 
         public override void GameEnd()
         {
-            foreach (var player in Players)
-            {
-                Plugin.Instance.GameManager.SendPlayerToLobby(player.GamePlayer.Player);
-                Plugin.Instance.UIManager.ClearFFAHUD(player.GamePlayer);
-            }
-
-            if (GameEnder != null)
-            {
-                Plugin.Instance.StopCoroutine(GameEnder);
-            }
-            
-            if (GameStarter != null)
-            {
-                Plugin.Instance.StopCoroutine(GameStarter);
-            }
-
-            Plugin.Instance.GameManager.EndGame();
+            // TO BE ADDED
         }
 
         public override void AddPlayerToGame(GamePlayer player)

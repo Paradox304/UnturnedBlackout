@@ -21,18 +21,16 @@ namespace UnturnedLegends.Managers
         public Config Config { get; set; }
 
         public Dictionary<CSteamID, GamePlayer> Players { get; set; }
-        public Game Game { get; set; }
+        public List<Game> Games { get; set; }
 
-        public ArenaLocation CurrentLocation { get; set; }
-        public EGameType CurrentGame { get; set; }
+        public List<int> AvailableLocations { get; set; }
 
         public GameManager()
         {
             Config = Plugin.Instance.Configuration.Instance;
             Players = new Dictionary<CSteamID, GamePlayer>();
-
-            CurrentLocation = new ArenaLocation(-1, "None");
-            CurrentGame = EGameType.None;
+            Games = new List<Game>();
+            AvailableLocations = Config.ArenaLocations.Select(k => k.LocationID).ToList();
 
             U.Events.OnPlayerConnected += OnPlayerJoined;
             U.Events.OnPlayerDisconnected += OnPlayerLeft;
@@ -40,73 +38,32 @@ namespace UnturnedLegends.Managers
 
             DamageTool.damagePlayerRequested += OnDamagePlayer;
 
-            StartGame();
+            StartGames();
         }
 
-        public void StartGame()
+        public void StartGames()
         {
-            Utility.Debug($"Starting game, finding a random arena location, previous location was {CurrentLocation.LocationName}");
-            var locations = Config.ArenaLocations.ToList();
-            var randomLocation = locations[UnityEngine.Random.Range(0, locations.Count)];
-            Utility.Debug($"Found a random location, name is {randomLocation.LocationName}");
-
-            CurrentLocation = randomLocation;
-            CurrentGame = EGameType.FFA;
-
-            Game = new FFAGame(randomLocation.LocationID);
-            foreach (var client in Provider.clients)
+            Utility.Debug($"Starting games");
+            foreach (var arena in Config.Arenas)
             {
-                Plugin.Instance.HUDManager.OnGamemodeChanged(client.player, CurrentLocation, CurrentGame);
+                Utility.Debug($"Starting ")
+                var locations = arena.Locations.Where(k => AvailableLocations.Contains(k)).ToList();
             }
-            Utility.Debug($"Started a {CurrentGame} game");
         }
 
-        public void EndGame()
+        public void EndGame(Game game)
         {
-            Utility.Debug($"Ending the game, destroying the Current Game and starting the timer to start another game");
-            Game.Destroy();
-            Game = null;
-            StartGame();
+            // TO BE ADDED
         }
 
         public void AddPlayerToGame(UnturnedPlayer player)
         {
-            Utility.Debug($"Trying to add {player.CharacterName} to game");
-            if (Game == null)
-            {
-                Utility.Say(player, Plugin.Instance.Translate("No_Game_Going_On").ToRich());
-                return;
-            }
-
-            var gPlayer = GetGamePlayer(player);
-            if (gPlayer == null)
-            {
-                Utility.Debug("Error finding game player of the player, returning");
-                return;
-            }
-
-            Game.AddPlayerToGame(gPlayer);
+            // TO BE ADDED
         }
 
         public void RemovePlayerFromGame(UnturnedPlayer player)
         {
-            Utility.Debug($"Trying to remove {player.CharacterName} from game");
-            if (Game == null)
-            {
-                Utility.Say(player, Plugin.Instance.Translate("No_Game_Going_On").ToRich());
-                return;
-            }
-
-            var gPlayer = GetGamePlayer(player);
-            if (gPlayer == null)
-            {
-                Utility.Debug("Error finding game player of the player, returning");
-                return;
-            }
-
-            Game.RemovePlayerFromGame(gPlayer);
-            Utility.Debug("Sending player to lobby");
-            SendPlayerToLobby(player);
+            // TO BE ADDED
         }
 
         private void OnPlayerJoined(UnturnedPlayer player)
@@ -135,36 +92,17 @@ namespace UnturnedLegends.Managers
 
         private void OnPlayerLeft(UnturnedPlayer player)
         {
-            Utility.Debug($"{player.CharacterName} left the server, removing them from game and removing the game player");
-            if (Players.TryGetValue(player.CSteamID, out GamePlayer gPlayer))
-            {
-                if (Game != null)
-                {
-                    Game.RemovePlayerFromGame(gPlayer);
-                }
-
-                Players.Remove(player.CSteamID);
-            }
+            // TO BE ADDED
         }
 
         private void OnPlayerRevived(UnturnedPlayer player, Vector3 position, byte angle)
         {
-            Utility.Debug("Player revived, checking if the player is in a game");
-            if (Game == null || !Game.IsPlayerIngame(player))
-            {
-                Utility.Debug("Player is not in a game, spawning them in the lobby");
-                SendPlayerToLobby(player);
-            }
+            // TO BE ADDED
         }
 
         private void OnDamagePlayer(ref DamagePlayerParameters parameters, ref bool shouldAllow)
         {
-            Utility.Debug("Player damaged, checking if the player is in a game");
-            if (Game == null || !Game.IsPlayerIngame(parameters.player))
-            {
-                Utility.Debug("Player is not in a game, disabling the damage done");
-                shouldAllow = false;
-            }
+            // TO BE ADDED
         }
 
         public void SendPlayerToLobby(UnturnedPlayer player)

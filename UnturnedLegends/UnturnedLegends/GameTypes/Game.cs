@@ -15,15 +15,21 @@ namespace UnturnedLegends.GameTypes
     {
         public EGameType GameType { get; set; }
         public Config Config { get; set; }
-        public ArenaLocation CurrentLocation { get; set; }
 
+        public ArenaLocation Location { get; set; }
+        public Arena Arena { get; set; }
+
+        public bool IsVoting { get; set; }
         public bool HasStarted { get; set; }
 
-        public Game(EGameType gameType, int locationID)
+        public Game(EGameType gameType, int locationID, int arenaID)
         {
             GameType = gameType;
             Config = Plugin.Instance.Configuration.Instance;
-            CurrentLocation = Config.ArenaLocations.FirstOrDefault(k => k.LocationID == locationID);
+            Location = Config.ArenaLocations.FirstOrDefault(k => k.LocationID == locationID);
+            Arena = Config.Arenas.FirstOrDefault(k => k.ArenaID == arenaID);
+
+            IsVoting = false;
             HasStarted = false;
 
             PlayerLife.onPlayerDied += OnPlayerDied;

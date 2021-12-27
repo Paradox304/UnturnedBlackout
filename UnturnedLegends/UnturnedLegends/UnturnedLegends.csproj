@@ -141,6 +141,7 @@
     <Compile Include="Managers\GameManager.cs" />
     <Compile Include="Managers\HUDManager.cs" />
     <Compile Include="Managers\UIManager.cs" />
+    <Compile Include="Models\Arena.cs" />
     <Compile Include="Models\ArenaLocation.cs" />
     <Compile Include="Models\FFAConfig.cs" />
     <Compile Include="Patches\FiremodePatch.cs" />

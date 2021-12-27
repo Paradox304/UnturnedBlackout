@@ -28,9 +28,10 @@ namespace UnturnedLegends
         public int LastDamageAfterHealSeconds { get; set; }
         public float HealSeconds { get; set; }
 
-        public List<ArenaLocation> ArenaLocations { get; set; }
-
         public FFAConfig FFA { get; set; }
+
+        public List<ArenaLocation> ArenaLocations { get; set; }
+        public List<Arena> Arenas { get; set; }
 
         public void LoadDefaults()
         {
@@ -55,6 +56,8 @@ namespace UnturnedLegends
             LastDamageAfterHealSeconds = 5;
             HealSeconds = 0.075f;
 
+            FFA = new FFAConfig(10, 600, 10, 30, 10, 5, 10, 10, 10, 5);
+
             ArenaLocations = new List<ArenaLocation>
             {
                 new ArenaLocation(1, "Seattle"),
@@ -62,7 +65,12 @@ namespace UnturnedLegends
                 new ArenaLocation(3, "Military Base")
             };
 
-            FFA = new FFAConfig(10, 600, 10, 30, 10, 5, 10, 10, 10, 5);
+            Arenas = new List<Arena>
+            {
+                new Arena(1, 6, new List<int> { 3 }),
+                new Arena(2, 12, new List<int> { 2 }),
+                new Arena(3, 24, new List<int> { 1 })
+            };
         }
     }
 }
