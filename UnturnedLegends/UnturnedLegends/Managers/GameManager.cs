@@ -63,7 +63,7 @@ namespace UnturnedLegends.Managers
             switch (gameMode)
             {
                 case EGameType.FFA:
-                    game = new FFAGame(location, arena, new List<GamePlayer>());
+                    game = new FFAGame(location, arena, players);
                     break;
                 default:
                     break;
@@ -82,20 +82,32 @@ namespace UnturnedLegends.Managers
             AvailableLocations.Add(game.Location.LocationID);
         }
 
-        public void AddPlayerToGame(UnturnedPlayer player, int arenaID)
+        public void AddPlayerToGame(UnturnedPlayer player, int selectedID)
         {
-            Utility.Debug($"Trying to add {player.CharacterName} to game with arena id {arenaID}");
-            var game = Games.FirstOrDefault(k => k.Arena.ArenaID == arenaID);
+            Utility.Debug($"Trying to add {player.CharacterName} to game with id {selectedID}");
+            var game = Games[selectedID];
 
-            if (game == null)
+            if (selectedID > (Games.Count - 1))
             {
                 Utility.Say(player, Plugin.Instance.Translate("Game_Not_Found_With_ID").ToRich());
                 return;
             }
 
+            if (TryGetCurrentGame(player.CSteamID, out _))
+            {
+                Utility.Say(player, Plugin.Instance.Translate("Ingame").ToRich());
+                return;
+            }
+
+            if (game.GetPlayerCount() >= game.Arena.MaxPlayers)
+            {
+                Utility.Say(player, Plugin.Instance.Translate("Game_Full").ToRich());
+                return;
+            }
+
             if (game.IsVoting)
             {
-                Utility.Debug("Can't join game, voting going on");
+                Utility.Say(player, Plugin.Instance.Translate("Game_Voting").ToRich());
                 return;
             }
 

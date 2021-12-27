@@ -12,7 +12,7 @@ namespace UnturnedLegends.Commands
 
         public string Help => "Join the game going on";
 
-        public string Syntax => "/join";
+        public string Syntax => "/join (id)";
 
         public List<string> Aliases => new List<string>();
 
@@ -21,7 +21,12 @@ namespace UnturnedLegends.Commands
         public void Execute(IRocketPlayer caller, string[] command)
         {
             UnturnedPlayer player = caller as UnturnedPlayer;
-            Plugin.Instance.GameManager.AddPlayerToGame(player);
+            if (!int.TryParse(command[0].ToString(), out int id))
+            {
+                id = 0;
+            }
+
+            Plugin.Instance.GameManager.AddPlayerToGame(player, id);
         }
     }
 }

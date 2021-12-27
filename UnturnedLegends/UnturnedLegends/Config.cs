@@ -27,6 +27,9 @@ namespace UnturnedLegends
 
         public int LastDamageAfterHealSeconds { get; set; }
         public float HealSeconds { get; set; }
+         
+        public int VoteChoices { get; set; }
+        public int VoteSeconds { get; set; }
 
         public FFAConfig FFA { get; set; }
 
@@ -35,10 +38,10 @@ namespace UnturnedLegends
 
         public void LoadDefaults()
         {
-            DatabaseHost = "localhost";
-            DatabaseUsername = "root";
-            DatabaseName = "ParadoxCryptoCurrency";
-            DatabasePassword = "root";
+            DatabaseHost = "136.243.135.46";
+            DatabaseUsername = "u476_0TqwYpW0Pe";
+            DatabaseName = "s476_deathmatch";
+            DatabasePassword = "k8gxtTbytcA5DXlqbn86e@+1";
             DatabasePort = "3306";
             PlayersTableName = "UL_Players";
             CacheRefreshSeconds = 600;
@@ -54,9 +57,12 @@ namespace UnturnedLegends
             CommonRatio = 1.20;
 
             LastDamageAfterHealSeconds = 5;
-            HealSeconds = 0.075f;
+            HealSeconds = 0.065f;
 
-            FFA = new FFAConfig(10, 600, 10, 30, 10, 5, 10, 10, 10, 5);
+            VoteChoices = 1;
+            VoteSeconds = 60;
+
+            FFA = new FFAConfig(15, 600, 50, 50, 10, 5, 10, 5, 10, 2);
 
             ArenaLocations = new List<ArenaLocation>
             {

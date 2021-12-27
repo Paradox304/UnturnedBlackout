@@ -10,6 +10,8 @@ namespace UnturnedLegends.Structs
         public UnturnedPlayer Player { get; set; }
         public ITransportConnection TransportConnection { get; set; }
 
+        public int VoteChoice { get; set; }
+
         public GamePlayer(UnturnedPlayer player, ITransportConnection transportConnection)
         {
             SteamID = player.CSteamID;

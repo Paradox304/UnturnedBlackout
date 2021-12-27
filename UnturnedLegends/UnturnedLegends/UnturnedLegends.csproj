@@ -126,7 +126,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Commands\EndGameCommand.cs" />
     <Compile Include="Commands\FFASPCommand.cs" />
     <Compile Include="Commands\JoinCommand.cs" />
     <Compile Include="Commands\LeaveCommand.cs" />
@@ -144,6 +143,7 @@
     <Compile Include="Models\Arena.cs" />
     <Compile Include="Models\ArenaLocation.cs" />
     <Compile Include="Models\FFAConfig.cs" />
+    <Compile Include="Models\VoteChoice.cs" />
     <Compile Include="Patches\FiremodePatch.cs" />
     <Compile Include="Structs\FFAPlayer.cs" />
     <Compile Include="Structs\GamePlayer.cs" />

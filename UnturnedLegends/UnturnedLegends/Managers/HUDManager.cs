@@ -42,7 +42,6 @@ namespace UnturnedLegends.Managers
             EffectManager.sendUIEffect(ID, Key, player.Player.channel.GetOwnerTransportConnection(), true);
 
             OnHealthChanged(player, player.Player.life.health);
-            OnGamemodeChanged(player.Player, Plugin.Instance.GameManager.CurrentLocation, Plugin.Instance.GameManager.CurrentGame);
         }
 
         private void OnDisconnected(UnturnedPlayer player)
