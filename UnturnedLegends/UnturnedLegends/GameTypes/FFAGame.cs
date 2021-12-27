@@ -42,25 +42,21 @@ namespace UnturnedLegends.GameTypes
         {
             for (int seconds = Config.FFA.StartSeconds; seconds >= 0; seconds--)
             {
-                Utility.Debug($"Starting game in {seconds} seconds");
                 yield return new WaitForSeconds(1);
                 foreach (var player in Players)
                 {
-                    EffectManager.sendUIEffectText(Key, player.GamePlayer.TransportConnection, true, "CountdownNum", seconds.ToString());
+                    Plugin.Instance.UIManager.SendCountdownSeconds(player.GamePlayer, seconds);
                 }
             }
             HasStarted = true;
 
-            Utility.Debug("Starting game!");
             foreach (var player in Players)
             {
                 player.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1);
 
-                EffectManager.sendUIEffectVisibility(Key, player.GamePlayer.TransportConnection, true, "Timer", true);
-                EffectManager.sendUIEffect(27610, 27610, player.GamePlayer.TransportConnection, true, Plugin.Instance.Translate("FFA_Name").ToRich(), Plugin.Instance.Translate("FFA_Desc").ToRich());
-                EffectManager.sendUIEffectVisibility(Key, player.GamePlayer.TransportConnection, true, "StartCountdown", false);
-                EffectManager.sendUIEffectVisibility(Key, player.GamePlayer.TransportConnection, true, "ScoreCounter", true);
-                ShowTopUI(player);
+                Plugin.Instance.UIManager.ShowFFAHUD(player.GamePlayer);
+                Plugin.Instance.UIManager.ClearCountdownUI(player.GamePlayer);
+                Plugin.Instance.UIManager.UpdateFFATopUI(player, Players);
             }
 
             GameEnder = Plugin.Instance.StartCoroutine(EndGame());
@@ -68,20 +64,14 @@ namespace UnturnedLegends.GameTypes
 
         public IEnumerator EndGame()
         {
-            Stopwatch watch = new Stopwatch();
             for (int seconds = Config.FFA.EndSeconds; seconds >= 0; seconds--)
             {
-                Utility.Debug($"Ending game in {seconds} seconds");
                 yield return new WaitForSeconds(1);
                 TimeSpan timeSpan = TimeSpan.FromSeconds(seconds);
-                watch.Start();
                 foreach (var player in Players)
                 {
-                    EffectManager.sendUIEffectText(Key, player.GamePlayer.TransportConnection, true, "TimerTxt", timeSpan.ToString(@"m\:ss"));
+                    Plugin.Instance.UIManager.UpdateFFATimer(player.GamePlayer, timeSpan.ToString(@"m\:ss"));
                 }
-                watch.Stop();
-                Utility.Debug($"Took {watch.ElapsedMilliseconds} ms to iterate through {Players.Count} players on sending the timer");
-                watch.Reset();
             }
             GameEnd();
         }
@@ -91,7 +81,7 @@ namespace UnturnedLegends.GameTypes
             foreach (var player in Players)
             {
                 Plugin.Instance.GameManager.SendPlayerToLobby(player.GamePlayer.Player);
-                EffectManager.askEffectClearByID(ID, player.GamePlayer.TransportConnection);
+                Plugin.Instance.UIManager.ClearFFAHUD(player.GamePlayer);
             }
 
             if (GameEnder != null)
@@ -122,24 +112,22 @@ namespace UnturnedLegends.GameTypes
             GiveLoadout(fPlayer);
             SpawnPlayer(fPlayer);
 
-            EffectManager.sendUIEffect(ID, Key, player.TransportConnection, true);
+            
             if (!HasStarted)
             {
-                EffectManager.sendUIEffectVisibility(Key, player.TransportConnection, true, "StartCountdown", true);
+                Plugin.Instance.UIManager.ShowCountdownUI(player);
             }
             else
             {
-                EffectManager.sendUIEffectVisibility(Key, player.TransportConnection, true, "ScoreCounter", true);
-                EffectManager.sendUIEffect(27610, 27610, player.TransportConnection, true, Plugin.Instance.Translate("FFA_Name").ToRich(), Plugin.Instance.Translate("FFA_Desc").ToRich());
-                EffectManager.sendUIEffectVisibility(Key, player.TransportConnection, true, "Timer", true);
-                ShowTopUI(fPlayer);
+                Plugin.Instance.UIManager.ShowFFAHUD(player);
+                Plugin.Instance.UIManager.UpdateFFATopUI(fPlayer, Players);
             }
 
             if (Players.Count == 2)
             {
                 foreach (var ply in Players)
                 {
-                    ShowTopUI(ply);
+                    Plugin.Instance.UIManager.UpdateFFATopUI(ply, Players);
                 }
             }
         }
@@ -153,7 +141,7 @@ namespace UnturnedLegends.GameTypes
                 return;
             }
 
-            EffectManager.askEffectClearByID(ID, player.TransportConnection);
+            Plugin.Instance.UIManager.ClearFFAHUD(player);
             var fPlayer = GetFFAPlayer(player.Player);
             if (fPlayer != null)
             {
@@ -161,14 +149,10 @@ namespace UnturnedLegends.GameTypes
                 Players.Remove(fPlayer);
             }
 
-            Stopwatch watch = new Stopwatch();
-            watch.Start();
             foreach (var ply in Players)
             {
-                ShowTopUI(ply);
+                Plugin.Instance.UIManager.UpdateFFATopUI(ply, Players);
             }
-            watch.Stop();
-            Utility.Debug($"Took {watch.ElapsedMilliseconds} ms to iterate through {Players.Count} in sending the top UI");
         }
 
         public override void OnPlayerDead(Player player, CSteamID killer, ELimb limb)
@@ -233,18 +217,12 @@ namespace UnturnedLegends.GameTypes
 
 
             Players.Sort((x, y) => y.Kills.CompareTo(x.Kills));
-            Utility.Debug($"Killer's killstreak: {kPlayer.KillStreak}, Killer's XP gained: {xpGained}, Killer's Multiple Kills: {kPlayer.MultipleKills}");
+            Plugin.Instance.UIManager.ShowXPUI(kPlayer.GamePlayer, xpGained, xpText);
 
-            EffectManager.sendUIEffect(27630, 27630, kPlayer.GamePlayer.TransportConnection, true, $"+{xpGained} XP", xpText);
-
-            Stopwatch watch = new Stopwatch();
-            watch.Start();
             foreach (var ply in Players)
             {
-                ShowTopUI(ply);
+                Plugin.Instance.UIManager.UpdateFFATopUI(ply, Players);
             }
-            watch.Stop();
-            Utility.Debug($"Took {watch.ElapsedMilliseconds} to iterate through {Players.Count} players on sending the top UI");
 
             ThreadPool.QueueUserWorkItem(async (o) =>
             {
@@ -310,38 +288,6 @@ namespace UnturnedLegends.GameTypes
             }
 
             SpawnPlayer(fPlayer);
-        }
-
-        public void ShowTopUI(FFAPlayer player)
-        {
-            Utility.Debug($"Showing FFA top UI for {player.GamePlayer.Player.CharacterName}");
-            if (Players.Count == 0)
-            {
-                Utility.Debug("There are no players registered in the game, returning");
-                return;
-            }
-
-            var firstPlayer = Players[0];
-            var secondPlayer = player;
-            if (player.GamePlayer.SteamID == firstPlayer.GamePlayer.SteamID)
-            {
-                secondPlayer = Players.Count > 1 ? Players[1] : null;
-
-                EffectManager.sendUIEffectVisibility(Key, player.GamePlayer.TransportConnection, true, "CounterWinning", true);
-                EffectManager.sendUIEffectVisibility(Key, player.GamePlayer.TransportConnection, true, "CounterLosing", false);
-            }
-            else
-            {
-                EffectManager.sendUIEffectVisibility(Key, player.GamePlayer.TransportConnection, true, "CounterWinning", false);
-                EffectManager.sendUIEffectVisibility(Key, player.GamePlayer.TransportConnection, true, "CounterLosing", true);
-            }
-
-            EffectManager.sendUIEffectText(Key, player.GamePlayer.TransportConnection, true, "1stPlacementName", firstPlayer.GamePlayer.Player.CharacterName);
-            EffectManager.sendUIEffectText(Key, player.GamePlayer.TransportConnection, true, "1stPlacementScore", firstPlayer.Kills.ToString());
-
-            EffectManager.sendUIEffectText(Key, player.GamePlayer.TransportConnection, true, "2ndPlacementPlace", secondPlayer != null ? Utility.GetOrdinal(Players.IndexOf(secondPlayer) + 1) : "0");
-            EffectManager.sendUIEffectText(Key, player.GamePlayer.TransportConnection, true, "2ndPlacementName", secondPlayer != null ? secondPlayer.GamePlayer.Player.CharacterName : "NONE");
-            EffectManager.sendUIEffectText(Key, player.GamePlayer.TransportConnection, true, "2ndPlacementScore", secondPlayer != null ? secondPlayer.Kills.ToString() : "0");
         }
 
         public void GiveLoadout(FFAPlayer player)

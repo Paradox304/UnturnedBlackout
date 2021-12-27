@@ -46,7 +46,7 @@ namespace UnturnedLegends.Managers
         public void StartGame()
         {
             Utility.Debug($"Starting game, finding a random arena location, previous location was {CurrentLocation.LocationName}");
-            var locations = Config.ArenaLocations.Where(k => k.LocationID != CurrentLocation.LocationID).ToList();
+            var locations = Config.ArenaLocations.ToList();
             var randomLocation = locations[UnityEngine.Random.Range(0, locations.Count)];
             Utility.Debug($"Found a random location, name is {randomLocation.LocationName}");
 

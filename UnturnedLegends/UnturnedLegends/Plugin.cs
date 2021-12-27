@@ -28,6 +28,8 @@ namespace UnturnedLegends
 
             DBManager = new DatabaseManager();
             DataManager = new DataManager();
+            UIManager = new UIManager();
+
             StartCoroutine(Day());
 
             Level.onPostLevelLoaded += OnLevelLoaded;
@@ -92,6 +94,7 @@ namespace UnturnedLegends
         };
 
         public static Harmony Harmony { get; set; }
+        public UIManager UIManager { get; set; }
         public HUDManager HUDManager { get; set; }
         public GameManager GameManager { get; set; }
         public DataManager DataManager { get; set; }
