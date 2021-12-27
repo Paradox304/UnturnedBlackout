@@ -78,7 +78,8 @@ namespace UnturnedLegends
             { "Correct_Usage", "[color=red]Correct Usage: {0}[/color]" },
             { "Location_Not_Found", "[color=red]Location with that ID not found[/color]" },
             { "FFA_Spawnpoint_Set", "[color=red]FFA spawnpoint set for arena {0}[/color]" },
-            { "No_Game_Going_On", "[color=red]There is no game going on at the moment[/color]" },
+            { "Game_Not_Found_With_ID", "[color=red]No game found with that ID[/color]" },
+            { "Not_Ingame", "[color=red]You aren't in any game[/color]" }
             { "FFA_Name", "Free-for-all" },
             { "FFA_Desc", "Eliminate other players." },
             { "Arena_Name", "{0} Arena" },

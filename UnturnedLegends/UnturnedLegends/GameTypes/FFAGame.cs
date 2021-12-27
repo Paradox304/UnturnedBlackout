@@ -12,6 +12,7 @@ using System.Linq;
 using System.Threading;
 using UnityEngine;
 using UnturnedLegends.Enums;
+using UnturnedLegends.Models;
 using UnturnedLegends.SpawnPoints;
 using UnturnedLegends.Structs;
 
@@ -28,10 +29,10 @@ namespace UnturnedLegends.GameTypes
         public const ushort ID = 27620;
         public const short Key = 27620;
 
-        public FFAGame(int locationID, int arenaID, List<GamePlayer> players) : base(EGameType.FFA, locationID, arenaID)
+        public FFAGame(ArenaLocation location, Arena arena, List<GamePlayer> players) : base(EGameType.FFA, location, arena)
         {
-            Utility.Debug($"Initializing FFA game for arena ID {arenaID} and location id {locationID}");
-            SpawnPoints = Plugin.Instance.DataManager.Data.FFASpawnPoints.Where(k => k.LocationID == locationID).ToList();
+            Utility.Debug($"Initializing FFA game for arena ID {arena.ArenaID} and location {location.LocationName}");
+            SpawnPoints = Plugin.Instance.DataManager.Data.FFASpawnPoints.Where(k => k.LocationID == location.LocationID).ToList();
             Players = new List<FFAPlayer>();
             Utility.Debug($"Found {SpawnPoints.Count} positions for FFA");
 
@@ -318,24 +319,9 @@ namespace UnturnedLegends.GameTypes
             return Players.FirstOrDefault(k => k.GamePlayer.SteamID == player.channel.owner.playerID.steamID);
         }
 
-        public override bool IsPlayerIngame(GamePlayer player)
-        {
-            return Players.Exists(k => k.GamePlayer.SteamID == player.SteamID);
-        }
-
         public override bool IsPlayerIngame(CSteamID steamID)
         {
             return Players.Exists(k => k.GamePlayer.SteamID == steamID);
-        }
-
-        public override bool IsPlayerIngame(UnturnedPlayer player)
-        {
-            return Players.Exists(k => k.GamePlayer.SteamID == player.CSteamID);
-        }
-
-        public override bool IsPlayerIngame(Player player)
-        {
-            return Players.Exists(k => k.GamePlayer.SteamID == player.channel.owner.playerID.steamID);
         }
     }
 }

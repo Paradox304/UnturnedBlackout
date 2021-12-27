@@ -13,21 +13,21 @@ namespace UnturnedLegends.GameTypes
 {
     public abstract class Game
     {
-        public EGameType GameType { get; set; }
         public Config Config { get; set; }
 
+        public EGameType GameMode { get; set; }
         public ArenaLocation Location { get; set; }
         public Arena Arena { get; set; }
 
         public bool IsVoting { get; set; }
         public bool HasStarted { get; set; }
 
-        public Game(EGameType gameType, int locationID, int arenaID)
+        public Game(EGameType gameMode, ArenaLocation location, Arena arena)
         {
-            GameType = gameType;
+            GameMode = gameMode;
             Config = Plugin.Instance.Configuration.Instance;
-            Location = Config.ArenaLocations.FirstOrDefault(k => k.LocationID == locationID);
-            Arena = Config.Arenas.FirstOrDefault(k => k.ArenaID == arenaID);
+            Location = location;
+            Arena = arena;
 
             IsVoting = false;
             HasStarted = false;
@@ -60,14 +60,12 @@ namespace UnturnedLegends.GameTypes
         }
 
         public abstract void GameEnd();
-        public abstract bool IsPlayerIngame(Player player);
         public abstract bool IsPlayerIngame(CSteamID steamID);
-        public abstract bool IsPlayerIngame(UnturnedPlayer player);
-        public abstract bool IsPlayerIngame(GamePlayer player);
         public abstract void OnPlayerRevived(UnturnedPlayer player);
         public abstract void OnPlayerDead(Player player, CSteamID killer, ELimb limb);
         public abstract void OnPlayerDamage(ref DamagePlayerParameters parameters, ref bool shouldAllow);
         public abstract void AddPlayerToGame(GamePlayer player);
         public abstract void RemovePlayerFromGame(GamePlayer player);
+        public abstract int GetPlayerCount();
     }
 }

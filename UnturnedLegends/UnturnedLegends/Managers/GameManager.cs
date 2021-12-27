@@ -46,24 +46,88 @@ namespace UnturnedLegends.Managers
             Utility.Debug($"Starting games");
             foreach (var arena in Config.Arenas)
             {
-                Utility.Debug($"Starting ")
+                Utility.Debug($"Getting the location and setting the gamemode default to FFA for arena {arena.ArenaID}");
                 var locations = arena.Locations.Where(k => AvailableLocations.Contains(k)).ToList();
+                Utility.Debug($"Found {locations.Count} free locations to choose from");
+                var location = locations[UnityEngine.Random.Range(0, locations.Count)];
+                var loc = Config.ArenaLocations.FirstOrDefault(k => k.LocationID == location);
+                Utility.Debug($"Found a random location with name {loc.LocationName}");
+                StartGame(arena, loc, EGameType.FFA, new List<GamePlayer>());
             }
+        }
+
+        public void StartGame(Arena arena, ArenaLocation location, EGameType gameMode, List<GamePlayer> players)
+        {
+            Utility.Debug($"Starting game for arena {arena.ArenaID} with location {location.LocationID} for gamemode {gameMode}");
+            Game game = null;
+            switch (gameMode)
+            {
+                case EGameType.FFA:
+                    game = new FFAGame(location, arena, new List<GamePlayer>());
+                    break;
+                default:
+                    break;
+            }
+            Utility.Debug("Game is created, adding the game to the list, and releasing the location from available locations");
+            Games.Add(game);
+            AvailableLocations.Remove(location.LocationID);
         }
 
         public void EndGame(Game game)
         {
-            // TO BE ADDED
+            Utility.Debug($"Ending game for arena {game.Arena.ArenaID} with location {game.Location.LocationName} for gamemode {game.GameMode}");
+            Utility.Debug("Destroying the game, removing the game from the list, and adding the location to available locations");
+            game.Destroy();
+            Games.Remove(game);
+            AvailableLocations.Add(game.Location.LocationID);
         }
 
-        public void AddPlayerToGame(UnturnedPlayer player)
+        public void AddPlayerToGame(UnturnedPlayer player, int arenaID)
         {
-            // TO BE ADDED
+            Utility.Debug($"Trying to add {player.CharacterName} to game with arena id {arenaID}");
+            var game = Games.FirstOrDefault(k => k.Arena.ArenaID == arenaID);
+
+            if (game == null)
+            {
+                Utility.Say(player, Plugin.Instance.Translate("Game_Not_Found_With_ID").ToRich());
+                return;
+            }
+
+            if (game.IsVoting)
+            {
+                Utility.Debug("Can't join game, voting going on");
+                return;
+            }
+
+            var gPlayer = GetGamePlayer(player);
+            if (gPlayer == null)
+            {
+                Utility.Debug("Error finding game player of the player, returning");
+                return;
+            }
+
+            game.AddPlayerToGame(gPlayer);
         }
 
         public void RemovePlayerFromGame(UnturnedPlayer player)
         {
-            // TO BE ADDED
+            Utility.Debug($"Trying to remove {player.CharacterName} from game");
+            if (!TryGetCurrentGame(player.CSteamID, out Game game))
+            {
+                Utility.Say(player, Plugin.Instance.Translate("Not_Ingame").ToRich());
+                return;
+            }
+
+            var gPlayer = GetGamePlayer(player);
+            if (gPlayer == null)
+            {
+                Utility.Debug("Error finding game player of the player, returning");
+                return;
+            }
+
+            game.RemovePlayerFromGame(gPlayer);
+            Utility.Debug("Sending player to lobby");
+            SendPlayerToLobby(player);
         }
 
         private void OnPlayerJoined(UnturnedPlayer player)
@@ -92,17 +156,36 @@ namespace UnturnedLegends.Managers
 
         private void OnPlayerLeft(UnturnedPlayer player)
         {
-            // TO BE ADDED
+            Utility.Debug($"{player.CharacterName} left the server, removing them from game and removing the game player");
+            if (Players.TryGetValue(player.CSteamID, out GamePlayer gPlayer))
+            {
+                if (TryGetCurrentGame(player.CSteamID, out Game game))
+                {
+                    game.RemovePlayerFromGame(gPlayer);
+                }
+
+                Players.Remove(player.CSteamID);
+            }
         }
 
         private void OnPlayerRevived(UnturnedPlayer player, Vector3 position, byte angle)
         {
-            // TO BE ADDED
+            Utility.Debug("Player revived, checking if the player is in a game");
+            if (!TryGetCurrentGame(player.CSteamID, out _))
+            {
+                Utility.Debug("Player is not in a game, spawning them in the lobby");
+                SendPlayerToLobby(player);
+            }
         }
 
         private void OnDamagePlayer(ref DamagePlayerParameters parameters, ref bool shouldAllow)
         {
-            // TO BE ADDED
+            Utility.Debug("Player damaged, checking if the player is in a game");
+            if (!TryGetCurrentGame(parameters.player.channel.owner.playerID.steamID, out _))
+            {
+                Utility.Debug("Player is not in a game, disabling the damage done");
+                shouldAllow = false;
+            }
         }
 
         public void SendPlayerToLobby(UnturnedPlayer player)
@@ -128,6 +211,12 @@ namespace UnturnedLegends.Managers
         public GamePlayer GetGamePlayer(UnturnedPlayer player)
         {
             return Players.TryGetValue(player.CSteamID, out GamePlayer gPlayer) ? gPlayer : null;
+        }
+
+        public bool TryGetCurrentGame(CSteamID steamID, out Game game)
+        {
+            game = Games.FirstOrDefault(k => k.IsPlayerIngame(steamID));
+            return game != null;
         }
     }
 }
