@@ -144,7 +144,7 @@ namespace UnturnedLegends.GameTypes
             } 
             if (fPlayer != null)
             {
-                fPlayer.Destroy();
+                fPlayer.GamePlayer.OnGameLeft();
                 Players.Remove(fPlayer);
             }
 
@@ -246,13 +246,13 @@ namespace UnturnedLegends.GameTypes
                 return;
             }
 
-            if (player.HasSpawnProtection)
+            if (player.GamePlayer.HasSpawnProtection)
             {
                 shouldAllow = false;
                 return;
             }
 
-            player.OnDamaged();
+            player.GamePlayer.OnDamaged();
 
             var kPlayer = GetFFAPlayer(parameters.killer);
             if (kPlayer == null)
@@ -261,9 +261,9 @@ namespace UnturnedLegends.GameTypes
                 return;
             }
 
-            if (kPlayer.HasSpawnProtection)
+            if (kPlayer.GamePlayer.HasSpawnProtection)
             {
-                kPlayer.HasSpawnProtection = false;
+                kPlayer.GamePlayer.HasSpawnProtection = false;
             }
         }
 
@@ -309,7 +309,7 @@ namespace UnturnedLegends.GameTypes
             var spawnpoint = SpawnPoints[UnityEngine.Random.Range(0, SpawnPoints.Count)];
             player.GamePlayer.Player.Player.teleportToLocationUnsafe(spawnpoint.GetSpawnPoint(), 0);
 
-            player.GiveSpawnProtection();
+            player.GamePlayer.GiveSpawnProtection(Config.FFA.SpawnProtectionSeconds);
         }
 
         public FFAPlayer GetFFAPlayer(CSteamID steamID)
