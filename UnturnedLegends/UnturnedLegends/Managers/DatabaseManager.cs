@@ -38,7 +38,7 @@ namespace UnturnedLegends.Managers
                 try
                 {
                     await Conn.OpenAsync();
-                    await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{Config.PlayersTableName}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `SteamName` VARCHAR(65) NOT NULL , `AvatarLink` VARCHAR(200) NOT NULL , `XP` INT UNSIGNED NOT NULL DEFAULT '0' , `Level` INT UNSIGNED NOT NULL DEFAULT '0' , `Credits` INT UNSIGNED NOT NULL DEFAULT '0' , `Kills` INT UNSIGNED NOT NULL DEFAULT '0' , `Deaths` INT UNSIGNED NOT NULL DEFAULT '0' , PRIMARY KEY (`SteamID`));", Conn).ExecuteScalarAsync();
+                    await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{Config.PlayersTableName}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `SteamName` VARCHAR(65) NOT NULL , `AvatarLink` VARCHAR(200) NOT NULL , `XP` INT UNSIGNED NOT NULL DEFAULT '0' , `Level` INT UNSIGNED NOT NULL DEFAULT '0' , `Credits` INT UNSIGNED NOT NULL DEFAULT '0' , `Kills` INT UNSIGNED NOT NULL DEFAULT '0' , `HeadshotKills` INT UNSIGNED NOT NULL DEFAULT '0' , `Highest Killstreak` INT UNSIGNED NOT NULL DEFAULT '0' , `Highest MultiKills` INT UNSIGNED NOT NULL DEFAULT '0' , `Kills Confirmed` INT UNSIGNED NOT NULL DEFAULT '0' , `Kills Denied` INT UNSIGNED NOT NULL DEFAULT '0' , `Flags Captured` INT UNSIGNED NOT NULL DEFAULT '0' , `Flags Saved` INT UNSIGNED NOT NULL DEFAULT '0' , `Areas Taken` INT UNSIGNED NOT NULL DEFAULT '0' , `Deaths` INT UNSIGNED NOT NULL DEFAULT '0' , PRIMARY KEY (`SteamID`));", Conn).ExecuteScalarAsync();
                 }
                 catch (Exception ex)
                 {
@@ -247,6 +247,238 @@ namespace UnturnedLegends.Managers
                 catch (Exception ex)
                 {
                     Logger.Log($"Error adding {kills} kills for player with steam id {steamID}");
+                    Logger.Log(ex);
+                }
+                finally
+                {
+                    await Conn.CloseAsync();
+                }
+            }
+        }
+
+        public async Task IncreasePlayerHeadshotKillsAsync(CSteamID steamID, uint headshotKills)
+        {
+            using (MySqlConnection Conn = new MySqlConnection(ConnectionString))
+            {
+                try
+                {
+                    await Conn.OpenAsync();
+
+                    await new MySqlCommand($"UPDATE `{Config.PlayersTableName}` SET `Headshot Kills` = `Headshot Kills` + {headshotKills} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                    var obj = await new MySqlCommand($"Select `Headshot Kills` FROM `{Config.PlayersTableName}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                    if (PlayerCache.TryGetValue(steamID, out PlayerData data))
+                    {
+                        if (obj is uint newHeadshotKills)
+                        {
+                            data.HeadshotKills = newHeadshotKills;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log($"Error adding {headshotKills} headshot kills for player with steam id {steamID}");
+                    Logger.Log(ex);
+                }
+                finally
+                {
+                    await Conn.CloseAsync();
+                }
+            }
+        }
+
+        public async Task UpdatePlayerHighestKillStreakAsync(CSteamID steamID, uint killStreak)
+        {
+            using (MySqlConnection Conn = new MySqlConnection(ConnectionString))
+            {
+                try
+                {
+                    await Conn.OpenAsync();
+
+                    await new MySqlCommand($"UPDATE `{Config.PlayersTableName}` SET `Highest Killstreak` = {killStreak} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                    if (PlayerCache.TryGetValue(steamID, out PlayerData data))
+                    {
+                        data.HighestKillstreak = killStreak;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log($"Error setting {killStreak} highest killstreak for player with steam id {steamID}");
+                    Logger.Log(ex);
+                }
+                finally
+                {
+                    await Conn.CloseAsync();
+                }
+            }
+        }
+
+        public async Task UpdatePlayerHighestMultiKillsAsync(CSteamID steamID, uint multiKills)
+        {
+            using (MySqlConnection Conn = new MySqlConnection(ConnectionString))
+            {
+                try
+                {
+                    await Conn.OpenAsync();
+
+                    await new MySqlCommand($"UPDATE `{Config.PlayersTableName}` SET `Highest MultiKills` = {multiKills} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                    if (PlayerCache.TryGetValue(steamID, out PlayerData data))
+                    {
+                        data.HighestMultiKills = multiKills;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log($"Error setting {multiKills} highest multi kills for player with steam id {steamID}");
+                    Logger.Log(ex);
+                }
+                finally
+                {
+                    await Conn.CloseAsync();
+                }
+            }
+        }
+
+        public async Task IncreasePlayerKillsConfirmedAsync(CSteamID steamID, uint killsConfirmed)
+        {
+            using (MySqlConnection Conn = new MySqlConnection(ConnectionString))
+            {
+                try
+                {
+                    await Conn.OpenAsync();
+
+                    await new MySqlCommand($"UPDATE `{Config.PlayersTableName}` SET `Kills Confirmed` = `Kills Confirmed` + {killsConfirmed} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                    var obj = await new MySqlCommand($"Select `Kills Confirmed` FROM `{Config.PlayersTableName}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                    if (PlayerCache.TryGetValue(steamID, out PlayerData data))
+                    {
+                        if (obj is uint newKillsConfirmed)
+                        {
+                            data.KillsConfirmed = newKillsConfirmed;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log($"Error adding {killsConfirmed} kills confirmed for player with steam id {steamID}");
+                    Logger.Log(ex);
+                }
+                finally
+                {
+                    await Conn.CloseAsync();
+                }
+            }
+        }
+
+        public async Task IncreasePlayerKillsDeniedAsync(CSteamID steamID, uint killsDenied)
+        {
+            using (MySqlConnection Conn = new MySqlConnection(ConnectionString))
+            {
+                try
+                {
+                    await Conn.OpenAsync();
+
+                    await new MySqlCommand($"UPDATE `{Config.PlayersTableName}` SET `Kills Denied` = `Kills Denied` + {killsDenied} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                    var obj = await new MySqlCommand($"Select `Kills Denied` FROM `{Config.PlayersTableName}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                    if (PlayerCache.TryGetValue(steamID, out PlayerData data))
+                    {
+                        if (obj is uint newKillsDenied)
+                        {
+                            data.KillsDenied = newKillsDenied;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log($"Error adding {killsDenied} kills denied for player with steam id {steamID}");
+                    Logger.Log(ex);
+                }
+                finally
+                {
+                    await Conn.CloseAsync();
+                }
+            }
+        }
+
+        public async Task IncreasePlayerFlagsCapturedAsync(CSteamID steamID, uint flagsCaptured)
+        {
+            using (MySqlConnection Conn = new MySqlConnection(ConnectionString))
+            {
+                try
+                {
+                    await Conn.OpenAsync();
+
+                    await new MySqlCommand($"UPDATE `{Config.PlayersTableName}` SET `Flags Captured` = `Flags Captured` + {flagsCaptured} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                    var obj = await new MySqlCommand($"Select `Flags Captured` FROM `{Config.PlayersTableName}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                    if (PlayerCache.TryGetValue(steamID, out PlayerData data))
+                    {
+                        if (obj is uint newFlagsCaptured)
+                        {
+                            data.FlagsCaptured = newFlagsCaptured;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log($"Error adding {flagsCaptured} flags captured for player with steam id {steamID}");
+                    Logger.Log(ex);
+                }
+                finally
+                {
+                    await Conn.CloseAsync();
+                }
+            }
+        }
+
+        public async Task IncreasePlayerFlagsSavedAsync(CSteamID steamID, uint flagsSaved)
+        {
+            using (MySqlConnection Conn = new MySqlConnection(ConnectionString))
+            {
+                try
+                {
+                    await Conn.OpenAsync();
+
+                    await new MySqlCommand($"UPDATE `{Config.PlayersTableName}` SET `Flags Saved` = `Flags Saved` + {flagsSaved} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                    var obj = await new MySqlCommand($"Select `Flags Saved` FROM `{Config.PlayersTableName}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                    if (PlayerCache.TryGetValue(steamID, out PlayerData data))
+                    {
+                        if (obj is uint newFlagsSaved)
+                        {
+                            data.FlagsSaved = newFlagsSaved;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log($"Error adding {flagsSaved} flags saved for player with steam id {steamID}");
+                    Logger.Log(ex);
+                }
+                finally
+                {
+                    await Conn.CloseAsync();
+                }
+            }
+        }
+
+        public async Task IncreasePlayerAreasTakenAsync(CSteamID steamID, uint areasTaken)
+        {
+            using (MySqlConnection Conn = new MySqlConnection(ConnectionString))
+            {
+                try
+                {
+                    await Conn.OpenAsync();
+
+                    await new MySqlCommand($"UPDATE `{Config.PlayersTableName}` SET `Areas Taken` = `Areas Taken` + {areasTaken} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                    var obj = await new MySqlCommand($"Select `Areas Taken` FROM `{Config.PlayersTableName}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                    if (PlayerCache.TryGetValue(steamID, out PlayerData data))
+                    {
+                        if (obj is uint newArenasTaken)
+                        {
+                            data.AreasTaken = newArenasTaken;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log($"Error adding {areasTaken} areas taken for player with steam id {steamID}");
                     Logger.Log(ex);
                 }
                 finally

@@ -47,8 +47,10 @@ namespace UnturnedLegends.GameTypes
 
         public void StartVoting()
         {
+            Utility.Debug($"Trying to start voting on location {Location.LocationName} with game mode {GameMode}");
             if (!Plugin.Instance.GameManager.CanStartVoting())
             {
+                Utility.Debug("There is already a voting going on, returning");
                 GamePhase = EGamePhase.WaitingForVoting;
                 return;
             }
