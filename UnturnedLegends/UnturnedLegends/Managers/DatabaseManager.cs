@@ -110,7 +110,47 @@ namespace UnturnedLegends.Managers
                                 continue;
                             }
 
-                            if (!uint.TryParse(rdr[7].ToString(), out uint deaths))
+                            if (!uint.TryParse(rdr[7].ToString(), out uint headshotKills))
+                            {
+                                continue;
+                            }
+
+                            if (!uint.TryParse(rdr[8].ToString(), out uint highestKillstreak))
+                            {
+                                continue;
+                            }
+
+                            if (!uint.TryParse(rdr[9].ToString(), out uint highestMultiKills))
+                            {
+                                continue;
+                            }
+
+                            if (!uint.TryParse(rdr[10].ToString(), out uint killsConfirmed))
+                            {
+                                continue;
+                            }
+
+                            if (!uint.TryParse(rdr[11].ToString(), out uint killsDenied))
+                            {
+                                continue;
+                            }
+
+                            if (!uint.TryParse(rdr[12].ToString(), out uint flagsCaptured))
+                            {
+                                continue;
+                            }
+
+                            if (!uint.TryParse(rdr[13].ToString(), out uint flagsSaved))
+                            {
+                                continue;
+                            }
+
+                            if (!uint.TryParse(rdr[14].ToString(), out uint areasTaken))
+                            {
+                                continue;
+                            }
+
+                            if (!uint.TryParse(rdr[15].ToString(), out uint deaths))
                             {
                                 continue;
                             }
@@ -120,7 +160,7 @@ namespace UnturnedLegends.Managers
                                 PlayerCache.Remove(steamID);
                             }
 
-                            PlayerCache.Add(steamID, new PlayerData(steamID, steamName, avatarLink, xp, level, credits, kills, deaths));
+                            PlayerCache.Add(steamID, new PlayerData(steamID, steamName, avatarLink, xp, level, credits, kills, headshotKills, highestKillstreak, highestMultiKills, killsConfirmed, killsDenied, flagsCaptured, flagsSaved, areasTaken, deaths));
                         }
                     }
                     catch (Exception ex)
