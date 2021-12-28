@@ -44,26 +44,25 @@ namespace UnturnedLegends.Managers
         public void StartGames()
         {
             Utility.Debug($"Starting games");
-            foreach (var arena in Config.Arenas)
+            for (int i = 1; i <= Config.GamesCount; i++)
             {
-                Utility.Debug($"Getting the location and setting the gamemode default to FFA for arena {arena.ArenaID}");
-                var locations = arena.Locations.Where(k => AvailableLocations.Contains(k)).ToList();
-                Utility.Debug($"Found {locations.Count} free locations to choose from");
-                var location = locations[UnityEngine.Random.Range(0, locations.Count)];
-                var loc = Config.ArenaLocations.FirstOrDefault(k => k.LocationID == location);
-                Utility.Debug($"Found a random location with name {loc.LocationName}");
-                StartGame(arena, loc, EGameType.FFA, new List<GamePlayer>());
+                Utility.Debug($"Getting the location and setting the gamemode default to FFA for game {i}");
+                Utility.Debug($"{AvailableLocations.Count} locations to choose from");
+                var locationID = AvailableLocations[UnityEngine.Random.Range(0, AvailableLocations.Count)];
+                var location = Config.ArenaLocations.FirstOrDefault(k => k.LocationID == locationID);
+                Utility.Debug($"Found {location.LocationName}");
+                StartGame(location, EGameType.FFA);
             }
         }
 
-        public void StartGame(Arena arena, ArenaLocation location, EGameType gameMode, List<GamePlayer> players)
+        public void StartGame(ArenaLocation location, EGameType gameMode)
         {
-            Utility.Debug($"Starting game for arena {arena.ArenaID} with location {location.LocationID} for gamemode {gameMode}");
+            Utility.Debug($"Starting game with location {location.LocationID} for gamemode {gameMode}");
             Game game = null;
             switch (gameMode)
             {
                 case EGameType.FFA:
-                    game = new FFAGame(location, arena, players);
+                    game = new FFAGame(location);
                     break;
                 default:
                     break;
@@ -75,7 +74,7 @@ namespace UnturnedLegends.Managers
 
         public void EndGame(Game game)
         {
-            Utility.Debug($"Ending game for arena {game.Arena.ArenaID} with location {game.Location.LocationName} for gamemode {game.GameMode}");
+            Utility.Debug($"Ending game for location {game.Location.LocationName} for gamemode {game.GameMode}");
             Utility.Debug("Destroying the game, removing the game from the list, and adding the location to available locations");
             game.Destroy();
             Games.Remove(game);
@@ -85,13 +84,12 @@ namespace UnturnedLegends.Managers
         public void AddPlayerToGame(UnturnedPlayer player, int selectedID)
         {
             Utility.Debug($"Trying to add {player.CharacterName} to game with id {selectedID}");
-            var game = Games[selectedID];
-
             if (selectedID > (Games.Count - 1))
             {
                 Utility.Say(player, Plugin.Instance.Translate("Game_Not_Found_With_ID").ToRich());
                 return;
             }
+            var game = Games[selectedID];
 
             if (TryGetCurrentGame(player.CSteamID, out _))
             {
@@ -99,7 +97,7 @@ namespace UnturnedLegends.Managers
                 return;
             }
 
-            if (game.GetPlayerCount() >= game.Arena.MaxPlayers)
+            if (game.GetPlayerCount() >= game.Location.MaxPlayers)
             {
                 Utility.Say(player, Plugin.Instance.Translate("Game_Full").ToRich());
                 return;

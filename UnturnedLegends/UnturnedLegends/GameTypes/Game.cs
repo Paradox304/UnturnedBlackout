@@ -19,74 +19,53 @@ namespace UnturnedLegends.GameTypes
 
         public EGameType GameMode { get; set; }
         public ArenaLocation Location { get; set; }
-        public Arena Arena { get; set; }
 
         public bool IsVoting { get; set; }
         public bool HasStarted { get; set; }
 
-        public List<VoteChoice> VoteChoices { get; set; }
-        public List<GamePlayer> VotePlayers { get; set; }
+        public Dictionary<int, VoteChoice> VoteChoices { get; set; }
+        public List<GamePlayer> Vote1 { get; set; }
+        public List<GamePlayer> Vote2 { get; set; }
 
         public Coroutine VoteEnder { get; set; }
 
-        public Game(EGameType gameMode, ArenaLocation location, Arena arena)
+        public Game(EGameType gameMode, ArenaLocation location)
         {
             GameMode = gameMode;
             Config = Plugin.Instance.Configuration.Instance;
             Location = location;
-            Arena = arena;
 
             IsVoting = false;
             HasStarted = false;
 
-            VoteChoices = new List<VoteChoice>();
-            VotePlayers = new List<GamePlayer>();
+            VoteChoices = new Dictionary<int, VoteChoice>();
+            Vote1 = new List<GamePlayer>();
+            Vote2 = new List<GamePlayer>();
 
             PlayerLife.onPlayerDied += OnPlayerDied;
             UnturnedPlayerEvents.OnPlayerRevive += OnPlayerRevive;
             DamageTool.damagePlayerRequested += OnPlayerDamaged;
         }
 
-        public void StartVoting(List<GamePlayer> players)
+        public void StartVoting()
         {
             IsVoting = true;
-            VotePlayers = players;
-            Utility.Debug($"Starting voting on arena with id {Arena.ArenaID} and location {Location.LocationName} with game mode {GameMode}");
-            for (int i = 1; i <= Config.VoteChoices; i++)
-            {
-                Utility.Debug("Getting the available locations to choose from");
-                var locations = Arena.Locations.Where(k => Plugin.Instance.GameManager.AvailableLocations.Contains(k)).ToList();
-                // Remove this when there are more locations available
-                locations.Add(Location.LocationID);
-                if (locations.Count == 0)
-                {
-                    break;
-                }
+            Utility.Debug($"Starting voting on location {Location.LocationName} with game mode {GameMode}");
 
+            var locations = Plugin.Instance.GameManager.AvailableLocations.ToList();
+            locations.Add(Location.LocationID);
+            var gameModes = new List<byte> { (byte)GameMode };
+
+            for (int i = 2; i <= Config.VoteChoices; i++)
+            {
                 Utility.Debug($"Found {locations.Count} available locations to choose from");
                 var locationID = locations[UnityEngine.Random.Range(0, locations.Count)];
                 var location = Config.ArenaLocations.FirstOrDefault(k => k.LocationID == locationID);
-
-                Utility.Debug("Getting the available gamemodes to choose from");
-                // Remove this when there are more gamemodes available
-                var gameModes = new List<byte> { (byte)GameMode };
                 Utility.Debug($"Found {gameModes.Count} available gamemodes to choose from");
                 var gameMode = (EGameType)gameModes[UnityEngine.Random.Range(0, gameModes.Count)];
                 Utility.Debug($"Found gamemode {gameMode}");
                 var voteChoice = new VoteChoice(location, gameMode);
-                VoteChoices.Add(voteChoice);
-            }
-
-            if (VotePlayers.Count == 0 || VoteChoices.Count == 1)
-            {
-                Utility.Debug("There is only one vote choice or no players, choosing the first choice and sending it");
-                EndVoting(VoteChoices[0]);
-                return;
-            }
-
-            foreach (var player in VotePlayers)
-            {
-                // SEND CODE TO SHOW THE VOTING UI
+                VoteChoices.Add(i, voteChoice);
             }
 
             VoteEnder = Plugin.Instance.StartCoroutine(EndVoter());
@@ -96,42 +75,51 @@ namespace UnturnedLegends.GameTypes
         {
             yield return new WaitForSeconds(Config.VoteSeconds);
             Utility.Debug("Ending voting, getting the most voted choice");
-            int choice = (from i in (from x in VotePlayers
-                                     select x.VoteChoice).ToList()
-                          group i by i into grp
-                          orderby grp.Count() descending
-                          select grp.Key).FirstOrDefault();
-            Utility.Debug($"Most voted choice: {choice}");
-            if (choice == -1)
+            VoteChoice choice = null;
+            if (Vote1.Count >= Vote2.Count)
             {
-                Utility.Debug("Choice is -1, sending the first choice");
-                EndVoting(VoteChoices[0]);
+                choice = VoteChoices[1];
             } else
             {
-                EndVoting(VoteChoices[choice]);
+                choice = VoteChoices[2];
             }
+            Utility.Debug($"Most voted choice: {choice.Location.LocationName}, {choice.GameMode}");
+            EndVoting(choice);
         }
 
         public void OnVoted(GamePlayer player, int choice)
         {
-            Utility.Debug($"{player.Player.CharacterName} chose vote choice {choice}");
-            if (choice > (VoteChoices.Count - 1))
+            Utility.Debug($"{player.Player.CharacterName} chose {choice}");
+            if (Vote1.Contains(player))
             {
-                Utility.Debug($"Choice is higher than the listed vote choices, returning");
-                return;
+                if (choice == 1) return;
+                Vote1.Remove(player);
+                Vote2.Add(player);
+            } else if (Vote2.Contains(player))
+            {
+                if (choice == 2) return;
+                Vote2.Remove(player);
+                Vote1.Add(player);
+            } else
+            {
+                if (choice == 1)
+                {
+                    Vote1.Add(player);
+                } else
+                {
+                    Vote2.Add(player);
+                }
             }
-
-            player.VoteChoice = choice;
         }
 
         public void EndVoting(VoteChoice choice)
         {
-            Utility.Debug($"Stopping voting for arena id {Arena.ArenaID}");
-            Utility.Debug($"Ending the current game and starting a new one at the location {choice.Location.LocationName}, gamemode {choice.GameMode}, player count {VotePlayers.Count}");
+            Utility.Debug($"Stopping voting for game");
+            Utility.Debug($"Ending the current game and starting a new one at the location {choice.Location.LocationName}, gamemode {choice.GameMode}");
 
             IsVoting = false;
             Plugin.Instance.GameManager.EndGame(this);
-            Plugin.Instance.GameManager.StartGame(Arena, choice.Location, choice.GameMode, VotePlayers);
+            Plugin.Instance.GameManager.StartGame(choice.Location, choice.GameMode);
         }
 
         private void OnPlayerDamaged(ref DamagePlayerParameters parameters, ref bool shouldAllow)

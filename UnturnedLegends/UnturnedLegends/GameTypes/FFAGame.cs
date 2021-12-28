@@ -29,17 +29,12 @@ namespace UnturnedLegends.GameTypes
         public const ushort ID = 27620;
         public const short Key = 27620;
 
-        public FFAGame(ArenaLocation location, Arena arena, List<GamePlayer> players) : base(EGameType.FFA, location, arena)
+        public FFAGame(ArenaLocation location) : base(EGameType.FFA, location)
         {
-            Utility.Debug($"Initializing FFA game for arena ID {arena.ArenaID} and location {location.LocationName}");
+            Utility.Debug($"Initializing FFA game for location {location.LocationName}");
             SpawnPoints = Plugin.Instance.DataManager.Data.FFASpawnPoints.Where(k => k.LocationID == location.LocationID).ToList();
             Players = new List<FFAPlayer>();
             Utility.Debug($"Found {SpawnPoints.Count} positions for FFA");
-            Utility.Debug($"Found {players.Count} to preadd");
-            foreach (var player in players)
-            {
-                AddPlayerToGame(player);
-            }
             GameStarter = Plugin.Instance.StartCoroutine(StartGame());
         }
 
@@ -84,8 +79,14 @@ namespace UnturnedLegends.GameTypes
 
         public override void GameEnd()
         {
-            // TO BE ADDED
-            StartVoting(Players.Select(k => k.GamePlayer).ToList());
+            foreach (var player in Players)
+            {
+                RemovePlayerFromGame(player.GamePlayer);
+                Plugin.Instance.GameManager.SendPlayerToLobby(player.GamePlayer.Player);
+            }
+
+            Players = new List<FFAPlayer>();
+            StartVoting();
         }
 
         public override void AddPlayerToGame(GamePlayer player)
@@ -107,12 +108,14 @@ namespace UnturnedLegends.GameTypes
             Plugin.Instance.UIManager.ShowFFAHUD(player);
             if (!HasStarted)
             {
+                player.Player.Player.movement.sendPluginSpeedMultiplier(0);
                 Plugin.Instance.UIManager.ShowCountdownUI(player);
             }
             else
             {
                 Plugin.Instance.UIManager.UpdateFFATopUI(fPlayer, Players);
             }
+            Plugin.Instance.HUDManager.OnGamemodeChanged(player.Player.Player, Location, GameMode);
 
             if (Players.Count == 2)
             {
@@ -133,7 +136,12 @@ namespace UnturnedLegends.GameTypes
             }
 
             Plugin.Instance.UIManager.ClearFFAHUD(player);
+            Plugin.Instance.HUDManager.OnGamemodeChanged(player.Player.Player, new ArenaLocation(-1, 0, "None"), EGameType.None);
             var fPlayer = GetFFAPlayer(player.Player);
+            if (!HasStarted)
+            {
+                fPlayer.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1);
+            } 
             if (fPlayer != null)
             {
                 fPlayer.Destroy();
@@ -300,11 +308,6 @@ namespace UnturnedLegends.GameTypes
 
             var spawnpoint = SpawnPoints[UnityEngine.Random.Range(0, SpawnPoints.Count)];
             player.GamePlayer.Player.Player.teleportToLocationUnsafe(spawnpoint.GetSpawnPoint(), 0);
-
-            if (!HasStarted)
-            {
-                player.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(0);
-            }
 
             player.GiveSpawnProtection();
         }

@@ -31,10 +31,11 @@ namespace UnturnedLegends
         public int VoteChoices { get; set; }
         public int VoteSeconds { get; set; }
 
+        public int GamesCount { get; set; }
+
         public FFAConfig FFA { get; set; }
 
         public List<ArenaLocation> ArenaLocations { get; set; }
-        public List<Arena> Arenas { get; set; }
 
         public void LoadDefaults()
         {
@@ -62,21 +63,16 @@ namespace UnturnedLegends
             VoteChoices = 1;
             VoteSeconds = 60;
 
-            FFA = new FFAConfig(15, 600, 50, 50, 10, 5, 10, 5, 10, 2);
+            GamesCount = 3;
 
+            FFA = new FFAConfig(15, 600, 50, 50, 10, 5, 10, 5, 10, 2);
             ArenaLocations = new List<ArenaLocation>
             {
-                new ArenaLocation(1, "Seattle"),
-                new ArenaLocation(2, "Tacoma"),
-                new ArenaLocation(3, "Military Base")
+                new ArenaLocation(1, 10, "Seattle"),
+                new ArenaLocation(2, 10, "Tacoma"),
+                new ArenaLocation(3, 10, "Military Base")
             };
 
-            Arenas = new List<Arena>
-            {
-                new Arena(1, 6, new List<int> { 3 }),
-                new Arena(2, 12, new List<int> { 2 }),
-                new Arena(3, 24, new List<int> { 1 })
-            };
         }
     }
 }
