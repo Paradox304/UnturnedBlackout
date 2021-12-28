@@ -103,7 +103,7 @@ namespace UnturnedLegends.Managers
                 return;
             }
 
-            if (game.IsVoting)
+            if (game.GamePhase == EGamePhase.Voting || game.GamePhase == EGamePhase.WaitingForVoting)
             {
                 Utility.Say(player, Plugin.Instance.Translate("Game_Voting").ToRich());
                 return;
@@ -196,6 +196,32 @@ namespace UnturnedLegends.Managers
                 Utility.Debug("Player is not in a game, disabling the damage done");
                 shouldAllow = false;
             }
+        }
+
+        public void OnVotingEnded()
+        {
+            Utility.Debug("Voting ended for a map, checking if some other game is waiting to vote and start that");
+            foreach (var game in Games)
+            {
+                if (game.GamePhase == EGamePhase.WaitingForVoting)
+                {
+                    game.StartVoting();
+                    break;
+                }
+            }
+        }
+
+        public bool CanStartVoting()
+        {
+            foreach (var game in Games)
+            {
+                if (game.GamePhase == EGamePhase.Voting)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         public void SendPlayerToLobby(UnturnedPlayer player)

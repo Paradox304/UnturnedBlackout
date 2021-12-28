@@ -132,6 +132,7 @@
     <Compile Include="Commands\SetLobbyCommand.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Database\PlayerData.cs" />
+    <Compile Include="Enums\EGamePhase.cs" />
     <Compile Include="Enums\EGameType.cs" />
     <Compile Include="GameTypes\FFAGame.cs" />
     <Compile Include="GameTypes\Game.cs" />

@@ -48,7 +48,7 @@ namespace UnturnedLegends.GameTypes
                     Plugin.Instance.UIManager.SendCountdownSeconds(player.GamePlayer, seconds);
                 }
             }
-            HasStarted = true;
+            GamePhase = EGamePhase.Started;
 
             foreach (var player in Players)
             {
@@ -106,7 +106,7 @@ namespace UnturnedLegends.GameTypes
 
 
             Plugin.Instance.UIManager.ShowFFAHUD(player);
-            if (!HasStarted)
+            if (GamePhase == EGamePhase.Starting)
             {
                 player.Player.Player.movement.sendPluginSpeedMultiplier(0);
                 Plugin.Instance.UIManager.ShowCountdownUI(player);
@@ -138,7 +138,7 @@ namespace UnturnedLegends.GameTypes
             Plugin.Instance.UIManager.ClearFFAHUD(player);
             Plugin.Instance.HUDManager.OnGamemodeChanged(player.Player.Player, new ArenaLocation(-1, 0, "None"), EGameType.None);
             var fPlayer = GetFFAPlayer(player.Player);
-            if (!HasStarted)
+            if (GamePhase == EGamePhase.Starting)
             {
                 fPlayer.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1);
             } 
@@ -240,7 +240,7 @@ namespace UnturnedLegends.GameTypes
                 return;
             }
 
-            if (!HasStarted)
+            if (GamePhase == EGamePhase.Starting)
             {
                 shouldAllow = false;
                 return;

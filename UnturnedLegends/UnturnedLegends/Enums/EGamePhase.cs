@@ -6,9 +6,13 @@ using System.Threading.Tasks;
 
 namespace UnturnedLegends.Enums
 {
-    public enum EGameType
+    public enum EGamePhase
     {
-        FFA,
-        None
+        Starting,
+        Started,
+        Ending,
+        WaitingForVoting,
+        Voting,
+        Ended
     }
 }

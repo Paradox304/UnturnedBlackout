@@ -19,9 +19,8 @@ namespace UnturnedLegends.GameTypes
 
         public EGameType GameMode { get; set; }
         public ArenaLocation Location { get; set; }
-
-        public bool IsVoting { get; set; }
-        public bool HasStarted { get; set; }
+        
+        public EGamePhase GamePhase { get; set; }
 
         public Dictionary<int, VoteChoice> VoteChoices { get; set; }
         public List<GamePlayer> Vote1 { get; set; }
@@ -35,8 +34,7 @@ namespace UnturnedLegends.GameTypes
             Config = Plugin.Instance.Configuration.Instance;
             Location = location;
 
-            IsVoting = false;
-            HasStarted = false;
+            GamePhase = EGamePhase.Starting;
 
             VoteChoices = new Dictionary<int, VoteChoice>();
             Vote1 = new List<GamePlayer>();
@@ -49,14 +47,20 @@ namespace UnturnedLegends.GameTypes
 
         public void StartVoting()
         {
-            IsVoting = true;
+            if (!Plugin.Instance.GameManager.CanStartVoting())
+            {
+                GamePhase = EGamePhase.WaitingForVoting;
+                return;
+            }
+
+            GamePhase = EGamePhase.Voting;
             Utility.Debug($"Starting voting on location {Location.LocationName} with game mode {GameMode}");
 
             var locations = Plugin.Instance.GameManager.AvailableLocations.ToList();
             locations.Add(Location.LocationID);
             var gameModes = new List<byte> { (byte)GameMode };
 
-            for (int i = 2; i <= Config.VoteChoices; i++)
+            for (int i = 1; i <= 2; i++)
             {
                 Utility.Debug($"Found {locations.Count} available locations to choose from");
                 var locationID = locations[UnityEngine.Random.Range(0, locations.Count)];
@@ -117,9 +121,10 @@ namespace UnturnedLegends.GameTypes
             Utility.Debug($"Stopping voting for game");
             Utility.Debug($"Ending the current game and starting a new one at the location {choice.Location.LocationName}, gamemode {choice.GameMode}");
 
-            IsVoting = false;
+            GamePhase = EGamePhase.Ended;
             Plugin.Instance.GameManager.EndGame(this);
             Plugin.Instance.GameManager.StartGame(choice.Location, choice.GameMode);
+            Plugin.Instance.GameManager.OnVotingEnded();
         }
 
         private void OnPlayerDamaged(ref DamagePlayerParameters parameters, ref bool shouldAllow)

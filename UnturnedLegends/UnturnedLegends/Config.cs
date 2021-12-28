@@ -27,10 +27,8 @@ namespace UnturnedLegends
 
         public int LastDamageAfterHealSeconds { get; set; }
         public float HealSeconds { get; set; }
-         
-        public int VoteChoices { get; set; }
-        public int VoteSeconds { get; set; }
 
+        public int VoteSeconds { get; set; }
         public int GamesCount { get; set; }
 
         public FFAConfig FFA { get; set; }
@@ -60,9 +58,7 @@ namespace UnturnedLegends
             LastDamageAfterHealSeconds = 5;
             HealSeconds = 0.065f;
 
-            VoteChoices = 1;
             VoteSeconds = 60;
-
             GamesCount = 3;
 
             FFA = new FFAConfig(15, 600, 50, 50, 10, 5, 10, 5, 10, 2);
