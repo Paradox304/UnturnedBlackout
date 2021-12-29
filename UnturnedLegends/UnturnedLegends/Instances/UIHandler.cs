@@ -179,7 +179,7 @@ namespace UnturnedLegends.Instances
             {
                 var vote = game.VoteChoices[choice];
 
-                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"Lobby{index}VoteMap{choice}", Plugin.Instance.Translate($"Vote{choice}_MapName", vote.Location.LocationName, choice == 0 ? game.Vote0.Count : game.Vote1.Count).ToRich());
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"Lobby{index}VoteMapName{choice}", Plugin.Instance.Translate($"Vote{choice}_MapName", vote.Location.LocationName, choice == 0 ? game.Vote0.Count : game.Vote1.Count).ToRich());
             }
         }
 

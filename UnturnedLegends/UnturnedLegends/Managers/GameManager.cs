@@ -181,6 +181,28 @@ namespace UnturnedLegends.Managers
             }
         }
 
+        public void OnPlayerVoted(UnturnedPlayer player, int index, int choice)
+        {
+            Utility.Debug($"{player.CSteamID} voted on {index} with choice {choice}");
+            if (choice > (Games.Count - 1))
+            {
+                Utility.Debug("Game wasn't found, returning");
+                return;
+            }
+
+            var gPlayer = GetGamePlayer(player);
+            if (gPlayer == null)
+            {
+                Utility.Debug("Error finding game player of the unturned player, returning");
+                return;
+            }
+
+            var game = Games[index];
+            if (game.GamePhase == EGamePhase.Voting)
+            {
+                game.OnVoted(gPlayer, choice);
+            }
+        }
         private void OnPlayerRevived(UnturnedPlayer player, Vector3 position, byte angle)
         {
             Utility.Debug("Player revived, checking if the player is in a game");

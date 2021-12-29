@@ -42,6 +42,7 @@ namespace UnturnedLegends
         {
             GameManager.Destroy();
             HUDManager.Destroy();
+            UIManager.Destroy();
 
             Level.onPostLevelLoaded -= OnLevelLoaded;
             StopAllCoroutines();

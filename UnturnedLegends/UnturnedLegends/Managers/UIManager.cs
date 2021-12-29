@@ -202,6 +202,26 @@ namespace UnturnedLegends.Managers
         private void OnButtonClicked(Player player, string buttonName)
         {
             Utility.Debug($"{player.channel.owner.playerID.characterName} clicked {buttonName}");
+            var ply = UnturnedPlayer.FromPlayer(player);
+            if (buttonName.EndsWith("JoinButton"))
+            {
+                if (int.TryParse(buttonName.Replace("Lobby", "").Replace("JoinButton", ""), out int selected))
+                {
+                    Plugin.Instance.GameManager.AddPlayerToGame(ply, selected);
+                }
+            } else if (buttonName.EndsWith("Vote0"))
+            {
+                if (int.TryParse(buttonName.Replace("Lobby","").Replace("Vote0", ""), out int selected))
+                {
+                    Plugin.Instance.GameManager.OnPlayerVoted(ply, selected, 0);
+                }
+            } else if (buttonName.EndsWith("Vote1"))
+            {
+                if (int.TryParse(buttonName.Replace("Lobby", "").Replace("Vote1", ""), out int selected))
+                {
+                    Plugin.Instance.GameManager.OnPlayerVoted(ply, selected, 1);
+                }
+            }
         }
 
         public void Destroy()
