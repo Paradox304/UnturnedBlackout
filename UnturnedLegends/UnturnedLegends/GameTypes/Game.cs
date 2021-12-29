@@ -9,7 +9,6 @@ using System.Linq;
 using UnityEngine;
 using UnturnedLegends.Enums;
 using UnturnedLegends.Models;
-using UnturnedLegends.Structs;
 
 namespace UnturnedLegends.GameTypes
 {
@@ -23,8 +22,8 @@ namespace UnturnedLegends.GameTypes
         public EGamePhase GamePhase { get; set; }
 
         public Dictionary<int, VoteChoice> VoteChoices { get; set; }
+        public List<GamePlayer> Vote0 { get; set; }
         public List<GamePlayer> Vote1 { get; set; }
-        public List<GamePlayer> Vote2 { get; set; }
 
         public Coroutine VoteEnder { get; set; }
 
@@ -37,8 +36,8 @@ namespace UnturnedLegends.GameTypes
             GamePhase = EGamePhase.Starting;
 
             VoteChoices = new Dictionary<int, VoteChoice>();
+            Vote0 = new List<GamePlayer>();
             Vote1 = new List<GamePlayer>();
-            Vote2 = new List<GamePlayer>();
 
             PlayerLife.onPlayerDied += OnPlayerDied;
             UnturnedPlayerEvents.OnPlayerRevive += OnPlayerRevive;
@@ -52,6 +51,7 @@ namespace UnturnedLegends.GameTypes
             {
                 Utility.Debug("There is already a voting going on, returning");
                 GamePhase = EGamePhase.WaitingForVoting;
+                Plugin.Instance.UIManager.OnGameUpdated(this);
                 return;
             }
 
@@ -62,7 +62,7 @@ namespace UnturnedLegends.GameTypes
             locations.Add(Location.LocationID);
             var gameModes = new List<byte> { (byte)GameMode };
 
-            for (int i = 1; i <= 2; i++)
+            for (int i = 0; i <= 1; i++)
             {
                 Utility.Debug($"Found {locations.Count} available locations to choose from");
                 var locationID = locations[UnityEngine.Random.Range(0, locations.Count)];
@@ -75,19 +75,26 @@ namespace UnturnedLegends.GameTypes
             }
 
             VoteEnder = Plugin.Instance.StartCoroutine(EndVoter());
+            Plugin.Instance.UIManager.OnGameUpdated(this);
         }
 
         public IEnumerator EndVoter()
         {
-            yield return new WaitForSeconds(Config.VoteSeconds);
+            for (int seconds = Config.VoteSeconds; seconds >= 0; seconds--)
+            {
+                TimeSpan span = TimeSpan.FromSeconds(seconds);
+                Plugin.Instance.UIManager.OnGameVoteTimerUpdated(this, span.ToString(@"m\:ss"));
+                yield return new WaitForSeconds(1);
+            }
+
             Utility.Debug("Ending voting, getting the most voted choice");
             VoteChoice choice = null;
-            if (Vote1.Count >= Vote2.Count)
+            if (Vote0.Count >= Vote1.Count)
             {
-                choice = VoteChoices[1];
+                choice = VoteChoices[0];
             } else
             {
-                choice = VoteChoices[2];
+                choice = VoteChoices[1];
             }
             Utility.Debug($"Most voted choice: {choice.Location.LocationName}, {choice.GameMode}");
             EndVoting(choice);
@@ -96,16 +103,16 @@ namespace UnturnedLegends.GameTypes
         public void OnVoted(GamePlayer player, int choice)
         {
             Utility.Debug($"{player.Player.CharacterName} chose {choice}");
-            if (Vote1.Contains(player))
+            if (Vote0.Contains(player))
+            {
+                if (choice == 0) return;
+                Vote0.Remove(player);
+                Vote1.Add(player);
+            } else if (Vote1.Contains(player))
             {
                 if (choice == 1) return;
                 Vote1.Remove(player);
-                Vote2.Add(player);
-            } else if (Vote2.Contains(player))
-            {
-                if (choice == 2) return;
-                Vote2.Remove(player);
-                Vote1.Add(player);
+                Vote0.Add(player);
             } else
             {
                 if (choice == 1)
@@ -113,9 +120,10 @@ namespace UnturnedLegends.GameTypes
                     Vote1.Add(player);
                 } else
                 {
-                    Vote2.Add(player);
+                    Vote0.Add(player);
                 }
             }
+            Plugin.Instance.UIManager.OnGameVoteCountUpdated(this);
         }
 
         public void EndVoting(VoteChoice choice)

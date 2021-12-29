@@ -1,16 +1,22 @@
-﻿using SDG.Unturned;
+﻿using Rocket.Unturned.Player;
+using SDG.Unturned;
+using Steamworks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using UnturnedLegends.Structs;
+using UnturnedLegends.Enums;
+using UnturnedLegends.GameTypes;
+using UnturnedLegends.Instances;
+using UnturnedLegends.Models;
 
 namespace UnturnedLegends.Managers
 {
     public class UIManager
     {
         Config Config { get; set; }
+        public List<UIHandler> UIHandlers { get; set; }
 
         public const ushort FFAID = 27620;
         public const short FFAKey = 27620;
@@ -18,24 +24,59 @@ namespace UnturnedLegends.Managers
         public UIManager()
         {
             Config = Plugin.Instance.Configuration.Instance;
+            UIHandlers = new List<UIHandler>();
+
+            EffectManager.onEffectButtonClicked += OnButtonClicked;
+        }
+
+        public void RegisterUIHandler(UnturnedPlayer player)
+        {
+            if (UIHandlers.Exists(k => k.SteamID == player.CSteamID))
+            {
+                UIHandlers.RemoveAll(k => k.SteamID == player.CSteamID);
+            }
+
+            UIHandlers.Add(new UIHandler(player));
+        }
+
+        public void UnregisterUIHandler(UnturnedPlayer player)
+        {
+            UIHandlers.RemoveAll(k => k.SteamID == player.CSteamID);
+        }
+
+        public void ShowMenuUI(UnturnedPlayer player)
+        {
+            var handler = UIHandlers.FirstOrDefault(k => k.SteamID == player.CSteamID);
+            if (handler != null)
+            {
+                handler.ShowUI();
+            }
+        }
+
+        public void HideMenuUI(UnturnedPlayer player)
+        {
+            var handler = UIHandlers.FirstOrDefault(k => k.SteamID == player.CSteamID);
+            if (handler != null)
+            {
+                handler.HideUI();
+            }
         }
 
         // ALL GAMES RELATED UI
         public void ShowCountdownUI(GamePlayer player)
         {
-            // Make countdown an another effect instead of integrating in the FFAUI
-            EffectManager.sendUIEffectVisibility(FFAKey, player.TransportConnection, true, "StartCountdown", true);
+            EffectManager.sendUIEffect(27633, 27633, player.TransportConnection, true);
+            EffectManager.sendUIEffectVisibility(27633, player.TransportConnection, true, "StartCountdown", true);
         }
 
         public void SendCountdownSeconds(GamePlayer player, int seconds)
         {
-            EffectManager.sendUIEffectText(FFAKey, player.TransportConnection, true, "CountdownNum", seconds.ToString());
+            EffectManager.sendUIEffectText(27633, player.TransportConnection, true, "CountdownNum", seconds.ToString());
         }
 
         public void ClearCountdownUI(GamePlayer player)
         {
-            // Make countdown an another effect instead of integrating in the FFAUI
-            EffectManager.sendUIEffectVisibility(FFAKey, player.TransportConnection, true, "StartCountdown", false);
+            EffectManager.askEffectClearByID(27633, player.TransportConnection);
         }
 
         public void ShowXPUI(GamePlayer player, int xp, string xpGained)
@@ -91,6 +132,81 @@ namespace UnturnedLegends.Managers
         public void ClearFFAHUD(GamePlayer player)
         {
             EffectManager.askEffectClearByID(FFAID, player.TransportConnection);
+        }
+
+        // EVENTS
+        public void OnGamesUpdated()
+        {
+            foreach (var handler in UIHandlers)
+            {
+                if (handler.CurrentPage == EPage.Play)
+                {
+                    handler.ShowGames();
+                }
+            }
+        }
+
+        public void OnGameUpdated(Game game)
+        {
+            foreach (var handler in UIHandlers)
+            {
+                if (handler.CurrentPage == EPage.Play)
+                {
+                    handler.ShowGame(game);
+                }
+            }
+        }
+
+        public void OnGameCountUpdated(Game game)
+        {
+            foreach (var handler in UIHandlers)
+            {
+                if (handler.CurrentPage == EPage.Play)
+                {
+                    handler.UpdateGamePlayerCount(game);
+                }
+            }
+        }
+
+        public void OnGameVoteCountUpdated(Game game)
+        {
+            foreach (var handler in UIHandlers)
+            {
+                if (handler.CurrentPage == EPage.Play)
+                {
+                    handler.UpdateVoteCount(game);
+                }
+            }
+        }
+
+        public void OnGameVoteTimerUpdated(Game game, string timer)
+        {
+            foreach (var handler in UIHandlers)
+            {
+                if (handler.CurrentPage == EPage.Play)
+                {
+                    handler.UpdateVoteTimer(game, timer);
+                }
+            }
+        }
+
+        public void OnXPChanged(UnturnedPlayer player)
+        {
+            var handler = UIHandlers.FirstOrDefault(k => k.SteamID == player.CSteamID);
+            if (handler != null && handler.CurrentPage == EPage.Play)
+            {
+                handler.OnXPChanged();
+            }
+        }
+
+        private void OnButtonClicked(Player player, string buttonName)
+        {
+            Utility.Debug($"{player.channel.owner.playerID.characterName} clicked {buttonName}");
+        }
+
+        public void Destroy()
+        {
+            EffectManager.onEffectButtonClicked -= OnButtonClicked;
         }
     }
 }

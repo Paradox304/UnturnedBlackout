@@ -12,7 +12,6 @@ using UnityEngine;
 using UnturnedLegends.Enums;
 using UnturnedLegends.GameTypes;
 using UnturnedLegends.Models;
-using UnturnedLegends.Structs;
 
 namespace UnturnedLegends.Managers
 {
@@ -70,6 +69,7 @@ namespace UnturnedLegends.Managers
             Utility.Debug("Game is created, adding the game to the list, and releasing the location from available locations");
             Games.Add(game);
             AvailableLocations.Remove(location.LocationID);
+            Plugin.Instance.UIManager.OnGamesUpdated();
         }
 
         public void EndGame(Game game)
@@ -116,6 +116,7 @@ namespace UnturnedLegends.Managers
                 return;
             }
 
+            Plugin.Instance.UIManager.HideMenuUI(gPlayer.Player);
             game.AddPlayerToGame(gPlayer);
         }
 
@@ -150,23 +151,25 @@ namespace UnturnedLegends.Managers
 
                 TaskDispatcher.QueueOnMainThread(() =>
                 {
+                    Plugin.Instance.UIManager.RegisterUIHandler(player);
                     Plugin.Instance.HUDManager.OnXPChanged(player);
+
+                    Utility.Debug($"{player.CharacterName} joined the server, creating a game player and sending them to lobby!");
+                    if (!Players.ContainsKey(player.CSteamID))
+                    {
+                        Players.Remove(player.CSteamID);
+                    }
+
+                    Players.Add(player.CSteamID, new GamePlayer(player, player.Player.channel.GetOwnerTransportConnection()));
+                    SendPlayerToLobby(player);
                 });
             });
-
-            Utility.Debug($"{player.CharacterName} joined the server, creating a game player and sending them to lobby!");
-            if (!Players.ContainsKey(player.CSteamID))
-            {
-                Players.Remove(player.CSteamID);
-            }
-
-            Players.Add(player.CSteamID, new GamePlayer(player, player.Player.channel.GetOwnerTransportConnection()));
-            SendPlayerToLobby(player);
         }
 
         private void OnPlayerLeft(UnturnedPlayer player)
         {
             Utility.Debug($"{player.CharacterName} left the server, removing them from game and removing the game player");
+            Plugin.Instance.UIManager.UnregisterUIHandler(player);
             if (Players.TryGetValue(player.CSteamID, out GamePlayer gPlayer))
             {
                 if (TryGetCurrentGame(player.CSteamID, out Game game))
@@ -220,7 +223,6 @@ namespace UnturnedLegends.Managers
                     return false;
                 }
             }
-
             return true;
         }
 
@@ -228,9 +230,11 @@ namespace UnturnedLegends.Managers
         {
             Utility.Debug($"Sending {player.CharacterName} to the lobby");
             player.Player.inventory.ClearInventory();
+            player.Player.life.serverModifyHealth(100);
             TaskDispatcher.QueueOnMainThread(() =>
             {
                 player.Player.teleportToLocationUnsafe(Config.LobbySpawn, 0);
+                Plugin.Instance.UIManager.ShowMenuUI(player);
             });
         }
 

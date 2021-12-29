@@ -14,7 +14,6 @@ using UnityEngine;
 using UnturnedLegends.Enums;
 using UnturnedLegends.Models;
 using UnturnedLegends.SpawnPoints;
-using UnturnedLegends.Structs;
 
 namespace UnturnedLegends.GameTypes
 {
@@ -42,11 +41,11 @@ namespace UnturnedLegends.GameTypes
         {
             for (int seconds = Config.FFA.StartSeconds; seconds >= 0; seconds--)
             {
-                yield return new WaitForSeconds(1);
                 foreach (var player in Players)
                 {
                     Plugin.Instance.UIManager.SendCountdownSeconds(player.GamePlayer, seconds);
                 }
+                yield return new WaitForSeconds(1);
             }
             GamePhase = EGamePhase.Started;
 
@@ -66,12 +65,12 @@ namespace UnturnedLegends.GameTypes
         {
             for (int seconds = Config.FFA.EndSeconds; seconds >= 0; seconds--)
             {
-                yield return new WaitForSeconds(1);
                 TimeSpan timeSpan = TimeSpan.FromSeconds(seconds);
                 foreach (var player in Players)
                 {
                     Plugin.Instance.UIManager.UpdateFFATimer(player.GamePlayer, timeSpan.ToString(@"m\:ss"));
                 }
+                yield return new WaitForSeconds(1);
             }
 
             GameEnd();
@@ -79,7 +78,8 @@ namespace UnturnedLegends.GameTypes
 
         public override void GameEnd()
         {
-            foreach (var player in Players)
+            GamePhase = EGamePhase.Ending;
+            foreach (var player in Players.ToList())
             {
                 RemovePlayerFromGame(player.GamePlayer);
                 Plugin.Instance.GameManager.SendPlayerToLobby(player.GamePlayer.Player);
@@ -104,8 +104,6 @@ namespace UnturnedLegends.GameTypes
             GiveLoadout(fPlayer);
             SpawnPlayer(fPlayer);
 
-
-            Plugin.Instance.UIManager.ShowFFAHUD(player);
             if (GamePhase == EGamePhase.Starting)
             {
                 player.Player.Player.movement.sendPluginSpeedMultiplier(0);
@@ -113,6 +111,7 @@ namespace UnturnedLegends.GameTypes
             }
             else
             {
+                Plugin.Instance.UIManager.ShowFFAHUD(player);
                 Plugin.Instance.UIManager.UpdateFFATopUI(fPlayer, Players);
             }
             Plugin.Instance.HUDManager.OnGamemodeChanged(player.Player.Player, Location, GameMode);
@@ -124,6 +123,7 @@ namespace UnturnedLegends.GameTypes
                     Plugin.Instance.UIManager.UpdateFFATopUI(ply, Players);
                 }
             }
+            Plugin.Instance.UIManager.OnGameCountUpdated(this);
         }
 
         public override void RemovePlayerFromGame(GamePlayer player)
@@ -136,12 +136,14 @@ namespace UnturnedLegends.GameTypes
             }
 
             Plugin.Instance.UIManager.ClearFFAHUD(player);
-            Plugin.Instance.HUDManager.OnGamemodeChanged(player.Player.Player, new ArenaLocation(-1, 0, "None"), EGameType.None);
+            Plugin.Instance.HUDManager.OnGamemodeChanged(player.Player.Player, new ArenaLocation(-1, 0, "None", ""), EGameType.None);
             var fPlayer = GetFFAPlayer(player.Player);
             if (GamePhase == EGamePhase.Starting)
             {
+                Plugin.Instance.UIManager.ClearCountdownUI(player);
                 fPlayer.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1);
             } 
+
             if (fPlayer != null)
             {
                 fPlayer.GamePlayer.OnGameLeft();
@@ -152,6 +154,7 @@ namespace UnturnedLegends.GameTypes
             {
                 Plugin.Instance.UIManager.UpdateFFATopUI(ply, Players);
             }
+            Plugin.Instance.UIManager.OnGameCountUpdated(this);
         }
 
         public override void OnPlayerDead(Player player, CSteamID killer, ELimb limb)

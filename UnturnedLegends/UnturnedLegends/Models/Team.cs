@@ -1,7 +1,7 @@
 ﻿using Steamworks;
 using System.Collections.Generic;
 
-namespace UnturnedLegends.Structs
+namespace UnturnedLegends.Models
 {
     public class Team
     {

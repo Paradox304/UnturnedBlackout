@@ -134,8 +134,10 @@
     <Compile Include="Database\PlayerData.cs" />
     <Compile Include="Enums\EGamePhase.cs" />
     <Compile Include="Enums\EGameType.cs" />
+    <Compile Include="Enums\EPage.cs" />
     <Compile Include="GameTypes\FFAGame.cs" />
     <Compile Include="GameTypes\Game.cs" />
+    <Compile Include="Instances\UIHandler.cs" />
     <Compile Include="Managers\DatabaseManager.cs" />
     <Compile Include="Managers\DataManager.cs" />
     <Compile Include="Managers\GameManager.cs" />
@@ -145,10 +147,10 @@
     <Compile Include="Models\FFAConfig.cs" />
     <Compile Include="Models\VoteChoice.cs" />
     <Compile Include="Patches\FiremodePatch.cs" />
-    <Compile Include="Structs\FFAPlayer.cs" />
-    <Compile Include="Structs\GamePlayer.cs" />
+    <Compile Include="Models\FFAPlayer.cs" />
+    <Compile Include="Models\GamePlayer.cs" />
     <Compile Include="Models\PositionsData.cs" />
-    <Compile Include="Structs\Team.cs" />
+    <Compile Include="Models\Team.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SpawnPoints\FFASpawnPoint.cs" />

@@ -42,12 +42,22 @@ namespace UnturnedLegends.Managers
             EffectManager.sendUIEffect(ID, Key, player.Player.channel.GetOwnerTransportConnection(), true);
 
             OnHealthChanged(player, player.Player.life.health);
-            OnGamemodeChanged(player.Player, new ArenaLocation(-1, 0, "None"), EGameType.None);
+            OnGamemodeChanged(player.Player, new ArenaLocation(-1, 0, "None", ""), EGameType.None);
         }
 
         private void OnDisconnected(UnturnedPlayer player)
         {
             player.Player.equipment.onEquipRequested -= OnEquip;
+        }
+
+        public void ShowHUD(UnturnedPlayer player)
+        {
+            EffectManager.sendUIEffectVisibility(Key, player.Player.channel.GetOwnerTransportConnection(), true, "LeftSide", true);
+        }
+
+        public void HideHUD(UnturnedPlayer player)
+        {
+            EffectManager.sendUIEffectVisibility(Key, player.Player.channel.GetOwnerTransportConnection(), true, "LeftSide", false);
         }
 
         private void OnRevived(UnturnedPlayer player, Vector3 position, byte angle)
@@ -80,6 +90,8 @@ namespace UnturnedLegends.Managers
             var spaces = neededXP == 0 ? 0 : (int)(xp * 96 / neededXP);
             EffectManager.sendUIEffectText(Key, transportConnection, true, "XPNum", Plugin.Instance.Translate("Level_Show", level).ToRich());
             EffectManager.sendUIEffectText(Key, transportConnection, true, "XPBarFill", spaces == 0 ? " " : new string(' ', spaces));
+
+            Plugin.Instance.UIManager.OnXPChanged(player);
         }
 
         public void OnGamemodeChanged(Player player, ArenaLocation location, EGameType gameType)
@@ -95,7 +107,7 @@ namespace UnturnedLegends.Managers
             TaskDispatcher.QueueOnMainThread(() =>
             {
                 var connection = equipment.player.channel.GetOwnerTransportConnection();
-                EffectManager.sendUIEffectVisibility(Key, connection, true, "WeaponUI", true);
+                EffectManager.sendUIEffectVisibility(Key, connection, true, "RightSide", true);
                 if (asset.type == EItemType.GUN)
                 {
                     var gAsset = asset as ItemGunAsset;
@@ -121,7 +133,7 @@ namespace UnturnedLegends.Managers
         {
             if (obj.useable == null)
             {
-                EffectManager.sendUIEffectVisibility(Key, obj.player.channel.GetOwnerTransportConnection(), true, "WeaponUI", false);
+                EffectManager.sendUIEffectVisibility(Key, obj.player.channel.GetOwnerTransportConnection(), true, "RightSide", false);
             }
         }
 

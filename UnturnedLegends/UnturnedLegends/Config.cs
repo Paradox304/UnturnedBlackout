@@ -64,9 +64,9 @@ namespace UnturnedLegends
             FFA = new FFAConfig(15, 600, 50, 50, 10, 5, 10, 5, 10, 2);
             ArenaLocations = new List<ArenaLocation>
             {
-                new ArenaLocation(1, 10, "Seattle"),
-                new ArenaLocation(2, 10, "Tacoma"),
-                new ArenaLocation(3, 10, "Military Base")
+                new ArenaLocation(1, 10, "Seattle", ""),
+                new ArenaLocation(2, 10, "Tacoma", ""),
+                new ArenaLocation(3, 10, "Military Base", "")
             };
 
         }

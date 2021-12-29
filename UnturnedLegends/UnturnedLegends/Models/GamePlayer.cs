@@ -5,7 +5,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-namespace UnturnedLegends.Structs
+namespace UnturnedLegends.Models
 {
     public class GamePlayer
     {
