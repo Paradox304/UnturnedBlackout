@@ -4,6 +4,7 @@ using Rocket.API.Collections;
 using Rocket.Core;
 using Rocket.Core.Logging;
 using Rocket.Core.Plugins;
+using Rocket.Unturned.Player;
 using SDG.Unturned;
 using System;
 using System.Collections;
@@ -34,10 +35,10 @@ namespace UnturnedLegends
 
             Level.onPostLevelLoaded += OnLevelLoaded;
             PlayerVoice.onRelayVoice += OnVoice;
+            ChatManager.onChatted += OnChatted;
 
             Logger.Log("Unturned Legends has been loaded");
         }
-
 
         protected override void Unload()
         {
@@ -47,6 +48,8 @@ namespace UnturnedLegends
 
             Level.onPostLevelLoaded -= OnLevelLoaded;
             PlayerVoice.onRelayVoice -= OnVoice;
+            ChatManager.onChatted -= OnChatted;
+
             StopAllCoroutines();
 
             Logger.Log("Unturned Legends has been unloaded");
@@ -64,6 +67,14 @@ namespace UnturnedLegends
         private void OnVoice(PlayerVoice speaker, bool wantsToUseWalkieTalkie, ref bool shouldAllow, ref bool shouldBroadcastOverRadio, ref PlayerVoice.RelayVoiceCullingHandler cullingHandler)
         {
             shouldAllow = false;
+        }
+
+        private void OnChatted(SteamPlayer player, EChatMode mode, ref Color chatted, ref bool isRich, string text, ref bool isVisible)
+        {
+            if (!UnturnedPlayer.FromSteamPlayer(player).HasPermission("chatallow"))
+            {
+                isVisible = false;
+            }
         }
 
         private void OnLevelLoaded(int level)
