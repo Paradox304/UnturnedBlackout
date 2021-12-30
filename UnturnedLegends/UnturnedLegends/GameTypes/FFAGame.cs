@@ -214,7 +214,7 @@ namespace UnturnedLegends.GameTypes
             }
             else
             {
-                kPlayer.MultipleKills = 0;
+                kPlayer.MultipleKills = 1;
             }
 
             kPlayer.LastKill = DateTime.UtcNow;

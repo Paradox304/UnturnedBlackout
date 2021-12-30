@@ -35,8 +35,6 @@ namespace UnturnedLegends.Managers
             U.Events.OnPlayerDisconnected += OnPlayerLeft;
             UnturnedPlayerEvents.OnPlayerRevive += OnPlayerRevived;
 
-            DamageTool.damagePlayerRequested += OnDamagePlayer;
-
             StartGames();
         }
 
@@ -213,16 +211,6 @@ namespace UnturnedLegends.Managers
             }
         }
 
-        private void OnDamagePlayer(ref DamagePlayerParameters parameters, ref bool shouldAllow)
-        {
-            Utility.Debug("Player damaged, checking if the player is in a game");
-            if (!TryGetCurrentGame(parameters.player.channel.owner.playerID.steamID, out _))
-            {
-                Utility.Debug("Player is not in a game, disabling the damage done");
-                shouldAllow = false;
-            }
-        }
-
         public void OnVotingEnded()
         {
             Utility.Debug("Voting ended for a map, checking if some other game is waiting to vote and start that");
@@ -267,8 +255,6 @@ namespace UnturnedLegends.Managers
             U.Events.OnPlayerDisconnected -= OnPlayerLeft;
 
             UnturnedPlayerEvents.OnPlayerRevive -= OnPlayerRevived;
-
-            DamageTool.damagePlayerRequested -= OnDamagePlayer;
         }
 
         public GamePlayer GetGamePlayer(UnturnedPlayer player)
