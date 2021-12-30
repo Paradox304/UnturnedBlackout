@@ -20,6 +20,8 @@ namespace UnturnedLegends.GameTypes
     public class FFAGame : Game
     {
         public List<FFASpawnPoint> SpawnPoints { get; set; }
+        public List<FFASpawnPoint> UnavailableSpawnPoints { get; set; }
+
         public List<FFAPlayer> Players { get; set; }
 
         public Coroutine GameStarter { get; set; }
@@ -33,6 +35,7 @@ namespace UnturnedLegends.GameTypes
             Utility.Debug($"Initializing FFA game for location {location.LocationName}");
             SpawnPoints = Plugin.Instance.DataManager.Data.FFASpawnPoints.Where(k => k.LocationID == location.LocationID).ToList();
             Players = new List<FFAPlayer>();
+            UnavailableSpawnPoints = new List<FFASpawnPoint>();
             Utility.Debug($"Found {SpawnPoints.Count} positions for FFA");
             GameStarter = Plugin.Instance.StartCoroutine(StartGame());
         }
@@ -307,9 +310,22 @@ namespace UnturnedLegends.GameTypes
                 return;
             }
 
-            var spawnPoint = seperateSpawnPoint ? SpawnPoints[Players.IndexOf(player)] : SpawnPoints[UnityEngine.Random.Range(0, SpawnPoints.Count)];
+            var spawnPoint = seperateSpawnPoint ? SpawnPoints[Players.IndexOf(player)] : (SpawnPoints.Count > 0 ? SpawnPoints[UnityEngine.Random.Range(0, SpawnPoints.Count)] : UnavailableSpawnPoints[UnityEngine.Random.Range(0, UnavailableSpawnPoints.Count)]);
+            if (!seperateSpawnPoint && SpawnPoints.Count > 0)
+            {
+                Plugin.Instance.StartCoroutine(SpawnUsedUp(spawnPoint));
+            }
             player.GamePlayer.Player.Player.teleportToLocationUnsafe(spawnPoint.GetSpawnPoint(), 0);
             player.GamePlayer.GiveSpawnProtection(Config.FFA.SpawnProtectionSeconds);
+        }
+
+        public IEnumerator SpawnUsedUp(FFASpawnPoint spawnPoint)
+        {
+            SpawnPoints.Remove(spawnPoint);
+            UnavailableSpawnPoints.Add(spawnPoint);
+            yield return new WaitForSeconds(Config.SpawnUnavailableSeconds);
+            SpawnPoints.Add(spawnPoint);
+            UnavailableSpawnPoints.Remove(spawnPoint);
         }
 
         public FFAPlayer GetFFAPlayer(CSteamID steamID)

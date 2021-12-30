@@ -31,6 +31,8 @@ namespace UnturnedLegends
         public int VoteSeconds { get; set; }
         public int GamesCount { get; set; }
 
+        public int SpawnUnavailableSeconds { get; set; }
+
         public FFAConfig FFA { get; set; }
 
         public List<ArenaLocation> ArenaLocations { get; set; }
@@ -60,6 +62,8 @@ namespace UnturnedLegends
 
             VoteSeconds = 60;
             GamesCount = 3;
+
+            SpawnUnavailableSeconds = 5;
 
             FFA = new FFAConfig(15, 600, 50, 50, 10, 5, 10, 5, 10, 2);
             ArenaLocations = new List<ArenaLocation>
