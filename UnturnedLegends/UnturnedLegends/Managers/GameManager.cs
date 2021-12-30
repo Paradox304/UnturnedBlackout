@@ -201,6 +201,7 @@ namespace UnturnedLegends.Managers
                 game.OnVoted(gPlayer, choice);
             }
         }
+
         private void OnPlayerRevived(UnturnedPlayer player, Vector3 position, byte angle)
         {
             Utility.Debug("Player revived, checking if the player is in a game");
