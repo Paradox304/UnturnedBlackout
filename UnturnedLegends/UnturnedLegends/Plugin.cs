@@ -33,6 +33,7 @@ namespace UnturnedLegends
             StartCoroutine(Day());
 
             Level.onPostLevelLoaded += OnLevelLoaded;
+            PlayerVoice.onRelayVoice += OnVoice;
 
             Logger.Log("Unturned Legends has been loaded");
         }
@@ -45,6 +46,7 @@ namespace UnturnedLegends
             UIManager.Destroy();
 
             Level.onPostLevelLoaded -= OnLevelLoaded;
+            PlayerVoice.onRelayVoice -= OnVoice;
             StopAllCoroutines();
 
             Logger.Log("Unturned Legends has been unloaded");
@@ -52,12 +54,16 @@ namespace UnturnedLegends
 
         public IEnumerator Day()
         {
-            ConsolePlayer console = new ConsolePlayer();
             while (true)
             {
                 yield return new WaitForSeconds(60);
                 LightingManager.time = (uint)(LightingManager.cycle * LevelLighting.transition);
             }
+        }
+
+        private void OnVoice(PlayerVoice speaker, bool wantsToUseWalkieTalkie, ref bool shouldAllow, ref bool shouldBroadcastOverRadio, ref PlayerVoice.RelayVoiceCullingHandler cullingHandler)
+        {
+            shouldAllow = false;
         }
 
         private void OnLevelLoaded(int level)

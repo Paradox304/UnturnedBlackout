@@ -255,6 +255,7 @@ namespace UnturnedLegends.Managers
             player.Player.life.serverModifyHealth(100);
             TaskDispatcher.QueueOnMainThread(() =>
             {
+                player.Player.life.sendRespawn(false);
                 player.Player.teleportToLocationUnsafe(Config.LobbySpawn, 0);
                 Plugin.Instance.UIManager.ShowMenuUI(player);
             });

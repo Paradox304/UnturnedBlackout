@@ -21,6 +21,8 @@ namespace UnturnedLegends.Managers
         public const ushort FFAID = 27620;
         public const short FFAKey = 27620;
 
+        public const short SoundsKey = 27634;
+
         public UIManager()
         {
             Config = Plugin.Instance.Configuration.Instance;
@@ -82,6 +84,45 @@ namespace UnturnedLegends.Managers
         public void ShowXPUI(GamePlayer player, int xp, string xpGained)
         {
             EffectManager.sendUIEffect(27630, 27630, player.TransportConnection, true, $"+{xp} XP", xpGained);
+        }
+
+        public void SendMultiKillSound(GamePlayer player, int multiKill)
+        {
+            switch (multiKill)
+            {
+                case 0:
+                    EffectManager.sendUIEffectVisibility(SoundsKey, player.TransportConnection, true, "Kill", false);
+                    EffectManager.sendUIEffectVisibility(SoundsKey, player.TransportConnection, true, "Kill", true);
+                    return;
+                case 1:
+                    EffectManager.sendUIEffectVisibility(SoundsKey, player.TransportConnection, true, "Kill", false);
+                    EffectManager.sendUIEffectVisibility(SoundsKey, player.TransportConnection, true, "Kill", true);
+                    return;
+                case 2:
+                    EffectManager.sendUIEffectVisibility(SoundsKey, player.TransportConnection, true, "MultiKill1", false);
+                    EffectManager.sendUIEffectVisibility(SoundsKey, player.TransportConnection, true, "MultiKill1", true);
+                    return;
+                case 3:
+                    EffectManager.sendUIEffectVisibility(SoundsKey, player.TransportConnection, true, "MultiKill2", false);
+                    EffectManager.sendUIEffectVisibility(SoundsKey, player.TransportConnection, true, "MultiKill2", true);
+                    return;
+                case 4:
+                    EffectManager.sendUIEffectVisibility(SoundsKey, player.TransportConnection, true, "MultiKill3", false);
+                    EffectManager.sendUIEffectVisibility(SoundsKey, player.TransportConnection, true, "MultiKill3", true);
+                    return;
+                case 5:
+                    EffectManager.sendUIEffectVisibility(SoundsKey, player.TransportConnection, true, "MultiKill4", false);
+                    EffectManager.sendUIEffectVisibility(SoundsKey, player.TransportConnection, true, "MultiKill4", true);
+                    return;
+                case 6:
+                    EffectManager.sendUIEffectVisibility(SoundsKey, player.TransportConnection, true, "MultiKill5", false);
+                    EffectManager.sendUIEffectVisibility(SoundsKey, player.TransportConnection, true, "MultiKill5", true);
+                    return;
+                default:
+                    EffectManager.sendUIEffectVisibility(SoundsKey, player.TransportConnection, true, "MultiKill5", false);
+                    EffectManager.sendUIEffectVisibility(SoundsKey, player.TransportConnection, true, "MultiKill5", true);
+                    return;
+            };
         }
 
         // FFA RELATED UI

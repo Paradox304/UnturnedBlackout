@@ -222,6 +222,7 @@ namespace UnturnedLegends.GameTypes
 
             Players.Sort((x, y) => y.Kills.CompareTo(x.Kills));
             Plugin.Instance.UIManager.ShowXPUI(kPlayer.GamePlayer, xpGained, xpText);
+            Plugin.Instance.UIManager.SendMultiKillSound(kPlayer.GamePlayer, kPlayer.MultipleKills);
 
             foreach (var ply in Players)
             {
@@ -308,7 +309,6 @@ namespace UnturnedLegends.GameTypes
 
             var spawnPoint = seperateSpawnPoint ? SpawnPoints[Players.IndexOf(player)] : SpawnPoints[UnityEngine.Random.Range(0, SpawnPoints.Count)];
             player.GamePlayer.Player.Player.teleportToLocationUnsafe(spawnPoint.GetSpawnPoint(), 0);
-
             player.GamePlayer.GiveSpawnProtection(Config.FFA.SpawnProtectionSeconds);
         }
 
@@ -330,7 +330,7 @@ namespace UnturnedLegends.GameTypes
         public override bool IsPlayerIngame(CSteamID steamID)
         {
             return Players.Exists(k => k.GamePlayer.SteamID == steamID);
-        }
+        } 
 
         public override int GetPlayerCount()
         {

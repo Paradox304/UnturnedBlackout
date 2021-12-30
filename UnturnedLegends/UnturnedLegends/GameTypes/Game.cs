@@ -71,6 +71,7 @@ namespace UnturnedLegends.GameTypes
                 var gameMode = (EGameType)gameModes[UnityEngine.Random.Range(0, gameModes.Count)];
                 Utility.Debug($"Found gamemode {gameMode}");
                 var voteChoice = new VoteChoice(location, gameMode);
+                locations.Remove(locationID);
                 VoteChoices.Add(i, voteChoice);
             }
 
