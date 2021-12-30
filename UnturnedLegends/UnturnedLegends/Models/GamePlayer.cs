@@ -1,5 +1,6 @@
 ﻿using Rocket.Unturned.Player;
 using SDG.NetTransport;
+using SDG.Unturned;
 using Steamworks;
 using System;
 using System.Collections;
@@ -80,6 +81,26 @@ namespace UnturnedLegends.Models
                     break;
                 }
                 Player.Player.life.serverModifyHealth(1);
+            }
+        }
+
+        public void OnRevived()
+        {
+            var item = Player.Player.inventory.getItem(0, 0);
+            byte page = 0;
+            if (item == null)
+            {
+                item = Player.Player.inventory.getItem(1, 0);
+                page = 1;
+            }
+            if (item != null)
+            {
+                var magID = BitConverter.ToUInt16(item.item.state, 8);
+                if (Assets.find(EAssetType.ITEM, magID) is ItemMagazineAsset mAsset)
+                {
+                    item.item.state[10] = mAsset.amount;
+                }
+                Player.Player.equipment.tryEquip(page, item.x, item.y);
             }
         }
 

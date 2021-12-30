@@ -102,17 +102,18 @@ namespace UnturnedLegends.GameTypes
 
             Players.Add(fPlayer);
             GiveLoadout(fPlayer);
-            SpawnPlayer(fPlayer);
 
             if (GamePhase == EGamePhase.Starting)
             {
                 player.Player.Player.movement.sendPluginSpeedMultiplier(0);
                 Plugin.Instance.UIManager.ShowCountdownUI(player);
+                SpawnPlayer(fPlayer, true);
             }
             else
             {
                 Plugin.Instance.UIManager.ShowFFAHUD(player);
                 Plugin.Instance.UIManager.UpdateFFATopUI(fPlayer, Players);
+                SpawnPlayer(fPlayer, false);
             }
             Plugin.Instance.HUDManager.OnGamemodeChanged(player.Player.Player, Location, GameMode);
 
@@ -138,6 +139,7 @@ namespace UnturnedLegends.GameTypes
             Plugin.Instance.UIManager.ClearFFAHUD(player);
             Plugin.Instance.HUDManager.OnGamemodeChanged(player.Player.Player, new ArenaLocation(-1, 0, "None", ""), EGameType.None);
             var fPlayer = GetFFAPlayer(player.Player);
+
             if (GamePhase == EGamePhase.Starting)
             {
                 Plugin.Instance.UIManager.ClearCountdownUI(player);
@@ -194,7 +196,6 @@ namespace UnturnedLegends.GameTypes
             if (kPlayer.KillStreak > 0)
             {
                 xpGained += Config.FFA.BaseXPKS + (++kPlayer.KillStreak * Config.FFA.IncreaseXPPerKS);
-                xpText += Plugin.Instance.Translate("KillStreak_Show", kPlayer.KillStreak).ToRich() + "\n";
             }
             else
             {
@@ -208,7 +209,8 @@ namespace UnturnedLegends.GameTypes
             else if ((DateTime.UtcNow - kPlayer.LastKill).TotalSeconds <= 10)
             {
                 xpGained += Config.FFA.BaseXPMK + (++kPlayer.MultipleKills * Config.FFA.IncreaseXPPerMK);
-                xpText += Plugin.Instance.Translate("Multiple_Kills_Show", kPlayer.MultipleKills).ToRich() + "\n";
+                var multiKillText = Plugin.Instance.Translate($"Multiple_Kills_Show_{kPlayer.MultipleKills}").ToRich();
+                xpText += (multiKillText == $"Multiple_Kills_Show_{kPlayer.MultipleKills}" ? Plugin.Instance.Translate("Multiple_Kills_Show", kPlayer.MultipleKills).ToRich() : multiKillText) + "\n";
             }
             else
             {
@@ -283,13 +285,8 @@ namespace UnturnedLegends.GameTypes
             Utility.Debug($"Game player found, player name: {fPlayer.GamePlayer.Player.CharacterName}");
             Utility.Debug("Reviving the player");
 
-            var item = player.Player.inventory.getItem(0, 0);
-            if (item != null)
-            {
-                player.Player.equipment.tryEquip(0, item.x, item.y);
-            }
-
-            SpawnPlayer(fPlayer);
+            fPlayer.GamePlayer.OnRevived();
+            SpawnPlayer(fPlayer, false);
         }
 
         public void GiveLoadout(FFAPlayer player)
@@ -300,7 +297,7 @@ namespace UnturnedLegends.GameTypes
             R.Commands.Execute(player.GamePlayer.Player, $"/kit {Config.KitName}");
         }
 
-        public void SpawnPlayer(FFAPlayer player)
+        public void SpawnPlayer(FFAPlayer player, bool seperateSpawnPoint)
         {
             Utility.Debug($"Spawning {player.GamePlayer.Player.CharacterName}, getting a random location");
             if (SpawnPoints.Count == 0)
@@ -309,8 +306,8 @@ namespace UnturnedLegends.GameTypes
                 return;
             }
 
-            var spawnpoint = SpawnPoints[UnityEngine.Random.Range(0, SpawnPoints.Count)];
-            player.GamePlayer.Player.Player.teleportToLocationUnsafe(spawnpoint.GetSpawnPoint(), 0);
+            var spawnPoint = seperateSpawnPoint ? SpawnPoints[Players.IndexOf(player)] : SpawnPoints[UnityEngine.Random.Range(0, SpawnPoints.Count)];
+            player.GamePlayer.Player.Player.teleportToLocationUnsafe(spawnPoint.GetSpawnPoint(), 0);
 
             player.GamePlayer.GiveSpawnProtection(Config.FFA.SpawnProtectionSeconds);
         }
