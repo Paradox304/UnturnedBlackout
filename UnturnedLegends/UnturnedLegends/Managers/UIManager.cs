@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UnturnedLegends.Database;
 using UnturnedLegends.Enums;
 using UnturnedLegends.GameTypes;
 using UnturnedLegends.Instances;
@@ -22,6 +23,9 @@ namespace UnturnedLegends.Managers
         public const short FFAKey = 27620;
 
         public const short SoundsKey = 27634;
+
+        public const ushort DeathID = 27635;
+        public const short DeathKey = 27635;
 
         public UIManager()
         {
@@ -95,22 +99,26 @@ namespace UnturnedLegends.Managers
                     EffectManager.sendUIEffectVisibility(SoundsKey, player.TransportConnection, true, "Kill", true);
                     return;
                 case 1:
+                    EffectManager.sendUIEffectVisibility(SoundsKey, player.TransportConnection, true, "Kill", false);
+                    EffectManager.sendUIEffectVisibility(SoundsKey, player.TransportConnection, true, "Kill", true);
+                    return;
+                case 2:
                     EffectManager.sendUIEffectVisibility(SoundsKey, player.TransportConnection, true, "MultiKill1", false);
                     EffectManager.sendUIEffectVisibility(SoundsKey, player.TransportConnection, true, "MultiKill1", true);
                     return;
-                case 2:
+                case 3:
                     EffectManager.sendUIEffectVisibility(SoundsKey, player.TransportConnection, true, "MultiKill2", false);
                     EffectManager.sendUIEffectVisibility(SoundsKey, player.TransportConnection, true, "MultiKill2", true);
                     return;
-                case 3:
+                case 4:
                     EffectManager.sendUIEffectVisibility(SoundsKey, player.TransportConnection, true, "MultiKill3", false);
                     EffectManager.sendUIEffectVisibility(SoundsKey, player.TransportConnection, true, "MultiKill3", true);
                     return;
-                case 4:
+                case 5:
                     EffectManager.sendUIEffectVisibility(SoundsKey, player.TransportConnection, true, "MultiKill4", false);
                     EffectManager.sendUIEffectVisibility(SoundsKey, player.TransportConnection, true, "MultiKill4", true);
                     return;
-                case 5:
+                case 6:
                     EffectManager.sendUIEffectVisibility(SoundsKey, player.TransportConnection, true, "MultiKill5", false);
                     EffectManager.sendUIEffectVisibility(SoundsKey, player.TransportConnection, true, "MultiKill5", true);
                     return;
@@ -119,6 +127,31 @@ namespace UnturnedLegends.Managers
                     EffectManager.sendUIEffectVisibility(SoundsKey, player.TransportConnection, true, "MultiKill5", true);
                     return;
             };
+        }
+
+        public void SendDeathUI(GamePlayer victim, PlayerData victimData, PlayerData killerData, string gunName)
+        {
+            victim.Player.Player.enablePluginWidgetFlag(EPluginWidgetFlags.Modal);
+
+            EffectManager.sendUIEffect(DeathID, DeathKey, victim.TransportConnection, true);
+            EffectManager.sendUIEffectText(DeathKey, victim.TransportConnection, true, "WeaponName", gunName.ToUpper());
+            EffectManager.sendUIEffectImageURL(DeathKey, victim.TransportConnection, true, "SelfIcon", victimData.AvatarLink);
+            EffectManager.sendUIEffectText(DeathKey, victim.TransportConnection, true, "SelfName", victimData.SteamName.ToUpper());
+            EffectManager.sendUIEffectText(DeathKey, victim.TransportConnection, true, "SelfXPNum", Plugin.Instance.Translate("Level_Show", victimData.Level).ToRich());
+            EffectManager.sendUIEffectImageURL(DeathKey, victim.TransportConnection, true, "EnemyIcon", killerData.AvatarLink);
+            EffectManager.sendUIEffectText(DeathKey, victim.TransportConnection, true, "DeathName", killerData.SteamName.ToUpper());
+            EffectManager.sendUIEffectText(DeathKey, victim.TransportConnection, true, "EnemyXPNum", Plugin.Instance.Translate("Level_Show", killerData.Level).ToRich());
+        }
+
+        public void UpdateRespawnTimer(GamePlayer player, string timer)
+        {
+            EffectManager.sendUIEffectText(DeathKey, player.TransportConnection, true, "RespawnTime", timer);
+        }
+
+        public void ClearDeathUI(GamePlayer player)
+        {
+            player.Player.Player.disablePluginWidgetFlag(EPluginWidgetFlags.Modal);
+            EffectManager.askEffectClearByID(DeathID, player.TransportConnection);
         }
 
         // FFA RELATED UI
@@ -240,6 +273,7 @@ namespace UnturnedLegends.Managers
         {
             Utility.Debug($"{player.channel.owner.playerID.characterName} clicked {buttonName}");
             var ply = UnturnedPlayer.FromPlayer(player);
+
             if (buttonName.EndsWith("JoinButton"))
             {
                 if (int.TryParse(buttonName.Replace("Lobby", "").Replace("JoinButton", ""), out int selected))

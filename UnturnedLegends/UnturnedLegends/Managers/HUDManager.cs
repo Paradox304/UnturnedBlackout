@@ -37,6 +37,8 @@ namespace UnturnedLegends.Managers
             player.Player.disablePluginWidgetFlag(EPluginWidgetFlags.ShowLifeMeters);
             player.Player.disablePluginWidgetFlag(EPluginWidgetFlags.ShowStatusIcons);
             player.Player.disablePluginWidgetFlag(EPluginWidgetFlags.ShowUseableGunStatus);
+            player.Player.disablePluginWidgetFlag(EPluginWidgetFlags.ShowDeathMenu);
+
             player.Player.equipment.onEquipRequested += OnEquip;
 
             EffectManager.sendUIEffect(ID, Key, player.Player.channel.GetOwnerTransportConnection(), true);

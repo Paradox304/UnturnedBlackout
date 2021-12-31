@@ -174,6 +174,7 @@ namespace UnturnedLegends.GameTypes
 
             Utility.Debug($"Game player found, player name: {fPlayer.GamePlayer.Player.CharacterName}");
             fPlayer.OnDeath();
+            fPlayer.GamePlayer.OnDeath(killer);
             ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DBManager.IncreasePlayerDeathsAsync(fPlayer.GamePlayer.SteamID, 1));
 
             var kPlayer = GetFFAPlayer(killer);

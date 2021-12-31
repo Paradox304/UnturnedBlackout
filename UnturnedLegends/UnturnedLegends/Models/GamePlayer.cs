@@ -5,6 +5,7 @@ using Steamworks;
 using System;
 using System.Collections;
 using UnityEngine;
+using UnturnedLegends.Database;
 
 namespace UnturnedLegends.Models
 {
@@ -22,6 +23,7 @@ namespace UnturnedLegends.Models
         public Coroutine ProtectionRemover { get; set; }
         public Coroutine DamageChecker { get; set; }
         public Coroutine Healer { get; set; }
+        public Coroutine RespawnTimer { get; set; }
 
         public GamePlayer(UnturnedPlayer player, ITransportConnection transportConnection)
         {
@@ -30,6 +32,7 @@ namespace UnturnedLegends.Models
             TransportConnection = transportConnection;
         }
 
+        // Spawn Protection Seconds
         public void GiveSpawnProtection(int seconds)
         {
             HasSpawnProtection = true;
@@ -46,6 +49,7 @@ namespace UnturnedLegends.Models
             HasSpawnProtection = false;
         }
 
+        // Healing
         public void OnDamaged()
         {
             Utility.Debug($"{Player.CharacterName} got damaged, setting the last damage to now and checking after some seconds to heal");
@@ -84,6 +88,43 @@ namespace UnturnedLegends.Models
             }
         }
 
+        // Death screen
+        public void OnDeath(CSteamID killer)
+        {
+            var player = Plugin.Instance.GameManager.GetGamePlayer(killer);
+            string killedBy = "NONE";
+            if (player != null)
+            {
+                killedBy = player.Player.Player.equipment.asset == null ? "PUNCH" : player.Player.Player.equipment.asset.itemName;
+            }
+
+            if (!Plugin.Instance.DBManager.PlayerCache.TryGetValue(SteamID, out PlayerData playerData))
+            {
+                Player.Player.life.ServerRespawn(false);
+                return;
+            }
+
+            if (!Plugin.Instance.DBManager.PlayerCache.TryGetValue(killer, out PlayerData killerData))
+            {
+                Player.Player.life.ServerRespawn(false);
+                return;
+            }
+
+            Plugin.Instance.UIManager.SendDeathUI(this, playerData, killerData, killedBy);
+            RespawnTimer = Plugin.Instance.StartCoroutine(RespawnTime());
+        }
+
+        public IEnumerator RespawnTime()
+        {
+            for (int seconds = Plugin.Instance.Configuration.Instance.RespawnSeconds; seconds >= 0; seconds--)
+            {
+                Plugin.Instance.UIManager.UpdateRespawnTimer(this, $"{seconds}s");
+                yield return new WaitForSeconds(1);
+            }
+            Player.Player.life.ServerRespawn(false);
+        }
+
+        // Equipping and refilling on guns on respawn
         public void OnRevived()
         {
             bool hasEquip = false;
@@ -106,6 +147,8 @@ namespace UnturnedLegends.Models
                     }
                 }
             }
+
+            Plugin.Instance.UIManager.ClearDeathUI(this);
         }
 
         public void OnGameLeft()
@@ -124,6 +167,13 @@ namespace UnturnedLegends.Models
             {
                 Plugin.Instance.StopCoroutine(DamageChecker);
             }
+
+            if (RespawnTimer != null)
+            {
+                Plugin.Instance.StopCoroutine(RespawnTimer);
+            }
+
+            Plugin.Instance.UIManager.ClearDeathUI(this);
         }
     }
 }

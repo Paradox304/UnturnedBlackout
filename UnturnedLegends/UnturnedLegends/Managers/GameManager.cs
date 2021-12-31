@@ -244,7 +244,7 @@ namespace UnturnedLegends.Managers
             player.Player.life.serverModifyHealth(100);
             TaskDispatcher.QueueOnMainThread(() =>
             {
-                player.Player.life.sendRespawn(false);
+                player.Player.life.ServerRespawn(false);
                 player.Player.teleportToLocationUnsafe(Config.LobbySpawn, 0);
                 Plugin.Instance.UIManager.ShowMenuUI(player);
             });
@@ -261,6 +261,16 @@ namespace UnturnedLegends.Managers
         public GamePlayer GetGamePlayer(UnturnedPlayer player)
         {
             return Players.TryGetValue(player.CSteamID, out GamePlayer gPlayer) ? gPlayer : null;
+        }
+
+        public GamePlayer GetGamePlayer(CSteamID steamID)
+        {
+            return Players.TryGetValue(steamID, out GamePlayer gPlayer) ? gPlayer : null;
+        }
+
+        public GamePlayer GetGamePlayer(Player player)
+        {
+            return Players.TryGetValue(player.channel.owner.playerID.steamID, out GamePlayer gPlayer) ? gPlayer : null;
         }
 
         public bool TryGetCurrentGame(CSteamID steamID, out Game game)

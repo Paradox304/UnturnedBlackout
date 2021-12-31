@@ -32,6 +32,7 @@ namespace UnturnedLegends
         public int GamesCount { get; set; }
 
         public int SpawnUnavailableSeconds { get; set; }
+        public int RespawnSeconds { get; set; }
 
         public FFAConfig FFA { get; set; }
 
