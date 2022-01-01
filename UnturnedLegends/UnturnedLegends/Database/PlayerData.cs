@@ -1,5 +1,6 @@
 ﻿using Steamworks;
 using System;
+using System.Threading;
 
 namespace UnturnedLegends.Database
 {
@@ -46,6 +47,28 @@ namespace UnturnedLegends.Database
         {
             var config = Plugin.Instance.Configuration.Instance;
             return (int)(config.BaseXP * Math.Pow(config.CommonRatio, Level));
+        }
+
+        public void CheckMultipleKills(int multiKills)
+        {
+            if (multiKills > HighestMultiKills)
+            {
+                ThreadPool.QueueUserWorkItem(async (o) =>
+                {
+                    await Plugin.Instance.DBManager.UpdatePlayerHighestMultiKillsAsync(SteamID, (uint)multiKills);
+                });
+            }
+        }
+
+        public void CheckKillstreak(int killStreak)
+        {
+            if (killStreak > HighestKillstreak)
+            {
+                ThreadPool.QueueUserWorkItem(async (o) =>
+                {
+                    await Plugin.Instance.DBManager.UpdatePlayerHighestKillStreakAsync(SteamID, (uint)killStreak);
+                });
+            }
         }
     }
 }

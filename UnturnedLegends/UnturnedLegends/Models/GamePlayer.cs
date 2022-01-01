@@ -118,8 +118,8 @@ namespace UnturnedLegends.Models
         {
             for (int seconds = Plugin.Instance.Configuration.Instance.RespawnSeconds; seconds >= 0; seconds--)
             {
-                Plugin.Instance.UIManager.UpdateRespawnTimer(this, $"{seconds}s");
                 yield return new WaitForSeconds(1);
+                Plugin.Instance.UIManager.UpdateRespawnTimer(this, $"{seconds}s");
             }
             Player.Player.life.ServerRespawn(false);
         }

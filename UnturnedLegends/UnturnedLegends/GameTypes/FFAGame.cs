@@ -44,11 +44,11 @@ namespace UnturnedLegends.GameTypes
         {
             for (int seconds = Config.FFA.StartSeconds; seconds >= 0; seconds--)
             {
+                yield return new WaitForSeconds(1);
                 foreach (var player in Players)
                 {
                     Plugin.Instance.UIManager.SendCountdownSeconds(player.GamePlayer, seconds);
                 }
-                yield return new WaitForSeconds(1);
             }
             GamePhase = EGamePhase.Started;
 
@@ -68,12 +68,12 @@ namespace UnturnedLegends.GameTypes
         {
             for (int seconds = Config.FFA.EndSeconds; seconds >= 0; seconds--)
             {
+                yield return new WaitForSeconds(1);
                 TimeSpan timeSpan = TimeSpan.FromSeconds(seconds);
                 foreach (var player in Players)
                 {
                     Plugin.Instance.UIManager.UpdateFFATimer(player.GamePlayer, timeSpan.ToString(@"m\:ss"));
                 }
-                yield return new WaitForSeconds(1);
             }
 
             GameEnd();
@@ -223,10 +223,11 @@ namespace UnturnedLegends.GameTypes
 
             kPlayer.LastKill = DateTime.UtcNow;
 
-
             Players.Sort((x, y) => y.Kills.CompareTo(x.Kills));
+
             Plugin.Instance.UIManager.ShowXPUI(kPlayer.GamePlayer, xpGained, xpText);
             Plugin.Instance.UIManager.SendMultiKillSound(kPlayer.GamePlayer, kPlayer.MultipleKills);
+            kPlayer.CheckKills();
 
             foreach (var ply in Players)
             {
