@@ -160,7 +160,6 @@ namespace UnturnedLegends.GameTypes
             DamageTool.damagePlayerRequested -= OnPlayerDamaged;
         }
 
-        public abstract void GameEnd();
         public abstract bool IsPlayerIngame(CSteamID steamID);
         public abstract void OnPlayerRevived(UnturnedPlayer player);
         public abstract void OnPlayerDead(Player player, CSteamID killer, ELimb limb);

@@ -45,7 +45,6 @@ namespace UnturnedLegends.Managers
             EffectManager.sendUIEffect(27634, 27634, player.Player.channel.GetOwnerTransportConnection(), true);
 
             OnHealthChanged(player, player.Player.life.health);
-            OnGamemodeChanged(player.Player, new ArenaLocation(-1, 0, "None", ""), EGameType.None);
         }
 
         private void OnDisconnected(UnturnedPlayer player)
@@ -95,14 +94,6 @@ namespace UnturnedLegends.Managers
             EffectManager.sendUIEffectText(Key, transportConnection, true, "XPBarFill", spaces == 0 ? " " : new string(' ', spaces));
 
             Plugin.Instance.UIManager.OnXPChanged(player);
-        }
-
-        public void OnGamemodeChanged(Player player, ArenaLocation location, EGameType gameType)
-        {
-            var transportConnection = player.channel.GetOwnerTransportConnection();
-
-            EffectManager.sendUIEffectText(Key, transportConnection, true, "GamemodeName", gameType == EGameType.None ? "None" : Plugin.Instance.Translate($"{gameType}_Name").ToRich());
-            EffectManager.sendUIEffectText(Key, transportConnection, true, "ArenaName", location.LocationID == -1 ? "None" : Plugin.Instance.Translate("Arena_Name", location.LocationName).ToRich());
         }
 
         private void OnEquip(PlayerEquipment equipment, ItemJar jar, ItemAsset asset, ref bool shouldAllow)

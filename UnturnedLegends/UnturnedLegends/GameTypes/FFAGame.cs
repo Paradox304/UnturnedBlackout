@@ -76,11 +76,6 @@ namespace UnturnedLegends.GameTypes
                 }
             }
 
-            GameEnd();
-        }
-
-        public override void GameEnd()
-        {
             GamePhase = EGamePhase.Ending;
             foreach (var player in Players.ToList())
             {
@@ -118,7 +113,6 @@ namespace UnturnedLegends.GameTypes
                 Plugin.Instance.UIManager.UpdateFFATopUI(fPlayer, Players);
                 SpawnPlayer(fPlayer, false);
             }
-            Plugin.Instance.HUDManager.OnGamemodeChanged(player.Player.Player, Location, GameMode);
 
             if (Players.Count == 2)
             {
@@ -140,7 +134,6 @@ namespace UnturnedLegends.GameTypes
             }
 
             Plugin.Instance.UIManager.ClearFFAHUD(player);
-            Plugin.Instance.HUDManager.OnGamemodeChanged(player.Player.Player, new ArenaLocation(-1, 0, "None", ""), EGameType.None);
             var fPlayer = GetFFAPlayer(player.Player);
 
             if (GamePhase == EGamePhase.Starting)
