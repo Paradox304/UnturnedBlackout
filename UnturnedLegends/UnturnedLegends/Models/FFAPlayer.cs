@@ -9,12 +9,11 @@ namespace UnturnedLegends.Models
     {
         public GamePlayer GamePlayer { get; set; }
 
+        public int Score { get; set; }
         public int Kills { get; set; }
         public int Deaths { get; set; }
         public int KillStreak { get; set; }
         public int MultipleKills { get; set; }
-        public int HighestKillStreak { get; set; }
-        public int HighestMultipleKills { get; set; }
 
         public DateTime LastKill { get; set; }
 
@@ -22,12 +21,11 @@ namespace UnturnedLegends.Models
         {
             GamePlayer = gamePlayer;
 
+            Score = 0;
             Kills = 0;
             Deaths = 0;
             KillStreak = 0;
             MultipleKills = 0;
-            HighestKillStreak = 0;
-            HighestMultipleKills = 0;
 
             LastKill = DateTime.UtcNow;
         }
@@ -46,18 +44,8 @@ namespace UnturnedLegends.Models
             {
                 return;
             }
-
-            if (KillStreak > HighestKillStreak)
-            {
-                HighestKillStreak = KillStreak;
-                data.CheckKillstreak(KillStreak);
-            }
-
-            if (MultipleKills > HighestMultipleKills)
-            {
-                MultipleKills = HighestMultipleKills;
-                data.CheckMultipleKills(MultipleKills);
-            }
+            data.CheckKillstreak(KillStreak);
+            data.CheckMultipleKills(MultipleKills);
         }
     }
 }

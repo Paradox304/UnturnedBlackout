@@ -16,7 +16,6 @@ namespace UnturnedLegends.Managers
 {
     public class UIManager
     {
-        Config Config { get; set; }
         public List<UIHandler> UIHandlers { get; set; }
 
         public const ushort FFAID = 27620;
@@ -27,9 +26,11 @@ namespace UnturnedLegends.Managers
         public const ushort DeathID = 27635;
         public const short DeathKey = 27635;
 
+        public const ushort PreEndingUIID = 26000;
+        public const short PreEndingUIKey = 26000;
+
         public UIManager()
         {
-            Config = Plugin.Instance.Configuration.Instance;
             UIHandlers = new List<UIHandler>();
 
             EffectManager.onEffectButtonClicked += OnButtonClicked;
@@ -154,8 +155,29 @@ namespace UnturnedLegends.Managers
             EffectManager.askEffectClearByID(DeathID, player.TransportConnection);
         }
 
+        public void SendPreEndingUI(GamePlayer player, EGameType gameMode, bool hasWon, int blueScore, int redScore)
+        {
+            EffectManager.sendUIEffect(PreEndingUIID, PreEndingUIKey, player.TransportConnection, true);
+            EffectManager.sendUIEffectVisibility(PreEndingUIKey, player.TransportConnection, true, hasWon ? "Victory" : "Defeat", true);
+            EffectManager.sendUIEffectText(PreEndingUIKey, player.TransportConnection, true, hasWon ? "VictoryTxt" : "DefeatTxt", Plugin.Instance.Translate(hasWon ? $"{gameMode}_Victory_Desc" : $"{gameMode}_Defeat_Desc").ToRich());
+
+            if (gameMode != EGameType.FFA)
+            {
+                EffectManager.sendUIEffectVisibility(PreEndingUIKey, player.TransportConnection, true, "Scores", true);
+                EffectManager.sendUIEffectText(PreEndingUIKey, player.TransportConnection, true, "BlueSideScore", blueScore.ToString());
+                EffectManager.sendUIEffectText(PreEndingUIKey, player.TransportConnection, true, "BlueSideName", Plugin.Instance.Translate("Blue_Team_Name").ToRich());
+                EffectManager.sendUIEffectText(PreEndingUIKey, player.TransportConnection, true, "RedSideScore", redScore.ToString());
+                EffectManager.sendUIEffectText(PreEndingUIKey, player.TransportConnection, true, "RedSideName", Plugin.Instance.Translate("Red_Team_Name").ToRich());
+            }
+        }
+
+        public void ClearPreEndingUI(GamePlayer player)
+        {
+            EffectManager.askEffectClearByID(PreEndingUIID, player.TransportConnection);
+        }
+
         // FFA RELATED UI
-        public void ShowFFAHUD(GamePlayer player)
+        public void SendFFAHUD(GamePlayer player)
         {
             EffectManager.sendUIEffect(FFAID, FFAKey, player.TransportConnection, true);
 
@@ -163,7 +185,7 @@ namespace UnturnedLegends.Managers
             EffectManager.sendUIEffect(27610, 27610, player.TransportConnection, true, Plugin.Instance.Translate("FFA_Name").ToRich(), Plugin.Instance.Translate("FFA_Desc").ToRich());
             EffectManager.sendUIEffectVisibility(FFAKey, player.TransportConnection, true, "Timer", true);
         }
-        
+
         public void UpdateFFATimer(GamePlayer player, string text)
         {
             EffectManager.sendUIEffectText(FFAKey, player.TransportConnection, true, "TimerTxt", text);
@@ -197,6 +219,44 @@ namespace UnturnedLegends.Managers
             EffectManager.sendUIEffectText(FFAKey, player.GamePlayer.TransportConnection, true, "2ndPlacementPlace", secondPlayer != null ? Utility.GetOrdinal(Players.IndexOf(secondPlayer) + 1) : "0");
             EffectManager.sendUIEffectText(FFAKey, player.GamePlayer.TransportConnection, true, "2ndPlacementName", secondPlayer != null ? secondPlayer.GamePlayer.Player.CharacterName : "NONE");
             EffectManager.sendUIEffectText(FFAKey, player.GamePlayer.TransportConnection, true, "2ndPlacementScore", secondPlayer != null ? secondPlayer.Kills.ToString() : "0");
+        }
+
+        public void HideFFAHUD(GamePlayer player)
+        {
+            EffectManager.sendUIEffectVisibility(FFAKey, player.TransportConnection, true, "ScoreCounter", false);
+            EffectManager.sendUIEffectVisibility(FFAKey, player.TransportConnection, true, "Timer", false);
+        }
+
+        public void SetupFFAEndingLeaderboard(List<FFAPlayer> players, ArenaLocation location)
+        {
+            for (int i = 0; i < players.Count; i++)
+            {
+                var ply = players[i];
+                if (!Plugin.Instance.DBManager.PlayerCache.TryGetValue(ply.GamePlayer.SteamID, out PlayerData data))
+                {
+                    continue;
+                }
+
+                var ratio = String.Format("{0:n}", Math.Round((decimal)(ply.Kills / ply.Deaths), 2));
+                EffectManager.sendUIEffectText(FFAKey, ply.GamePlayer.TransportConnection, true, "MatchResult", Plugin.Instance.Translate(i == 0 ? "Victory_Text" : "Defeat_Text").ToRich());
+                EffectManager.sendUIEffectText(FFAKey, ply.GamePlayer.TransportConnection, true, "MapName", location.LocationName);
+                
+                for (int i2 = 0; i2 < players.Count; i2++)
+                {
+                    var player = players[i2];
+                    EffectManager.sendUIEffectVisibility(FFAKey, player.GamePlayer.TransportConnection, true, $"PlayerStats{i}", true);
+                    EffectManager.sendUIEffectText(FFAKey, player.GamePlayer.TransportConnection, true, $"NameTxt{i}", data.SteamName);
+                    EffectManager.sendUIEffectText(FFAKey, player.GamePlayer.TransportConnection, true, $"KillsTxt{i}", ply.Kills.ToString());
+                    EffectManager.sendUIEffectText(FFAKey, player.GamePlayer.TransportConnection, true, $"DeathsTxt{i}", ply.Deaths.ToString());
+                    EffectManager.sendUIEffectText(FFAKey, player.GamePlayer.TransportConnection, true, $"RatioTxt{i}", ratio);
+                    EffectManager.sendUIEffectText(FFAKey, player.GamePlayer.TransportConnection, true, $"ScoreTxt{i}", ply.Score.ToString());
+                }
+            }
+        }
+
+        public void ShowFFAEndingLeaderboard(GamePlayer player)
+        {
+            EffectManager.sendUIEffectVisibility(FFAKey, player.TransportConnection, true, "MatchResults", true);
         }
 
         public void ClearFFAHUD(GamePlayer player)

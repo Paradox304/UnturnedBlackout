@@ -56,7 +56,7 @@ namespace UnturnedLegends.GameTypes
             {
                 player.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1);
 
-                Plugin.Instance.UIManager.ShowFFAHUD(player.GamePlayer);
+                Plugin.Instance.UIManager.SendFFAHUD(player.GamePlayer);
                 Plugin.Instance.UIManager.ClearCountdownUI(player.GamePlayer);
                 Plugin.Instance.UIManager.UpdateFFATopUI(player, Players);
             }
@@ -76,15 +76,23 @@ namespace UnturnedLegends.GameTypes
                 }
             }
 
+            Plugin.Instance.StartCoroutine(GameEnd());
+        }
+
+        public IEnumerator GameEnd()
+        {
             GamePhase = EGamePhase.Ending;
-            foreach (var player in Players.ToList())
+
+
+            /*foreach (var player in Players.ToList())
             {
                 RemovePlayerFromGame(player.GamePlayer);
                 Plugin.Instance.GameManager.SendPlayerToLobby(player.GamePlayer.Player);
             }
-
+            
             Players = new List<FFAPlayer>();
             StartVoting();
+            */
         }
 
         public override void AddPlayerToGame(GamePlayer player)
@@ -109,7 +117,7 @@ namespace UnturnedLegends.GameTypes
             }
             else
             {
-                Plugin.Instance.UIManager.ShowFFAHUD(player);
+                Plugin.Instance.UIManager.SendFFAHUD(player);
                 Plugin.Instance.UIManager.UpdateFFATopUI(fPlayer, Players);
                 SpawnPlayer(fPlayer, false);
             }
@@ -185,6 +193,7 @@ namespace UnturnedLegends.GameTypes
 
             Utility.Debug($"Killer found, killer name: {kPlayer.GamePlayer.Player.CharacterName}");
             kPlayer.Kills++;
+            kPlayer.Score += Config.KillPoints;
 
             var xpGained = limb == ELimb.SKULL ? Config.FFA.XPPerKillHeadshot : Config.FFA.XPPerKill;
             string xpText = limb == ELimb.SKULL ? Plugin.Instance.Translate("Headshot_Kill").ToRich() : Plugin.Instance.Translate("Normal_Kill").ToRich();

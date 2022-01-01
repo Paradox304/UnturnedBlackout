@@ -34,6 +34,10 @@ namespace UnturnedLegends
         public int SpawnUnavailableSeconds { get; set; }
         public int RespawnSeconds { get; set; }
 
+        public int EndingLeaderboardSeconds { get; set; }
+
+        public int KillPoints { get; set; }
+
         public FFAConfig FFA { get; set; }
 
         public List<ArenaLocation> ArenaLocations { get; set; }
@@ -65,6 +69,11 @@ namespace UnturnedLegends
             GamesCount = 3;
 
             SpawnUnavailableSeconds = 5;
+            RespawnSeconds = 5;
+
+            EndingLeaderboardSeconds = 20;
+
+            KillPoints = 100;
 
             FFA = new FFAConfig(15, 600, 50, 50, 10, 5, 10, 5, 10, 2);
             ArenaLocations = new List<ArenaLocation>
