@@ -82,9 +82,21 @@ namespace UnturnedLegends.GameTypes
         public IEnumerator GameEnd()
         {
             GamePhase = EGamePhase.Ending;
-
-
-            /*foreach (var player in Players.ToList())
+            Plugin.Instance.UIManager.OnGameUpdated(this);
+            for (int index = 0; index < Players.Count; index++)
+            {
+                var player = Players[index];
+                Plugin.Instance.UIManager.ClearFFAHUD(player.GamePlayer);
+                Plugin.Instance.UIManager.SendPreEndingUI(player.GamePlayer, EGameType.FFA, index == 0, 0, 0);
+            }
+            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.SetupFFAEndingLeaderboard(Players, Location));
+            yield return new WaitForSeconds(5);
+            foreach (var player in Players)
+            {
+                Plugin.Instance.UIManager.ShowFFAEndingLeaderboard(player.GamePlayer);
+            }
+            yield return new WaitForSeconds(Config.EndingLeaderboardSeconds);
+            foreach (var player in Players.ToList())
             {
                 RemovePlayerFromGame(player.GamePlayer);
                 Plugin.Instance.GameManager.SendPlayerToLobby(player.GamePlayer.Player);
@@ -92,7 +104,6 @@ namespace UnturnedLegends.GameTypes
             
             Players = new List<FFAPlayer>();
             StartVoting();
-            */
         }
 
         public override void AddPlayerToGame(GamePlayer player)
@@ -148,7 +159,10 @@ namespace UnturnedLegends.GameTypes
             {
                 Plugin.Instance.UIManager.ClearCountdownUI(player);
                 fPlayer.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1);
-            } 
+            } else if (GamePhase == EGamePhase.Ending)
+            {
+                Plugin.Instance.UIManager.ClearPreEndingUI(player);
+            }
 
             if (fPlayer != null)
             {
@@ -253,7 +267,7 @@ namespace UnturnedLegends.GameTypes
                 return;
             }
 
-            if (GamePhase == EGamePhase.Starting)
+            if (GamePhase == EGamePhase.Starting || GamePhase == EGamePhase.Ending)
             {
                 shouldAllow = false;
                 return;

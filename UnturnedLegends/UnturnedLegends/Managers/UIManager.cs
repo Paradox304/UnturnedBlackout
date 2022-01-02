@@ -26,8 +26,8 @@ namespace UnturnedLegends.Managers
         public const ushort DeathID = 27635;
         public const short DeathKey = 27635;
 
-        public const ushort PreEndingUIID = 26000;
-        public const short PreEndingUIKey = 26000;
+        public const ushort PreEndingUIID = 27636;
+        public const short PreEndingUIKey = 27636;
 
         public UIManager()
         {
@@ -158,6 +158,7 @@ namespace UnturnedLegends.Managers
         public void SendPreEndingUI(GamePlayer player, EGameType gameMode, bool hasWon, int blueScore, int redScore)
         {
             EffectManager.sendUIEffect(PreEndingUIID, PreEndingUIKey, player.TransportConnection, true);
+
             EffectManager.sendUIEffectVisibility(PreEndingUIKey, player.TransportConnection, true, hasWon ? "Victory" : "Defeat", true);
             EffectManager.sendUIEffectText(PreEndingUIKey, player.TransportConnection, true, hasWon ? "VictoryTxt" : "DefeatTxt", Plugin.Instance.Translate(hasWon ? $"{gameMode}_Victory_Desc" : $"{gameMode}_Defeat_Desc").ToRich());
 
@@ -221,12 +222,6 @@ namespace UnturnedLegends.Managers
             EffectManager.sendUIEffectText(FFAKey, player.GamePlayer.TransportConnection, true, "2ndPlacementScore", secondPlayer != null ? secondPlayer.Kills.ToString() : "0");
         }
 
-        public void HideFFAHUD(GamePlayer player)
-        {
-            EffectManager.sendUIEffectVisibility(FFAKey, player.TransportConnection, true, "ScoreCounter", false);
-            EffectManager.sendUIEffectVisibility(FFAKey, player.TransportConnection, true, "Timer", false);
-        }
-
         public void SetupFFAEndingLeaderboard(List<FFAPlayer> players, ArenaLocation location)
         {
             for (int i = 0; i < players.Count; i++)
@@ -237,26 +232,30 @@ namespace UnturnedLegends.Managers
                     continue;
                 }
 
-                var ratio = String.Format("{0:n}", Math.Round((decimal)(ply.Kills / ply.Deaths), 2));
-                EffectManager.sendUIEffectText(FFAKey, ply.GamePlayer.TransportConnection, true, "MatchResult", Plugin.Instance.Translate(i == 0 ? "Victory_Text" : "Defeat_Text").ToRich());
-                EffectManager.sendUIEffectText(FFAKey, ply.GamePlayer.TransportConnection, true, "MapName", location.LocationName);
+                var ratio = ply.Deaths == 0 ? "0.00" : String.Format("{0:n}", Math.Round((decimal)(ply.Kills / ply.Deaths), 2));
+                EffectManager.sendUIEffectText(PreEndingUIKey, ply.GamePlayer.TransportConnection, true, "MatchResult1", Plugin.Instance.Translate(i == 0 ? "Victory_Text" : "Defeat_Text").ToRich());
+                EffectManager.sendUIEffectText(PreEndingUIKey, ply.GamePlayer.TransportConnection, true, "MapName1", location.LocationName.ToUpper());
                 
                 for (int i2 = 0; i2 < players.Count; i2++)
                 {
                     var player = players[i2];
-                    EffectManager.sendUIEffectVisibility(FFAKey, player.GamePlayer.TransportConnection, true, $"PlayerStats{i}", true);
-                    EffectManager.sendUIEffectText(FFAKey, player.GamePlayer.TransportConnection, true, $"NameTxt{i}", data.SteamName);
-                    EffectManager.sendUIEffectText(FFAKey, player.GamePlayer.TransportConnection, true, $"KillsTxt{i}", ply.Kills.ToString());
-                    EffectManager.sendUIEffectText(FFAKey, player.GamePlayer.TransportConnection, true, $"DeathsTxt{i}", ply.Deaths.ToString());
-                    EffectManager.sendUIEffectText(FFAKey, player.GamePlayer.TransportConnection, true, $"RatioTxt{i}", ratio);
-                    EffectManager.sendUIEffectText(FFAKey, player.GamePlayer.TransportConnection, true, $"ScoreTxt{i}", ply.Score.ToString());
+                    EffectManager.sendUIEffectVisibility(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"PlayerStats{i}", true);
+                    EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"NameTxt{i}", data.SteamName);
+                    EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"KillsTxt{i}", ply.Kills.ToString());
+                    EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"DeathsTxt{i}", ply.Deaths.ToString());
+                    EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"RatioTxt{i}", ratio);
+                    EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"ScoreTxt{i}", ply.Score.ToString());
                 }
             }
         }
 
         public void ShowFFAEndingLeaderboard(GamePlayer player)
         {
-            EffectManager.sendUIEffectVisibility(FFAKey, player.TransportConnection, true, "MatchResults", true);
+            EffectManager.sendUIEffectVisibility(PreEndingUIKey, player.TransportConnection, true, "Victory", false);
+            EffectManager.sendUIEffectVisibility(PreEndingUIKey, player.TransportConnection, true, "Defeat", false);
+            EffectManager.sendUIEffectVisibility(PreEndingUIKey, player.TransportConnection, true, "Scores", false);
+
+            EffectManager.sendUIEffectVisibility(PreEndingUIKey, player.TransportConnection, true, "Scoreboard1", true);
         }
 
         public void ClearFFAHUD(GamePlayer player)
