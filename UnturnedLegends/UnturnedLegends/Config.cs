@@ -39,6 +39,7 @@ namespace UnturnedLegends
         public int KillPoints { get; set; }
 
         public FFAConfig FFA { get; set; }
+        public TDMConfig TDM { get; set; }
 
         public List<ArenaLocation> ArenaLocations { get; set; }
 
@@ -76,6 +77,8 @@ namespace UnturnedLegends
             KillPoints = 100;
 
             FFA = new FFAConfig(15, 600, 50, 50, 10, 5, 10, 5, 10, 15, 2);
+            TDM = new TDMConfig(15, 600, 50, 50, 10, 5, 10, 5, 10, 15, 2);
+
             ArenaLocations = new List<ArenaLocation>
             {
                 new ArenaLocation(1, 10, "Seattle", ""),

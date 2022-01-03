@@ -92,25 +92,13 @@ namespace UnturnedLegends.Models
         public void OnDeath(CSteamID killer)
         {
             var player = Plugin.Instance.GameManager.GetGamePlayer(killer);
-            string killedBy = "NONE";
-            if (player != null)
-            {
-                killedBy = player.Player.Player.equipment.asset == null ? "PUNCH" : player.Player.Player.equipment.asset.itemName;
-            }
-
-            if (!Plugin.Instance.DBManager.PlayerCache.TryGetValue(SteamID, out PlayerData playerData))
-            {
-                Player.Player.life.ServerRespawn(false);
-                return;
-            }
-
             if (!Plugin.Instance.DBManager.PlayerCache.TryGetValue(killer, out PlayerData killerData))
             {
                 Player.Player.life.ServerRespawn(false);
                 return;
             }
 
-            Plugin.Instance.UIManager.SendDeathUI(this, playerData, killerData, killedBy);
+            Plugin.Instance.UIManager.SendDeathUI(this, killerData);
             RespawnTimer = Plugin.Instance.StartCoroutine(RespawnTime());
         }
 

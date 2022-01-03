@@ -1,5 +1,4 @@
-﻿using Rocket.API;
-using Rocket.Core;
+﻿using Rocket.Core;
 using Rocket.Core.Utils;
 using Rocket.Unturned.Player;
 using SDG.Unturned;
@@ -7,9 +6,10 @@ using Steamworks;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
+using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnturnedLegends.Enums;
 using UnturnedLegends.Models;
@@ -17,29 +17,43 @@ using UnturnedLegends.SpawnPoints;
 
 namespace UnturnedLegends.GameTypes
 {
-    public class FFAGame : Game
+    public class TDMGame : Game
     {
-        public List<FFASpawnPoint> SpawnPoints { get; set; }
-        public List<FFASpawnPoint> UnavailableSpawnPoints { get; set; }
+        public List<TDMSpawnPoint> BlueSpawnPoints { get; set; }
+        public List<TDMSpawnPoint> BlueUnavailableSpawnPoints { get; set; }
 
-        public List<FFAPlayer> Players { get; set; }
+        public List<TDMSpawnPoint> RedSpawnPoints { get; set; }
+        public List<TDMSpawnPoint> RedUnavailableSpawnPoints { get; set; }
+
+        public List<TDMPlayer> Players { get; set; }
+
+        public Team BlueTeam { get; set; }
+        public Team RedTeam { get; set; }
 
         public Coroutine GameStarter { get; set; }
         public Coroutine GameEnder { get; set; }
 
-        public FFAGame(ArenaLocation location) : base(EGameType.FFA, location)
+        public TDMGame(ArenaLocation location) : base(EGameType.TDM, location)
         {
-            Utility.Debug($"Initializing FFA game for location {location.LocationName}");
-            SpawnPoints = Plugin.Instance.DataManager.Data.FFASpawnPoints.Where(k => k.LocationID == location.LocationID).ToList();
-            Players = new List<FFAPlayer>();
-            UnavailableSpawnPoints = new List<FFASpawnPoint>();
-            Utility.Debug($"Found {SpawnPoints.Count} positions for FFA");
+            Utility.Debug($"Initializing TDM game for location {location.LocationName}");
+            BlueSpawnPoints = Plugin.Instance.DataManager.Data.TDMSpawnPoints.Where(k => k.LocationID == location.LocationID && k.TeamID == (byte)ETeam.Blue).ToList();
+            RedSpawnPoints = Plugin.Instance.DataManager.Data.TDMSpawnPoints.Where(k => k.LocationID == location.LocationID && k.TeamID == (byte)ETeam.Red).ToList();
+            Players = new List<TDMPlayer>();
+
+            BlueUnavailableSpawnPoints = new List<TDMSpawnPoint>();
+            RedUnavailableSpawnPoints = new List<TDMSpawnPoint>();
+            Utility.Debug($"Found {BlueSpawnPoints.Count} positions for TDM for Blue Team");
+            Utility.Debug($"Found {RedSpawnPoints.Count} positions for TDM for Red Team");
+
+            BlueTeam = new Team((byte)ETeam.Blue);
+            RedTeam = new Team((byte)ETeam.Red);
+
             GameStarter = Plugin.Instance.StartCoroutine(StartGame());
         }
 
         public IEnumerator StartGame()
         {
-            for (int seconds = Config.FFA.StartSeconds; seconds >= 0; seconds--)
+            for (int seconds = Config.TDM.StartSeconds; seconds >= 0; seconds--)
             {
                 yield return new WaitForSeconds(1);
                 foreach (var player in Players)
@@ -53,9 +67,8 @@ namespace UnturnedLegends.GameTypes
             {
                 player.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1);
 
-                Plugin.Instance.UIManager.SendFFAHUD(player.GamePlayer);
+                Plugin.Instance.UIManager.SendTDMHUD(player, BlueTeam, RedTeam);
                 Plugin.Instance.UIManager.ClearCountdownUI(player.GamePlayer);
-                Plugin.Instance.UIManager.UpdateFFATopUI(player, Players);
             }
 
             GameEnder = Plugin.Instance.StartCoroutine(EndGame());
@@ -63,17 +76,18 @@ namespace UnturnedLegends.GameTypes
 
         public IEnumerator EndGame()
         {
-            for (int seconds = Config.FFA.EndSeconds; seconds >= 0; seconds--)
+            for (int seconds = Config.TDM.EndSeconds; seconds >= 0; seconds--)
             {
                 yield return new WaitForSeconds(1);
                 TimeSpan timeSpan = TimeSpan.FromSeconds(seconds);
                 foreach (var player in Players)
                 {
-                    Plugin.Instance.UIManager.UpdateFFATimer(player.GamePlayer, timeSpan.ToString(@"m\:ss"));
+                    Plugin.Instance.UIManager.UpdateTDMTimer(player.GamePlayer, timeSpan.ToString(@"m\:ss"));
                 }
             }
 
-            Plugin.Instance.StartCoroutine(GameEnd());
+            // Need to figure out a winning thing
+            //Plugin.Instance.StartCoroutine(GameEnd());
         }
 
         public IEnumerator GameEnd()
@@ -88,14 +102,14 @@ namespace UnturnedLegends.GameTypes
             for (int index = 0; index < Players.Count; index++)
             {
                 var player = Players[index];
-                Plugin.Instance.UIManager.ClearFFAHUD(player.GamePlayer);
-                Plugin.Instance.UIManager.SendPreEndingUI(player.GamePlayer, EGameType.FFA, index == 0, 0, 0);
+                Plugin.Instance.UIManager.ClearTDMHUD(player.GamePlayer);
+                //Plugin.Instance.UIManager.SendPreEndingUI(player.GamePlayer, EGameType.TDM, player.Team == wonTeam, BlueTeam.Score, RedTeam.Score);
             }
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.SetupFFAEndingLeaderboard(Players, Location));
+            //TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.SetupFFAEndingLeaderboard(Players, Location));
             yield return new WaitForSeconds(5);
             foreach (var player in Players)
             {
-                Plugin.Instance.UIManager.ShowFFAEndingLeaderboard(player.GamePlayer);
+                //Plugin.Instance.UIManager.ShowFFAEndingLeaderboard(player.GamePlayer);
             }
             yield return new WaitForSeconds(Config.EndingLeaderboardSeconds);
             foreach (var player in Players.ToList())
@@ -103,105 +117,100 @@ namespace UnturnedLegends.GameTypes
                 RemovePlayerFromGame(player.GamePlayer);
                 Plugin.Instance.GameManager.SendPlayerToLobby(player.GamePlayer.Player);
             }
-            
-            Players = new List<FFAPlayer>();
+
+            Players = new List<TDMPlayer>();
+            BlueTeam.Destroy();
+            RedTeam.Destroy();
+
             StartVoting();
         }
 
         public override void AddPlayerToGame(GamePlayer player)
         {
-            Utility.Debug($"Adding {player.Player.CharacterName} to FFA game");
+            Utility.Debug($"Adding {player.Player.CharacterName} to TDM game");
             if (Players.Exists(k => k.GamePlayer.SteamID == player.SteamID))
             {
                 Utility.Debug("Player is already in the game, returning");
                 return;
             }
 
-            FFAPlayer fPlayer = new FFAPlayer(player);
+            var team = BlueTeam.Players.Count > RedTeam.Players.Count ? RedTeam : BlueTeam;
 
-            Players.Add(fPlayer);
-            GiveLoadout(fPlayer);
+            Utility.Debug($"Found a team for player with id {team}");
+            TDMPlayer tPlayer = new TDMPlayer(player, team);
+            team.AddPlayer(player.SteamID);
+            Players.Add(tPlayer);
+            GiveLoadout(tPlayer);
 
             if (GamePhase == EGamePhase.Starting)
             {
                 player.Player.Player.movement.sendPluginSpeedMultiplier(0);
                 Plugin.Instance.UIManager.ShowCountdownUI(player);
-                SpawnPlayer(fPlayer, true);
+                SpawnPlayer(tPlayer, true);
             }
             else
             {
-                Plugin.Instance.UIManager.SendFFAHUD(player);
-                Plugin.Instance.UIManager.UpdateFFATopUI(fPlayer, Players);
-                SpawnPlayer(fPlayer, false);
+                Plugin.Instance.UIManager.SendTDMHUD(tPlayer, BlueTeam, RedTeam);
+                SpawnPlayer(tPlayer, false);
             }
 
-            if (Players.Count == 2)
-            {
-                foreach (var ply in Players)
-                {
-                    Plugin.Instance.UIManager.UpdateFFATopUI(ply, Players);
-                }
-            }
             Plugin.Instance.UIManager.OnGameCountUpdated(this);
         }
 
         public override void RemovePlayerFromGame(GamePlayer player)
         {
-            Utility.Debug($"Removing {player.Player.CharacterName} from FFA game");
+            Utility.Debug($"Removing {player.Player.CharacterName} from TDM game");
             if (!Players.Exists(k => k.GamePlayer.SteamID == player.SteamID))
             {
                 Utility.Debug("Player is already not in the game, returning");
                 return;
             }
 
-            Plugin.Instance.UIManager.ClearFFAHUD(player);
-            var fPlayer = GetFFAPlayer(player.Player);
+            Plugin.Instance.UIManager.ClearTDMHUD(player);
+            var tPlayer = GetTDMPlayer(player.Player);
 
             if (GamePhase == EGamePhase.Starting)
             {
                 Plugin.Instance.UIManager.ClearCountdownUI(player);
-                fPlayer.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1);
-            } else if (GamePhase == EGamePhase.Ending)
+                tPlayer.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1);
+            }
+            else if (GamePhase == EGamePhase.Ending)
             {
                 Plugin.Instance.UIManager.ClearPreEndingUI(player);
             }
 
-            if (fPlayer != null)
+            if (tPlayer != null)
             {
-                fPlayer.GamePlayer.OnGameLeft();
-                Players.Remove(fPlayer);
+                tPlayer.GamePlayer.OnGameLeft();
+                Players.Remove(tPlayer);
             }
 
-            foreach (var ply in Players)
-            {
-                Plugin.Instance.UIManager.UpdateFFATopUI(ply, Players);
-            }
             Plugin.Instance.UIManager.OnGameCountUpdated(this);
         }
 
         public override void OnPlayerDead(Player player, CSteamID killer, ELimb limb)
         {
             Utility.Debug("Player died, getting the ffa player");
-            var fPlayer = GetFFAPlayer(player);
-            if (fPlayer == null)
+            var tPlayer = GetTDMPlayer(player);
+            if (tPlayer == null)
             {
                 Utility.Debug("Could'nt find the ffa player, returning");
                 return;
             }
 
-            Utility.Debug($"Game player found, player name: {fPlayer.GamePlayer.Player.CharacterName}");
-            fPlayer.OnDeath();
-            fPlayer.GamePlayer.OnDeath(killer);
-            ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DBManager.IncreasePlayerDeathsAsync(fPlayer.GamePlayer.SteamID, 1));
+            Utility.Debug($"Game player found, player name: {tPlayer.GamePlayer.Player.CharacterName}");
+            tPlayer.OnDeath();
+            tPlayer.GamePlayer.OnDeath(killer);
+            ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DBManager.IncreasePlayerDeathsAsync(tPlayer.GamePlayer.SteamID, 1));
 
-            var kPlayer = GetFFAPlayer(killer);
+            var kPlayer = GetTDMPlayer(killer);
             if (kPlayer == null)
             {
                 Utility.Debug("Could'nt find the killer, returning");
                 return;
             }
 
-            if (kPlayer.GamePlayer.SteamID == fPlayer.GamePlayer.SteamID)
+            if (kPlayer.GamePlayer.SteamID == tPlayer.GamePlayer.SteamID)
             {
                 Utility.Debug("Player killed themselves, returning");
                 return;
@@ -209,15 +218,16 @@ namespace UnturnedLegends.GameTypes
 
             Utility.Debug($"Killer found, killer name: {kPlayer.GamePlayer.Player.CharacterName}");
             kPlayer.Kills++;
+            kPlayer.Team.Score++;
             kPlayer.Score += Config.KillPoints;
 
-            var xpGained = limb == ELimb.SKULL ? Config.FFA.XPPerKillHeadshot : Config.FFA.XPPerKill;
+            var xpGained = limb == ELimb.SKULL ? Config.TDM.XPPerKillHeadshot : Config.TDM.XPPerKill;
             string xpText = limb == ELimb.SKULL ? Plugin.Instance.Translate("Headshot_Kill").ToRich() : Plugin.Instance.Translate("Normal_Kill").ToRich();
             xpText += "\n";
 
             if (kPlayer.KillStreak > 0)
             {
-                xpGained += Config.FFA.BaseXPKS + (++kPlayer.KillStreak * Config.FFA.IncreaseXPPerKS);
+                xpGained += Config.TDM.BaseXPKS + (++kPlayer.KillStreak * Config.TDM.IncreaseXPPerKS);
             }
             else
             {
@@ -230,7 +240,7 @@ namespace UnturnedLegends.GameTypes
             }
             else if ((DateTime.UtcNow - kPlayer.LastKill).TotalSeconds <= 10)
             {
-                xpGained += Config.FFA.BaseXPMK + (++kPlayer.MultipleKills * Config.FFA.IncreaseXPPerMK);
+                xpGained += Config.TDM.BaseXPMK + (++kPlayer.MultipleKills * Config.TDM.IncreaseXPPerMK);
                 var multiKillText = Plugin.Instance.Translate($"Multiple_Kills_Show_{kPlayer.MultipleKills}").ToRich();
                 xpText += (multiKillText == $"Multiple_Kills_Show_{kPlayer.MultipleKills}" ? Plugin.Instance.Translate("Multiple_Kills_Show", kPlayer.MultipleKills).ToRich() : multiKillText) + "\n";
             }
@@ -249,9 +259,9 @@ namespace UnturnedLegends.GameTypes
 
             foreach (var ply in Players)
             {
-                Plugin.Instance.UIManager.UpdateFFATopUI(ply, Players);
+                Plugin.Instance.UIManager.UpdateTDMScore(ply, kPlayer.Team);
             }
-            if (kPlayer.Kills == Config.FFA.ScoreLimit)
+            if (kPlayer.Team.Score == Config.TDM.ScoreLimit)
             {
                 Plugin.Instance.StartCoroutine(GameEnd());
             }
@@ -265,7 +275,7 @@ namespace UnturnedLegends.GameTypes
         public override void OnPlayerDamage(ref DamagePlayerParameters parameters, ref bool shouldAllow)
         {
             Utility.Debug($"{parameters.player.channel.owner.playerID.characterName} got damaged, checking if the player is in game");
-            var player = GetFFAPlayer(parameters.player);
+            var player = GetTDMPlayer(parameters.player);
             if (player == null)
             {
                 Utility.Debug("Player isn't ingame, returning");
@@ -286,7 +296,7 @@ namespace UnturnedLegends.GameTypes
 
             player.GamePlayer.OnDamaged();
 
-            var kPlayer = GetFFAPlayer(parameters.killer);
+            var kPlayer = GetTDMPlayer(parameters.killer);
             if (kPlayer == null)
             {
                 Utility.Debug("Killer not found, returning");
@@ -302,21 +312,21 @@ namespace UnturnedLegends.GameTypes
         public override void OnPlayerRevived(UnturnedPlayer player)
         {
             Utility.Debug("Player revived, getting the ffa player");
-            var fPlayer = GetFFAPlayer(player);
-            if (fPlayer == null)
+            var tPlayer = GetTDMPlayer(player);
+            if (tPlayer == null)
             {
                 Utility.Debug("Could'nt find the ffa player, returning");
                 return;
             }
 
-            Utility.Debug($"Game player found, player name: {fPlayer.GamePlayer.Player.CharacterName}");
+            Utility.Debug($"Game player found, player name: {tPlayer.GamePlayer.Player.CharacterName}");
             Utility.Debug("Reviving the player");
 
-            fPlayer.GamePlayer.OnRevived();
-            SpawnPlayer(fPlayer, false);
+            tPlayer.GamePlayer.OnRevived();
+            SpawnPlayer(tPlayer, false);
         }
 
-        public void GiveLoadout(FFAPlayer player)
+        public void GiveLoadout(TDMPlayer player)
         {
             Utility.Debug($"Giving loadout to {player.GamePlayer.Player.CharacterName}");
 
@@ -324,44 +334,57 @@ namespace UnturnedLegends.GameTypes
             R.Commands.Execute(player.GamePlayer.Player, $"/kit {Config.KitName}");
         }
 
-        public void SpawnPlayer(FFAPlayer player, bool seperateSpawnPoint)
+        public void SpawnPlayer(TDMPlayer player, bool seperateSpawnPoint)
         {
             Utility.Debug($"Spawning {player.GamePlayer.Player.CharacterName}, getting a random location");
-            if (SpawnPoints.Count == 0)
+            var spawnPoints = player.Team.TeamID == (byte)ETeam.Blue ? BlueSpawnPoints : RedSpawnPoints;
+            var unavailableSpawnPoints = player.Team.TeamID == (byte)ETeam.Blue ? BlueUnavailableSpawnPoints : RedUnavailableSpawnPoints;
+            if (spawnPoints.Count == 0)
             {
-                Utility.Debug("No spawnpoints set for FFA, returning");
+                Utility.Debug("No spawnpoints set for TDM, returning");
                 return;
             }
 
-            var spawnPoint = seperateSpawnPoint ? SpawnPoints[Players.IndexOf(player)] : (SpawnPoints.Count > 0 ? SpawnPoints[UnityEngine.Random.Range(0, SpawnPoints.Count)] : UnavailableSpawnPoints[UnityEngine.Random.Range(0, UnavailableSpawnPoints.Count)]);
-            if (!seperateSpawnPoint && SpawnPoints.Count > 0)
+            var spawnPoint = seperateSpawnPoint ? spawnPoints[Players.IndexOf(player)] : (spawnPoints.Count > 0 ? spawnPoints[UnityEngine.Random.Range(0, spawnPoints.Count)] : unavailableSpawnPoints[UnityEngine.Random.Range(0, unavailableSpawnPoints.Count)]);
+            if (!seperateSpawnPoint && spawnPoints.Count > 0)
             {
-                Plugin.Instance.StartCoroutine(SpawnUsedUp(spawnPoint));
+                Plugin.Instance.StartCoroutine(SpawnUsedUp(spawnPoint, (ETeam)player.Team.TeamID));
             }
             player.GamePlayer.Player.Player.teleportToLocationUnsafe(spawnPoint.GetSpawnPoint(), 0);
-            player.GamePlayer.GiveSpawnProtection(Config.FFA.SpawnProtectionSeconds);
+            player.GamePlayer.GiveSpawnProtection(Config.TDM.SpawnProtectionSeconds);
         }
 
-        public IEnumerator SpawnUsedUp(FFASpawnPoint spawnPoint)
+        public IEnumerator SpawnUsedUp(TDMSpawnPoint spawnPoint, ETeam team)
         {
-            SpawnPoints.Remove(spawnPoint);
-            UnavailableSpawnPoints.Add(spawnPoint);
-            yield return new WaitForSeconds(Config.SpawnUnavailableSeconds);
-            SpawnPoints.Add(spawnPoint);
-            UnavailableSpawnPoints.Remove(spawnPoint);
+            if (team == ETeam.Blue)
+            {
+                BlueSpawnPoints.Remove(spawnPoint);
+                BlueUnavailableSpawnPoints.Add(spawnPoint);
+                yield return new WaitForSeconds(Config.SpawnUnavailableSeconds);
+                BlueSpawnPoints.Add(spawnPoint);
+                BlueUnavailableSpawnPoints.Remove(spawnPoint);
+            } else
+            {
+
+                RedSpawnPoints.Remove(spawnPoint);
+                RedUnavailableSpawnPoints.Add(spawnPoint);
+                yield return new WaitForSeconds(Config.SpawnUnavailableSeconds);
+                RedSpawnPoints.Add(spawnPoint);
+                RedUnavailableSpawnPoints.Remove(spawnPoint);
+            }
         }
 
-        public FFAPlayer GetFFAPlayer(CSteamID steamID)
+        public TDMPlayer GetTDMPlayer(CSteamID steamID)
         {
             return Players.FirstOrDefault(k => k.GamePlayer.SteamID == steamID);
         }
 
-        public FFAPlayer GetFFAPlayer(UnturnedPlayer player)
+        public TDMPlayer GetTDMPlayer(UnturnedPlayer player)
         {
             return Players.FirstOrDefault(k => k.GamePlayer.SteamID == player.CSteamID);
         }
 
-        public FFAPlayer GetFFAPlayer(Player player)
+        public TDMPlayer GetTDMPlayer(Player player)
         {
             return Players.FirstOrDefault(k => k.GamePlayer.SteamID == player.channel.owner.playerID.steamID);
         }
@@ -369,7 +392,7 @@ namespace UnturnedLegends.GameTypes
         public override bool IsPlayerIngame(CSteamID steamID)
         {
             return Players.Exists(k => k.GamePlayer.SteamID == steamID);
-        } 
+        }
 
         public override int GetPlayerCount()
         {

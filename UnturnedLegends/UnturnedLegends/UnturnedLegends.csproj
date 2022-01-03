@@ -139,8 +139,10 @@
     <Compile Include="Enums\EGamePhase.cs" />
     <Compile Include="Enums\EGameType.cs" />
     <Compile Include="Enums\EPage.cs" />
+    <Compile Include="Enums\ETeam.cs" />
     <Compile Include="GameTypes\FFAGame.cs" />
     <Compile Include="GameTypes\Game.cs" />
+    <Compile Include="GameTypes\TDMGame.cs" />
     <Compile Include="Instances\UIHandler.cs" />
     <Compile Include="Managers\DatabaseManager.cs" />
     <Compile Include="Managers\DataManager.cs" />
@@ -149,6 +151,8 @@
     <Compile Include="Managers\UIManager.cs" />
     <Compile Include="Models\ArenaLocation.cs" />
     <Compile Include="Models\FFAConfig.cs" />
+    <Compile Include="Models\TDMConfig.cs" />
+    <Compile Include="Models\TDMPlayer.cs" />
     <Compile Include="Models\VoteChoice.cs" />
     <Compile Include="Patches\FiremodePatch.cs" />
     <Compile Include="Models\FFAPlayer.cs" />

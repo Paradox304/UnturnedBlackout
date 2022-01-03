@@ -16,10 +16,15 @@ namespace UnturnedLegends.Managers
 {
     public class UIManager
     {
+        public Config Config { get; set; }
+
         public List<UIHandler> UIHandlers { get; set; }
 
         public const ushort FFAID = 27620;
         public const short FFAKey = 27620;
+
+        public const ushort TDMID = 27621;
+        public const short TDMKey = 27621;
 
         public const short SoundsKey = 27634;
 
@@ -31,6 +36,7 @@ namespace UnturnedLegends.Managers
 
         public UIManager()
         {
+            Config = Plugin.Instance.Configuration.Instance;
             UIHandlers = new List<UIHandler>();
 
             EffectManager.onEffectButtonClicked += OnButtonClicked;
@@ -130,7 +136,7 @@ namespace UnturnedLegends.Managers
             };
         }
 
-        public void SendDeathUI(GamePlayer victim, PlayerData victimData, PlayerData killerData, string gunName)
+        public void SendDeathUI(GamePlayer victim, PlayerData killerData)
         {
             victim.Player.Player.enablePluginWidgetFlag(EPluginWidgetFlags.Modal);
 
@@ -257,6 +263,45 @@ namespace UnturnedLegends.Managers
         public void ClearFFAHUD(GamePlayer player)
         {
             EffectManager.askEffectClearByID(FFAID, player.TransportConnection);
+        }
+
+
+        // TDM Related UI
+        public void SendTDMHUD(TDMPlayer player, Team blueTeam, Team redTeam)
+        {
+            EffectManager.sendUIEffect(TDMID, TDMKey, player.GamePlayer.TransportConnection, true);
+            EffectManager.sendUIEffectVisibility(TDMKey, player.GamePlayer.TransportConnection, true, player.Team.TeamID == (byte)ETeam.Blue ? "BlueTeam" : "RedTeam", true);
+            EffectManager.sendUIEffect(27611, 27611, player.GamePlayer.TransportConnection, true, Plugin.Instance.Translate("TDM_Name").ToRich(), Plugin.Instance.Translate("TDM_Desc").ToRich());
+            EffectManager.sendUIEffectVisibility(TDMKey, player.GamePlayer.TransportConnection, true, "Timer", true);
+
+            int index = player.Team.TeamID == (byte)ETeam.Blue ? 1 : 0;
+            int blueSpaces = blueTeam.Score * 96 / Config.TDM.ScoreLimit;
+            int redSpaces = redTeam.Score * 96 / Config.TDM.ScoreLimit;
+            EffectManager.sendUIEffectText(TDMKey, player.GamePlayer.TransportConnection, true, $"RedNum{index}", redTeam.Score.ToString());
+            EffectManager.sendUIEffectText(TDMKey, player.GamePlayer.TransportConnection, true, $"RedBarFill{index}", redSpaces == 0 ? " " : new string(' ', redSpaces));
+
+            EffectManager.sendUIEffectText(TDMKey, player.GamePlayer.TransportConnection, true, $"BlueNum{index}", blueTeam.Score.ToString());
+            EffectManager.sendUIEffectText(TDMKey, player.GamePlayer.TransportConnection, true, $"BlueBarFill{index}", blueSpaces == 0 ? " " : new string(' ', blueSpaces));
+        }
+
+        public void UpdateTDMTimer(GamePlayer player, string text)
+        {
+            EffectManager.sendUIEffectText(TDMKey, player.TransportConnection, true, "TimerTxt", text);
+        }
+
+        public void UpdateTDMScore(TDMPlayer player, Team changeTeam)
+        {
+            int index = player.Team.TeamID == (byte)ETeam.Blue ? 1 : 0;
+            var team = (ETeam)changeTeam.TeamID;
+            int spaces = changeTeam.Score * 96 / Config.TDM.ScoreLimit;
+
+            EffectManager.sendUIEffectText(TDMKey, player.GamePlayer.TransportConnection, true, $"{team}Num{index}", changeTeam.Score.ToString());
+            EffectManager.sendUIEffectText(TDMKey, player.GamePlayer.TransportConnection, true, $"{team}BarFill{index}", spaces == 0 ? " " : new string(' ', spaces));
+        }
+
+        public void ClearTDMHUD(GamePlayer player)
+        {
+            EffectManager.askEffectClearByID(TDMID, player.TransportConnection);
         }
 
         // EVENTS

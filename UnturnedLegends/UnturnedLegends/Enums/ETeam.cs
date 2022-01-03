@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 
 namespace UnturnedLegends.Enums
 {
-    public enum EGameType
+    public enum ETeam
     {
-        FFA,
-        TDM,
-        None
+        Blue,
+        Red
     }
 }
