@@ -5,14 +5,14 @@ namespace UnturnedLegends.Models
 {
     public class Team
     {
-        public string TeamName { get; set; }
+        public int TeamID { get; set; }
         public HashSet<CSteamID> Players { get; set; }
 
         public CSteamID GroupID { get; set; }
 
-        public Team(string teamName)
+        public Team(int teamID)
         {
-            TeamName = teamName;
+            TeamID = teamID;
             Players = new HashSet<CSteamID>();
         }
 

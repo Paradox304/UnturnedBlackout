@@ -135,12 +135,8 @@ namespace UnturnedLegends.Managers
             victim.Player.Player.enablePluginWidgetFlag(EPluginWidgetFlags.Modal);
 
             EffectManager.sendUIEffect(DeathID, DeathKey, victim.TransportConnection, true);
-            EffectManager.sendUIEffectText(DeathKey, victim.TransportConnection, true, "WeaponName", gunName.ToUpper());
-            EffectManager.sendUIEffectImageURL(DeathKey, victim.TransportConnection, true, "SelfIcon", victimData.AvatarLink);
-            EffectManager.sendUIEffectText(DeathKey, victim.TransportConnection, true, "SelfName", victimData.SteamName.ToUpper());
-            EffectManager.sendUIEffectText(DeathKey, victim.TransportConnection, true, "SelfXPNum", Plugin.Instance.Translate("Level_Show", victimData.Level).ToRich());
             EffectManager.sendUIEffectImageURL(DeathKey, victim.TransportConnection, true, "EnemyIcon", killerData.AvatarLink);
-            EffectManager.sendUIEffectText(DeathKey, victim.TransportConnection, true, "DeathName", killerData.SteamName.ToUpper());
+            EffectManager.sendUIEffectText(DeathKey, victim.TransportConnection, true, "EnemyName", killerData.SteamName.ToUpper());
             EffectManager.sendUIEffectText(DeathKey, victim.TransportConnection, true, "EnemyXPNum", Plugin.Instance.Translate("Level_Show", killerData.Level).ToRich());
         }
 

@@ -75,7 +75,7 @@ namespace UnturnedLegends
 
             KillPoints = 100;
 
-            FFA = new FFAConfig(15, 600, 50, 50, 10, 5, 10, 5, 10, 2);
+            FFA = new FFAConfig(15, 600, 50, 50, 10, 5, 10, 5, 10, 15, 2);
             ArenaLocations = new List<ArenaLocation>
             {
                 new ArenaLocation(1, 10, "Seattle", ""),

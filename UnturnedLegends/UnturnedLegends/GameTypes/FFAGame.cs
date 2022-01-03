@@ -81,6 +81,11 @@ namespace UnturnedLegends.GameTypes
 
         public IEnumerator GameEnd()
         {
+            if (GameEnder != null)
+            {
+                Plugin.Instance.StopCoroutine(GameEnder);
+            }
+
             GamePhase = EGamePhase.Ending;
             Plugin.Instance.UIManager.OnGameUpdated(this);
             for (int index = 0; index < Players.Count; index++)
@@ -249,7 +254,10 @@ namespace UnturnedLegends.GameTypes
             {
                 Plugin.Instance.UIManager.UpdateFFATopUI(ply, Players);
             }
-
+            if (kPlayer.Kills == Config.FFA.ScoreLimit)
+            {
+                Plugin.Instance.StartCoroutine(GameEnd());
+            }
             ThreadPool.QueueUserWorkItem(async (o) =>
             {
                 await Plugin.Instance.DBManager.IncreasePlayerKillsAsync(kPlayer.GamePlayer.SteamID, 1);

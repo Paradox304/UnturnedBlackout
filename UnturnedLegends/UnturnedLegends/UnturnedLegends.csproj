@@ -133,6 +133,7 @@
     <Compile Include="Commands\JoinCommand.cs" />
     <Compile Include="Commands\LeaveCommand.cs" />
     <Compile Include="Commands\SetLobbyCommand.cs" />
+    <Compile Include="Commands\TDMSPCommand.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Database\PlayerData.cs" />
     <Compile Include="Enums\EGamePhase.cs" />
@@ -157,6 +158,7 @@
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SpawnPoints\FFASpawnPoint.cs" />
+    <Compile Include="SpawnPoints\TDMSpawnPoint.cs" />
     <Compile Include="Utility.cs" />
   </ItemGroup>
   <ItemGroup>
