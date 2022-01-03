@@ -18,7 +18,7 @@ namespace UnturnedLegends.GameTypes
 
         public EGameType GameMode { get; set; }
         public ArenaLocation Location { get; set; }
-        
+
         public EGamePhase GamePhase { get; set; }
 
         public Dictionary<int, VoteChoice> VoteChoices { get; set; }
@@ -60,7 +60,7 @@ namespace UnturnedLegends.GameTypes
 
             var locations = Plugin.Instance.GameManager.AvailableLocations.ToList();
             locations.Add(Location.LocationID);
-            var gameModes = new List<byte> { (byte)GameMode };
+            var gameModes = new List<byte> { (byte)EGameType.FFA, (byte)EGameType.TDM };
 
             for (int i = 0; i <= 1; i++)
             {
@@ -71,7 +71,7 @@ namespace UnturnedLegends.GameTypes
                 var gameMode = (EGameType)gameModes[UnityEngine.Random.Range(0, gameModes.Count)];
                 Utility.Debug($"Found gamemode {gameMode}");
                 var voteChoice = new VoteChoice(location, gameMode);
-                locations.Remove(locationID);
+                gameModes.Remove((byte)gameMode);
                 VoteChoices.Add(i, voteChoice);
             }
 
@@ -89,11 +89,12 @@ namespace UnturnedLegends.GameTypes
             }
 
             Utility.Debug("Ending voting, getting the most voted choice");
-            VoteChoice choice = null;
+            VoteChoice choice;
             if (Vote0.Count >= Vote1.Count)
             {
                 choice = VoteChoices[0];
-            } else
+            }
+            else
             {
                 choice = VoteChoices[1];
             }
@@ -106,20 +107,31 @@ namespace UnturnedLegends.GameTypes
             Utility.Debug($"{player.Player.CharacterName} chose {choice}");
             if (Vote0.Contains(player))
             {
-                if (choice == 0) return;
+                if (choice == 0)
+                {
+                    return;
+                }
+
                 Vote0.Remove(player);
                 Vote1.Add(player);
-            } else if (Vote1.Contains(player))
+            }
+            else if (Vote1.Contains(player))
             {
-                if (choice == 1) return;
+                if (choice == 1)
+                {
+                    return;
+                }
+
                 Vote1.Remove(player);
                 Vote0.Add(player);
-            } else
+            }
+            else
             {
                 if (choice == 1)
                 {
                     Vote1.Add(player);
-                } else
+                }
+                else
                 {
                     Vote0.Add(player);
                 }

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using UnturnedLegends.SpawnPoints;
 
 namespace UnturnedLegends.Models
 {

@@ -4,7 +4,6 @@ using Rocket.Unturned.Events;
 using Rocket.Unturned.Player;
 using SDG.Unturned;
 using Steamworks;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -60,6 +59,9 @@ namespace UnturnedLegends.Managers
             {
                 case EGameType.FFA:
                     game = new FFAGame(location);
+                    break;
+                case EGameType.TDM:
+                    game = new TDMGame(location);
                     break;
                 default:
                     break;

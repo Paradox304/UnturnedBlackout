@@ -220,7 +220,10 @@ namespace UnturnedLegends.Managers
                     TaskDispatcher.QueueOnMainThread(() =>
                     {
                         var player = UnturnedPlayer.FromCSteamID(steamID);
-                        if (player != null) Plugin.Instance.HUDManager.OnXPChanged(player);
+                        if (player != null)
+                        {
+                            Plugin.Instance.HUDManager.OnXPChanged(player);
+                        }
                     });
                 }
                 catch (Exception ex)

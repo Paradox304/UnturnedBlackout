@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace UnturnedLegends.SpawnPoints
+namespace UnturnedLegends.Models
 {
     public class FFASpawnPoint
     {

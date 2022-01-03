@@ -2,7 +2,7 @@
 using Rocket.Unturned.Player;
 using System.Collections.Generic;
 using System.Linq;
-using UnturnedLegends.SpawnPoints;
+using UnturnedLegends.Models;
 
 namespace UnturnedLegends.Commands
 {

@@ -1,5 +1,4 @@
-﻿using Rocket.API;
-using Rocket.Core;
+﻿using Rocket.Core;
 using Rocket.Core.Utils;
 using Rocket.Unturned.Player;
 using SDG.Unturned;
@@ -7,13 +6,11 @@ using Steamworks;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using UnityEngine;
 using UnturnedLegends.Enums;
 using UnturnedLegends.Models;
-using UnturnedLegends.SpawnPoints;
 
 namespace UnturnedLegends.GameTypes
 {
@@ -103,7 +100,7 @@ namespace UnturnedLegends.GameTypes
                 RemovePlayerFromGame(player.GamePlayer);
                 Plugin.Instance.GameManager.SendPlayerToLobby(player.GamePlayer.Player);
             }
-            
+
             Players = new List<FFAPlayer>();
             StartVoting();
         }
@@ -161,7 +158,8 @@ namespace UnturnedLegends.GameTypes
             {
                 Plugin.Instance.UIManager.ClearCountdownUI(player);
                 fPlayer.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1);
-            } else if (GamePhase == EGamePhase.Ending)
+            }
+            else if (GamePhase == EGamePhase.Ending)
             {
                 Plugin.Instance.UIManager.ClearPreEndingUI(player);
             }
@@ -369,7 +367,7 @@ namespace UnturnedLegends.GameTypes
         public override bool IsPlayerIngame(CSteamID steamID)
         {
             return Players.Exists(k => k.GamePlayer.SteamID == steamID);
-        } 
+        }
 
         public override int GetPlayerCount()
         {

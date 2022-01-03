@@ -1,11 +1,8 @@
 ﻿using Rocket.Unturned.Player;
 using SDG.Unturned;
-using Steamworks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnturnedLegends.Database;
 using UnturnedLegends.Enums;
 using UnturnedLegends.GameTypes;
@@ -237,7 +234,7 @@ namespace UnturnedLegends.Managers
                 var ratio = ply.Deaths == 0 ? "0.00" : String.Format("{0:n}", Math.Round((decimal)(ply.Kills / ply.Deaths), 2));
                 EffectManager.sendUIEffectText(PreEndingUIKey, ply.GamePlayer.TransportConnection, true, "MatchResult1", Plugin.Instance.Translate(i == 0 ? "Victory_Text" : "Defeat_Text").ToRich());
                 EffectManager.sendUIEffectText(PreEndingUIKey, ply.GamePlayer.TransportConnection, true, "MapName1", location.LocationName.ToUpper());
-                
+
                 for (int i2 = 0; i2 < players.Count; i2++)
                 {
                     var player = players[i2];
@@ -380,13 +377,15 @@ namespace UnturnedLegends.Managers
                 {
                     Plugin.Instance.GameManager.AddPlayerToGame(ply, selected);
                 }
-            } else if (buttonName.EndsWith("Vote0"))
+            }
+            else if (buttonName.EndsWith("Vote0"))
             {
-                if (int.TryParse(buttonName.Replace("Lobby","").Replace("Vote0", ""), out int selected))
+                if (int.TryParse(buttonName.Replace("Lobby", "").Replace("Vote0", ""), out int selected))
                 {
                     Plugin.Instance.GameManager.OnPlayerVoted(ply, selected, 0);
                 }
-            } else if (buttonName.EndsWith("Vote1"))
+            }
+            else if (buttonName.EndsWith("Vote1"))
             {
                 if (int.TryParse(buttonName.Replace("Lobby", "").Replace("Vote1", ""), out int selected))
                 {

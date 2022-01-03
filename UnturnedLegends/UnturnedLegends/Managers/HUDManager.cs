@@ -6,8 +6,6 @@ using SDG.Unturned;
 using System;
 using UnityEngine;
 using UnturnedLegends.Database;
-using UnturnedLegends.Enums;
-using UnturnedLegends.Models;
 
 namespace UnturnedLegends.Managers
 {
@@ -108,7 +106,7 @@ namespace UnturnedLegends.Managers
                     var mAsset = Assets.find(EAssetType.ITEM, BitConverter.ToUInt16(equipment.state, 8)) as ItemMagazineAsset;
                     string firemode = GetFiremode(equipment.state[11]);
                     int currentAmmo = equipment.state[10];
-                    
+
                     EffectManager.sendUIEffectText(Key, connection, true, "WeaponName", gAsset.itemName);
                     EffectManager.sendUIEffectText(Key, connection, true, "WeaponMode", firemode);
                     EffectManager.sendUIEffectText(Key, connection, true, "AmmoNum", currentAmmo.ToString());

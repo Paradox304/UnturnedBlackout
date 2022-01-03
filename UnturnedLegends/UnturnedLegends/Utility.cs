@@ -110,7 +110,10 @@ namespace UnturnedLegends
         /// </exception>
         public static Vector3 AverageCenter(this IEnumerable<Vector3> source)
         {
-            if (source == null) throw new ArgumentNullException(nameof(source));
+            if (source == null)
+            {
+                throw new ArgumentNullException(nameof(source));
+            }
 
             var list = source.ToList();
 
@@ -121,7 +124,10 @@ namespace UnturnedLegends
                 sum = list.Aggregate(sum, (current, element) => current + element);
             }
 
-            if (list.Count > 0) return sum / list.Count;
+            if (list.Count > 0)
+            {
+                return sum / list.Count;
+            }
 
             return Vector3.zero;
         }

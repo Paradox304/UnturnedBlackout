@@ -2,11 +2,6 @@
 using SDG.NetTransport;
 using SDG.Unturned;
 using Steamworks;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnturnedLegends.Database;
 using UnturnedLegends.Enums;
 using UnturnedLegends.GameTypes;
@@ -83,7 +78,7 @@ namespace UnturnedLegends.Instances
         {
             Utility.Debug($"Showing games for {Player.CharacterName}");
             CurrentPage = EPage.Play;
-            
+
             for (int i = 0; i <= 9; i++)
             {
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"Lobby{i}", false);

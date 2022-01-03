@@ -1,5 +1,4 @@
 ﻿using Rocket.Core;
-using Rocket.Core.Utils;
 using Rocket.Unturned.Player;
 using SDG.Unturned;
 using Steamworks;
@@ -7,13 +6,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnturnedLegends.Enums;
 using UnturnedLegends.Models;
-using UnturnedLegends.SpawnPoints;
 
 namespace UnturnedLegends.GameTypes
 {
@@ -363,7 +359,8 @@ namespace UnturnedLegends.GameTypes
                 yield return new WaitForSeconds(Config.SpawnUnavailableSeconds);
                 BlueSpawnPoints.Add(spawnPoint);
                 BlueUnavailableSpawnPoints.Remove(spawnPoint);
-            } else
+            }
+            else
             {
 
                 RedSpawnPoints.Remove(spawnPoint);
