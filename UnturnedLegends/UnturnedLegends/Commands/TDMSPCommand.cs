@@ -12,9 +12,9 @@ namespace UnturnedLegends.Commands
 
         public string Name => "tdmsp";
 
-        public string Help => "Set the tdm spawnpoints for an area location for a team";
+        public string Help => "Set the tdm spawnpoints for an area location for a group";
 
-        public string Syntax => "/tdmsp (LocationID) (TeamID)";
+        public string Syntax => "/tdmsp (LocationID) (GroupID)";
 
         public List<string> Aliases => new List<string>();
 
@@ -30,15 +30,15 @@ namespace UnturnedLegends.Commands
                 return;
             }
 
-            if (!int.TryParse(command[0], out int teamID) || (teamID != 0 && teamID != 1))
-            {
-                Utility.Say(caller, Plugin.Instance.Translate("Team_Not_Found").ToRich());
-                return;
-            }
-
             if (!int.TryParse(command[0], out int locationID))
             {
                 Utility.Say(caller, Plugin.Instance.Translate("Location_Not_Found").ToRich());
+                return;
+            }
+
+            if (!int.TryParse(command[1], out int groupID))
+            {
+                Utility.Say(caller, Plugin.Instance.Translate("Group_Not_Found").ToRich());
                 return;
             }
 
@@ -49,8 +49,8 @@ namespace UnturnedLegends.Commands
                 return;
             }
 
-            Utility.Say(caller, Plugin.Instance.Translate("TDM_SpawnPoint_Set", location.LocationName, teamID == 0 ? "BLUE TEAM" : "RED TEAM").ToRich());
-            Plugin.Instance.DataManager.Data.TDMSpawnPoints.Add(new TDMSpawnPoint(locationID, teamID, player.Player.transform.position.x, player.Player.transform.position.y, player.Player.transform.position.z));
+            Utility.Say(caller, Plugin.Instance.Translate("TDM_SpawnPoint_Set", location.LocationName, groupID).ToRich());
+            Plugin.Instance.DataManager.Data.TDMSpawnPoints.Add(new TDMSpawnPoint(locationID, groupID, player.Player.transform.position.x, player.Player.transform.position.y, player.Player.transform.position.z));
             Plugin.Instance.DataManager.SaveJson();
         }
     }

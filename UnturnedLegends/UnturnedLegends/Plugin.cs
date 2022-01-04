@@ -92,9 +92,9 @@ namespace UnturnedLegends
         {
             { "Correct_Usage", "[color=red]Correct Usage: {0}[/color]" },
             { "Location_Not_Found", "[color=red]Location with that ID not found[/color]" },
-            { "Team_Not_Found", "[color=red]Team with that ID not found (0, 1 valid IDs)[/color]" },
+            { "Group_Not_Found", "[color=red]Group with that ID not found[/color]" },
             { "FFA_Spawnpoint_Set", "[color=green]FFA spawnpoint set for arena {0}[/color]" },
-            { "TDM_SpawnPoint_Set", "[color=green]TDM spawnpoint set for arena {0} for {1}[/color]" },
+            { "TDM_SpawnPoint_Set", "[color=green]TDM spawnpoint set for arena {0} for group {1}[/color]" },
             { "Game_Not_Found_With_ID", "[color=red]No game found with that ID[/color]" },
             { "Game_Full", "[color=red]Game is full, can't join[/color]" },
             { "Game_Voting", "[color=red]There is voting going on in that game, can't join[/color]" },

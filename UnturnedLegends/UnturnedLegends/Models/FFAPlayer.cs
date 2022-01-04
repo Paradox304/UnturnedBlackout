@@ -32,13 +32,13 @@ namespace UnturnedLegends.Models
             PlayersKilled = new Dictionary<CSteamID, int>();
         }
 
-        public void OnDeath()
+        public void OnDeath(CSteamID killer)
         {
             KillStreak = 0;
             MultipleKills = 0;
             Deaths++;
             LastKill = DateTime.UtcNow;
-            PlayersKilled.Clear();
+            PlayersKilled.Remove(killer);
         }
 
         public void CheckKills()

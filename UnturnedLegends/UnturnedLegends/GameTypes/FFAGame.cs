@@ -189,7 +189,7 @@ namespace UnturnedLegends.GameTypes
             var victimKS = fPlayer.KillStreak;
 
             Utility.Debug($"Game player found, player name: {fPlayer.GamePlayer.Player.CharacterName}");
-            fPlayer.OnDeath();
+            fPlayer.OnDeath(killer);
             fPlayer.GamePlayer.OnDeath(killer);
             ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DBManager.IncreasePlayerDeathsAsync(fPlayer.GamePlayer.SteamID, 1));
 

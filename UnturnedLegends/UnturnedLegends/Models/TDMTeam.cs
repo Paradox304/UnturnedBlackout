@@ -26,6 +26,7 @@ namespace UnturnedLegends.Models
 
         public TDMTeam(TDMGame game, int teamID, bool isDummy)
         {
+            Config = Plugin.Instance.Configuration.Instance;
             TeamID = teamID;
             if (!isDummy)
             {
@@ -56,6 +57,7 @@ namespace UnturnedLegends.Models
 
         public void OnDeath(CSteamID steamID)
         {
+            Utility.Debug($"Team player died, spawn threshold {SpawnThreshold}");
             if (!Players.TryGetValue(steamID, out DateTime lastDeath))
             {
                 return;
@@ -63,9 +65,12 @@ namespace UnturnedLegends.Models
 
             if ((DateTime.UtcNow - lastDeath).TotalSeconds < Config.SpawnSwitchCountSeconds)
             {
+                Utility.Debug("Last death comes within the seconds");
                 SpawnThreshold++;
+                Utility.Debug($"Threshold: {SpawnThreshold}");
                 if (SpawnThreshold > Config.SpawnSwitchThreshold)
                 {
+                    Utility.Debug("Threshold limit reached, switch the spawns");
                     if (SpawnSwitcher != null)
                     {
                         Plugin.Instance.StopCoroutine(SpawnSwitcher);

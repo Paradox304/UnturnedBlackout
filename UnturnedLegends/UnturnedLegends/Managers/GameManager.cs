@@ -146,7 +146,7 @@ namespace UnturnedLegends.Managers
             ThreadPool.QueueUserWorkItem(async (o) =>
             {
                 var profile = player.SteamProfile;
-                await Plugin.Instance.DBManager.AddOrUpdatePlayerAsync(player.CSteamID, profile.SteamID, profile.AvatarFull.ToString());
+                await Plugin.Instance.DBManager.AddOrUpdatePlayerAsync(player.CSteamID, player.CharacterName.ToUnrich(), profile.AvatarFull.ToString());
                 await Plugin.Instance.DBManager.GetPlayerDataAsync(player.CSteamID);
 
                 TaskDispatcher.QueueOnMainThread(() =>
