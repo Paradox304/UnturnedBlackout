@@ -267,7 +267,7 @@ namespace UnturnedLegends.Managers
 
 
         // TDM Related UI
-        public void SendTDMHUD(TDMPlayer player, Team blueTeam, Team redTeam)
+        public void SendTDMHUD(TDMPlayer player, TDMTeam blueTeam, TDMTeam redTeam)
         {
             EffectManager.sendUIEffect(TDMID, TDMKey, player.GamePlayer.TransportConnection, true);
             EffectManager.sendUIEffectVisibility(TDMKey, player.GamePlayer.TransportConnection, true, player.Team.TeamID == (byte)ETeam.Blue ? "BlueTeam" : "RedTeam", true);
@@ -289,7 +289,7 @@ namespace UnturnedLegends.Managers
             EffectManager.sendUIEffectText(TDMKey, player.TransportConnection, true, "TimerTxt", text);
         }
 
-        public void UpdateTDMScore(TDMPlayer player, Team changeTeam)
+        public void UpdateTDMScore(TDMPlayer player, TDMTeam changeTeam)
         {
             int index = player.Team.TeamID == (byte)ETeam.Blue ? 1 : 0;
             var team = (ETeam)changeTeam.TeamID;
@@ -299,7 +299,7 @@ namespace UnturnedLegends.Managers
             EffectManager.sendUIEffectText(TDMKey, player.GamePlayer.TransportConnection, true, $"{team}BarFill{index}", spaces == 0 ? " " : new string(' ', spaces));
         }
 
-        public void SetupTDMEndingLeaderboard(List<TDMPlayer> players, ArenaLocation location, Team wonTeam)
+        public void SetupTDMEndingLeaderboard(List<TDMPlayer> players, ArenaLocation location, TDMTeam wonTeam)
         {
             var bluePlayers = players.Where(k => k.Team.TeamID == (byte)ETeam.Blue).ToList();
             var redPlayers = players.Where(k => k.Team.TeamID == (byte)ETeam.Red).ToList();

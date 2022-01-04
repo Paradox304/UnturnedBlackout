@@ -9,7 +9,7 @@ namespace UnturnedLegends.Models
     {
         public GamePlayer GamePlayer { get; set; }
 
-        public Team Team { get; set; }
+        public TDMTeam Team { get; set; }
 
         public int Score { get; set; }
         public int Kills { get; set; }
@@ -20,7 +20,7 @@ namespace UnturnedLegends.Models
         public DateTime LastKill { get; set; }
         public Dictionary<CSteamID, int> PlayersKilled { get; set; }
 
-        public TDMPlayer(GamePlayer gamePlayer, Team team)
+        public TDMPlayer(GamePlayer gamePlayer, TDMTeam team)
         {
             GamePlayer = gamePlayer;
             Team = team;

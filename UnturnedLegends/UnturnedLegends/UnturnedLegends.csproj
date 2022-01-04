@@ -158,7 +158,7 @@
     <Compile Include="Models\FFAPlayer.cs" />
     <Compile Include="Models\GamePlayer.cs" />
     <Compile Include="Models\PositionsData.cs" />
-    <Compile Include="Models\Team.cs" />
+    <Compile Include="Models\TDMTeam.cs" />
     <Compile Include="Patches\GroupPatch.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

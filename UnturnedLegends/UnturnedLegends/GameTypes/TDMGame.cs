@@ -16,34 +16,29 @@ namespace UnturnedLegends.GameTypes
 {
     public class TDMGame : Game
     {
-        public List<TDMSpawnPoint> BlueSpawnPoints { get; set; }
-        public List<TDMSpawnPoint> BlueUnavailableSpawnPoints { get; set; }
-
-        public List<TDMSpawnPoint> RedSpawnPoints { get; set; }
-        public List<TDMSpawnPoint> RedUnavailableSpawnPoints { get; set; }
+        public List<TDMSpawnPoint> SpawnPoints0 { get; set; }
+        public List<TDMSpawnPoint> SpawnPoints1 { get; set; }
 
         public List<TDMPlayer> Players { get; set; }
 
-        public Team BlueTeam { get; set; }
-        public Team RedTeam { get; set; }
+        public TDMTeam BlueTeam { get; set; }
+        public TDMTeam RedTeam { get; set; }
 
         public Coroutine GameStarter { get; set; }
         public Coroutine GameEnder { get; set; }
+        public Coroutine SpawnSwitcher { get; set; }
 
         public TDMGame(ArenaLocation location) : base(EGameType.TDM, location)
         {
             Utility.Debug($"Initializing TDM game for location {location.LocationName}");
-            BlueSpawnPoints = Plugin.Instance.DataManager.Data.TDMSpawnPoints.Where(k => k.LocationID == location.LocationID && k.TeamID == (byte)ETeam.Blue).ToList();
-            RedSpawnPoints = Plugin.Instance.DataManager.Data.TDMSpawnPoints.Where(k => k.LocationID == location.LocationID && k.TeamID == (byte)ETeam.Red).ToList();
+            SpawnPoints0 = Plugin.Instance.DataManager.Data.TDMSpawnPoints.Where(k => k.LocationID == location.LocationID && k.TeamID == 0).ToList();
+            SpawnPoints1 = Plugin.Instance.DataManager.Data.TDMSpawnPoints.Where(k => k.LocationID == location.LocationID && k.TeamID == 1).ToList();
             Players = new List<TDMPlayer>();
+            Utility.Debug($"Found {SpawnPoints0.Count} positions for TDM for 0");
+            Utility.Debug($"Found {SpawnPoints1.Count} positions for TDM for 1");
 
-            BlueUnavailableSpawnPoints = new List<TDMSpawnPoint>();
-            RedUnavailableSpawnPoints = new List<TDMSpawnPoint>();
-            Utility.Debug($"Found {BlueSpawnPoints.Count} positions for TDM for Blue Team");
-            Utility.Debug($"Found {RedSpawnPoints.Count} positions for TDM for Red Team");
-
-            BlueTeam = new Team((byte)ETeam.Blue, false);
-            RedTeam = new Team((byte)ETeam.Red, false);
+            BlueTeam = new TDMTeam(this, (byte)ETeam.Blue, false);
+            RedTeam = new TDMTeam(this, (byte)ETeam.Red, false);
 
             GameStarter = Plugin.Instance.StartCoroutine(StartGame());
         }
@@ -68,6 +63,7 @@ namespace UnturnedLegends.GameTypes
                 Plugin.Instance.UIManager.ClearCountdownUI(player.GamePlayer);
             }
 
+            SpawnSwitcher = Plugin.Instance.StartCoroutine(SpawnSwitch());
             GameEnder = Plugin.Instance.StartCoroutine(EndGame());
         }
 
@@ -83,7 +79,7 @@ namespace UnturnedLegends.GameTypes
                 }
             }
 
-            Team wonTeam;
+            TDMTeam wonTeam;
             if (BlueTeam.Score > RedTeam.Score)
             {
                 wonTeam = BlueTeam;
@@ -92,12 +88,12 @@ namespace UnturnedLegends.GameTypes
                 wonTeam = RedTeam;
             } else
             {
-                wonTeam = new Team(-1, true);
+                wonTeam = new TDMTeam(this, -1, true);
             }
             Plugin.Instance.StartCoroutine(GameEnd(wonTeam));
         }
 
-        public IEnumerator GameEnd(Team wonTeam)
+        public IEnumerator GameEnd(TDMTeam wonTeam)
         {
             if (GameEnder != null)
             {
@@ -128,6 +124,10 @@ namespace UnturnedLegends.GameTypes
             Players = new List<TDMPlayer>();
             BlueTeam.Destroy();
             RedTeam.Destroy();
+            if (SpawnSwitcher != null)
+            {
+                Plugin.Instance.StopCoroutine(SpawnSwitcher);
+            }
 
             StartVoting();
         }
@@ -209,6 +209,7 @@ namespace UnturnedLegends.GameTypes
             Utility.Debug($"Game player found, player name: {tPlayer.GamePlayer.Player.CharacterName}");
             tPlayer.OnDeath();
             tPlayer.GamePlayer.OnDeath(killer);
+            tPlayer.Team.OnDeath(tPlayer.GamePlayer.SteamID);
             ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DBManager.IncreasePlayerDeathsAsync(tPlayer.GamePlayer.SteamID, 1));
 
             var kPlayer = GetTDMPlayer(killer);
@@ -364,42 +365,40 @@ namespace UnturnedLegends.GameTypes
         public void SpawnPlayer(TDMPlayer player, bool seperateSpawnPoint)
         {
             Utility.Debug($"Spawning {player.GamePlayer.Player.CharacterName}, getting a random location");
-            var spawnPoints = player.Team.TeamID == (byte)ETeam.Blue ? BlueSpawnPoints : RedSpawnPoints;
-            var unavailableSpawnPoints = player.Team.TeamID == (byte)ETeam.Blue ? BlueUnavailableSpawnPoints : RedUnavailableSpawnPoints;
+            var spawnPoints = player.Team.SpawnPoint == 0 ? SpawnPoints0 : SpawnPoints1;
             if (spawnPoints.Count == 0)
             {
                 Utility.Debug("No spawnpoints set for TDM, returning");
                 return;
             }
 
-            var spawnPoint = seperateSpawnPoint ? spawnPoints[Players.IndexOf(player)] : (spawnPoints.Count > 0 ? spawnPoints[UnityEngine.Random.Range(0, spawnPoints.Count)] : unavailableSpawnPoints[UnityEngine.Random.Range(0, unavailableSpawnPoints.Count)]);
-            if (!seperateSpawnPoint && spawnPoints.Count > 0)
-            {
-                Plugin.Instance.StartCoroutine(SpawnUsedUp(spawnPoint, (ETeam)player.Team.TeamID));
-            }
+            var spawnPoint = seperateSpawnPoint ? spawnPoints[Players.IndexOf(player)] : spawnPoints[UnityEngine.Random.Range(0, spawnPoints.Count)];
             player.GamePlayer.Player.Player.teleportToLocationUnsafe(spawnPoint.GetSpawnPoint(), 0);
             player.GamePlayer.GiveSpawnProtection(Config.TDM.SpawnProtectionSeconds);
         }
 
-        public IEnumerator SpawnUsedUp(TDMSpawnPoint spawnPoint, ETeam team)
+        public IEnumerator SpawnSwitch()
         {
-            if (team == ETeam.Blue)
-            {
-                BlueSpawnPoints.Remove(spawnPoint);
-                BlueUnavailableSpawnPoints.Add(spawnPoint);
-                yield return new WaitForSeconds(Config.SpawnUnavailableSeconds);
-                BlueSpawnPoints.Add(spawnPoint);
-                BlueUnavailableSpawnPoints.Remove(spawnPoint);
-            }
-            else
-            {
+            yield return new WaitForSeconds(Config.SpawnSwitchSeconds);
+            SwitchSpawn();
+        }
 
-                RedSpawnPoints.Remove(spawnPoint);
-                RedUnavailableSpawnPoints.Add(spawnPoint);
-                yield return new WaitForSeconds(Config.SpawnUnavailableSeconds);
-                RedSpawnPoints.Add(spawnPoint);
-                RedUnavailableSpawnPoints.Remove(spawnPoint);
+        public void SwitchSpawn()
+        {
+            if (SpawnSwitcher != null)
+            {
+                Plugin.Instance.StopCoroutine(SpawnSwitcher);
             }
+            if (BlueTeam.SpawnPoint == 0)
+            {
+                BlueTeam.SpawnPoint = 1;
+                RedTeam.SpawnPoint = 0;
+            } else
+            {
+                BlueTeam.SpawnPoint = 0;
+                RedTeam.SpawnPoint = 1;
+            }
+            SpawnSwitcher = Plugin.Instance.StartCoroutine(SpawnSwitch());
         }
 
         public TDMPlayer GetTDMPlayer(CSteamID steamID)

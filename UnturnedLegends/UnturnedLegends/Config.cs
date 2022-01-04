@@ -39,6 +39,11 @@ namespace UnturnedLegends
         public int DominationKills { get; set; }
         public int ShutdownKillStreak { get; set; }
 
+        public int SpawnSwitchThreshold { get; set; }
+        public int SpawnSwitchCountSeconds { get; set; }
+        public int SpawnSwitchTimeFrame { get; set; }
+        public int SpawnSwitchSeconds { get; set; }
+
         public FFAConfig FFA { get; set; }
         public TDMConfig TDM { get; set; }
 
@@ -77,6 +82,11 @@ namespace UnturnedLegends
             KillPoints = 100;
             DominationKills = 5;
             ShutdownKillStreak = 5;
+
+            SpawnSwitchThreshold = 10;
+            SpawnSwitchCountSeconds = 15;
+            SpawnSwitchTimeFrame = 60;
+            SpawnSwitchSeconds = 120;
 
             FFA = new FFAConfig(15, 600, 50, 50, 10, 5, 10, 5, 10, 15, 15, 15, 2);
             TDM = new TDMConfig(15, 600, 50, 50, 10, 5, 10, 5, 10, 15, 15, 15, 2);
