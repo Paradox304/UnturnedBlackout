@@ -186,6 +186,7 @@ namespace UnturnedLegends.GameTypes
                 Utility.Debug("Could'nt find the ffa player, returning");
                 return;
             }
+            var victimKS = fPlayer.KillStreak;
 
             Utility.Debug($"Game player found, player name: {fPlayer.GamePlayer.Player.CharacterName}");
             fPlayer.OnDeath();
@@ -236,7 +237,25 @@ namespace UnturnedLegends.GameTypes
             {
                 kPlayer.MultipleKills = 1;
             }
+            
+            if (victimKS > Config.ShutdownKillStreak)
+            {
+                xpGained += Config.FFA.ShutdownXP;
+                xpText += Plugin.Instance.Translate("Shutdown_Kill").ToRich() + "\n";
+            }
 
+            if (kPlayer.PlayersKilled.ContainsKey(fPlayer.GamePlayer.SteamID))
+            {
+                kPlayer.PlayersKilled[fPlayer.GamePlayer.SteamID] += 1;
+                if (kPlayer.PlayersKilled[fPlayer.GamePlayer.SteamID] > Config.DominationKills)
+                {
+                    xpGained += Config.FFA.DominationXP;
+                    xpText += Plugin.Instance.Translate("Domination_Kill").ToRich() + "\n";
+                }
+            } else
+            {
+                kPlayer.PlayersKilled.Add(fPlayer.GamePlayer.SteamID, 1);
+            }
             kPlayer.LastKill = DateTime.UtcNow;
 
             Players.Sort((x, y) => y.Kills.CompareTo(x.Kills));

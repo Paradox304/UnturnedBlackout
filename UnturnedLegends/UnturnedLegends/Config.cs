@@ -15,7 +15,6 @@ namespace UnturnedLegends
         public string PlayersTableName { get; set; }
         public int CacheRefreshSeconds { get; set; }
 
-        public string MapName { get; set; }
         public string KitName { get; set; }
 
         public bool EnableDebugLogs { get; set; }
@@ -37,6 +36,8 @@ namespace UnturnedLegends
         public int EndingLeaderboardSeconds { get; set; }
 
         public int KillPoints { get; set; }
+        public int DominationKills { get; set; }
+        public int ShutdownKillStreak { get; set; }
 
         public FFAConfig FFA { get; set; }
         public TDMConfig TDM { get; set; }
@@ -53,7 +54,6 @@ namespace UnturnedLegends
             PlayersTableName = "UL_Players";
             CacheRefreshSeconds = 600;
 
-            MapName = "Washington";
             KitName = "Starter";
 
             EnableDebugLogs = true;
@@ -75,9 +75,11 @@ namespace UnturnedLegends
             EndingLeaderboardSeconds = 20;
 
             KillPoints = 100;
+            DominationKills = 5;
+            ShutdownKillStreak = 5;
 
-            FFA = new FFAConfig(15, 600, 50, 50, 10, 5, 10, 5, 10, 15, 2);
-            TDM = new TDMConfig(15, 600, 50, 50, 10, 5, 10, 5, 10, 15, 2);
+            FFA = new FFAConfig(15, 600, 50, 50, 10, 5, 10, 5, 10, 15, 15, 15, 2);
+            TDM = new TDMConfig(15, 600, 50, 50, 10, 5, 10, 5, 10, 15, 15, 15, 2);
 
             ArenaLocations = new List<ArenaLocation>
             {

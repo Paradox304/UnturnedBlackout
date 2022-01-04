@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Steamworks;
+using System;
+using System.Collections.Generic;
 using UnturnedLegends.Database;
 
 namespace UnturnedLegends.Models
@@ -14,6 +16,7 @@ namespace UnturnedLegends.Models
         public int MultipleKills { get; set; }
 
         public DateTime LastKill { get; set; }
+        public Dictionary<CSteamID, int> PlayersKilled { get; set; }
 
         public FFAPlayer(GamePlayer gamePlayer)
         {
@@ -26,6 +29,7 @@ namespace UnturnedLegends.Models
             MultipleKills = 0;
 
             LastKill = DateTime.UtcNow;
+            PlayersKilled = new Dictionary<CSteamID, int>();
         }
 
         public void OnDeath()
@@ -34,6 +38,7 @@ namespace UnturnedLegends.Models
             MultipleKills = 0;
             Deaths++;
             LastKill = DateTime.UtcNow;
+            PlayersKilled.Clear();
         }
 
         public void CheckKills()

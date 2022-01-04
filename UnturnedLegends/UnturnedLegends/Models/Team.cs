@@ -14,13 +14,16 @@ namespace UnturnedLegends.Models
 
         public CSteamID GroupID { get; set; }
 
-        public Team(int teamID)
+        public Team(int teamID, bool isDummy)
         {
             TeamID = teamID;
-            Players = new HashSet<CSteamID>();
-            Score = 0;
-            GroupID = GroupManager.generateUniqueGroupID();
-            GroupManager.addGroup(GroupID, TeamID == 0 ? Plugin.Instance.Translate("Blue_Team_Name").ToUnrich() : Plugin.Instance.Translate("Red_Team_Name").ToUnrich());
+            if (!isDummy)
+            {
+                Players = new HashSet<CSteamID>();
+                Score = 0;
+                GroupID = GroupManager.generateUniqueGroupID();
+                GroupManager.addGroup(GroupID, TeamID == 0 ? Plugin.Instance.Translate("Blue_Team_Name").ToUnrich() : Plugin.Instance.Translate("Red_Team_Name").ToUnrich());
+            }
         }
 
         public void AddPlayer(CSteamID steamID)

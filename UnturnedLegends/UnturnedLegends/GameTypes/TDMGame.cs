@@ -1,4 +1,5 @@
 ﻿using Rocket.Core;
+using Rocket.Core.Utils;
 using Rocket.Unturned.Player;
 using SDG.Unturned;
 using Steamworks;
@@ -41,8 +42,8 @@ namespace UnturnedLegends.GameTypes
             Utility.Debug($"Found {BlueSpawnPoints.Count} positions for TDM for Blue Team");
             Utility.Debug($"Found {RedSpawnPoints.Count} positions for TDM for Red Team");
 
-            BlueTeam = new Team((byte)ETeam.Blue);
-            RedTeam = new Team((byte)ETeam.Red);
+            BlueTeam = new Team((byte)ETeam.Blue, false);
+            RedTeam = new Team((byte)ETeam.Red, false);
 
             GameStarter = Plugin.Instance.StartCoroutine(StartGame());
         }
@@ -82,11 +83,21 @@ namespace UnturnedLegends.GameTypes
                 }
             }
 
-            // Need to figure out a winning thing
-            //Plugin.Instance.StartCoroutine(GameEnd());
+            Team wonTeam;
+            if (BlueTeam.Score > RedTeam.Score)
+            {
+                wonTeam = BlueTeam;
+            } else if (RedTeam.Score > BlueTeam.Score)
+            {
+                wonTeam = RedTeam;
+            } else
+            {
+                wonTeam = new Team(-1, true);
+            }
+            Plugin.Instance.StartCoroutine(GameEnd(wonTeam));
         }
 
-        public IEnumerator GameEnd()
+        public IEnumerator GameEnd(Team wonTeam)
         {
             if (GameEnder != null)
             {
@@ -99,13 +110,13 @@ namespace UnturnedLegends.GameTypes
             {
                 var player = Players[index];
                 Plugin.Instance.UIManager.ClearTDMHUD(player.GamePlayer);
-                //Plugin.Instance.UIManager.SendPreEndingUI(player.GamePlayer, EGameType.TDM, player.Team == wonTeam, BlueTeam.Score, RedTeam.Score);
+                Plugin.Instance.UIManager.SendPreEndingUI(player.GamePlayer, EGameType.TDM, player.Team.TeamID == wonTeam.TeamID, BlueTeam.Score, RedTeam.Score);
             }
-            //TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.SetupFFAEndingLeaderboard(Players, Location));
+            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.SetupTDMEndingLeaderboard(Players, Location, wonTeam));
             yield return new WaitForSeconds(5);
             foreach (var player in Players)
             {
-                //Plugin.Instance.UIManager.ShowFFAEndingLeaderboard(player.GamePlayer);
+                Plugin.Instance.UIManager.ShowTDMEndingLeaderboard(player.GamePlayer);
             }
             yield return new WaitForSeconds(Config.EndingLeaderboardSeconds);
             foreach (var player in Players.ToList())
@@ -193,6 +204,7 @@ namespace UnturnedLegends.GameTypes
                 Utility.Debug("Could'nt find the ffa player, returning");
                 return;
             }
+            var victimKS = tPlayer.KillStreak;
 
             Utility.Debug($"Game player found, player name: {tPlayer.GamePlayer.Player.CharacterName}");
             tPlayer.OnDeath();
@@ -245,6 +257,25 @@ namespace UnturnedLegends.GameTypes
                 kPlayer.MultipleKills = 1;
             }
 
+            if (victimKS > Config.ShutdownKillStreak)
+            {
+                xpGained += Config.TDM.ShutdownXP;
+                xpText += Plugin.Instance.Translate("Shutdown_Kill").ToRich() + "\n";
+            }
+
+            if (kPlayer.PlayersKilled.ContainsKey(tPlayer.GamePlayer.SteamID))
+            {
+                kPlayer.PlayersKilled[tPlayer.GamePlayer.SteamID] += 1;
+                if (kPlayer.PlayersKilled[tPlayer.GamePlayer.SteamID] > Config.DominationKills)
+                {
+                    xpGained += Config.TDM.DominationXP;
+                    xpText += Plugin.Instance.Translate("Domination_Kill").ToRich() + "\n";
+                }
+            }
+            else
+            {
+                kPlayer.PlayersKilled.Add(tPlayer.GamePlayer.SteamID, 1);
+            }
             kPlayer.LastKill = DateTime.UtcNow;
 
             Players.Sort((x, y) => y.Kills.CompareTo(x.Kills));
@@ -259,7 +290,7 @@ namespace UnturnedLegends.GameTypes
             }
             if (kPlayer.Team.Score == Config.TDM.ScoreLimit)
             {
-                Plugin.Instance.StartCoroutine(GameEnd());
+                Plugin.Instance.StartCoroutine(GameEnd(kPlayer.Team));
             }
             ThreadPool.QueueUserWorkItem(async (o) =>
             {

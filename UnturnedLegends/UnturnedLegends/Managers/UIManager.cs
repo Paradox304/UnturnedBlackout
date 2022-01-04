@@ -231,7 +231,10 @@ namespace UnturnedLegends.Managers
                     continue;
                 }
 
-                var ratio = ply.Deaths == 0 ? "0.00" : String.Format("{0:n}", Math.Round((decimal)(ply.Kills / ply.Deaths), 2));
+                var kills = (decimal)ply.Kills;
+                var deaths = (decimal)ply.Deaths;
+
+                var ratio = ply.Deaths == 0 ? String.Format("{0:n}", kills) : String.Format("{0:n}", Math.Round(kills / deaths, 2));
                 EffectManager.sendUIEffectText(PreEndingUIKey, ply.GamePlayer.TransportConnection, true, "MatchResult1", Plugin.Instance.Translate(i == 0 ? "Victory_Text" : "Defeat_Text").ToRich());
                 EffectManager.sendUIEffectText(PreEndingUIKey, ply.GamePlayer.TransportConnection, true, "MapName1", location.LocationName.ToUpper());
 
@@ -294,6 +297,74 @@ namespace UnturnedLegends.Managers
 
             EffectManager.sendUIEffectText(TDMKey, player.GamePlayer.TransportConnection, true, $"{team}Num{index}", changeTeam.Score.ToString());
             EffectManager.sendUIEffectText(TDMKey, player.GamePlayer.TransportConnection, true, $"{team}BarFill{index}", spaces == 0 ? " " : new string(' ', spaces));
+        }
+
+        public void SetupTDMEndingLeaderboard(List<TDMPlayer> players, ArenaLocation location, Team wonTeam)
+        {
+            var bluePlayers = players.Where(k => k.Team.TeamID == (byte)ETeam.Blue).ToList();
+            var redPlayers = players.Where(k => k.Team.TeamID == (byte)ETeam.Red).ToList();
+
+            var blueWon = wonTeam.TeamID == (byte)ETeam.Blue;
+            for (int i = 0; i < bluePlayers.Count; i++)
+            {
+                var ply = bluePlayers[i];
+                if (!Plugin.Instance.DBManager.PlayerCache.TryGetValue(ply.GamePlayer.SteamID, out PlayerData data))
+                {
+                    continue;
+                }
+
+                var ratio = ply.Deaths == 0 ? "0.00" : String.Format("{0:n}", Math.Round((decimal)(ply.Kills / ply.Deaths), 2));
+                EffectManager.sendUIEffectText(PreEndingUIKey, ply.GamePlayer.TransportConnection, true, "MatchResult0", Plugin.Instance.Translate(blueWon ? "Victory_Text" : "Defeat_Text").ToRich());
+                EffectManager.sendUIEffectText(PreEndingUIKey, ply.GamePlayer.TransportConnection, true, "MapName0", location.LocationName.ToUpper());
+
+                for (int i2 = 0; i2 < players.Count; i2++)
+                {
+                    var player = players[i2];
+                    EffectManager.sendUIEffectVisibility(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"PlayerStats{i}B", true);
+                    EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"NameTxt{i}B", data.SteamName);
+                    EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"KillsTxt{i}B", ply.Kills.ToString());
+                    EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"DeathsTxt{i}B", ply.Deaths.ToString());
+                    EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"RatioTxt{i}B", ratio);
+                    EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"ScoreTxt{i}B", ply.Score.ToString());
+                }
+            }
+
+            var redWon = wonTeam.TeamID == (byte)ETeam.Red;
+            for (int i = 0; i < redPlayers.Count; i++)
+            {
+                var ply = redPlayers[i];
+                if (!Plugin.Instance.DBManager.PlayerCache.TryGetValue(ply.GamePlayer.SteamID, out PlayerData data))
+                {
+                    continue;
+                }
+
+                var kills = (decimal)ply.Kills;
+                var deaths = (decimal)ply.Deaths;
+
+                var ratio = ply.Deaths == 0 ? String.Format("{0:n}", kills) : String.Format("{0:n}", Math.Round(kills / deaths, 2));
+                EffectManager.sendUIEffectText(PreEndingUIKey, ply.GamePlayer.TransportConnection, true, "MatchResult0", Plugin.Instance.Translate(redWon ? "Victory_Text" : "Defeat_Text").ToRich());
+                EffectManager.sendUIEffectText(PreEndingUIKey, ply.GamePlayer.TransportConnection, true, "MapName0", location.LocationName.ToUpper());
+
+                for (int i2 = 0; i2 < players.Count; i2++)
+                {
+                    var player = players[i2];
+                    EffectManager.sendUIEffectVisibility(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"PlayerStats{i}R", true);
+                    EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"NameTxt{i}R", data.SteamName);
+                    EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"KillsTxt{i}R", ply.Kills.ToString());
+                    EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"DeathsTxt{i}R", ply.Deaths.ToString());
+                    EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"RatioTxt{i}R", ratio);
+                    EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"ScoreTxt{i}R", ply.Score.ToString());
+                }
+            }
+        }
+
+        public void ShowTDMEndingLeaderboard(GamePlayer player)
+        {
+            EffectManager.sendUIEffectVisibility(PreEndingUIKey, player.TransportConnection, true, "Victory", false);
+            EffectManager.sendUIEffectVisibility(PreEndingUIKey, player.TransportConnection, true, "Defeat", false);
+            EffectManager.sendUIEffectVisibility(PreEndingUIKey, player.TransportConnection, true, "Scores", false);
+
+            EffectManager.sendUIEffectVisibility(PreEndingUIKey, player.TransportConnection, true, "Scoreboard0", true);
         }
 
         public void ClearTDMHUD(GamePlayer player)
