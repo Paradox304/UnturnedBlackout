@@ -397,16 +397,21 @@ namespace UnturnedLegends.GameTypes
 
         public void SwitchSpawn()
         {
+            Utility.Debug($"Switching the spawns, current spawn {BlueTeam.SpawnPoint} for blue, {RedTeam.SpawnPoint} for red");
             if (SpawnSwitcher != null)
             {
                 Plugin.Instance.StopCoroutine(SpawnSwitcher);
             }
             var keys = SpawnPoints.Keys.ToList();
-            keys.Remove(BlueTeam.SpawnPoint);
+            Utility.Debug($"Found {keys.Count} spawn groups to switch from");
+            var sp = BlueTeam.SpawnPoint;
+            keys.Remove(sp);
             BlueTeam.SpawnPoint = keys[UnityEngine.Random.Range(0, keys.Count)];
-            keys.Add(BlueTeam.SpawnPoint);
+            keys.Add(sp);
+            keys.Remove(BlueTeam.SpawnPoint);
             keys.Remove(RedTeam.SpawnPoint);
             RedTeam.SpawnPoint = keys[UnityEngine.Random.Range(0, keys.Count)];
+            Utility.Debug($"Changed spawns, current spawn {BlueTeam.SpawnPoint} for blue, {RedTeam.SpawnPoint} for red");
             SpawnSwitcher = Plugin.Instance.StartCoroutine(SpawnSwitch());
         }
 
