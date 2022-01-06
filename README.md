@@ -1,2 +1,2 @@
-# UnturnedLegends
-Plugin for Unturned Legends Server
+# UnturnedBlackout
+Plugin for Unturned Blackout Server
