@@ -20,6 +20,7 @@ namespace UnturnedLegends.GameTypes
         public List<FFASpawnPoint> UnavailableSpawnPoints { get; set; }
 
         public List<FFAPlayer> Players { get; set; }
+        public Dictionary<CSteamID, FFAPlayer> PlayersLookup { get; set; }
 
         public Coroutine GameStarter { get; set; }
         public Coroutine GameEnder { get; set; }
@@ -29,6 +30,7 @@ namespace UnturnedLegends.GameTypes
             Utility.Debug($"Initializing FFA game for location {location.LocationName}");
             SpawnPoints = Plugin.Instance.DataManager.Data.FFASpawnPoints.Where(k => k.LocationID == location.LocationID).ToList();
             Players = new List<FFAPlayer>();
+            PlayersLookup = new Dictionary<CSteamID, FFAPlayer>();
             UnavailableSpawnPoints = new List<FFASpawnPoint>();
             Utility.Debug($"Found {SpawnPoints.Count} positions for FFA");
             GameStarter = Plugin.Instance.StartCoroutine(StartGame());
@@ -117,6 +119,11 @@ namespace UnturnedLegends.GameTypes
             FFAPlayer fPlayer = new FFAPlayer(player);
 
             Players.Add(fPlayer);
+            if (PlayersLookup.ContainsKey(player.SteamID))
+            {
+                PlayersLookup.Remove(player.SteamID);
+            }
+            PlayersLookup.Add(player.SteamID, fPlayer);
             GiveLoadout(fPlayer);
 
             if (GamePhase == EGamePhase.Starting)
@@ -168,6 +175,7 @@ namespace UnturnedLegends.GameTypes
             {
                 fPlayer.GamePlayer.OnGameLeft();
                 Players.Remove(fPlayer);
+                PlayersLookup.Remove(fPlayer.GamePlayer.SteamID);
             }
 
             foreach (var ply in Players)
@@ -370,17 +378,17 @@ namespace UnturnedLegends.GameTypes
 
         public FFAPlayer GetFFAPlayer(CSteamID steamID)
         {
-            return Players.FirstOrDefault(k => k.GamePlayer.SteamID == steamID);
+            return PlayersLookup.TryGetValue(steamID, out FFAPlayer fPlayer) ? fPlayer : null;
         }
 
         public FFAPlayer GetFFAPlayer(UnturnedPlayer player)
         {
-            return Players.FirstOrDefault(k => k.GamePlayer.SteamID == player.CSteamID);
+            return PlayersLookup.TryGetValue(player.CSteamID, out FFAPlayer fPlayer) ? fPlayer : null;
         }
 
         public FFAPlayer GetFFAPlayer(Player player)
         {
-            return Players.FirstOrDefault(k => k.GamePlayer.SteamID == player.channel.owner.playerID.steamID);
+            return PlayersLookup.TryGetValue(player.channel.owner.playerID.steamID, out FFAPlayer fPlayer) ? fPlayer : null;
         }
 
         public override bool IsPlayerIngame(CSteamID steamID)

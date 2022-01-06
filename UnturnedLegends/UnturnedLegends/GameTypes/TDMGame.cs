@@ -19,6 +19,7 @@ namespace UnturnedLegends.GameTypes
         public Dictionary<int, List<TDMSpawnPoint>> SpawnPoints { get; set; }
 
         public List<TDMPlayer> Players { get; set; }
+        public Dictionary<CSteamID, TDMPlayer> PlayersLookup { get; set; }
 
         public TDMTeam BlueTeam { get; set; }
         public TDMTeam RedTeam { get; set; }
@@ -47,6 +48,7 @@ namespace UnturnedLegends.GameTypes
                 Utility.Debug(key.ToString());
             }
             Players = new List<TDMPlayer>();
+            PlayersLookup = new Dictionary<CSteamID, TDMPlayer>();
 
             BlueTeam = new TDMTeam(this, (byte)ETeam.Blue, false);
             RedTeam = new TDMTeam(this, (byte)ETeam.Red, false);
@@ -159,6 +161,11 @@ namespace UnturnedLegends.GameTypes
             TDMPlayer tPlayer = new TDMPlayer(player, team);
             team.AddPlayer(player.SteamID);
             Players.Add(tPlayer);
+            if (PlayersLookup.ContainsKey(player.SteamID))
+            {
+                PlayersLookup.Remove(player.SteamID);
+            }
+            PlayersLookup.Add(player.SteamID, tPlayer);
             GiveLoadout(tPlayer);
 
             if (GamePhase == EGamePhase.Starting)
@@ -202,6 +209,7 @@ namespace UnturnedLegends.GameTypes
             {
                 tPlayer.GamePlayer.OnGameLeft();
                 Players.Remove(tPlayer);
+                PlayersLookup.Remove(tPlayer.GamePlayer.SteamID);
             }
 
             Plugin.Instance.UIManager.OnGameCountUpdated(this);
@@ -426,17 +434,17 @@ namespace UnturnedLegends.GameTypes
 
         public TDMPlayer GetTDMPlayer(CSteamID steamID)
         {
-            return Players.FirstOrDefault(k => k.GamePlayer.SteamID == steamID);
+            return PlayersLookup.TryGetValue(steamID, out TDMPlayer tPlayer) ? tPlayer : null;
         }
 
         public TDMPlayer GetTDMPlayer(UnturnedPlayer player)
         {
-            return Players.FirstOrDefault(k => k.GamePlayer.SteamID == player.CSteamID);
+            return PlayersLookup.TryGetValue(player.CSteamID, out TDMPlayer tPlayer) ? tPlayer : null;
         }
 
         public TDMPlayer GetTDMPlayer(Player player)
         {
-            return Players.FirstOrDefault(k => k.GamePlayer.SteamID == player.channel.owner.playerID.steamID);
+            return PlayersLookup.TryGetValue(player.channel.owner.playerID.steamID, out TDMPlayer tPlayer) ? tPlayer : null;
         }
 
         public override bool IsPlayerIngame(CSteamID steamID)

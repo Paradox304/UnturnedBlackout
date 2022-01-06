@@ -97,7 +97,14 @@ namespace UnturnedLegends.Models
                 Player.Player.life.ServerRespawn(false);
                 return;
             }
-
+            if (DamageChecker != null)
+            {
+                Plugin.Instance.StopCoroutine(DamageChecker);
+            }
+            if (Healer != null)
+            {
+                Plugin.Instance.StopCoroutine(Healer);
+            }
             Plugin.Instance.UIManager.SendDeathUI(this, killerData);
             RespawnTimer = Plugin.Instance.StartCoroutine(RespawnTime());
         }
