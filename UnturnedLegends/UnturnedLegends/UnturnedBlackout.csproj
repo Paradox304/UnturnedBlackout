@@ -7,7 +7,7 @@
     <ProjectGuid>{9E42445C-F532-4AED-A91C-CD464CC2A885}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>UnturnedLegends</RootNamespace>
+    <RootNamespace>UnturnedBlackout</RootNamespace>
     <AssemblyName>UnturnedBlackout</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

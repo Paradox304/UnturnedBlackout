@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace UnturnedLegends.Models
+namespace UnturnedBlackout.Models
 {
     public class PositionsData
     {

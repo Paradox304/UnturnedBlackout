@@ -1,4 +1,4 @@
-﻿namespace UnturnedLegends.Models
+﻿namespace UnturnedBlackout.Models
 {
     public class TDMConfig
     {

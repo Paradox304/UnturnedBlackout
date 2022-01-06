@@ -8,10 +8,10 @@ using System.Collections;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
-using UnturnedLegends.Managers;
+using UnturnedBlackout.Managers;
 using Logger = Rocket.Core.Logging.Logger;
 
-namespace UnturnedLegends
+namespace UnturnedBlackout
 {
     public class Plugin : RocketPlugin<Config>
     {
@@ -20,7 +20,7 @@ namespace UnturnedLegends
             Instance = this;
             if (Harmony == null)
             {
-                Harmony = new Harmony("UnturnedLegends");
+                Harmony = new Harmony("UnturnedBlackout");
                 Harmony.PatchAll(Assembly);
             }
 

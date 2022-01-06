@@ -2,7 +2,7 @@
 using Rocket.Unturned.Player;
 using System.Collections.Generic;
 
-namespace UnturnedLegends.Commands
+namespace UnturnedBlackout.Commands
 {
     class JoinCommand : IRocketCommand
     {

@@ -7,10 +7,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnturnedLegends.Enums;
-using UnturnedLegends.Models;
+using UnturnedBlackout.Enums;
+using UnturnedBlackout.Models;
 
-namespace UnturnedLegends.GameTypes
+namespace UnturnedBlackout.GameTypes
 {
     public abstract class Game
     {

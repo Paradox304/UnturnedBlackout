@@ -2,7 +2,7 @@
 using System;
 using System.Threading;
 
-namespace UnturnedLegends.Database
+namespace UnturnedBlackout.Database
 {
     public class PlayerData
     {

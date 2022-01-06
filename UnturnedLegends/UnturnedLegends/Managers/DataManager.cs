@@ -1,8 +1,8 @@
 ﻿using Newtonsoft.Json;
 using System.IO;
-using UnturnedLegends.Models;
+using UnturnedBlackout.Models;
 
-namespace UnturnedLegends.Managers
+namespace UnturnedBlackout.Managers
 {
     public class DataManager
     {

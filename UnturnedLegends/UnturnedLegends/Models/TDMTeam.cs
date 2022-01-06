@@ -4,9 +4,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnturnedLegends.GameTypes;
+using UnturnedBlackout.GameTypes;
 
-namespace UnturnedLegends.Models
+namespace UnturnedBlackout.Models
 {
     public class TDMTeam
     {

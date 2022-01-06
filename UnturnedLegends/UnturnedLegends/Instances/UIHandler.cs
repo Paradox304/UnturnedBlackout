@@ -2,11 +2,11 @@
 using SDG.NetTransport;
 using SDG.Unturned;
 using Steamworks;
-using UnturnedLegends.Database;
-using UnturnedLegends.Enums;
-using UnturnedLegends.GameTypes;
+using UnturnedBlackout.Database;
+using UnturnedBlackout.Enums;
+using UnturnedBlackout.GameTypes;
 
-namespace UnturnedLegends.Instances
+namespace UnturnedBlackout.Instances
 {
     public class UIHandler
     {

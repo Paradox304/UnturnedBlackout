@@ -7,7 +7,7 @@ using System.Linq;
 using UnityEngine;
 using Logger = Rocket.Core.Logging.Logger;
 
-namespace UnturnedLegends
+namespace UnturnedBlackout
 {
     public static class Utility
     {

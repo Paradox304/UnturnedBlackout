@@ -1,4 +1,4 @@
-﻿namespace UnturnedLegends.Enums
+﻿namespace UnturnedBlackout.Enums
 {
     public enum EGamePhase
     {

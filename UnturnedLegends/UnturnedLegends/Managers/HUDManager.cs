@@ -5,9 +5,9 @@ using Rocket.Unturned.Player;
 using SDG.Unturned;
 using System;
 using UnityEngine;
-using UnturnedLegends.Database;
+using UnturnedBlackout.Database;
 
-namespace UnturnedLegends.Managers
+namespace UnturnedBlackout.Managers
 {
     public class HUDManager
     {

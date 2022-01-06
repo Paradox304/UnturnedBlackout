@@ -9,10 +9,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using UnityEngine;
-using UnturnedLegends.Enums;
-using UnturnedLegends.Models;
+using UnturnedBlackout.Enums;
+using UnturnedBlackout.Models;
 
-namespace UnturnedLegends.GameTypes
+namespace UnturnedBlackout.GameTypes
 {
     public class TDMGame : Game
     {

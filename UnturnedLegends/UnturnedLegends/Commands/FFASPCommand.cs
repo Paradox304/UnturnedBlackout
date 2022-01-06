@@ -2,9 +2,9 @@
 using Rocket.Unturned.Player;
 using System.Collections.Generic;
 using System.Linq;
-using UnturnedLegends.Models;
+using UnturnedBlackout.Models;
 
-namespace UnturnedLegends.Commands
+namespace UnturnedBlackout.Commands
 {
     public class FFASPCommand : IRocketCommand
     {

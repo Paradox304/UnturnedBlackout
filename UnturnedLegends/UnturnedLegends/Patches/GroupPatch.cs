@@ -1,7 +1,7 @@
 ﻿using HarmonyLib;
 using SDG.Unturned;
 
-namespace UnturnedLegends.Patches
+namespace UnturnedBlackout.Patches
 {
     [HarmonyPatch(typeof(GroupManager), "requestGroupExit")]
     public static class OnExitGroup_Patch

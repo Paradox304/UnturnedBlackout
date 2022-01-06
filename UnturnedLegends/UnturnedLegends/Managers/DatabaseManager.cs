@@ -7,9 +7,9 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using UnturnedLegends.Database;
+using UnturnedBlackout.Database;
 
-namespace UnturnedLegends.Managers
+namespace UnturnedBlackout.Managers
 {
     public class DatabaseManager
     {

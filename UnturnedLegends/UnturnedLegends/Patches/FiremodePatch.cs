@@ -2,7 +2,7 @@
 using Rocket.Unturned.Player;
 using SDG.Unturned;
 
-namespace UnturnedLegends.Patches
+namespace UnturnedBlackout.Patches
 {
     [HarmonyPatch(typeof(UseableGun), "ReceiveChangeFiremode")]
     public static class OnAskFireMode_Patch

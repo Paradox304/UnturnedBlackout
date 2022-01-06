@@ -8,11 +8,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using UnityEngine;
-using UnturnedLegends.Enums;
-using UnturnedLegends.GameTypes;
-using UnturnedLegends.Models;
+using UnturnedBlackout.Enums;
+using UnturnedBlackout.GameTypes;
+using UnturnedBlackout.Models;
 
-namespace UnturnedLegends.Managers
+namespace UnturnedBlackout.Managers
 {
     public class GameManager
     {

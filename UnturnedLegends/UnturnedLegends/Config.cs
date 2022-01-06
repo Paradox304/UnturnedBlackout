@@ -1,9 +1,9 @@
 ﻿using Rocket.API;
 using System.Collections.Generic;
 using UnityEngine;
-using UnturnedLegends.Models;
+using UnturnedBlackout.Models;
 
-namespace UnturnedLegends
+namespace UnturnedBlackout
 {
     public class Config : IRocketPluginConfiguration
     {

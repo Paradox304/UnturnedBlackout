@@ -1,6 +1,6 @@
-﻿using UnturnedLegends.Enums;
+﻿using UnturnedBlackout.Enums;
 
-namespace UnturnedLegends.Models
+namespace UnturnedBlackout.Models
 {
     public class VoteChoice
     {

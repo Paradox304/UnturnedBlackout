@@ -3,13 +3,13 @@ using SDG.Unturned;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnturnedLegends.Database;
-using UnturnedLegends.Enums;
-using UnturnedLegends.GameTypes;
-using UnturnedLegends.Instances;
-using UnturnedLegends.Models;
+using UnturnedBlackout.Database;
+using UnturnedBlackout.Enums;
+using UnturnedBlackout.GameTypes;
+using UnturnedBlackout.Instances;
+using UnturnedBlackout.Models;
 
-namespace UnturnedLegends.Managers
+namespace UnturnedBlackout.Managers
 {
     public class UIManager
     {

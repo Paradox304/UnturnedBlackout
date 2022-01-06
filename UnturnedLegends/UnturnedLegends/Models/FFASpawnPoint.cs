@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace UnturnedLegends.Models
+namespace UnturnedBlackout.Models
 {
     public class FFASpawnPoint
     {

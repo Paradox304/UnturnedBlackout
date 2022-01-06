@@ -5,9 +5,9 @@ using Steamworks;
 using System;
 using System.Collections;
 using UnityEngine;
-using UnturnedLegends.Database;
+using UnturnedBlackout.Database;
 
-namespace UnturnedLegends.Models
+namespace UnturnedBlackout.Models
 {
     public class GamePlayer
     {

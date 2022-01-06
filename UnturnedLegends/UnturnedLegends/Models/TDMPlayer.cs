@@ -1,9 +1,9 @@
 ﻿using Steamworks;
 using System;
 using System.Collections.Generic;
-using UnturnedLegends.Database;
+using UnturnedBlackout.Database;
 
-namespace UnturnedLegends.Models
+namespace UnturnedBlackout.Models
 {
     public class TDMPlayer
     {
