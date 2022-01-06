@@ -274,6 +274,8 @@ namespace UnturnedLegends.Managers
             EffectManager.sendUIEffectVisibility(TDMKey, player.GamePlayer.TransportConnection, true, player.Team.TeamID == (byte)ETeam.Blue ? "BlueTeam" : "RedTeam", true);
             EffectManager.sendUIEffect(27611, 27611, player.GamePlayer.TransportConnection, true, Plugin.Instance.Translate("TDM_Name").ToRich(), Plugin.Instance.Translate("TDM_Desc").ToRich());
             EffectManager.sendUIEffectVisibility(TDMKey, player.GamePlayer.TransportConnection, true, "Timer", true);
+            EffectManager.sendUIEffectVisibility(TDMKey, player.GamePlayer.TransportConnection, true, "Team", true);
+            EffectManager.sendUIEffectText(TDMKey, player.GamePlayer.TransportConnection, true, "TeamName", Plugin.Instance.Translate($"{(ETeam)player.Team.TeamID}_Team_Name").ToRich());
 
             int index = player.Team.TeamID == (byte)ETeam.Blue ? 1 : 0;
             int blueSpaces = blueTeam.Score * 96 / Config.TDM.ScoreLimit;
@@ -300,7 +302,7 @@ namespace UnturnedLegends.Managers
             EffectManager.sendUIEffectText(TDMKey, player.GamePlayer.TransportConnection, true, $"{team}BarFill{index}", spaces == 0 ? " " : new string(' ', spaces));
         }
 
-        public void SetupTDMEndingLeaderboard(List<TDMPlayer> players, ArenaLocation location, TDMTeam wonTeam)
+        public void SetupTDMEndingLeaderboard(List<TDMPlayer> players, ArenaLocation location, TDMTeam wonTeam, TDMTeam blueTeam, TDMTeam redTeam)
         {
             var bluePlayers = players.Where(k => k.Team.TeamID == (byte)ETeam.Blue).ToList();
             var redPlayers = players.Where(k => k.Team.TeamID == (byte)ETeam.Red).ToList();
@@ -317,6 +319,10 @@ namespace UnturnedLegends.Managers
                 var ratio = ply.Deaths == 0 ? "0.00" : String.Format("{0:n}", Math.Round((decimal)(ply.Kills / ply.Deaths), 2));
                 EffectManager.sendUIEffectText(PreEndingUIKey, ply.GamePlayer.TransportConnection, true, "MatchResult0", Plugin.Instance.Translate(blueWon ? "Victory_Text" : "Defeat_Text").ToRich());
                 EffectManager.sendUIEffectText(PreEndingUIKey, ply.GamePlayer.TransportConnection, true, "MapName0", location.LocationName.ToUpper());
+                EffectManager.sendUIEffectText(PreEndingUIKey, ply.GamePlayer.TransportConnection, true, "TeamNameR", Plugin.Instance.Translate("Red_Team_Name").ToRich());
+                EffectManager.sendUIEffectText(PreEndingUIKey, ply.GamePlayer.TransportConnection, true, "TeamScoreR", redTeam.Score.ToString());
+                EffectManager.sendUIEffectText(PreEndingUIKey, ply.GamePlayer.TransportConnection, true, "TeamNameB", Plugin.Instance.Translate("Blue_Team_Name").ToRich());
+                EffectManager.sendUIEffectText(PreEndingUIKey, ply.GamePlayer.TransportConnection, true, "TeamScoreB", blueTeam.Score.ToString());
 
                 for (int i2 = 0; i2 < players.Count; i2++)
                 {
