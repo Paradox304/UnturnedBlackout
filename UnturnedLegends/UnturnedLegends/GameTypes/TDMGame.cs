@@ -41,6 +41,11 @@ namespace UnturnedLegends.GameTypes
                     SpawnPoints.Add(spawnPoint.GroupID, new List<TDMSpawnPoint> { spawnPoint });
                 }
             }
+            Utility.Debug($"Found {SpawnPoints.Count} spawnpoints registered");
+            foreach (var key in SpawnPoints.Keys)
+            {
+                Utility.Debug(key.ToString());
+            }
             Players = new List<TDMPlayer>();
 
             BlueTeam = new TDMTeam(this, (byte)ETeam.Blue, false);
@@ -114,7 +119,7 @@ namespace UnturnedLegends.GameTypes
                 Plugin.Instance.UIManager.ClearTDMHUD(player.GamePlayer);
                 Plugin.Instance.UIManager.SendPreEndingUI(player.GamePlayer, EGameType.TDM, player.Team.TeamID == wonTeam.TeamID, BlueTeam.Score, RedTeam.Score);
             }
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.SetupTDMEndingLeaderboard(Players, Location, wonTeam));
+            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.SetupTDMEndingLeaderboard(Players, Location, wonTeam, BlueTeam, RedTeam));
             yield return new WaitForSeconds(5);
             foreach (var player in Players)
             {
@@ -404,6 +409,10 @@ namespace UnturnedLegends.GameTypes
             }
             var keys = SpawnPoints.Keys.ToList();
             Utility.Debug($"Found {keys.Count} spawn groups to switch from");
+            if (keys.Count == 0)
+            {
+                return;
+            }
             var sp = BlueTeam.SpawnPoint;
             keys.Remove(sp);
             BlueTeam.SpawnPoint = keys[UnityEngine.Random.Range(0, keys.Count)];
