@@ -98,6 +98,19 @@ namespace UnturnedBlackout
             }
         }
 
+        public static uint GetFreeFrequency()
+        {
+            while (true)
+            {
+                var freq = (uint)UnityEngine.Random.Range(300000, 900000);
+                if (!UsedFrequencies.Contains(freq) && freq != 460327)
+                {
+                    UsedFrequencies.Add(freq);
+                    return freq;
+                }
+            }
+        }
+
         /// <summary>
         /// Calculates the average center of an <see cref="IEnumerable{Vector3}"/>.
         /// </summary>
@@ -150,5 +163,7 @@ namespace UnturnedBlackout
         {
             return source.Select(selector).AverageCenter();
         }
+
+        public static List<uint> UsedFrequencies = new List<uint>();
     }
 }

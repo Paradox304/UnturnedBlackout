@@ -207,6 +207,7 @@ namespace UnturnedBlackout.GameTypes
 
             if (tPlayer != null)
             {
+                tPlayer.Team.RemovePlayer(tPlayer.GamePlayer.SteamID);
                 tPlayer.GamePlayer.OnGameLeft();
                 Players.Remove(tPlayer);
                 PlayersLookup.Remove(tPlayer.GamePlayer.SteamID);

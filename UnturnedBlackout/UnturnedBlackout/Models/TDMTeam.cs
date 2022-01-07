@@ -20,8 +20,8 @@ namespace UnturnedBlackout.Models
         public int SpawnPoint { get; set; }
 
         public int SpawnThreshold { get; set; }
-        public CSteamID GroupID { get; set; }
-
+        public GroupInfo IngameGroup { get; set; }
+        public uint Frequency { get; set; }
         public Coroutine SpawnSwitcher { get; set; }
 
         public TDMTeam(TDMGame game, int teamID, bool isDummy)
@@ -35,17 +35,22 @@ namespace UnturnedBlackout.Models
                 Score = 0;
                 SpawnPoint = teamID;
                 SpawnThreshold = 0;
-                GroupID = GroupManager.generateUniqueGroupID();
-                GroupManager.addGroup(GroupID, TeamID == 0 ? Plugin.Instance.Translate("Blue_Team_Name").ToUnrich() : Plugin.Instance.Translate("Red_Team_Name").ToUnrich());
+                Frequency = Utility.GetFreeFrequency();
+                IngameGroup = GroupManager.addGroup(GroupManager.generateUniqueGroupID(), TeamID == 0 ? Plugin.Instance.Translate("Blue_Team_Name").ToUnrich() : Plugin.Instance.Translate("Red_Team_Name").ToUnrich());
+                Utility.Debug($"Game: {Game.Location.LocationName}, Team: {IngameGroup.name}, ID: {IngameGroup.groupID}, FREQ: {Frequency}");
             }
         }
 
         public void AddPlayer(CSteamID steamID)
         {
+            Utility.Debug($"Adding player to team {TeamID}");
             var player = PlayerTool.getPlayer(steamID);
             Players.Add(steamID, DateTime.UtcNow);
-            player.quests.ServerAssignToGroup(GroupID, EPlayerGroupRank.MEMBER, true);
-            player.quests.sendSetRadioFrequency((uint)GroupID);
+            Utility.Debug("Assigning the group");
+            player.quests.ServerAssignToGroup(IngameGroup.groupID, EPlayerGroupRank.MEMBER, true);
+            Utility.Debug($"Setting the frequency: {Frequency}");
+            player.quests.askSetRadioFrequency(CSteamID.Nil, Frequency);
+            Utility.Debug($"Setted the frequency, {player.quests.radioFrequency}");
         }
 
         public void RemovePlayer(CSteamID steamID)
@@ -53,7 +58,7 @@ namespace UnturnedBlackout.Models
             var player = PlayerTool.getPlayer(steamID);
             Players.Remove(steamID);
             player.quests.leaveGroup(true);
-            player.quests.sendSetRadioFrequency(0);
+            player.quests.askSetRadioFrequency(CSteamID.Nil, 0);
         }
 
         public void OnDeath(CSteamID steamID)
@@ -103,7 +108,7 @@ namespace UnturnedBlackout.Models
                 Plugin.Instance.StopCoroutine(SpawnSwitcher);
             }
             Game = null;
-            GroupManager.deleteGroup(GroupID);
+            GroupManager.deleteGroup(IngameGroup.groupID);
             Players.Clear();
         }
     }

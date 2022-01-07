@@ -25,6 +25,8 @@ namespace UnturnedBlackout.GameTypes
         public Coroutine GameStarter { get; set; }
         public Coroutine GameEnder { get; set; }
 
+        public uint Frequency { get; set; }
+
         public FFAGame(ArenaLocation location) : base(EGameType.FFA, location)
         {
             Utility.Debug($"Initializing FFA game for location {location.LocationName}");
@@ -32,6 +34,7 @@ namespace UnturnedBlackout.GameTypes
             Players = new List<FFAPlayer>();
             PlayersLookup = new Dictionary<CSteamID, FFAPlayer>();
             UnavailableSpawnPoints = new List<FFASpawnPoint>();
+            Frequency = Utility.GetFreeFrequency();
             Utility.Debug($"Found {SpawnPoints.Count} positions for FFA");
             GameStarter = Plugin.Instance.StartCoroutine(StartGame());
         }
@@ -118,6 +121,7 @@ namespace UnturnedBlackout.GameTypes
 
             FFAPlayer fPlayer = new FFAPlayer(player);
 
+            player.Player.Player.quests.askSetRadioFrequency(CSteamID.Nil, Frequency);
             Players.Add(fPlayer);
             if (PlayersLookup.ContainsKey(player.SteamID))
             {
@@ -173,6 +177,7 @@ namespace UnturnedBlackout.GameTypes
 
             if (fPlayer != null)
             {
+                player.Player.Player.quests.askSetRadioFrequency(CSteamID.Nil, 0);
                 fPlayer.GamePlayer.OnGameLeft();
                 Players.Remove(fPlayer);
                 PlayersLookup.Remove(fPlayer.GamePlayer.SteamID);
