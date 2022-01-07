@@ -354,6 +354,10 @@ namespace UnturnedBlackout.Managers
                 var ratio = ply.Deaths == 0 ? String.Format("{0:n}", kills) : String.Format("{0:n}", Math.Round(kills / deaths, 2));
                 EffectManager.sendUIEffectText(PreEndingUIKey, ply.GamePlayer.TransportConnection, true, "MatchResult0", Plugin.Instance.Translate(redWon ? "Victory_Text" : "Defeat_Text").ToRich());
                 EffectManager.sendUIEffectText(PreEndingUIKey, ply.GamePlayer.TransportConnection, true, "MapName0", location.LocationName.ToUpper());
+                EffectManager.sendUIEffectText(PreEndingUIKey, ply.GamePlayer.TransportConnection, true, "TeamNameR", Plugin.Instance.Translate("Red_Team_Name").ToRich());
+                EffectManager.sendUIEffectText(PreEndingUIKey, ply.GamePlayer.TransportConnection, true, "TeamScoreR", redTeam.Score.ToString());
+                EffectManager.sendUIEffectText(PreEndingUIKey, ply.GamePlayer.TransportConnection, true, "TeamNameB", Plugin.Instance.Translate("Blue_Team_Name").ToRich());
+                EffectManager.sendUIEffectText(PreEndingUIKey, ply.GamePlayer.TransportConnection, true, "TeamScoreB", blueTeam.Score.ToString());
 
                 for (int i2 = 0; i2 < players.Count; i2++)
                 {

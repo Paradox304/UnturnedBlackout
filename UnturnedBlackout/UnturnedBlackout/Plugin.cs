@@ -4,6 +4,8 @@ using Rocket.API.Collections;
 using Rocket.Core.Plugins;
 using Rocket.Unturned.Player;
 using SDG.Unturned;
+using Steamworks;
+using System;
 using System.Collections;
 using System.Linq;
 using System.Reflection;
@@ -34,6 +36,11 @@ namespace UnturnedBlackout
             PlayerVoice.onRelayVoice += OnVoice;
             ChatManager.onChatted += OnChatted;
 
+            ObjectManager.onDamageObjectRequested += OnDamageObject;
+            ResourceManager.onDamageResourceRequested += OnDamageResource;
+            BarricadeManager.onDamageBarricadeRequested += OnDamageBarricade;
+            StructureManager.onDamageStructureRequested += OnDamageStructure;
+
             Logger.Log("Unturned Legends has been loaded");
         }
 
@@ -46,6 +53,11 @@ namespace UnturnedBlackout
             Level.onPostLevelLoaded -= OnLevelLoaded;
             PlayerVoice.onRelayVoice -= OnVoice;
             ChatManager.onChatted -= OnChatted;
+
+            ObjectManager.onDamageObjectRequested -= OnDamageObject;
+            ResourceManager.onDamageResourceRequested -= OnDamageResource;
+            BarricadeManager.onDamageBarricadeRequested -= OnDamageBarricade;
+            StructureManager.onDamageStructureRequested -= OnDamageStructure;
 
             StopAllCoroutines();
 
@@ -61,9 +73,29 @@ namespace UnturnedBlackout
             }
         }
 
-        private void OnVoice(PlayerVoice speaker, bool wantsToUseWalkieTalkie, ref bool shouldAllow, ref bool shouldBroadcastOverRadio, ref PlayerVoice.RelayVoiceCullingHandler cullingHandler)
+        private void OnDamageStructure(CSteamID instigatorSteamID, Transform structureTransform, ref ushort pendingTotalDamage, ref bool shouldAllow, EDamageOrigin damageOrigin)
         {
             shouldAllow = false;
+        }
+
+        private void OnDamageBarricade(CSteamID instigatorSteamID, Transform barricadeTransform, ref ushort pendingTotalDamage, ref bool shouldAllow, EDamageOrigin damageOrigin)
+        {
+            shouldAllow = false;
+        }
+
+        private void OnDamageResource(CSteamID instigatorSteamID, Transform objectTransform, ref ushort pendingTotalDamage, ref bool shouldAllow, EDamageOrigin damageOrigin)
+        {
+            shouldAllow = false;
+        }
+
+        private void OnDamageObject(CSteamID instigatorSteamID, Transform objectTransform, byte section, ref ushort pendingTotalDamage, ref bool shouldAllow, EDamageOrigin damageOrigin)
+        {
+            shouldAllow = false;
+        }
+
+        private void OnVoice(PlayerVoice speaker, bool wantsToUseWalkieTalkie, ref bool shouldAllow, ref bool shouldBroadcastOverRadio, ref PlayerVoice.RelayVoiceCullingHandler cullingHandler)
+        {
+            shouldBroadcastOverRadio = true;
         }
 
         private void OnChatted(SteamPlayer player, EChatMode mode, ref Color chatted, ref bool isRich, string text, ref bool isVisible)
@@ -79,12 +111,21 @@ namespace UnturnedBlackout
             Utility.Debug("LEVEL LOADED, INITIALIZING GAME MANAGER AND HUD MANAGER");
             GameManager = new GameManager();
             HUDManager = new HUDManager();
-            Utility.Debug("CHANGING ALL MAGAZINES TO REFILL WHEN THE PLAYER DIES");
+
+            Utility.Debug("CHANGING ALL MAGAZINES TO REFILL WHEN THE PLAYER RELOADS");
             var shouldFillAfterDetach = typeof(ItemMagazineAsset).GetProperty("shouldFillAfterDetach", BindingFlags.Public | BindingFlags.Instance);
             var magazines = Assets.find(EAssetType.ITEM).OfType<ItemMagazineAsset>();
             foreach (var mag in magazines)
             {
                 shouldFillAfterDetach.GetSetMethod(true).Invoke(mag, new object[] { true });
+            }
+
+            Utility.Debug("CHANGING ALL MASKS TO HAVE EARPIECES IN THEM");
+            var isEarpiece = typeof(ItemMaskAsset).GetField("_isEarpiece", BindingFlags.NonPublic | BindingFlags.Instance);
+            var masks = Assets.find(EAssetType.ITEM).OfType<ItemMaskAsset>();
+            foreach (var mask in masks)
+            {
+                isEarpiece.SetValue(mask, true);
             }
         }
 

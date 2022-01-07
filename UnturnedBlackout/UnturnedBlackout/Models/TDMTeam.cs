@@ -53,6 +53,7 @@ namespace UnturnedBlackout.Models
             var player = PlayerTool.getPlayer(steamID);
             Players.Remove(steamID);
             player.quests.leaveGroup(true);
+            player.quests.sendSetRadioFrequency(0);
         }
 
         public void OnDeath(CSteamID steamID)
