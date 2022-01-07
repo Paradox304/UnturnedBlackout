@@ -17,7 +17,6 @@ namespace UnturnedBlackout.Managers
         public HUDManager()
         {
             UnturnedPlayerEvents.OnPlayerUpdateHealth += OnHealthChanged;
-            UnturnedPlayerEvents.OnPlayerUpdateStamina += OnStaminaChanged;
 
             UnturnedPlayerEvents.OnPlayerRevive += OnRevived;
 
@@ -143,14 +142,6 @@ namespace UnturnedBlackout.Managers
             EffectManager.sendUIEffectText(Key, gun.player.channel.GetOwnerTransportConnection(), true, "AmmoNum", gun.player.equipment.state[10].ToString());
         }
 
-        private void OnStaminaChanged(UnturnedPlayer player, byte stamina)
-        {
-            if (stamina <= 20)
-            {
-                player.Player.life.serverModifyStamina(100);
-            }
-        }
-
         public void ChangeFiremode(UnturnedPlayer player, byte newFiremode)
         {
             EffectManager.sendUIEffectText(Key, player.SteamPlayer().transportConnection, true, "WeaponMode", GetFiremode(newFiremode));
@@ -176,7 +167,6 @@ namespace UnturnedBlackout.Managers
         public void Destroy()
         {
             UnturnedPlayerEvents.OnPlayerUpdateHealth -= OnHealthChanged;
-            UnturnedPlayerEvents.OnPlayerUpdateStamina -= OnStaminaChanged;
 
             UnturnedPlayerEvents.OnPlayerRevive -= OnRevived;
 

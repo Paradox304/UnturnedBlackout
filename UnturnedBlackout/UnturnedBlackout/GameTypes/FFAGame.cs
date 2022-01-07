@@ -309,6 +309,11 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
+            if (parameters.cause == EDeathCause.MELEE || parameters.cause == EDeathCause.PUNCH)
+            {
+                parameters.damage = 200;
+            }
+
             player.GamePlayer.OnDamaged();
 
             var kPlayer = GetFFAPlayer(parameters.killer);
