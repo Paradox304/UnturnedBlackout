@@ -4,6 +4,7 @@ using Rocket.Unturned.Events;
 using Rocket.Unturned.Player;
 using SDG.Unturned;
 using Steamworks;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -11,6 +12,7 @@ using UnityEngine;
 using UnturnedBlackout.Enums;
 using UnturnedBlackout.GameTypes;
 using UnturnedBlackout.Models;
+using Logger = Rocket.Core.Logging.Logger;
 
 namespace UnturnedBlackout.Managers
 {
@@ -145,9 +147,19 @@ namespace UnturnedBlackout.Managers
         {
             ThreadPool.QueueUserWorkItem(async (o) =>
             {
-                var profile = player.SteamProfile;
-                await Plugin.Instance.DBManager.AddOrUpdatePlayerAsync(player.CSteamID, player.CharacterName.ToUnrich(), profile.AvatarFull.ToString());
-                await Plugin.Instance.DBManager.GetPlayerDataAsync(player.CSteamID);
+                var avatarURL = "";
+                try
+                {
+                    avatarURL = player.SteamProfile.AvatarFull.ToString();
+                } catch (Exception ex)
+                {
+                    Utility.Debug("Error getting the steam profile for the player");
+                    Logger.Log(ex);
+                } finally
+                {
+                    await Plugin.Instance.DBManager.AddOrUpdatePlayerAsync(player.CSteamID, player.CharacterName.ToUnrich(), avatarURL);
+                    await Plugin.Instance.DBManager.GetPlayerDataAsync(player.CSteamID);
+                }
 
                 TaskDispatcher.QueueOnMainThread(() =>
                 {
