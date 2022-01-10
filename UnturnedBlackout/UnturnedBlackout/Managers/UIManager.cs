@@ -25,6 +25,8 @@ namespace UnturnedBlackout.Managers
 
         public const short SoundsKey = 27634;
 
+        public const short HitmarkerKey = 27637;
+
         public const ushort DeathID = 27635;
         public const short DeathKey = 27635;
 
@@ -131,6 +133,11 @@ namespace UnturnedBlackout.Managers
                     EffectManager.sendUIEffectVisibility(SoundsKey, player.TransportConnection, true, "MultiKill5", true);
                     return;
             };
+        }
+
+        public void SendHitmarkerSound(GamePlayer player)
+        {
+            EffectManager.sendUIEffect(27637, HitmarkerKey, player.TransportConnection, true);
         }
 
         public void SendDeathUI(GamePlayer victim, PlayerData killerData)
