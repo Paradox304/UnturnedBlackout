@@ -233,91 +233,94 @@ namespace UnturnedBlackout.GameTypes
             tPlayer.Team.OnDeath(tPlayer.GamePlayer.SteamID);
             ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DBManager.IncreasePlayerDeathsAsync(tPlayer.GamePlayer.SteamID, 1));
 
-            var kPlayer = GetTDMPlayer(killer);
-            if (kPlayer == null)
+            TaskDispatcher.QueueOnMainThread(() =>
             {
-                Utility.Debug("Could'nt find the killer, returning");
-                return;
-            }
-
-            if (kPlayer.GamePlayer.SteamID == tPlayer.GamePlayer.SteamID)
-            {
-                Utility.Debug("Player killed themselves, returning");
-                return;
-            }
-
-            Utility.Debug($"Killer found, killer name: {kPlayer.GamePlayer.Player.CharacterName}");
-            kPlayer.Kills++;
-            kPlayer.Team.Score++;
-            kPlayer.Score += Config.KillPoints;
-
-            var xpGained = limb == ELimb.SKULL ? Config.TDM.XPPerKillHeadshot : Config.TDM.XPPerKill;
-            string xpText = limb == ELimb.SKULL ? Plugin.Instance.Translate("Headshot_Kill").ToRich() : Plugin.Instance.Translate("Normal_Kill").ToRich();
-            xpText += "\n";
-
-            if (kPlayer.KillStreak > 0)
-            {
-                xpGained += Config.TDM.BaseXPKS + (++kPlayer.KillStreak * Config.TDM.IncreaseXPPerKS);
-            }
-            else
-            {
-                kPlayer.KillStreak++;
-            }
-
-            if (kPlayer.MultipleKills == 0)
-            {
-                kPlayer.MultipleKills++;
-            }
-            else if ((DateTime.UtcNow - kPlayer.LastKill).TotalSeconds <= 10)
-            {
-                xpGained += Config.TDM.BaseXPMK + (++kPlayer.MultipleKills * Config.TDM.IncreaseXPPerMK);
-                var multiKillText = Plugin.Instance.Translate($"Multiple_Kills_Show_{kPlayer.MultipleKills}").ToRich();
-                xpText += (multiKillText == $"Multiple_Kills_Show_{kPlayer.MultipleKills}" ? Plugin.Instance.Translate("Multiple_Kills_Show", kPlayer.MultipleKills).ToRich() : multiKillText) + "\n";
-            }
-            else
-            {
-                kPlayer.MultipleKills = 1;
-            }
-
-            if (victimKS > Config.ShutdownKillStreak)
-            {
-                xpGained += Config.TDM.ShutdownXP;
-                xpText += Plugin.Instance.Translate("Shutdown_Kill").ToRich() + "\n";
-            }
-
-            if (kPlayer.PlayersKilled.ContainsKey(tPlayer.GamePlayer.SteamID))
-            {
-                kPlayer.PlayersKilled[tPlayer.GamePlayer.SteamID] += 1;
-                if (kPlayer.PlayersKilled[tPlayer.GamePlayer.SteamID] > Config.DominationKills)
+                var kPlayer = GetTDMPlayer(killer);
+                if (kPlayer == null)
                 {
-                    xpGained += Config.TDM.DominationXP;
-                    xpText += Plugin.Instance.Translate("Domination_Kill").ToRich() + "\n";
+                    Utility.Debug("Could'nt find the killer, returning");
+                    return;
                 }
-            }
-            else
-            {
-                kPlayer.PlayersKilled.Add(tPlayer.GamePlayer.SteamID, 1);
-            }
-            kPlayer.LastKill = DateTime.UtcNow;
 
-            Players.Sort((x, y) => y.Kills.CompareTo(x.Kills));
+                if (kPlayer.GamePlayer.SteamID == tPlayer.GamePlayer.SteamID)
+                {
+                    Utility.Debug("Player killed themselves, returning");
+                    return;
+                }
 
-            Plugin.Instance.UIManager.ShowXPUI(kPlayer.GamePlayer, xpGained, xpText);
-            Plugin.Instance.UIManager.SendMultiKillSound(kPlayer.GamePlayer, kPlayer.MultipleKills);
-            kPlayer.CheckKills();
+                Utility.Debug($"Killer found, killer name: {kPlayer.GamePlayer.Player.CharacterName}");
+                kPlayer.Kills++;
+                kPlayer.Team.Score++;
+                kPlayer.Score += Config.KillPoints;
 
-            foreach (var ply in Players)
-            {
-                Plugin.Instance.UIManager.UpdateTDMScore(ply, kPlayer.Team);
-            }
-            if (kPlayer.Team.Score == Config.TDM.ScoreLimit)
-            {
-                Plugin.Instance.StartCoroutine(GameEnd(kPlayer.Team));
-            }
-            ThreadPool.QueueUserWorkItem(async (o) =>
-            {
-                await Plugin.Instance.DBManager.IncreasePlayerKillsAsync(kPlayer.GamePlayer.SteamID, 1);
-                await Plugin.Instance.DBManager.IncreasePlayerXPAsync(kPlayer.GamePlayer.SteamID, (uint)xpGained);
+                var xpGained = limb == ELimb.SKULL ? Config.TDM.XPPerKillHeadshot : Config.TDM.XPPerKill;
+                string xpText = limb == ELimb.SKULL ? Plugin.Instance.Translate("Headshot_Kill").ToRich() : Plugin.Instance.Translate("Normal_Kill").ToRich();
+                xpText += "\n";
+
+                if (kPlayer.KillStreak > 0)
+                {
+                    xpGained += Config.TDM.BaseXPKS + (++kPlayer.KillStreak * Config.TDM.IncreaseXPPerKS);
+                }
+                else
+                {
+                    kPlayer.KillStreak++;
+                }
+
+                if (kPlayer.MultipleKills == 0)
+                {
+                    kPlayer.MultipleKills++;
+                }
+                else if ((DateTime.UtcNow - kPlayer.LastKill).TotalSeconds <= 10)
+                {
+                    xpGained += Config.TDM.BaseXPMK + (++kPlayer.MultipleKills * Config.TDM.IncreaseXPPerMK);
+                    var multiKillText = Plugin.Instance.Translate($"Multiple_Kills_Show_{kPlayer.MultipleKills}").ToRich();
+                    xpText += (multiKillText == $"Multiple_Kills_Show_{kPlayer.MultipleKills}" ? Plugin.Instance.Translate("Multiple_Kills_Show", kPlayer.MultipleKills).ToRich() : multiKillText) + "\n";
+                }
+                else
+                {
+                    kPlayer.MultipleKills = 1;
+                }
+
+                if (victimKS > Config.ShutdownKillStreak)
+                {
+                    xpGained += Config.TDM.ShutdownXP;
+                    xpText += Plugin.Instance.Translate("Shutdown_Kill").ToRich() + "\n";
+                }
+
+                if (kPlayer.PlayersKilled.ContainsKey(tPlayer.GamePlayer.SteamID))
+                {
+                    kPlayer.PlayersKilled[tPlayer.GamePlayer.SteamID] += 1;
+                    if (kPlayer.PlayersKilled[tPlayer.GamePlayer.SteamID] > Config.DominationKills)
+                    {
+                        xpGained += Config.TDM.DominationXP;
+                        xpText += Plugin.Instance.Translate("Domination_Kill").ToRich() + "\n";
+                    }
+                }
+                else
+                {
+                    kPlayer.PlayersKilled.Add(tPlayer.GamePlayer.SteamID, 1);
+                }
+                kPlayer.LastKill = DateTime.UtcNow;
+
+                Players.Sort((x, y) => y.Kills.CompareTo(x.Kills));
+
+                Plugin.Instance.UIManager.ShowXPUI(kPlayer.GamePlayer, xpGained, xpText);
+                Plugin.Instance.UIManager.SendMultiKillSound(kPlayer.GamePlayer, kPlayer.MultipleKills);
+                kPlayer.CheckKills();
+
+                foreach (var ply in Players)
+                {
+                    Plugin.Instance.UIManager.UpdateTDMScore(ply, kPlayer.Team);
+                }
+                if (kPlayer.Team.Score == Config.TDM.ScoreLimit)
+                {
+                    Plugin.Instance.StartCoroutine(GameEnd(kPlayer.Team));
+                }
+                ThreadPool.QueueUserWorkItem(async (o) =>
+                {
+                    await Plugin.Instance.DBManager.IncreasePlayerKillsAsync(kPlayer.GamePlayer.SteamID, 1);
+                    await Plugin.Instance.DBManager.IncreasePlayerXPAsync(kPlayer.GamePlayer.SteamID, (uint)xpGained);
+                });
             });
         }
 
@@ -341,6 +344,11 @@ namespace UnturnedBlackout.GameTypes
             {
                 shouldAllow = false;
                 return;
+            }
+
+            if (parameters.cause == EDeathCause.MELEE || parameters.cause == EDeathCause.PUNCH)
+            {
+                parameters.damage = 200;
             }
 
             player.GamePlayer.OnDamaged();

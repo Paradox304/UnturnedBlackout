@@ -66,7 +66,8 @@ namespace UnturnedBlackout.Managers
 
         private void OnHealthChanged(UnturnedPlayer player, byte health)
         {
-            var spaces = health * 96 / 100;
+            Utility.Debug($"{player.CharacterName} health changed to {health}, time {DateTime.UtcNow}");
+            var spaces = health * 96 / 100; 
             var transportConnection = player.Player.channel.GetOwnerTransportConnection();
 
             EffectManager.sendUIEffectText(Key, transportConnection, true, "HealthBarFill", spaces == 0 ? " " : new string(' ', spaces));

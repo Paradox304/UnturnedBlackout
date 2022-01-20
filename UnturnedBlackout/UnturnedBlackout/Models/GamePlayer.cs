@@ -50,6 +50,8 @@ namespace UnturnedBlackout.Models
         }
 
         // Healing
+
+        /* Deprecated Healing System
         public void OnDamaged()
         {
             Utility.Debug($"{Player.CharacterName} got damaged, setting the last damage to now and checking after some seconds to heal");
@@ -87,11 +89,38 @@ namespace UnturnedBlackout.Models
                 Player.Player.life.serverModifyHealth(1);
             }
         }
+        */
+
+        public void OnDamaged()
+        {
+            Utility.Debug($"{Player.CharacterName} got damaged, setting the water to 89 and checking after some seconds to set it to 91");
+            LastDamage = DateTime.UtcNow;
+            if (DamageChecker != null)
+            {
+                Plugin.Instance.StopCoroutine(DamageChecker);
+            }
+            if (Player.Player.life.water > 90)
+            {
+                Player.Player.life.serverModifyWater(89 - Player.Player.life.water);
+            }
+            Utility.Debug($"Players water has been set to {Player.Player.life.water}, food is {Player.Player.life.food}");
+            DamageChecker = Plugin.Instance.StartCoroutine(CheckDamage());
+        }
+
+        public IEnumerator CheckDamage()
+        {
+            yield return new WaitForSeconds(Plugin.Instance.Configuration.Instance.LastDamageAfterHealSeconds);
+            Utility.Debug($"{Player.CharacterName} hasn't gotten damaged in the last {Plugin.Instance.Configuration.Instance.LastDamageAfterHealSeconds} setting water to 91");
+            if (Player.Player.life.water < 90)
+            {
+                Player.Player.life.serverModifyWater(91 - Player.Player.life.water);
+            }
+            Utility.Debug($"Players water has been set to {Player.Player.life.water}, food is {Player.Player.life.food}");
+        }
 
         // Death screen
         public void OnDeath(CSteamID killer)
         {
-            var player = Plugin.Instance.GameManager.GetGamePlayer(killer);
             if (!Plugin.Instance.DBManager.PlayerCache.TryGetValue(killer, out PlayerData killerData))
             {
                 Player.Player.life.ServerRespawn(false);
@@ -127,7 +156,7 @@ namespace UnturnedBlackout.Models
             for (byte i = 0; i <= 1; i++)
             {
                 var item = Player.Player.inventory.getItem(i, 0);
-                if (item != null)
+                if (item != null && item.item.state.Length > 8)
                 {
                     var magID = BitConverter.ToUInt16(item.item.state, 8);
                     if (Assets.find(EAssetType.ITEM, magID) is ItemMagazineAsset mAsset)
