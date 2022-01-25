@@ -4,6 +4,7 @@
     {
         FFA,
         TDM,
+        KC,
         None
     }
 }

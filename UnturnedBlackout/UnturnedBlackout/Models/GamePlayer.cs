@@ -50,8 +50,6 @@ namespace UnturnedBlackout.Models
         }
 
         // Healing
-
-        /* Deprecated Healing System
         public void OnDamaged()
         {
             Utility.Debug($"{Player.CharacterName} got damaged, setting the last damage to now and checking after some seconds to heal");
@@ -86,36 +84,8 @@ namespace UnturnedBlackout.Models
                 {
                     break;
                 }
-                Player.Player.life.serverModifyHealth(1);
+                Player.Player.life.serverModifyHealth(20);
             }
-        }
-        */
-
-        public void OnDamaged()
-        {
-            Utility.Debug($"{Player.CharacterName} got damaged, setting the water to 89 and checking after some seconds to set it to 91");
-            LastDamage = DateTime.UtcNow;
-            if (DamageChecker != null)
-            {
-                Plugin.Instance.StopCoroutine(DamageChecker);
-            }
-            if (Player.Player.life.water > 90)
-            {
-                Player.Player.life.serverModifyWater(89 - Player.Player.life.water);
-            }
-            Utility.Debug($"Players water has been set to {Player.Player.life.water}, food is {Player.Player.life.food}");
-            DamageChecker = Plugin.Instance.StartCoroutine(CheckDamage());
-        }
-
-        public IEnumerator CheckDamage()
-        {
-            yield return new WaitForSeconds(Plugin.Instance.Configuration.Instance.LastDamageAfterHealSeconds);
-            Utility.Debug($"{Player.CharacterName} hasn't gotten damaged in the last {Plugin.Instance.Configuration.Instance.LastDamageAfterHealSeconds} setting water to 91");
-            if (Player.Player.life.water < 90)
-            {
-                Player.Player.life.serverModifyWater(91 - Player.Player.life.water);
-            }
-            Utility.Debug($"Players water has been set to {Player.Player.life.water}, food is {Player.Player.life.food}");
         }
 
         // Death screen
