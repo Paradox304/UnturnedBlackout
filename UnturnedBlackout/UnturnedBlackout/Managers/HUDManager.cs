@@ -16,9 +16,8 @@ namespace UnturnedBlackout.Managers
 
         public HUDManager()
         {
-            UnturnedPlayerEvents.OnPlayerUpdateHealth += OnHealthChanged;
-
-            UnturnedPlayerEvents.OnPlayerRevive += OnRevived;
+            //UnturnedPlayerEvents.OnPlayerUpdateHealth += OnHealthChanged;
+            //UnturnedPlayerEvents.OnPlayerRevive += OnRevived;
 
             UseableGun.onChangeMagazineRequested += OnMagazineChanged;
             UseableGun.onBulletSpawned += OnBulletShot;
@@ -41,7 +40,7 @@ namespace UnturnedBlackout.Managers
             EffectManager.sendUIEffect(ID, Key, player.Player.channel.GetOwnerTransportConnection(), true);
             EffectManager.sendUIEffect(27634, 27634, player.Player.channel.GetOwnerTransportConnection(), true);
 
-            OnHealthChanged(player, player.Player.life.health);
+            //OnHealthChanged(player, player.Player.life.health);
         }
 
         private void OnDisconnected(UnturnedPlayer player)
@@ -49,6 +48,7 @@ namespace UnturnedBlackout.Managers
             player.Player.equipment.onEquipRequested -= OnEquip;
         }
 
+        /*
         public void ShowHUD(UnturnedPlayer player)
         {
             EffectManager.sendUIEffectVisibility(Key, player.Player.channel.GetOwnerTransportConnection(), true, "LeftSide", true);
@@ -61,21 +61,22 @@ namespace UnturnedBlackout.Managers
 
         private void OnRevived(UnturnedPlayer player, Vector3 position, byte angle)
         {
-            OnHealthChanged(player, player.Player.life.health);
+            //OnHealthChanged(player, player.Player.life.health);
         }
 
         private void OnHealthChanged(UnturnedPlayer player, byte health)
         {
-            Utility.Debug($"{player.CharacterName} health changed to {health}, time {DateTime.UtcNow}");
             var spaces = health * 96 / 100; 
             var transportConnection = player.Player.channel.GetOwnerTransportConnection();
 
             EffectManager.sendUIEffectText(Key, transportConnection, true, "HealthBarFill", spaces == 0 ? " " : new string(' ', spaces));
             EffectManager.sendUIEffectText(Key, transportConnection, true, "HealthNum", health.ToString());
         }
+        */
 
         public void OnXPChanged(UnturnedPlayer player)
         {
+            /*
             var transportConnection = player.Player.channel.GetOwnerTransportConnection();
             var xp = (uint)0;
             var level = (uint)0;
@@ -90,6 +91,7 @@ namespace UnturnedBlackout.Managers
             var spaces = neededXP == 0 ? 0 : (int)(xp * 96 / neededXP);
             EffectManager.sendUIEffectText(Key, transportConnection, true, "XPNum", Plugin.Instance.Translate("Level_Show", level).ToRich());
             EffectManager.sendUIEffectText(Key, transportConnection, true, "XPBarFill", spaces == 0 ? " " : new string(' ', spaces));
+            */
 
             Plugin.Instance.UIManager.OnXPChanged(player);
         }
@@ -167,9 +169,8 @@ namespace UnturnedBlackout.Managers
 
         public void Destroy()
         {
-            UnturnedPlayerEvents.OnPlayerUpdateHealth -= OnHealthChanged;
-
-            UnturnedPlayerEvents.OnPlayerRevive -= OnRevived;
+            //UnturnedPlayerEvents.OnPlayerUpdateHealth -= OnHealthChanged;
+            //UnturnedPlayerEvents.OnPlayerRevive -= OnRevived;
 
             UseableGun.onChangeMagazineRequested -= OnMagazineChanged;
             UseableGun.onBulletSpawned -= OnBulletShot;

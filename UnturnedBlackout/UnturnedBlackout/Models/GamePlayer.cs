@@ -52,7 +52,6 @@ namespace UnturnedBlackout.Models
         // Healing
         public void OnDamaged()
         {
-            Utility.Debug($"{Player.CharacterName} got damaged, setting the last damage to now and checking after some seconds to heal");
             LastDamage = DateTime.UtcNow;
             if (DamageChecker != null)
             {
@@ -69,7 +68,6 @@ namespace UnturnedBlackout.Models
         public IEnumerator CheckDamage()
         {
             yield return new WaitForSeconds(Plugin.Instance.Configuration.Instance.LastDamageAfterHealSeconds);
-            Utility.Debug($"Starting healing on {Player.CharacterName}");
             Healer = Plugin.Instance.StartCoroutine(HealPlayer());
         }
 
