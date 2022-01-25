@@ -11,11 +11,14 @@ namespace UnturnedBlackout.Models
 
         public int Score { get; set; }
         public int Kills { get; set; }
+        public int Assists { get; set; }
         public int Deaths { get; set; }
         public int KillStreak { get; set; }
         public int MultipleKills { get; set; }
 
         public DateTime LastKill { get; set; }
+        public CSteamID LastDamager { get; set; }
+
         public Dictionary<CSteamID, int> PlayersKilled { get; set; }
 
         public FFAPlayer(GamePlayer gamePlayer)
@@ -25,6 +28,7 @@ namespace UnturnedBlackout.Models
             Score = 0;
             Kills = 0;
             Deaths = 0;
+            Assists = 0;
             KillStreak = 0;
             MultipleKills = 0;
 
@@ -37,8 +41,15 @@ namespace UnturnedBlackout.Models
             KillStreak = 0;
             MultipleKills = 0;
             Deaths++;
+
             LastKill = DateTime.UtcNow;
             PlayersKilled.Remove(killer);
+        }
+
+        public void OnDamaged(CSteamID damager)
+        {
+            LastDamager = damager;
+            GamePlayer.OnDamaged();
         }
 
         public void CheckKills()

@@ -351,7 +351,7 @@ namespace UnturnedBlackout.GameTypes
                 parameters.damage = 200;
             }
 
-            player.GamePlayer.OnDamaged();
+            player.OnDamaged(parameters.damage >= parameters.player.life.health ? player.LastDamager : parameters.killer);
 
             var kPlayer = GetTDMPlayer(parameters.killer);
             if (kPlayer == null)
