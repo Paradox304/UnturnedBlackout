@@ -80,7 +80,14 @@ namespace UnturnedBlackout
 
         private void OnDamageBarricade(CSteamID instigatorSteamID, Transform barricadeTransform, ref ushort pendingTotalDamage, ref bool shouldAllow, EDamageOrigin damageOrigin)
         {
-            shouldAllow = false;
+            var drop = BarricadeManager.FindBarricadeByRootTransform(barricadeTransform);
+            if (drop != null)
+            {
+                if (!Configuration.Instance.AllowDamageBarricades.Contains(drop.asset.id))
+                {
+                    shouldAllow = false;
+                }
+            }
         }
 
         private void OnDamageResource(CSteamID instigatorSteamID, Transform objectTransform, ref ushort pendingTotalDamage, ref bool shouldAllow, EDamageOrigin damageOrigin)

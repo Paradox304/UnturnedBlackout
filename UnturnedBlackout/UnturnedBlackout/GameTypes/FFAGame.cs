@@ -323,7 +323,7 @@ namespace UnturnedBlackout.GameTypes
                 parameters.damage = 200;
             }
 
-            player.OnDamaged(parameters.damage >= parameters.player.life.health ? player.LastDamager : parameters.killer);
+            player.GamePlayer.OnDamaged(parameters.damage >= parameters.player.life.health ? player.GamePlayer.LastDamager : parameters.killer);
 
             var kPlayer = GetFFAPlayer(parameters.killer);
             if (kPlayer == null)

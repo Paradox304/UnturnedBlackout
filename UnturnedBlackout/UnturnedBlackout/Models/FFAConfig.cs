@@ -7,6 +7,7 @@
 
         public int XPPerKill { get; set; }
         public int XPPerKillHeadshot { get; set; }
+        public int XPPerAssist { get; set; }
 
         public int BaseXPKS { get; set; }
         public int IncreaseXPPerKS { get; set; }
@@ -26,12 +27,13 @@
 
         }
 
-        public FFAConfig(int startSeconds, int endSeconds, int xPPerKill, int xPPerKillHeadshot, int baseXPKS, int increaseXPPerKS, int baseXPMK, int increaseXPPerMK, int mKSeconds, int shutdownXP, int dominationXP, int scoreLimit, int spawnProtectionSeconds)
+        public FFAConfig(int startSeconds, int endSeconds, int xPPerKill, int xPPerKillHeadshot, int xPPerAssist, int baseXPKS, int increaseXPPerKS, int baseXPMK, int increaseXPPerMK, int mKSeconds, int shutdownXP, int dominationXP, int scoreLimit, int spawnProtectionSeconds)
         {
             StartSeconds = startSeconds;
             EndSeconds = endSeconds;
             XPPerKill = xPPerKill;
             XPPerKillHeadshot = xPPerKillHeadshot;
+            XPPerAssist = xPPerAssist;
             BaseXPKS = baseXPKS;
             IncreaseXPPerKS = increaseXPPerKS;
             BaseXPMK = baseXPMK;

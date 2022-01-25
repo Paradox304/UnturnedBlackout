@@ -17,8 +17,6 @@ namespace UnturnedBlackout.Models
         public int MultipleKills { get; set; }
 
         public DateTime LastKill { get; set; }
-        public CSteamID LastDamager { get; set; }
-
         public Dictionary<CSteamID, int> PlayersKilled { get; set; }
 
         public FFAPlayer(GamePlayer gamePlayer)
@@ -44,12 +42,6 @@ namespace UnturnedBlackout.Models
 
             LastKill = DateTime.UtcNow;
             PlayersKilled.Remove(killer);
-        }
-
-        public void OnDamaged(CSteamID damager)
-        {
-            LastDamager = damager;
-            GamePlayer.OnDamaged();
         }
 
         public void CheckKills()

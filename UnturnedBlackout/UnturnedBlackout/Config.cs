@@ -48,6 +48,7 @@ namespace UnturnedBlackout
         public TDMConfig TDM { get; set; }
 
         public List<ArenaLocation> ArenaLocations { get; set; }
+        public List<ushort> AllowDamageBarricades { get; set; }
 
         public void LoadDefaults()
         {
@@ -88,8 +89,8 @@ namespace UnturnedBlackout
             SpawnSwitchTimeFrame = 60;
             SpawnSwitchSeconds = 120;
 
-            FFA = new FFAConfig(15, 600, 50, 50, 10, 5, 10, 5, 10, 15, 15, 15, 2);
-            TDM = new TDMConfig(15, 600, 50, 50, 10, 5, 10, 5, 10, 15, 15, 15, 2);
+            FFA = new FFAConfig(15, 600, 50, 50, 20, 10, 5, 10, 5, 10, 15, 15, 15, 2);
+            TDM = new TDMConfig(15, 600, 50, 50, 20, 10, 5, 10, 5, 10, 15, 15, 15, 2);
 
             ArenaLocations = new List<ArenaLocation>
             {
@@ -97,7 +98,7 @@ namespace UnturnedBlackout
                 new ArenaLocation(2, 10, "Tacoma", ""),
                 new ArenaLocation(3, 10, "Military Base", "")
             };
-
+            AllowDamageBarricades = new List<ushort> { 3, 4, 5 };
         }
     }
 }

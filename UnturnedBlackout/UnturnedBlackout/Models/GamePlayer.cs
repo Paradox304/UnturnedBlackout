@@ -15,10 +15,8 @@ namespace UnturnedBlackout.Models
         public UnturnedPlayer Player { get; set; }
         public ITransportConnection TransportConnection { get; set; }
 
-
         public bool HasSpawnProtection { get; set; }
-
-        public DateTime LastDamage { get; set; }
+        public CSteamID LastDamager { get; set; }
 
         public Coroutine ProtectionRemover { get; set; }
         public Coroutine DamageChecker { get; set; }
@@ -50,9 +48,8 @@ namespace UnturnedBlackout.Models
         }
 
         // Healing
-        public void OnDamaged()
+        public void OnDamaged(CSteamID damager)
         {
-            LastDamage = DateTime.UtcNow;
             if (DamageChecker != null)
             {
                 Plugin.Instance.StopCoroutine(DamageChecker);
@@ -62,6 +59,7 @@ namespace UnturnedBlackout.Models
                 Plugin.Instance.StopCoroutine(Healer);
             }
 
+            LastDamager = damager;
             DamageChecker = Plugin.Instance.StartCoroutine(CheckDamage());
         }
 
@@ -80,6 +78,7 @@ namespace UnturnedBlackout.Models
                 var health = Player.Player.life.health;
                 if (health == 100)
                 {
+                    LastDamager = CSteamID.Nil;
                     break;
                 }
                 Player.Player.life.serverModifyHealth(20);
@@ -102,6 +101,7 @@ namespace UnturnedBlackout.Models
             {
                 Plugin.Instance.StopCoroutine(Healer);
             }
+
             Plugin.Instance.UIManager.SendDeathUI(this, killerData);
             RespawnTimer = Plugin.Instance.StartCoroutine(RespawnTime());
         }
