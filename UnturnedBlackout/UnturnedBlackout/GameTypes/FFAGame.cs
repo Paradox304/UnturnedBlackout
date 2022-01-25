@@ -204,6 +204,12 @@ namespace UnturnedBlackout.GameTypes
             Utility.Debug($"Game player found, player name: {fPlayer.GamePlayer.Player.CharacterName}");
             fPlayer.OnDeath(killer);
             fPlayer.GamePlayer.OnDeath(killer);
+
+            foreach (var ass in Players.Where(k => k.GamePlayer.LastDamager == player.channel.owner.playerID.steamID))
+            {
+                ass.GamePlayer.LastDamager = CSteamID.Nil;
+            }
+
             ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DBManager.IncreasePlayerDeathsAsync(fPlayer.GamePlayer.SteamID, 1));
 
             TaskDispatcher.QueueOnMainThread(() =>
@@ -222,6 +228,14 @@ namespace UnturnedBlackout.GameTypes
                 }
 
                 Utility.Debug($"Killer found, killer name: {kPlayer.GamePlayer.Player.CharacterName}");
+                var assister = GetFFAPlayer(fPlayer.GamePlayer.LastDamager);
+                if (assister != null)
+                {
+                    assister.Assists++;
+                    Plugin.Instance.UIManager.ShowXPUI(assister.GamePlayer, Config.FFA.XPPerAssist, Plugin.Instance.Translate("Assist_Kill"));
+                    ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DBManager.IncreasePlayerXPAsync(assister.GamePlayer.SteamID, (uint)Config.FFA.XPPerAssist));
+                }
+
                 kPlayer.Kills++;
                 kPlayer.Score += Config.KillPoints;
 

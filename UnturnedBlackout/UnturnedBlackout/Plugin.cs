@@ -152,6 +152,7 @@ namespace UnturnedBlackout
             { "Normal_Kill", "Normal Kill" },
             { "Domination_Kill", "Domination" },
             { "Shutdown_Kill", "Shutdown" },
+            { "Assist_Kill", "Kill Assist" },
             { "Multiple_Kills_Show", "Multiple Kills x{0}" },
             { "Multiple_Kills_Show_2", "2 Multiple Kills" },
             { "Multiple_Kills_Show_3", "3 Multiple Kills" },
