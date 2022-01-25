@@ -36,7 +36,7 @@ namespace UnturnedBlackout.Instances
         {
             Utility.Debug($"Showing Menu UI for player {Player.CharacterName}");
             EffectManager.sendUIEffect(ID, Key, TransportConnection, true);
-            Plugin.Instance.HUDManager.HideHUD(Player);
+            //Plugin.Instance.HUDManager.HideHUD(Player);
             Player.Player.enablePluginWidgetFlag(EPluginWidgetFlags.Modal);
             ResetUIValues();
             ShowGames();
@@ -47,7 +47,7 @@ namespace UnturnedBlackout.Instances
         {
             Utility.Debug($"Hiding menu UI for player {Player.CharacterName}");
             EffectManager.askEffectClearByID(ID, TransportConnection);
-            Plugin.Instance.HUDManager.ShowHUD(Player);
+            //Plugin.Instance.HUDManager.ShowHUD(Player);
             Player.Player.disablePluginWidgetFlag(EPluginWidgetFlags.Modal);
             ResetUIValues();
         }

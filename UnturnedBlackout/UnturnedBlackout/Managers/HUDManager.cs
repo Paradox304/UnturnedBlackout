@@ -38,6 +38,7 @@ namespace UnturnedBlackout.Managers
             player.Player.equipment.onEquipRequested += OnEquip;
 
             EffectManager.sendUIEffect(ID, Key, player.Player.channel.GetOwnerTransportConnection(), true);
+            // Sound UI
             EffectManager.sendUIEffect(27634, 27634, player.Player.channel.GetOwnerTransportConnection(), true);
 
             //OnHealthChanged(player, player.Player.life.health);
