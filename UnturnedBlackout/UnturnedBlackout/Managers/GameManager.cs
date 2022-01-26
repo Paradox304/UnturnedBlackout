@@ -34,7 +34,7 @@ namespace UnturnedBlackout.Managers
 
             U.Events.OnPlayerConnected += OnPlayerJoined;
             U.Events.OnPlayerDisconnected += OnPlayerLeft;
-            UnturnedPlayerEvents.OnPlayerRevive += OnPlayerRevived;
+            PlayerLife.onPlayerDied += OnPlayerDeath;
 
             StartGames();
         }
@@ -166,6 +166,7 @@ namespace UnturnedBlackout.Managers
                     Plugin.Instance.UIManager.RegisterUIHandler(player);
                     Plugin.Instance.HUDManager.OnXPChanged(player);
 
+                    player.Player.quests.leaveGroup(true);
                     Utility.Debug($"{player.CharacterName} joined the server, creating a game player and sending them to lobby!");
                     if (!Players.ContainsKey(player.CSteamID))
                     {
@@ -216,13 +217,14 @@ namespace UnturnedBlackout.Managers
             }
         }
 
-        private void OnPlayerRevived(UnturnedPlayer player, Vector3 position, byte angle)
+
+        private void OnPlayerDeath(PlayerLife sender, EDeathCause cause, ELimb limb, CSteamID instigator)
         {
-            Utility.Debug("Player revived, checking if the player is in a game");
-            if (!TryGetCurrentGame(player.CSteamID, out _))
+            Utility.Debug("Player died, checking if the player is in a game");
+            if (!TryGetCurrentGame(sender.player.channel.owner.playerID.steamID, out _))
             {
                 Utility.Debug("Player is not in a game, spawning them in the lobby");
-                SendPlayerToLobby(player);
+                SendPlayerToLobby(UnturnedPlayer.FromPlayer(sender.player));
             }
         }
 
@@ -269,7 +271,7 @@ namespace UnturnedBlackout.Managers
             U.Events.OnPlayerConnected -= OnPlayerJoined;
             U.Events.OnPlayerDisconnected -= OnPlayerLeft;
 
-            UnturnedPlayerEvents.OnPlayerRevive -= OnPlayerRevived;
+            PlayerLife.onPlayerDied -= OnPlayerDeath;
         }
 
         public GamePlayer GetGamePlayer(UnturnedPlayer player)

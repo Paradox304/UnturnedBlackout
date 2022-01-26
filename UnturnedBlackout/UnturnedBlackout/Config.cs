@@ -49,6 +49,8 @@ namespace UnturnedBlackout
         public int SpawnSwitchTimeFrame { get; set; }
         public int SpawnSwitchSeconds { get; set; }
 
+        public ushort KnifeID { get; set; }
+
         public FFAConfig FFA { get; set; }
         public TDMConfig TDM { get; set; }
 
@@ -97,9 +99,10 @@ namespace UnturnedBlackout
             SpawnSwitchCountSeconds = 15;
             SpawnSwitchTimeFrame = 60;
             SpawnSwitchSeconds = 120;
+            KnifeID = 58129;
 
-            FFA = new FFAConfig(15, 600, 50, 50, 20, 10, 5, 10, 5, 10, 15, 15, 15, 2);
-            TDM = new TDMConfig(15, 600, 50, 50, 20, 10, 5, 10, 5, 10, 15, 15, 15, 2);
+            FFA = new FFAConfig(15, 600, 50, 60, 50, 20, 10, 5, 10, 5, 10, 15, 15, 15, 2);
+            TDM = new TDMConfig(15, 600, 50, 60, 50, 20, 10, 5, 10, 5, 10, 15, 15, 15, 2);
 
             ArenaLocations = new List<ArenaLocation>
             {

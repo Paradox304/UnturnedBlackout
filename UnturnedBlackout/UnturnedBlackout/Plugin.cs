@@ -2,6 +2,7 @@
 using Rocket.API;
 using Rocket.API.Collections;
 using Rocket.Core.Plugins;
+using Rocket.Unturned.Events;
 using Rocket.Unturned.Player;
 using SDG.Unturned;
 using Steamworks;
@@ -40,7 +41,6 @@ namespace UnturnedBlackout
             ResourceManager.onDamageResourceRequested += OnDamageResource;
             BarricadeManager.onDamageBarricadeRequested += OnDamageBarricade;
             StructureManager.onDamageStructureRequested += OnDamageStructure;
-
             Logger.Log("Unturned Legends has been loaded");
         }
 
@@ -152,7 +152,8 @@ namespace UnturnedBlackout
             { "Normal_Kill", "Normal Kill" },
             { "Domination_Kill", "Domination" },
             { "Shutdown_Kill", "Shutdown" },
-            { "Assist_Kill", "Kill Assist" },
+            { "Assist_Kill", "Kill Assist ({0})" },
+            { "Melee_Kill", "Melee Kill" },
             { "Multiple_Kills_Show", "Multiple Kills x{0}" },
             { "Multiple_Kills_Show_2", "2 Multiple Kills" },
             { "Multiple_Kills_Show_3", "3 Multiple Kills" },

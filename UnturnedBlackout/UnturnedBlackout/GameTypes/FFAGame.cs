@@ -190,7 +190,7 @@ namespace UnturnedBlackout.GameTypes
             Plugin.Instance.UIManager.OnGameCountUpdated(this);
         }
 
-        public override void OnPlayerDead(Player player, CSteamID killer, ELimb limb)
+        public override void OnPlayerDead(Player player, CSteamID killer, ELimb limb, EDeathCause cause)
         {
             Utility.Debug("Player died, getting the ffa player");
             var fPlayer = GetFFAPlayer(player);
@@ -238,7 +238,7 @@ namespace UnturnedBlackout.GameTypes
                         assister.Score += Config.AssistPoints;
                         if (!assister.GamePlayer.Player.Player.life.isDead)
                         {
-                            Plugin.Instance.UIManager.ShowXPUI(assister.GamePlayer, Config.FFA.XPPerAssist, Plugin.Instance.Translate("Assist_Kill"));
+                            Plugin.Instance.UIManager.ShowXPUI(assister.GamePlayer, Config.FFA.XPPerAssist, Plugin.Instance.Translate("Assist_Kill", fPlayer.GamePlayer.Player.CharacterName.ToUnrich()));
                         }
                         ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DBManager.IncreasePlayerXPAsync(assister.GamePlayer.SteamID, (uint)Config.FFA.XPPerAssist));
                     }
@@ -248,8 +248,24 @@ namespace UnturnedBlackout.GameTypes
                 kPlayer.Kills++;
                 kPlayer.Score += Config.KillPoints;
 
-                var xpGained = limb == ELimb.SKULL ? Config.FFA.XPPerKillHeadshot : Config.FFA.XPPerKill;
-                string xpText = limb == ELimb.SKULL ? Plugin.Instance.Translate("Headshot_Kill").ToRich() : Plugin.Instance.Translate("Normal_Kill").ToRich();
+                int xpGained = 0;
+                string xpText = "";
+                if (cause == EDeathCause.MELEE || cause == EDeathCause.PUNCH)
+                {
+                    xpGained += Config.FFA.XPPerMeleeKill;
+                    xpText += Plugin.Instance.Translate("Melee_Kill").ToRich();
+
+                }
+                else if (limb == ELimb.SKULL)
+                {
+                    xpGained += Config.FFA.XPPerKillHeadshot;
+                    xpText += Plugin.Instance.Translate("Headshot_Kill").ToRich();
+                }
+                else
+                {
+                    xpGained += Config.FFA.XPPerKill;
+                    xpText += Plugin.Instance.Translate("Normal_Kill").ToRich();
+                }
                 xpText += "\n";
 
                 if (kPlayer.KillStreak > 0)

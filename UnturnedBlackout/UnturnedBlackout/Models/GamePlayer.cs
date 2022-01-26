@@ -62,7 +62,13 @@ namespace UnturnedBlackout.Models
             }
 
             Utility.Debug($"{Player.CharacterName} got damaged by {damager}");
-            if (LastDamager.Peek() != damager)
+            if (LastDamager.Count > 0)
+            {
+                if (LastDamager.Peek() != damager)
+                {
+                    LastDamager.Push(damager);
+                }
+            } else
             {
                 LastDamager.Push(damager);
             }

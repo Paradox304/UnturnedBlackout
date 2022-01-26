@@ -39,7 +39,7 @@ namespace UnturnedBlackout.GameTypes
             Vote0 = new List<GamePlayer>();
             Vote1 = new List<GamePlayer>();
 
-            PlayerLife.onPlayerDied += OnPlayerDied;
+            UnturnedPlayerEvents.OnPlayerDeath += OnPlayerDeath;
             UnturnedPlayerEvents.OnPlayerRevive += OnPlayerRevive;
             DamageTool.damagePlayerRequested += OnPlayerDamaged;
         }
@@ -160,21 +160,21 @@ namespace UnturnedBlackout.GameTypes
             OnPlayerRevived(player);
         }
 
-        private void OnPlayerDied(PlayerLife sender, EDeathCause cause, ELimb limb, CSteamID instigator)
+        private void OnPlayerDeath(UnturnedPlayer player, EDeathCause cause, ELimb limb, CSteamID murderer)
         {
-            OnPlayerDead(sender.player, instigator, limb);
+            OnPlayerDead(player.Player, murderer, limb, cause);
         }
 
         public void Destroy()
         {
-            PlayerLife.onPlayerDied -= OnPlayerDied;
+            UnturnedPlayerEvents.OnPlayerDeath -= OnPlayerDeath;
             UnturnedPlayerEvents.OnPlayerRevive -= OnPlayerRevive;
             DamageTool.damagePlayerRequested -= OnPlayerDamaged;
         }
 
         public abstract bool IsPlayerIngame(CSteamID steamID);
         public abstract void OnPlayerRevived(UnturnedPlayer player);
-        public abstract void OnPlayerDead(Player player, CSteamID killer, ELimb limb);
+        public abstract void OnPlayerDead(Player player, CSteamID killer, ELimb limb, EDeathCause cause);
         public abstract void OnPlayerDamage(ref DamagePlayerParameters parameters, ref bool shouldAllow);
         public abstract void AddPlayerToGame(GamePlayer player);
         public abstract void RemovePlayerFromGame(GamePlayer player);

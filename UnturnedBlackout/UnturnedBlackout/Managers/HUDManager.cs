@@ -128,9 +128,21 @@ namespace UnturnedBlackout.Managers
 
         private void OnDequip(PlayerEquipment obj)
         {
-            if (obj.useable == null)
+            if (obj.useable == null && Plugin.Instance.GameManager.TryGetCurrentGame(obj.player.channel.owner.playerID.steamID, out _))
             {
-                EffectManager.sendUIEffectVisibility(Key, obj.player.channel.GetOwnerTransportConnection(), true, "RightSide", false);
+                var inv = obj.player.inventory;
+                for (byte page = 0; page < PlayerInventory.PAGES - 2; page++)
+                {
+                    for (int index = inv.getItemCount(page) - 1; index >= 0; index--)
+                    {
+                        var item = inv.getItem(page, (byte)index);
+                        if (item != null && item.item.id == Plugin.Instance.Configuration.Instance.KnifeID)
+                        {
+                            obj.tryEquip(page, item.x, item.y);
+                            return;
+                        }
+                    }
+                }
             }
         }
 
@@ -178,10 +190,10 @@ namespace UnturnedBlackout.Managers
             UseableGun.onChangeMagazineRequested -= OnMagazineChanged;
             UseableGun.onBulletSpawned -= OnBulletShot;
 
-            PlayerEquipment.OnUseableChanged_Global -= OnDequip;
-
             U.Events.OnPlayerConnected -= OnConnected;
             U.Events.OnPlayerDisconnected -= OnDisconnected;
+
+            PlayerEquipment.OnUseableChanged_Global -= OnDequip;
         }
     }
 }
