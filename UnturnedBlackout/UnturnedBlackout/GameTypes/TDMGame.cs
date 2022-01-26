@@ -232,11 +232,6 @@ namespace UnturnedBlackout.GameTypes
             tPlayer.GamePlayer.OnDeath(killer);
             tPlayer.Team.OnDeath(tPlayer.GamePlayer.SteamID);
 
-            foreach (var ass in Players.Where(k => k.GamePlayer.LastDamager == player.channel.owner.playerID.steamID))
-            {
-                ass.GamePlayer.LastDamager = CSteamID.Nil;
-            }
-
             ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DBManager.IncreasePlayerDeathsAsync(tPlayer.GamePlayer.SteamID, 1));
 
             TaskDispatcher.QueueOnMainThread(() =>
@@ -255,13 +250,26 @@ namespace UnturnedBlackout.GameTypes
                 }
 
                 Utility.Debug($"Killer found, killer name: {kPlayer.GamePlayer.Player.CharacterName}");
-                var assister = GetTDMPlayer(tPlayer.GamePlayer.LastDamager);
-                if (assister != null)
+                if (tPlayer.GamePlayer.LastDamager.Peek() == kPlayer.GamePlayer.SteamID)
                 {
-                    Utility.Debug($"Last damage done to the player by {assister.GamePlayer.Player.CharacterName}");
-                    assister.Assists++;
-                    Plugin.Instance.UIManager.ShowXPUI(assister.GamePlayer, Config.TDM.XPPerAssist, Plugin.Instance.Translate("Assist_Kill"));
-                    ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DBManager.IncreasePlayerXPAsync(assister.GamePlayer.SteamID, (uint)Config.TDM.XPPerAssist));
+                    tPlayer.GamePlayer.LastDamager.Pop();
+                }
+
+                if (tPlayer.GamePlayer.LastDamager.Count > 0)
+                {
+                    var assister = GetTDMPlayer(tPlayer.GamePlayer.LastDamager.Pop());
+                    if (assister != null && assister != kPlayer)
+                    {
+                        Utility.Debug($"Last damage done to the player by {assister.GamePlayer.Player.CharacterName}");
+                        assister.Assists++;
+                        assister.Score += Config.AssistPoints;
+                        if (!assister.GamePlayer.Player.Player.life.isDead)
+                        {
+                            Plugin.Instance.UIManager.ShowXPUI(assister.GamePlayer, Config.TDM.XPPerAssist, Plugin.Instance.Translate("Assist_Kill"));
+                        }
+                        ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DBManager.IncreasePlayerXPAsync(assister.GamePlayer.SteamID, (uint)Config.FFA.XPPerAssist));
+                    }
+                    tPlayer.GamePlayer.LastDamager.Clear();
                 }
 
                 kPlayer.Kills++;
@@ -333,7 +341,14 @@ namespace UnturnedBlackout.GameTypes
                 }
                 ThreadPool.QueueUserWorkItem(async (o) =>
                 {
-                    await Plugin.Instance.DBManager.IncreasePlayerKillsAsync(kPlayer.GamePlayer.SteamID, 1);
+                    if (limb == ELimb.SKULL)
+                    {
+                        await Plugin.Instance.DBManager.IncreasePlayerHeadshotKillsAsync(kPlayer.GamePlayer.SteamID, 1);
+                    }
+                    else
+                    {
+                        await Plugin.Instance.DBManager.IncreasePlayerKillsAsync(kPlayer.GamePlayer.SteamID, 1);
+                    }
                     await Plugin.Instance.DBManager.IncreasePlayerXPAsync(kPlayer.GamePlayer.SteamID, (uint)xpGained);
                 });
             });
@@ -366,7 +381,7 @@ namespace UnturnedBlackout.GameTypes
                 parameters.damage = 200;
             }
 
-            player.GamePlayer.OnDamaged(parameters.damage >= parameters.player.life.health ? player.GamePlayer.LastDamager : parameters.killer);
+            player.GamePlayer.OnDamaged(parameters.killer);
 
             var kPlayer = GetTDMPlayer(parameters.killer);
             if (kPlayer == null)

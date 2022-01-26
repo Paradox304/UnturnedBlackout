@@ -39,6 +39,7 @@ namespace UnturnedBlackout
         public int EndingLeaderboardSeconds { get; set; }
 
         public int KillPoints { get; set; }
+        public int AssistPoints { get; set; }
 
         public int DominationKills { get; set; }
         public int ShutdownKillStreak { get; set; }
@@ -88,6 +89,7 @@ namespace UnturnedBlackout
             EndingLeaderboardSeconds = 20;
 
             KillPoints = 100;
+            AssistPoints = 50;
             DominationKills = 5;
             ShutdownKillStreak = 5;
 

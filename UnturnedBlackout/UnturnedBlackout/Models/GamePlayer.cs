@@ -4,6 +4,7 @@ using SDG.Unturned;
 using Steamworks;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnturnedBlackout.Database;
 
@@ -16,7 +17,7 @@ namespace UnturnedBlackout.Models
         public ITransportConnection TransportConnection { get; set; }
 
         public bool HasSpawnProtection { get; set; }
-        public CSteamID LastDamager { get; set; }
+        public Stack<CSteamID> LastDamager { get; set; }
 
         public Coroutine ProtectionRemover { get; set; }
         public Coroutine DamageChecker { get; set; }
@@ -28,6 +29,7 @@ namespace UnturnedBlackout.Models
             SteamID = player.CSteamID;
             Player = player;
             TransportConnection = transportConnection;
+            LastDamager = new Stack<CSteamID>(100);
         }
 
         // Spawn Protection Seconds
@@ -60,7 +62,10 @@ namespace UnturnedBlackout.Models
             }
 
             Utility.Debug($"{Player.CharacterName} got damaged by {damager}");
-            LastDamager = damager;
+            if (LastDamager.Peek() != damager)
+            {
+                LastDamager.Push(damager);
+            }
             DamageChecker = Plugin.Instance.StartCoroutine(CheckDamage());
         }
 
@@ -79,7 +84,7 @@ namespace UnturnedBlackout.Models
                 var health = Player.Player.life.health;
                 if (health == 100)
                 {
-                    LastDamager = CSteamID.Nil;
+                    LastDamager.Clear();
                     break;
                 }
                 Player.Player.life.serverModifyHealth(Plugin.Instance.Configuration.Instance.HealAmount);
@@ -166,6 +171,7 @@ namespace UnturnedBlackout.Models
                 Plugin.Instance.StopCoroutine(RespawnTimer);
             }
 
+            LastDamager.Clear();
             Plugin.Instance.UIManager.ClearDeathUI(this);
         }
     }
