@@ -59,6 +59,7 @@ namespace UnturnedBlackout.Models
                 Plugin.Instance.StopCoroutine(Healer);
             }
 
+            Utility.Debug($"{Player.CharacterName} got damaged by {damager}");
             LastDamager = damager;
             DamageChecker = Plugin.Instance.StartCoroutine(CheckDamage());
         }
@@ -81,7 +82,7 @@ namespace UnturnedBlackout.Models
                     LastDamager = CSteamID.Nil;
                     break;
                 }
-                Player.Player.life.serverModifyHealth(20);
+                Player.Player.life.serverModifyHealth(Plugin.Instance.Configuration.Instance.HealAmount);
             }
         }
 

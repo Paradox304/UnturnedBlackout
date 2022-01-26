@@ -15,7 +15,9 @@ namespace UnturnedBlackout
         public string PlayersTableName { get; set; }
         public int CacheRefreshSeconds { get; set; }
 
-        public string KitName { get; set; }
+        public string FFAKitName { get; set; }
+        public string BlueKitName { get; set; }
+        public string RedKitName { get; set; }
 
         public bool EnableDebugLogs { get; set; }
 
@@ -26,6 +28,7 @@ namespace UnturnedBlackout
 
         public int LastDamageAfterHealSeconds { get; set; }
         public float HealSeconds { get; set; }
+        public int HealAmount { get; set; }
 
         public int VoteSeconds { get; set; }
         public int GamesCount { get; set; }
@@ -36,6 +39,7 @@ namespace UnturnedBlackout
         public int EndingLeaderboardSeconds { get; set; }
 
         public int KillPoints { get; set; }
+
         public int DominationKills { get; set; }
         public int ShutdownKillStreak { get; set; }
 
@@ -60,7 +64,9 @@ namespace UnturnedBlackout
             PlayersTableName = "UL_Players";
             CacheRefreshSeconds = 600;
 
-            KitName = "Starter";
+            FFAKitName = "Starter";
+            RedKitName = "Red";
+            BlueKitName = "Blue";
 
             EnableDebugLogs = true;
 
@@ -71,6 +77,7 @@ namespace UnturnedBlackout
 
             LastDamageAfterHealSeconds = 5;
             HealSeconds = 0.065f;
+            HealAmount = 10;
 
             VoteSeconds = 60;
             GamesCount = 3;

@@ -229,8 +229,9 @@ namespace UnturnedBlackout.GameTypes
 
                 Utility.Debug($"Killer found, killer name: {kPlayer.GamePlayer.Player.CharacterName}");
                 var assister = GetFFAPlayer(fPlayer.GamePlayer.LastDamager);
-                if (assister != null)
+                if (assister != null && assister != kPlayer)
                 {
+                    Utility.Debug($"Last damage done to the player by {assister.GamePlayer.Player.CharacterName}");
                     assister.Assists++;
                     Plugin.Instance.UIManager.ShowXPUI(assister.GamePlayer, Config.FFA.XPPerAssist, Plugin.Instance.Translate("Assist_Kill"));
                     ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DBManager.IncreasePlayerXPAsync(assister.GamePlayer.SteamID, (uint)Config.FFA.XPPerAssist));
@@ -312,7 +313,7 @@ namespace UnturnedBlackout.GameTypes
 
         public override void OnPlayerDamage(ref DamagePlayerParameters parameters, ref bool shouldAllow)
         {
-            Utility.Debug($"{parameters.player.channel.owner.playerID.characterName} got damaged, checking if the player is in game");
+            Utility.Debug($"{parameters.player.channel.owner.playerID.characterName} got damaged, checking if the player is in game, times {parameters.times}");
             var player = GetFFAPlayer(parameters.player);
             if (player == null)
             {
@@ -374,7 +375,7 @@ namespace UnturnedBlackout.GameTypes
             Utility.Debug($"Giving loadout to {player.GamePlayer.Player.CharacterName}");
 
             player.GamePlayer.Player.Player.inventory.ClearInventory();
-            R.Commands.Execute(player.GamePlayer.Player, $"/kit {Config.KitName}");
+            R.Commands.Execute(player.GamePlayer.Player, $"/kit {Config.FFAKitName}");
         }
 
         public void SpawnPlayer(FFAPlayer player, bool seperateSpawnPoint)

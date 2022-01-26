@@ -258,10 +258,12 @@ namespace UnturnedBlackout.GameTypes
                 var assister = GetTDMPlayer(tPlayer.GamePlayer.LastDamager);
                 if (assister != null)
                 {
+                    Utility.Debug($"Last damage done to the player by {assister.GamePlayer.Player.CharacterName}");
                     assister.Assists++;
                     Plugin.Instance.UIManager.ShowXPUI(assister.GamePlayer, Config.TDM.XPPerAssist, Plugin.Instance.Translate("Assist_Kill"));
                     ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DBManager.IncreasePlayerXPAsync(assister.GamePlayer.SteamID, (uint)Config.TDM.XPPerAssist));
                 }
+
                 kPlayer.Kills++;
                 kPlayer.Team.Score++;
                 kPlayer.Score += Config.KillPoints;
@@ -401,7 +403,7 @@ namespace UnturnedBlackout.GameTypes
             Utility.Debug($"Giving loadout to {player.GamePlayer.Player.CharacterName}");
 
             player.GamePlayer.Player.Player.inventory.ClearInventory();
-            R.Commands.Execute(player.GamePlayer.Player, $"/kit {Config.KitName}");
+            R.Commands.Execute(player.GamePlayer.Player, $"/kit {((ETeam)player.Team.TeamID == ETeam.Blue ? Config.BlueKitName : Config.RedKitName)}");
         }
 
         public void SpawnPlayer(TDMPlayer player)
