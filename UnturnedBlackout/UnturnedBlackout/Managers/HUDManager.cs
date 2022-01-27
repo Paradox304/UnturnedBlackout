@@ -128,17 +128,22 @@ namespace UnturnedBlackout.Managers
 
         private void OnDequip(PlayerEquipment obj)
         {
-            if (obj.useable == null && Plugin.Instance.GameManager.TryGetCurrentGame(obj.player.channel.owner.playerID.steamID, out _))
+            Utility.Debug($"{obj.player.channel.owner.playerID.characterName} useable changed, is useable null {obj.useable == null}, can equip {obj.canEquip}");
+            if (obj.useable == null && obj.canEquip && Plugin.Instance.GameManager.TryGetCurrentGame(obj.player.channel.owner.playerID.steamID, out _))
             {
+                EffectManager.sendUIEffectVisibility(Key, obj.player.channel.GetOwnerTransportConnection(), true, "RightSide", false);
+                Utility.Debug("Player is ingame, find the knife");
                 var inv = obj.player.inventory;
                 for (byte page = 0; page < PlayerInventory.PAGES - 2; page++)
                 {
                     for (int index = inv.getItemCount(page) - 1; index >= 0; index--)
                     {
+                        Utility.Debug($"Page: {page}, Index: {index}");
                         var item = inv.getItem(page, (byte)index);
                         if (item != null && item.item.id == Plugin.Instance.Configuration.Instance.KnifeID)
                         {
-                            obj.tryEquip(page, item.x, item.y);
+                            Utility.Debug("Found the knife");
+                            TaskDispatcher.QueueOnMainThread(() => obj.tryEquip(page, item.x, item.y));
                             return;
                         }
                     }

@@ -2,6 +2,7 @@
 using Rocket.API;
 using Rocket.API.Collections;
 using Rocket.Core.Plugins;
+using Rocket.Unturned.Enumerations;
 using Rocket.Unturned.Events;
 using Rocket.Unturned.Player;
 using SDG.Unturned;

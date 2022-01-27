@@ -23,6 +23,9 @@ namespace UnturnedBlackout.Managers
         public const ushort TDMID = 27621;
         public const short TDMKey = 27621;
 
+        public const ushort KCID = 27621;
+        public const short KCKey = 27621;
+
         public const short SoundsKey = 27634;
 
         public const ushort DeathID = 27635;

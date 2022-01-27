@@ -50,9 +50,12 @@ namespace UnturnedBlackout
         public int SpawnSwitchSeconds { get; set; }
 
         public ushort KnifeID { get; set; }
+        public ushort RedDogTagID { get; set; }
+        public ushort BlueDogTagID { get; set; }
 
         public FFAConfig FFA { get; set; }
         public TDMConfig TDM { get; set; }
+        public KCConfig KC { get; set; }
 
         public List<ArenaLocation> ArenaLocations { get; set; }
         public List<ushort> AllowDamageBarricades { get; set; }
@@ -99,10 +102,14 @@ namespace UnturnedBlackout
             SpawnSwitchCountSeconds = 15;
             SpawnSwitchTimeFrame = 60;
             SpawnSwitchSeconds = 120;
+
             KnifeID = 58129;
+            RedDogTagID = 26820;
+            BlueDogTagID = 26821;
 
             FFA = new FFAConfig(15, 600, 50, 60, 50, 20, 10, 5, 10, 5, 10, 15, 15, 15, 2);
             TDM = new TDMConfig(15, 600, 50, 60, 50, 20, 10, 5, 10, 5, 10, 15, 15, 15, 2);
+            KC = new KCConfig(15, 600, 50, 60, 50, 20, 10, 10, 10, 5, 10, 5, 10, 15, 15, 15, 2);
 
             ArenaLocations = new List<ArenaLocation>
             {
