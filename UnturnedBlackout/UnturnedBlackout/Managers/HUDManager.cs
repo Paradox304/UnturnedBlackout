@@ -142,23 +142,18 @@ namespace UnturnedBlackout.Managers
         public IEnumerator EquipKnife(PlayerEquipment obj)
         {
             yield return new WaitForSeconds(0.2f);
-            Utility.Debug($"{obj.player.channel.owner.playerID.characterName} useable changed, is useable null {obj.useable == null}, can equip {obj.canEquip}, is equip {obj.isEquipped}, is busy {obj.isBusy}, is selected {obj.isSelected}");
             if (obj.useable == null && obj.canEquip && Plugin.Instance.GameManager.TryGetCurrentGame(obj.player.channel.owner.playerID.steamID, out _))
             {
                 EffectManager.sendUIEffectVisibility(Key, obj.player.channel.GetOwnerTransportConnection(), true, "RightSide", false);
-                Utility.Debug("Player is ingame, find the knife");
                 var inv = obj.player.inventory;
                 for (byte page = 0; page < PlayerInventory.PAGES - 2; page++)
                 {
                     for (int index = inv.getItemCount(page) - 1; index >= 0; index--)
                     {
-                        Utility.Debug($"Page: {page}, Index: {index}");
                         var item = inv.getItem(page, (byte)index);
                         if (item != null && item.item.id == Plugin.Instance.Configuration.Instance.KnifeID)
                         {
                             var asset = Assets.find(EAssetType.ITEM, item.item.id) as ItemAsset;
-                            Utility.Debug($"Can equip: {asset.slot.canEquipInPage(page)}, can equip: {asset.canPlayerEquip}");
-                            Utility.Debug("Found the knife");
                             TaskDispatcher.QueueOnMainThread(() => obj.tryEquip(page, item.x, item.y));
                             yield break;
                         }
