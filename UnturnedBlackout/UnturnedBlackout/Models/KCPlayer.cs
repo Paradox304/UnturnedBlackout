@@ -12,7 +12,7 @@ namespace UnturnedBlackout.Models
     {
         public GamePlayer GamePlayer { get; set; }
 
-        public TDMTeam Team { get; set; }
+        public KCTeam Team { get; set; }
 
         public int Score { get; set; }
         public int Kills { get; set; }
@@ -26,7 +26,7 @@ namespace UnturnedBlackout.Models
         public DateTime LastKill { get; set; }
         public Dictionary<CSteamID, int> PlayersKilled { get; set; }
 
-        public KCPlayer(GamePlayer gamePlayer, TDMTeam team)
+        public KCPlayer(GamePlayer gamePlayer, KCTeam team)
         {
             GamePlayer = gamePlayer;
             Team = team;

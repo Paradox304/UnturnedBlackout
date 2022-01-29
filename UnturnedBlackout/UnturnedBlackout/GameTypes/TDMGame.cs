@@ -1,5 +1,6 @@
 ﻿using Rocket.Core;
 using Rocket.Core.Utils;
+using Rocket.Unturned.Enumerations;
 using Rocket.Unturned.Player;
 using SDG.Unturned;
 using Steamworks;
@@ -218,11 +219,11 @@ namespace UnturnedBlackout.GameTypes
 
         public override void OnPlayerDead(Player player, CSteamID killer, ELimb limb, EDeathCause cause)
         {
-            Utility.Debug("Player died, getting the ffa player");
+            Utility.Debug("Player died, getting the tdm player");
             var tPlayer = GetTDMPlayer(player);
             if (tPlayer == null)
             {
-                Utility.Debug("Could'nt find the ffa player, returning");
+                Utility.Debug("Could'nt find the tdm player, returning");
                 return;
             }
             var victimKS = tPlayer.KillStreak;
@@ -267,7 +268,7 @@ namespace UnturnedBlackout.GameTypes
                         {
                             Plugin.Instance.UIManager.ShowXPUI(assister.GamePlayer, Config.TDM.XPPerAssist, Plugin.Instance.Translate("Assist_Kill", tPlayer.GamePlayer.Player.CharacterName.ToUnrich()));
                         }
-                        ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DBManager.IncreasePlayerXPAsync(assister.GamePlayer.SteamID, (uint)Config.FFA.XPPerAssist));
+                        ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DBManager.IncreasePlayerXPAsync(assister.GamePlayer.SteamID, (uint)Config.TDM.XPPerAssist));
                     }
                     tPlayer.GamePlayer.LastDamager.Clear();
                 }
@@ -280,18 +281,18 @@ namespace UnturnedBlackout.GameTypes
                 string xpText = "";
                 if (cause == EDeathCause.MELEE || cause == EDeathCause.PUNCH)
                 {
-                    xpGained += Config.FFA.XPPerMeleeKill;
+                    xpGained += Config.TDM.XPPerMeleeKill;
                     xpText += Plugin.Instance.Translate("Melee_Kill").ToRich();
 
                 }
                 else if (limb == ELimb.SKULL)
                 {
-                    xpGained += Config.FFA.XPPerKillHeadshot;
+                    xpGained += Config.TDM.XPPerKillHeadshot;
                     xpText += Plugin.Instance.Translate("Headshot_Kill").ToRich();
                 }
                 else
                 {
-                    xpGained += Config.FFA.XPPerKill;
+                    xpGained += Config.TDM.XPPerKill;
                     xpText += Plugin.Instance.Translate("Normal_Kill").ToRich();
                 }
                 xpText += "\n";
@@ -414,11 +415,11 @@ namespace UnturnedBlackout.GameTypes
 
         public override void OnPlayerRevived(UnturnedPlayer player)
         {
-            Utility.Debug("Player revived, getting the ffa player");
+            Utility.Debug("Player revived, getting the tdm player");
             var tPlayer = GetTDMPlayer(player);
             if (tPlayer == null)
             {
-                Utility.Debug("Could'nt find the ffa player, returning");
+                Utility.Debug("Could'nt find the tdm player, returning");
                 return;
             }
 
@@ -510,6 +511,11 @@ namespace UnturnedBlackout.GameTypes
         public override int GetPlayerCount()
         {
             return Players.Count;
+        }
+
+        public override void PlayerPickupItem(UnturnedPlayer player, InventoryGroup inventoryGroup, byte inventoryIndex, ItemJar P)
+        {
+
         }
     }
 }

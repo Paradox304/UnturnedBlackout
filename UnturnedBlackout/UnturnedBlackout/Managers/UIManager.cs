@@ -257,6 +257,7 @@ namespace UnturnedBlackout.Managers
                     EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"KDRTxt{i}", ratio);
                     EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"ScoreTxt{i}", ply.Score.ToString());
                     EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"LvlTxt{i}", data.Level.ToString());
+                    EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"AssistsTxt{i}", ply.Assists.ToString());
                 }
             }
         }
@@ -346,6 +347,7 @@ namespace UnturnedBlackout.Managers
                     EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"KDRTxt{i}B", ratio);
                     EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"ScoreTxt{i}B", ply.Score.ToString());
                     EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"LvlTxt{i}B", data.Level.ToString());
+                    EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"AssistsTxt{i}B", ply.Assists.ToString());
                 }
             }
 
@@ -379,6 +381,7 @@ namespace UnturnedBlackout.Managers
                     EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"KDRTxt{i}R", ratio);
                     EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"ScoreTxt{i}R", ply.Score.ToString());
                     EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"LvlTxt{i}R", data.Level.ToString());
+                    EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"AssistsTxt{i}R", ply.Assists.ToString());
                 }
             }
         }
@@ -397,6 +400,128 @@ namespace UnturnedBlackout.Managers
             EffectManager.askEffectClearByID(TDMID, player.TransportConnection);
         }
 
+        // KC Related UI
+        public void SendKCHUD(KCPlayer player, KCTeam blueTeam, KCTeam redTeam)
+        {
+            EffectManager.sendUIEffect(KCID, KCKey, player.GamePlayer.TransportConnection, true);
+            EffectManager.sendUIEffectVisibility(KCKey, player.GamePlayer.TransportConnection, true, player.Team.TeamID == (byte)ETeam.Blue ? "BlueTeam" : "RedTeam", true);
+            EffectManager.sendUIEffect(27611, 27611, player.GamePlayer.TransportConnection, true, Plugin.Instance.Translate("KC_Name").ToRich(), Plugin.Instance.Translate("KC_Desc").ToRich());
+            EffectManager.sendUIEffectVisibility(KCKey, player.GamePlayer.TransportConnection, true, "Timer", true);
+            EffectManager.sendUIEffectVisibility(KCKey, player.GamePlayer.TransportConnection, true, "Team", true);
+            EffectManager.sendUIEffectText(KCKey, player.GamePlayer.TransportConnection, true, "TeamName", Plugin.Instance.Translate($"{(ETeam)player.Team.TeamID}_Team_Name").ToRich());
+
+            int index = player.Team.TeamID == (byte)ETeam.Blue ? 1 : 0;
+            int blueSpaces = blueTeam.Score * 96 / Config.TDM.ScoreLimit;
+            int redSpaces = redTeam.Score * 96 / Config.TDM.ScoreLimit;
+            EffectManager.sendUIEffectText(KCKey, player.GamePlayer.TransportConnection, true, $"RedNum{index}", redTeam.Score.ToString());
+            EffectManager.sendUIEffectText(KCKey, player.GamePlayer.TransportConnection, true, $"RedBarFill{index}", redSpaces == 0 ? " " : new string(' ', redSpaces));
+
+            EffectManager.sendUIEffectText(KCKey, player.GamePlayer.TransportConnection, true, $"BlueNum{index}", blueTeam.Score.ToString());
+            EffectManager.sendUIEffectText(KCKey, player.GamePlayer.TransportConnection, true, $"BlueBarFill{index}", blueSpaces == 0 ? " " : new string(' ', blueSpaces));
+        }
+
+        public void UpdateKCTimer(GamePlayer player, string text)
+        {
+            EffectManager.sendUIEffectText(KCKey, player.TransportConnection, true, "TimerTxt", text);
+        }
+
+        public void UpdateKCScore(KCPlayer player, KCTeam changeTeam)
+        {
+            int index = player.Team.TeamID == (byte)ETeam.Blue ? 1 : 0;
+            var team = (ETeam)changeTeam.TeamID;
+            int spaces = changeTeam.Score * 96 / Config.TDM.ScoreLimit;
+
+            EffectManager.sendUIEffectText(KCKey, player.GamePlayer.TransportConnection, true, $"{team}Num{index}", changeTeam.Score.ToString());
+            EffectManager.sendUIEffectText(KCKey, player.GamePlayer.TransportConnection, true, $"{team}BarFill{index}", spaces == 0 ? " " : new string(' ', spaces));
+        }
+
+        public void SetupKCEndingLeaderboard(List<KCPlayer> players, ArenaLocation location, KCTeam wonTeam, KCTeam blueTeam, KCTeam redTeam)
+        {
+            var bluePlayers = players.Where(k => k.Team.TeamID == (byte)ETeam.Blue).ToList();
+            var redPlayers = players.Where(k => k.Team.TeamID == (byte)ETeam.Red).ToList();
+
+            var blueWon = wonTeam.TeamID == (byte)ETeam.Blue;
+            for (int i = 0; i < bluePlayers.Count; i++)
+            {
+                var ply = bluePlayers[i];
+                if (!Plugin.Instance.DBManager.PlayerCache.TryGetValue(ply.GamePlayer.SteamID, out PlayerData data))
+                {
+                    continue;
+                }
+
+                var kills = (decimal)ply.Kills;
+                var deaths = (decimal)ply.Deaths;
+
+                var ratio = ply.Deaths == 0 ? String.Format("{0:n}", kills) : String.Format("{0:n}", Math.Round(kills / deaths, 2));
+                EffectManager.sendUIEffectText(PreEndingUIKey, ply.GamePlayer.TransportConnection, true, "MatchResult0", Plugin.Instance.Translate(blueWon ? "Victory_Text" : "Defeat_Text").ToRich());
+                EffectManager.sendUIEffectText(PreEndingUIKey, ply.GamePlayer.TransportConnection, true, "MapName0", location.LocationName.ToUpper());
+                EffectManager.sendUIEffectText(PreEndingUIKey, ply.GamePlayer.TransportConnection, true, "TeamNameR", Plugin.Instance.Translate("Red_Team_Name").ToRich());
+                EffectManager.sendUIEffectText(PreEndingUIKey, ply.GamePlayer.TransportConnection, true, "TeamScoreR", redTeam.Score.ToString());
+                EffectManager.sendUIEffectText(PreEndingUIKey, ply.GamePlayer.TransportConnection, true, "TeamNameB", Plugin.Instance.Translate("Blue_Team_Name").ToRich());
+                EffectManager.sendUIEffectText(PreEndingUIKey, ply.GamePlayer.TransportConnection, true, "TeamScoreB", blueTeam.Score.ToString());
+
+                for (int i2 = 0; i2 < players.Count; i2++)
+                {
+                    var player = players[i2];
+                    EffectManager.sendUIEffectVisibility(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"PlayerStats{i}B", true);
+                    EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"NameTxt{i}B", data.SteamName);
+                    EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"KillsTxt{i}B", ply.Kills.ToString());
+                    EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"DeathsTxt{i}B", ply.Deaths.ToString());
+                    EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"KDRTxt{i}B", ratio);
+                    EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"ScoreTxt{i}B", ply.Score.ToString());
+                    EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"LvlTxt{i}B", data.Level.ToString());
+                    EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"AssistsTxt{i}B", ply.Assists.ToString());
+                }
+            }
+
+            var redWon = wonTeam.TeamID == (byte)ETeam.Red;
+            for (int i = 0; i < redPlayers.Count; i++)
+            {
+                var ply = redPlayers[i];
+                if (!Plugin.Instance.DBManager.PlayerCache.TryGetValue(ply.GamePlayer.SteamID, out PlayerData data))
+                {
+                    continue;
+                }
+
+                var kills = (decimal)ply.Kills;
+                var deaths = (decimal)ply.Deaths;
+
+                var ratio = ply.Deaths == 0 ? String.Format("{0:n}", kills) : String.Format("{0:n}", Math.Round(kills / deaths, 2));
+                EffectManager.sendUIEffectText(PreEndingUIKey, ply.GamePlayer.TransportConnection, true, "MatchResult0", Plugin.Instance.Translate(redWon ? "Victory_Text" : "Defeat_Text").ToRich());
+                EffectManager.sendUIEffectText(PreEndingUIKey, ply.GamePlayer.TransportConnection, true, "MapName0", location.LocationName.ToUpper());
+                EffectManager.sendUIEffectText(PreEndingUIKey, ply.GamePlayer.TransportConnection, true, "TeamNameR", Plugin.Instance.Translate("Red_Team_Name").ToRich());
+                EffectManager.sendUIEffectText(PreEndingUIKey, ply.GamePlayer.TransportConnection, true, "TeamScoreR", redTeam.Score.ToString());
+                EffectManager.sendUIEffectText(PreEndingUIKey, ply.GamePlayer.TransportConnection, true, "TeamNameB", Plugin.Instance.Translate("Blue_Team_Name").ToRich());
+                EffectManager.sendUIEffectText(PreEndingUIKey, ply.GamePlayer.TransportConnection, true, "TeamScoreB", blueTeam.Score.ToString());
+
+                for (int i2 = 0; i2 < players.Count; i2++)
+                {
+                    var player = players[i2];
+                    EffectManager.sendUIEffectVisibility(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"PlayerStats{i}R", true);
+                    EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"NameTxt{i}R", data.SteamName);
+                    EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"KillsTxt{i}R", ply.Kills.ToString());
+                    EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"DeathsTxt{i}R", ply.Deaths.ToString());
+                    EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"KDRTxt{i}R", ratio);
+                    EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"ScoreTxt{i}R", ply.Score.ToString());
+                    EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"LvlTxt{i}R", data.Level.ToString());
+                    EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"AssistsTxt{i}R", ply.Assists.ToString());
+                }
+            }
+        }
+
+        public void ShowKCEndingLeaderboard(GamePlayer player)
+        {
+            EffectManager.sendUIEffectVisibility(PreEndingUIKey, player.TransportConnection, true, "Victory", false);
+            EffectManager.sendUIEffectVisibility(PreEndingUIKey, player.TransportConnection, true, "Defeat", false);
+            EffectManager.sendUIEffectVisibility(PreEndingUIKey, player.TransportConnection, true, "Scores", false);
+
+            EffectManager.sendUIEffectVisibility(PreEndingUIKey, player.TransportConnection, true, "Scoreboard0", true);
+        }
+
+        public void ClearKCHUD(GamePlayer player)
+        {
+            EffectManager.askEffectClearByID(KCID, player.TransportConnection);
+        }
         // EVENTS
         public void OnGamesUpdated()
         {

@@ -1,5 +1,6 @@
 ﻿using Rocket.Core;
 using Rocket.Core.Utils;
+using Rocket.Unturned.Enumerations;
 using Rocket.Unturned.Player;
 using SDG.Unturned;
 using Steamworks;
@@ -458,6 +459,11 @@ namespace UnturnedBlackout.GameTypes
         public override int GetPlayerCount()
         {
             return Players.Count;
+        }
+
+        public override void PlayerPickupItem(UnturnedPlayer player, InventoryGroup inventoryGroup, byte inventoryIndex, ItemJar P)
+        {
+            
         }
     }
 }

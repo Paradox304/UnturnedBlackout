@@ -49,7 +49,7 @@ namespace UnturnedBlackout.Managers
                 var locationID = AvailableLocations[UnityEngine.Random.Range(0, AvailableLocations.Count)];
                 var location = Config.ArenaLocations.FirstOrDefault(k => k.LocationID == locationID);
                 Utility.Debug($"Found {location.LocationName}");
-                StartGame(location, EGameType.FFA);
+                StartGame(location, EGameType.KC);
             }
         }
 
@@ -64,6 +64,9 @@ namespace UnturnedBlackout.Managers
                     break;
                 case EGameType.TDM:
                     game = new TDMGame(location);
+                    break;
+                case EGameType.KC:
+                    game = new KCGame(location);
                     break;
                 default:
                     break;

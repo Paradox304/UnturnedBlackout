@@ -1,4 +1,5 @@
-﻿using Rocket.Unturned.Events;
+﻿using Rocket.Unturned.Enumerations;
+using Rocket.Unturned.Events;
 using Rocket.Unturned.Player;
 using SDG.Unturned;
 using Steamworks;
@@ -41,7 +42,13 @@ namespace UnturnedBlackout.GameTypes
 
             UnturnedPlayerEvents.OnPlayerDeath += OnPlayerDeath;
             UnturnedPlayerEvents.OnPlayerRevive += OnPlayerRevive;
+            UnturnedPlayerEvents.OnPlayerInventoryAdded += OnPlayerPickupItem;
             DamageTool.damagePlayerRequested += OnPlayerDamaged;
+        }
+
+        private void OnPlayerPickupItem(UnturnedPlayer player, InventoryGroup inventoryGroup, byte inventoryIndex, ItemJar P)
+        {
+            PlayerPickupItem(player, inventoryGroup, inventoryIndex, P);
         }
 
         public void StartVoting()
@@ -60,7 +67,7 @@ namespace UnturnedBlackout.GameTypes
 
             var locations = Plugin.Instance.GameManager.AvailableLocations.ToList();
             locations.Add(Location.LocationID);
-            var gameModes = new List<byte> { (byte)EGameType.FFA, (byte)EGameType.TDM };
+            var gameModes = new List<byte> { (byte)EGameType.FFA, (byte)EGameType.TDM, (byte)EGameType.KC };
 
             for (int i = 0; i <= 1; i++)
             {
@@ -169,6 +176,7 @@ namespace UnturnedBlackout.GameTypes
         {
             UnturnedPlayerEvents.OnPlayerDeath -= OnPlayerDeath;
             UnturnedPlayerEvents.OnPlayerRevive -= OnPlayerRevive;
+            UnturnedPlayerEvents.OnPlayerInventoryAdded -= OnPlayerPickupItem;
             DamageTool.damagePlayerRequested -= OnPlayerDamaged;
         }
 
@@ -178,6 +186,7 @@ namespace UnturnedBlackout.GameTypes
         public abstract void OnPlayerDamage(ref DamagePlayerParameters parameters, ref bool shouldAllow);
         public abstract void AddPlayerToGame(GamePlayer player);
         public abstract void RemovePlayerFromGame(GamePlayer player);
+        public abstract void PlayerPickupItem(UnturnedPlayer player, InventoryGroup inventoryGroup, byte inventoryIndex, ItemJar P);
         public abstract int GetPlayerCount();
     }
 }

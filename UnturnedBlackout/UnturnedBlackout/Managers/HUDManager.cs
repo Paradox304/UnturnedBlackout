@@ -4,6 +4,7 @@ using Rocket.Unturned.Events;
 using Rocket.Unturned.Player;
 using SDG.Unturned;
 using System;
+using System.Collections;
 using UnityEngine;
 using UnturnedBlackout.Database;
 
@@ -36,6 +37,7 @@ namespace UnturnedBlackout.Managers
             player.Player.disablePluginWidgetFlag(EPluginWidgetFlags.ShowDeathMenu);
 
             player.Player.equipment.onEquipRequested += OnEquip;
+            player.Player.inventory.onDropItemRequested += OnDropItem;
 
             EffectManager.sendUIEffect(ID, Key, player.Player.channel.GetOwnerTransportConnection(), true);
             // Sound UI
@@ -46,6 +48,12 @@ namespace UnturnedBlackout.Managers
         private void OnDisconnected(UnturnedPlayer player)
         {
             player.Player.equipment.onEquipRequested -= OnEquip;
+            player.Player.inventory.onDropItemRequested -= OnDropItem;
+        }
+
+        private void OnDropItem(PlayerInventory inventory, Item item, ref bool shouldAllow)
+        {
+            shouldAllow = false;
         }
 
         /*
@@ -126,9 +134,15 @@ namespace UnturnedBlackout.Managers
             });
         }
 
-        private void OnDequip(PlayerEquipment obj)
+        public void OnDequip(PlayerEquipment obj)
         {
-            Utility.Debug($"{obj.player.channel.owner.playerID.characterName} useable changed, is useable null {obj.useable == null}, can equip {obj.canEquip}");
+            Plugin.Instance.StartCoroutine(EquipKnife(obj));
+        }
+
+        public IEnumerator EquipKnife(PlayerEquipment obj)
+        {
+            yield return new WaitForSeconds(0.2f);
+            Utility.Debug($"{obj.player.channel.owner.playerID.characterName} useable changed, is useable null {obj.useable == null}, can equip {obj.canEquip}, is equip {obj.isEquipped}, is busy {obj.isBusy}, is selected {obj.isSelected}");
             if (obj.useable == null && obj.canEquip && Plugin.Instance.GameManager.TryGetCurrentGame(obj.player.channel.owner.playerID.steamID, out _))
             {
                 EffectManager.sendUIEffectVisibility(Key, obj.player.channel.GetOwnerTransportConnection(), true, "RightSide", false);
@@ -142,9 +156,11 @@ namespace UnturnedBlackout.Managers
                         var item = inv.getItem(page, (byte)index);
                         if (item != null && item.item.id == Plugin.Instance.Configuration.Instance.KnifeID)
                         {
+                            var asset = Assets.find(EAssetType.ITEM, item.item.id) as ItemAsset;
+                            Utility.Debug($"Can equip: {asset.slot.canEquipInPage(page)}, can equip: {asset.canPlayerEquip}");
                             Utility.Debug("Found the knife");
                             TaskDispatcher.QueueOnMainThread(() => obj.tryEquip(page, item.x, item.y));
-                            return;
+                            yield break;
                         }
                     }
                 }

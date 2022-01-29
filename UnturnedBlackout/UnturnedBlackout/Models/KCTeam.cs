@@ -19,6 +19,7 @@ namespace UnturnedBlackout.Models
         public int TeamID { get; set; }
         public Dictionary<CSteamID, DateTime> Players { get; set; }
 
+        public ushort DogTagID { get; set; }
         public int Score { get; set; }
         public int SpawnPoint { get; set; }
 
@@ -27,7 +28,7 @@ namespace UnturnedBlackout.Models
         public uint Frequency { get; set; }
         public Coroutine SpawnSwitcher { get; set; }
 
-        public KCTeam(KCGame game, int teamID, bool isDummy)
+        public KCTeam(KCGame game, int teamID, bool isDummy, ushort dogTagID)
         {
             Config = Plugin.Instance.Configuration.Instance;
             TeamID = teamID;
@@ -35,6 +36,7 @@ namespace UnturnedBlackout.Models
             {
                 Game = game;
                 Players = new Dictionary<CSteamID, DateTime>();
+                DogTagID = dogTagID;
                 Score = 0;
                 SpawnPoint = teamID;
                 SpawnThreshold = 0;

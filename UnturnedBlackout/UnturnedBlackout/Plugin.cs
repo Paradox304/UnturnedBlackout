@@ -42,6 +42,7 @@ namespace UnturnedBlackout
             ResourceManager.onDamageResourceRequested += OnDamageResource;
             BarricadeManager.onDamageBarricadeRequested += OnDamageBarricade;
             StructureManager.onDamageStructureRequested += OnDamageStructure;
+
             Logger.Log("Unturned Legends has been loaded");
         }
 
@@ -155,6 +156,8 @@ namespace UnturnedBlackout
             { "Shutdown_Kill", "Shutdown" },
             { "Assist_Kill", "Kill Assist ({0})" },
             { "Melee_Kill", "Melee Kill" },
+            { "Kill_Confirmed", "Kill Confirmed" },
+            { "Kill_Denied", "Kill Denied" },
             { "Multiple_Kills_Show", "Multiple Kills x{0}" },
             { "Multiple_Kills_Show_2", "2 Multiple Kills" },
             { "Multiple_Kills_Show_3", "3 Multiple Kills" },
@@ -163,8 +166,8 @@ namespace UnturnedBlackout
             { "Level_Show", "LVL. {0}" },
             { "Vote0_MapName", "{0} [color=#ffa142]{1}[/color]" },
             { "Vote1_MapName", "[color=#3672ff]{1}[/color] {0}" },
-            { "Victory_Text", "VICTORY!" },
-            { "Defeat_Text", "DEFEAT!" },
+            { "Victory_Text", "VICTORY" },
+            { "Defeat_Text", "DEFEAT" },
             { "FFA_Name", "FFA" },
             { "FFA_Desc", "Eliminate other players." },
             { "FFA_Victory_Desc", "Score limit reached" },
@@ -175,6 +178,10 @@ namespace UnturnedBlackout
             { "TDM_Defeat_Desc", "You could'nt reach the score limit" },
             { "Red_Team_Name", "COALITION" },
             { "Blue_Team_Name", "ALLEGIANCE" },
+            { "KC_Name", "Kill Confirmed" },
+            { "KC_Desc", "Eliminate hostiles and recover their dog tags." },
+            { "KC_Victory_Desc", "Score limit reached" },
+            { "KC_Defeat_Desc", "You could'nt reach the score limit" },
             { "SAFETY", "SAFETY" },
             { "AUTO", "AUTO" },
             { "BURST", "BURST" },
