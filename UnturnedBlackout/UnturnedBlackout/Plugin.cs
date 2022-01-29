@@ -43,7 +43,7 @@ namespace UnturnedBlackout
             BarricadeManager.onDamageBarricadeRequested += OnDamageBarricade;
             StructureManager.onDamageStructureRequested += OnDamageStructure;
 
-            Logger.Log("Unturned Legends has been loaded");
+            Logger.Log("Unturned Blackout has been loaded");
         }
 
         protected override void Unload()
@@ -63,7 +63,7 @@ namespace UnturnedBlackout
 
             StopAllCoroutines();
 
-            Logger.Log("Unturned Legends has been unloaded");
+            Logger.Log("Unturned Blackout has been unloaded");
         }
 
         public IEnumerator Day()

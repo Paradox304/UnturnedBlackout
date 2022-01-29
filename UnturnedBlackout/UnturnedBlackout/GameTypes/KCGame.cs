@@ -281,7 +281,7 @@ namespace UnturnedBlackout.GameTypes
 
                 int xpGained = 0;
                 string xpText = "";
-                if (cause == EDeathCause.MELEE || cause == EDeathCause.PUNCH)
+                if (cause == EDeathCause.MELEE)
                 {
                     xpGained += Config.KC.XPPerMeleeKill;
                     xpText += Plugin.Instance.Translate("Melee_Kill").ToRich();
@@ -386,7 +386,7 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
-            if (parameters.cause == EDeathCause.MELEE || parameters.cause == EDeathCause.PUNCH)
+            if (parameters.cause == EDeathCause.MELEE)
             {
                 parameters.damage = 200;
             }
