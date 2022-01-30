@@ -405,7 +405,7 @@ namespace UnturnedBlackout.Managers
         {
             EffectManager.sendUIEffect(KCID, KCKey, player.GamePlayer.TransportConnection, true);
             EffectManager.sendUIEffectVisibility(KCKey, player.GamePlayer.TransportConnection, true, player.Team.TeamID == (byte)ETeam.Blue ? "BlueTeam" : "RedTeam", true);
-            EffectManager.sendUIEffect(27611, 27611, player.GamePlayer.TransportConnection, true, Plugin.Instance.Translate("KC_Name").ToRich(), Plugin.Instance.Translate("KC_Desc").ToRich());
+            EffectManager.sendUIEffect(27612, 27612, player.GamePlayer.TransportConnection, true, Plugin.Instance.Translate("KC_Name").ToRich(), Plugin.Instance.Translate("KC_Desc").ToRich());
             EffectManager.sendUIEffectVisibility(KCKey, player.GamePlayer.TransportConnection, true, "Timer", true);
             EffectManager.sendUIEffectVisibility(KCKey, player.GamePlayer.TransportConnection, true, "Team", true);
             EffectManager.sendUIEffectText(KCKey, player.GamePlayer.TransportConnection, true, "TeamName", Plugin.Instance.Translate($"{(ETeam)player.Team.TeamID}_Team_Name").ToRich());

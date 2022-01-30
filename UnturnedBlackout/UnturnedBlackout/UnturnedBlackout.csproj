@@ -157,6 +157,7 @@
     <Compile Include="Models\TDMConfig.cs" />
     <Compile Include="Models\TDMPlayer.cs" />
     <Compile Include="Models\VoteChoice.cs" />
+    <Compile Include="Patches\ClothingPatches.cs" />
     <Compile Include="Patches\FiremodePatch.cs" />
     <Compile Include="Models\FFAPlayer.cs" />
     <Compile Include="Models\GamePlayer.cs" />
