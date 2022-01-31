@@ -6,18 +6,20 @@
         public int MaxPlayers { get; set; }
         public string LocationName { get; set; }
         public string ImageLink { get; set; }
+        public int NavMesh { get; set; }
 
         public ArenaLocation()
         {
 
         }
 
-        public ArenaLocation(int locationID, int maxPlayers, string locationName, string imageLink)
+        public ArenaLocation(int locationID, int maxPlayers, string locationName, string imageLink, int navMesh)
         {
             LocationID = locationID;
             MaxPlayers = maxPlayers;
             LocationName = locationName;
             ImageLink = imageLink;
+            NavMesh = navMesh;
         }
     }
 }

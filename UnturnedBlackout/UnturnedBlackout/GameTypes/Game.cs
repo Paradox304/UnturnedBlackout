@@ -172,6 +172,14 @@ namespace UnturnedBlackout.GameTypes
             OnPlayerDead(player.Player, murderer, limb, cause);
         }
 
+        public void WipeItems()
+        {
+            foreach (var region in ItemManager.regions)
+            {
+                region.items.RemoveAll(k => LevelNavigation.tryGetNavigation(k.point, out byte nav) && nav == Location.NavMesh);
+            }
+        }
+
         public void Destroy()
         {
             UnturnedPlayerEvents.OnPlayerDeath -= OnPlayerDeath;

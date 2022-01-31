@@ -200,7 +200,7 @@ namespace UnturnedBlackout.Managers
         public void OnPlayerVoted(UnturnedPlayer player, int index, int choice)
         {
             Utility.Debug($"{player.CSteamID} voted on {index} with choice {choice}");
-            if (choice > (Games.Count - 1))
+            if (index > (Games.Count - 1))
             {
                 Utility.Debug("Game wasn't found, returning");
                 return;

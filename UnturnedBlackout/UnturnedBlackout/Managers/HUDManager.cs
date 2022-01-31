@@ -53,7 +53,10 @@ namespace UnturnedBlackout.Managers
 
         private void OnDropItem(PlayerInventory inventory, Item item, ref bool shouldAllow)
         {
-            shouldAllow = false;
+            if (!UnturnedPlayer.FromPlayer(inventory.player).IsAdmin)
+            {
+                shouldAllow = false;
+            }
         }
 
         /*

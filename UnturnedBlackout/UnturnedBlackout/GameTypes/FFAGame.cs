@@ -94,7 +94,11 @@ namespace UnturnedBlackout.GameTypes
                 Plugin.Instance.UIManager.ClearFFAHUD(player.GamePlayer);
                 Plugin.Instance.UIManager.SendPreEndingUI(player.GamePlayer, EGameType.FFA, index == 0, 0, 0);
             }
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.SetupFFAEndingLeaderboard(Players, Location));
+            TaskDispatcher.QueueOnMainThread(() =>
+            {
+                Plugin.Instance.UIManager.SetupFFAEndingLeaderboard(Players, Location);
+                WipeItems();
+            });
             yield return new WaitForSeconds(5);
             foreach (var player in Players)
             {

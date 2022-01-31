@@ -118,9 +118,9 @@ namespace UnturnedBlackout
 
             ArenaLocations = new List<ArenaLocation>
             {
-                new ArenaLocation(1, 10, "Seattle", ""),
-                new ArenaLocation(2, 10, "Tacoma", ""),
-                new ArenaLocation(3, 10, "Military Base", "")
+                new ArenaLocation(1, 10, "Seattle", "", 0),
+                new ArenaLocation(2, 10, "Tacoma", "", 1),
+                new ArenaLocation(3, 10, "Military Base", "", 2)
             };
             AllowDamageBarricades = new List<ushort> { 3, 4, 5 };
         }

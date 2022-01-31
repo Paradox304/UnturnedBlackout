@@ -125,7 +125,11 @@ namespace UnturnedBlackout.GameTypes
                 Plugin.Instance.UIManager.ClearKCHUD(player.GamePlayer);
                 Plugin.Instance.UIManager.SendPreEndingUI(player.GamePlayer, EGameType.KC, player.Team.TeamID == wonTeam.TeamID, BlueTeam.Score, RedTeam.Score);
             }
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.SetupKCEndingLeaderboard(Players, Location, wonTeam, BlueTeam, RedTeam));
+            TaskDispatcher.QueueOnMainThread(() =>
+            {
+                Plugin.Instance.UIManager.SetupKCEndingLeaderboard(Players, Location, wonTeam, BlueTeam, RedTeam);
+                WipeItems();
+            });
             yield return new WaitForSeconds(5);
             foreach (var player in Players)
             {
