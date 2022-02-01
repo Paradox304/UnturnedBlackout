@@ -212,6 +212,14 @@ namespace UnturnedBlackout.Managers
                             if (obj is uint level)
                             {
                                 data.Level = level;
+                                TaskDispatcher.QueueOnMainThread(() =>
+                                {
+                                    var player = Plugin.Instance.GameManager.GetGamePlayer(data.SteamID);
+                                    if (player != null)
+                                    {
+                                        Plugin.Instance.UIManager.SendLevelUpAnimation(player, level);
+                                    }
+                                });
                             }
                             data.XP = (uint)newXP;
                         }

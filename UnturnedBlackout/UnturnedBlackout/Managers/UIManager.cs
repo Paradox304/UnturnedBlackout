@@ -136,6 +136,18 @@ namespace UnturnedBlackout.Managers
             };
         }
 
+        public void SendLevelUpAnimation(GamePlayer player, int newRank)
+        {
+            var icon = Config.LevelIcons.FirstOrDefault(k => k.MinRank >= newRank && newRank < k.MaxRank);
+            if (icon == null)
+            {
+                icon = Config.LevelIcons.FirstOrDefault(k => k.MinRank == 0);
+            }
+            EffectManager.sendUIEffect(27638, 27638, player.TransportConnection, true);
+            EffectManager.sendUIEffectImageURL(27638, player.TransportConnection, true, "LevelUpIcon", icon.IconLink);
+            EffectManager.sendUIEffectText(27638, player.TransportConnection, true, "LevelUpDesc", Plugin.Instance.Translate("Level_Up_Desc", newRank).ToRich());
+        } 
+
         public void SendHitmarkerSound(GamePlayer player)
         {
             EffectManager.sendUIEffect(27637, 27637, player.TransportConnection, true);

@@ -60,6 +60,7 @@ namespace UnturnedBlackout
         public KCConfig KC { get; set; }
 
         public List<ArenaLocation> ArenaLocations { get; set; }
+        public List<LevelIcon> LevelIcons { get; set; }
         public List<ushort> AllowDamageBarricades { get; set; }
 
         public void LoadDefaults()
@@ -121,6 +122,12 @@ namespace UnturnedBlackout
                 new ArenaLocation(1, 10, "Seattle", "", 0),
                 new ArenaLocation(2, 10, "Tacoma", "", 1),
                 new ArenaLocation(3, 10, "Military Base", "", 2)
+            };
+            LevelIcons = new List<LevelIcon>
+            {
+                new LevelIcon(0, 0, ""),
+                new LevelIcon(1, 10, ""),
+                new LevelIcon(10, 20, "")
             };
             AllowDamageBarricades = new List<ushort> { 3, 4, 5 };
         }

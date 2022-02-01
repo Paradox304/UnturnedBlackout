@@ -190,7 +190,8 @@ namespace UnturnedBlackout
             { "SAFETY", "SAFETY" },
             { "AUTO", "AUTO" },
             { "BURST", "BURST" },
-            { "SEMI", "SEMI" }
+            { "SEMI", "SEMI" },
+            { "Level_Up_Desc", "New Rank: {0}" }
         };
 
         public static Harmony Harmony { get; set; }
