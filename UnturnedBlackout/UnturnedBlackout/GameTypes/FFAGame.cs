@@ -92,17 +92,17 @@ namespace UnturnedBlackout.GameTypes
             {
                 var player = Players[index];
                 Plugin.Instance.UIManager.ClearFFAHUD(player.GamePlayer);
-                Plugin.Instance.UIManager.SendPreEndingUI(player.GamePlayer, EGameType.FFA, index == 0, 0, 0);
+                Plugin.Instance.UIManager.SetupPreEndingUI(player.GamePlayer, EGameType.FFA, index == 0, 0, 0);
             }
             TaskDispatcher.QueueOnMainThread(() =>
             {
-                Plugin.Instance.UIManager.SetupFFAEndingLeaderboard(Players, Location);
+                Plugin.Instance.UIManager.SetupFFALeaderboard(Players, Location, false);
                 WipeItems();
             });
             yield return new WaitForSeconds(5);
             foreach (var player in Players)
             {
-                Plugin.Instance.UIManager.ShowFFAEndingLeaderboard(player.GamePlayer);
+                Plugin.Instance.UIManager.ShowFFALeaderboard(player.GamePlayer);
             }
             yield return new WaitForSeconds(Config.EndingLeaderboardSeconds);
             foreach (var player in Players.ToList())
@@ -147,6 +147,7 @@ namespace UnturnedBlackout.GameTypes
                 Plugin.Instance.UIManager.UpdateFFATopUI(fPlayer, Players);
                 SpawnPlayer(fPlayer, false);
             }
+            Plugin.Instance.UIManager.SendPreEndingUI(fPlayer.GamePlayer);
 
             if (Players.Count == 2)
             {

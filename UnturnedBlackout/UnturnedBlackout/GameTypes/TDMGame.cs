@@ -120,17 +120,17 @@ namespace UnturnedBlackout.GameTypes
             {
                 var player = Players[index];
                 Plugin.Instance.UIManager.ClearTDMHUD(player.GamePlayer);
-                Plugin.Instance.UIManager.SendPreEndingUI(player.GamePlayer, EGameType.TDM, player.Team.TeamID == wonTeam.TeamID, BlueTeam.Score, RedTeam.Score);
+                Plugin.Instance.UIManager.SetupPreEndingUI(player.GamePlayer, EGameType.TDM, player.Team.TeamID == wonTeam.TeamID, BlueTeam.Score, RedTeam.Score);
             }
             TaskDispatcher.QueueOnMainThread(() =>
             {
-                Plugin.Instance.UIManager.SetupTDMEndingLeaderboard(Players, Location, wonTeam, BlueTeam, RedTeam);
+                Plugin.Instance.UIManager.SetupTDMLeaderboard(Players, Location, wonTeam, BlueTeam, RedTeam, false);
                 WipeItems();
             });
             yield return new WaitForSeconds(5);
             foreach (var player in Players)
             {
-                Plugin.Instance.UIManager.ShowTDMEndingLeaderboard(player.GamePlayer);
+                Plugin.Instance.UIManager.ShowTDMLeaderboard(player.GamePlayer);
             }
             yield return new WaitForSeconds(Config.EndingLeaderboardSeconds);
             foreach (var player in Players.ToList())
@@ -184,6 +184,7 @@ namespace UnturnedBlackout.GameTypes
                 Plugin.Instance.UIManager.SendTDMHUD(tPlayer, BlueTeam, RedTeam);
                 SpawnPlayer(tPlayer);
             }
+            Plugin.Instance.UIManager.SendPreEndingUI(tPlayer.GamePlayer);
 
             Plugin.Instance.UIManager.OnGameCountUpdated(this);
         }

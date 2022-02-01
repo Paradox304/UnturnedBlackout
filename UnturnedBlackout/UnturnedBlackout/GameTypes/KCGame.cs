@@ -123,17 +123,17 @@ namespace UnturnedBlackout.GameTypes
             {
                 var player = Players[index];
                 Plugin.Instance.UIManager.ClearKCHUD(player.GamePlayer);
-                Plugin.Instance.UIManager.SendPreEndingUI(player.GamePlayer, EGameType.KC, player.Team.TeamID == wonTeam.TeamID, BlueTeam.Score, RedTeam.Score);
+                Plugin.Instance.UIManager.SetupPreEndingUI(player.GamePlayer, EGameType.KC, player.Team.TeamID == wonTeam.TeamID, BlueTeam.Score, RedTeam.Score);
             }
             TaskDispatcher.QueueOnMainThread(() =>
             {
-                Plugin.Instance.UIManager.SetupKCEndingLeaderboard(Players, Location, wonTeam, BlueTeam, RedTeam);
+                Plugin.Instance.UIManager.SetupKCLeaderboard(Players, Location, wonTeam, BlueTeam, RedTeam, false);
                 WipeItems();
             });
             yield return new WaitForSeconds(5);
             foreach (var player in Players)
             {
-                Plugin.Instance.UIManager.ShowKCEndingLeaderboard(player.GamePlayer);
+                Plugin.Instance.UIManager.ShowKCLeaderboard(player.GamePlayer);
             }
             yield return new WaitForSeconds(Config.EndingLeaderboardSeconds);
             foreach (var player in Players.ToList())
@@ -187,6 +187,7 @@ namespace UnturnedBlackout.GameTypes
                 Plugin.Instance.UIManager.SendKCHUD(kPlayer, BlueTeam, RedTeam);
                 SpawnPlayer(kPlayer);
             }
+            Plugin.Instance.UIManager.SendPreEndingUI(kPlayer.GamePlayer);
 
             Plugin.Instance.UIManager.OnGameCountUpdated(this);
         }
@@ -432,6 +433,7 @@ namespace UnturnedBlackout.GameTypes
             if (P == null) return;
             var kPlayer = GetKCPlayer(player.CSteamID);
             if (kPlayer == null) return;
+            if (GamePhase == EGamePhase.Ending) return;
             Utility.Debug($"{player.CharacterName} picked up item with id {P.item.id}");
             var otherTeam = kPlayer.Team.TeamID == (byte)ETeam.Blue ? RedTeam : BlueTeam;
             
