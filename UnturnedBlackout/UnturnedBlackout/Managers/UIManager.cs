@@ -136,7 +136,7 @@ namespace UnturnedBlackout.Managers
             };
         }
 
-        public void SendLevelUpAnimation(GamePlayer player, int newRank)
+        public void SendLevelUpAnimation(GamePlayer player, uint newRank)
         {
             var icon = Config.LevelIcons.FirstOrDefault(k => k.MinRank >= newRank && newRank < k.MaxRank);
             if (icon == null)
@@ -146,6 +146,7 @@ namespace UnturnedBlackout.Managers
             EffectManager.sendUIEffect(27638, 27638, player.TransportConnection, true);
             EffectManager.sendUIEffectImageURL(27638, player.TransportConnection, true, "LevelUpIcon", icon.IconLink);
             EffectManager.sendUIEffectText(27638, player.TransportConnection, true, "LevelUpDesc", Plugin.Instance.Translate("Level_Up_Desc", newRank).ToRich());
+            EffectManager.sendUIEffectText(27638, player.TransportConnection, true, "LevelUpText", Plugin.Instance.Translate("Level_Up_Text").ToRich());
         } 
 
         public void SendHitmarkerSound(GamePlayer player)
