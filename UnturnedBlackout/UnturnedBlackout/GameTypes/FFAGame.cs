@@ -168,17 +168,15 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
-            Plugin.Instance.UIManager.ClearFFAHUD(player);
             var fPlayer = GetFFAPlayer(player.Player);
+
+            Plugin.Instance.UIManager.ClearPreEndingUI(player);
+            Plugin.Instance.UIManager.ClearFFAHUD(player);
 
             if (GamePhase == EGamePhase.Starting)
             {
                 Plugin.Instance.UIManager.ClearCountdownUI(player);
                 fPlayer.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1);
-            }
-            else if (GamePhase == EGamePhase.Ending)
-            {
-                Plugin.Instance.UIManager.ClearPreEndingUI(player);
             }
 
             if (fPlayer != null)
@@ -205,6 +203,13 @@ namespace UnturnedBlackout.GameTypes
                 Utility.Debug("Could'nt find the ffa player, returning");
                 return;
             }
+
+            if (fPlayer.GamePlayer.HasScoreboard)
+            {
+                fPlayer.GamePlayer.HasScoreboard = false;
+                Plugin.Instance.UIManager.HideFFALeaderboard(fPlayer.GamePlayer);
+            }
+
             var victimKS = fPlayer.KillStreak;
 
             Utility.Debug($"Game player found, player name: {fPlayer.GamePlayer.Player.CharacterName}");
@@ -430,6 +435,26 @@ namespace UnturnedBlackout.GameTypes
             }
             player.GamePlayer.Player.Player.teleportToLocationUnsafe(spawnPoint.GetSpawnPoint(), 0);
             player.GamePlayer.GiveSpawnProtection(Config.FFA.SpawnProtectionSeconds);
+        }
+
+        public override void PlayerLeaned(PlayerAnimator obj)
+        {
+            if (obj.lean != 1) return;
+            FFAPlayer fPlayer = GetFFAPlayer(obj.player);
+            if (fPlayer == null) return;
+            if (GamePhase == EGamePhase.Ending || GamePhase == EGamePhase.Starting) return;
+            Utility.Debug($"{obj.player.channel.owner.playerID.characterName} leaned, lean {obj.lean}");
+
+            if (fPlayer.GamePlayer.HasScoreboard)
+            {
+                fPlayer.GamePlayer.HasScoreboard = false;
+                Plugin.Instance.UIManager.HideFFALeaderboard(fPlayer.GamePlayer);
+            } else
+            {
+                fPlayer.GamePlayer.HasScoreboard = true;
+                Plugin.Instance.UIManager.SetupFFALeaderboard(fPlayer, Players, Location, true);
+                Plugin.Instance.UIManager.ShowFFALeaderboard(fPlayer.GamePlayer);
+            }
         }
 
         public IEnumerator SpawnUsedUp(FFASpawnPoint spawnPoint)

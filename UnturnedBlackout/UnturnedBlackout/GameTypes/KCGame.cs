@@ -201,17 +201,14 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
-            Plugin.Instance.UIManager.ClearKCHUD(player);
             var kPlayer = GetKCPlayer(player.Player);
 
+            Plugin.Instance.UIManager.ClearKCHUD(player);
+            Plugin.Instance.UIManager.ClearPreEndingUI(player);
             if (GamePhase == EGamePhase.Starting)
             {
                 Plugin.Instance.UIManager.ClearCountdownUI(player);
                 kPlayer.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1);
-            }
-            else if (GamePhase == EGamePhase.Ending)
-            {
-                Plugin.Instance.UIManager.ClearPreEndingUI(player);
             }
 
             if (kPlayer != null)
@@ -234,8 +231,14 @@ namespace UnturnedBlackout.GameTypes
                 Utility.Debug("Could'nt find the kc player, returning");
                 return;
             }
-            var victimKS = vPlayer.KillStreak;
 
+            if (vPlayer.GamePlayer.HasScoreboard)
+            {
+                vPlayer.GamePlayer.HasScoreboard = false;
+                Plugin.Instance.UIManager.HideKCLeaderboard(vPlayer.GamePlayer);
+            }
+
+            var victimKS = vPlayer.KillStreak;
             Utility.Debug($"Game player found, player name: {vPlayer.GamePlayer.Player.CharacterName}");
             vPlayer.OnDeath(killer);
             vPlayer.GamePlayer.OnDeath(killer);
@@ -507,6 +510,40 @@ namespace UnturnedBlackout.GameTypes
             var spawnPoint = spawnPoints[UnityEngine.Random.Range(0, spawnPoints.Count)];
             player.GamePlayer.Player.Player.teleportToLocationUnsafe(spawnPoint.GetSpawnPoint(), 0);
             player.GamePlayer.GiveSpawnProtection(Config.KC.SpawnProtectionSeconds);
+        }
+
+        public override void PlayerLeaned(PlayerAnimator obj)
+        {
+            if (obj.lean != 1) return;
+            KCPlayer kPlayer = GetKCPlayer(obj.player);
+            if (kPlayer == null) return;
+            if (GamePhase == EGamePhase.Ending || GamePhase == EGamePhase.Starting) return;
+            Utility.Debug($"{obj.player.channel.owner.playerID.characterName} leaned, lean {obj.lean}");
+
+            if (kPlayer.GamePlayer.HasScoreboard)
+            {   
+                kPlayer.GamePlayer.HasScoreboard = false;
+                Plugin.Instance.UIManager.HideKCLeaderboard(kPlayer.GamePlayer);
+            }
+            else
+            {
+                kPlayer.GamePlayer.HasScoreboard = true;
+                KCTeam wonTeam;
+                if (BlueTeam.Score > RedTeam.Score)
+                {
+                    wonTeam = BlueTeam;
+                }
+                else if (RedTeam.Score > BlueTeam.Score)
+                {
+                    wonTeam = RedTeam;
+                }
+                else
+                {
+                    wonTeam = new KCTeam(this, -1, true, 0);
+                }
+                Plugin.Instance.UIManager.SetupKCLeaderboard(kPlayer, Players, Location, wonTeam, BlueTeam, RedTeam, true);
+                Plugin.Instance.UIManager.ShowKCLeaderboard(kPlayer.GamePlayer);
+            }
         }
 
         public IEnumerator SpawnSwitch()

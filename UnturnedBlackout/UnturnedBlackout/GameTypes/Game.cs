@@ -43,7 +43,13 @@ namespace UnturnedBlackout.GameTypes
             UnturnedPlayerEvents.OnPlayerDeath += OnPlayerDeath;
             UnturnedPlayerEvents.OnPlayerRevive += OnPlayerRevive;
             UnturnedPlayerEvents.OnPlayerInventoryAdded += OnPlayerPickupItem;
+            PlayerAnimator.OnLeanChanged_Global += OnLeaned;
             DamageTool.damagePlayerRequested += OnPlayerDamaged;
+        }
+
+        private void OnLeaned(PlayerAnimator obj)
+        {
+            PlayerLeaned(obj);
         }
 
         private void OnPlayerPickupItem(UnturnedPlayer player, InventoryGroup inventoryGroup, byte inventoryIndex, ItemJar P)
@@ -186,6 +192,7 @@ namespace UnturnedBlackout.GameTypes
             UnturnedPlayerEvents.OnPlayerRevive -= OnPlayerRevive;
             UnturnedPlayerEvents.OnPlayerInventoryAdded -= OnPlayerPickupItem;
             DamageTool.damagePlayerRequested -= OnPlayerDamaged;
+            PlayerAnimator.OnLeanChanged_Global -= OnLeaned;
         }
 
         public abstract bool IsPlayerIngame(CSteamID steamID);
@@ -195,6 +202,7 @@ namespace UnturnedBlackout.GameTypes
         public abstract void AddPlayerToGame(GamePlayer player);
         public abstract void RemovePlayerFromGame(GamePlayer player);
         public abstract void PlayerPickupItem(UnturnedPlayer player, InventoryGroup inventoryGroup, byte inventoryIndex, ItemJar P);
+        public abstract void PlayerLeaned(PlayerAnimator obj);
         public abstract int GetPlayerCount();
     }
 }

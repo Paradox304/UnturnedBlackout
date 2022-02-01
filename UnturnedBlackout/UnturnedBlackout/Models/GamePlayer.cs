@@ -17,6 +17,7 @@ namespace UnturnedBlackout.Models
         public UnturnedPlayer Player { get; set; }
         public ITransportConnection TransportConnection { get; set; }
 
+        public bool HasScoreboard { get; set; }
         public bool HasSpawnProtection { get; set; }
         public Stack<CSteamID> LastDamager { get; set; }
 
@@ -182,6 +183,7 @@ namespace UnturnedBlackout.Models
                 Plugin.Instance.StopCoroutine(RespawnTimer);
             }
 
+            HasScoreboard = false;
             LastDamager.Clear();
             Plugin.Instance.UIManager.ClearDeathUI(this);
         }

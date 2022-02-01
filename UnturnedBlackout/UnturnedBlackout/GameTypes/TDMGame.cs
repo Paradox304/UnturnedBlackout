@@ -198,17 +198,15 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
-            Plugin.Instance.UIManager.ClearTDMHUD(player);
             var tPlayer = GetTDMPlayer(player.Player);
+
+            Plugin.Instance.UIManager.ClearTDMHUD(player);
+            Plugin.Instance.UIManager.ClearPreEndingUI(player);
 
             if (GamePhase == EGamePhase.Starting)
             {
                 Plugin.Instance.UIManager.ClearCountdownUI(player);
                 tPlayer.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1);
-            }
-            else if (GamePhase == EGamePhase.Ending)
-            {
-                Plugin.Instance.UIManager.ClearPreEndingUI(player);
             }
 
             if (tPlayer != null)
@@ -231,6 +229,13 @@ namespace UnturnedBlackout.GameTypes
                 Utility.Debug("Could'nt find the tdm player, returning");
                 return;
             }
+
+            if (tPlayer.GamePlayer.HasScoreboard)
+            {
+                tPlayer.GamePlayer.HasScoreboard = false;
+                Plugin.Instance.UIManager.HideTDMLeaderboard(tPlayer.GamePlayer);
+            }
+
             var victimKS = tPlayer.KillStreak;
 
             Utility.Debug($"Game player found, player name: {tPlayer.GamePlayer.Player.CharacterName}");
@@ -461,6 +466,40 @@ namespace UnturnedBlackout.GameTypes
             var spawnPoint = spawnPoints[UnityEngine.Random.Range(0, spawnPoints.Count)];
             player.GamePlayer.Player.Player.teleportToLocationUnsafe(spawnPoint.GetSpawnPoint(), 0);
             player.GamePlayer.GiveSpawnProtection(Config.TDM.SpawnProtectionSeconds);
+        }
+
+        public override void PlayerLeaned(PlayerAnimator obj)
+        {
+            if (obj.lean != 1) return;
+            TDMPlayer tPlayer = GetTDMPlayer(obj.player);
+            if (tPlayer == null) return;
+            if (GamePhase == EGamePhase.Ending || GamePhase == EGamePhase.Starting) return;
+            Utility.Debug($"{obj.player.channel.owner.playerID.characterName} leaned, lean {obj.lean}");
+
+            if (tPlayer.GamePlayer.HasScoreboard)
+            {
+                tPlayer.GamePlayer.HasScoreboard = false;
+                Plugin.Instance.UIManager.HideTDMLeaderboard(tPlayer.GamePlayer);
+            }
+            else
+            {
+                tPlayer.GamePlayer.HasScoreboard = true;
+                TDMTeam wonTeam;
+                if (BlueTeam.Score > RedTeam.Score)
+                {
+                    wonTeam = BlueTeam;
+                }
+                else if (RedTeam.Score > BlueTeam.Score)
+                {
+                    wonTeam = RedTeam;
+                }
+                else
+                {
+                    wonTeam = new TDMTeam(this, -1, true);
+                }
+                Plugin.Instance.UIManager.SetupTDMLeaderboard(tPlayer, Players, Location, wonTeam, BlueTeam, RedTeam, true);
+                Plugin.Instance.UIManager.ShowTDMLeaderboard(tPlayer.GamePlayer);
+            }
         }
 
         public IEnumerator SpawnSwitch()
