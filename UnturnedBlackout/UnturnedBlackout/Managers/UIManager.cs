@@ -34,6 +34,9 @@ namespace UnturnedBlackout.Managers
         public const ushort PreEndingUIID = 27636;
         public const short PreEndingUIKey = 27636;
 
+        public const ushort LevelUpID = 27638;
+        public const short LevelUpKey = 27638;
+
         public UIManager()
         {
             Config = Plugin.Instance.Configuration.Instance;
@@ -143,10 +146,11 @@ namespace UnturnedBlackout.Managers
             {
                 icon = Config.LevelIcons.FirstOrDefault(k => k.MinRank == 0);
             }
-            EffectManager.sendUIEffect(27638, 27638, player.TransportConnection, true);
-            EffectManager.sendUIEffectImageURL(27638, player.TransportConnection, true, "LevelUpIcon", icon.IconLink);
-            EffectManager.sendUIEffectText(27638, player.TransportConnection, true, "LevelUpDesc", Plugin.Instance.Translate("Level_Up_Desc", newRank).ToRich());
-            EffectManager.sendUIEffectText(27638, player.TransportConnection, true, "LevelUpText", Plugin.Instance.Translate("Level_Up_Text").ToRich());
+
+            EffectManager.sendUIEffect(LevelUpID, LevelUpKey, player.TransportConnection, true);
+            EffectManager.sendUIEffectImageURL(LevelUpKey, player.TransportConnection, true, "LevelUpIcon", icon.IconLink);
+            EffectManager.sendUIEffectText(LevelUpKey, player.TransportConnection, true, "LevelUpDesc", Plugin.Instance.Translate("Level_Up_Desc", newRank).ToRich());
+            EffectManager.sendUIEffectText(LevelUpKey, player.TransportConnection, true, "LevelUpText", Plugin.Instance.Translate("Level_Up_Text").ToRich());
         } 
 
         public void SendHitmarkerSound(GamePlayer player)
