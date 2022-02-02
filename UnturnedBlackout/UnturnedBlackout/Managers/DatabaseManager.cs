@@ -225,7 +225,7 @@ namespace UnturnedBlackout.Managers
                         }
                     }
 
-                    TaskDispatcher.QueueOnMainThread(() =>s
+                    TaskDispatcher.QueueOnMainThread(() =>
                     {
                         var player = UnturnedPlayer.FromCSteamID(steamID);
                         if (player != null)
