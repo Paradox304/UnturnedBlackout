@@ -224,7 +224,7 @@ namespace UnturnedBlackout.Managers
                             data.XP = (uint)newXP;
                         }
                     }
-
+                    s
                     TaskDispatcher.QueueOnMainThread(() =>
                     {
                         var player = UnturnedPlayer.FromCSteamID(steamID);
