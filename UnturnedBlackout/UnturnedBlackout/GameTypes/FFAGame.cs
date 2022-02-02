@@ -92,6 +92,11 @@ namespace UnturnedBlackout.GameTypes
             {
                 var player = Players[index];
                 Plugin.Instance.UIManager.ClearFFAHUD(player.GamePlayer);
+                if (player.GamePlayer.HasScoreboard)
+                {
+                    player.GamePlayer.HasScoreboard = false;
+                    Plugin.Instance.UIManager.HideFFALeaderboard(player.GamePlayer);
+                }
                 Plugin.Instance.UIManager.SetupPreEndingUI(player.GamePlayer, EGameType.FFA, index == 0, 0, 0);
             }
             TaskDispatcher.QueueOnMainThread(() =>

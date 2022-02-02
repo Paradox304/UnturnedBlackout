@@ -123,6 +123,11 @@ namespace UnturnedBlackout.GameTypes
             {
                 var player = Players[index];
                 Plugin.Instance.UIManager.ClearKCHUD(player.GamePlayer);
+                if (player.GamePlayer.HasScoreboard)
+                {
+                    player.GamePlayer.HasScoreboard = false;
+                    Plugin.Instance.UIManager.HideKCLeaderboard(player.GamePlayer);
+                }
                 Plugin.Instance.UIManager.SetupPreEndingUI(player.GamePlayer, EGameType.KC, player.Team.TeamID == wonTeam.TeamID, BlueTeam.Score, RedTeam.Score);
             }
             TaskDispatcher.QueueOnMainThread(() =>
@@ -446,6 +451,7 @@ namespace UnturnedBlackout.GameTypes
                 kPlayer.Score += Config.KillDeniedPoints;
                 kPlayer.KillsDenied++;
                 Plugin.Instance.UIManager.ShowXPUI(kPlayer.GamePlayer, Config.KC.XPPerKillDenied, Plugin.Instance.Translate("Kill_Denied").ToRich());
+                Plugin.Instance.UIManager.SendKillConfirmedSound(kPlayer.GamePlayer);
                 ThreadPool.QueueUserWorkItem(async (o) =>
                 {
                     await Plugin.Instance.DBManager.IncreasePlayerXPAsync(kPlayer.GamePlayer.SteamID, (uint)Config.KC.XPPerKillDenied);
@@ -459,6 +465,7 @@ namespace UnturnedBlackout.GameTypes
                 kPlayer.KillsConfirmed++;
                 kPlayer.Team.Score++;
                 Plugin.Instance.UIManager.ShowXPUI(kPlayer.GamePlayer, Config.KC.XPPerKillConfirmed, Plugin.Instance.Translate("Kill_Confirmed").ToRich());
+                Plugin.Instance.UIManager.SendKillDeniedSound(kPlayer.GamePlayer);
                 ThreadPool.QueueUserWorkItem(async (o) =>
                 {
                     await Plugin.Instance.DBManager.IncreasePlayerXPAsync(kPlayer.GamePlayer.SteamID, (uint)Config.KC.XPPerKillConfirmed);

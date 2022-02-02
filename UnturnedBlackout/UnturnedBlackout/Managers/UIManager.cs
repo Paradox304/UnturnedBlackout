@@ -143,10 +143,10 @@ namespace UnturnedBlackout.Managers
 
         public void SendLevelUpAnimation(GamePlayer player, uint newRank)
         {
-            var icon = Config.LevelIcons.FirstOrDefault(k => k.MinRank >= newRank && newRank < k.MaxRank);
+            var icon = Config.LevelIcons.FirstOrDefault(k => k.Rank == newRank);
             if (icon == null)
             {
-                icon = Config.LevelIcons.FirstOrDefault(k => k.MinRank == 0);
+                icon = Config.LevelIcons.FirstOrDefault(k => k.Rank == 0);
             }
 
             EffectManager.sendUIEffect(LevelUpID, LevelUpKey, player.TransportConnection, true);
@@ -587,6 +587,20 @@ namespace UnturnedBlackout.Managers
         public void HideKCLeaderboard(GamePlayer player)
         {
             EffectManager.sendUIEffectVisibility(PreEndingUIKey, player.TransportConnection, true, "Scoreboard2", false);
+        }
+
+        public void SendKillConfirmedSound(GamePlayer player)
+        {
+            var random = UnityEngine.Random.Range(0, 4);
+            EffectManager.sendUIEffectVisibility(SoundsKey, player.TransportConnection, true, $"KillConfirmed{random}", false);
+            EffectManager.sendUIEffectVisibility(SoundsKey, player.TransportConnection, true, $"KillConfirmed{random}", true);
+        }
+
+        public void SendKillDeniedSound(GamePlayer player)
+        {
+            var random = UnityEngine.Random.Range(0, 3);
+            EffectManager.sendUIEffectVisibility(SoundsKey, player.TransportConnection, true, $"KillDenied{random}", false);
+            EffectManager.sendUIEffectVisibility(SoundsKey, player.TransportConnection, true, $"KillDenied{random}", true);
         }
 
         public void ClearKCHUD(GamePlayer player)

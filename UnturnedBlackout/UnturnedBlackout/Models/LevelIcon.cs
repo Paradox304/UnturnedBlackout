@@ -8,14 +8,12 @@ namespace UnturnedBlackout.Models
 {
     public class LevelIcon
     {
-        public int MinRank { get; set; }
-        public int MaxRank { get; set; }
+        public int Rank { get; set; }
         public string IconLink { get; set; }
 
-        public LevelIcon(int minRank, int maxRank, string iconLink)
+        public LevelIcon(int rank, string iconLink)
         {
-            MinRank = minRank;
-            MaxRank = maxRank;
+            Rank = rank;
             IconLink = iconLink;
         }
 

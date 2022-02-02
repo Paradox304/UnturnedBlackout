@@ -2,6 +2,7 @@
 using SDG.NetTransport;
 using SDG.Unturned;
 using Steamworks;
+using System;
 using UnturnedBlackout.Database;
 using UnturnedBlackout.Enums;
 using UnturnedBlackout.GameTypes;
@@ -196,7 +197,6 @@ namespace UnturnedBlackout.Instances
         // Events
         public void OnXPChanged()
         {
-            Utility.Debug($"XP changed for {Player.CharacterName}");
             if (!Plugin.Instance.DBManager.PlayerCache.TryGetValue(SteamID, out PlayerData data))
             {
                 return;
@@ -204,7 +204,8 @@ namespace UnturnedBlackout.Instances
 
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "XPNum", Plugin.Instance.Translate("Level_Show", data.Level).ToRich());
             var neededXP = data.GetNeededXP();
-            var spaces = neededXP == 0 ? 0 : (int)(data.XP * 96 / neededXP);
+            var spaces = Math.Min(96, neededXP == 0 ? 0 : (int)(data.XP * 96 / neededXP));
+            Utility.Debug($"XP changed {Player.CharacterName}, XP: {data.XP}, Needed XP: {neededXP}, Spaces: {spaces}");
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "XPBarFill", spaces == 0 ? " " : new string(' ', spaces));
         }
     }

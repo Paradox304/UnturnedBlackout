@@ -125,9 +125,9 @@ namespace UnturnedBlackout
             };
             LevelIcons = new List<LevelIcon>
             {
-                new LevelIcon(0, 0, ""),
-                new LevelIcon(1, 10, ""),
-                new LevelIcon(10, 20, "")
+                new LevelIcon(0, ""),
+                new LevelIcon(1, ""),
+                new LevelIcon(2, "")
             };
             AllowDamageBarricades = new List<ushort> { 3, 4, 5 };
         }
