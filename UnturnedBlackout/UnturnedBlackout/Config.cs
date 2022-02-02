@@ -18,6 +18,7 @@ namespace UnturnedBlackout
         public string FFAKitName { get; set; }
         public string BlueKitName { get; set; }
         public string RedKitName { get; set; }
+        public string PlayerColorHexCode { get; set; }
 
         public bool EnableDebugLogs { get; set; }
 
@@ -70,12 +71,13 @@ namespace UnturnedBlackout
             DatabaseName = "s476_deathmatch";
             DatabasePassword = "k8gxtTbytcA5DXlqbn86e@+1";
             DatabasePort = "3306";
-            PlayersTableName = "UL_Players";
+            PlayersTableName = "UB_Players";
             CacheRefreshSeconds = 600;
 
             FFAKitName = "Starter";
             RedKitName = "Red";
             BlueKitName = "Blue";
+            PlayerColorHexCode = "#FFFF00";
 
             EnableDebugLogs = true;
 
