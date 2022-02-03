@@ -371,6 +371,8 @@ namespace UnturnedBlackout.GameTypes
                 {
                     Plugin.Instance.StartCoroutine(GameEnd(kPlayer.Team));
                 }
+                OnKill(tPlayer.GamePlayer, kPlayer.GamePlayer, kPlayer.GamePlayer.Player.Player.equipment.itemID);
+
                 ThreadPool.QueueUserWorkItem(async (o) =>
                 {
                     if (limb == ELimb.SKULL)
@@ -565,6 +567,11 @@ namespace UnturnedBlackout.GameTypes
         public override void PlayerPickupItem(UnturnedPlayer player, InventoryGroup inventoryGroup, byte inventoryIndex, ItemJar P)
         {
 
+        }
+
+        public override List<GamePlayer> GetPlayers()
+        {
+            return Players.Select(k => k.GamePlayer).ToList();
         }
     }
 }

@@ -22,11 +22,14 @@ namespace UnturnedBlackout.GameTypes
 
         public EGamePhase GamePhase { get; set; }
 
+        public List<Feed> Killfeed { get; set; }
+
         public Dictionary<int, VoteChoice> VoteChoices { get; set; }
         public List<GamePlayer> Vote0 { get; set; }
         public List<GamePlayer> Vote1 { get; set; }
 
         public Coroutine VoteEnder { get; set; }
+        public Coroutine KillFeedChecker { get; set; }
 
         public Game(EGameType gameMode, ArenaLocation location)
         {
@@ -35,6 +38,7 @@ namespace UnturnedBlackout.GameTypes
             Location = location;
 
             GamePhase = EGamePhase.Starting;
+            Killfeed = new List<Feed>();
 
             VoteChoices = new Dictionary<int, VoteChoice>();
             Vote0 = new List<GamePlayer>();
@@ -45,6 +49,8 @@ namespace UnturnedBlackout.GameTypes
             UnturnedPlayerEvents.OnPlayerInventoryAdded += OnPlayerPickupItem;
             PlayerAnimator.OnLeanChanged_Global += OnLeaned;
             DamageTool.damagePlayerRequested += OnPlayerDamaged;
+
+            KillFeedChecker = Plugin.Instance.StartCoroutine(UpdateKillfeed());
         }
 
         private void OnLeaned(PlayerAnimator obj)
@@ -60,6 +66,10 @@ namespace UnturnedBlackout.GameTypes
         public void StartVoting()
         {
             Utility.Debug($"Trying to start voting on location {Location.LocationName} with game mode {GameMode}");
+            if (KillFeedChecker != null)
+            {
+                Plugin.Instance.StopCoroutine(KillFeedChecker);
+            }
             if (!Plugin.Instance.GameManager.CanStartVoting())
             {
                 Utility.Debug("There is already a voting going on, returning");
@@ -152,6 +162,52 @@ namespace UnturnedBlackout.GameTypes
             Plugin.Instance.UIManager.OnGameVoteCountUpdated(this);
         }
 
+        public void OnKill(GamePlayer killer, GamePlayer victim, ushort weaponID)
+        {
+            Utility.Debug($"Adding killfeed for killer {killer.Player.CharacterName} victim {victim.Player.CharacterName} with weapon id {weaponID}");
+            var icon = Config.KillFeedIcons.FirstOrDefault(k => k.WeaponID == weaponID);
+            if (icon == null)
+            {
+                Utility.Debug("Icon not found, return");
+                return;
+            }
+
+            var feed = new Feed($"{killer.Player.CharacterName.ToUnrich()} {icon.Symbol} {victim.Player.CharacterName.ToUnrich()}", DateTime.UtcNow);
+            if (Killfeed.Count < Config.MaxKillFeed)
+            {
+                Utility.Debug($"{Killfeed.Count} is less than {Config.MaxKillFeed}, add");
+                Killfeed.Add(feed);
+                return;
+            }
+
+            Utility.Debug($"Killfeed is not less than {Config.MaxKillFeed} find the oldest one");
+            var removeKillfeed = Killfeed.OrderBy(k => k.Time).FirstOrDefault();
+            Utility.Debug($"Found the oldest one with date {removeKillfeed.Time}");
+            Killfeed.Remove(removeKillfeed);
+            Utility.Debug("Removed the old killfeed, and add the new one");
+            Killfeed.Add(feed);
+            OnKillfeedUpdated();
+        }
+
+        public void OnKillfeedUpdated()
+        {
+            Plugin.Instance.UIManager.SendKillfeed(GetPlayers(), GameMode, Killfeed);
+        }
+
+        public IEnumerator UpdateKillfeed()
+        {
+            while (true)
+            {
+                yield return new WaitForSeconds(Config.KillFeedSeconds);
+                var prevCount = Killfeed.Count;
+                Killfeed.RemoveAll(k => (DateTime.UtcNow - k.Time).TotalSeconds >= Config.KillFeedSeconds);
+                if (prevCount != Killfeed.Count)
+                {
+                    OnKillfeedUpdated();
+                }
+            }
+        }
+
         public void EndVoting(VoteChoice choice)
         {
             Utility.Debug($"Stopping voting for game");
@@ -204,5 +260,6 @@ namespace UnturnedBlackout.GameTypes
         public abstract void PlayerPickupItem(UnturnedPlayer player, InventoryGroup inventoryGroup, byte inventoryIndex, ItemJar P);
         public abstract void PlayerLeaned(PlayerAnimator obj);
         public abstract int GetPlayerCount();
+        public abstract List<GamePlayer> GetPlayers();
     }
 }

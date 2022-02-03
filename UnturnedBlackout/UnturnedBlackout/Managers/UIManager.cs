@@ -160,6 +160,41 @@ namespace UnturnedBlackout.Managers
             EffectManager.sendUIEffect(27637, 27637, player.TransportConnection, true);
         }
 
+        public void SendKillfeed(List<GamePlayer> players, EGameType type, List<Feed> killfeed)
+        {
+            short key;
+            switch (type)
+            {
+                case EGameType.FFA:
+                    key = FFAKey;
+                    break;
+                case EGameType.TDM:
+                    key = TDMKey;
+                    break;
+                case EGameType.KC:
+                    key = TDMKey;
+                    break;
+                default:
+                    return;
+            }
+
+            var feedText = "";
+            foreach (var feed in killfeed)
+            {
+                feedText += feed.KillMessage + "\n";
+            }
+
+            if (!string.IsNullOrEmpty(feedText))
+            {
+                feedText = $"<font={Config.DefaultFont}>" + feedText + "</font>";
+            }
+
+            foreach (var player in players)
+            {
+                EffectManager.sendUIEffectText(key, player.TransportConnection, true, "Killfeed", feedText); 
+            }
+        }
+
         public void SendDeathUI(GamePlayer victim, PlayerData killerData)
         {
             victim.Player.Player.enablePluginWidgetFlag(EPluginWidgetFlags.Modal);
@@ -369,10 +404,8 @@ namespace UnturnedBlackout.Managers
 
         public void SetupTDMLeaderboard(TDMPlayer player, List<TDMPlayer> players, ArenaLocation location, TDMTeam wonTeam, TDMTeam blueTeam, TDMTeam redTeam, bool isPlaying)
         {
-            Utility.Debug($"Setting up TDM leaderboard for {player.GamePlayer.Player.CharacterName}");
             var bluePlayers = players.Where(k => k.Team.TeamID == (byte)ETeam.Blue).ToList();
             var redPlayers = players.Where(k => k.Team.TeamID == (byte)ETeam.Red).ToList();
-            Utility.Debug($"{bluePlayers.Count} blue players, {redPlayers.Count} red players");
 
             EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, "MatchResult0", Plugin.Instance.Translate(player.Team == wonTeam ? (isPlaying ? "Winning_Text" : "Victory_Text") : (isPlaying ? "Losing_Text" : "Defeat_Text")).ToRich());
             EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, "MapName0", location.LocationName.ToUpper());
@@ -380,10 +413,9 @@ namespace UnturnedBlackout.Managers
             EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, "TeamScoreR0", redTeam.Score.ToString());
             EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, "TeamNameB0", Plugin.Instance.Translate("Blue_Team_Name").ToRich());
             EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, "TeamScoreB0", blueTeam.Score.ToString());
-            Utility.Debug("2");
+
             for (int i = 0; i <= 9; i++)
             {
-                Utility.Debug($"{i}");
                 EffectManager.sendUIEffectVisibility(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"PlayerStats{i}B0", false);
                 EffectManager.sendUIEffectVisibility(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"PlayerStats{i}R0", false);
             }
@@ -397,7 +429,6 @@ namespace UnturnedBlackout.Managers
                     continue;
                 }
 
-                Utility.Debug($"{i} {ply.GamePlayer.Player.CharacterName}");
                 var kills = (decimal)ply.Kills;
                 var deaths = (decimal)ply.Deaths;
 
@@ -422,7 +453,6 @@ namespace UnturnedBlackout.Managers
                     continue;
                 }
 
-                Utility.Debug($"{i} {ply.GamePlayer.Player.CharacterName}");
                 var kills = (decimal)ply.Kills;
                 var deaths = (decimal)ply.Deaths;
 
@@ -507,10 +537,8 @@ namespace UnturnedBlackout.Managers
 
         public void SetupKCLeaderboard(KCPlayer player, List<KCPlayer> players, ArenaLocation location, KCTeam wonTeam, KCTeam blueTeam, KCTeam redTeam, bool isPlaying)
         {
-            Utility.Debug($"Setting up KC leaderboard for {player.GamePlayer.Player.CharacterName}");
             var bluePlayers = players.Where(k => k.Team.TeamID == (byte)ETeam.Blue).ToList();
             var redPlayers = players.Where(k => k.Team.TeamID == (byte)ETeam.Red).ToList();
-            Utility.Debug($"Found {bluePlayers.Count} blue players, {redPlayers.Count} red players");
 
             EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, "MatchResult2", Plugin.Instance.Translate(player.Team == wonTeam ? (isPlaying ? "Winning_Text" : "Victory_Text") : (isPlaying ? "Losing_Text" : "Defeat_Text")).ToRich());
             EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, "MapName2", location.LocationName.ToUpper());
@@ -518,10 +546,9 @@ namespace UnturnedBlackout.Managers
             EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, "TeamScoreR1", redTeam.Score.ToString());
             EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, "TeamNameB1", Plugin.Instance.Translate("Blue_Team_Name").ToRich());
             EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, "TeamScoreB1", blueTeam.Score.ToString());
-            Utility.Debug("2");
+
             for (int i = 0; i <= 9; i++)
             {
-                Utility.Debug($"i: {i}");
                 EffectManager.sendUIEffectVisibility(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"PlayerStats{i}B1", false);
                 EffectManager.sendUIEffectVisibility(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"PlayerStats{i}R1", false);
             }
@@ -535,7 +562,6 @@ namespace UnturnedBlackout.Managers
                     continue;
                 }
 
-                Utility.Debug($"{i} {ply.GamePlayer.Player.CharacterName}");
                 var kills = (decimal)ply.Kills;
                 var deaths = (decimal)ply.Deaths;
                 var objective = ply.KillsConfirmed + ply.KillsDenied;
@@ -562,7 +588,6 @@ namespace UnturnedBlackout.Managers
                     continue;
                 }
 
-                Utility.Debug($"{i} {ply.GamePlayer.Player.CharacterName}");
                 var kills = (decimal)ply.Kills;
                 var deaths = (decimal)ply.Deaths;
                 var objective = ply.KillsConfirmed + ply.KillsDenied;

@@ -150,6 +150,8 @@
     <Compile Include="Managers\HUDManager.cs" />
     <Compile Include="Managers\UIManager.cs" />
     <Compile Include="Models\ArenaLocation.cs" />
+    <Compile Include="Models\Feed.cs" />
+    <Compile Include="Models\FeedIcon.cs" />
     <Compile Include="Models\FFAConfig.cs" />
     <Compile Include="Models\KCConfig.cs" />
     <Compile Include="Models\KCPlayer.cs" />

@@ -334,7 +334,7 @@ namespace UnturnedBlackout.GameTypes
                 Plugin.Instance.UIManager.ShowXPUI(kPlayer.GamePlayer, xpGained, xpText);
                 Plugin.Instance.UIManager.SendMultiKillSound(kPlayer.GamePlayer, kPlayer.MultipleKills);
                 kPlayer.CheckKills();
-
+                OnKill(fPlayer.GamePlayer, kPlayer.GamePlayer, kPlayer.GamePlayer.Player.Player.equipment.itemID);
                 foreach (var ply in Players)
                 {
                     Plugin.Instance.UIManager.UpdateFFATopUI(ply, Players);
@@ -499,6 +499,11 @@ namespace UnturnedBlackout.GameTypes
         public override void PlayerPickupItem(UnturnedPlayer player, InventoryGroup inventoryGroup, byte inventoryIndex, ItemJar P)
         {
             
+        }
+
+        public override List<GamePlayer> GetPlayers()
+        {
+            return Players.Select(k => k.GamePlayer).ToList();
         }
     }
 }

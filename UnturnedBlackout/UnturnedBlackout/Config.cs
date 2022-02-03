@@ -20,6 +20,10 @@ namespace UnturnedBlackout
         public string RedKitName { get; set; }
         public string PlayerColorHexCode { get; set; }
 
+        public int MaxKillFeed { get; set; }
+        public int DefaultFont { get; set; }
+        public int KillFeedSeconds { get; set; }
+
         public bool EnableDebugLogs { get; set; }
 
         public Vector3 LobbySpawn { get; set; }
@@ -62,6 +66,7 @@ namespace UnturnedBlackout
 
         public List<ArenaLocation> ArenaLocations { get; set; }
         public List<LevelIcon> LevelIcons { get; set; }
+        public List<FeedIcon> KillFeedIcons { get; set; }
         public List<ushort> AllowDamageBarricades { get; set; }
 
         public void LoadDefaults()
@@ -78,6 +83,10 @@ namespace UnturnedBlackout
             RedKitName = "Red";
             BlueKitName = "Blue";
             PlayerColorHexCode = "#FFFF00";
+
+            MaxKillFeed = 5;
+            DefaultFont = 12;
+            KillFeedSeconds = 5;
 
             EnableDebugLogs = true;
 
@@ -130,6 +139,10 @@ namespace UnturnedBlackout
                 new LevelIcon(0, ""),
                 new LevelIcon(1, ""),
                 new LevelIcon(2, "")
+            };
+            KillFeedIcons = new List<FeedIcon>
+            {
+                
             };
             AllowDamageBarricades = new List<ushort> { 3, 4, 5 };
         }

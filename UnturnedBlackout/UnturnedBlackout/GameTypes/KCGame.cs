@@ -361,7 +361,7 @@ namespace UnturnedBlackout.GameTypes
                 Plugin.Instance.UIManager.ShowXPUI(kPlayer.GamePlayer, xpGained, xpText);
                 Plugin.Instance.UIManager.SendMultiKillSound(kPlayer.GamePlayer, kPlayer.MultipleKills);
                 kPlayer.CheckKills();
-
+                OnKill(vPlayer.GamePlayer, kPlayer.GamePlayer, kPlayer.GamePlayer.Player.Player.equipment.itemID);
                 ThreadPool.QueueUserWorkItem(async (o) =>
                 {
                     if (limb == ELimb.SKULL)
@@ -606,6 +606,11 @@ namespace UnturnedBlackout.GameTypes
         public override int GetPlayerCount()
         {
             return Players.Count;
+        }
+
+        public override List<GamePlayer> GetPlayers()
+        {
+            return Players.Select(k => k.GamePlayer).ToList();
         }
     }
 }
