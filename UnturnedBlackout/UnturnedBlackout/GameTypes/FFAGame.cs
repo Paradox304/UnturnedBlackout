@@ -334,7 +334,7 @@ namespace UnturnedBlackout.GameTypes
                 Plugin.Instance.UIManager.ShowXPUI(kPlayer.GamePlayer, xpGained, xpText);
                 Plugin.Instance.UIManager.SendMultiKillSound(kPlayer.GamePlayer, kPlayer.MultipleKills);
                 kPlayer.CheckKills();
-                OnKill(fPlayer.GamePlayer, kPlayer.GamePlayer, kPlayer.GamePlayer.Player.Player.equipment.itemID);
+                OnKill(kPlayer.GamePlayer, fPlayer.GamePlayer, kPlayer.GamePlayer.Player.Player.equipment.itemID, "white", "white");
                 foreach (var ply in Players)
                 {
                     Plugin.Instance.UIManager.UpdateFFATopUI(ply, Players);

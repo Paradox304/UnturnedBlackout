@@ -19,6 +19,8 @@ namespace UnturnedBlackout
         public string BlueKitName { get; set; }
         public string RedKitName { get; set; }
         public string PlayerColorHexCode { get; set; }
+        public string BlueHexCode { get; set; }
+        public string RedHexCode { get; set; }
 
         public int MaxKillFeed { get; set; }
         public int DefaultFont { get; set; }
@@ -83,7 +85,8 @@ namespace UnturnedBlackout
             RedKitName = "Red";
             BlueKitName = "Blue";
             PlayerColorHexCode = "#FFFF00";
-
+            BlueHexCode = "#89CFF0";
+            RedHexCode = "#DC143C";
             MaxKillFeed = 5;
             DefaultFont = 12;
             KillFeedSeconds = 5;

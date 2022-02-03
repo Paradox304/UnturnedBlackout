@@ -361,7 +361,7 @@ namespace UnturnedBlackout.GameTypes
                 Plugin.Instance.UIManager.ShowXPUI(kPlayer.GamePlayer, xpGained, xpText);
                 Plugin.Instance.UIManager.SendMultiKillSound(kPlayer.GamePlayer, kPlayer.MultipleKills);
                 kPlayer.CheckKills();
-                OnKill(vPlayer.GamePlayer, kPlayer.GamePlayer, kPlayer.GamePlayer.Player.Player.equipment.itemID);
+                OnKill(kPlayer.GamePlayer, vPlayer.GamePlayer, kPlayer.GamePlayer.Player.Player.equipment.itemID, kPlayer.Team == BlueTeam ? Config.BlueHexCode : Config.RedHexCode, vPlayer.Team == BlueTeam ? Config.BlueHexCode : Config.RedHexCode);
                 ThreadPool.QueueUserWorkItem(async (o) =>
                 {
                     if (limb == ELimb.SKULL)

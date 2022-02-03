@@ -371,7 +371,7 @@ namespace UnturnedBlackout.GameTypes
                 {
                     Plugin.Instance.StartCoroutine(GameEnd(kPlayer.Team));
                 }
-                OnKill(tPlayer.GamePlayer, kPlayer.GamePlayer, kPlayer.GamePlayer.Player.Player.equipment.itemID);
+                OnKill(kPlayer.GamePlayer, tPlayer.GamePlayer, kPlayer.GamePlayer.Player.Player.equipment.itemID, kPlayer.Team == BlueTeam ? Config.BlueHexCode : Config.RedHexCode, tPlayer.Team == BlueTeam ? Config.BlueHexCode : Config.RedHexCode);
 
                 ThreadPool.QueueUserWorkItem(async (o) =>
                 {

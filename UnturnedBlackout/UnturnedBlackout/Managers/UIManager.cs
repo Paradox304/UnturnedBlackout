@@ -162,6 +162,7 @@ namespace UnturnedBlackout.Managers
 
         public void SendKillfeed(List<GamePlayer> players, EGameType type, List<Feed> killfeed)
         {
+            Utility.Debug($"Sending killfeed for {players.Count} players for gamemode {type} with {killfeed.Count} feeds");
             short key;
             switch (type)
             {
@@ -177,20 +178,21 @@ namespace UnturnedBlackout.Managers
                 default:
                     return;
             }
-
+            Utility.Debug($"Key selected {key}");
             var feedText = "";
             foreach (var feed in killfeed)
             {
                 feedText += feed.KillMessage + "\n";
             }
-
+            Utility.Debug("Built the killfeed");
             if (!string.IsNullOrEmpty(feedText))
             {
-                feedText = $"<font={Config.DefaultFont}>" + feedText + "</font>";
+                feedText = $"<size={Config.DefaultFont}>" + feedText + "</size>";
             }
-
+            Utility.Debug($"{feedText}");
             foreach (var player in players)
             {
+                Utility.Debug($"Sending killfeed to {player.Player.CharacterName}");
                 EffectManager.sendUIEffectText(key, player.TransportConnection, true, "Killfeed", feedText); 
             }
         }

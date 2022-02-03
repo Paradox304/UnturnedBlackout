@@ -162,7 +162,7 @@ namespace UnturnedBlackout.GameTypes
             Plugin.Instance.UIManager.OnGameVoteCountUpdated(this);
         }
 
-        public void OnKill(GamePlayer killer, GamePlayer victim, ushort weaponID)
+        public void OnKill(GamePlayer killer, GamePlayer victim, ushort weaponID, string killerColor, string victimColor)
         {
             Utility.Debug($"Adding killfeed for killer {killer.Player.CharacterName} victim {victim.Player.CharacterName} with weapon id {weaponID}");
             var icon = Config.KillFeedIcons.FirstOrDefault(k => k.WeaponID == weaponID);
@@ -172,11 +172,12 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
-            var feed = new Feed($"{killer.Player.CharacterName.ToUnrich()} {icon.Symbol} {victim.Player.CharacterName.ToUnrich()}", DateTime.UtcNow);
+            var feed = new Feed($"<color={killerColor}>{killer.Player.CharacterName.ToUnrich()}</color> {icon.Symbol} <color={victimColor}>{victim.Player.CharacterName.ToUnrich()}</color>", DateTime.UtcNow);
             if (Killfeed.Count < Config.MaxKillFeed)
             {
                 Utility.Debug($"{Killfeed.Count} is less than {Config.MaxKillFeed}, add");
                 Killfeed.Add(feed);
+                OnKillfeedUpdated();
                 return;
             }
 
@@ -199,10 +200,9 @@ namespace UnturnedBlackout.GameTypes
             while (true)
             {
                 yield return new WaitForSeconds(Config.KillFeedSeconds);
-                var prevCount = Killfeed.Count;
-                Killfeed.RemoveAll(k => (DateTime.UtcNow - k.Time).TotalSeconds >= Config.KillFeedSeconds);
-                if (prevCount != Killfeed.Count)
+                if (Killfeed.RemoveAll(k => (DateTime.UtcNow - k.Time).TotalSeconds >= Config.KillFeedSeconds) > 0)
                 {
+                    Utility.Debug("Updating killfeed");
                     OnKillfeedUpdated();
                 }
             }
