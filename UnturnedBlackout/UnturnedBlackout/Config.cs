@@ -142,7 +142,13 @@ namespace UnturnedBlackout
             };
             KillFeedIcons = new List<FeedIcon>
             {
-                
+                new FeedIcon(28090, ""),
+                new FeedIcon(28540, ""),
+                new FeedIcon(28000, ""),
+                new FeedIcon(28270, ""),
+                new FeedIcon(28720, ""),
+                new FeedIcon(28810, ""),
+                new FeedIcon(28060, "")
             };
             AllowDamageBarricades = new List<ushort> { 3, 4, 5 };
         }
