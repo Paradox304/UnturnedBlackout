@@ -113,7 +113,7 @@ namespace UnturnedBlackout
 
         public static string ToColor(this object value, bool isPlayer)
         {
-            return isPlayer ? $"[color={Plugin.Instance.Configuration.Instance.PlayerColorHexCode}]{value}[/color]" : value.ToString();
+            return isPlayer ? $"<color={Plugin.Instance.Configuration.Instance.PlayerColorHexCode}>{value}</color>" : value.ToString();
         }
 
         public static List<uint> UsedFrequencies = new List<uint>();
