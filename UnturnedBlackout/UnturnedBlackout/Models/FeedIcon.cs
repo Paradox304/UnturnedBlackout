@@ -16,5 +16,10 @@ namespace UnturnedBlackout.Models
             WeaponID = weaponID;
             Symbol = symbol;
         }
+
+        public FeedIcon()
+        {
+
+        }
     }
 }
