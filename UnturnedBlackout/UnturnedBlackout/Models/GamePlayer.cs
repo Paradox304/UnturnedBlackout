@@ -102,14 +102,11 @@ namespace UnturnedBlackout.Models
         // Death screen
         public void OnDeath(CSteamID killer)
         {
-            Utility.Debug("1");
             if (!Plugin.Instance.DBManager.PlayerCache.TryGetValue(killer, out PlayerData killerData))
             {
-                Utility.Debug("2");
                 TaskDispatcher.QueueOnMainThread(() => Player.Player.life.ServerRespawn(false));
                 return;
             }
-            Utility.Debug("3");
             if (DamageChecker != null)
             {
                 Plugin.Instance.StopCoroutine(DamageChecker);
@@ -119,7 +116,6 @@ namespace UnturnedBlackout.Models
                 Plugin.Instance.StopCoroutine(Healer);
             }
 
-            Utility.Debug("4");
             Plugin.Instance.UIManager.SendDeathUI(this, killerData);
             RespawnTimer = Plugin.Instance.StartCoroutine(RespawnTime());
         }

@@ -139,9 +139,9 @@ namespace UnturnedBlackout
             };
             LevelIcons = new List<LevelIcon>
             {
-                new LevelIcon(0, ""),
-                new LevelIcon(1, ""),
-                new LevelIcon(2, "")
+                new LevelIcon(0, "", "", ""),
+                new LevelIcon(1, "", "", ""),
+                new LevelIcon(2, "", "", "")
             };
             KillFeedIcons = new List<FeedIcon>
             {
