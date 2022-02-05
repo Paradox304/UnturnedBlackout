@@ -49,8 +49,14 @@ namespace UnturnedBlackout.GameTypes
             UnturnedPlayerEvents.OnPlayerInventoryAdded += OnPlayerPickupItem;
             PlayerAnimator.OnLeanChanged_Global += OnLeaned;
             DamageTool.damagePlayerRequested += OnPlayerDamaged;
+            PlayerStance.OnStanceChanged_Global += OnStanceChanged;
 
             KillFeedChecker = Plugin.Instance.StartCoroutine(UpdateKillfeed());
+        }
+
+        private void OnStanceChanged(PlayerStance obj)
+        {
+            PlayerStanceChanged(obj);
         }
 
         private void OnLeaned(PlayerAnimator obj)
@@ -165,8 +171,7 @@ namespace UnturnedBlackout.GameTypes
         public void OnKill(GamePlayer killer, GamePlayer victim, ushort weaponID, string killerColor, string victimColor)
         {
             Utility.Debug($"Adding killfeed for killer {killer.Player.CharacterName} victim {victim.Player.CharacterName} with weapon id {weaponID}");
-            var icon = Config.KillFeedIcons.FirstOrDefault(k => k.WeaponID == weaponID);
-            if (icon == null)
+            if (!Plugin.Instance.UIManager.KillFeedIcons.TryGetValue(weaponID, out FeedIcon icon))
             {
                 Utility.Debug("Icon not found, return");
                 return;
@@ -259,6 +264,7 @@ namespace UnturnedBlackout.GameTypes
         public abstract void RemovePlayerFromGame(GamePlayer player);
         public abstract void PlayerPickupItem(UnturnedPlayer player, InventoryGroup inventoryGroup, byte inventoryIndex, ItemJar P);
         public abstract void PlayerLeaned(PlayerAnimator obj);
+        public abstract void PlayerStanceChanged(PlayerStance obj);
         public abstract int GetPlayerCount();
         public abstract List<GamePlayer> GetPlayers();
     }

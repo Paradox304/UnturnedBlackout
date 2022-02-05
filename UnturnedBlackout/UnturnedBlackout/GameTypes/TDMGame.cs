@@ -356,7 +356,7 @@ namespace UnturnedBlackout.GameTypes
                     kPlayer.PlayersKilled.Add(tPlayer.GamePlayer.SteamID, 1);
                 }
                 kPlayer.LastKill = DateTime.UtcNow;
-
+                kPlayer.XP += xpGained;
                 Players.Sort((x, y) => y.Kills.CompareTo(x.Kills));
 
                 Plugin.Instance.UIManager.ShowXPUI(kPlayer.GamePlayer, xpGained, xpText);
@@ -507,6 +507,17 @@ namespace UnturnedBlackout.GameTypes
                 Plugin.Instance.UIManager.SetupTDMLeaderboard(tPlayer, Players, Location, wonTeam, BlueTeam, RedTeam, true);
                 Plugin.Instance.UIManager.ShowTDMLeaderboard(tPlayer.GamePlayer);
             }
+        }
+
+        public override void PlayerStanceChanged(PlayerStance obj)
+        {
+            var tPlayer = GetTDMPlayer(obj.player);
+            if (tPlayer == null)
+            {
+                return;
+            }
+            Utility.Debug($"{tPlayer.GamePlayer.Player.CharacterName} changed stance to {obj.stance}");
+            tPlayer.GamePlayer.OnStanceChanged(obj.stance);
         }
 
         public IEnumerator SpawnSwitch()

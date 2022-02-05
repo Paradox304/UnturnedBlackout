@@ -134,6 +134,14 @@ namespace UnturnedBlackout.Managers
                     EffectManager.sendUIEffectText(Key, connection, true, "AmmoNum", "1");
                     EffectManager.sendUIEffectText(Key, connection, true, "ReserveNum", " / 0");
                 }
+
+                var player = Plugin.Instance.GameManager.GetGamePlayer(equipment.player);
+                if (player != null)
+                {
+                    player.LastEquippedPage = equipment.equippedPage;
+                    player.LastEquippedX = equipment.equipped_x;
+                    player.LastEquippedY = equipment.equipped_y;
+                }
             });
         }
 

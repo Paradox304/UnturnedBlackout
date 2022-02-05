@@ -203,25 +203,27 @@ namespace UnturnedBlackout.Managers
                             data.XP = newXp;
                         }
 
-                        var neededXP = data.GetNeededXP();
-                        if (data.XP >= neededXP)
+                        if (data.TryGetNeededXP(out int neededXP))
                         {
-                            var newXP = data.XP - neededXP;
-                            await new MySqlCommand($"UPDATE `{Config.PlayersTableName}` SET `XP` = {newXP}, `Level` = `Level` + 1 WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-                            obj = await new MySqlCommand($"Select `Level` FROM `{Config.PlayersTableName}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-                            if (obj is uint level)
+                            if (data.XP >= neededXP)
                             {
-                                data.Level = level;
-                                TaskDispatcher.QueueOnMainThread(() =>
+                                var newXP = data.XP - neededXP;
+                                await new MySqlCommand($"UPDATE `{Config.PlayersTableName}` SET `XP` = {newXP}, `Level` = `Level` + 1 WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                                obj = await new MySqlCommand($"Select `Level` FROM `{Config.PlayersTableName}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                                if (obj is uint level)
                                 {
-                                    var player = Plugin.Instance.GameManager.GetGamePlayer(data.SteamID);
-                                    if (player != null)
+                                    data.Level = level;
+                                    TaskDispatcher.QueueOnMainThread(() =>
                                     {
-                                        Plugin.Instance.UIManager.SendLevelUpAnimation(player, level);
-                                    }
-                                });
+                                        var player = Plugin.Instance.GameManager.GetGamePlayer(data.SteamID);
+                                        if (player != null)
+                                        {
+                                            Plugin.Instance.UIManager.SendLevelUpAnimation(player, level);
+                                        }
+                                    });
+                                }
+                                data.XP = (uint)newXP;
                             }
-                            data.XP = (uint)newXP;
                         }
                     }
 

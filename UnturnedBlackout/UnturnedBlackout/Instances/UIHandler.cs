@@ -206,8 +206,11 @@ namespace UnturnedBlackout.Instances
             var ui = Plugin.Instance.UIManager;
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "XPNum", Plugin.Instance.Translate("Level_Show", data.Level).ToRich());
             EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "XPIcon", ui.Icons.TryGetValue(data.Level, out LevelIcon icon) ? icon.IconLink54 : (ui.Icons.TryGetValue(0, out icon) ? icon.IconLink54 : ""));
-            var neededXP = data.GetNeededXP();
-            var spaces = Math.Min(96, neededXP == 0 ? 0 : (int)(data.XP * 96 / neededXP));
+            int spaces = 0;
+            if (data.TryGetNeededXP(out int neededXP))
+            {
+                spaces = Math.Min(96, neededXP == 0 ? 0 : (int)(data.XP * 96 / neededXP));
+            }
             Utility.Debug($"XP changed {Player.CharacterName}, XP: {data.XP}, Needed XP: {neededXP}, Spaces: {spaces}");
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "XPBarFill", spaces == 0 ? " " : new string(' ', spaces));
         }

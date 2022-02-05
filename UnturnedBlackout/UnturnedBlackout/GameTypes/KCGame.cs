@@ -356,6 +356,8 @@ namespace UnturnedBlackout.GameTypes
                     kPlayer.PlayersKilled.Add(vPlayer.GamePlayer.SteamID, 1);
                 }
                 kPlayer.LastKill = DateTime.UtcNow;
+                kPlayer.XP += xpGained;
+
                 Players.Sort((x, y) => y.Kills.CompareTo(x.Kills));
 
                 Plugin.Instance.UIManager.ShowXPUI(kPlayer.GamePlayer, xpGained, xpText);
@@ -449,6 +451,7 @@ namespace UnturnedBlackout.GameTypes
             {
                 Utility.Debug("Player denied kill");
                 kPlayer.Score += Config.KillDeniedPoints;
+                kPlayer.XP += Config.KC.XPPerKillDenied;
                 kPlayer.KillsDenied++;
                 Plugin.Instance.UIManager.ShowXPUI(kPlayer.GamePlayer, Config.KC.XPPerKillDenied, Plugin.Instance.Translate("Kill_Denied").ToRich());
                 Plugin.Instance.UIManager.SendKillConfirmedSound(kPlayer.GamePlayer);
@@ -462,6 +465,7 @@ namespace UnturnedBlackout.GameTypes
             {
                 Utility.Debug("Player confirmed kill");
                 kPlayer.Score += Config.KillConfirmedPoints;
+                kPlayer.XP += Config.KC.XPPerKillConfirmed;
                 kPlayer.KillsConfirmed++;
                 kPlayer.Team.Score++;
                 Plugin.Instance.UIManager.ShowXPUI(kPlayer.GamePlayer, Config.KC.XPPerKillConfirmed, Plugin.Instance.Translate("Kill_Confirmed").ToRich());
@@ -551,6 +555,17 @@ namespace UnturnedBlackout.GameTypes
                 Plugin.Instance.UIManager.SetupKCLeaderboard(kPlayer, Players, Location, wonTeam, BlueTeam, RedTeam, true);
                 Plugin.Instance.UIManager.ShowKCLeaderboard(kPlayer.GamePlayer);
             }
+        }
+
+        public override void PlayerStanceChanged(PlayerStance obj)
+        {
+            var kPlayer = GetKCPlayer(obj.player);
+            if (kPlayer == null)
+            {
+                return;
+            }
+            Utility.Debug($"{kPlayer.GamePlayer.Player.CharacterName} changed stance to {obj.stance}");
+            kPlayer.GamePlayer.OnStanceChanged(obj.stance);
         }
 
         public IEnumerator SpawnSwitch()

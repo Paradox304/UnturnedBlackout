@@ -9,6 +9,7 @@ namespace UnturnedBlackout.Models
     {
         public GamePlayer GamePlayer { get; set; }
 
+        public int XP { get; set; }
         public int Score { get; set; }
         public int Kills { get; set; }
         public int Assists { get; set; }
@@ -23,6 +24,7 @@ namespace UnturnedBlackout.Models
         {
             GamePlayer = gamePlayer;
 
+            XP = 0;
             Score = 0;
             Kills = 0;
             Deaths = 0;

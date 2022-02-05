@@ -30,9 +30,6 @@ namespace UnturnedBlackout
 
         public Vector3 LobbySpawn { get; set; }
 
-        public int BaseXP { get; set; }
-        public double CommonRatio { get; set; }
-
         public int LastDamageAfterHealSeconds { get; set; }
         public float HealSeconds { get; set; }
         public int HealAmount { get; set; }
@@ -69,6 +66,8 @@ namespace UnturnedBlackout
         public List<ArenaLocation> ArenaLocations { get; set; }
         public List<LevelIcon> LevelIcons { get; set; }
         public List<FeedIcon> KillFeedIcons { get; set; }
+        public List<LevelXP> LevelsXP { get; set; }
+
         public List<ushort> AllowDamageBarricades { get; set; }
 
         public void LoadDefaults()
@@ -94,9 +93,6 @@ namespace UnturnedBlackout
             EnableDebugLogs = true;
 
             LobbySpawn = Vector3.zero;
-
-            BaseXP = 200;
-            CommonRatio = 1.20;
 
             LastDamageAfterHealSeconds = 5;
             HealSeconds = 0.065f;
@@ -152,6 +148,11 @@ namespace UnturnedBlackout
                 new FeedIcon(28720, ""),
                 new FeedIcon(28810, ""),
                 new FeedIcon(28060, "")
+            };
+            LevelsXP = new List<LevelXP>
+            {
+                new LevelXP(2, 100),
+                new LevelXP(3, 200)
             };
             AllowDamageBarricades = new List<ushort> { 3, 4, 5 };
         }

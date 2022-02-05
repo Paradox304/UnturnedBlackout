@@ -14,6 +14,7 @@ namespace UnturnedBlackout.Models
 
         public KCTeam Team { get; set; }
 
+        public int XP { get; set; }
         public int Score { get; set; }
         public int Kills { get; set; }
         public int Deaths { get; set; }
@@ -31,6 +32,7 @@ namespace UnturnedBlackout.Models
             GamePlayer = gamePlayer;
             Team = team;
 
+            XP = 0;
             Score = 0;
             Kills = 0;
             Deaths = 0;

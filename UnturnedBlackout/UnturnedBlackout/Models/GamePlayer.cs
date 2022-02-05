@@ -21,6 +21,12 @@ namespace UnturnedBlackout.Models
         public bool HasSpawnProtection { get; set; }
         public Stack<CSteamID> LastDamager { get; set; }
 
+        public byte LastEquippedPage { get; set; }
+        public byte LastEquippedX { get; set; }
+        public byte LastEquippedY { get; set; }
+
+        public EPlayerStance PreviousStance { get; set; }
+
         public Coroutine ProtectionRemover { get; set; }
         public Coroutine DamageChecker { get; set; }
         public Coroutine Healer { get; set; }
@@ -31,6 +37,7 @@ namespace UnturnedBlackout.Models
             SteamID = player.CSteamID;
             Player = player;
             TransportConnection = transportConnection;
+            PreviousStance = EPlayerStance.STAND;
             LastDamager = new Stack<CSteamID>(100);
         }
 
@@ -117,6 +124,7 @@ namespace UnturnedBlackout.Models
             }
 
             Plugin.Instance.UIManager.SendDeathUI(this, killerData);
+            PreviousStance = EPlayerStance.STAND;
             RespawnTimer = Plugin.Instance.StartCoroutine(RespawnTime());
         }
 
@@ -133,7 +141,6 @@ namespace UnturnedBlackout.Models
         // Equipping and refilling on guns on respawn
         public void OnRevived()
         {
-            bool hasEquip = false;
 
             for (byte i = 0; i <= 1; i++)
             {
@@ -145,16 +152,22 @@ namespace UnturnedBlackout.Models
                     {
                         item.item.state[10] = mAsset.amount;
                     }
-
-                    if (!hasEquip)
-                    {
-                        Player.Player.equipment.tryEquip(i, item.x, item.y);
-                        hasEquip = true;
-                    }
                 }
             }
 
+            Player.Player.equipment.tryEquip(LastEquippedPage, LastEquippedX, LastEquippedY);
             Plugin.Instance.UIManager.ClearDeathUI(this);
+        }
+
+
+        // Stance changing
+        public void OnStanceChanged(EPlayerStance newStance)
+        {
+            if (PreviousStance == EPlayerStance.CLIMB && newStance != EPlayerStance.CLIMB)
+            {
+                Player.Player.equipment.tryEquip(LastEquippedPage, LastEquippedX, LastEquippedY);
+            }
+            PreviousStance = newStance;
         }
 
         public void OnGameLeft()

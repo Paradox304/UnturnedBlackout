@@ -1,6 +1,7 @@
 ﻿using Steamworks;
 using System;
 using System.Threading;
+using UnturnedBlackout.Models;
 
 namespace UnturnedBlackout.Database
 {
@@ -43,10 +44,16 @@ namespace UnturnedBlackout.Database
             Deaths = deaths;
         }
 
-        public int GetNeededXP()
+        public bool TryGetNeededXP(out int xp)
         {
-            var config = Plugin.Instance.Configuration.Instance;
-            return (int)(config.BaseXP * Math.Pow(config.CommonRatio, Level));
+            var ui = Plugin.Instance.UIManager;
+            if (ui.LevelsXPNeeded.TryGetValue(Level + 1, out LevelXP xpNeeded))
+            {
+                xp = xpNeeded.XPNeeded;
+                return true;
+            }
+            xp = 0;
+            return false;
         }
 
         public void CheckMultipleKills(int multiKills)

@@ -18,6 +18,9 @@ namespace UnturnedBlackout.Managers
         public Config Config { get; set; }
 
         public Dictionary<uint, LevelIcon> Icons { get; set; }
+        public Dictionary<uint, LevelXP> LevelsXPNeeded { get; set; }
+        public Dictionary<ushort, FeedIcon> KillFeedIcons { get; set; }
+
         public List<UIHandler> UIHandlers { get; set; }
 
         public const ushort FFAID = 27620;
@@ -44,6 +47,9 @@ namespace UnturnedBlackout.Managers
         {
             Config = Plugin.Instance.Configuration.Instance;
             Icons = Config.LevelIcons.ToDictionary(k => k.Rank);
+            LevelsXPNeeded = Config.LevelsXP.ToDictionary(k => k.Level);
+            KillFeedIcons = Config.KillFeedIcons.ToDictionary(k => k.WeaponID);
+
             UIHandlers = new List<UIHandler>();
 
             EffectManager.onEffectButtonClicked += OnButtonClicked;

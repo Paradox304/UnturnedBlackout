@@ -328,6 +328,7 @@ namespace UnturnedBlackout.GameTypes
                     kPlayer.PlayersKilled.Add(fPlayer.GamePlayer.SteamID, 1);
                 }
                 kPlayer.LastKill = DateTime.UtcNow;
+                kPlayer.XP += xpGained;
 
                 Players.Sort((x, y) => y.Kills.CompareTo(x.Kills));
 
@@ -460,6 +461,17 @@ namespace UnturnedBlackout.GameTypes
                 Plugin.Instance.UIManager.SetupFFALeaderboard(fPlayer, Players, Location, true);
                 Plugin.Instance.UIManager.ShowFFALeaderboard(fPlayer.GamePlayer);
             }
+        }
+
+        public override void PlayerStanceChanged(PlayerStance obj)
+        {
+            var fPlayer = GetFFAPlayer(obj.player);
+            if (fPlayer == null)
+            {
+                return;
+            }
+            Utility.Debug($"{fPlayer.GamePlayer.Player.CharacterName} changed stance to {obj.stance}");
+            fPlayer.GamePlayer.OnStanceChanged(obj.stance);
         }
 
         public IEnumerator SpawnUsedUp(FFASpawnPoint spawnPoint)
