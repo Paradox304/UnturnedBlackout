@@ -620,7 +620,7 @@ namespace UnturnedBlackout.GameTypes
 
         public override bool IsPlayerIngame(CSteamID steamID)
         {
-            return Players.Exists(k => k.GamePlayer.SteamID == steamID);
+            return PlayersLookup.ContainsKey(steamID);
         }
 
         public override int GetPlayerCount()

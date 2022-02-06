@@ -163,9 +163,12 @@ namespace UnturnedBlackout.Models
         // Stance changing
         public void OnStanceChanged(EPlayerStance newStance)
         {
+            Utility.Debug($"{Player.CharacterName} previous stance {PreviousStance} and new stance {newStance}");
             if (PreviousStance == EPlayerStance.CLIMB && newStance != EPlayerStance.CLIMB)
             {
-                Player.Player.equipment.tryEquip(LastEquippedPage, LastEquippedX, LastEquippedY);
+                Utility.Debug($"Page: {LastEquippedPage}, X: {LastEquippedX}, Y: {LastEquippedY}");
+                TaskDispatcher.QueueOnMainThread(() => Player.Player.equipment.tryEquip(LastEquippedPage, LastEquippedX, LastEquippedY));
+                
             }
             PreviousStance = newStance;
         }

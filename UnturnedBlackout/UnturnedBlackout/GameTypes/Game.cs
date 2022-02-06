@@ -49,12 +49,11 @@ namespace UnturnedBlackout.GameTypes
             UnturnedPlayerEvents.OnPlayerInventoryAdded += OnPlayerPickupItem;
             PlayerAnimator.OnLeanChanged_Global += OnLeaned;
             DamageTool.damagePlayerRequested += OnPlayerDamaged;
-            PlayerStance.OnStanceChanged_Global += OnStanceChanged;
 
             KillFeedChecker = Plugin.Instance.StartCoroutine(UpdateKillfeed());
         }
 
-        private void OnStanceChanged(PlayerStance obj)
+        public void OnStanceChanged(PlayerStance obj)
         {
             PlayerStanceChanged(obj);
         }

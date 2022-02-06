@@ -7,6 +7,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 using UnturnedBlackout.Database;
+using UnturnedBlackout.GameTypes;
 
 namespace UnturnedBlackout.Managers
 {
@@ -38,6 +39,7 @@ namespace UnturnedBlackout.Managers
 
             player.Player.equipment.onEquipRequested += OnEquip;
             player.Player.inventory.onDropItemRequested += OnDropItem;
+            player.Player.stance.onStanceUpdated += () => OnStanceUpdated(player.Player);
 
             EffectManager.sendUIEffect(ID, Key, player.Player.channel.GetOwnerTransportConnection(), true);
             // Sound UI
@@ -45,10 +47,19 @@ namespace UnturnedBlackout.Managers
             //OnHealthChanged(player, player.Player.life.health);
         }
 
+        private void OnStanceUpdated(Player player)
+        {
+            if (Plugin.Instance.GameManager.TryGetCurrentGame(player.channel.owner.playerID.steamID, out Game game))
+            {
+                game.OnStanceChanged(player.stance);
+            }
+        }
+
         private void OnDisconnected(UnturnedPlayer player)
         {
             player.Player.equipment.onEquipRequested -= OnEquip;
             player.Player.inventory.onDropItemRequested -= OnDropItem;
+            player.Player.stance.onStanceUpdated -= () => OnStanceUpdated(player.Player);
         }
 
         private void OnDropItem(PlayerInventory inventory, Item item, ref bool shouldAllow)
