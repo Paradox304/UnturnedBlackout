@@ -20,6 +20,8 @@
         public int ShutdownXP { get; set; }
         public int DominationXP { get; set; }
 
+        public float WinMultipler { get; set; }
+
         public int ScoreLimit { get; set; }
         public int SpawnProtectionSeconds { get; set; }
 
@@ -28,7 +30,7 @@
 
         }
 
-        public TDMConfig(int startSeconds, int endSeconds, int xPPerKill, int xPPerMeleeKill, int xPPerKillHeadshot, int xPPerAssist, int baseXPKS, int increaseXPPerKS, int baseXPMK, int increaseXPPerMK, int mKSeconds, int shutdownXP, int dominationXP, int scoreLimit, int spawnProtectionSeconds)
+        public TDMConfig(int startSeconds, int endSeconds, int xPPerKill, int xPPerMeleeKill, int xPPerKillHeadshot, int xPPerAssist, int baseXPKS, int increaseXPPerKS, int baseXPMK, int increaseXPPerMK, int mKSeconds, int shutdownXP, int dominationXP, float winMultipler, int scoreLimit, int spawnProtectionSeconds)
         {
             StartSeconds = startSeconds;
             EndSeconds = endSeconds;
@@ -43,6 +45,7 @@
             MKSeconds = mKSeconds;
             ShutdownXP = shutdownXP;
             DominationXP = dominationXP;
+            WinMultipler = winMultipler;
             ScoreLimit = scoreLimit;
             SpawnProtectionSeconds = spawnProtectionSeconds;
         }

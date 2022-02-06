@@ -125,6 +125,11 @@ namespace UnturnedBlackout.GameTypes
                     player.GamePlayer.HasScoreboard = false;
                     Plugin.Instance.UIManager.HideTDMLeaderboard(player.GamePlayer);
                 }
+                if (player.Team == wonTeam)
+                {
+                    var xp = player.XP * Config.TDM.WinMultipler;
+                    ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DBManager.IncreasePlayerXPAsync(player.GamePlayer.SteamID, (uint)xp));
+                }
                 Plugin.Instance.UIManager.SetupPreEndingUI(player.GamePlayer, EGameType.TDM, player.Team.TeamID == wonTeam.TeamID, BlueTeam.Score, RedTeam.Score);
             }
             TaskDispatcher.QueueOnMainThread(() =>

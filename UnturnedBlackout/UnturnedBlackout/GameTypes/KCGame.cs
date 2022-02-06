@@ -128,6 +128,11 @@ namespace UnturnedBlackout.GameTypes
                     player.GamePlayer.HasScoreboard = false;
                     Plugin.Instance.UIManager.HideKCLeaderboard(player.GamePlayer);
                 }
+                if (player.Team == wonTeam)
+                {
+                    var xp = player.XP * Config.KC.WinMultipler;
+                    ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DBManager.IncreasePlayerXPAsync(player.GamePlayer.SteamID, (uint)xp));
+                }
                 Plugin.Instance.UIManager.SetupPreEndingUI(player.GamePlayer, EGameType.KC, player.Team.TeamID == wonTeam.TeamID, BlueTeam.Score, RedTeam.Score);
             }
             TaskDispatcher.QueueOnMainThread(() =>

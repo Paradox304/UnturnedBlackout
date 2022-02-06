@@ -98,6 +98,11 @@ namespace UnturnedBlackout.GameTypes
                     Plugin.Instance.UIManager.HideFFALeaderboard(player.GamePlayer);
                 }
                 Plugin.Instance.UIManager.SetupPreEndingUI(player.GamePlayer, EGameType.FFA, index == 0, 0, 0);
+                if (index == 0)
+                {
+                    var xp = player.XP * Config.FFA.WinMultipler;
+                    ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DBManager.IncreasePlayerXPAsync(player.GamePlayer.SteamID, (uint)xp));
+                }
             }
             TaskDispatcher.QueueOnMainThread(() =>
             {

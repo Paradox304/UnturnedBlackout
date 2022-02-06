@@ -123,9 +123,9 @@ namespace UnturnedBlackout
             RedDogTagID = 26820;
             BlueDogTagID = 26821;
 
-            FFA = new FFAConfig(15, 600, 50, 60, 50, 20, 10, 5, 10, 5, 10, 15, 15, 15, 2);
-            TDM = new TDMConfig(15, 600, 50, 60, 50, 20, 10, 5, 10, 5, 10, 15, 15, 15, 2);
-            KC = new KCConfig(15, 600, 50, 60, 50, 20, 10, 10, 10, 5, 10, 5, 10, 15, 15, 15, 2);
+            FFA = new FFAConfig(15, 600, 50, 60, 50, 20, 10, 5, 10, 5, 10, 15, 15, 1.5f, 15, 2);
+            TDM = new TDMConfig(15, 600, 50, 60, 50, 20, 10, 5, 10, 5, 10, 15, 15, 1.5f, 15, 2);
+            KC = new KCConfig(15, 600, 50, 60, 50, 20, 10, 10, 10, 5, 10, 5, 10, 15, 15, 1.5f, 15, 2);
 
             ArenaLocations = new List<ArenaLocation>
             {

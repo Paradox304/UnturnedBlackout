@@ -29,6 +29,8 @@ namespace UnturnedBlackout.Models
         public int ShutdownXP { get; set; }
         public int DominationXP { get; set; }
 
+        public float WinMultipler { get; set; }
+
         public int ScoreLimit { get; set; }
         public int SpawnProtectionSeconds { get; set; }
 
@@ -37,7 +39,7 @@ namespace UnturnedBlackout.Models
 
         }
 
-        public KCConfig(int startSeconds, int endSeconds, int xPPerKill, int xPPerMeleeKill, int xPPerKillHeadshot, int xPPerAssist, int xPPerKillConfirmed, int xPPerKillDenied, int baseXPKS, int increaseXPPerKS, int baseXPMK, int increaseXPPerMK, int mKSeconds, int shutdownXP, int dominationXP, int scoreLimit, int spawnProtectionSeconds)
+        public KCConfig(int startSeconds, int endSeconds, int xPPerKill, int xPPerMeleeKill, int xPPerKillHeadshot, int xPPerAssist, int xPPerKillConfirmed, int xPPerKillDenied, int baseXPKS, int increaseXPPerKS, int baseXPMK, int increaseXPPerMK, int mKSeconds, int shutdownXP, int dominationXP, float winMultipler, int scoreLimit, int spawnProtectionSeconds)
         {
             StartSeconds = startSeconds;
             EndSeconds = endSeconds;
@@ -54,6 +56,7 @@ namespace UnturnedBlackout.Models
             MKSeconds = mKSeconds;
             ShutdownXP = shutdownXP;
             DominationXP = dominationXP;
+            WinMultipler = winMultipler;
             ScoreLimit = scoreLimit;
             SpawnProtectionSeconds = spawnProtectionSeconds;
         }
