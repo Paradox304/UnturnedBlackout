@@ -37,9 +37,6 @@ namespace UnturnedBlackout
 
             Level.onPostLevelLoaded += OnLevelLoaded;
             PlayerVoice.onRelayVoice += OnVoice;
-            ChatManager.onChatted += OnChatted;
-            ChatManager.onServerFormattingMessage += OnServerFormattingMessage;
-            ChatManager.onServerSendingMessage += OnServerSendingMessage;
 
             ObjectManager.onDamageObjectRequested += OnDamageObject;
             ResourceManager.onDamageResourceRequested += OnDamageResource;
@@ -47,16 +44,6 @@ namespace UnturnedBlackout
             StructureManager.onDamageStructureRequested += OnDamageStructure;
 
             Logger.Log("Unturned Blackout has been loaded");
-        }
-
-        private void OnServerSendingMessage(ref string text, ref Color color, SteamPlayer fromPlayer, SteamPlayer toPlayer, EChatMode mode, ref string iconURL, ref bool useRichTextFormatting)
-        {
-            throw new NotImplementedException();
-        }
-
-        private void OnServerFormattingMessage(SteamPlayer speaker, EChatMode mode, ref string text)
-        {
-            throw new NotImplementedException();
         }
 
         protected override void Unload()
@@ -67,7 +54,6 @@ namespace UnturnedBlackout
 
             Level.onPostLevelLoaded -= OnLevelLoaded;
             PlayerVoice.onRelayVoice -= OnVoice;
-            ChatManager.onChatted -= OnChatted;
 
             ObjectManager.onDamageObjectRequested -= OnDamageObject;
             ResourceManager.onDamageResourceRequested -= OnDamageResource;
@@ -122,11 +108,9 @@ namespace UnturnedBlackout
 
         private void OnLevelLoaded(int level)
         {
-            Utility.Debug("LEVEL LOADED, INITIALIZING GAME MANAGER AND HUD MANAGER");
             GameManager = new GameManager();
             HUDManager = new HUDManager();
 
-            Utility.Debug("CHANGING ALL MAGAZINES TO REFILL WHEN THE PLAYER RELOADS");
             var shouldFillAfterDetach = typeof(ItemMagazineAsset).GetProperty("shouldFillAfterDetach", BindingFlags.Public | BindingFlags.Instance);
             var magazines = Assets.find(EAssetType.ITEM).OfType<ItemMagazineAsset>();
             foreach (var mag in magazines)
@@ -134,7 +118,6 @@ namespace UnturnedBlackout
                 shouldFillAfterDetach.GetSetMethod(true).Invoke(mag, new object[] { true });
             }
 
-            Utility.Debug("CHANGING ALL MASKS TO HAVE EARPIECES IN THEM");
             var isEarpiece = typeof(ItemMaskAsset).GetField("_isEarpiece", BindingFlags.NonPublic | BindingFlags.Instance);
             var masks = Assets.find(EAssetType.ITEM).OfType<ItemMaskAsset>();
             foreach (var mask in masks)

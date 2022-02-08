@@ -23,12 +23,12 @@ namespace UnturnedBlackout
 
             foreach (var c in value)
             {
-                if (c == '[')
+                if (c == '[' || c == '<')
                 {
                     omit = true;
                     continue;
                 }
-                else if (c == ']')
+                else if (c == ']' || c == '>')
                 {
                     omit = false;
                     continue;
@@ -41,6 +41,7 @@ namespace UnturnedBlackout
 
                 newString += c;
             }
+
             return newString;
         }
 

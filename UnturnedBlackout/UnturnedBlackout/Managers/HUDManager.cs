@@ -40,7 +40,6 @@ namespace UnturnedBlackout.Managers
             player.Player.equipment.onEquipRequested += OnEquip;
             player.Player.inventory.onDropItemRequested += OnDropItem;
             player.Player.stance.onStanceUpdated += () => OnStanceUpdated(player.Player);
-
             EffectManager.sendUIEffect(ID, Key, player.Player.channel.GetOwnerTransportConnection(), true);
             // Sound UI
             EffectManager.sendUIEffect(27634, 27634, player.Player.channel.GetOwnerTransportConnection(), true);

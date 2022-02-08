@@ -455,6 +455,12 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
+            if (text.Substring(0, 1) == "/")
+            {
+                return;
+            }
+
+            Utility.Debug($"{player.Player.CharacterName} sent a message {text} on mode {chatMode}");
             isVisible = false;
             TaskDispatcher.QueueOnMainThread(() =>
             {
@@ -464,7 +470,7 @@ namespace UnturnedBlackout.GameTypes
                 }
 
                 var iconLink = Plugin.Instance.UIManager.Icons.TryGetValue(data.Level, out LevelIcon icon) ? icon.IconLink : (Plugin.Instance.UIManager.Icons.TryGetValue(0, out icon) ? icon.IconLink : "");
-                var updatedText = $"<color={kPlayer.Team.Info.ChatPlayerHexCode}>{player.Player.CharacterName.ToUnrich().Trim()}</color>: <color={kPlayer.Team.Info.ChatMessageHexCode}>{text.ToUnrich()}</color>";
+                var updatedText = $"<color={kPlayer.Team.Info.ChatPlayerHexCode}>{player.Player.CharacterName.Trim()}</color>: <color={kPlayer.Team.Info.ChatMessageHexCode}>{text.ToUnrich()}</color>";
 
                 if (chatMode == EChatMode.GLOBAL)
                 {
@@ -476,7 +482,7 @@ namespace UnturnedBlackout.GameTypes
                 }
 
                 var teamPlayers = Players.Where(k => k.Team == kPlayer.Team);
-                foreach (var reciever in Players)
+                foreach (var reciever in teamPlayers)
                 {
                     ChatManager.serverSendMessage(updatedText, Color.white, toPlayer: reciever.GamePlayer.Player.SteamPlayer(), iconURL: iconLink, useRichTextFormatting: true);
                 }

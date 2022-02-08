@@ -431,6 +431,11 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
+            if (text.Substring(0, 1) == "/")
+            {
+                return;
+            }
+
             isVisible = false;
             TaskDispatcher.QueueOnMainThread(() =>
             {
@@ -440,7 +445,7 @@ namespace UnturnedBlackout.GameTypes
                 }
 
                 var iconLink = Plugin.Instance.UIManager.Icons.TryGetValue(data.Level, out LevelIcon icon) ? icon.IconLink : (Plugin.Instance.UIManager.Icons.TryGetValue(0, out icon) ? icon.IconLink : "");
-                var updatedText = $"<color={Config.FFA.ChatPlayerHexCode}>{player.Player.CharacterName.ToUnrich().Trim()}</color>: <color={Config.FFA.ChatMessageHexCode}>{text.ToUnrich()}</color>";
+                var updatedText = $"<color={Config.FFA.ChatPlayerHexCode}>{player.Player.CharacterName.Trim()}</color>: <color={Config.FFA.ChatMessageHexCode}>{text.ToUnrich()}</color>";
 
                 foreach (var reciever in Players)
                 {
