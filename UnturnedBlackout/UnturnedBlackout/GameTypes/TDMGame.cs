@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using UnityEngine;
+using UnturnedBlackout.Database;
 using UnturnedBlackout.Enums;
 using UnturnedBlackout.Models;
 
@@ -51,8 +52,11 @@ namespace UnturnedBlackout.GameTypes
             Players = new List<TDMPlayer>();
             PlayersLookup = new Dictionary<CSteamID, TDMPlayer>();
 
-            BlueTeam = new TDMTeam(this, (byte)ETeam.Blue, false);
-            RedTeam = new TDMTeam(this, (byte)ETeam.Red, false);
+            var blueTeamInfo = Config.TeamsInfo.FirstOrDefault(k => k.TeamID == location.BlueTeamID);
+            var redTeamInfo = Config.TeamsInfo.FirstOrDefault(k => k.TeamID == location.RedTeamID);
+
+            BlueTeam = new TDMTeam(this, (byte)ETeam.Blue, false, blueTeamInfo);
+            RedTeam = new TDMTeam(this, (byte)ETeam.Red, false, redTeamInfo);
 
             GameStarter = Plugin.Instance.StartCoroutine(StartGame());
         }
@@ -102,7 +106,7 @@ namespace UnturnedBlackout.GameTypes
                 wonTeam = RedTeam;
             } else
             {
-                wonTeam = new TDMTeam(this, -1, true);
+                wonTeam = new TDMTeam(this, -1, true, new TeamInfo());
             }
             Plugin.Instance.StartCoroutine(GameEnd(wonTeam));
         }
@@ -130,7 +134,7 @@ namespace UnturnedBlackout.GameTypes
                     var xp = player.XP * Config.TDM.WinMultipler;
                     ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DBManager.IncreasePlayerXPAsync(player.GamePlayer.SteamID, (uint)xp));
                 }
-                Plugin.Instance.UIManager.SetupPreEndingUI(player.GamePlayer, EGameType.TDM, player.Team.TeamID == wonTeam.TeamID, BlueTeam.Score, RedTeam.Score);
+                Plugin.Instance.UIManager.SetupPreEndingUI(player.GamePlayer, EGameType.TDM, player.Team.TeamID == wonTeam.TeamID, BlueTeam.Score, RedTeam.Score, BlueTeam.Info.TeamName, RedTeam.Info.TeamName);
             }
             TaskDispatcher.QueueOnMainThread(() =>
             {
@@ -376,7 +380,7 @@ namespace UnturnedBlackout.GameTypes
                 {
                     Plugin.Instance.StartCoroutine(GameEnd(kPlayer.Team));
                 }
-                OnKill(kPlayer.GamePlayer, tPlayer.GamePlayer, kPlayer.GamePlayer.Player.Player.equipment.itemID, kPlayer.Team == BlueTeam ? Config.BlueHexCode : Config.RedHexCode, tPlayer.Team == BlueTeam ? Config.BlueHexCode : Config.RedHexCode);
+                OnKill(kPlayer.GamePlayer, tPlayer.GamePlayer, kPlayer.GamePlayer.Player.Player.equipment.itemID, kPlayer.Team.Info.KillFeedHexCode, tPlayer.Team.Info.KillFeedHexCode);
 
                 ThreadPool.QueueUserWorkItem(async (o) =>
                 {
@@ -452,12 +456,48 @@ namespace UnturnedBlackout.GameTypes
             SpawnPlayer(tPlayer);
         }
 
+        public override void OnChatMessageSent(GamePlayer player, EChatMode chatMode, string text, ref bool isVisible)
+        {
+            var tPlayer = GetTDMPlayer(player.Player);
+            if (tPlayer == null)
+            {
+                return;
+            }
+
+            isVisible = false;
+            TaskDispatcher.QueueOnMainThread(() =>
+            {
+                if (!Plugin.Instance.DBManager.PlayerCache.TryGetValue(player.SteamID, out PlayerData data))
+                {
+                    return;
+                }
+
+                var iconLink = Plugin.Instance.UIManager.Icons.TryGetValue(data.Level, out LevelIcon icon) ? icon.IconLink : (Plugin.Instance.UIManager.Icons.TryGetValue(0, out icon) ? icon.IconLink : "");
+                var updatedText = $"<color={tPlayer.Team.Info.ChatPlayerHexCode}>{player.Player.CharacterName.ToUnrich().Trim()}</color>: <color={tPlayer.Team.Info.ChatMessageHexCode}>{text.ToUnrich()}</color>";
+
+                if (chatMode == EChatMode.GLOBAL)
+                {
+                    foreach (var reciever in Players)
+                    {
+                        ChatManager.serverSendMessage(updatedText, Color.white, toPlayer: reciever.GamePlayer.Player.SteamPlayer(), iconURL: iconLink, useRichTextFormatting: true);
+                    }
+                    return;
+                }
+
+                var teamPlayers = Players.Where(k => k.Team == tPlayer.Team);
+                foreach (var reciever in Players)
+                {
+                    ChatManager.serverSendMessage(updatedText, Color.white, toPlayer: reciever.GamePlayer.Player.SteamPlayer(), iconURL: iconLink, useRichTextFormatting: true);
+                }
+            });
+        }
+
         public void GiveLoadout(TDMPlayer player)
         {
             Utility.Debug($"Giving loadout to {player.GamePlayer.Player.CharacterName}");
 
             player.GamePlayer.Player.Player.inventory.ClearInventory();
-            R.Commands.Execute(player.GamePlayer.Player, $"/kit {((ETeam)player.Team.TeamID == ETeam.Blue ? Config.BlueKitName : Config.RedKitName)}");
+            R.Commands.Execute(player.GamePlayer.Player, $"/kit {player.Team.Info.KitNames[UnityEngine.Random.Range(0, player.Team.Info.KitNames.Count)]}");
         }
 
         public void SpawnPlayer(TDMPlayer player)
@@ -507,7 +547,7 @@ namespace UnturnedBlackout.GameTypes
                 }
                 else
                 {
-                    wonTeam = new TDMTeam(this, -1, true);
+                    wonTeam = new TDMTeam(this, -1, true, new TeamInfo());
                 }
                 Plugin.Instance.UIManager.SetupTDMLeaderboard(tPlayer, Players, Location, wonTeam, BlueTeam, RedTeam, true);
                 Plugin.Instance.UIManager.ShowTDMLeaderboard(tPlayer.GamePlayer);

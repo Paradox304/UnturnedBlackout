@@ -12,6 +12,7 @@ using System.Collections;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
+using UnturnedBlackout.GameTypes;
 using UnturnedBlackout.Managers;
 using Logger = Rocket.Core.Logging.Logger;
 
@@ -37,6 +38,8 @@ namespace UnturnedBlackout
             Level.onPostLevelLoaded += OnLevelLoaded;
             PlayerVoice.onRelayVoice += OnVoice;
             ChatManager.onChatted += OnChatted;
+            ChatManager.onServerFormattingMessage += OnServerFormattingMessage;
+            ChatManager.onServerSendingMessage += OnServerSendingMessage;
 
             ObjectManager.onDamageObjectRequested += OnDamageObject;
             ResourceManager.onDamageResourceRequested += OnDamageResource;
@@ -44,6 +47,16 @@ namespace UnturnedBlackout
             StructureManager.onDamageStructureRequested += OnDamageStructure;
 
             Logger.Log("Unturned Blackout has been loaded");
+        }
+
+        private void OnServerSendingMessage(ref string text, ref Color color, SteamPlayer fromPlayer, SteamPlayer toPlayer, EChatMode mode, ref string iconURL, ref bool useRichTextFormatting)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void OnServerFormattingMessage(SteamPlayer speaker, EChatMode mode, ref string text)
+        {
+            throw new NotImplementedException();
         }
 
         protected override void Unload()
@@ -105,14 +118,6 @@ namespace UnturnedBlackout
         private void OnVoice(PlayerVoice speaker, bool wantsToUseWalkieTalkie, ref bool shouldAllow, ref bool shouldBroadcastOverRadio, ref PlayerVoice.RelayVoiceCullingHandler cullingHandler)
         {
             shouldBroadcastOverRadio = true;
-        }
-
-        private void OnChatted(SteamPlayer player, EChatMode mode, ref Color chatted, ref bool isRich, string text, ref bool isVisible)
-        {
-            if (!UnturnedPlayer.FromSteamPlayer(player).HasPermission("chatallow"))
-            {
-                isVisible = false;
-            }
         }
 
         private void OnLevelLoaded(int level)
@@ -180,8 +185,6 @@ namespace UnturnedBlackout
             { "TDM_Desc", "Eliminate the enemy at all costs." },
             { "TDM_Victory_Desc", "Score limit reached" },
             { "TDM_Defeat_Desc", "You could'nt reach the score limit" },
-            { "Red_Team_Name", "COALITION" },
-            { "Blue_Team_Name", "ALLEGIANCE" },
             { "KC_Name", "Kill Confirmed" },
             { "KC_Name_Full", "Kill-Confirmed" },
             { "KC_Desc", "Eliminate hostiles and recover their dog tags." },
@@ -191,8 +194,8 @@ namespace UnturnedBlackout
             { "AUTO", "AUTO" },
             { "BURST", "BURST" },
             { "SEMI", "SEMI" },
-            { "Level_Up_Desc", "New Rank: {0}" },
-            { "Level_Up_Text", "RANKED UP!"}
+            { "Level_Up_Desc", "New Level: {0}" },
+            { "Level_Up_Text", "LEVELLED UP!"}
         };
 
         public static Harmony Harmony { get; set; }

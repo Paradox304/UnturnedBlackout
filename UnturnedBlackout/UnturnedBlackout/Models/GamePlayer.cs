@@ -163,12 +163,28 @@ namespace UnturnedBlackout.Models
         // Stance changing
         public void OnStanceChanged(EPlayerStance newStance)
         {
-            if (PreviousStance == EPlayerStance.CLIMB && newStance != EPlayerStance.CLIMB)
+            TaskDispatcher.QueueOnMainThread(() =>
             {
-                TaskDispatcher.QueueOnMainThread(() => Player.Player.equipment.tryEquip(LastEquippedPage, LastEquippedX, LastEquippedY));
-            }
-            PreviousStance = newStance;
+                if (PreviousStance == EPlayerStance.CLIMB && newStance != EPlayerStance.CLIMB)
+                {
+                    Player.Player.equipment.tryEquip(LastEquippedPage, LastEquippedX, LastEquippedY);
+                }
+                /*if (newStance == EPlayerStance.PRONE && Plugin.Instance.Configuration.Instance.DisableProne)
+                {
+                    Plugin.Instance.StartCoroutine(ChangeStance());
+                }*/
+                PreviousStance = newStance;
+            });
         }
+
+        /*public IEnumerator ChangeStance()
+        {
+            yield return new WaitForSeconds(0.5f);
+            if (Player.Player.stance.stance == EPlayerStance.PRONE)
+            {
+                Player.Player.stance.checkStance(EPlayerStance.STAND, true);
+            }
+        }*/
 
         public void OnGameLeft()
         {

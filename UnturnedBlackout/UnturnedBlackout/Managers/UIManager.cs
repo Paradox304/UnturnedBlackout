@@ -233,7 +233,7 @@ namespace UnturnedBlackout.Managers
             EffectManager.sendUIEffect(PreEndingUIID, PreEndingUIKey, player.TransportConnection, true);
         }
 
-        public void SetupPreEndingUI(GamePlayer player, EGameType gameMode, bool hasWon, int blueScore, int redScore)
+        public void SetupPreEndingUI(GamePlayer player, EGameType gameMode, bool hasWon, int blueScore, int redScore, string blueName, string redName)
         {
             EffectManager.sendUIEffectVisibility(PreEndingUIKey, player.TransportConnection, true, hasWon ? "Victory" : "Defeat", true);
             EffectManager.sendUIEffectText(PreEndingUIKey, player.TransportConnection, true, hasWon ? "VictoryTxt" : "DefeatTxt", Plugin.Instance.Translate(hasWon ? $"{gameMode}_Victory_Desc" : $"{gameMode}_Defeat_Desc").ToRich());
@@ -242,9 +242,9 @@ namespace UnturnedBlackout.Managers
             {
                 EffectManager.sendUIEffectVisibility(PreEndingUIKey, player.TransportConnection, true, "Scores", true);
                 EffectManager.sendUIEffectText(PreEndingUIKey, player.TransportConnection, true, "BlueSideScore", blueScore.ToString());
-                EffectManager.sendUIEffectText(PreEndingUIKey, player.TransportConnection, true, "BlueSideName", Plugin.Instance.Translate("Blue_Team_Name").ToRich());
+                EffectManager.sendUIEffectText(PreEndingUIKey, player.TransportConnection, true, "BlueSideName", blueName);
                 EffectManager.sendUIEffectText(PreEndingUIKey, player.TransportConnection, true, "RedSideScore", redScore.ToString());
-                EffectManager.sendUIEffectText(PreEndingUIKey, player.TransportConnection, true, "RedSideName", Plugin.Instance.Translate("Red_Team_Name").ToRich());
+                EffectManager.sendUIEffectText(PreEndingUIKey, player.TransportConnection, true, "RedSideName", redName);
             }
         }
 
@@ -374,7 +374,7 @@ namespace UnturnedBlackout.Managers
             EffectManager.sendUIEffect(27611, 27611, player.GamePlayer.TransportConnection, true, Plugin.Instance.Translate("TDM_Name").ToRich(), Plugin.Instance.Translate("TDM_Desc").ToRich());
             EffectManager.sendUIEffectVisibility(TDMKey, player.GamePlayer.TransportConnection, true, "Timer", true);
             EffectManager.sendUIEffectVisibility(TDMKey, player.GamePlayer.TransportConnection, true, "Team", true);
-            EffectManager.sendUIEffectText(TDMKey, player.GamePlayer.TransportConnection, true, "TeamName", Plugin.Instance.Translate($"{(ETeam)player.Team.TeamID}_Team_Name").ToRich());
+            EffectManager.sendUIEffectText(TDMKey, player.GamePlayer.TransportConnection, true, "TeamName", $"<color={player.Team.Info.TeamColorHexCode}>{player.Team.Info.TeamName}</color>");
 
             int index = player.Team.TeamID == (byte)ETeam.Blue ? 1 : 0;
             int blueSpaces = blueTeam.Score * 96 / Config.TDM.ScoreLimit;
@@ -509,7 +509,7 @@ namespace UnturnedBlackout.Managers
             EffectManager.sendUIEffect(27612, 27612, player.GamePlayer.TransportConnection, true, Plugin.Instance.Translate("KC_Name").ToRich(), Plugin.Instance.Translate("KC_Desc").ToRich());
             EffectManager.sendUIEffectVisibility(KCKey, player.GamePlayer.TransportConnection, true, "Timer", true);
             EffectManager.sendUIEffectVisibility(KCKey, player.GamePlayer.TransportConnection, true, "Team", true);
-            EffectManager.sendUIEffectText(KCKey, player.GamePlayer.TransportConnection, true, "TeamName", Plugin.Instance.Translate($"{(ETeam)player.Team.TeamID}_Team_Name").ToRich());
+            EffectManager.sendUIEffectText(KCKey, player.GamePlayer.TransportConnection, true, "TeamName", $"<color={player.Team.Info.TeamColorHexCode}>{player.Team.Info.TeamName}</color>");
 
             int index = player.Team.TeamID == (byte)ETeam.Blue ? 1 : 0;
             int blueSpaces = blueTeam.Score * 96 / Config.TDM.ScoreLimit;

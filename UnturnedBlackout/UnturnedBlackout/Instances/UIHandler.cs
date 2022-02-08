@@ -3,6 +3,7 @@ using SDG.NetTransport;
 using SDG.Unturned;
 using Steamworks;
 using System;
+using UnityEngine;
 using UnturnedBlackout.Database;
 using UnturnedBlackout.Enums;
 using UnturnedBlackout.GameTypes;
@@ -42,6 +43,7 @@ namespace UnturnedBlackout.Instances
             Player.Player.enablePluginWidgetFlag(EPluginWidgetFlags.Modal);
             ResetUIValues();
             ShowGames();
+            ClearChat();
             SetupUI();
         }
 
@@ -72,6 +74,15 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "PlayerIcon", data.AvatarLink);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "PlayerName", data.SteamName);
             OnXPChanged();
+        }
+
+        public void ClearChat()
+        {
+            var steamPlayer = Player.SteamPlayer();
+            for (int i = 0; i <= 10; i++)
+            {
+                ChatManager.serverSendMessage("", Color.white, toPlayer: steamPlayer);
+            }
         }
 
         // Play Page

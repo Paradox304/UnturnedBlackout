@@ -49,8 +49,19 @@ namespace UnturnedBlackout.GameTypes
             UnturnedPlayerEvents.OnPlayerInventoryAdded += OnPlayerPickupItem;
             PlayerAnimator.OnLeanChanged_Global += OnLeaned;
             DamageTool.damagePlayerRequested += OnPlayerDamaged;
-
+            ChatManager.onChatted += OnChatted;
             KillFeedChecker = Plugin.Instance.StartCoroutine(UpdateKillfeed());
+        }
+
+        private void OnChatted(SteamPlayer player, EChatMode mode, ref Color chatted, ref bool isRich, string text, ref bool isVisible)
+        {
+            var gPlayer = Plugin.Instance.GameManager.GetGamePlayer(player.player);
+            if (gPlayer == null)
+            {
+                isVisible = false;
+                return;
+            }
+            OnChatMessageSent(gPlayer, mode, text, ref isVisible);
         }
 
         public void OnStanceChanged(PlayerStance obj)
@@ -176,7 +187,7 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
-            var feed = new Feed($"<color={killerColor}>{killer.Player.CharacterName.ToUnrich()}</color> {icon.Symbol} <color={victimColor}>{victim.Player.CharacterName.ToUnrich()}</color>", DateTime.UtcNow);
+            var feed = new Feed($"<color={killerColor}>{killer.Player.CharacterName.ToUnrich().Trim()}</color> {icon.Symbol} <color={victimColor}>{victim.Player.CharacterName.ToUnrich().Trim()}</color>", DateTime.UtcNow);
             if (Killfeed.Count < Config.MaxKillFeed)
             {
                 Utility.Debug($"{Killfeed.Count} is less than {Config.MaxKillFeed}, add");
@@ -253,6 +264,7 @@ namespace UnturnedBlackout.GameTypes
             UnturnedPlayerEvents.OnPlayerInventoryAdded -= OnPlayerPickupItem;
             DamageTool.damagePlayerRequested -= OnPlayerDamaged;
             PlayerAnimator.OnLeanChanged_Global -= OnLeaned;
+            ChatManager.onChatted -= OnChatted;
         }
 
         public abstract bool IsPlayerIngame(CSteamID steamID);
@@ -264,6 +276,7 @@ namespace UnturnedBlackout.GameTypes
         public abstract void PlayerPickupItem(UnturnedPlayer player, InventoryGroup inventoryGroup, byte inventoryIndex, ItemJar P);
         public abstract void PlayerLeaned(PlayerAnimator obj);
         public abstract void PlayerStanceChanged(PlayerStance obj);
+        public abstract void OnChatMessageSent(GamePlayer player, EChatMode chatMode, string text, ref bool isVisible);
         public abstract int GetPlayerCount();
         public abstract List<GamePlayer> GetPlayers();
     }

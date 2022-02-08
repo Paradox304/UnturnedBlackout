@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using UnityEngine;
+using UnturnedBlackout.Database;
 using UnturnedBlackout.Enums;
 using UnturnedBlackout.Models;
 
@@ -52,8 +53,11 @@ namespace UnturnedBlackout.GameTypes
             Players = new List<KCPlayer>();
             PlayersLookup = new Dictionary<CSteamID, KCPlayer>();
 
-            BlueTeam = new KCTeam(this, (byte)ETeam.Blue, false, Config.BlueDogTagID);
-            RedTeam = new KCTeam(this, (byte)ETeam.Red, false, Config.RedDogTagID);
+            var blueTeamInfo = Config.TeamsInfo.FirstOrDefault(k => k.TeamID == location.BlueTeamID);
+            var redTeamInfo = Config.TeamsInfo.FirstOrDefault(k => k.TeamID == location.RedTeamID);
+
+            BlueTeam = new KCTeam(this, (byte)ETeam.Blue, false, Config.BlueDogTagID, blueTeamInfo);
+            RedTeam = new KCTeam(this, (byte)ETeam.Red, false, Config.RedDogTagID, redTeamInfo);
 
             GameStarter = Plugin.Instance.StartCoroutine(StartGame());
         }
@@ -105,7 +109,7 @@ namespace UnturnedBlackout.GameTypes
             }
             else
             {
-                wonTeam = new KCTeam(this, -1, true, 0);
+                wonTeam = new KCTeam(this, -1, true, 0, new TeamInfo());
             }
             Plugin.Instance.StartCoroutine(GameEnd(wonTeam));
         }
@@ -133,7 +137,7 @@ namespace UnturnedBlackout.GameTypes
                     var xp = player.XP * Config.KC.WinMultipler;
                     ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DBManager.IncreasePlayerXPAsync(player.GamePlayer.SteamID, (uint)xp));
                 }
-                Plugin.Instance.UIManager.SetupPreEndingUI(player.GamePlayer, EGameType.KC, player.Team.TeamID == wonTeam.TeamID, BlueTeam.Score, RedTeam.Score);
+                Plugin.Instance.UIManager.SetupPreEndingUI(player.GamePlayer, EGameType.KC, player.Team.TeamID == wonTeam.TeamID, BlueTeam.Score, RedTeam.Score, BlueTeam.Info.TeamName, RedTeam.Info.TeamName);
             }
             TaskDispatcher.QueueOnMainThread(() =>
             {
@@ -368,7 +372,7 @@ namespace UnturnedBlackout.GameTypes
                 Plugin.Instance.UIManager.ShowXPUI(kPlayer.GamePlayer, xpGained, xpText);
                 Plugin.Instance.UIManager.SendMultiKillSound(kPlayer.GamePlayer, kPlayer.MultipleKills);
                 kPlayer.CheckKills();
-                OnKill(kPlayer.GamePlayer, vPlayer.GamePlayer, kPlayer.GamePlayer.Player.Player.equipment.itemID, kPlayer.Team == BlueTeam ? Config.BlueHexCode : Config.RedHexCode, vPlayer.Team == BlueTeam ? Config.BlueHexCode : Config.RedHexCode);
+                OnKill(kPlayer.GamePlayer, vPlayer.GamePlayer, kPlayer.GamePlayer.Player.Player.equipment.itemID, kPlayer.Team.Info.KillFeedHexCode, vPlayer.Team.Info.KillFeedHexCode);
                 ThreadPool.QueueUserWorkItem(async (o) =>
                 {
                     if (limb == ELimb.SKULL)
@@ -443,18 +447,53 @@ namespace UnturnedBlackout.GameTypes
             SpawnPlayer(kPlayer);
         }
 
+        public override void OnChatMessageSent(GamePlayer player, EChatMode chatMode, string text, ref bool isVisible)
+        {
+            var kPlayer = GetKCPlayer(player.Player);
+            if (kPlayer == null)
+            {
+                return;
+            }
+
+            isVisible = false;
+            TaskDispatcher.QueueOnMainThread(() =>
+            {
+                if (!Plugin.Instance.DBManager.PlayerCache.TryGetValue(player.SteamID, out PlayerData data))
+                {
+                    return;
+                }
+
+                var iconLink = Plugin.Instance.UIManager.Icons.TryGetValue(data.Level, out LevelIcon icon) ? icon.IconLink : (Plugin.Instance.UIManager.Icons.TryGetValue(0, out icon) ? icon.IconLink : "");
+                var updatedText = $"<color={kPlayer.Team.Info.ChatPlayerHexCode}>{player.Player.CharacterName.ToUnrich().Trim()}</color>: <color={kPlayer.Team.Info.ChatMessageHexCode}>{text.ToUnrich()}</color>";
+
+                if (chatMode == EChatMode.GLOBAL)
+                {
+                    foreach (var reciever in Players)
+                    {
+                        ChatManager.serverSendMessage(updatedText, Color.white, toPlayer: reciever.GamePlayer.Player.SteamPlayer(), iconURL: iconLink, useRichTextFormatting: true);
+                    }
+                    return;
+                }
+
+                var teamPlayers = Players.Where(k => k.Team == kPlayer.Team);
+                foreach (var reciever in Players)
+                {
+                    ChatManager.serverSendMessage(updatedText, Color.white, toPlayer: reciever.GamePlayer.Player.SteamPlayer(), iconURL: iconLink, useRichTextFormatting: true);
+                }
+            });
+        }
+
         public override void PlayerPickupItem(UnturnedPlayer player, InventoryGroup inventoryGroup, byte inventoryIndex, ItemJar P)
         {
             if (P == null) return;
             var kPlayer = GetKCPlayer(player.CSteamID);
             if (kPlayer == null) return;
             if (GamePhase == EGamePhase.Ending) return;
-            Utility.Debug($"{player.CharacterName} picked up item with id {P.item.id}");
+
             var otherTeam = kPlayer.Team.TeamID == (byte)ETeam.Blue ? RedTeam : BlueTeam;
             
             if (kPlayer.Team.DogTagID == P.item.id)
             {
-                Utility.Debug("Player denied kill");
                 kPlayer.Score += Config.KillDeniedPoints;
                 kPlayer.XP += Config.KC.XPPerKillDenied;
                 kPlayer.KillsDenied++;
@@ -468,7 +507,6 @@ namespace UnturnedBlackout.GameTypes
 
             } else if (P.item.id == otherTeam.DogTagID)
             {
-                Utility.Debug("Player confirmed kill");
                 kPlayer.Score += Config.KillConfirmedPoints;
                 kPlayer.XP += Config.KC.XPPerKillConfirmed;
                 kPlayer.KillsConfirmed++;
@@ -505,7 +543,7 @@ namespace UnturnedBlackout.GameTypes
             Utility.Debug($"Giving loadout to {player.GamePlayer.Player.CharacterName}");
 
             player.GamePlayer.Player.Player.inventory.ClearInventory();
-            R.Commands.Execute(player.GamePlayer.Player, $"/kit {((ETeam)player.Team.TeamID == ETeam.Blue ? Config.BlueKitName : Config.RedKitName)}");
+            R.Commands.Execute(player.GamePlayer.Player, $"/kit {player.Team.Info.KitNames[UnityEngine.Random.Range(0, player.Team.Info.KitNames.Count)]}");
         }
 
         public void SpawnPlayer(KCPlayer player)
@@ -555,7 +593,7 @@ namespace UnturnedBlackout.GameTypes
                 }
                 else
                 {
-                    wonTeam = new KCTeam(this, -1, true, 0);
+                    wonTeam = new KCTeam(this, -1, true, 0, new TeamInfo());
                 }
                 Plugin.Instance.UIManager.SetupKCLeaderboard(kPlayer, Players, Location, wonTeam, BlueTeam, RedTeam, true);
                 Plugin.Instance.UIManager.ShowKCLeaderboard(kPlayer.GamePlayer);

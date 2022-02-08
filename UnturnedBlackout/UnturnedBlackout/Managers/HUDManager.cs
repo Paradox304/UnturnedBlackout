@@ -127,6 +127,7 @@ namespace UnturnedBlackout.Managers
             {
                 var connection = equipment.player.channel.GetOwnerTransportConnection();
                 EffectManager.sendUIEffectVisibility(Key, connection, true, "RightSide", true);
+                if (asset == null) return;
                 if (asset.type == EItemType.GUN)
                 {
                     var gAsset = asset as ItemGunAsset;

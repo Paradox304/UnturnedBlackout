@@ -15,18 +15,14 @@ namespace UnturnedBlackout
         public string PlayersTableName { get; set; }
         public int CacheRefreshSeconds { get; set; }
 
-        public string FFAKitName { get; set; }
-        public string BlueKitName { get; set; }
-        public string RedKitName { get; set; }
         public string PlayerColorHexCode { get; set; }
-        public string BlueHexCode { get; set; }
-        public string RedHexCode { get; set; }
 
         public int MaxKillFeed { get; set; }
         public int DefaultFont { get; set; }
         public int KillFeedSeconds { get; set; }
 
         public bool EnableDebugLogs { get; set; }
+        public bool DisableProne { get; set; }
 
         public Vector3 LobbySpawn { get; set; }
 
@@ -67,6 +63,7 @@ namespace UnturnedBlackout
         public List<LevelIcon> LevelIcons { get; set; }
         public List<FeedIcon> KillFeedIcons { get; set; }
         public List<LevelXP> LevelsXP { get; set; }
+        public List<TeamInfo> TeamsInfo { get; set; }
 
         public List<ushort> AllowDamageBarricades { get; set; }
 
@@ -80,12 +77,7 @@ namespace UnturnedBlackout
             PlayersTableName = "UB_Players";
             CacheRefreshSeconds = 600;
 
-            FFAKitName = "Starter";
-            RedKitName = "Red";
-            BlueKitName = "Blue";
             PlayerColorHexCode = "#FFFF00";
-            BlueHexCode = "#89CFF0";
-            RedHexCode = "#DC143C";
             MaxKillFeed = 5;
             DefaultFont = 12;
             KillFeedSeconds = 5;
@@ -123,15 +115,15 @@ namespace UnturnedBlackout
             RedDogTagID = 26820;
             BlueDogTagID = 26821;
 
-            FFA = new FFAConfig(15, 600, 50, 60, 50, 20, 10, 5, 10, 5, 10, 15, 15, 1.5f, 15, 2);
+            FFA = new FFAConfig(15, 600, "FFA", "white", "#dcb4ff", "#dcb4ff", 50, 60, 50, 20, 10, 5, 10, 5, 10, 15, 15, 1.5f, 15, 2);
             TDM = new TDMConfig(15, 600, 50, 60, 50, 20, 10, 5, 10, 5, 10, 15, 15, 1.5f, 15, 2);
             KC = new KCConfig(15, 600, 50, 60, 50, 20, 10, 10, 10, 5, 10, 5, 10, 15, 15, 1.5f, 15, 2);
 
             ArenaLocations = new List<ArenaLocation>
             {
-                new ArenaLocation(1, 10, "Seattle", "", 0),
-                new ArenaLocation(2, 10, "Tacoma", "", 1),
-                new ArenaLocation(3, 10, "Military Base", "", 2)
+                new ArenaLocation(1, 10, "Seattle", "", 0, 1, 2),
+                new ArenaLocation(2, 10, "Tacoma", "", 1, 1, 2),
+                new ArenaLocation(3, 10, "Military Base", "", 2, 1, 2)
             };
             LevelIcons = new List<LevelIcon>
             {
@@ -153,6 +145,11 @@ namespace UnturnedBlackout
             {
                 new LevelXP(2, 100),
                 new LevelXP(3, 200)
+            };
+            TeamsInfo = new List<TeamInfo>
+            {
+                new TeamInfo(1, "Turned Ops", "#9ac5ff", "#9ac5ff", "#9ac5ff", "#9ac5ff", new List<string> { "TurnedOps" }),
+                new TeamInfo(2, "Omega", "#ff7e7e", "#ff7e7e", "#ff7e7e", "#ff7e7e", new List<string> { "Omega" })
             };
             AllowDamageBarricades = new List<ushort> { 3, 4, 5 };
         }

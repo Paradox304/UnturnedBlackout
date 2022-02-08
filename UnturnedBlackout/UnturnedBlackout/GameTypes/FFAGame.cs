@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using UnityEngine;
+using UnturnedBlackout.Database;
 using UnturnedBlackout.Enums;
 using UnturnedBlackout.Models;
 
@@ -97,7 +98,7 @@ namespace UnturnedBlackout.GameTypes
                     player.GamePlayer.HasScoreboard = false;
                     Plugin.Instance.UIManager.HideFFALeaderboard(player.GamePlayer);
                 }
-                Plugin.Instance.UIManager.SetupPreEndingUI(player.GamePlayer, EGameType.FFA, index == 0, 0, 0);
+                Plugin.Instance.UIManager.SetupPreEndingUI(player.GamePlayer, EGameType.FFA, index == 0, 0, 0, "", "");
                 if (index == 0)
                 {
                     var xp = player.XP * Config.FFA.WinMultipler;
@@ -340,7 +341,7 @@ namespace UnturnedBlackout.GameTypes
                 Plugin.Instance.UIManager.ShowXPUI(kPlayer.GamePlayer, xpGained, xpText);
                 Plugin.Instance.UIManager.SendMultiKillSound(kPlayer.GamePlayer, kPlayer.MultipleKills);
                 kPlayer.CheckKills();
-                OnKill(kPlayer.GamePlayer, fPlayer.GamePlayer, kPlayer.GamePlayer.Player.Player.equipment.itemID, "white", "white");
+                OnKill(kPlayer.GamePlayer, fPlayer.GamePlayer, kPlayer.GamePlayer.Player.Player.equipment.itemID, Config.FFA.KillFeedHexCode, Config.FFA.KillFeedHexCode);
                 foreach (var ply in Players)
                 {
                     Plugin.Instance.UIManager.UpdateFFATopUI(ply, Players);
@@ -422,12 +423,38 @@ namespace UnturnedBlackout.GameTypes
             SpawnPlayer(fPlayer, false);
         }
 
+        public override void OnChatMessageSent(GamePlayer player, EChatMode chatMode, string text, ref bool isVisible)
+        {
+            var fPlayer = GetFFAPlayer(player.Player);
+            if (fPlayer == null)
+            {
+                return;
+            }
+
+            isVisible = false;
+            TaskDispatcher.QueueOnMainThread(() =>
+            {
+                if (!Plugin.Instance.DBManager.PlayerCache.TryGetValue(player.SteamID, out PlayerData data))
+                {
+                    return;
+                }
+
+                var iconLink = Plugin.Instance.UIManager.Icons.TryGetValue(data.Level, out LevelIcon icon) ? icon.IconLink : (Plugin.Instance.UIManager.Icons.TryGetValue(0, out icon) ? icon.IconLink : "");
+                var updatedText = $"<color={Config.FFA.ChatPlayerHexCode}>{player.Player.CharacterName.ToUnrich().Trim()}</color>: <color={Config.FFA.ChatMessageHexCode}>{text.ToUnrich()}</color>";
+
+                foreach (var reciever in Players)
+                {
+                    ChatManager.serverSendMessage(updatedText, Color.white, toPlayer: reciever.GamePlayer.Player.SteamPlayer(), iconURL: iconLink, useRichTextFormatting: true);
+                }
+            });
+        }
+
         public void GiveLoadout(FFAPlayer player)
         {
             Utility.Debug($"Giving loadout to {player.GamePlayer.Player.CharacterName}");
 
             player.GamePlayer.Player.Player.inventory.ClearInventory();
-            R.Commands.Execute(player.GamePlayer.Player, $"/kit {Config.FFAKitName}");
+            R.Commands.Execute(player.GamePlayer.Player, $"/kit {Config.FFA.KitName}");
         }
 
         public void SpawnPlayer(FFAPlayer player, bool seperateSpawnPoint)
