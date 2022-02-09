@@ -104,6 +104,7 @@ namespace UnturnedBlackout
         private void OnVoice(PlayerVoice speaker, bool wantsToUseWalkieTalkie, ref bool shouldAllow, ref bool shouldBroadcastOverRadio, ref PlayerVoice.RelayVoiceCullingHandler cullingHandler)
         {
             shouldBroadcastOverRadio = true;
+            GameManager.GetGamePlayer(speaker.player).OnTalking();
         }
 
         private void OnLevelLoaded(int level)

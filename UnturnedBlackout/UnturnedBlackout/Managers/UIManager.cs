@@ -195,12 +195,47 @@ namespace UnturnedBlackout.Managers
             }
             if (!string.IsNullOrEmpty(feedText))
             {
-                feedText = $"<size={Config.DefaultFont}>" + feedText + "</size>";
+                feedText = $"<size={Config.KillFeedFont}>{feedText}</size>";
             }
-            Utility.Debug($"{feedText}");
             foreach (var player in players)
             {
                 EffectManager.sendUIEffectText(key, player.TransportConnection, true, "Killfeed", feedText); 
+            }
+        }
+
+        public void SendVoiceChat(List<GamePlayer> players, EGameType type, bool isEnding, List<GamePlayer> playersTalking)
+        {
+            short key = PreEndingUIKey;
+            if (!isEnding)
+            {
+                switch (type)
+                {
+                    case EGameType.FFA:
+                        key = FFAKey;
+                        break;
+                    case EGameType.TDM:
+                        key = TDMKey;
+                        break;
+                    case EGameType.KC:
+                        key = TDMKey;
+                        break;
+                    default:
+                        return;
+                }
+            }
+
+            var voiceChatText = "";
+            foreach (var talking in playersTalking)
+            {
+                voiceChatText += $"{talking.Player.CharacterName.ToUnrich().Trim()} \n";
+            }
+            if (!string.IsNullOrEmpty(voiceChatText))
+            {
+                voiceChatText = $"<size={Config.VoiceChatFont}>{voiceChatText}</size>";
+            }
+            foreach (var player in players)
+            {
+                EffectManager.sendUIEffectText(key, player.TransportConnection, true, "VoiceChatUsers", voiceChatText);
             }
         }
 

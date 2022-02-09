@@ -30,6 +30,7 @@ namespace UnturnedBlackout.GameTypes
         public Coroutine GameEnder { get; set; }
         public Coroutine SpawnSwitcher { get; set; }
 
+        public uint Frequency { get; set; }
         public TDMGame(ArenaLocation location) : base(EGameType.TDM, location)
         {
             Utility.Debug($"Initializing TDM game for location {location.LocationName}");
@@ -57,6 +58,7 @@ namespace UnturnedBlackout.GameTypes
 
             BlueTeam = new TDMTeam(this, (byte)ETeam.Blue, false, blueTeamInfo);
             RedTeam = new TDMTeam(this, (byte)ETeam.Red, false, redTeamInfo);
+            Frequency = Utility.GetFreeFrequency();
 
             GameStarter = Plugin.Instance.StartCoroutine(StartGame());
         }
@@ -135,6 +137,7 @@ namespace UnturnedBlackout.GameTypes
                     ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DBManager.IncreasePlayerXPAsync(player.GamePlayer.SteamID, (uint)xp));
                 }
                 Plugin.Instance.UIManager.SetupPreEndingUI(player.GamePlayer, EGameType.TDM, player.Team.TeamID == wonTeam.TeamID, BlueTeam.Score, RedTeam.Score, BlueTeam.Info.TeamName, RedTeam.Info.TeamName);
+                player.GamePlayer.Player.Player.quests.askSetRadioFrequency(CSteamID.Nil, Frequency);
             }
             TaskDispatcher.QueueOnMainThread(() =>
             {
@@ -495,6 +498,18 @@ namespace UnturnedBlackout.GameTypes
                     ChatManager.serverSendMessage(updatedText, Color.white, toPlayer: reciever.GamePlayer.Player.SteamPlayer(), iconURL: iconLink, useRichTextFormatting: true);
                 }
             });
+        }
+
+        public override void OnVoiceChatUpdated(GamePlayer player)
+        {
+            if (GamePhase == EGamePhase.Ending)
+            {
+                SendVoiceChat(Players.Select(k => k.GamePlayer).ToList(), false);
+                return;
+            }
+
+            var tPlayer = GetTDMPlayer(player.Player);
+            SendVoiceChat(Players.Where(k => k.Team == tPlayer.Team).Select(k => k.GamePlayer).ToList(), true);
         }
 
         public void GiveLoadout(TDMPlayer player)

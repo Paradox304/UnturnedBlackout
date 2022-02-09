@@ -8,6 +8,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnturnedBlackout.Database;
+using UnturnedBlackout.GameTypes;
 
 namespace UnturnedBlackout.Models
 {
@@ -31,6 +32,7 @@ namespace UnturnedBlackout.Models
         public Coroutine DamageChecker { get; set; }
         public Coroutine Healer { get; set; }
         public Coroutine RespawnTimer { get; set; }
+        public Coroutine VoiceChatChecker { get; set; }
 
         public GamePlayer(UnturnedPlayer player, ITransportConnection transportConnection)
         {
@@ -161,6 +163,7 @@ namespace UnturnedBlackout.Models
 
 
         // Stance changing
+
         public void OnStanceChanged(EPlayerStance newStance)
         {
             TaskDispatcher.QueueOnMainThread(() =>
@@ -169,22 +172,38 @@ namespace UnturnedBlackout.Models
                 {
                     Player.Player.equipment.tryEquip(LastEquippedPage, LastEquippedX, LastEquippedY);
                 }
-                /*if (newStance == EPlayerStance.PRONE && Plugin.Instance.Configuration.Instance.DisableProne)
-                {
-                    Plugin.Instance.StartCoroutine(ChangeStance());
-                }*/
                 PreviousStance = newStance;
             });
         }
 
-        /*public IEnumerator ChangeStance()
+        // Voice chat
+
+        public void OnTalking()
         {
-            yield return new WaitForSeconds(0.5f);
-            if (Player.Player.stance.stance == EPlayerStance.PRONE)
+            if (VoiceChatChecker != null)
             {
-                Player.Player.stance.checkStance(EPlayerStance.STAND, true);
+                Plugin.Instance.StopCoroutine(VoiceChatChecker);
+            } else
+            {
+                if (Plugin.Instance.GameManager.TryGetCurrentGame(SteamID, out Game game))
+                {
+                    game.OnStartedTalking(this);
+                }
             }
-        }*/
+
+            VoiceChatChecker = Plugin.Instance.StartCoroutine(CheckVoiceChat());
+        }
+
+        public IEnumerator CheckVoiceChat()
+        {
+            yield return new WaitForSeconds(1.5f);
+            if (Plugin.Instance.GameManager.TryGetCurrentGame(SteamID, out Game game) && !Player.Player.voice.isTalking)
+            {
+                game.OnStoppedTalking(this);
+            }
+
+            VoiceChatChecker = null;
+        }
 
         public void OnGameLeft()
         {
@@ -206,6 +225,11 @@ namespace UnturnedBlackout.Models
             if (RespawnTimer != null)
             {
                 Plugin.Instance.StopCoroutine(RespawnTimer);
+            }
+
+            if (VoiceChatChecker != null)
+            {
+                Plugin.Instance.StopCoroutine(VoiceChatChecker);
             }
 
             HasScoreboard = false;

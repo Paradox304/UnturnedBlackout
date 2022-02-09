@@ -163,7 +163,6 @@
     <Compile Include="Models\TeamInfo.cs" />
     <Compile Include="Models\VoteChoice.cs" />
     <Compile Include="Patches\ClothingPatches.cs" />
-    <Compile Include="Patches\FiremodePatch.cs" />
     <Compile Include="Models\FFAPlayer.cs" />
     <Compile Include="Models\GamePlayer.cs" />
     <Compile Include="Models\PositionsData.cs" />

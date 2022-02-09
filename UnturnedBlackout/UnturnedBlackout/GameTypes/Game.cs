@@ -28,6 +28,8 @@ namespace UnturnedBlackout.GameTypes
         public List<GamePlayer> Vote0 { get; set; }
         public List<GamePlayer> Vote1 { get; set; }
 
+        public List<GamePlayer> PlayersTalking { get; set; }
+
         public Coroutine VoteEnder { get; set; }
         public Coroutine KillFeedChecker { get; set; }
 
@@ -43,6 +45,8 @@ namespace UnturnedBlackout.GameTypes
             VoteChoices = new Dictionary<int, VoteChoice>();
             Vote0 = new List<GamePlayer>();
             Vote1 = new List<GamePlayer>();
+
+            PlayersTalking = new List<GamePlayer>();
 
             UnturnedPlayerEvents.OnPlayerDeath += OnPlayerDeath;
             UnturnedPlayerEvents.OnPlayerRevive += OnPlayerRevive;
@@ -62,6 +66,38 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
             OnChatMessageSent(gPlayer, mode, text, ref isVisible);
+        }
+
+        public void OnStartedTalking(GamePlayer player)
+        {
+            Utility.Debug($"{player.Player.CharacterName} started talking");
+            if (!PlayersTalking.Contains(player))
+            {
+                Utility.Debug("Add him to the list and check");
+                PlayersTalking.Add(player);
+                OnVoiceChatUpdated(player);
+            }
+        }
+
+        public void OnStoppedTalking(GamePlayer player)
+        {
+            Utility.Debug($"{player.Player.CharacterName} stopped talking");
+            if (PlayersTalking.Contains(player))
+            {
+                Utility.Debug("Remove him from the list and check");
+                PlayersTalking.Remove(player);
+                OnVoiceChatUpdated(player);
+            }
+        }
+
+        public void SendVoiceChat(List<GamePlayer> players, bool isTeam)
+        {
+            var talkingPlayers = PlayersTalking;
+            if (isTeam)
+            {
+                talkingPlayers = PlayersTalking.Where(k => players.Contains(k)).ToList();
+            }
+            Plugin.Instance.UIManager.SendVoiceChat(players, GameMode, GamePhase == EGamePhase.Ending, talkingPlayers);
         }
 
         public void OnStanceChanged(PlayerStance obj)
@@ -277,6 +313,7 @@ namespace UnturnedBlackout.GameTypes
         public abstract void PlayerLeaned(PlayerAnimator obj);
         public abstract void PlayerStanceChanged(PlayerStance obj);
         public abstract void OnChatMessageSent(GamePlayer player, EChatMode chatMode, string text, ref bool isVisible);
+        public abstract void OnVoiceChatUpdated(GamePlayer player);
         public abstract int GetPlayerCount();
         public abstract List<GamePlayer> GetPlayers();
     }

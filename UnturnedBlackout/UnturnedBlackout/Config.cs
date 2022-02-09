@@ -18,8 +18,10 @@ namespace UnturnedBlackout
         public string PlayerColorHexCode { get; set; }
 
         public int MaxKillFeed { get; set; }
-        public int DefaultFont { get; set; }
+        public int KillFeedFont { get; set; }
         public int KillFeedSeconds { get; set; }
+
+        public int VoiceChatFont { get; set; }
 
         public bool EnableDebugLogs { get; set; }
         public bool DisableProne { get; set; }
@@ -79,8 +81,10 @@ namespace UnturnedBlackout
 
             PlayerColorHexCode = "#FFFF00";
             MaxKillFeed = 5;
-            DefaultFont = 12;
+            KillFeedFont = 12;
             KillFeedSeconds = 5;
+
+            VoiceChatFont = 30;
 
             EnableDebugLogs = true;
 

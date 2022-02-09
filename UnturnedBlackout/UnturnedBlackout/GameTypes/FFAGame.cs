@@ -454,6 +454,11 @@ namespace UnturnedBlackout.GameTypes
             });
         }
 
+        public override void OnVoiceChatUpdated(GamePlayer player)
+        {
+            SendVoiceChat(Players.Select(k => k.GamePlayer).ToList(), false);
+        }
+
         public void GiveLoadout(FFAPlayer player)
         {
             Utility.Debug($"Giving loadout to {player.GamePlayer.Player.CharacterName}");

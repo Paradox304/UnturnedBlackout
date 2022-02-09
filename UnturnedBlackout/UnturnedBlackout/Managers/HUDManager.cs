@@ -131,11 +131,9 @@ namespace UnturnedBlackout.Managers
                 {
                     var gAsset = asset as ItemGunAsset;
                     var mAsset = Assets.find(EAssetType.ITEM, BitConverter.ToUInt16(equipment.state, 8)) as ItemMagazineAsset;
-                    string firemode = GetFiremode(equipment.state[11]);
                     int currentAmmo = equipment.state[10];
 
                     EffectManager.sendUIEffectText(Key, connection, true, "WeaponName", gAsset.itemName);
-                    EffectManager.sendUIEffectText(Key, connection, true, "WeaponMode", firemode);
                     EffectManager.sendUIEffectText(Key, connection, true, "AmmoNum", currentAmmo.ToString());
                     EffectManager.sendUIEffectText(Key, connection, true, "ReserveNum", $" / {mAsset.amount}");
                 }
@@ -196,28 +194,6 @@ namespace UnturnedBlackout.Managers
         private void OnBulletShot(UseableGun gun, BulletInfo bullet)
         {
             EffectManager.sendUIEffectText(Key, gun.player.channel.GetOwnerTransportConnection(), true, "AmmoNum", gun.player.equipment.state[10].ToString());
-        }
-
-        public void ChangeFiremode(UnturnedPlayer player, byte newFiremode)
-        {
-            EffectManager.sendUIEffectText(Key, player.SteamPlayer().transportConnection, true, "WeaponMode", GetFiremode(newFiremode));
-        }
-
-        public string GetFiremode(byte firemode)
-        {
-            switch (firemode)
-            {
-                case (byte)EFiremode.SAFETY:
-                    return Plugin.Instance.Translate("SAFETY");
-                case (byte)EFiremode.SEMI:
-                    return Plugin.Instance.Translate("SEMI");
-                case (byte)EFiremode.BURST:
-                    return Plugin.Instance.Translate("BURST");
-                case (byte)EFiremode.AUTO:
-                    return Plugin.Instance.Translate("AUTO");
-                default:
-                    return "None";
-            }
         }
 
         public void Destroy()

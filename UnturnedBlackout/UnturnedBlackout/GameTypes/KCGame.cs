@@ -30,6 +30,8 @@ namespace UnturnedBlackout.GameTypes
         public Coroutine GameEnder { get; set; }
         public Coroutine SpawnSwitcher { get; set; }
 
+        public uint Frequency { get; set; }
+
         public KCGame(ArenaLocation location) : base(EGameType.KC, location)
         {
             Utility.Debug($"Initializing KC game for location {location.LocationName}");
@@ -58,6 +60,7 @@ namespace UnturnedBlackout.GameTypes
 
             BlueTeam = new KCTeam(this, (byte)ETeam.Blue, false, Config.BlueDogTagID, blueTeamInfo);
             RedTeam = new KCTeam(this, (byte)ETeam.Red, false, Config.RedDogTagID, redTeamInfo);
+            Frequency = Utility.GetFreeFrequency();
 
             GameStarter = Plugin.Instance.StartCoroutine(StartGame());
         }
@@ -138,6 +141,7 @@ namespace UnturnedBlackout.GameTypes
                     ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DBManager.IncreasePlayerXPAsync(player.GamePlayer.SteamID, (uint)xp));
                 }
                 Plugin.Instance.UIManager.SetupPreEndingUI(player.GamePlayer, EGameType.KC, player.Team.TeamID == wonTeam.TeamID, BlueTeam.Score, RedTeam.Score, BlueTeam.Info.TeamName, RedTeam.Info.TeamName);
+                player.GamePlayer.Player.Player.quests.askSetRadioFrequency(CSteamID.Nil, Frequency);
             }
             TaskDispatcher.QueueOnMainThread(() =>
             {
@@ -487,6 +491,18 @@ namespace UnturnedBlackout.GameTypes
                     ChatManager.serverSendMessage(updatedText, Color.white, toPlayer: reciever.GamePlayer.Player.SteamPlayer(), iconURL: iconLink, useRichTextFormatting: true);
                 }
             });
+        }
+
+        public override void OnVoiceChatUpdated(GamePlayer player)
+        {
+            if (GamePhase == EGamePhase.Ending)
+            {
+                SendVoiceChat(Players.Select(k => k.GamePlayer).ToList(), false);
+                return;
+            }
+
+            var kPlayer = GetKCPlayer(player.Player);
+            SendVoiceChat(Players.Where(k => k.Team == kPlayer.Team).Select(k => k.GamePlayer).ToList(), true);
         }
 
         public override void PlayerPickupItem(UnturnedPlayer player, InventoryGroup inventoryGroup, byte inventoryIndex, ItemJar P)
