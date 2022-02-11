@@ -9,7 +9,8 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnturnedBlackout.Enums;
-using UnturnedBlackout.Models;
+using UnturnedBlackout.Models.Feed;
+using UnturnedBlackout.Models.Global;
 
 namespace UnturnedBlackout.GameTypes
 {

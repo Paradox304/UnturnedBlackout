@@ -149,7 +149,7 @@
     <Compile Include="Managers\GameManager.cs" />
     <Compile Include="Managers\HUDManager.cs" />
     <Compile Include="Managers\UIManager.cs" />
-    <Compile Include="Models\Game\ArenaLocation.cs" />
+    <Compile Include="Models\Global\ArenaLocation.cs" />
     <Compile Include="Models\CTF\CTFConfig.cs" />
     <Compile Include="Models\CTF\CTFPlayer.cs" />
     <Compile Include="Models\CTF\CTFSpawnPoint.cs" />
@@ -164,11 +164,11 @@
     <Compile Include="Models\Level\LevelXP.cs" />
     <Compile Include="Models\TDM\TDMConfig.cs" />
     <Compile Include="Models\TDM\TDMPlayer.cs" />
-    <Compile Include="Models\Game\TeamInfo.cs" />
-    <Compile Include="Models\Game\VoteChoice.cs" />
+    <Compile Include="Models\Global\TeamInfo.cs" />
+    <Compile Include="Models\Global\VoteChoice.cs" />
     <Compile Include="Patches\ClothingPatches.cs" />
     <Compile Include="Models\FFA\FFAPlayer.cs" />
-    <Compile Include="Models\Game\GamePlayer.cs" />
+    <Compile Include="Models\Global\GamePlayer.cs" />
     <Compile Include="Models\PositionsData.cs" />
     <Compile Include="Models\TDM\TDMTeam.cs" />
     <Compile Include="Patches\GroupPatch.cs" />

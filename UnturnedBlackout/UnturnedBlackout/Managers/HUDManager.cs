@@ -6,7 +6,6 @@ using SDG.Unturned;
 using System;
 using System.Collections;
 using UnityEngine;
-using UnturnedBlackout.Database;
 using UnturnedBlackout.GameTypes;
 
 namespace UnturnedBlackout.Managers

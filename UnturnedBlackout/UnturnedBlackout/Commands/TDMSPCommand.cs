@@ -2,7 +2,7 @@
 using Rocket.Unturned.Player;
 using System.Collections.Generic;
 using System.Linq;
-using UnturnedBlackout.Models;
+using UnturnedBlackout.Models.TDM;
 
 namespace UnturnedBlackout.Commands
 {

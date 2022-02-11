@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace UnturnedBlackout.Models.CTF
+﻿namespace UnturnedBlackout.Models.CTF
 {
     public class CTFConfig
     {

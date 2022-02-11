@@ -1,7 +1,6 @@
 ﻿using Steamworks;
-using System;
 using System.Threading;
-using UnturnedBlackout.Models;
+using UnturnedBlackout.Models.Level;
 
 namespace UnturnedBlackout.Database
 {

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using UnturnedBlackout.Database;
+using UnturnedBlackout.Models.Global;
 
 namespace UnturnedBlackout.Models.FFA
 {

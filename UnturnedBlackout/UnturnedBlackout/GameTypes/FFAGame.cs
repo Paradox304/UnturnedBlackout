@@ -12,7 +12,9 @@ using System.Threading;
 using UnityEngine;
 using UnturnedBlackout.Database;
 using UnturnedBlackout.Enums;
-using UnturnedBlackout.Models;
+using UnturnedBlackout.Models.FFA;
+using UnturnedBlackout.Models.Global;
+using UnturnedBlackout.Models.Level;
 
 namespace UnturnedBlackout.GameTypes
 {

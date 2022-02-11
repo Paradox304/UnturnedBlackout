@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnturnedBlackout.GameTypes;
+using UnturnedBlackout.Models.Global;
 
 namespace UnturnedBlackout.Models.TDM
 {

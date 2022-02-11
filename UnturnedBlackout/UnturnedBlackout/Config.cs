@@ -1,7 +1,13 @@
 ﻿using Rocket.API;
 using System.Collections.Generic;
 using UnityEngine;
-using UnturnedBlackout.Models;
+using UnturnedBlackout.Models.CTF;
+using UnturnedBlackout.Models.Feed;
+using UnturnedBlackout.Models.FFA;
+using UnturnedBlackout.Models.Global;
+using UnturnedBlackout.Models.KC;
+using UnturnedBlackout.Models.Level;
+using UnturnedBlackout.Models.TDM;
 
 namespace UnturnedBlackout
 {

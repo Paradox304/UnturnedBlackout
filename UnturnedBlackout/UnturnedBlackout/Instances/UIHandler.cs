@@ -7,7 +7,7 @@ using UnityEngine;
 using UnturnedBlackout.Database;
 using UnturnedBlackout.Enums;
 using UnturnedBlackout.GameTypes;
-using UnturnedBlackout.Models;
+using UnturnedBlackout.Models.Level;
 
 namespace UnturnedBlackout.Instances
 {

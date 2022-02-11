@@ -1,6 +1,6 @@
 ﻿using UnturnedBlackout.Enums;
 
-namespace UnturnedBlackout.Models.Game
+namespace UnturnedBlackout.Models.Global
 {
     public class VoteChoice
     {

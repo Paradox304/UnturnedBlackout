@@ -1,18 +1,12 @@
 ﻿using HarmonyLib;
-using Rocket.API;
 using Rocket.API.Collections;
 using Rocket.Core.Plugins;
-using Rocket.Unturned.Enumerations;
-using Rocket.Unturned.Events;
-using Rocket.Unturned.Player;
 using SDG.Unturned;
 using Steamworks;
-using System;
 using System.Collections;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
-using UnturnedBlackout.GameTypes;
 using UnturnedBlackout.Managers;
 using Logger = Rocket.Core.Logging.Logger;
 
