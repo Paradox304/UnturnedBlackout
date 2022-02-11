@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnturnedBlackout.GameTypes;
 
-namespace UnturnedBlackout.Models
+namespace UnturnedBlackout.Models.TDM
 {
     public class TDMTeam
     {
@@ -38,21 +38,17 @@ namespace UnturnedBlackout.Models
                 SpawnPoint = teamID;
                 SpawnThreshold = 0;
                 Frequency = Utility.GetFreeFrequency();
-                IngameGroup = GroupManager.addGroup(GroupManager.generateUniqueGroupID(), TeamID == 0 ? Plugin.Instance.Translate("Blue_Team_Name").ToUnrich() : Plugin.Instance.Translate("Red_Team_Name").ToUnrich());
-                Utility.Debug($"Game: {Game.Location.LocationName}, Team: {IngameGroup.name}, ID: {IngameGroup.groupID}, FREQ: {Frequency}");
+                IngameGroup = GroupManager.addGroup(GroupManager.generateUniqueGroupID(), Info.TeamName);
             }
         }
 
         public void AddPlayer(CSteamID steamID)
         {
-            Utility.Debug($"Adding player to team {TeamID}");
             var player = PlayerTool.getPlayer(steamID);
             Players.Add(steamID, DateTime.UtcNow);
-            Utility.Debug("Assigning the group");
+
             player.quests.ServerAssignToGroup(IngameGroup.groupID, EPlayerGroupRank.MEMBER, true);
-            Utility.Debug($"Setting the frequency: {Frequency}");
             player.quests.askSetRadioFrequency(CSteamID.Nil, Frequency);
-            Utility.Debug($"Setted the frequency, {player.quests.radioFrequency}");
         }
 
         public void RemovePlayer(CSteamID steamID)
@@ -65,7 +61,6 @@ namespace UnturnedBlackout.Models
 
         public void OnDeath(CSteamID steamID)
         {
-            Utility.Debug($"Team player died, spawn threshold {SpawnThreshold}");
             if (!Players.TryGetValue(steamID, out DateTime lastDeath))
             {
                 return;
@@ -73,12 +68,9 @@ namespace UnturnedBlackout.Models
 
             if ((DateTime.UtcNow - lastDeath).TotalSeconds < Config.SpawnSwitchCountSeconds)
             {
-                Utility.Debug("Last death comes within the seconds");
                 SpawnThreshold++;
-                Utility.Debug($"Threshold: {SpawnThreshold}");
                 if (SpawnThreshold > Config.SpawnSwitchThreshold)
                 {
-                    Utility.Debug("Threshold limit reached, switch the spawns");
                     if (SpawnSwitcher != null)
                     {
                         Plugin.Instance.StopCoroutine(SpawnSwitcher);

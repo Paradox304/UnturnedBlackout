@@ -324,14 +324,7 @@ namespace UnturnedBlackout.GameTypes
                 }
                 xpText += "\n";
 
-                if (kPlayer.KillStreak > 0)
-                {
-                    xpGained += Config.TDM.BaseXPKS + (++kPlayer.KillStreak * Config.TDM.IncreaseXPPerKS);
-                }
-                else
-                {
-                    kPlayer.KillStreak++;
-                }
+                kPlayer.KillStreak++;
 
                 if (kPlayer.MultipleKills == 0)
                 {
@@ -480,7 +473,7 @@ namespace UnturnedBlackout.GameTypes
                     return;
                 }
 
-                var iconLink = Plugin.Instance.UIManager.Icons.TryGetValue(data.Level, out LevelIcon icon) ? icon.IconLink : (Plugin.Instance.UIManager.Icons.TryGetValue(0, out icon) ? icon.IconLink : "");
+                var iconLink = Plugin.Instance.UIManager.Icons.TryGetValue(data.Level, out LevelIcon icon) ? icon.IconLink28 : (Plugin.Instance.UIManager.Icons.TryGetValue(0, out icon) ? icon.IconLink28 : "");
                 var updatedText = $"<color={tPlayer.Team.Info.ChatPlayerHexCode}>{player.Player.CharacterName.Trim()}</color>: <color={tPlayer.Team.Info.ChatMessageHexCode}>{text.ToUnrich()}</color>";
 
                 if (chatMode == EChatMode.GLOBAL)

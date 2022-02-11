@@ -10,7 +10,7 @@ using UnityEngine;
 using UnturnedBlackout.Database;
 using UnturnedBlackout.GameTypes;
 
-namespace UnturnedBlackout.Models
+namespace UnturnedBlackout.Models.Game
 {
     public class GamePlayer
     {

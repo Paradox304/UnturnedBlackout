@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace UnturnedBlackout.Models
+namespace UnturnedBlackout.Models.TDM
 {
     public class TDMSpawnPoint
     {

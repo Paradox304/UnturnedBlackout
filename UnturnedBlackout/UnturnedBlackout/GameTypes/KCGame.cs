@@ -58,8 +58,8 @@ namespace UnturnedBlackout.GameTypes
             var blueTeamInfo = Config.TeamsInfo.FirstOrDefault(k => k.TeamID == location.BlueTeamID);
             var redTeamInfo = Config.TeamsInfo.FirstOrDefault(k => k.TeamID == location.RedTeamID);
 
-            BlueTeam = new KCTeam(this, (byte)ETeam.Blue, false, Config.BlueDogTagID, blueTeamInfo);
-            RedTeam = new KCTeam(this, (byte)ETeam.Red, false, Config.RedDogTagID, redTeamInfo);
+            BlueTeam = new KCTeam(this, (byte)ETeam.Blue, false, Config.KC.BlueDogTagID, blueTeamInfo);
+            RedTeam = new KCTeam(this, (byte)ETeam.Red, false, Config.KC.RedDogTagID, redTeamInfo);
             Frequency = Utility.GetFreeFrequency();
 
             GameStarter = Plugin.Instance.StartCoroutine(StartGame());
@@ -325,14 +325,7 @@ namespace UnturnedBlackout.GameTypes
                 }
                 xpText += "\n";
 
-                if (kPlayer.KillStreak > 0)
-                {
-                    xpGained += Config.KC.BaseXPKS + (++kPlayer.KillStreak * Config.KC.IncreaseXPPerKS);
-                }
-                else
-                {
-                    kPlayer.KillStreak++;
-                }
+                kPlayer.KillStreak++;
 
                 if (kPlayer.MultipleKills == 0)
                 {
@@ -473,7 +466,7 @@ namespace UnturnedBlackout.GameTypes
                     return;
                 }
 
-                var iconLink = Plugin.Instance.UIManager.Icons.TryGetValue(data.Level, out LevelIcon icon) ? icon.IconLink : (Plugin.Instance.UIManager.Icons.TryGetValue(0, out icon) ? icon.IconLink : "");
+                var iconLink = Plugin.Instance.UIManager.Icons.TryGetValue(data.Level, out LevelIcon icon) ? icon.IconLink28 : (Plugin.Instance.UIManager.Icons.TryGetValue(0, out icon) ? icon.IconLink28 : "");
                 var updatedText = $"<color={kPlayer.Team.Info.ChatPlayerHexCode}>{player.Player.CharacterName.Trim()}</color>: <color={kPlayer.Team.Info.ChatMessageHexCode}>{text.ToUnrich()}</color>";
 
                 if (chatMode == EChatMode.GLOBAL)

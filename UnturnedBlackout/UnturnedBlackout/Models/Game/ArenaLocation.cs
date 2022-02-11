@@ -1,4 +1,4 @@
-﻿namespace UnturnedBlackout.Models
+﻿namespace UnturnedBlackout.Models.Game
 {
     public class ArenaLocation
     {

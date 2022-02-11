@@ -1,22 +1,23 @@
-﻿namespace UnturnedBlackout.Models
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace UnturnedBlackout.Models.KC
 {
-    public class FFAConfig
+    public class KCConfig
     {
         public int StartSeconds { get; set; }
         public int EndSeconds { get; set; }
-
-        public string KitName { get; set; }
-        public string KillFeedHexCode { get; set; }
-        public string ChatPlayerHexCode { get; set; }
-        public string ChatMessageHexCode { get; set; }
 
         public int XPPerKill { get; set; }
         public int XPPerMeleeKill { get; set; }
         public int XPPerKillHeadshot { get; set; }
         public int XPPerAssist { get; set; }
 
-        public int BaseXPKS { get; set; }
-        public int IncreaseXPPerKS { get; set; }
+        public int XPPerKillConfirmed { get; set; }
+        public int XPPerKillDenied { get; set; }
 
         public int BaseXPMK { get; set; }
         public int IncreaseXPPerMK { get; set; }
@@ -30,25 +31,24 @@
         public int ScoreLimit { get; set; }
         public int SpawnProtectionSeconds { get; set; }
 
-        public FFAConfig()
+        public ushort RedDogTagID { get; set; }
+        public ushort BlueDogTagID { get; set; }
+
+        public KCConfig()
         {
 
         }
 
-        public FFAConfig(int startSeconds, int endSeconds, string kitName, string killFeedHexCode, string chatPlayerHexCode, string chatMessageHexCode, int xPPerKill, int xPPerMeleeKill, int xPPerKillHeadshot, int xPPerAssist, int baseXPKS, int increaseXPPerKS, int baseXPMK, int increaseXPPerMK, int mKSeconds, int shutdownXP, int dominationXP, float winMultipler, int scoreLimit, int spawnProtectionSeconds)
+        public KCConfig(int startSeconds, int endSeconds, int xPPerKill, int xPPerMeleeKill, int xPPerKillHeadshot, int xPPerAssist, int xPPerKillConfirmed, int xPPerKillDenied, int baseXPMK, int increaseXPPerMK, int mKSeconds, int shutdownXP, int dominationXP, float winMultipler, int scoreLimit, int spawnProtectionSeconds, ushort redDogTagID, ushort blueDogTagID)
         {
             StartSeconds = startSeconds;
             EndSeconds = endSeconds;
-            KitName = kitName;
-            KillFeedHexCode = killFeedHexCode;
-            ChatPlayerHexCode = chatPlayerHexCode;
-            ChatMessageHexCode = chatMessageHexCode;
             XPPerKill = xPPerKill;
             XPPerMeleeKill = xPPerMeleeKill;
             XPPerKillHeadshot = xPPerKillHeadshot;
             XPPerAssist = xPPerAssist;
-            BaseXPKS = baseXPKS;
-            IncreaseXPPerKS = increaseXPPerKS;
+            XPPerKillConfirmed = xPPerKillConfirmed;
+            XPPerKillDenied = xPPerKillDenied;
             BaseXPMK = baseXPMK;
             IncreaseXPPerMK = increaseXPPerMK;
             MKSeconds = mKSeconds;
@@ -57,6 +57,8 @@
             WinMultipler = winMultipler;
             ScoreLimit = scoreLimit;
             SpawnProtectionSeconds = spawnProtectionSeconds;
+            RedDogTagID = redDogTagID;
+            BlueDogTagID = blueDogTagID;
         }
     }
 }

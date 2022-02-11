@@ -290,14 +290,7 @@ namespace UnturnedBlackout.GameTypes
                 }
                 xpText += "\n";
 
-                if (kPlayer.KillStreak > 0)
-                {
-                    xpGained += Config.FFA.BaseXPKS + (++kPlayer.KillStreak * Config.FFA.IncreaseXPPerKS);
-                }
-                else
-                {
-                    kPlayer.KillStreak++;
-                }
+                kPlayer.KillStreak++;
 
                 if (kPlayer.MultipleKills == 0)
                 {
@@ -444,7 +437,7 @@ namespace UnturnedBlackout.GameTypes
                     return;
                 }
 
-                var iconLink = Plugin.Instance.UIManager.Icons.TryGetValue(data.Level, out LevelIcon icon) ? icon.IconLink : (Plugin.Instance.UIManager.Icons.TryGetValue(0, out icon) ? icon.IconLink : "");
+                var iconLink = Plugin.Instance.UIManager.Icons.TryGetValue(data.Level, out LevelIcon icon) ? icon.IconLink28 : (Plugin.Instance.UIManager.Icons.TryGetValue(0, out icon) ? icon.IconLink28 : "");
                 var updatedText = $"<color={Config.FFA.ChatPlayerHexCode}>{player.Player.CharacterName.Trim()}</color>: <color={Config.FFA.ChatMessageHexCode}>{text.ToUnrich()}</color>";
 
                 foreach (var reciever in Players)

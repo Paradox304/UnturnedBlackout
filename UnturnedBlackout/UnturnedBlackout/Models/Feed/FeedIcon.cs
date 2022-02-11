@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace UnturnedBlackout.Models
+namespace UnturnedBlackout.Models.Feed
 {
     public class FeedIcon
     {

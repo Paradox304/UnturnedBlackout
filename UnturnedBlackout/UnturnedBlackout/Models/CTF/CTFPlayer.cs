@@ -1,28 +1,36 @@
 ﻿using Steamworks;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using UnturnedBlackout.Database;
 
-namespace UnturnedBlackout.Models
+namespace UnturnedBlackout.Models.CTF
 {
-    public class FFAPlayer
+    public class CTFPlayer
     {
         public GamePlayer GamePlayer { get; set; }
+
+        public CTFTeam Team { get; set; }
 
         public int XP { get; set; }
         public int Score { get; set; }
         public int Kills { get; set; }
-        public int Assists { get; set; }
         public int Deaths { get; set; }
+        public int Assists { get; set; }
         public int KillStreak { get; set; }
         public int MultipleKills { get; set; }
+        public int FlagsCaptured { get; set; }
+        public int FlagsSaved { get; set; }
 
         public DateTime LastKill { get; set; }
         public Dictionary<CSteamID, int> PlayersKilled { get; set; }
 
-        public FFAPlayer(GamePlayer gamePlayer)
+        public CTFPlayer(GamePlayer gamePlayer, CTFTeam team)
         {
             GamePlayer = gamePlayer;
+            Team = team;
 
             XP = 0;
             Score = 0;
@@ -31,6 +39,8 @@ namespace UnturnedBlackout.Models
             Assists = 0;
             KillStreak = 0;
             MultipleKills = 0;
+            FlagsCaptured = 0;
+            FlagsSaved = 0;
 
             LastKill = DateTime.UtcNow;
             PlayersKilled = new Dictionary<CSteamID, int>();

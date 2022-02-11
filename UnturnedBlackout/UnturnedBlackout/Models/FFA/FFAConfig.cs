@@ -1,26 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace UnturnedBlackout.Models
+﻿namespace UnturnedBlackout.Models.FFA
 {
-    public class KCConfig
+    public class FFAConfig
     {
         public int StartSeconds { get; set; }
         public int EndSeconds { get; set; }
+
+        public string KitName { get; set; }
+        public string KillFeedHexCode { get; set; }
+        public string ChatPlayerHexCode { get; set; }
+        public string ChatMessageHexCode { get; set; }
 
         public int XPPerKill { get; set; }
         public int XPPerMeleeKill { get; set; }
         public int XPPerKillHeadshot { get; set; }
         public int XPPerAssist { get; set; }
-
-        public int XPPerKillConfirmed { get; set; }
-        public int XPPerKillDenied { get; set; }
-
-        public int BaseXPKS { get; set; }
-        public int IncreaseXPPerKS { get; set; }
 
         public int BaseXPMK { get; set; }
         public int IncreaseXPPerMK { get; set; }
@@ -34,23 +27,23 @@ namespace UnturnedBlackout.Models
         public int ScoreLimit { get; set; }
         public int SpawnProtectionSeconds { get; set; }
 
-        public KCConfig()
+        public FFAConfig()
         {
 
         }
 
-        public KCConfig(int startSeconds, int endSeconds, int xPPerKill, int xPPerMeleeKill, int xPPerKillHeadshot, int xPPerAssist, int xPPerKillConfirmed, int xPPerKillDenied, int baseXPKS, int increaseXPPerKS, int baseXPMK, int increaseXPPerMK, int mKSeconds, int shutdownXP, int dominationXP, float winMultipler, int scoreLimit, int spawnProtectionSeconds)
+        public FFAConfig(int startSeconds, int endSeconds, string kitName, string killFeedHexCode, string chatPlayerHexCode, string chatMessageHexCode, int xPPerKill, int xPPerMeleeKill, int xPPerKillHeadshot, int xPPerAssist, int baseXPMK, int increaseXPPerMK, int mKSeconds, int shutdownXP, int dominationXP, float winMultipler, int scoreLimit, int spawnProtectionSeconds)
         {
             StartSeconds = startSeconds;
             EndSeconds = endSeconds;
+            KitName = kitName;
+            KillFeedHexCode = killFeedHexCode;
+            ChatPlayerHexCode = chatPlayerHexCode;
+            ChatMessageHexCode = chatMessageHexCode;
             XPPerKill = xPPerKill;
             XPPerMeleeKill = xPPerMeleeKill;
             XPPerKillHeadshot = xPPerKillHeadshot;
             XPPerAssist = xPPerAssist;
-            XPPerKillConfirmed = xPPerKillConfirmed;
-            XPPerKillDenied = xPPerKillDenied;
-            BaseXPKS = baseXPKS;
-            IncreaseXPPerKS = increaseXPPerKS;
             BaseXPMK = baseXPMK;
             IncreaseXPPerMK = increaseXPPerMK;
             MKSeconds = mKSeconds;

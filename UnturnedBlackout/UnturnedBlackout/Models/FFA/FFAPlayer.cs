@@ -1,36 +1,28 @@
 ﻿using Steamworks;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnturnedBlackout.Database;
 
-namespace UnturnedBlackout.Models
+namespace UnturnedBlackout.Models.FFA
 {
-    public class KCPlayer
+    public class FFAPlayer
     {
         public GamePlayer GamePlayer { get; set; }
-
-        public KCTeam Team { get; set; }
 
         public int XP { get; set; }
         public int Score { get; set; }
         public int Kills { get; set; }
-        public int Deaths { get; set; }
         public int Assists { get; set; }
+        public int Deaths { get; set; }
         public int KillStreak { get; set; }
         public int MultipleKills { get; set; }
-        public int KillsConfirmed { get; set; }
-        public int KillsDenied { get; set; }
 
         public DateTime LastKill { get; set; }
         public Dictionary<CSteamID, int> PlayersKilled { get; set; }
 
-        public KCPlayer(GamePlayer gamePlayer, KCTeam team)
+        public FFAPlayer(GamePlayer gamePlayer)
         {
             GamePlayer = gamePlayer;
-            Team = team;
 
             XP = 0;
             Score = 0;

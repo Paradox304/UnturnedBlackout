@@ -1,4 +1,4 @@
-﻿namespace UnturnedBlackout.Models
+﻿namespace UnturnedBlackout.Models.TDM
 {
     public class TDMConfig
     {
@@ -9,9 +9,6 @@
         public int XPPerMeleeKill { get; set; }
         public int XPPerKillHeadshot { get; set; }
         public int XPPerAssist { get; set; }
-
-        public int BaseXPKS { get; set; }
-        public int IncreaseXPPerKS { get; set; }
 
         public int BaseXPMK { get; set; }
         public int IncreaseXPPerMK { get; set; }
@@ -30,7 +27,7 @@
 
         }
 
-        public TDMConfig(int startSeconds, int endSeconds, int xPPerKill, int xPPerMeleeKill, int xPPerKillHeadshot, int xPPerAssist, int baseXPKS, int increaseXPPerKS, int baseXPMK, int increaseXPPerMK, int mKSeconds, int shutdownXP, int dominationXP, float winMultipler, int scoreLimit, int spawnProtectionSeconds)
+        public TDMConfig(int startSeconds, int endSeconds, int xPPerKill, int xPPerMeleeKill, int xPPerKillHeadshot, int xPPerAssist, int baseXPMK, int increaseXPPerMK, int mKSeconds, int shutdownXP, int dominationXP, float winMultipler, int scoreLimit, int spawnProtectionSeconds)
         {
             StartSeconds = startSeconds;
             EndSeconds = endSeconds;
@@ -38,8 +35,6 @@
             XPPerMeleeKill = xPPerMeleeKill;
             XPPerKillHeadshot = xPPerKillHeadshot;
             XPPerAssist = xPPerAssist;
-            BaseXPKS = baseXPKS;
-            IncreaseXPPerKS = increaseXPPerKS;
             BaseXPMK = baseXPMK;
             IncreaseXPPerMK = increaseXPPerMK;
             MKSeconds = mKSeconds;

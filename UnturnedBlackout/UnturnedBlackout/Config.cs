@@ -24,7 +24,6 @@ namespace UnturnedBlackout
         public int VoiceChatFont { get; set; }
 
         public bool EnableDebugLogs { get; set; }
-        public bool DisableProne { get; set; }
 
         public Vector3 LobbySpawn { get; set; }
 
@@ -54,12 +53,11 @@ namespace UnturnedBlackout
         public int SpawnSwitchSeconds { get; set; }
 
         public ushort KnifeID { get; set; }
-        public ushort RedDogTagID { get; set; }
-        public ushort BlueDogTagID { get; set; }
 
         public FFAConfig FFA { get; set; }
         public TDMConfig TDM { get; set; }
         public KCConfig KC { get; set; }
+        public CTFConfig CTF { get; set; }
 
         public List<ArenaLocation> ArenaLocations { get; set; }
         public List<LevelIcon> LevelIcons { get; set; }
@@ -116,12 +114,11 @@ namespace UnturnedBlackout
             SpawnSwitchSeconds = 120;
 
             KnifeID = 58129;
-            RedDogTagID = 26820;
-            BlueDogTagID = 26821;
 
-            FFA = new FFAConfig(15, 600, "FFA", "white", "#dcb4ff", "#dcb4ff", 50, 60, 50, 20, 10, 5, 10, 5, 10, 15, 15, 1.5f, 15, 2);
-            TDM = new TDMConfig(15, 600, 50, 60, 50, 20, 10, 5, 10, 5, 10, 15, 15, 1.5f, 15, 2);
-            KC = new KCConfig(15, 600, 50, 60, 50, 20, 10, 10, 10, 5, 10, 5, 10, 15, 15, 1.5f, 15, 2);
+            FFA = new FFAConfig(15, 600, "FFA", "white", "#dcb4ff", "#dcb4ff", 50, 60, 50, 20, 10, 5, 10, 15, 15, 1.5f, 15, 2);
+            TDM = new TDMConfig(15, 600, 50, 60, 50, 20, 10, 5, 10, 15, 15, 1.5f, 15, 2);
+            KC = new KCConfig(15, 600, 50, 60, 50, 20, 10, 10, 10, 5, 10, 15, 15, 1.5f, 15, 2, 26820, 26821);
+            CTF = new CTFConfig(15, 600, 50, 60, 50, 20, 10, 10, 10, 5, 10, 15, 15, 1.5f, 3, 2, 26820, 26821);
 
             ArenaLocations = new List<ArenaLocation>
             {

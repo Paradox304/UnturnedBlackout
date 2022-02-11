@@ -46,7 +46,7 @@ namespace UnturnedBlackout.Managers
         public UIManager()
         {
             Config = Plugin.Instance.Configuration.Instance;
-            Icons = Config.LevelIcons.ToDictionary(k => k.Rank);
+            Icons = Config.LevelIcons.ToDictionary(k => k.Level);
             LevelsXPNeeded = Config.LevelsXP.ToDictionary(k => k.Level);
             KillFeedIcons = Config.KillFeedIcons.ToDictionary(k => k.WeaponID);
 
@@ -227,7 +227,7 @@ namespace UnturnedBlackout.Managers
             var voiceChatText = "";
             foreach (var talking in playersTalking)
             {
-                voiceChatText += $"{talking.Player.CharacterName.ToUnrich().Trim()} \n";
+                voiceChatText += $" {talking.Player.CharacterName.ToUnrich().Trim()} \n";
             }
             if (!string.IsNullOrEmpty(voiceChatText))
             {

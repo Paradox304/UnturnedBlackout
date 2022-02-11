@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using UnturnedBlackout.Database;
 
-namespace UnturnedBlackout.Models
+namespace UnturnedBlackout.Models.TDM
 {
     public class TDMPlayer
     {
