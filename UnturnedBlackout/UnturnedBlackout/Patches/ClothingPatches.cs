@@ -17,7 +17,11 @@ namespace UnturnedBlackout.Patches
         [HarmonyPrefix]
         public static bool WearBackpackPrefix(byte page, byte x, byte y)
         {
-            return false;
+            if (page == 255)
+            {
+                return false;
+            } 
+            return true;
         }
 
         [HarmonyPatch("ReceiveSwapVestRequest")]
@@ -44,6 +48,13 @@ namespace UnturnedBlackout.Patches
         [HarmonyPatch("ReceiveSwapPantsRequest")]
         [HarmonyPrefix]
         public static bool WearPantsPrefix(byte page, byte x, byte y)
+        {
+            return false;
+        }
+
+        [HarmonyPatch("ReceiveSwapGlassesRequest")]
+        [HarmonyPrefix]
+        public static bool WearGlassesPrefix(byte page, byte x, byte y)
         {
             return false;
         }

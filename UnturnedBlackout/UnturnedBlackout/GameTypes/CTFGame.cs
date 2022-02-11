@@ -274,6 +274,17 @@ namespace UnturnedBlackout.GameTypes
             cPlayer.OnDeath(killer);
             cPlayer.GamePlayer.OnDeath(killer);
 
+            var otherTeam = cPlayer.Team == BlueTeam ? RedTeam : BlueTeam;
+            if (cPlayer.IsCarryingFlag)
+            {
+                if (player.clothing.backpack == otherTeam.FlagID)
+                {
+                    ItemManager.dropItem(new Item(otherTeam.FlagID, true), player.transform.position, true, true, true);
+                    // Code to update the UI
+                }
+                cPlayer.IsCarryingFlag = false;
+            }
+
             ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DBManager.IncreasePlayerDeathsAsync(cPlayer.GamePlayer.SteamID, 1));
 
             TaskDispatcher.QueueOnMainThread(() =>
@@ -454,8 +465,97 @@ namespace UnturnedBlackout.GameTypes
             Utility.Debug($"Game player found, player name: {cPlayer.GamePlayer.Player.CharacterName}");
             Utility.Debug("Reviving the player");
 
+            var otherTeam = cPlayer.Team == BlueTeam ? RedTeam : BlueTeam;
+            if (otherTeam.FlagID == player.Player.clothing.backpack)
+            {
+                player.Player.clothing.thirdClothes.backpack = 0;
+                player.Player.clothing.askWearBackpack(0, 0, new byte[0], true);
+            }
+
             cPlayer.GamePlayer.OnRevived();
             SpawnPlayer(cPlayer);
+        }
+
+        public override void OnTakingItem(GamePlayer player, ItemData itemData, ref bool shouldAllow)
+        {
+            var cPlayer = GetCTFPlayer(player.Player);
+            if (cPlayer == null)
+            {
+                return;
+            }
+
+            Utility.Debug($"{player.Player.CharacterName} is trying to pick up item {itemData.item.id}");
+            var otherTeam = cPlayer.Team == BlueTeam ? RedTeam : BlueTeam;
+
+            if (cPlayer.Team.FlagID == itemData.item.id)
+            {
+                Utility.Debug($"{player.Player.CharacterName} is trying to pick up their own flag, checking if they are saving the flag");
+                shouldAllow = false;
+
+                if (!cPlayer.Team.HasFlag)
+                {
+                    Utility.Debug($"{player.Player.CharacterName} is saving their flag, clearing the flag and putting it back into position");
+                    ItemManager.ServerClearItemsInSphere(itemData.point, 1);
+                    ItemManager.dropItem(new Item(cPlayer.Team.FlagID, true), cPlayer.Team.FlagSP, true, true, true);
+                    cPlayer.Team.HasFlag = true;
+                    cPlayer.Score += Config.FlagSavedPoints;
+                    cPlayer.XP += Config.CTF.XPPerFlagSaved;
+                    Plugin.Instance.UIManager.ShowXPUI(cPlayer.GamePlayer, Config.CTF.XPPerFlagSaved, Plugin.Instance.Translate("Flag_Saved").ToRich());
+
+                    // Code to update the UI
+                    ThreadPool.QueueUserWorkItem(async (o) =>
+                    {
+                        await Plugin.Instance.DBManager.IncreasePlayerFlagsSavedAsync(cPlayer.GamePlayer.SteamID, 1);
+                        await Plugin.Instance.DBManager.IncreasePlayerXPAsync(cPlayer.GamePlayer.SteamID, (uint)Config.CTF.XPPerFlagSaved);
+                    });
+                    return;
+                }
+
+                if (!cPlayer.IsCarryingFlag)
+                {
+                    Utility.Debug($"{player.Player.CharacterName} is not carrying an enemy's flag");
+                    return;
+                }
+
+                Utility.Debug($"{player.Player.CharacterName} is carrying the enemy's flag, getting the flag, other team lost flag {otherTeam.HasFlag}");
+                if (player.Player.Player.clothing.backpack == otherTeam.FlagID && !otherTeam.HasFlag)
+                {
+                    player.Player.Player.clothing.thirdClothes.backpack = 0;
+                    player.Player.Player.clothing.askWearBackpack(0, 0, new byte[0], true);
+
+                    ItemManager.dropItem(new Item(otherTeam.FlagID, true), otherTeam.FlagSP, true, true, true);
+                    otherTeam.HasFlag = true;
+                    cPlayer.Team.Score++;
+                    cPlayer.Score += Config.FlagCapturedPoints;
+                    cPlayer.XP += Config.CTF.XPPerFlagCaptured;
+                    Plugin.Instance.UIManager.ShowXPUI(cPlayer.GamePlayer, Config.CTF.XPPerFlagCaptured, Plugin.Instance.Translate("Flag_Captured").ToRich());
+
+                    // Code to update the UI
+                    ThreadPool.QueueUserWorkItem(async (o) =>
+                    {
+                        await Plugin.Instance.DBManager.IncreasePlayerFlagsCapturedAsync(cPlayer.GamePlayer.SteamID, 1);
+                        await Plugin.Instance.DBManager.IncreasePlayerXPAsync(cPlayer.GamePlayer.SteamID, (uint)Config.CTF.XPPerFlagCaptured);
+                    });
+                } else
+                {
+                    Utility.Debug($"[ERROR] Could'nt find the other team's flag as the player's backpack");
+                }
+
+                cPlayer.IsCarryingFlag = false;
+            } else if (otherTeam.FlagID == itemData.item.id)
+            {
+                Utility.Debug($"{player.Player.CharacterName} is trying to pick up the other team's flag, checking if they have their own flag");
+                if (!cPlayer.Team.HasFlag)
+                {
+                    Utility.Debug($"Their own team doesn't have their flag, don't allow to pickup flag");
+                    shouldAllow = false;
+                    return;
+                }
+
+                otherTeam.HasFlag = false;
+                cPlayer.IsCarryingFlag = true;
+                // Code to update the UI
+            }
         }
 
         public override void OnChatMessageSent(GamePlayer player, EChatMode chatMode, string text, ref bool isVisible)

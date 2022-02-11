@@ -550,6 +550,10 @@ namespace UnturnedBlackout.GameTypes
             
         }
 
+        public override void OnTakingItem(GamePlayer player, ItemData itemData, ref bool shouldAllow)
+        {
+        }
+
         public override List<GamePlayer> GetPlayers()
         {
             return Players.Select(k => k.GamePlayer).ToList();

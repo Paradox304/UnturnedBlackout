@@ -23,6 +23,7 @@ namespace UnturnedBlackout.Models.CTF
         public GroupInfo IngameGroup { get; set; }
         public uint Frequency { get; set; }
 
+        public bool HasFlag { get; set; }
         public Vector3 FlagSP { get; set; }
 
         public CTFTeam(int teamID, bool isDummy, TeamInfo info, ushort flagID, Vector3 flagSP)
@@ -39,6 +40,7 @@ namespace UnturnedBlackout.Models.CTF
                 Frequency = Utility.GetFreeFrequency();
                 FlagSP = flagSP;
                 FlagID = flagID;
+                HasFlag = true;
                 IngameGroup = GroupManager.addGroup(GroupManager.generateUniqueGroupID(), Info.TeamName);
             }
         }

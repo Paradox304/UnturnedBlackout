@@ -143,6 +143,8 @@ namespace UnturnedBlackout
             { "Melee_Kill", "Melee Kill" },
             { "Kill_Confirmed", "Kill Confirmed" },
             { "Kill_Denied", "Kill Denied" },
+            { "Flag_Captured", "Flag Captured" },
+            { "Flag_Saved", "Flag Saved" },
             { "Multiple_Kills_Show", "Multiple Kills x{0}" },
             { "Multiple_Kills_Show_2", "2 Multiple Kills" },
             { "Multiple_Kills_Show_3", "3 Multiple Kills" },

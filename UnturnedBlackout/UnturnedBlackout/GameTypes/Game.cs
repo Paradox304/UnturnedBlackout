@@ -55,7 +55,21 @@ namespace UnturnedBlackout.GameTypes
             PlayerAnimator.OnLeanChanged_Global += OnLeaned;
             DamageTool.damagePlayerRequested += OnPlayerDamaged;
             ChatManager.onChatted += OnChatted;
+            ItemManager.onTakeItemRequested += OnTakeItem;
+
             KillFeedChecker = Plugin.Instance.StartCoroutine(UpdateKillfeed());
+        }
+
+        private void OnTakeItem(Player player, byte x, byte y, uint instanceID, byte to_x, byte to_y, byte to_rot, byte to_page, ItemData itemData, ref bool shouldAllow)
+        {
+            var gPlayer = Plugin.Instance.GameManager.GetGamePlayer(player);
+            if (gPlayer == null)
+            {
+                shouldAllow = false;
+                return;
+            }
+
+            OnTakingItem(gPlayer, itemData, ref shouldAllow);
         }
 
         private void OnChatted(SteamPlayer player, EChatMode mode, ref Color chatted, ref bool isRich, string text, ref bool isVisible)
@@ -315,6 +329,7 @@ namespace UnturnedBlackout.GameTypes
         public abstract void PlayerStanceChanged(PlayerStance obj);
         public abstract void OnChatMessageSent(GamePlayer player, EChatMode chatMode, string text, ref bool isVisible);
         public abstract void OnVoiceChatUpdated(GamePlayer player);
+        public abstract void OnTakingItem(GamePlayer player, ItemData itemData, ref bool shouldAllow);
         public abstract int GetPlayerCount();
         public abstract List<GamePlayer> GetPlayers();
     }

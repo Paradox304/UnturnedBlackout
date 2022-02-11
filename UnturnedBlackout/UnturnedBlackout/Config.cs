@@ -49,6 +49,8 @@ namespace UnturnedBlackout
         public int AssistPoints { get; set; }
         public int KillConfirmedPoints { get; set; }
         public int KillDeniedPoints { get; set; }
+        public int FlagSavedPoints { get; set; }
+        public int FlagCapturedPoints { get; set; }
 
         public int DominationKills { get; set; }
         public int ShutdownKillStreak { get; set; }
@@ -110,6 +112,8 @@ namespace UnturnedBlackout
             AssistPoints = 50;
             KillConfirmedPoints = 10;
             KillDeniedPoints = 10;
+            FlagSavedPoints = 50;
+            FlagCapturedPoints = 50;
 
             DominationKills = 5;
             ShutdownKillStreak = 5;

@@ -12,6 +12,8 @@ namespace UnturnedBlackout.Models.CTF
 
         public CTFTeam Team { get; set; }
 
+        public bool IsCarryingFlag { get; set; }
+
         public int XP { get; set; }
         public int Score { get; set; }
         public int Kills { get; set; }
@@ -30,6 +32,7 @@ namespace UnturnedBlackout.Models.CTF
             GamePlayer = gamePlayer;
             Team = team;
 
+            IsCarryingFlag = false;
             XP = 0;
             Score = 0;
             Kills = 0;
