@@ -2,6 +2,7 @@
 using Steamworks;
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 using UnturnedBlackout.Models.Global;
 
 namespace UnturnedBlackout.Models.CTF
@@ -14,6 +15,7 @@ namespace UnturnedBlackout.Models.CTF
         public int TeamID { get; set; }
         public Dictionary<CSteamID, DateTime> Players { get; set; }
 
+        public ushort FlagID { get; set; }
         public int Score { get; set; }
         public int SpawnPoint { get; set; }
 
@@ -21,7 +23,9 @@ namespace UnturnedBlackout.Models.CTF
         public GroupInfo IngameGroup { get; set; }
         public uint Frequency { get; set; }
 
-        public CTFTeam(int teamID, bool isDummy, TeamInfo info)
+        public Vector3 FlagSP { get; set; }
+
+        public CTFTeam(int teamID, bool isDummy, TeamInfo info, ushort flagID, Vector3 flagSP)
         {
             Config = Plugin.Instance.Configuration.Instance;
             TeamID = teamID;
@@ -33,6 +37,8 @@ namespace UnturnedBlackout.Models.CTF
                 SpawnPoint = teamID;
                 SpawnThreshold = 0;
                 Frequency = Utility.GetFreeFrequency();
+                FlagSP = flagSP;
+                FlagID = flagID;
                 IngameGroup = GroupManager.addGroup(GroupManager.generateUniqueGroupID(), Info.TeamName);
             }
         }

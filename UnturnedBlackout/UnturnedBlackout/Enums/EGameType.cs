@@ -5,6 +5,7 @@
         FFA,
         TDM,
         KC,
+        CTF,
         None
     }
 }

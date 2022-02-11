@@ -140,6 +140,7 @@
     <Compile Include="Enums\EGameType.cs" />
     <Compile Include="Enums\EPage.cs" />
     <Compile Include="Enums\ETeam.cs" />
+    <Compile Include="GameTypes\CTFGame.cs" />
     <Compile Include="GameTypes\FFAGame.cs" />
     <Compile Include="GameTypes\Game.cs" />
     <Compile Include="GameTypes\KCGame.cs" />

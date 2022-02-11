@@ -42,7 +42,7 @@ namespace UnturnedBlackout.Managers
             Utility.Debug($"Starting games");
             for (int i = 1; i <= Config.GamesCount; i++)
             {
-                Utility.Debug($"Getting the location and setting the gamemode default to FFA for game {i}");
+                Utility.Debug($"Getting the location and setting the gamemode default to KC for game {i}");
                 Utility.Debug($"{AvailableLocations.Count} locations to choose from");
                 var locationID = AvailableLocations[UnityEngine.Random.Range(0, AvailableLocations.Count)];
                 var location = Config.ArenaLocations.FirstOrDefault(k => k.LocationID == locationID);
@@ -66,9 +66,13 @@ namespace UnturnedBlackout.Managers
                 case EGameType.KC:
                     game = new KCGame(location);
                     break;
+                case EGameType.CTF:
+                    game = new CTFGame(location);
+                    break;
                 default:
                     break;
             }
+
             Utility.Debug("Game is created, adding the game to the list, and releasing the location from available locations");
             Games.Add(game);
             AvailableLocations.Remove(location.LocationID);

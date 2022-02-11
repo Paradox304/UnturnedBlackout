@@ -61,7 +61,7 @@ namespace UnturnedBlackout.Commands
                 return;
             }
 
-            Utility.Say(caller, Plugin.Instance.Translate("CTF_SpawnPoint_Set", location.LocationName, groupID, isFlag).ToRich());
+            Utility.Say(caller, isFlag == true ? Plugin.Instance.Translate("CTF_Flag_SpawnPoint_Set", location.LocationName, groupID) : Plugin.Instance.Translate("CTF_SpawnPoint_Set", location.LocationName, groupID).ToRich());
             Plugin.Instance.DataManager.Data.CTFSpawnPoints.Add(new CTFSpawnPoint(locationID, groupID, player.Player.transform.position.x, player.Player.transform.position.y, player.Player.transform.position.z, isFlag));
             Plugin.Instance.DataManager.SaveJson();
         }
