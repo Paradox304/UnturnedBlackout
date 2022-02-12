@@ -84,6 +84,8 @@ namespace UnturnedBlackout.GameTypes
 
         public IEnumerator StartGame()
         {
+            TaskDispatcher.QueueOnMainThread(() => WipeItems());
+
             for (int seconds = Config.CTF.StartSeconds; seconds >= 0; seconds--)
             {
                 yield return new WaitForSeconds(1);
@@ -102,6 +104,8 @@ namespace UnturnedBlackout.GameTypes
                 Plugin.Instance.UIManager.ClearCountdownUI(player.GamePlayer);
             }
 
+            ItemManager.dropItem(new Item(RedTeam.FlagID, true), RedTeam.FlagSP, true, true, true);
+            ItemManager.dropItem(new Item(BlueTeam.FlagID, true), BlueTeam.FlagSP, true, true, true);
             GameEnder = Plugin.Instance.StartCoroutine(EndGame());
         }
 
@@ -150,7 +154,7 @@ namespace UnturnedBlackout.GameTypes
                 if (player.GamePlayer.HasScoreboard)
                 {
                     player.GamePlayer.HasScoreboard = false;
-                    //Plugin.Instance.UIManager.HideTDMLeaderboard(player.GamePlayer);
+                    Plugin.Instance.UIManager.HideCTFLeaderboard(player.GamePlayer);
                 }
                 if (player.Team == wonTeam)
                 {
@@ -162,13 +166,13 @@ namespace UnturnedBlackout.GameTypes
             }
             TaskDispatcher.QueueOnMainThread(() =>
             {
-                //Plugin.Instance.UIManager.SetupTDMLeaderboard(Players, Location, wonTeam, BlueTeam, RedTeam, false);
+                Plugin.Instance.UIManager.SetupCTFLeaderboard(Players, Location, wonTeam, BlueTeam, RedTeam, false);
                 WipeItems();
             });
             yield return new WaitForSeconds(5);
             foreach (var player in Players)
             {
-                //Plugin.Instance.UIManager.ShowTDMLeaderboard(player.GamePlayer);
+                Plugin.Instance.UIManager.ShowCTFLeaderboard(player.GamePlayer);
             }
             yield return new WaitForSeconds(Config.EndingLeaderboardSeconds);
             foreach (var player in Players.ToList())
@@ -265,14 +269,14 @@ namespace UnturnedBlackout.GameTypes
             if (cPlayer.GamePlayer.HasScoreboard)
             {
                 cPlayer.GamePlayer.HasScoreboard = false;
-                //Plugin.Instance.UIManager.HideTDMLeaderboard(cPlayer.GamePlayer);
+                Plugin.Instance.UIManager.HideCTFLeaderboard(cPlayer.GamePlayer);
             }
 
             var victimKS = cPlayer.KillStreak;
 
             Utility.Debug($"Game player found, player name: {cPlayer.GamePlayer.Player.CharacterName}");
             cPlayer.OnDeath(killer);
-            cPlayer.GamePlayer.OnDeath(killer);
+            cPlayer.GamePlayer.OnDeath(killer, Config.CTF.RespawnSeconds);
 
             var otherTeam = cPlayer.Team == BlueTeam ? RedTeam : BlueTeam;
             if (cPlayer.IsCarryingFlag)
@@ -500,6 +504,7 @@ namespace UnturnedBlackout.GameTypes
                     cPlayer.Team.HasFlag = true;
                     cPlayer.Score += Config.FlagSavedPoints;
                     cPlayer.XP += Config.CTF.XPPerFlagSaved;
+                    cPlayer.FlagsSaved++;
                     Plugin.Instance.UIManager.ShowXPUI(cPlayer.GamePlayer, Config.CTF.XPPerFlagSaved, Plugin.Instance.Translate("Flag_Saved").ToRich());
 
                     // Code to update the UI
@@ -528,6 +533,7 @@ namespace UnturnedBlackout.GameTypes
                     cPlayer.Team.Score++;
                     cPlayer.Score += Config.FlagCapturedPoints;
                     cPlayer.XP += Config.CTF.XPPerFlagCaptured;
+                    cPlayer.FlagsCaptured++;
                     Plugin.Instance.UIManager.ShowXPUI(cPlayer.GamePlayer, Config.CTF.XPPerFlagCaptured, Plugin.Instance.Translate("Flag_Captured").ToRich());
 
                     // Code to update the UI
@@ -580,7 +586,7 @@ namespace UnturnedBlackout.GameTypes
                 }
 
                 var iconLink = Plugin.Instance.UIManager.Icons.TryGetValue(data.Level, out LevelIcon icon) ? icon.IconLink28 : (Plugin.Instance.UIManager.Icons.TryGetValue(0, out icon) ? icon.IconLink28 : "");
-                var updatedText = $"<color={tPlayer.Team.Info.ChatPlayerHexCode}>{player.Player.CharacterName.Trim()}</color>: <color={tPlayer.Team.Info.ChatMessageHexCode}>{text.ToUnrich()}</color>";
+                var updatedText = $"<color={tPlayer.Team.Info.ChatPlayerHexCode}>{player.Player.CharacterName}</color>: <color={tPlayer.Team.Info.ChatMessageHexCode}>{text.ToUnrich()}</color>";
 
                 if (chatMode == EChatMode.GLOBAL)
                 {
@@ -650,7 +656,7 @@ namespace UnturnedBlackout.GameTypes
             if (cPlayer.GamePlayer.HasScoreboard)
             {
                 cPlayer.GamePlayer.HasScoreboard = false;
-                //Plugin.Instance.UIManager.HideTDMLeaderboard(cPlayer.GamePlayer);
+                Plugin.Instance.UIManager.HideCTFLeaderboard(cPlayer.GamePlayer);
             }
             else
             {
@@ -668,8 +674,8 @@ namespace UnturnedBlackout.GameTypes
                 {
                     wonTeam = new CTFTeam(-1, true, new TeamInfo(), 0, Vector3.zero);
                 }
-                //Plugin.Instance.UIManager.SetupTDMLeaderboard(cPlayer, Players, Location, wonTeam, BlueTeam, RedTeam, true);
-                //Plugin.Instance.UIManager.ShowTDMLeaderboard(cPlayer.GamePlayer);
+                Plugin.Instance.UIManager.SetupCTFLeaderboard(cPlayer, Players, Location, wonTeam, BlueTeam, RedTeam, true);
+                Plugin.Instance.UIManager.ShowCTFLeaderboard(cPlayer.GamePlayer);
             }
         }
 

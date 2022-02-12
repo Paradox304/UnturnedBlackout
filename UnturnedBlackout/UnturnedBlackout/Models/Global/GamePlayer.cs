@@ -109,7 +109,7 @@ namespace UnturnedBlackout.Models.Global
         }
 
         // Death screen
-        public void OnDeath(CSteamID killer)
+        public void OnDeath(CSteamID killer, int respawnSeconds)
         {
             if (!Plugin.Instance.DBManager.PlayerCache.TryGetValue(killer, out PlayerData killerData))
             {
@@ -127,12 +127,12 @@ namespace UnturnedBlackout.Models.Global
 
             Plugin.Instance.UIManager.SendDeathUI(this, killerData);
             PreviousStance = EPlayerStance.STAND;
-            RespawnTimer = Plugin.Instance.StartCoroutine(RespawnTime());
+            RespawnTimer = Plugin.Instance.StartCoroutine(RespawnTime(respawnSeconds));
         }
 
-        public IEnumerator RespawnTime()
+        public IEnumerator RespawnTime(int respawnSeconds)
         {
-            for (int seconds = Plugin.Instance.Configuration.Instance.RespawnSeconds; seconds >= 0; seconds--)
+            for (int seconds = respawnSeconds; seconds >= 0; seconds--)
             {
                 yield return new WaitForSeconds(1);
                 Plugin.Instance.UIManager.UpdateRespawnTimer(this, $"{seconds}s");

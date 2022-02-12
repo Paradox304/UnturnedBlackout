@@ -21,12 +21,12 @@ namespace UnturnedBlackout
 
             foreach (var c in value)
             {
-                if (c == '[' || c == '<')
+                if (c == '<')
                 {
                     omit = true;
                     continue;
                 }
-                else if (c == ']' || c == '>')
+                else if (c == '>')
                 {
                     omit = false;
                     continue;
@@ -40,7 +40,7 @@ namespace UnturnedBlackout
                 newString += c;
             }
 
-            return newString;
+            return newString.Trim();
         }
 
         public static void Say(IRocketPlayer target, string message)

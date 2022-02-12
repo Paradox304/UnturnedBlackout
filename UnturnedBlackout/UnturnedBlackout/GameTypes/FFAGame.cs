@@ -45,6 +45,8 @@ namespace UnturnedBlackout.GameTypes
 
         public IEnumerator StartGame()
         {
+            TaskDispatcher.QueueOnMainThread(() => WipeItems());
+
             for (int seconds = Config.FFA.StartSeconds; seconds >= 0; seconds--)
             {
                 yield return new WaitForSeconds(1);
@@ -227,7 +229,7 @@ namespace UnturnedBlackout.GameTypes
 
             Utility.Debug($"Game player found, player name: {fPlayer.GamePlayer.Player.CharacterName}");
             fPlayer.OnDeath(killer);
-            fPlayer.GamePlayer.OnDeath(killer);
+            fPlayer.GamePlayer.OnDeath(killer, Config.FFA.RespawnSeconds);
 
             ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DBManager.IncreasePlayerDeathsAsync(fPlayer.GamePlayer.SteamID, 1));
 
@@ -440,7 +442,7 @@ namespace UnturnedBlackout.GameTypes
                 }
 
                 var iconLink = Plugin.Instance.UIManager.Icons.TryGetValue(data.Level, out LevelIcon icon) ? icon.IconLink28 : (Plugin.Instance.UIManager.Icons.TryGetValue(0, out icon) ? icon.IconLink28 : "");
-                var updatedText = $"<color={Config.FFA.ChatPlayerHexCode}>{player.Player.CharacterName.Trim()}</color>: <color={Config.FFA.ChatMessageHexCode}>{text.ToUnrich()}</color>";
+                var updatedText = $"<color={Config.FFA.ChatPlayerHexCode}>{player.Player.CharacterName.ToUnrich()}</color>: <color={Config.FFA.ChatMessageHexCode}>{text.ToUnrich()}</color>";
 
                 foreach (var reciever in Players)
                 {

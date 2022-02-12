@@ -128,7 +128,7 @@ namespace UnturnedBlackout
             { "Group_Not_Found", "[color=red]Group with that ID not found[/color]" },
             { "FFA_Spawnpoint_Set", "[color=green]FFA spawnpoint set for arena {0}[/color]" },
             { "TDM_SpawnPoint_Set", "[color=green]TDM spawnpoint set for arena {0} for group {1}[/color]" },
-            { "CTF_SpawnPoint_Set", "[color=green]CTF spawnpoint set for arena {0} for group {1}" },
+            { "CTF_SpawnPoint_Set", "[color=green]CTF spawnpoint set for arena {0} for group {1}[/color]" },
             { "CTF_Flag_SpawnPoint_Set", "[color=green]CTF Flag spawnpoint set for arena {0} for group {1}" },
             { "Game_Not_Found_With_ID", "[color=red]No game found with that ID[/color]" },
             { "Game_Full", "[color=red]Game is full, can't join[/color]" },

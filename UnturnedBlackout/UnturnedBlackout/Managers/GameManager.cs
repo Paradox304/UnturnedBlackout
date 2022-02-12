@@ -42,12 +42,12 @@ namespace UnturnedBlackout.Managers
             Utility.Debug($"Starting games");
             for (int i = 1; i <= Config.GamesCount; i++)
             {
-                Utility.Debug($"Getting the location and setting the gamemode default to KC for game {i}");
+                Utility.Debug($"Getting the location and setting the gamemode default to FFA for game {i}");
                 Utility.Debug($"{AvailableLocations.Count} locations to choose from");
                 var locationID = AvailableLocations[UnityEngine.Random.Range(0, AvailableLocations.Count)];
                 var location = Config.ArenaLocations.FirstOrDefault(k => k.LocationID == locationID);
                 Utility.Debug($"Found {location.LocationName}");
-                StartGame(location, EGameType.KC);
+                StartGame(location, EGameType.FFA);
             }
         }
 
@@ -104,7 +104,7 @@ namespace UnturnedBlackout.Managers
                 return;
             }
 
-            if (game.GetPlayerCount() >= game.Location.MaxPlayers)
+            if (game.GetPlayerCount() >= game.Location.GetMaxPlayers(game.GameMode))
             {
                 Utility.Say(player, Plugin.Instance.Translate("Game_Full").ToRich());
                 return;

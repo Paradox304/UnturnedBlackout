@@ -24,6 +24,7 @@
 
         public int ScoreLimit { get; set; }
         public int SpawnProtectionSeconds { get; set; }
+        public int RespawnSeconds { get; set; }
 
         public ushort RedDogTagID { get; set; }
         public ushort BlueDogTagID { get; set; }
@@ -33,7 +34,7 @@
 
         }
 
-        public KCConfig(int startSeconds, int endSeconds, int xPPerKill, int xPPerMeleeKill, int xPPerKillHeadshot, int xPPerAssist, int xPPerKillConfirmed, int xPPerKillDenied, int baseXPMK, int increaseXPPerMK, int mKSeconds, int shutdownXP, int dominationXP, float winMultipler, int scoreLimit, int spawnProtectionSeconds, ushort redDogTagID, ushort blueDogTagID)
+        public KCConfig(int startSeconds, int endSeconds, int xPPerKill, int xPPerMeleeKill, int xPPerKillHeadshot, int xPPerAssist, int xPPerKillConfirmed, int xPPerKillDenied, int baseXPMK, int increaseXPPerMK, int mKSeconds, int shutdownXP, int dominationXP, float winMultipler, int scoreLimit, int spawnProtectionSeconds, int respawnSeconds, ushort redDogTagID, ushort blueDogTagID)
         {
             StartSeconds = startSeconds;
             EndSeconds = endSeconds;
@@ -51,6 +52,7 @@
             WinMultipler = winMultipler;
             ScoreLimit = scoreLimit;
             SpawnProtectionSeconds = spawnProtectionSeconds;
+            RespawnSeconds = respawnSeconds;
             RedDogTagID = redDogTagID;
             BlueDogTagID = blueDogTagID;
         }

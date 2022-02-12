@@ -24,6 +24,7 @@
 
         public int ScoreLimit { get; set; }
         public int SpawnProtectionSeconds { get; set; }
+        public int RespawnSeconds { get; set; }
 
         public ushort RedFlagID { get; set; }
         public ushort BlueFlagID { get; set; }
@@ -33,7 +34,7 @@
 
         }
 
-        public CTFConfig(int startSeconds, int endSeconds, int xPPerKill, int xPPerMeleeKill, int xPPerKillHeadshot, int xPPerAssist, int xPPerFlagCaptured, int xPPerFlagSaved, int baseXPMK, int increaseXPPerMK, int mKSeconds, int shutdownXP, int dominationXP, float winMultipler, int scoreLimit, int spawnProtectionSeconds, ushort redFlagID, ushort blueFlagID)
+        public CTFConfig(int startSeconds, int endSeconds, int xPPerKill, int xPPerMeleeKill, int xPPerKillHeadshot, int xPPerAssist, int xPPerFlagCaptured, int xPPerFlagSaved, int baseXPMK, int increaseXPPerMK, int mKSeconds, int shutdownXP, int dominationXP, float winMultipler, int scoreLimit, int spawnProtectionSeconds, int respawnSeconds, ushort redFlagID, ushort blueFlagID)
         {
             StartSeconds = startSeconds;
             EndSeconds = endSeconds;
@@ -51,6 +52,7 @@
             WinMultipler = winMultipler;
             ScoreLimit = scoreLimit;
             SpawnProtectionSeconds = spawnProtectionSeconds;
+            RespawnSeconds = respawnSeconds;
             RedFlagID = redFlagID;
             BlueFlagID = blueFlagID;
         }

@@ -67,6 +67,8 @@ namespace UnturnedBlackout.GameTypes
 
         public IEnumerator StartGame()
         {
+            TaskDispatcher.QueueOnMainThread(() => WipeItems());
+
             for (int seconds = Config.TDM.StartSeconds; seconds >= 0; seconds--)
             {
                 yield return new WaitForSeconds(1);
@@ -259,7 +261,7 @@ namespace UnturnedBlackout.GameTypes
 
             Utility.Debug($"Game player found, player name: {tPlayer.GamePlayer.Player.CharacterName}");
             tPlayer.OnDeath(killer);
-            tPlayer.GamePlayer.OnDeath(killer);
+            tPlayer.GamePlayer.OnDeath(killer, Config.TDM.RespawnSeconds);
             tPlayer.Team.OnDeath(tPlayer.GamePlayer.SteamID);
 
             ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DBManager.IncreasePlayerDeathsAsync(tPlayer.GamePlayer.SteamID, 1));
@@ -476,7 +478,7 @@ namespace UnturnedBlackout.GameTypes
                 }
 
                 var iconLink = Plugin.Instance.UIManager.Icons.TryGetValue(data.Level, out LevelIcon icon) ? icon.IconLink28 : (Plugin.Instance.UIManager.Icons.TryGetValue(0, out icon) ? icon.IconLink28 : "");
-                var updatedText = $"<color={tPlayer.Team.Info.ChatPlayerHexCode}>{player.Player.CharacterName.Trim()}</color>: <color={tPlayer.Team.Info.ChatMessageHexCode}>{text.ToUnrich()}</color>";
+                var updatedText = $"<color={tPlayer.Team.Info.ChatPlayerHexCode}>{player.Player.CharacterName}</color>: <color={tPlayer.Team.Info.ChatMessageHexCode}>{text.ToUnrich()}</color>";
 
                 if (chatMode == EChatMode.GLOBAL)
                 {

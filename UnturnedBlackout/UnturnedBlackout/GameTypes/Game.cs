@@ -150,7 +150,7 @@ namespace UnturnedBlackout.GameTypes
 
             var locations = Plugin.Instance.GameManager.AvailableLocations.ToList();
             locations.Add(Location.LocationID);
-            var gameModes = new List<byte> { (byte)EGameType.FFA, (byte)EGameType.TDM, (byte)EGameType.KC };
+            var gameModes = new List<byte> { (byte)EGameType.FFA, (byte)EGameType.TDM, (byte)EGameType.KC, (byte)EGameType.CTF };
 
             for (int i = 0; i <= 1; i++)
             {
@@ -238,7 +238,7 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
-            var feed = new Feed($"<color={killerColor}>{killer.Player.CharacterName.ToUnrich().Trim()}</color> {icon.Symbol} <color={victimColor}>{victim.Player.CharacterName.ToUnrich().Trim()}</color>", DateTime.UtcNow);
+            var feed = new Feed($"<color={killerColor}>{killer.Player.CharacterName.ToUnrich()}</color> {icon.Symbol} <color={victimColor}>{victim.Player.CharacterName.ToUnrich()}</color>", DateTime.UtcNow);
             if (Killfeed.Count < Config.MaxKillFeed)
             {
                 Utility.Debug($"{Killfeed.Count} is less than {Config.MaxKillFeed}, add");

@@ -15,6 +15,7 @@ namespace UnturnedBlackout.Models
         {
             FFASpawnPoints = new List<FFASpawnPoint>();
             TDMSpawnPoints = new List<TDMSpawnPoint>();
+            CTFSpawnPoints = new List<CTFSpawnPoint>();
         }
     }
 }

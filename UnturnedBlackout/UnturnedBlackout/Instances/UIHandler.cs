@@ -101,7 +101,7 @@ namespace UnturnedBlackout.Instances
             for (int i = 0; i < games.Count; i++)
             {
                 var game = games[i];
-                Utility.Debug($"i: {i}, players: {game.GetPlayerCount()}, max players: {game.Location.MaxPlayers}, phase: {game.GamePhase}");
+                Utility.Debug($"i: {i}, players: {game.GetPlayerCount()}, max players: {game.Location.GetMaxPlayers(game.GameMode)}, phase: {game.GamePhase}");
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"Lobby{i}", true);
                 ShowGame(game);
             }
@@ -125,7 +125,7 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"Lobby{index}IMG", game.Location.ImageLink);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"Lobby{index}Map", game.Location.LocationName);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"Lobby{index}Mode", Plugin.Instance.Translate($"{game.GameMode}_Name").ToRich());
-                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"Lobby{index}Count", $"{game.GetPlayerCount()}/{game.Location.MaxPlayers}");
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"Lobby{index}Count", $"{game.GetPlayerCount()}/{game.Location.GetMaxPlayers(game.GameMode)}");
 
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, game.GamePhase == EGamePhase.Starting || game.GamePhase == EGamePhase.Started ? $"Lobby{index}JoinButton" : $"Lobby{index}EndingButton", true);
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, game.GamePhase == EGamePhase.Starting || game.GamePhase == EGamePhase.Started ? $"Lobby{index}EndingButton" : $"Lobby{index}JoinButton", false);
@@ -165,7 +165,7 @@ namespace UnturnedBlackout.Instances
 
             if (game.GamePhase == EGamePhase.Starting || game.GamePhase == EGamePhase.Started)
             {
-                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"Lobby{index}Count", $"{game.GetPlayerCount()}/{game.Location.MaxPlayers}");
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"Lobby{index}Count", $"{game.GetPlayerCount()}/{game.Location.GetMaxPlayers(game.GameMode)}");
             }
         }
 

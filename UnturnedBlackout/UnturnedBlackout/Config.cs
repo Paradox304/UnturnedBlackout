@@ -41,7 +41,6 @@ namespace UnturnedBlackout
         public int GamesCount { get; set; }
 
         public int SpawnUnavailableSeconds { get; set; }
-        public int RespawnSeconds { get; set; }
 
         public int EndingLeaderboardSeconds { get; set; }
 
@@ -104,7 +103,6 @@ namespace UnturnedBlackout
             GamesCount = 3;
 
             SpawnUnavailableSeconds = 5;
-            RespawnSeconds = 5;
 
             EndingLeaderboardSeconds = 20;
 
@@ -125,16 +123,16 @@ namespace UnturnedBlackout
 
             KnifeID = 58129;
 
-            FFA = new FFAConfig(15, 600, "FFA", "white", "#dcb4ff", "#dcb4ff", 50, 60, 50, 20, 10, 5, 10, 15, 15, 1.5f, 15, 2);
-            TDM = new TDMConfig(15, 600, 50, 60, 50, 20, 10, 5, 10, 15, 15, 1.5f, 15, 2);
-            KC = new KCConfig(15, 600, 50, 60, 50, 20, 10, 10, 10, 5, 10, 15, 15, 1.5f, 15, 2, 26820, 26821);
-            CTF = new CTFConfig(15, 600, 50, 60, 50, 20, 10, 10, 10, 5, 10, 15, 15, 1.5f, 3, 2, 26820, 26821);
+            FFA = new FFAConfig(15, 600, "FFA", "white", "#dcb4ff", "#dcb4ff", 50, 60, 50, 20, 10, 5, 10, 15, 15, 1.5f, 15, 2, 4);
+            TDM = new TDMConfig(15, 600, 50, 60, 50, 20, 10, 5, 10, 15, 15, 1.5f, 15, 2, 4);
+            KC = new KCConfig(15, 600, 50, 60, 50, 20, 10, 10, 10, 5, 10, 15, 15, 1.5f, 15, 2, 4, 26820, 26821);
+            CTF = new CTFConfig(15, 600, 50, 60, 50, 20, 10, 10, 10, 5, 10, 15, 15, 1.5f, 3, 2, 4, 26820, 26821);
 
             ArenaLocations = new List<ArenaLocation>
             {
-                new ArenaLocation(1, 10, "Seattle", "", 0, 1, 2),
-                new ArenaLocation(2, 10, "Tacoma", "", 1, 1, 2),
-                new ArenaLocation(3, 10, "Military Base", "", 2, 1, 2)
+                new ArenaLocation(1, "Seattle", "", 0, 0, 1, 0, 0, 0, 0),
+                new ArenaLocation(2, "Tacoma", "", 1, 1, 2, 0, 0, 0, 0),
+                new ArenaLocation(3, "Military Base", "", 2, 1, 2, 0, 0, 0, 0)
             };
             LevelIcons = new List<LevelIcon>
             {

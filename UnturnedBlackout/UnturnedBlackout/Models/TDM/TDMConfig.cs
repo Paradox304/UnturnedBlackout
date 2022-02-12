@@ -21,13 +21,14 @@
 
         public int ScoreLimit { get; set; }
         public int SpawnProtectionSeconds { get; set; }
+        public int RespawnSeconds { get; set; }
 
         public TDMConfig()
         {
 
         }
 
-        public TDMConfig(int startSeconds, int endSeconds, int xPPerKill, int xPPerMeleeKill, int xPPerKillHeadshot, int xPPerAssist, int baseXPMK, int increaseXPPerMK, int mKSeconds, int shutdownXP, int dominationXP, float winMultipler, int scoreLimit, int spawnProtectionSeconds)
+        public TDMConfig(int startSeconds, int endSeconds, int xPPerKill, int xPPerMeleeKill, int xPPerKillHeadshot, int xPPerAssist, int baseXPMK, int increaseXPPerMK, int mKSeconds, int shutdownXP, int dominationXP, float winMultipler, int scoreLimit, int spawnProtectionSeconds, int respawnSeconds)
         {
             StartSeconds = startSeconds;
             EndSeconds = endSeconds;
@@ -43,6 +44,7 @@
             WinMultipler = winMultipler;
             ScoreLimit = scoreLimit;
             SpawnProtectionSeconds = spawnProtectionSeconds;
+            RespawnSeconds = respawnSeconds;
         }
     }
 }

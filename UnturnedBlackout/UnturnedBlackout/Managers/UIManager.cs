@@ -232,7 +232,7 @@ namespace UnturnedBlackout.Managers
             var voiceChatText = "";
             foreach (var talking in playersTalking)
             {
-                voiceChatText += $" {talking.Player.CharacterName.ToUnrich().Trim()} \n";
+                voiceChatText += $" {talking.Player.CharacterName.ToUnrich()} \n";
             }
             if (!string.IsNullOrEmpty(voiceChatText))
             {

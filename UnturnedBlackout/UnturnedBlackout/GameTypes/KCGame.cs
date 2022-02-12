@@ -70,6 +70,8 @@ namespace UnturnedBlackout.GameTypes
 
         public IEnumerator StartGame()
         {
+            TaskDispatcher.QueueOnMainThread(() => WipeItems());
+
             for (int seconds = Config.KC.StartSeconds; seconds >= 0; seconds--)
             {
                 yield return new WaitForSeconds(1);
@@ -262,7 +264,7 @@ namespace UnturnedBlackout.GameTypes
             var victimKS = vPlayer.KillStreak;
             Utility.Debug($"Game player found, player name: {vPlayer.GamePlayer.Player.CharacterName}");
             vPlayer.OnDeath(killer);
-            vPlayer.GamePlayer.OnDeath(killer);
+            vPlayer.GamePlayer.OnDeath(killer, Config.KC.RespawnSeconds);
             vPlayer.Team.OnDeath(vPlayer.GamePlayer.SteamID);
             ItemManager.dropItem(new Item(vPlayer.Team.DogTagID, true), vPlayer.GamePlayer.Player.Player.transform.position, true, true, true);
             ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DBManager.IncreasePlayerDeathsAsync(vPlayer.GamePlayer.SteamID, 1));
@@ -298,7 +300,7 @@ namespace UnturnedBlackout.GameTypes
                         assister.Score += Config.AssistPoints;
                         if (!assister.GamePlayer.Player.Player.life.isDead)
                         {
-                            Plugin.Instance.UIManager.ShowXPUI(assister.GamePlayer, Config.KC.XPPerAssist, Plugin.Instance.Translate("Assist_Kill", vPlayer.GamePlayer.Player.CharacterName.ToUnrich()));
+                            Plugin.Instance.UIManager.ShowXPUI(assister.GamePlayer, Config.KC.XPPerAssist, Plugin.Instance.Translate("Assist_Kill", vPlayer.GamePlayer.Player.CharacterName.ToUnrich()).ToRich());
                         }
                         ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DBManager.IncreasePlayerXPAsync(assister.GamePlayer.SteamID, (uint)Config.KC.XPPerAssist));
                     }
@@ -470,7 +472,7 @@ namespace UnturnedBlackout.GameTypes
                 }
 
                 var iconLink = Plugin.Instance.UIManager.Icons.TryGetValue(data.Level, out LevelIcon icon) ? icon.IconLink28 : (Plugin.Instance.UIManager.Icons.TryGetValue(0, out icon) ? icon.IconLink28 : "");
-                var updatedText = $"<color={kPlayer.Team.Info.ChatPlayerHexCode}>{player.Player.CharacterName.Trim()}</color>: <color={kPlayer.Team.Info.ChatMessageHexCode}>{text.ToUnrich()}</color>";
+                var updatedText = $"<color={kPlayer.Team.Info.ChatPlayerHexCode}>{player.Player.CharacterName.ToUnrich()}</color>: <color={kPlayer.Team.Info.ChatMessageHexCode}>{text.ToUnrich()}</color>";
 
                 if (chatMode == EChatMode.GLOBAL)
                 {
