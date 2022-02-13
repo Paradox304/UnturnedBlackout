@@ -38,7 +38,7 @@ namespace UnturnedBlackout.Managers
                 try
                 {
                     await Conn.OpenAsync();
-                    await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{Config.PlayersTableName}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `SteamName` VARCHAR(65) NOT NULL , `AvatarLink` VARCHAR(200) NOT NULL , `XP` INT UNSIGNED NOT NULL DEFAULT '0' , `Level` INT UNSIGNED NOT NULL DEFAULT '1' , `Credits` INT UNSIGNED NOT NULL DEFAULT '0' , `Kills` INT UNSIGNED NOT NULL DEFAULT '0' , `Headshot Kills` INT UNSIGNED NOT NULL DEFAULT '0' , `Highest Killstreak` INT UNSIGNED NOT NULL DEFAULT '0' , `Highest MultiKills` INT UNSIGNED NOT NULL DEFAULT '0' , `Kills Confirmed` INT UNSIGNED NOT NULL DEFAULT '0' , `Kills Denied` INT UNSIGNED NOT NULL DEFAULT '0' , `Flags Captured` INT UNSIGNED NOT NULL DEFAULT '0' , `Flags Saved` INT UNSIGNED NOT NULL DEFAULT '0' , `Areas Taken` INT UNSIGNED NOT NULL DEFAULT '0' , `Deaths` INT UNSIGNED NOT NULL DEFAULT '0' , PRIMARY KEY (`SteamID`));", Conn).ExecuteScalarAsync();
+                    await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{Config.PlayersTableName}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `SteamName` VARCHAR(65) NOT NULL , `AvatarLink` VARCHAR(200) NOT NULL , `XP` INT UNSIGNED NOT NULL DEFAULT '0' , `Level` INT UNSIGNED NOT NULL DEFAULT '1' , `Credits` INT UNSIGNED NOT NULL DEFAULT '0' , `Kills` INT UNSIGNED NOT NULL DEFAULT '0' , `Headshot Kills` INT UNSIGNED NOT NULL DEFAULT '0' , `Highest Killstreak` INT UNSIGNED NOT NULL DEFAULT '0' , `Highest MultiKills` INT UNSIGNED NOT NULL DEFAULT '0' , `Kills Confirmed` INT UNSIGNED NOT NULL DEFAULT '0' , `Kills Denied` INT UNSIGNED NOT NULL DEFAULT '0' , `Flags Captured` INT UNSIGNED NOT NULL DEFAULT '0' , `Flags Saved` INT UNSIGNED NOT NULL DEFAULT '0' , `Areas Taken` INT UNSIGNED NOT NULL DEFAULT '0' , `Deaths` INT UNSIGNED NOT NULL DEFAULT '0' , `Music` BOOLEAN NOT NULL DEFAULT TRUE , PRIMARY KEY (`SteamID`));", Conn).ExecuteScalarAsync();
                 }
                 catch (Exception ex)
                 {
@@ -155,12 +155,17 @@ namespace UnturnedBlackout.Managers
                                 continue;
                             }
 
+                            if (!bool.TryParse(rdr[16].ToString(), out bool music))
+                            {
+                                continue;
+                            }
+
                             if (PlayerCache.ContainsKey(steamID))
                             {
                                 PlayerCache.Remove(steamID);
                             }
 
-                            PlayerCache.Add(steamID, new PlayerData(steamID, steamName, avatarLink, xp, level, credits, kills, headshotKills, highestKillstreak, highestMultiKills, killsConfirmed, killsDenied, flagsCaptured, flagsSaved, areasTaken, deaths));
+                            PlayerCache.Add(steamID, new PlayerData(steamID, steamName, avatarLink, xp, level, credits, kills, headshotKills, highestKillstreak, highestMultiKills, killsConfirmed, killsDenied, flagsCaptured, flagsSaved, areasTaken, deaths, music));
                         }
                     }
                     catch (Exception ex)
@@ -562,6 +567,32 @@ namespace UnturnedBlackout.Managers
                 catch (Exception ex)
                 {
                     Logger.Log($"Error adding {deaths} deaths for player with steam id {steamID}");
+                    Logger.Log(ex);
+                }
+                finally
+                {
+                    await Conn.CloseAsync();
+                }
+            }
+        }
+
+        public async Task ChangePlayerMusicAsync(CSteamID steamID, bool isMusic)
+        {
+            using (MySqlConnection Conn = new MySqlConnection(ConnectionString))
+            {
+                try
+                {
+                    await Conn.OpenAsync();
+
+                    await new MySqlCommand($"UPDATE `{Config.PlayersTableName}` SET `Music` = {(isMusic ? 1 : 0)} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                    if (PlayerCache.TryGetValue(steamID, out PlayerData data))
+                    {
+                        data.Music = isMusic;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log($"Error changing music to {isMusic} for player with steam id {steamID}");
                     Logger.Log(ex);
                 }
                 finally

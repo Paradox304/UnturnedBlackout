@@ -22,8 +22,9 @@ namespace UnturnedBlackout.Database
         public uint FlagsSaved { get; set; }
         public uint AreasTaken { get; set; }
         public uint Deaths { get; set; }
+        public bool Music { get; set; }
 
-        public PlayerData(CSteamID steamID, string steamName, string avatarLink, uint xP, uint level, uint credits, uint kills, uint headshotKills, uint highestKillstreak, uint highestMultiKills, uint killsConfirmed, uint killsDenied, uint flagsCaptured, uint flagsSaved, uint areasTaken, uint deaths)
+        public PlayerData(CSteamID steamID, string steamName, string avatarLink, uint xP, uint level, uint credits, uint kills, uint headshotKills, uint highestKillstreak, uint highestMultiKills, uint killsConfirmed, uint killsDenied, uint flagsCaptured, uint flagsSaved, uint areasTaken, uint deaths, bool music)
         {
             SteamID = steamID;
             SteamName = steamName;
@@ -41,6 +42,7 @@ namespace UnturnedBlackout.Database
             FlagsSaved = flagsSaved;
             AreasTaken = areasTaken;
             Deaths = deaths;
+            Music = music;
         }
 
         public bool TryGetNeededXP(out int xp)

@@ -3,6 +3,7 @@ using SDG.NetTransport;
 using SDG.Unturned;
 using Steamworks;
 using System;
+using System.Threading;
 using UnityEngine;
 using UnturnedBlackout.Database;
 using UnturnedBlackout.Enums;
@@ -37,19 +38,16 @@ namespace UnturnedBlackout.Instances
 
         public void ShowUI()
         {
-            Utility.Debug($"Showing Menu UI for player {Player.CharacterName}");
             EffectManager.sendUIEffect(ID, Key, TransportConnection, true);
             //Plugin.Instance.HUDManager.HideHUD(Player);
             Player.Player.enablePluginWidgetFlag(EPluginWidgetFlags.Modal);
             ResetUIValues();
             ShowGames();
-            ClearChat();
             SetupUI();
         }
 
         public void HideUI()
         {
-            Utility.Debug($"Hiding menu UI for player {Player.CharacterName}");
             EffectManager.askEffectClearByID(ID, TransportConnection);
             //Plugin.Instance.HUDManager.ShowHUD(Player);
             Player.Player.disablePluginWidgetFlag(EPluginWidgetFlags.Modal);
@@ -58,13 +56,11 @@ namespace UnturnedBlackout.Instances
 
         public void ResetUIValues()
         {
-            Utility.Debug($"Resetting UI stats for player {Player.CharacterName}");
             CurrentPage = EPage.None;
         }
 
         public void SetupUI()
         {
-            Utility.Debug($"Setting up UI for {Player.CharacterName}");
             if (!Plugin.Instance.DBManager.PlayerCache.TryGetValue(SteamID, out PlayerData data))
             {
                 Utility.Debug("Could'nt find data, returning");
@@ -73,7 +69,10 @@ namespace UnturnedBlackout.Instances
 
             EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "PlayerIcon", data.AvatarLink);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "PlayerName", data.SteamName);
+
+            ClearChat();
             OnXPChanged();
+            OnMusicChanged(data.Music);
         }
 
         public void ClearChat()
@@ -207,6 +206,7 @@ namespace UnturnedBlackout.Instances
         }
 
         // Events
+
         public void OnXPChanged()
         {
             if (!Plugin.Instance.DBManager.PlayerCache.TryGetValue(SteamID, out PlayerData data))
@@ -224,6 +224,19 @@ namespace UnturnedBlackout.Instances
             }
             Utility.Debug($"XP changed {Player.CharacterName}, XP: {data.XP}, Needed XP: {neededXP}, Spaces: {spaces}");
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "XPBarFill", spaces == 0 ? " " : new string(' ', spaces));
+        }
+
+        public void OnMusicChanged(bool isMusic)
+        {
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, isMusic ? "KnobOn" : "KnobOff", true);
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, isMusic ? "KnobOff" : "KnobOn", false);
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SwitchOn", isMusic);
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "Music", isMusic);
+
+            ThreadPool.QueueUserWorkItem(async (o) =>
+            {
+                await Plugin.Instance.DBManager.ChangePlayerMusicAsync(SteamID, isMusic);
+            });
         }
     }
 }

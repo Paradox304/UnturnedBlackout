@@ -932,10 +932,31 @@ namespace UnturnedBlackout.Managers
             }
         }
 
+        public void OnPlayerMusicChanged(Player player, bool isMusic)
+        {
+            var handler = UIHandlers.FirstOrDefault(k => k.SteamID == player.channel.owner.playerID.steamID);
+            if (handler != null && handler.CurrentPage == EPage.Play)
+            {
+                handler.OnMusicChanged(isMusic);
+            }
+        }
+
         private void OnButtonClicked(Player player, string buttonName)
         {
             Utility.Debug($"{player.channel.owner.playerID.characterName} clicked {buttonName}");
             var ply = UnturnedPlayer.FromPlayer(player);
+
+            switch (buttonName)
+            {
+                case "KnobOff":
+                    OnPlayerMusicChanged(player, true);
+                    return;
+                case "KnobOn":
+                    OnPlayerMusicChanged(player, false);
+                    return;
+                default:
+                    break;
+            }
 
             if (buttonName.EndsWith("JoinButton"))
             {

@@ -285,9 +285,9 @@ namespace UnturnedBlackout.GameTypes
                 if (player.clothing.backpack == otherTeam.FlagID)
                 {
                     ItemManager.dropItem(new Item(otherTeam.FlagID, true), player.transform.position, true, true, true);
-                    Plugin.Instance.UIManager.UpdateCTFHUD(Players, otherTeam);
                 }
                 cPlayer.IsCarryingFlag = false;
+                Plugin.Instance.UIManager.UpdateCTFHUD(Players, otherTeam);
             }
 
             ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DBManager.IncreasePlayerDeathsAsync(cPlayer.GamePlayer.SteamID, 1));
@@ -537,7 +537,12 @@ namespace UnturnedBlackout.GameTypes
                     cPlayer.FlagsCaptured++;
                     Plugin.Instance.UIManager.ShowXPUI(cPlayer.GamePlayer, Config.CTF.XPPerFlagCaptured, Plugin.Instance.Translate("Flag_Captured").ToRich());
 
+                    Plugin.Instance.UIManager.UpdateCTFHUD(Players, cPlayer.Team);
                     Plugin.Instance.UIManager.UpdateCTFHUD(Players, otherTeam);
+                    if (cPlayer.Team.Score >= Config.CTF.ScoreLimit)
+                    {
+                        Plugin.Instance.StartCoroutine(GameEnd(cPlayer.Team));
+                    }
                     ThreadPool.QueueUserWorkItem(async (o) =>
                     {
                         await Plugin.Instance.DBManager.IncreasePlayerFlagsCapturedAsync(cPlayer.GamePlayer.SteamID, 1);
