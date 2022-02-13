@@ -100,9 +100,10 @@ namespace UnturnedBlackout.GameTypes
             {
                 player.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1);
 
-                // Plugin.Instance.UIManager.SendTDMHUD(player, BlueTeam, RedTeam);
                 Plugin.Instance.UIManager.ClearCountdownUI(player.GamePlayer);
             }
+
+            Plugin.Instance.UIManager.SendCTFHUD(BlueTeam, RedTeam, Players);
 
             ItemManager.dropItem(new Item(RedTeam.FlagID, true), RedTeam.FlagSP, true, true, true);
             ItemManager.dropItem(new Item(BlueTeam.FlagID, true), BlueTeam.FlagSP, true, true, true);
@@ -117,7 +118,7 @@ namespace UnturnedBlackout.GameTypes
                 TimeSpan timeSpan = TimeSpan.FromSeconds(seconds);
                 foreach (var player in Players)
                 {
-                    //Plugin.Instance.UIManager.UpdateTDMTimer(player.GamePlayer, timeSpan.ToString(@"m\:ss"));
+                    Plugin.Instance.UIManager.UpdateCTFTimer(player.GamePlayer, timeSpan.ToString(@"m\:ss"));
                 }
             }
 
@@ -150,7 +151,7 @@ namespace UnturnedBlackout.GameTypes
             for (int index = 0; index < Players.Count; index++)
             {
                 var player = Players[index];
-                //Plugin.Instance.UIManager.ClearTDMHUD(player.GamePlayer);
+                Plugin.Instance.UIManager.ClearCTFHUD(player.GamePlayer);
                 if (player.GamePlayer.HasScoreboard)
                 {
                     player.GamePlayer.HasScoreboard = false;
@@ -217,7 +218,7 @@ namespace UnturnedBlackout.GameTypes
             }
             else
             {
-                //Plugin.Instance.UIManager.SendTDMHUD(tPlayer, BlueTeam, RedTeam);
+                Plugin.Instance.UIManager.SendCTFHUD(cPlayer, BlueTeam, RedTeam, Players);
                 SpawnPlayer(cPlayer);
             }
             Plugin.Instance.UIManager.SendPreEndingUI(cPlayer.GamePlayer);
@@ -236,7 +237,7 @@ namespace UnturnedBlackout.GameTypes
 
             var cPlayer = GetCTFPlayer(player.Player);
 
-            //Plugin.Instance.UIManager.ClearTDMHUD(player);
+            Plugin.Instance.UIManager.ClearCTFHUD(player);
             Plugin.Instance.UIManager.ClearPreEndingUI(player);
 
             if (GamePhase == EGamePhase.Starting)
@@ -284,7 +285,7 @@ namespace UnturnedBlackout.GameTypes
                 if (player.clothing.backpack == otherTeam.FlagID)
                 {
                     ItemManager.dropItem(new Item(otherTeam.FlagID, true), player.transform.position, true, true, true);
-                    // Code to update the UI
+                    Plugin.Instance.UIManager.UpdateCTFHUD(Players, otherTeam);
                 }
                 cPlayer.IsCarryingFlag = false;
             }
@@ -507,7 +508,7 @@ namespace UnturnedBlackout.GameTypes
                     cPlayer.FlagsSaved++;
                     Plugin.Instance.UIManager.ShowXPUI(cPlayer.GamePlayer, Config.CTF.XPPerFlagSaved, Plugin.Instance.Translate("Flag_Saved").ToRich());
 
-                    // Code to update the UI
+                    Plugin.Instance.UIManager.UpdateCTFHUD(Players, cPlayer.Team);
                     ThreadPool.QueueUserWorkItem(async (o) =>
                     {
                         await Plugin.Instance.DBManager.IncreasePlayerFlagsSavedAsync(cPlayer.GamePlayer.SteamID, 1);
@@ -536,7 +537,7 @@ namespace UnturnedBlackout.GameTypes
                     cPlayer.FlagsCaptured++;
                     Plugin.Instance.UIManager.ShowXPUI(cPlayer.GamePlayer, Config.CTF.XPPerFlagCaptured, Plugin.Instance.Translate("Flag_Captured").ToRich());
 
-                    // Code to update the UI
+                    Plugin.Instance.UIManager.UpdateCTFHUD(Players, otherTeam);
                     ThreadPool.QueueUserWorkItem(async (o) =>
                     {
                         await Plugin.Instance.DBManager.IncreasePlayerFlagsCapturedAsync(cPlayer.GamePlayer.SteamID, 1);
@@ -560,7 +561,7 @@ namespace UnturnedBlackout.GameTypes
 
                 otherTeam.HasFlag = false;
                 cPlayer.IsCarryingFlag = true;
-                // Code to update the UI
+                Plugin.Instance.UIManager.UpdateCTFHUD(Players, otherTeam);
             }
         }
 

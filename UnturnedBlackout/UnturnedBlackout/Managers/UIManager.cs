@@ -37,6 +37,9 @@ namespace UnturnedBlackout.Managers
         public const ushort KCID = 27621;
         public const short KCKey = 27621;
 
+        public const ushort CTFID = 27623;
+        public const short CTFKey = 27623;
+
         public const short SoundsKey = 27634;
 
         public const ushort DeathID = 27635;
@@ -189,6 +192,9 @@ namespace UnturnedBlackout.Managers
                 case EGameType.KC:
                     key = TDMKey;
                     break;
+                case EGameType.CTF:
+                    key = CTFKey;
+                    break;
                 default:
                     return;
             }
@@ -223,6 +229,9 @@ namespace UnturnedBlackout.Managers
                         break;
                     case EGameType.KC:
                         key = TDMKey;
+                        break;
+                    case EGameType.CTF:
+                        key = CTFKey;
                         break;
                     default:
                         return;
@@ -269,7 +278,6 @@ namespace UnturnedBlackout.Managers
 
         public void SendPreEndingUI(GamePlayer player)
         {
-            Utility.Debug($"Sending PreEndingUI for {player.Player.CharacterName}");
             EffectManager.sendUIEffect(PreEndingUIID, PreEndingUIKey, player.TransportConnection, true);
         }
 
@@ -294,6 +302,7 @@ namespace UnturnedBlackout.Managers
         }
 
         // FFA RELATED UI
+
         public void SendFFAHUD(GamePlayer player)
         {
             EffectManager.sendUIEffect(FFAID, FFAKey, player.TransportConnection, true);
@@ -340,14 +349,10 @@ namespace UnturnedBlackout.Managers
 
         public void SetupFFALeaderboard(List<FFAPlayer> players, ArenaLocation location, bool isPlaying)
         {
-            Stopwatch stopWatch = new Stopwatch();
-            stopWatch.Start();
             foreach (var player in players)
             {
                 SetupFFALeaderboard(player, players, location, isPlaying);
             }
-            stopWatch.Start();
-            Utility.Debug($"Took {stopWatch.ElapsedMilliseconds}ms to update the FFA Leaderboard for {players.Count} players");
         }
 
         public void SetupFFALeaderboard(FFAPlayer ply, List<FFAPlayer> players, ArenaLocation location, bool isPlaying)
@@ -408,6 +413,7 @@ namespace UnturnedBlackout.Managers
 
 
         // TDM Related UI
+
         public void SendTDMHUD(TDMPlayer player, TDMTeam blueTeam, TDMTeam redTeam)
         {
             EffectManager.sendUIEffect(TDMID, TDMKey, player.GamePlayer.TransportConnection, true);
@@ -444,14 +450,10 @@ namespace UnturnedBlackout.Managers
 
         public void SetupTDMLeaderboard(List<TDMPlayer> players, ArenaLocation location, TDMTeam wonTeam, TDMTeam blueTeam, TDMTeam redTeam, bool isPlaying)
         {
-            Stopwatch stopWatch = new Stopwatch();
-            stopWatch.Start();
             foreach (var player in players)
             {
                 SetupTDMLeaderboard(player, players, location, wonTeam, blueTeam, redTeam, isPlaying);
             }
-            stopWatch.Stop();
-            Utility.Debug($"Took {stopWatch.ElapsedMilliseconds}ms to update the TDM Leaderboard for {players.Count} players");
         }
 
         public void SetupTDMLeaderboard(TDMPlayer player, List<TDMPlayer> players, ArenaLocation location, TDMTeam wonTeam, TDMTeam blueTeam, TDMTeam redTeam, bool isPlaying)
@@ -581,14 +583,10 @@ namespace UnturnedBlackout.Managers
 
         public void SetupKCLeaderboard(List<KCPlayer> players, ArenaLocation location, KCTeam wonTeam, KCTeam blueTeam, KCTeam redTeam, bool isPlaying)
         {
-            Stopwatch stopWatch = new Stopwatch();
-            stopWatch.Start();
             foreach (var player in players)
             {
                 SetupKCLeaderboard(player, players, location, wonTeam, blueTeam, redTeam, isPlaying);
             }
-            stopWatch.Stop();
-            Utility.Debug($"Took {stopWatch.ElapsedMilliseconds}ms to update the KC Leaderboard for {players.Count} players");
         }
 
         public void SetupKCLeaderboard(KCPlayer player, List<KCPlayer> players, ArenaLocation location, KCTeam wonTeam, KCTeam blueTeam, KCTeam redTeam, bool isPlaying)
@@ -700,16 +698,80 @@ namespace UnturnedBlackout.Managers
 
         // CTF Related UI
 
+        public void SendCTFHUD(CTFPlayer player, CTFTeam blueTeam, CTFTeam redTeam, List<CTFPlayer> players)
+        {
+            var bluePlayers = players.Where(k => k.Team.TeamID == blueTeam.TeamID);
+            var redPlayers = players.Where(k => k.Team.TeamID == redTeam.TeamID);
+            var index = player.Team.TeamID == blueTeam.TeamID ? 1 : 0;
+
+            EffectManager.sendUIEffect(CTFID, CTFKey, player.GamePlayer.TransportConnection, true);
+            EffectManager.sendUIEffect(27613, 27613, player.GamePlayer.TransportConnection, true, Plugin.Instance.Translate("CTF_Name").ToRich(), Plugin.Instance.Translate("CTF_Desc").ToRich());
+            EffectManager.sendUIEffectVisibility(CTFKey, player.GamePlayer.TransportConnection, true, player.Team == blueTeam ? "BlueTeam" : "RedTeam", true);
+            EffectManager.sendUIEffectText(CTFKey, player.GamePlayer.TransportConnection, true, $"RedNum{index}", redTeam.Score.ToString());
+            EffectManager.sendUIEffectText(CTFKey, player.GamePlayer.TransportConnection, true, $"BlueNum{index}", blueTeam.Score.ToString());
+            EffectManager.sendUIEffectText(CTFKey, player.GamePlayer.TransportConnection, true, $"RedFlag{index}", redTeam.HasFlag ? "" : "");
+            EffectManager.sendUIEffectText(CTFKey, player.GamePlayer.TransportConnection, true, $"BlueFlag{index}", blueTeam.HasFlag ? "" : "");
+
+            var blueFlagTaker = redPlayers.FirstOrDefault(k => k.IsCarryingFlag);
+            var redFlagTaker = bluePlayers.FirstOrDefault(k => k.IsCarryingFlag);
+
+            EffectManager.sendUIEffectText(CTFKey, player.GamePlayer.TransportConnection, true, $"RedTxt{index}", redTeam.HasFlag ? "Home" : (redFlagTaker == null ? "Away" : redFlagTaker.GamePlayer.Player.CharacterName.ToUnrich()));
+            EffectManager.sendUIEffectText(CTFKey, player.GamePlayer.TransportConnection, true, $"BlueTxt{index}", blueTeam.HasFlag ? "Home" : (redFlagTaker == null ? "Away" : redFlagTaker.GamePlayer.Player.CharacterName.ToUnrich()));
+        }
+
+        public void SendCTFHUD(CTFTeam blueTeam, CTFTeam redTeam, List<CTFPlayer> players)
+        {
+            var bluePlayers = players.Where(k => k.Team.TeamID == blueTeam.TeamID);
+            var redPlayers = players.Where(k => k.Team.TeamID == redTeam.TeamID);
+
+            var blueFlagTaker = redPlayers.FirstOrDefault(k => k.IsCarryingFlag);
+            var redFlagTaker = bluePlayers.FirstOrDefault(k => k.IsCarryingFlag);
+
+            foreach (var player in players)
+            {
+                var index = player.Team.TeamID == blueTeam.TeamID ? 1 : 0;
+
+                EffectManager.sendUIEffect(CTFID, CTFKey, player.GamePlayer.TransportConnection, true);
+                EffectManager.sendUIEffect(27613, 27613, player.GamePlayer.TransportConnection, true, Plugin.Instance.Translate("CTF_Name").ToRich(), Plugin.Instance.Translate("CTF_Desc").ToRich());
+                EffectManager.sendUIEffectVisibility(CTFKey, player.GamePlayer.TransportConnection, true, player.Team == blueTeam ? "BlueTeam" : "RedTeam", true);
+                EffectManager.sendUIEffectText(CTFKey, player.GamePlayer.TransportConnection, true, $"RedNum{index}", redTeam.Score.ToString());
+                EffectManager.sendUIEffectText(CTFKey, player.GamePlayer.TransportConnection, true, $"BlueNum{index}", blueTeam.Score.ToString());
+                EffectManager.sendUIEffectText(CTFKey, player.GamePlayer.TransportConnection, true, $"RedFlag{index}", redTeam.HasFlag ? "" : "");
+                EffectManager.sendUIEffectText(CTFKey, player.GamePlayer.TransportConnection, true, $"BlueFlag{index}", blueTeam.HasFlag ? "" : "");
+
+
+                EffectManager.sendUIEffectText(CTFKey, player.GamePlayer.TransportConnection, true, $"RedTxt{index}", redTeam.HasFlag ? "Home" : (redFlagTaker == null ? "Away" : redFlagTaker.GamePlayer.Player.CharacterName.ToUnrich()));
+                EffectManager.sendUIEffectText(CTFKey, player.GamePlayer.TransportConnection, true, $"BlueTxt{index}", blueTeam.HasFlag ? "Home" : (redFlagTaker == null ? "Away" : redFlagTaker.GamePlayer.Player.CharacterName.ToUnrich()));
+            }
+        }
+
+        public void UpdateCTFTimer(GamePlayer player, string text)
+        {
+            EffectManager.sendUIEffectText(CTFKey, player.TransportConnection, true, "TimerTxt", text);
+        }
+
+        public void UpdateCTFHUD(List<CTFPlayer> players, CTFTeam changeTeam)
+        {
+            var team = (ETeam)changeTeam.TeamID == ETeam.Blue ? "Blue" : "Red";
+            var otherTeamPlayers = players.Where(k => k.Team.TeamID != changeTeam.TeamID);
+            var teamFlagTaker = otherTeamPlayers.FirstOrDefault(k => k.IsCarryingFlag);
+
+            foreach (var player in players)
+            {
+                var index = (ETeam)player.Team.TeamID == ETeam.Blue ? 1 : 0;
+
+                EffectManager.sendUIEffectText(CTFKey, player.GamePlayer.TransportConnection, true, $"{team}Num{index}", changeTeam.Score.ToString());
+                EffectManager.sendUIEffectText(CTFKey, player.GamePlayer.TransportConnection, true, $"{team}Flag{index}", changeTeam.HasFlag ? "" : "");
+                EffectManager.sendUIEffectText(CTFKey, player.GamePlayer.TransportConnection, true, $"{team}Txt{index}", changeTeam.HasFlag ? "Home" : (teamFlagTaker == null ? "Away" : teamFlagTaker.GamePlayer.Player.CharacterName.ToUnrich()));
+            }
+        }
+
         public void SetupCTFLeaderboard(List<CTFPlayer> players, ArenaLocation location, CTFTeam wonTeam, CTFTeam blueTeam, CTFTeam redTeam, bool isPlaying)
         {
-            Stopwatch stopWatch = new Stopwatch();
-            stopWatch.Start();
             foreach (var player in players)
             {
                 SetupCTFLeaderboard(player, players, location, wonTeam, blueTeam, redTeam, isPlaying);
             }
-            stopWatch.Stop();
-            Utility.Debug($"Took {stopWatch.ElapsedMilliseconds}ms to update the KC Leaderboard for {players.Count} players");
         }
 
         public void SetupCTFLeaderboard(CTFPlayer player, List<CTFPlayer> players, ArenaLocation location, CTFTeam wonTeam, CTFTeam blueTeam, CTFTeam redTeam, bool isPlaying)
@@ -798,6 +860,11 @@ namespace UnturnedBlackout.Managers
         public void HideCTFLeaderboard(GamePlayer player)
         {
             EffectManager.sendUIEffectVisibility(PreEndingUIKey, player.TransportConnection, true, "Scoreboard2", false);
+        }
+
+        public void ClearCTFHUD(GamePlayer player)
+        {
+            EffectManager.askEffectClearByID(CTFID, player.TransportConnection);
         }
 
         // EVENTS
