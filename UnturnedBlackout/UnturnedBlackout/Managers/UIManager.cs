@@ -705,6 +705,7 @@ namespace UnturnedBlackout.Managers
             var index = player.Team.TeamID == blueTeam.TeamID ? 1 : 0;
 
             EffectManager.sendUIEffect(CTFID, CTFKey, player.GamePlayer.TransportConnection, true);
+            EffectManager.sendUIEffectVisibility(CTFKey, player.GamePlayer.TransportConnection, true, "Timer", true);
             EffectManager.sendUIEffect(27613, 27613, player.GamePlayer.TransportConnection, true, Plugin.Instance.Translate("CTF_Name").ToRich(), Plugin.Instance.Translate("CTF_Desc").ToRich());
             EffectManager.sendUIEffectVisibility(CTFKey, player.GamePlayer.TransportConnection, true, player.Team == blueTeam ? "BlueTeam" : "RedTeam", true);
             EffectManager.sendUIEffectText(CTFKey, player.GamePlayer.TransportConnection, true, $"RedNum{index}", redTeam.Score.ToString());

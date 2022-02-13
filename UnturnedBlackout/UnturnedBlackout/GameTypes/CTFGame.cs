@@ -34,6 +34,7 @@ namespace UnturnedBlackout.GameTypes
         public Coroutine GameEnder { get; set; }
 
         public uint Frequency { get; set; }
+
         public CTFGame(ArenaLocation location) : base(EGameType.CTF, location)
         {
             Utility.Debug($"Initializing CTF game for location {location.LocationName}");
@@ -64,6 +65,7 @@ namespace UnturnedBlackout.GameTypes
                     SpawnPoints.Add(spawnPoint.GroupID, new List<CTFSpawnPoint> { spawnPoint });
                 }
             }
+
             Utility.Debug($"Found {SpawnPoints.Count} spawnpoints registered");
             foreach (var key in SpawnPoints.Keys)
             {
@@ -288,6 +290,15 @@ namespace UnturnedBlackout.GameTypes
                 }
                 cPlayer.IsCarryingFlag = false;
                 Plugin.Instance.UIManager.UpdateCTFHUD(Players, otherTeam);
+
+                TaskDispatcher.QueueOnMainThread(() =>
+                {
+                    var otherPlayers = Players.Where(k => k.Team.TeamID == otherTeam.TeamID);
+                    foreach (var ply in otherPlayers)
+                    {
+                        ply.GamePlayer.Player.Player.quests.sendSetMarker(true, cPlayer.GamePlayer.Player.Player.transform.position);
+                    }
+                });
             }
 
             ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DBManager.IncreasePlayerDeathsAsync(cPlayer.GamePlayer.SteamID, 1));
@@ -539,6 +550,7 @@ namespace UnturnedBlackout.GameTypes
 
                     Plugin.Instance.UIManager.UpdateCTFHUD(Players, cPlayer.Team);
                     Plugin.Instance.UIManager.UpdateCTFHUD(Players, otherTeam);
+
                     if (cPlayer.Team.Score >= Config.CTF.ScoreLimit)
                     {
                         Plugin.Instance.StartCoroutine(GameEnd(cPlayer.Team));
@@ -566,6 +578,7 @@ namespace UnturnedBlackout.GameTypes
 
                 otherTeam.HasFlag = false;
                 cPlayer.IsCarryingFlag = true;
+
                 Plugin.Instance.UIManager.UpdateCTFHUD(Players, otherTeam);
             }
         }

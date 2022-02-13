@@ -150,7 +150,7 @@ namespace UnturnedBlackout.GameTypes
 
             var locations = Plugin.Instance.GameManager.AvailableLocations.ToList();
             locations.Add(Location.LocationID);
-            var gameModes = new List<byte> { (byte)EGameType.FFA, (byte)EGameType.TDM, (byte)EGameType.KC, (byte)EGameType.CTF };
+            var gameModes = new List<byte> { (byte)EGameType.CTF, (byte)EGameType.FFA };
 
             for (int i = 0; i <= 1; i++)
             {
