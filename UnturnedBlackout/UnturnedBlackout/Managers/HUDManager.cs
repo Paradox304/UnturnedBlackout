@@ -40,6 +40,7 @@ namespace UnturnedBlackout.Managers
             player.Player.inventory.onDropItemRequested += OnDropItem;
             player.Player.stance.onStanceUpdated += () => OnStanceUpdated(player.Player);
             EffectManager.sendUIEffect(ID, Key, player.Player.channel.GetOwnerTransportConnection(), true);
+
             // Sound UI
             EffectManager.sendUIEffect(27634, 27634, player.Player.channel.GetOwnerTransportConnection(), true);
             //OnHealthChanged(player, player.Player.life.health);
@@ -121,6 +122,20 @@ namespace UnturnedBlackout.Managers
 
         private void OnEquip(PlayerEquipment equipment, ItemJar jar, ItemAsset asset, ref bool shouldAllow)
         {
+            var player = Plugin.Instance.GameManager.GetGamePlayer(equipment.player);
+
+            if (Plugin.Instance.GameManager.TryGetCurrentGame(player.SteamID, out Game game) && game.GameMode == Enums.EGameType.CTF)
+            {
+                if (game.IsPlayerCarryingFlag(player))
+                {
+                    if (equipment.player.inventory.getItem(0, 0) == jar)
+                    {
+                        shouldAllow = false;
+                        return;
+                    }
+                }
+            }
+
             TaskDispatcher.QueueOnMainThread(() =>
             {
                 var connection = equipment.player.channel.GetOwnerTransportConnection();
@@ -143,7 +158,6 @@ namespace UnturnedBlackout.Managers
                     EffectManager.sendUIEffectText(Key, connection, true, "ReserveNum", " / 0");
                 }
 
-                var player = Plugin.Instance.GameManager.GetGamePlayer(equipment.player);
                 if (player != null)
                 {
                     player.LastEquippedPage = equipment.equippedPage;

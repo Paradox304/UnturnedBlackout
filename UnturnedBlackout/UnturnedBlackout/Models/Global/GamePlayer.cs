@@ -196,7 +196,7 @@ namespace UnturnedBlackout.Models.Global
 
         public IEnumerator CheckVoiceChat()
         {
-            yield return new WaitForSeconds(0.5f);
+            yield return new WaitForSeconds(1f);
             if (Plugin.Instance.GameManager.TryGetCurrentGame(SteamID, out Game game) && !Player.Player.voice.isTalking)
             {
                 game.OnStoppedTalking(this);

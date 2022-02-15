@@ -29,12 +29,14 @@
         public ushort RedFlagID { get; set; }
         public ushort BlueFlagID { get; set; }
 
+        public float FlagCarryingSpeed { get; set; }
+
         public CTFConfig()
         {
 
         }
 
-        public CTFConfig(int startSeconds, int endSeconds, int xPPerKill, int xPPerMeleeKill, int xPPerKillHeadshot, int xPPerAssist, int xPPerFlagCaptured, int xPPerFlagSaved, int baseXPMK, int increaseXPPerMK, int mKSeconds, int shutdownXP, int dominationXP, float winMultipler, int scoreLimit, int spawnProtectionSeconds, int respawnSeconds, ushort redFlagID, ushort blueFlagID)
+        public CTFConfig(int startSeconds, int endSeconds, int xPPerKill, int xPPerMeleeKill, int xPPerKillHeadshot, int xPPerAssist, int xPPerFlagCaptured, int xPPerFlagSaved, int baseXPMK, int increaseXPPerMK, int mKSeconds, int shutdownXP, int dominationXP, float winMultipler, int scoreLimit, int spawnProtectionSeconds, int respawnSeconds, ushort redFlagID, ushort blueFlagID, float flagCarryingSpeed)
         {
             StartSeconds = startSeconds;
             EndSeconds = endSeconds;
@@ -55,6 +57,7 @@
             RespawnSeconds = respawnSeconds;
             RedFlagID = redFlagID;
             BlueFlagID = blueFlagID;
+            FlagCarryingSpeed = flagCarryingSpeed;
         }
     }
 }

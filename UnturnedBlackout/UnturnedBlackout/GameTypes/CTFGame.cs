@@ -248,6 +248,22 @@ namespace UnturnedBlackout.GameTypes
                 cPlayer.GamePlayer.OnGameLeft();
                 Players.Remove(cPlayer);
                 PlayersLookup.Remove(cPlayer.GamePlayer.SteamID);
+
+                if (cPlayer.IsCarryingFlag)
+                {
+                    var otherTeam = cPlayer.Team.TeamID == BlueTeam.TeamID ? RedTeam : BlueTeam;
+                    if (cPlayer.GamePlayer.Player.Player.clothing.backpack == otherTeam.FlagID)
+                    {
+                        ItemManager.dropItem(new Item(otherTeam.FlagID, true), cPlayer.GamePlayer.Player.Player.transform.position, true, true, true);
+                    }
+                    cPlayer.IsCarryingFlag = false;
+                    cPlayer.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1f);
+                    TaskDispatcher.QueueOnMainThread(() =>
+                    {
+                        Plugin.Instance.UIManager.UpdateCTFHUD(Players, otherTeam);
+                        Plugin.Instance.UIManager.SendCTFFlagStates(cPlayer.Team, (ETeam)otherTeam.TeamID, Players, EFlagState.Dropped);
+                    });
+                }
             }
 
             Plugin.Instance.UIManager.OnGameCountUpdated(this);
@@ -283,10 +299,11 @@ namespace UnturnedBlackout.GameTypes
                     ItemManager.dropItem(new Item(otherTeam.FlagID, true), player.transform.position, true, true, true);
                 }
                 cPlayer.IsCarryingFlag = false;
+                cPlayer.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1f);
                 TaskDispatcher.QueueOnMainThread(() =>
                 {
                     Plugin.Instance.UIManager.UpdateCTFHUD(Players, otherTeam);
-                    Plugin.Instance.UIManager.SendCTFFlagStates(cPlayer.Team, Players, EFlagState.Dropped);
+                    Plugin.Instance.UIManager.SendCTFFlagStates(cPlayer.Team, (ETeam)otherTeam.TeamID, Players, EFlagState.Dropped);
                 });
             }
 
@@ -507,11 +524,12 @@ namespace UnturnedBlackout.GameTypes
                     cPlayer.XP += Config.CTF.XPPerFlagSaved;
                     cPlayer.FlagsSaved++;
                     Plugin.Instance.UIManager.ShowXPUI(cPlayer.GamePlayer, Config.CTF.XPPerFlagSaved, Plugin.Instance.Translate("Flag_Saved").ToRich());
+                    Plugin.Instance.UIManager.SendFlagSavedSound(cPlayer.GamePlayer);
 
                     TaskDispatcher.QueueOnMainThread(() =>
                     {
                         Plugin.Instance.UIManager.UpdateCTFHUD(Players, cPlayer.Team);
-                        Plugin.Instance.UIManager.SendCTFFlagStates(cPlayer.Team, Players, EFlagState.Recovered);
+                        Plugin.Instance.UIManager.SendCTFFlagStates(cPlayer.Team, (ETeam)cPlayer.Team.TeamID, Players, EFlagState.Recovered);
                     });
 
                     ThreadPool.QueueUserWorkItem(async (o) =>
@@ -540,13 +558,16 @@ namespace UnturnedBlackout.GameTypes
                     cPlayer.Score += Config.FlagCapturedPoints;
                     cPlayer.XP += Config.CTF.XPPerFlagCaptured;
                     cPlayer.FlagsCaptured++;
+                    cPlayer.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1f);
+
                     Plugin.Instance.UIManager.ShowXPUI(cPlayer.GamePlayer, Config.CTF.XPPerFlagCaptured, Plugin.Instance.Translate("Flag_Captured").ToRich());
+                    Plugin.Instance.UIManager.SendFlagCapturedSound(cPlayer.GamePlayer);
 
                     TaskDispatcher.QueueOnMainThread(() =>
                     {
                         Plugin.Instance.UIManager.UpdateCTFHUD(Players, cPlayer.Team);
                         Plugin.Instance.UIManager.UpdateCTFHUD(Players, otherTeam);
-                        Plugin.Instance.UIManager.SendCTFFlagStates(cPlayer.Team, Players, EFlagState.Captured);
+                        Plugin.Instance.UIManager.SendCTFFlagStates(cPlayer.Team, (ETeam)otherTeam.TeamID, Players, EFlagState.Captured);
                     });
 
                     if (cPlayer.Team.Score >= Config.CTF.ScoreLimit)
@@ -579,19 +600,35 @@ namespace UnturnedBlackout.GameTypes
                 {
                     TaskDispatcher.QueueOnMainThread(() =>
                     {
-                        Plugin.Instance.UIManager.SendCTFFlagStates(cPlayer.Team, Players, EFlagState.Taken);
+                        Plugin.Instance.UIManager.SendCTFFlagStates(cPlayer.Team, (ETeam)otherTeam.TeamID, Players, EFlagState.Taken);
                     });
                     otherTeam.HasFlag = false;
                 } else
                 {
                     TaskDispatcher.QueueOnMainThread(() =>
                     {
-                        Plugin.Instance.UIManager.SendCTFFlagStates(cPlayer.Team, Players, EFlagState.Picked);
+                        Plugin.Instance.UIManager.SendCTFFlagStates(cPlayer.Team, (ETeam)otherTeam.TeamID, Players, EFlagState.Picked);
                     });
                 }
 
-                cPlayer.IsCarryingFlag = true;
+                TaskDispatcher.QueueOnMainThread(() =>
+                {
+                    var ply = cPlayer.GamePlayer.Player.Player;
+                    if (ply.equipment.equippedPage == 0)
+                    {
+                        var secondary = ply.inventory.getItem(1, 0);
+                        if (secondary != null)
+                        {
+                            ply.equipment.tryEquip(1, secondary.x, secondary.y);
+                        } else
+                        {
+                            ply.equipment.dequip();
+                        }
+                    }
+                });
 
+                cPlayer.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(Config.CTF.FlagCarryingSpeed);
+                cPlayer.IsCarryingFlag = true;
                 Plugin.Instance.UIManager.UpdateCTFHUD(Players, otherTeam);
             }
         }
@@ -651,8 +688,6 @@ namespace UnturnedBlackout.GameTypes
 
         public void GiveLoadout(CTFPlayer player)
         {
-            Utility.Debug($"Giving loadout to {player.GamePlayer.Player.CharacterName}");
-
             player.GamePlayer.Player.Player.inventory.ClearInventory();
             R.Commands.Execute(player.GamePlayer.Player, $"/kit {player.Team.Info.KitNames[UnityEngine.Random.Range(0, player.Team.Info.KitNames.Count)]}");
         }
@@ -683,7 +718,6 @@ namespace UnturnedBlackout.GameTypes
             var cPlayer = GetCTFPlayer(obj.player);
             if (cPlayer == null) return;
             if (GamePhase == EGamePhase.Ending || GamePhase == EGamePhase.Starting) return;
-            Utility.Debug($"{obj.player.channel.owner.playerID.characterName} leaned, lean {obj.lean}");
 
             if (cPlayer.GamePlayer.HasScoreboard)
             {
@@ -718,7 +752,6 @@ namespace UnturnedBlackout.GameTypes
             {
                 return;
             }
-            Utility.Debug($"{cPlayer.GamePlayer.Player.CharacterName} changed stance to {obj.stance}");
             cPlayer.GamePlayer.OnStanceChanged(obj.stance);
         }
 
@@ -755,6 +788,16 @@ namespace UnturnedBlackout.GameTypes
         public override List<GamePlayer> GetPlayers()
         {
             return Players.Select(k => k.GamePlayer).ToList();
+        }
+
+        public override bool IsPlayerCarryingFlag(GamePlayer player)
+        {
+            var cPlayer = GetCTFPlayer(player.SteamID);
+            if (cPlayer != null)
+            {
+                return cPlayer.IsCarryingFlag;
+            }
+            return false;
         }
     }
 }

@@ -739,7 +739,7 @@ namespace UnturnedBlackout.Managers
                 EffectManager.sendUIEffectText(CTFKey, player.GamePlayer.TransportConnection, true, $"BlueNum{index}", blueTeam.Score.ToString());
                 EffectManager.sendUIEffectText(CTFKey, player.GamePlayer.TransportConnection, true, $"RedFlag{index}", redTeam.HasFlag ? "" : "");
                 EffectManager.sendUIEffectText(CTFKey, player.GamePlayer.TransportConnection, true, $"BlueFlag{index}", blueTeam.HasFlag ? "" : "");
-
+                EffectManager.sendUIEffectVisibility(CTFKey, player.GamePlayer.TransportConnection, true, "Timer", true);
 
                 EffectManager.sendUIEffectText(CTFKey, player.GamePlayer.TransportConnection, true, $"RedTxt{index}", redTeam.HasFlag ? "Home" : (redFlagTaker == null ? "Away" : redFlagTaker.GamePlayer.Player.CharacterName.ToUnrich()));
                 EffectManager.sendUIEffectText(CTFKey, player.GamePlayer.TransportConnection, true, $"BlueTxt{index}", blueTeam.HasFlag ? "Home" : (redFlagTaker == null ? "Away" : redFlagTaker.GamePlayer.Player.CharacterName.ToUnrich()));
@@ -863,18 +863,27 @@ namespace UnturnedBlackout.Managers
             EffectManager.sendUIEffectVisibility(PreEndingUIKey, player.TransportConnection, true, "Scoreboard2", false);
         }
 
-        public void SendCTFFlagStates(CTFTeam team, List<CTFPlayer> players, EFlagState state)
+        public void SendCTFFlagStates(CTFTeam team, ETeam flag, List<CTFPlayer> players, EFlagState state)
         {
-            var teamFlagID = (ETeam)team.TeamID == ETeam.Blue ? 27901 : 27900;
-            var enemyFlagID = teamFlagID == 27901 ? 27900 : 27901;
+            var flagID = flag == ETeam.Blue ? 27901 : 27900;
 
             foreach (var player in players)
             {
-                var id = player.Team.TeamID == team.TeamID ? teamFlagID : enemyFlagID;
-               
-                EffectManager.sendUIEffect((ushort)id, (short)id, player.GamePlayer.TransportConnection, true);
-                EffectManager.sendUIEffectText((short)id, player.GamePlayer.TransportConnection, true, "FlagTxt", Plugin.Instance.Translate($"CTF_{(player.Team.TeamID == team.TeamID ? "Team" : "Enemy")}_{state}_Flag").ToRich());
+                EffectManager.sendUIEffect((ushort)flagID, (short)flagID, player.GamePlayer.TransportConnection, true);
+                EffectManager.sendUIEffectText((short)flagID, player.GamePlayer.TransportConnection, true, "FlagTxt", Plugin.Instance.Translate($"CTF_{(player.Team.TeamID == team.TeamID ? "Team" : "Enemy")}_{state}_Flag").ToRich());
             }
+        }
+
+        public void SendFlagSavedSound(GamePlayer player)
+        {
+            EffectManager.sendUIEffectVisibility(SoundsKey, player.TransportConnection, true, "FlagSaved0", false);
+            EffectManager.sendUIEffectVisibility(SoundsKey, player.TransportConnection, true, "FlagSaved0", true);
+        }
+
+        public void SendFlagCapturedSound(GamePlayer player)
+        {
+            EffectManager.sendUIEffectVisibility(SoundsKey, player.TransportConnection, true, "FlagSaved0", false);
+            EffectManager.sendUIEffectVisibility(SoundsKey, player.TransportConnection, true, "FlagSaved0", true);
         }
 
         public void ClearCTFHUD(GamePlayer player)

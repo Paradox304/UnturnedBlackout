@@ -509,7 +509,7 @@ namespace UnturnedBlackout.GameTypes
             {
                 return;
             }
-            Utility.Debug($"{fPlayer.GamePlayer.Player.CharacterName} changed stance to {obj.stance}");
+
             fPlayer.GamePlayer.OnStanceChanged(obj.stance);
         }
 
@@ -554,11 +554,17 @@ namespace UnturnedBlackout.GameTypes
 
         public override void OnTakingItem(GamePlayer player, ItemData itemData, ref bool shouldAllow)
         {
+
         }
 
         public override List<GamePlayer> GetPlayers()
         {
             return Players.Select(k => k.GamePlayer).ToList();
+        }
+
+        public override bool IsPlayerCarryingFlag(GamePlayer player)
+        {
+            return false;
         }
     }
 }

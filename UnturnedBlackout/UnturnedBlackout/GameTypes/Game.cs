@@ -132,34 +132,29 @@ namespace UnturnedBlackout.GameTypes
 
         public void StartVoting()
         {
-            Utility.Debug($"Trying to start voting on location {Location.LocationName} with game mode {GameMode}");
             if (KillFeedChecker != null)
             {
                 Plugin.Instance.StopCoroutine(KillFeedChecker);
             }
             if (!Plugin.Instance.GameManager.CanStartVoting())
             {
-                Utility.Debug("There is already a voting going on, returning");
                 GamePhase = EGamePhase.WaitingForVoting;
                 Plugin.Instance.UIManager.OnGameUpdated(this);
                 return;
             }
 
             GamePhase = EGamePhase.Voting;
-            Utility.Debug($"Starting voting on location {Location.LocationName} with game mode {GameMode}");
 
             var locations = Plugin.Instance.GameManager.AvailableLocations.ToList();
             locations.Add(Location.LocationID);
-            var gameModes = new List<byte> { (byte)EGameType.CTF, (byte)EGameType.FFA };
+            var gameModes = new List<byte> { (byte)EGameType.CTF, (byte)EGameType.FFA, (byte)EGameType.TDM, (byte)EGameType.KC };
 
             for (int i = 0; i <= 1; i++)
             {
-                Utility.Debug($"Found {locations.Count} available locations to choose from");
                 var locationID = locations[UnityEngine.Random.Range(0, locations.Count)];
                 var location = Config.ArenaLocations.FirstOrDefault(k => k.LocationID == locationID);
-                Utility.Debug($"Found {gameModes.Count} available gamemodes to choose from");
                 var gameMode = (EGameType)gameModes[UnityEngine.Random.Range(0, gameModes.Count)];
-                Utility.Debug($"Found gamemode {gameMode}");
+
                 var voteChoice = new VoteChoice(location, gameMode);
                 gameModes.Remove((byte)gameMode);
                 VoteChoices.Add(i, voteChoice);
@@ -178,7 +173,6 @@ namespace UnturnedBlackout.GameTypes
                 yield return new WaitForSeconds(1);
             }
 
-            Utility.Debug("Ending voting, getting the most voted choice");
             VoteChoice choice;
             if (Vote0.Count >= Vote1.Count)
             {
@@ -188,7 +182,7 @@ namespace UnturnedBlackout.GameTypes
             {
                 choice = VoteChoices[1];
             }
-            Utility.Debug($"Most voted choice: {choice.Location.LocationName}, {choice.GameMode}");
+
             EndVoting(choice);
         }
 
@@ -231,27 +225,23 @@ namespace UnturnedBlackout.GameTypes
 
         public void OnKill(GamePlayer killer, GamePlayer victim, ushort weaponID, string killerColor, string victimColor)
         {
-            Utility.Debug($"Adding killfeed for killer {killer.Player.CharacterName} victim {victim.Player.CharacterName} with weapon id {weaponID}");
             if (!Plugin.Instance.UIManager.KillFeedIcons.TryGetValue(weaponID, out FeedIcon icon))
             {
-                Utility.Debug("Icon not found, return");
                 return;
             }
 
             var feed = new Feed($"<color={killerColor}>{killer.Player.CharacterName.ToUnrich()}</color> {icon.Symbol} <color={victimColor}>{victim.Player.CharacterName.ToUnrich()}</color>", DateTime.UtcNow);
             if (Killfeed.Count < Config.MaxKillFeed)
             {
-                Utility.Debug($"{Killfeed.Count} is less than {Config.MaxKillFeed}, add");
                 Killfeed.Add(feed);
                 OnKillfeedUpdated();
                 return;
             }
 
-            Utility.Debug($"Killfeed is not less than {Config.MaxKillFeed} find the oldest one");
+
             var removeKillfeed = Killfeed.OrderBy(k => k.Time).FirstOrDefault();
-            Utility.Debug($"Found the oldest one with date {removeKillfeed.Time}");
+
             Killfeed.Remove(removeKillfeed);
-            Utility.Debug("Removed the old killfeed, and add the new one");
             Killfeed.Add(feed);
             OnKillfeedUpdated();
         }
@@ -268,7 +258,6 @@ namespace UnturnedBlackout.GameTypes
                 yield return new WaitForSeconds(Config.KillFeedSeconds);
                 if (Killfeed.RemoveAll(k => (DateTime.UtcNow - k.Time).TotalSeconds >= Config.KillFeedSeconds) > 0)
                 {
-                    Utility.Debug("Updating killfeed");
                     OnKillfeedUpdated();
                 }
             }
@@ -331,6 +320,7 @@ namespace UnturnedBlackout.GameTypes
         public abstract void OnVoiceChatUpdated(GamePlayer player);
         public abstract void OnTakingItem(GamePlayer player, ItemData itemData, ref bool shouldAllow);
         public abstract int GetPlayerCount();
+        public abstract bool IsPlayerCarryingFlag(GamePlayer player);
         public abstract List<GamePlayer> GetPlayers();
     }
 }
