@@ -136,6 +136,7 @@
     <Compile Include="Commands\TDMSPCommand.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Database\PlayerData.cs" />
+    <Compile Include="Enums\EFlagState.cs" />
     <Compile Include="Enums\EGamePhase.cs" />
     <Compile Include="Enums\EGameType.cs" />
     <Compile Include="Enums\EPage.cs" />

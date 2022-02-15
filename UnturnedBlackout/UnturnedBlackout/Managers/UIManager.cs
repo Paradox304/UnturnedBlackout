@@ -863,6 +863,20 @@ namespace UnturnedBlackout.Managers
             EffectManager.sendUIEffectVisibility(PreEndingUIKey, player.TransportConnection, true, "Scoreboard2", false);
         }
 
+        public void SendCTFFlagStates(CTFTeam team, List<CTFPlayer> players, EFlagState state)
+        {
+            var teamFlagID = (ETeam)team.TeamID == ETeam.Blue ? 27901 : 27900;
+            var enemyFlagID = teamFlagID == 27901 ? 27900 : 27901;
+
+            foreach (var player in players)
+            {
+                var id = player.Team.TeamID == team.TeamID ? teamFlagID : enemyFlagID;
+               
+                EffectManager.sendUIEffect((ushort)id, (short)id, player.GamePlayer.TransportConnection, true);
+                EffectManager.sendUIEffectText((short)id, player.GamePlayer.TransportConnection, true, "FlagTxt", Plugin.Instance.Translate($"CTF_{(player.Team.TeamID == team.TeamID ? "Team" : "Enemy")}_{state}_Flag").ToRich());
+            }
+        }
+
         public void ClearCTFHUD(GamePlayer player)
         {
             EffectManager.askEffectClearByID(CTFID, player.TransportConnection);

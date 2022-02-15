@@ -37,7 +37,6 @@ namespace UnturnedBlackout.GameTypes
 
         public CTFGame(ArenaLocation location) : base(EGameType.CTF, location)
         {
-            Utility.Debug($"Initializing CTF game for location {location.LocationName}");
             SpawnPoints = new Dictionary<int, List<CTFSpawnPoint>>();
             var blueFlag = Vector3.zero;
             var redFlag = Vector3.zero;
@@ -66,11 +65,6 @@ namespace UnturnedBlackout.GameTypes
                 }
             }
 
-            Utility.Debug($"Found {SpawnPoints.Count} spawnpoints registered");
-            foreach (var key in SpawnPoints.Keys)
-            {
-                Utility.Debug(key.ToString());
-            }
             Players = new List<CTFPlayer>();
             PlayersLookup = new Dictionary<CSteamID, CTFPlayer>();
 
@@ -289,15 +283,10 @@ namespace UnturnedBlackout.GameTypes
                     ItemManager.dropItem(new Item(otherTeam.FlagID, true), player.transform.position, true, true, true);
                 }
                 cPlayer.IsCarryingFlag = false;
-                Plugin.Instance.UIManager.UpdateCTFHUD(Players, otherTeam);
-
                 TaskDispatcher.QueueOnMainThread(() =>
                 {
-                    var otherPlayers = Players.Where(k => k.Team.TeamID == otherTeam.TeamID);
-                    foreach (var ply in otherPlayers)
-                    {
-                        ply.GamePlayer.Player.Player.quests.sendSetMarker(true, cPlayer.GamePlayer.Player.Player.transform.position);
-                    }
+                    Plugin.Instance.UIManager.UpdateCTFHUD(Players, otherTeam);
+                    Plugin.Instance.UIManager.SendCTFFlagStates(cPlayer.Team, Players, EFlagState.Dropped);
                 });
             }
 
@@ -519,7 +508,12 @@ namespace UnturnedBlackout.GameTypes
                     cPlayer.FlagsSaved++;
                     Plugin.Instance.UIManager.ShowXPUI(cPlayer.GamePlayer, Config.CTF.XPPerFlagSaved, Plugin.Instance.Translate("Flag_Saved").ToRich());
 
-                    Plugin.Instance.UIManager.UpdateCTFHUD(Players, cPlayer.Team);
+                    TaskDispatcher.QueueOnMainThread(() =>
+                    {
+                        Plugin.Instance.UIManager.UpdateCTFHUD(Players, cPlayer.Team);
+                        Plugin.Instance.UIManager.SendCTFFlagStates(cPlayer.Team, Players, EFlagState.Recovered);
+                    });
+
                     ThreadPool.QueueUserWorkItem(async (o) =>
                     {
                         await Plugin.Instance.DBManager.IncreasePlayerFlagsSavedAsync(cPlayer.GamePlayer.SteamID, 1);
@@ -548,13 +542,18 @@ namespace UnturnedBlackout.GameTypes
                     cPlayer.FlagsCaptured++;
                     Plugin.Instance.UIManager.ShowXPUI(cPlayer.GamePlayer, Config.CTF.XPPerFlagCaptured, Plugin.Instance.Translate("Flag_Captured").ToRich());
 
-                    Plugin.Instance.UIManager.UpdateCTFHUD(Players, cPlayer.Team);
-                    Plugin.Instance.UIManager.UpdateCTFHUD(Players, otherTeam);
+                    TaskDispatcher.QueueOnMainThread(() =>
+                    {
+                        Plugin.Instance.UIManager.UpdateCTFHUD(Players, cPlayer.Team);
+                        Plugin.Instance.UIManager.UpdateCTFHUD(Players, otherTeam);
+                        Plugin.Instance.UIManager.SendCTFFlagStates(cPlayer.Team, Players, EFlagState.Captured);
+                    });
 
                     if (cPlayer.Team.Score >= Config.CTF.ScoreLimit)
                     {
                         Plugin.Instance.StartCoroutine(GameEnd(cPlayer.Team));
                     }
+
                     ThreadPool.QueueUserWorkItem(async (o) =>
                     {
                         await Plugin.Instance.DBManager.IncreasePlayerFlagsCapturedAsync(cPlayer.GamePlayer.SteamID, 1);
@@ -576,7 +575,21 @@ namespace UnturnedBlackout.GameTypes
                     return;
                 }
 
-                otherTeam.HasFlag = false;
+                if (otherTeam.HasFlag)
+                {
+                    TaskDispatcher.QueueOnMainThread(() =>
+                    {
+                        Plugin.Instance.UIManager.SendCTFFlagStates(cPlayer.Team, Players, EFlagState.Taken);
+                    });
+                    otherTeam.HasFlag = false;
+                } else
+                {
+                    TaskDispatcher.QueueOnMainThread(() =>
+                    {
+                        Plugin.Instance.UIManager.SendCTFFlagStates(cPlayer.Team, Players, EFlagState.Picked);
+                    });
+                }
+
                 cPlayer.IsCarryingFlag = true;
 
                 Plugin.Instance.UIManager.UpdateCTFHUD(Players, otherTeam);
