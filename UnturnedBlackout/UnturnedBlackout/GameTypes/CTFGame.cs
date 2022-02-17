@@ -712,10 +712,9 @@ namespace UnturnedBlackout.GameTypes
             player.GamePlayer.GiveSpawnProtection(Config.CTF.SpawnProtectionSeconds);
         }
 
-        public override void PlayerLeaned(PlayerAnimator obj)
+        public override void PlayerChangeFiremode(GamePlayer player)
         {
-            if (obj.lean != 1) return;
-            var cPlayer = GetCTFPlayer(obj.player);
+            var cPlayer = GetCTFPlayer(player.Player);
             if (cPlayer == null) return;
             if (GamePhase == EGamePhase.Ending || GamePhase == EGamePhase.Starting) return;
 

@@ -537,13 +537,11 @@ namespace UnturnedBlackout.GameTypes
             player.GamePlayer.GiveSpawnProtection(Config.TDM.SpawnProtectionSeconds);
         }
 
-        public override void PlayerLeaned(PlayerAnimator obj)
+        public override void PlayerChangeFiremode(GamePlayer player)
         {
-            if (obj.lean != 1) return;
-            TDMPlayer tPlayer = GetTDMPlayer(obj.player);
+            TDMPlayer tPlayer = GetTDMPlayer(player.Player);
             if (tPlayer == null) return;
             if (GamePhase == EGamePhase.Ending || GamePhase == EGamePhase.Starting) return;
-            Utility.Debug($"{obj.player.channel.owner.playerID.characterName} leaned, lean {obj.lean}");
 
             if (tPlayer.GamePlayer.HasScoreboard)
             {

@@ -52,7 +52,6 @@ namespace UnturnedBlackout.GameTypes
             UnturnedPlayerEvents.OnPlayerDeath += OnPlayerDeath;
             UnturnedPlayerEvents.OnPlayerRevive += OnPlayerRevive;
             UnturnedPlayerEvents.OnPlayerInventoryAdded += OnPlayerPickupItem;
-            PlayerAnimator.OnLeanChanged_Global += OnLeaned;
             DamageTool.damagePlayerRequested += OnPlayerDamaged;
             ChatManager.onChatted += OnChatted;
             ItemManager.onTakeItemRequested += OnTakeItem;
@@ -120,9 +119,9 @@ namespace UnturnedBlackout.GameTypes
             PlayerStanceChanged(obj);
         }
 
-        private void OnLeaned(PlayerAnimator obj)
+        public void OnChangeFiremode(GamePlayer player)
         {
-            PlayerLeaned(obj);
+            PlayerChangeFiremode(player);
         }
 
         private void OnPlayerPickupItem(UnturnedPlayer player, InventoryGroup inventoryGroup, byte inventoryIndex, ItemJar P)
@@ -265,9 +264,6 @@ namespace UnturnedBlackout.GameTypes
 
         public void EndVoting(VoteChoice choice)
         {
-            Utility.Debug($"Stopping voting for game");
-            Utility.Debug($"Ending the current game and starting a new one at the location {choice.Location.LocationName}, gamemode {choice.GameMode}");
-
             GamePhase = EGamePhase.Ended;
             Plugin.Instance.GameManager.EndGame(this);
             Plugin.Instance.GameManager.StartGame(choice.Location, choice.GameMode);
@@ -303,7 +299,6 @@ namespace UnturnedBlackout.GameTypes
             UnturnedPlayerEvents.OnPlayerRevive -= OnPlayerRevive;
             UnturnedPlayerEvents.OnPlayerInventoryAdded -= OnPlayerPickupItem;
             DamageTool.damagePlayerRequested -= OnPlayerDamaged;
-            PlayerAnimator.OnLeanChanged_Global -= OnLeaned;
             ChatManager.onChatted -= OnChatted;
         }
 
@@ -314,7 +309,7 @@ namespace UnturnedBlackout.GameTypes
         public abstract void AddPlayerToGame(GamePlayer player);
         public abstract void RemovePlayerFromGame(GamePlayer player);
         public abstract void PlayerPickupItem(UnturnedPlayer player, InventoryGroup inventoryGroup, byte inventoryIndex, ItemJar P);
-        public abstract void PlayerLeaned(PlayerAnimator obj);
+        public abstract void PlayerChangeFiremode(GamePlayer player);
         public abstract void PlayerStanceChanged(PlayerStance obj);
         public abstract void OnChatMessageSent(GamePlayer player, EChatMode chatMode, string text, ref bool isVisible);
         public abstract void OnVoiceChatUpdated(GamePlayer player);
