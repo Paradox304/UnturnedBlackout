@@ -434,19 +434,36 @@ namespace UnturnedBlackout.GameTypes
 
         public override void OnPlayerRevived(UnturnedPlayer player)
         {
-            Utility.Debug("Player revived, getting the kc player");
             var kPlayer = GetKCPlayer(player);
             if (kPlayer == null)
             {
-                Utility.Debug("Could'nt find the kc player, returning");
                 return;
             }
 
-            Utility.Debug($"Game player found, player name: {kPlayer.GamePlayer.Player.CharacterName}");
-            Utility.Debug("Reviving the player");
-
             kPlayer.GamePlayer.OnRevived();
-            SpawnPlayer(kPlayer);
+        }
+
+        public override void OnPlayerRespawn(GamePlayer player, ref Vector3 respawnPosition)
+        {
+            var kPlayer = GetKCPlayer(player.Player);
+            if (kPlayer == null)
+            {
+                return;
+            }
+
+            if (!SpawnPoints.TryGetValue(kPlayer.Team.SpawnPoint, out var spawnPoints))
+            {
+                return;
+            }
+
+            if (spawnPoints.Count == 0)
+            {
+                return;
+            }
+
+            var spawnPoint = spawnPoints[UnityEngine.Random.Range(0, spawnPoints.Count)];
+            respawnPosition = spawnPoint.GetSpawnPoint();
+            player.GiveSpawnProtection(Config.KC.SpawnProtectionSeconds);
         }
 
         public override void OnChatMessageSent(GamePlayer player, EChatMode chatMode, string text, ref bool isVisible)
@@ -568,16 +585,13 @@ namespace UnturnedBlackout.GameTypes
 
         public void SpawnPlayer(KCPlayer player)
         {
-            Utility.Debug($"Spawning {player.GamePlayer.Player.CharacterName}, getting a random location");
             if (!SpawnPoints.TryGetValue(player.Team.SpawnPoint, out var spawnPoints))
             {
-                Utility.Debug($"Could'nt find the spawnpoints for group {player.Team.SpawnPoint}");
                 return;
             }
 
             if (spawnPoints.Count == 0)
             {
-                Utility.Debug("No spawnpoints set for KC, returning");
                 return;
             }
 

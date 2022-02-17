@@ -50,6 +50,7 @@ namespace UnturnedBlackout.GameTypes
             PlayersTalking = new List<GamePlayer>();
 
             UnturnedPlayerEvents.OnPlayerDeath += OnPlayerDeath;
+            PlayerLife.OnSelectingRespawnPoint += OnPlayerRespawning;
             UnturnedPlayerEvents.OnPlayerRevive += OnPlayerRevive;
             UnturnedPlayerEvents.OnPlayerInventoryAdded += OnPlayerPickupItem;
             DamageTool.damagePlayerRequested += OnPlayerDamaged;
@@ -57,6 +58,17 @@ namespace UnturnedBlackout.GameTypes
             ItemManager.onTakeItemRequested += OnTakeItem;
 
             KillFeedChecker = Plugin.Instance.StartCoroutine(UpdateKillfeed());
+        }
+
+        private void OnPlayerRespawning(PlayerLife sender, bool wantsToSpawnAtHome, ref Vector3 position, ref float yaw)
+        {
+            var gPlayer = Plugin.Instance.GameManager.GetGamePlayer(sender.player);
+            if (gPlayer == null)
+            {
+                return;
+            }
+
+            OnPlayerRespawn(gPlayer, ref position);
         }
 
         private void OnTakeItem(Player player, byte x, byte y, uint instanceID, byte to_x, byte to_y, byte to_rot, byte to_page, ItemData itemData, ref bool shouldAllow)
@@ -304,6 +316,7 @@ namespace UnturnedBlackout.GameTypes
 
         public abstract bool IsPlayerIngame(CSteamID steamID);
         public abstract void OnPlayerRevived(UnturnedPlayer player);
+        public abstract void OnPlayerRespawn(GamePlayer player, ref Vector3 respawnPosition);
         public abstract void OnPlayerDead(Player player, CSteamID killer, ELimb limb, EDeathCause cause);
         public abstract void OnPlayerDamage(ref DamagePlayerParameters parameters, ref bool shouldAllow);
         public abstract void AddPlayerToGame(GamePlayer player);

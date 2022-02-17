@@ -210,13 +210,14 @@ namespace UnturnedBlackout.GameTypes
             {
                 player.Player.Player.movement.sendPluginSpeedMultiplier(0);
                 Plugin.Instance.UIManager.ShowCountdownUI(player);
-                SpawnPlayer(cPlayer);
             }
             else
             {
                 Plugin.Instance.UIManager.SendCTFHUD(cPlayer, BlueTeam, RedTeam, Players);
-                SpawnPlayer(cPlayer);
             }
+
+            SpawnPlayer(cPlayer);
+
             Plugin.Instance.UIManager.SendPreEndingUI(cPlayer.GamePlayer);
 
             Plugin.Instance.UIManager.OnGameCountUpdated(this);
@@ -476,16 +477,11 @@ namespace UnturnedBlackout.GameTypes
 
         public override void OnPlayerRevived(UnturnedPlayer player)
         {
-            Utility.Debug("Player revived, getting the ctf player");
             var cPlayer = GetCTFPlayer(player);
             if (cPlayer == null)
             {
-                Utility.Debug("Could'nt find the ctf player, returning");
                 return;
             }
-
-            Utility.Debug($"Game player found, player name: {cPlayer.GamePlayer.Player.CharacterName}");
-            Utility.Debug("Reviving the player");
 
             var otherTeam = cPlayer.Team == BlueTeam ? RedTeam : BlueTeam;
             if (otherTeam.FlagID == player.Player.clothing.backpack)
@@ -495,7 +491,29 @@ namespace UnturnedBlackout.GameTypes
             }
 
             cPlayer.GamePlayer.OnRevived();
-            SpawnPlayer(cPlayer);
+        }
+
+        public override void OnPlayerRespawn(GamePlayer player, ref Vector3 respawnPosition)
+        {
+            var cPlayer = GetCTFPlayer(player.Player);
+            if (cPlayer == null)
+            {
+                return;
+            }
+
+            if (!SpawnPoints.TryGetValue(cPlayer.Team.SpawnPoint, out var spawnPoints))
+            {
+                return;
+            }
+
+            if (spawnPoints.Count == 0)
+            {
+                return;
+            }
+
+            var spawnPoint = spawnPoints[UnityEngine.Random.Range(0, spawnPoints.Count)];
+            respawnPosition = spawnPoint.GetSpawnPoint();
+            player.GiveSpawnProtection(Config.CTF.SpawnProtectionSeconds);
         }
 
         public override void OnTakingItem(GamePlayer player, ItemData itemData, ref bool shouldAllow)
@@ -694,16 +712,13 @@ namespace UnturnedBlackout.GameTypes
 
         public void SpawnPlayer(CTFPlayer player)
         {
-            Utility.Debug($"Spawning {player.GamePlayer.Player.CharacterName}, getting a random location");
             if (!SpawnPoints.TryGetValue(player.Team.SpawnPoint, out var spawnPoints))
             {
-                Utility.Debug($"Could'nt find the spawnpoints for group {player.Team.SpawnPoint}");
                 return;
             }
 
             if (spawnPoints.Count == 0)
             {
-                Utility.Debug("No spawnpoints set for CTF, returning");
                 return;
             }
 

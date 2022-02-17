@@ -405,19 +405,37 @@ namespace UnturnedBlackout.GameTypes
 
         public override void OnPlayerRevived(UnturnedPlayer player)
         {
-            Utility.Debug("Player revived, getting the ffa player");
             var fPlayer = GetFFAPlayer(player);
             if (fPlayer == null)
             {
-                Utility.Debug("Could'nt find the ffa player, returning");
                 return;
             }
 
-            Utility.Debug($"Game player found, player name: {fPlayer.GamePlayer.Player.CharacterName}");
-            Utility.Debug("Reviving the player");
-
             fPlayer.GamePlayer.OnRevived();
             SpawnPlayer(fPlayer, false);
+        }
+
+        public override void OnPlayerRespawn(GamePlayer player, ref Vector3 respawnPosition)
+        {
+            if (GetFFAPlayer(player.Player) == null)
+            {
+                return;
+            }
+
+            if (SpawnPoints.Count == 0)
+            {
+                return;
+            }
+
+            var spawnPoint = SpawnPoints.Count > 0 ? SpawnPoints[UnityEngine.Random.Range(0, SpawnPoints.Count)] : UnavailableSpawnPoints[UnityEngine.Random.Range(0, UnavailableSpawnPoints.Count)];
+
+            if (SpawnPoints.Count > 0)
+            {
+                Plugin.Instance.StartCoroutine(SpawnUsedUp(spawnPoint));
+            }
+
+            respawnPosition = spawnPoint.GetSpawnPoint();
+            player.GiveSpawnProtection(Config.FFA.SpawnProtectionSeconds);
         }
 
         public override void OnChatMessageSent(GamePlayer player, EChatMode chatMode, string text, ref bool isVisible)
@@ -466,10 +484,8 @@ namespace UnturnedBlackout.GameTypes
 
         public void SpawnPlayer(FFAPlayer player, bool seperateSpawnPoint)
         {
-            Utility.Debug($"Spawning {player.GamePlayer.Player.CharacterName}, getting a random location");
             if (SpawnPoints.Count == 0)
             {
-                Utility.Debug("No spawnpoints set for FFA, returning");
                 return;
             }
 
