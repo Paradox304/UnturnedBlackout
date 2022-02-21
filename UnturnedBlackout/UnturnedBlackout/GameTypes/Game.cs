@@ -40,7 +40,7 @@ namespace UnturnedBlackout.GameTypes
             Config = Plugin.Instance.Configuration.Instance;
             Location = location;
 
-            GamePhase = EGamePhase.Starting;
+            GamePhase = EGamePhase.WaitingForPlayers;
             Killfeed = new List<Feed>();
 
             VoteChoices = new Dictionary<int, VoteChoice>();
@@ -58,6 +58,11 @@ namespace UnturnedBlackout.GameTypes
             ItemManager.onTakeItemRequested += OnTakeItem;
 
             KillFeedChecker = Plugin.Instance.StartCoroutine(UpdateKillfeed());
+        }
+
+        public void OnTrapTriggered(GamePlayer player, int trapID)
+        {
+            Utility.Debug($"TRAP TRIGGERED BY {player.Player.CharacterName} with id {trapID}");
         }
 
         private void OnPlayerRespawning(PlayerLife sender, bool wantsToSpawnAtHome, ref Vector3 position, ref float yaw)
@@ -96,10 +101,8 @@ namespace UnturnedBlackout.GameTypes
 
         public void OnStartedTalking(GamePlayer player)
         {
-            Utility.Debug($"{player.Player.CharacterName} started talking");
             if (!PlayersTalking.Contains(player))
             {
-                Utility.Debug("Add him to the list and check");
                 PlayersTalking.Add(player);
                 OnVoiceChatUpdated(player);
             }
@@ -107,10 +110,8 @@ namespace UnturnedBlackout.GameTypes
 
         public void OnStoppedTalking(GamePlayer player)
         {
-            Utility.Debug($"{player.Player.CharacterName} stopped talking");
             if (PlayersTalking.Contains(player))
             {
-                Utility.Debug("Remove him from the list and check");
                 PlayersTalking.Remove(player);
                 OnVoiceChatUpdated(player);
             }
@@ -199,7 +200,6 @@ namespace UnturnedBlackout.GameTypes
 
         public void OnVoted(GamePlayer player, int choice)
         {
-            Utility.Debug($"{player.Player.CharacterName} chose {choice}");
             if (Vote0.Contains(player))
             {
                 if (choice == 0)
@@ -248,7 +248,6 @@ namespace UnturnedBlackout.GameTypes
                 OnKillfeedUpdated();
                 return;
             }
-
 
             var removeKillfeed = Killfeed.OrderBy(k => k.Time).FirstOrDefault();
 
@@ -319,7 +318,7 @@ namespace UnturnedBlackout.GameTypes
         public abstract void OnPlayerRespawn(GamePlayer player, ref Vector3 respawnPosition);
         public abstract void OnPlayerDead(Player player, CSteamID killer, ELimb limb, EDeathCause cause);
         public abstract void OnPlayerDamage(ref DamagePlayerParameters parameters, ref bool shouldAllow);
-        public abstract void AddPlayerToGame(GamePlayer player);
+        public abstract IEnumerator AddPlayerToGame(GamePlayer player);
         public abstract void RemovePlayerFromGame(GamePlayer player);
         public abstract void PlayerPickupItem(UnturnedPlayer player, InventoryGroup inventoryGroup, byte inventoryIndex, ItemJar P);
         public abstract void PlayerChangeFiremode(GamePlayer player);

@@ -20,7 +20,7 @@ namespace UnturnedBlackout.Patches
             if (page == 255)
             {
                 return false;
-            } 
+            }
             return true;
         }
 

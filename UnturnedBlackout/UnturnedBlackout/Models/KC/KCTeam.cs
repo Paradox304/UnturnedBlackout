@@ -1,9 +1,8 @@
 ﻿using SDG.Unturned;
 using Steamworks;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
+using System.Timers;
 using UnturnedBlackout.GameTypes;
 using UnturnedBlackout.Models.Global;
 
@@ -25,7 +24,8 @@ namespace UnturnedBlackout.Models.KC
         public int SpawnThreshold { get; set; }
         public GroupInfo IngameGroup { get; set; }
         public uint Frequency { get; set; }
-        public Coroutine SpawnSwitcher { get; set; }
+
+        public Timer m_CheckSpawnSwitch { get; set; }
 
         public KCTeam(KCGame game, int teamID, bool isDummy, ushort dogTagID, TeamInfo info)
         {
@@ -42,6 +42,9 @@ namespace UnturnedBlackout.Models.KC
                 SpawnThreshold = 0;
                 Frequency = Utility.GetFreeFrequency();
                 IngameGroup = GroupManager.addGroup(GroupManager.generateUniqueGroupID(), Info.TeamName);
+
+                m_CheckSpawnSwitch = new Timer(Plugin.Instance.Configuration.Instance.SpawnSwitchTimeFrame * 1000);
+                m_CheckSpawnSwitch.Elapsed += SpawnSwitch;
             }
         }
 
@@ -74,37 +77,38 @@ namespace UnturnedBlackout.Models.KC
                 SpawnThreshold++;
                 if (SpawnThreshold > Config.SpawnSwitchThreshold)
                 {
-                    if (SpawnSwitcher != null)
+                    if (m_CheckSpawnSwitch.Enabled)
                     {
-                        Plugin.Instance.StopCoroutine(SpawnSwitcher);
+                        m_CheckSpawnSwitch.Stop();
                     }
                     Game.SwitchSpawn();
                     SpawnThreshold = 0;
                 }
-                else if (SpawnSwitcher == null)
+                else if (!m_CheckSpawnSwitch.Enabled)
                 {
-                    SpawnSwitcher = Plugin.Instance.StartCoroutine(SpawnSwitch());
+                    m_CheckSpawnSwitch.Start();
                 }
             }
             Players[steamID] = DateTime.UtcNow;
         }
 
-        public IEnumerator SpawnSwitch()
+        private void SpawnSwitch(object sender, ElapsedEventArgs e)
         {
-            yield return new WaitForSeconds(Plugin.Instance.Configuration.Instance.SpawnSwitchTimeFrame);
             if (SpawnThreshold > Config.SpawnSwitchThreshold)
             {
                 Game.SwitchSpawn();
             }
             SpawnThreshold = 0;
+            m_CheckSpawnSwitch.Stop();
         }
 
         public void Destroy()
         {
-            if (SpawnSwitcher != null)
+            if (m_CheckSpawnSwitch.Enabled)
             {
-                Plugin.Instance.StopCoroutine(SpawnSwitcher);
+                m_CheckSpawnSwitch.Stop();
             }
+
             Game = null;
             GroupManager.deleteGroup(IngameGroup.groupID);
             Players.Clear();

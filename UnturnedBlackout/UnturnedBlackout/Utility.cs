@@ -82,6 +82,8 @@ namespace UnturnedBlackout
             inv.player.clothing.updateClothes(0, 0, new byte[0], 0, 0, new byte[0], 0, 0, new byte[0], 0, 0, new byte[0], 0, 0, new byte[0], 0, 0, new byte[0], 0, 0, new byte[0]);
             inv.player.equipment.sendSlot(0);
             inv.player.equipment.sendSlot(1);
+
+            Plugin.Instance.HUDManager.ClearGunUI(inv.player);
         }
 
         public static string GetOrdinal(int index)

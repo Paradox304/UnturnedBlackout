@@ -39,15 +39,18 @@ namespace UnturnedBlackout.Managers
 
         public void StartGames()
         {
-            Utility.Debug($"Starting games");
+            var gameModes = new List<byte> { (byte)EGameType.FFA, (byte)EGameType.TDM, (byte)EGameType.KC, (byte)EGameType.CTF };
+
             for (int i = 1; i <= Config.GamesCount; i++)
             {
-                Utility.Debug($"Getting the location and setting the gamemode default to FFA for game {i}");
+                Utility.Debug($"Getting the location");
                 Utility.Debug($"{AvailableLocations.Count} locations to choose from");
                 var locationID = AvailableLocations[UnityEngine.Random.Range(0, AvailableLocations.Count)];
                 var location = Config.ArenaLocations.FirstOrDefault(k => k.LocationID == locationID);
+                var gameMode = (EGameType)gameModes[UnityEngine.Random.Range(0, gameModes.Count)];
+                Utility.Debug($"Found {gameMode}");
                 Utility.Debug($"Found {location.LocationName}");
-                StartGame(location, EGameType.CTF);
+                StartGame(location, gameMode);
             }
         }
 
@@ -90,7 +93,6 @@ namespace UnturnedBlackout.Managers
 
         public void AddPlayerToGame(UnturnedPlayer player, int selectedID)
         {
-            Utility.Debug($"Trying to add {player.CharacterName} to game with id {selectedID}");
             if (selectedID > (Games.Count - 1))
             {
                 Utility.Say(player, Plugin.Instance.Translate("Game_Not_Found_With_ID").ToRich());
@@ -119,17 +121,15 @@ namespace UnturnedBlackout.Managers
             var gPlayer = GetGamePlayer(player);
             if (gPlayer == null)
             {
-                Utility.Debug("Error finding game player of the player, returning");
                 return;
             }
 
             Plugin.Instance.UIManager.HideMenuUI(gPlayer.Player);
-            game.AddPlayerToGame(gPlayer);
+            Plugin.Instance.StartCoroutine(game.AddPlayerToGame(gPlayer));
         }
 
         public void RemovePlayerFromGame(UnturnedPlayer player)
         {
-            Utility.Debug($"Trying to remove {player.CharacterName} from game");
             if (!TryGetCurrentGame(player.CSteamID, out Game game))
             {
                 Utility.Say(player, Plugin.Instance.Translate("Not_Ingame").ToRich());
@@ -139,12 +139,10 @@ namespace UnturnedBlackout.Managers
             var gPlayer = GetGamePlayer(player);
             if (gPlayer == null)
             {
-                Utility.Debug("Error finding game player of the player, returning");
                 return;
             }
 
             game.RemovePlayerFromGame(gPlayer);
-            Utility.Debug("Sending player to lobby");
             SendPlayerToLobby(player);
         }
 
@@ -156,11 +154,13 @@ namespace UnturnedBlackout.Managers
                 try
                 {
                     avatarURL = player.SteamProfile.AvatarFull.ToString();
-                } catch (Exception ex)
+                }
+                catch (Exception ex)
                 {
-                    Utility.Debug("Error getting the steam profile for the player");
+                    Logger.Log("Error getting the steam profile for the player");
                     Logger.Log(ex);
-                } finally
+                }
+                finally
                 {
                     await Plugin.Instance.DBManager.AddOrUpdatePlayerAsync(player.CSteamID, player.CharacterName.ToUnrich(), avatarURL);
                     await Plugin.Instance.DBManager.GetPlayerDataAsync(player.CSteamID);
@@ -172,7 +172,6 @@ namespace UnturnedBlackout.Managers
                     Plugin.Instance.HUDManager.OnXPChanged(player);
 
                     player.Player.quests.leaveGroup(true);
-                    Utility.Debug($"{player.CharacterName} joined the server, creating a game player and sending them to lobby!");
                     if (!Players.ContainsKey(player.CSteamID))
                     {
                         Players.Remove(player.CSteamID);
@@ -186,7 +185,6 @@ namespace UnturnedBlackout.Managers
 
         private void OnPlayerLeft(UnturnedPlayer player)
         {
-            Utility.Debug($"{player.CharacterName} left the server, removing them from game and removing the game player");
             Plugin.Instance.UIManager.UnregisterUIHandler(player);
             if (Players.TryGetValue(player.CSteamID, out GamePlayer gPlayer))
             {
@@ -201,17 +199,14 @@ namespace UnturnedBlackout.Managers
 
         public void OnPlayerVoted(UnturnedPlayer player, int index, int choice)
         {
-            Utility.Debug($"{player.CSteamID} voted on {index} with choice {choice}");
             if (index > (Games.Count - 1))
             {
-                Utility.Debug("Game wasn't found, returning");
                 return;
             }
 
             var gPlayer = GetGamePlayer(player);
             if (gPlayer == null)
             {
-                Utility.Debug("Error finding game player of the unturned player, returning");
                 return;
             }
 
@@ -225,17 +220,14 @@ namespace UnturnedBlackout.Managers
 
         private void OnPlayerDeath(PlayerLife sender, EDeathCause cause, ELimb limb, CSteamID instigator)
         {
-            Utility.Debug("Player died, checking if the player is in a game");
             if (!TryGetCurrentGame(sender.player.channel.owner.playerID.steamID, out _))
             {
-                Utility.Debug("Player is not in a game, spawning them in the lobby");
                 SendPlayerToLobby(UnturnedPlayer.FromPlayer(sender.player));
             }
         }
 
         public void OnVotingEnded()
         {
-            Utility.Debug("Voting ended for a map, checking if some other game is waiting to vote and start that");
             foreach (var game in Games)
             {
                 if (game.GamePhase == EGamePhase.WaitingForVoting)
@@ -260,7 +252,6 @@ namespace UnturnedBlackout.Managers
 
         public void SendPlayerToLobby(UnturnedPlayer player)
         {
-            Utility.Debug($"Sending {player.CharacterName} to the lobby");
             player.Player.inventory.ClearInventory();
             player.Player.life.serverModifyHealth(100);
             TaskDispatcher.QueueOnMainThread(() =>

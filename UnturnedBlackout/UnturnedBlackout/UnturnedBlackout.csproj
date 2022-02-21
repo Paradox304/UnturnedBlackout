@@ -131,6 +131,7 @@
   <ItemGroup>
     <Compile Include="Commands\CTFSPCommand.cs" />
     <Compile Include="Commands\FFASPCommand.cs" />
+    <Compile Include="Commands\GetNavMeshCommand.cs" />
     <Compile Include="Commands\LeaveCommand.cs" />
     <Compile Include="Commands\SetLobbyCommand.cs" />
     <Compile Include="Commands\TDMSPCommand.cs" />
@@ -176,6 +177,7 @@
     <Compile Include="Models\TDM\TDMTeam.cs" />
     <Compile Include="Patches\FiremodePatch.cs" />
     <Compile Include="Patches\GroupPatch.cs" />
+    <Compile Include="Patches\TriggerTrapPatch.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Models\FFA\FFASpawnPoint.cs" />

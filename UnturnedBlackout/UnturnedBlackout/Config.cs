@@ -130,15 +130,12 @@ namespace UnturnedBlackout
 
             ArenaLocations = new List<ArenaLocation>
             {
-                new ArenaLocation(1, "Seattle", "", 0, 0, 1, 0, 0, 0, 0),
-                new ArenaLocation(2, "Tacoma", "", 1, 1, 2, 0, 0, 0, 0),
-                new ArenaLocation(3, "Military Base", "", 2, 1, 2, 0, 0, 0, 0)
+                new ArenaLocation(1, "Seattle", "", 0, 0, 1, 0, 0, 0, 0, 2, 2, 2, 2)
             };
+
             LevelIcons = new List<LevelIcon>
             {
-                new LevelIcon(0, "", "", ""),
-                new LevelIcon(1, "", "", ""),
-                new LevelIcon(2, "", "", "")
+                new LevelIcon(0, "", "", "")
             };
             KillFeedIcons = new List<FeedIcon>
             {
@@ -152,8 +149,7 @@ namespace UnturnedBlackout
             };
             LevelsXP = new List<LevelXP>
             {
-                new LevelXP(2, 100),
-                new LevelXP(3, 200)
+                new LevelXP(2, 100)
             };
             TeamsInfo = new List<TeamInfo>
             {

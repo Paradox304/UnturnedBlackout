@@ -33,19 +33,21 @@ namespace UnturnedBlackout.GameTypes
 
         public FFAGame(ArenaLocation location) : base(EGameType.FFA, location)
         {
-            Utility.Debug($"Initializing FFA game for location {location.LocationName}");
             SpawnPoints = Plugin.Instance.DataManager.Data.FFASpawnPoints.Where(k => k.LocationID == location.LocationID).ToList();
             Players = new List<FFAPlayer>();
             PlayersLookup = new Dictionary<CSteamID, FFAPlayer>();
             UnavailableSpawnPoints = new List<FFASpawnPoint>();
             Frequency = Utility.GetFreeFrequency();
-            Utility.Debug($"Found {SpawnPoints.Count} positions for FFA");
-            GameStarter = Plugin.Instance.StartCoroutine(StartGame());
         }
 
         public IEnumerator StartGame()
         {
             TaskDispatcher.QueueOnMainThread(() => WipeItems());
+            GamePhase = EGamePhase.Starting;
+            foreach (var player in Players)
+            {
+                Plugin.Instance.UIManager.ClearWaitingForPlayersUI(player.GamePlayer);
+            }
 
             for (int seconds = Config.FFA.StartSeconds; seconds >= 0; seconds--)
             {
@@ -130,13 +132,11 @@ namespace UnturnedBlackout.GameTypes
             StartVoting();
         }
 
-        public override void AddPlayerToGame(GamePlayer player)
+        public override IEnumerator AddPlayerToGame(GamePlayer player)
         {
-            Utility.Debug($"Adding {player.Player.CharacterName} to FFA game");
             if (Players.Exists(k => k.GamePlayer.SteamID == player.SteamID))
             {
-                Utility.Debug("Player is already in the game, returning");
-                return;
+                yield break;
             }
 
             FFAPlayer fPlayer = new FFAPlayer(player);
@@ -148,38 +148,45 @@ namespace UnturnedBlackout.GameTypes
                 PlayersLookup.Remove(player.SteamID);
             }
             PlayersLookup.Add(player.SteamID, fPlayer);
-            GiveLoadout(fPlayer);
+            Plugin.Instance.UIManager.OnGameCountUpdated(this);
 
-            if (GamePhase == EGamePhase.Starting)
-            {
-                player.Player.Player.movement.sendPluginSpeedMultiplier(0);
-                Plugin.Instance.UIManager.ShowCountdownUI(player);
-                SpawnPlayer(fPlayer, true);
-            }
-            else
-            {
-                Plugin.Instance.UIManager.SendFFAHUD(player);
-                Plugin.Instance.UIManager.UpdateFFATopUI(fPlayer, Players);
-                SpawnPlayer(fPlayer, false);
-            }
+            Plugin.Instance.UIManager.SendLoadingUI(player, GameMode, Location);
+            yield return new WaitForSeconds(10);
+            GiveLoadout(fPlayer);
             Plugin.Instance.UIManager.SendPreEndingUI(fPlayer.GamePlayer);
 
-            if (Players.Count == 2)
+            switch (GamePhase)
             {
-                foreach (var ply in Players)
-                {
-                    Plugin.Instance.UIManager.UpdateFFATopUI(ply, Players);
-                }
+                case EGamePhase.WaitingForPlayers:
+                    Plugin.Instance.UIManager.SendWaitingForPlayersUI(player);
+                    if (Players.Count >= Location.GetMinPlayers(GameMode))
+                    {
+                        GameStarter = Plugin.Instance.StartCoroutine(StartGame());
+                    }
+                    break;
+                case EGamePhase.Starting:
+                    player.Player.Player.movement.sendPluginSpeedMultiplier(0);
+                    Plugin.Instance.UIManager.ShowCountdownUI(player);
+                    SpawnPlayer(fPlayer, true);
+                    break;
+                case EGamePhase.Ending:
+                    Plugin.Instance.UIManager.SetupFFALeaderboard(fPlayer, Players, Location, true);
+                    Plugin.Instance.UIManager.ShowFFALeaderboard(fPlayer.GamePlayer);
+                    break;
+                default:
+                    Plugin.Instance.UIManager.SendFFAHUD(player);
+                    Plugin.Instance.UIManager.UpdateFFATopUI(fPlayer, Players);
+                    SpawnPlayer(fPlayer, false);
+                    break;
             }
-            Plugin.Instance.UIManager.OnGameCountUpdated(this);
+
+            Plugin.Instance.UIManager.ClearLoadingUI(player);
         }
 
         public override void RemovePlayerFromGame(GamePlayer player)
         {
-            Utility.Debug($"Removing {player.Player.CharacterName} from FFA game");
             if (!Players.Exists(k => k.GamePlayer.SteamID == player.SteamID))
             {
-                Utility.Debug("Player is already not in the game, returning");
                 return;
             }
 
@@ -193,14 +200,15 @@ namespace UnturnedBlackout.GameTypes
                 Plugin.Instance.UIManager.ClearCountdownUI(player);
                 fPlayer.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1);
             }
-
-            if (fPlayer != null)
+            else if (GamePhase == EGamePhase.WaitingForPlayers)
             {
-                player.Player.Player.quests.askSetRadioFrequency(CSteamID.Nil, 0);
-                fPlayer.GamePlayer.OnGameLeft();
-                Players.Remove(fPlayer);
-                PlayersLookup.Remove(fPlayer.GamePlayer.SteamID);
+                Plugin.Instance.UIManager.ClearWaitingForPlayersUI(player);
             }
+
+            player.Player.Player.quests.askSetRadioFrequency(CSteamID.Nil, 0);
+            fPlayer.GamePlayer.OnGameLeft();
+            Players.Remove(fPlayer);
+            PlayersLookup.Remove(fPlayer.GamePlayer.SteamID);
 
             foreach (var ply in Players)
             {
@@ -211,11 +219,9 @@ namespace UnturnedBlackout.GameTypes
 
         public override void OnPlayerDead(Player player, CSteamID killer, ELimb limb, EDeathCause cause)
         {
-            Utility.Debug("Player died, getting the ffa player");
             var fPlayer = GetFFAPlayer(player);
             if (fPlayer == null)
             {
-                Utility.Debug("Could'nt find the ffa player, returning");
                 return;
             }
 
@@ -227,7 +233,7 @@ namespace UnturnedBlackout.GameTypes
 
             var victimKS = fPlayer.KillStreak;
 
-            Utility.Debug($"Game player found, player name: {fPlayer.GamePlayer.Player.CharacterName}");
+            Utility.Debug($"Game player died, player name: {fPlayer.GamePlayer.Player.CharacterName}");
             fPlayer.OnDeath(killer);
             fPlayer.GamePlayer.OnDeath(killer, Config.FFA.RespawnSeconds);
 
@@ -238,7 +244,6 @@ namespace UnturnedBlackout.GameTypes
                 var kPlayer = GetFFAPlayer(killer);
                 if (kPlayer == null)
                 {
-                    Utility.Debug("Could'nt find the killer, returning");
                     return;
                 }
 
@@ -259,7 +264,6 @@ namespace UnturnedBlackout.GameTypes
                     var assister = GetFFAPlayer(fPlayer.GamePlayer.LastDamager.Pop());
                     if (assister != null && assister != kPlayer)
                     {
-                        Utility.Debug($"Last damage done to the player by {assister.GamePlayer.Player.CharacterName}");
                         assister.Assists++;
                         assister.Score += Config.AssistPoints;
                         if (!assister.GamePlayer.Player.Player.life.isDead)
@@ -352,7 +356,8 @@ namespace UnturnedBlackout.GameTypes
                     if (limb == ELimb.SKULL)
                     {
                         await Plugin.Instance.DBManager.IncreasePlayerHeadshotKillsAsync(kPlayer.GamePlayer.SteamID, 1);
-                    } else
+                    }
+                    else
                     {
                         await Plugin.Instance.DBManager.IncreasePlayerKillsAsync(kPlayer.GamePlayer.SteamID, 1);
                     }
@@ -363,15 +368,13 @@ namespace UnturnedBlackout.GameTypes
 
         public override void OnPlayerDamage(ref DamagePlayerParameters parameters, ref bool shouldAllow)
         {
-            Utility.Debug($"{parameters.player.channel.owner.playerID.characterName} got damaged, checking if the player is in game, times {parameters.times}");
             var player = GetFFAPlayer(parameters.player);
             if (player == null)
             {
-                Utility.Debug("Player isn't ingame, returning");
                 return;
             }
 
-            if (GamePhase == EGamePhase.Starting || GamePhase == EGamePhase.Ending)
+            if (GamePhase != EGamePhase.Started)
             {
                 shouldAllow = false;
                 return;
@@ -393,12 +396,12 @@ namespace UnturnedBlackout.GameTypes
             var kPlayer = GetFFAPlayer(parameters.killer);
             if (kPlayer == null)
             {
-                Utility.Debug("Killer not found, returning");
                 return;
             }
 
             if (kPlayer.GamePlayer.HasSpawnProtection)
             {
+                kPlayer.GamePlayer.m_RemoveSpawnProtection.Stop();
                 kPlayer.GamePlayer.HasSpawnProtection = false;
             }
         }
@@ -476,8 +479,6 @@ namespace UnturnedBlackout.GameTypes
 
         public void GiveLoadout(FFAPlayer player)
         {
-            Utility.Debug($"Giving loadout to {player.GamePlayer.Player.CharacterName}");
-
             player.GamePlayer.Player.Player.inventory.ClearInventory();
             R.Commands.Execute(player.GamePlayer.Player, $"/kit {Config.FFA.KitName}");
         }
@@ -501,14 +502,22 @@ namespace UnturnedBlackout.GameTypes
         public override void PlayerChangeFiremode(GamePlayer player)
         {
             FFAPlayer fPlayer = GetFFAPlayer(player.Player);
-            if (fPlayer == null) return;
-            if (GamePhase == EGamePhase.Ending || GamePhase == EGamePhase.Starting) return;
+            if (fPlayer == null)
+            {
+                return;
+            }
+
+            if (GamePhase == EGamePhase.Ending || GamePhase == EGamePhase.Starting)
+            {
+                return;
+            }
 
             if (fPlayer.GamePlayer.HasScoreboard)
             {
                 fPlayer.GamePlayer.HasScoreboard = false;
                 Plugin.Instance.UIManager.HideFFALeaderboard(fPlayer.GamePlayer);
-            } else
+            }
+            else
             {
                 fPlayer.GamePlayer.HasScoreboard = true;
                 Plugin.Instance.UIManager.SetupFFALeaderboard(fPlayer, Players, Location, true);
@@ -563,7 +572,7 @@ namespace UnturnedBlackout.GameTypes
 
         public override void PlayerPickupItem(UnturnedPlayer player, InventoryGroup inventoryGroup, byte inventoryIndex, ItemJar P)
         {
-            
+
         }
 
         public override void OnTakingItem(GamePlayer player, ItemData itemData, ref bool shouldAllow)

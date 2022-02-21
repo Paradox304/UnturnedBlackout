@@ -6,6 +6,7 @@ using Steamworks;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Timers;
 using UnityEngine;
 using UnturnedBlackout.Database;
 using UnturnedBlackout.GameTypes;
@@ -28,11 +29,11 @@ namespace UnturnedBlackout.Models.Global
 
         public EPlayerStance PreviousStance { get; set; }
 
-        public Coroutine ProtectionRemover { get; set; }
-        public Coroutine DamageChecker { get; set; }
         public Coroutine Healer { get; set; }
         public Coroutine RespawnTimer { get; set; }
         public Coroutine VoiceChatChecker { get; set; }
+        public Timer m_RemoveSpawnProtection { get; set; }
+        public Timer m_DamageChecker { get; set; }
 
         public GamePlayer(UnturnedPlayer player, ITransportConnection transportConnection)
         {
@@ -41,55 +42,65 @@ namespace UnturnedBlackout.Models.Global
             TransportConnection = transportConnection;
             PreviousStance = EPlayerStance.STAND;
             LastDamager = new Stack<CSteamID>(100);
+
+            m_RemoveSpawnProtection = new Timer(1 * 1000);
+            m_RemoveSpawnProtection.Elapsed += RemoveSpawnProtection;
+
+            m_DamageChecker = new Timer(Plugin.Instance.Configuration.Instance.LastDamageAfterHealSeconds * 1000);
+            m_DamageChecker.Elapsed += CheckDamage;
         }
 
         // Spawn Protection Seconds
         public void GiveSpawnProtection(int seconds)
         {
             HasSpawnProtection = true;
-            if (ProtectionRemover != null)
+            if (m_RemoveSpawnProtection.Enabled)
             {
-                Plugin.Instance.StopCoroutine(ProtectionRemover);
+                m_RemoveSpawnProtection.Stop();
             }
-            Plugin.Instance.StartCoroutine(RemoveSpawnProtection(seconds));
+            m_RemoveSpawnProtection.Interval = seconds * 1000;
+            m_RemoveSpawnProtection.Start();
         }
 
-        public IEnumerator RemoveSpawnProtection(int seconds)
+        private void RemoveSpawnProtection(object sender, ElapsedEventArgs e)
         {
-            yield return new WaitForSeconds(seconds);
             HasSpawnProtection = false;
+            m_RemoveSpawnProtection.Stop();
         }
 
         // Healing
         public void OnDamaged(CSteamID damager)
         {
-            if (DamageChecker != null)
+            if (m_DamageChecker.Enabled)
             {
-                Plugin.Instance.StopCoroutine(DamageChecker);
+                m_DamageChecker.Stop();
             }
             if (Healer != null)
             {
                 Plugin.Instance.StopCoroutine(Healer);
             }
 
-            Utility.Debug($"{Player.CharacterName} got damaged by {damager}");
             if (LastDamager.Count > 0)
             {
                 if (LastDamager.Peek() != damager)
                 {
                     LastDamager.Push(damager);
                 }
-            } else
+            }
+            else
             {
                 LastDamager.Push(damager);
             }
-            DamageChecker = Plugin.Instance.StartCoroutine(CheckDamage());
+            m_DamageChecker.Start();
         }
 
-        public IEnumerator CheckDamage()
+        private void CheckDamage(object sender, ElapsedEventArgs e)
         {
-            yield return new WaitForSeconds(Plugin.Instance.Configuration.Instance.LastDamageAfterHealSeconds);
-            Healer = Plugin.Instance.StartCoroutine(HealPlayer());
+            TaskDispatcher.QueueOnMainThread(() =>
+            {
+                Healer = Plugin.Instance.StartCoroutine(HealPlayer());
+            });
+            m_DamageChecker.Stop();
         }
 
         public IEnumerator HealPlayer()
@@ -116,9 +127,9 @@ namespace UnturnedBlackout.Models.Global
                 TaskDispatcher.QueueOnMainThread(() => Player.Player.life.ServerRespawn(false));
                 return;
             }
-            if (DamageChecker != null)
+            if (m_DamageChecker.Enabled)
             {
-                Plugin.Instance.StopCoroutine(DamageChecker);
+                m_DamageChecker.Stop();
             }
             if (Healer != null)
             {
@@ -143,7 +154,6 @@ namespace UnturnedBlackout.Models.Global
         // Equipping and refilling on guns on respawn
         public void OnRevived()
         {
-
             for (byte i = 0; i <= 1; i++)
             {
                 var item = Player.Player.inventory.getItem(i, 0);
@@ -183,7 +193,8 @@ namespace UnturnedBlackout.Models.Global
             if (VoiceChatChecker != null)
             {
                 Plugin.Instance.StopCoroutine(VoiceChatChecker);
-            } else
+            }
+            else
             {
                 if (Plugin.Instance.GameManager.TryGetCurrentGame(SteamID, out Game game))
                 {
@@ -207,9 +218,9 @@ namespace UnturnedBlackout.Models.Global
 
         public void OnGameLeft()
         {
-            if (ProtectionRemover != null)
+            if (m_RemoveSpawnProtection.Enabled)
             {
-                Plugin.Instance.StopCoroutine(ProtectionRemover);
+                m_RemoveSpawnProtection.Stop();
             }
 
             if (Healer != null)
@@ -217,9 +228,9 @@ namespace UnturnedBlackout.Models.Global
                 Plugin.Instance.StopCoroutine(Healer);
             }
 
-            if (DamageChecker != null)
+            if (m_DamageChecker.Enabled)
             {
-                Plugin.Instance.StopCoroutine(DamageChecker);
+                m_DamageChecker.Stop();
             }
 
             if (RespawnTimer != null)

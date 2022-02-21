@@ -1,6 +1,5 @@
 ﻿using Rocket.Core.Utils;
 using Rocket.Unturned;
-using Rocket.Unturned.Events;
 using Rocket.Unturned.Player;
 using SDG.Unturned;
 using System;
@@ -17,9 +16,6 @@ namespace UnturnedBlackout.Managers
 
         public HUDManager()
         {
-            UnturnedPlayerEvents.OnPlayerUpdateHealth += OnHealthChanged;
-            //UnturnedPlayerEvents.OnPlayerRevive += OnRevived;
-
             UseableGun.onChangeMagazineRequested += OnMagazineChanged;
             UseableGun.onBulletSpawned += OnBulletShot;
 
@@ -41,9 +37,8 @@ namespace UnturnedBlackout.Managers
             player.Player.stance.onStanceUpdated += () => OnStanceUpdated(player.Player);
             EffectManager.sendUIEffect(ID, Key, player.Player.channel.GetOwnerTransportConnection(), true);
 
-            // Sound UI
+            // SOUND UI
             EffectManager.sendUIEffect(27634, 27634, player.Player.channel.GetOwnerTransportConnection(), true);
-            //OnHealthChanged(player, player.Player.life.health);
         }
 
         private void OnStanceUpdated(Player player)
@@ -69,58 +64,12 @@ namespace UnturnedBlackout.Managers
             }
         }
 
-        /*
-        public void ShowHUD(UnturnedPlayer player)
-        {
-            EffectManager.sendUIEffectVisibility(Key, player.Player.channel.GetOwnerTransportConnection(), true, "LeftSide", true);
-        }
-
-        public void HideHUD(UnturnedPlayer player)
-        {
-            EffectManager.sendUIEffectVisibility(Key, player.Player.channel.GetOwnerTransportConnection(), true, "LeftSide", false);
-        }
-
-        private void OnRevived(UnturnedPlayer player, Vector3 position, byte angle)
-        {
-            //OnHealthChanged(player, player.Player.life.health);
-        }
-        */
-
-        private void OnHealthChanged(UnturnedPlayer player, byte health)
-        {
-            Utility.Debug($"{player.CharacterName} health has been changed to {health}");
-            /*
-            var spaces = health * 96 / 100; 
-            var transportConnection = player.Player.channel.GetOwnerTransportConnection();
-
-            EffectManager.sendUIEffectText(Key, transportConnection, true, "HealthBarFill", spaces == 0 ? " " : new string(' ', spaces));
-            EffectManager.sendUIEffectText(Key, transportConnection, true, "HealthNum", health.ToString());
-            */
-        }
-
         public void OnXPChanged(UnturnedPlayer player)
         {
-            /*
-            var transportConnection = player.Player.channel.GetOwnerTransportConnection();
-            var xp = (uint)0;
-            var level = (uint)0;
-            var neededXP = 0;
-            if (Plugin.Instance.DBManager.PlayerCache.TryGetValue(player.CSteamID, out PlayerData data))
-            {
-                xp = data.XP;
-                level = data.Level;
-                neededXP = data.GetNeededXP();
-            }
-
-            var spaces = neededXP == 0 ? 0 : (int)(xp * 96 / neededXP);
-            EffectManager.sendUIEffectText(Key, transportConnection, true, "XPNum", Plugin.Instance.Translate("Level_Show", level).ToRich());
-            EffectManager.sendUIEffectText(Key, transportConnection, true, "XPBarFill", spaces == 0 ? " " : new string(' ', spaces));
-            */
-
             Plugin.Instance.UIManager.OnXPChanged(player);
         }
 
-        private void OnEquip(PlayerEquipment equipment, ItemJar jar, ItemAsset asset, ref bool shouldAllow)
+        protected void OnEquip(PlayerEquipment equipment, ItemJar jar, ItemAsset asset, ref bool shouldAllow)
         {
             var player = Plugin.Instance.GameManager.GetGamePlayer(equipment.player);
 
@@ -140,7 +89,11 @@ namespace UnturnedBlackout.Managers
             {
                 var connection = equipment.player.channel.GetOwnerTransportConnection();
                 EffectManager.sendUIEffectVisibility(Key, connection, true, "RightSide", true);
-                if (asset == null) return;
+                if (asset == null)
+                {
+                    return;
+                }
+
                 if (asset.type == EItemType.GUN)
                 {
                     var gAsset = asset as ItemGunAsset;
@@ -170,6 +123,11 @@ namespace UnturnedBlackout.Managers
         public void OnDequip(PlayerEquipment obj)
         {
             Plugin.Instance.StartCoroutine(EquipKnife(obj));
+        }
+
+        public void ClearGunUI(Player player)
+        {
+            EffectManager.sendUIEffectVisibility(Key, player.channel.GetOwnerTransportConnection(), true, "RightSide", false);
         }
 
         public IEnumerator EquipKnife(PlayerEquipment obj)
@@ -211,9 +169,6 @@ namespace UnturnedBlackout.Managers
 
         public void Destroy()
         {
-            UnturnedPlayerEvents.OnPlayerUpdateHealth -= OnHealthChanged;
-            //UnturnedPlayerEvents.OnPlayerRevive -= OnRevived;
-
             UseableGun.onChangeMagazineRequested -= OnMagazineChanged;
             UseableGun.onBulletSpawned -= OnBulletShot;
 

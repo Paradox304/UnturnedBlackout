@@ -2,6 +2,7 @@
 {
     public enum EGamePhase
     {
+        WaitingForPlayers,
         Starting,
         Started,
         Ending,

@@ -8,9 +8,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnturnedBlackout.Database;
 using UnturnedBlackout.Enums;
@@ -48,7 +46,8 @@ namespace UnturnedBlackout.GameTypes
                     if ((ETeam)spawnPoint.GroupID == ETeam.Blue)
                     {
                         blueFlag = spawnPoint.GetSpawnPoint();
-                    } else if ((ETeam)spawnPoint.GroupID == ETeam.Red)
+                    }
+                    else if ((ETeam)spawnPoint.GroupID == ETeam.Red)
                     {
                         redFlag = spawnPoint.GetSpawnPoint();
                     }
@@ -74,13 +73,15 @@ namespace UnturnedBlackout.GameTypes
             BlueTeam = new CTFTeam((byte)ETeam.Blue, false, blueTeamInfo, Config.CTF.BlueFlagID, blueFlag);
             RedTeam = new CTFTeam((byte)ETeam.Red, false, redTeamInfo, Config.CTF.RedFlagID, redFlag);
             Frequency = Utility.GetFreeFrequency();
-
-            GameStarter = Plugin.Instance.StartCoroutine(StartGame());
         }
 
         public IEnumerator StartGame()
         {
-            TaskDispatcher.QueueOnMainThread(() => WipeItems());
+            GamePhase = EGamePhase.Starting;
+            foreach (var player in Players)
+            {
+                Plugin.Instance.UIManager.ClearWaitingForPlayersUI(player.GamePlayer);
+            }
 
             for (int seconds = Config.CTF.StartSeconds; seconds >= 0; seconds--)
             {
@@ -91,18 +92,22 @@ namespace UnturnedBlackout.GameTypes
                 }
             }
             GamePhase = EGamePhase.Started;
-
             foreach (var player in Players)
             {
                 player.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1);
 
                 Plugin.Instance.UIManager.ClearCountdownUI(player.GamePlayer);
             }
-
             Plugin.Instance.UIManager.SendCTFHUD(BlueTeam, RedTeam, Players);
 
-            ItemManager.dropItem(new Item(RedTeam.FlagID, true), RedTeam.FlagSP, true, true, true);
-            ItemManager.dropItem(new Item(BlueTeam.FlagID, true), BlueTeam.FlagSP, true, true, true);
+            TaskDispatcher.QueueOnMainThread(() =>
+            {
+                WipeItems();
+                ItemManager.dropItem(new Item(RedTeam.FlagID, true), RedTeam.FlagSP, true, true, true);
+                ItemManager.dropItem(new Item(BlueTeam.FlagID, true), BlueTeam.FlagSP, true, true, true);
+                Utility.Debug($"Dropping red flag at {RedTeam.FlagSP} and blue flag at {BlueTeam.FlagSP} for location {Location.LocationName}");
+            });
+
             GameEnder = Plugin.Instance.StartCoroutine(EndGame());
         }
 
@@ -144,9 +149,8 @@ namespace UnturnedBlackout.GameTypes
             GamePhase = EGamePhase.Ending;
             Plugin.Instance.UIManager.OnGameUpdated(this);
 
-            for (int index = 0; index < Players.Count; index++)
+            foreach (var player in Players)
             {
-                var player = Players[index];
                 Plugin.Instance.UIManager.ClearCTFHUD(player.GamePlayer);
                 if (player.GamePlayer.HasScoreboard)
                 {
@@ -185,17 +189,14 @@ namespace UnturnedBlackout.GameTypes
             StartVoting();
         }
 
-        public override void AddPlayerToGame(GamePlayer player)
+        public override IEnumerator AddPlayerToGame(GamePlayer player)
         {
-            Utility.Debug($"Adding {player.Player.CharacterName} to CTF game");
             if (Players.Exists(k => k.GamePlayer.SteamID == player.SteamID))
             {
-                Utility.Debug("Player is already in the game, returning");
-                return;
+                yield break;
             }
 
             var team = BlueTeam.Players.Count > RedTeam.Players.Count ? RedTeam : BlueTeam;
-
             CTFPlayer cPlayer = new CTFPlayer(player, team);
             team.AddPlayer(player.SteamID);
             Players.Add(cPlayer);
@@ -204,31 +205,56 @@ namespace UnturnedBlackout.GameTypes
                 PlayersLookup.Remove(player.SteamID);
             }
             PlayersLookup.Add(player.SteamID, cPlayer);
-            GiveLoadout(cPlayer);
-
-            if (GamePhase == EGamePhase.Starting)
-            {
-                player.Player.Player.movement.sendPluginSpeedMultiplier(0);
-                Plugin.Instance.UIManager.ShowCountdownUI(player);
-            }
-            else
-            {
-                Plugin.Instance.UIManager.SendCTFHUD(cPlayer, BlueTeam, RedTeam, Players);
-            }
-
-            SpawnPlayer(cPlayer);
-
-            Plugin.Instance.UIManager.SendPreEndingUI(cPlayer.GamePlayer);
 
             Plugin.Instance.UIManager.OnGameCountUpdated(this);
+            Plugin.Instance.UIManager.SendLoadingUI(player, GameMode, Location);
+            yield return new WaitForSeconds(5);
+
+            GiveLoadout(cPlayer);
+            Plugin.Instance.UIManager.SendPreEndingUI(cPlayer.GamePlayer);
+            SpawnPlayer(cPlayer);
+            Plugin.Instance.UIManager.ClearLoadingUI(player);
+
+            switch (GamePhase)
+            {
+                case EGamePhase.WaitingForPlayers:
+                    Plugin.Instance.UIManager.SendWaitingForPlayersUI(player);
+                    if (Players.Count >= Location.GetMinPlayers(GameMode))
+                    {
+                        GameStarter = Plugin.Instance.StartCoroutine(StartGame());
+                    }
+                    break;
+                case EGamePhase.Starting:
+                    player.Player.Player.movement.sendPluginSpeedMultiplier(0);
+                    Plugin.Instance.UIManager.ShowCountdownUI(player);
+                    break;
+                case EGamePhase.Ending:
+                    CTFTeam wonTeam;
+                    if (BlueTeam.Score > RedTeam.Score)
+                    {
+                        wonTeam = BlueTeam;
+                    }
+                    else if (RedTeam.Score > BlueTeam.Score)
+                    {
+                        wonTeam = RedTeam;
+                    }
+                    else
+                    {
+                        wonTeam = new CTFTeam(-1, true, new TeamInfo(), 0, Vector3.zero);
+                    }
+                    Plugin.Instance.UIManager.SetupCTFLeaderboard(cPlayer, Players, Location, wonTeam, BlueTeam, RedTeam, true);
+                    Plugin.Instance.UIManager.ShowCTFLeaderboard(cPlayer.GamePlayer);
+                    break;
+                default:
+                    Plugin.Instance.UIManager.SendCTFHUD(cPlayer, BlueTeam, RedTeam, Players);
+                    break;
+            }
         }
 
         public override void RemovePlayerFromGame(GamePlayer player)
         {
-            Utility.Debug($"Removing {player.Player.CharacterName} from CTF game");
             if (!Players.Exists(k => k.GamePlayer.SteamID == player.SteamID))
             {
-                Utility.Debug("Player is already not in the game, returning");
                 return;
             }
 
@@ -241,6 +267,10 @@ namespace UnturnedBlackout.GameTypes
             {
                 Plugin.Instance.UIManager.ClearCountdownUI(player);
                 cPlayer.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1);
+            }
+            else if (GamePhase == EGamePhase.WaitingForPlayers)
+            {
+                Plugin.Instance.UIManager.ClearWaitingForPlayersUI(player);
             }
 
             if (cPlayer != null)
@@ -272,14 +302,11 @@ namespace UnturnedBlackout.GameTypes
 
         public override void OnPlayerDead(Player player, CSteamID killer, ELimb limb, EDeathCause cause)
         {
-            Utility.Debug("Player died, getting the ctf player");
             var cPlayer = GetCTFPlayer(player);
             if (cPlayer == null)
             {
-                Utility.Debug("Could'nt find the ctf player, returning");
                 return;
             }
-
             if (cPlayer.GamePlayer.HasScoreboard)
             {
                 cPlayer.GamePlayer.HasScoreboard = false;
@@ -288,7 +315,7 @@ namespace UnturnedBlackout.GameTypes
 
             var victimKS = cPlayer.KillStreak;
 
-            Utility.Debug($"Game player found, player name: {cPlayer.GamePlayer.Player.CharacterName}");
+            Utility.Debug($"Game player died, player name: {cPlayer.GamePlayer.Player.CharacterName}");
             cPlayer.OnDeath(killer);
             cPlayer.GamePlayer.OnDeath(killer, Config.CTF.RespawnSeconds);
 
@@ -315,7 +342,6 @@ namespace UnturnedBlackout.GameTypes
                 var kPlayer = GetCTFPlayer(killer);
                 if (kPlayer == null)
                 {
-                    Utility.Debug("Could'nt find the killer, returning");
                     return;
                 }
 
@@ -336,7 +362,6 @@ namespace UnturnedBlackout.GameTypes
                     var assister = GetCTFPlayer(cPlayer.GamePlayer.LastDamager.Pop());
                     if (assister != null && assister != kPlayer)
                     {
-                        Utility.Debug($"Last damage done to the player by {assister.GamePlayer.Player.CharacterName}");
                         assister.Assists++;
                         assister.Score += Config.AssistPoints;
                         if (!assister.GamePlayer.Player.Player.life.isDead)
@@ -435,15 +460,13 @@ namespace UnturnedBlackout.GameTypes
 
         public override void OnPlayerDamage(ref DamagePlayerParameters parameters, ref bool shouldAllow)
         {
-            Utility.Debug($"{parameters.player.channel.owner.playerID.characterName} got damaged, checking if the player is in game");
             var player = GetCTFPlayer(parameters.player);
             if (player == null)
             {
-                Utility.Debug("Player isn't ingame, returning");
                 return;
             }
 
-            if (GamePhase == EGamePhase.Starting || GamePhase == EGamePhase.Ending)
+            if (GamePhase != EGamePhase.Started)
             {
                 shouldAllow = false;
                 return;
@@ -465,12 +488,12 @@ namespace UnturnedBlackout.GameTypes
             var kPlayer = GetCTFPlayer(parameters.killer);
             if (kPlayer == null)
             {
-                Utility.Debug("Killer not found, returning");
                 return;
             }
 
             if (kPlayer.GamePlayer.HasSpawnProtection)
             {
+                kPlayer.GamePlayer.m_RemoveSpawnProtection.Stop();
                 kPlayer.GamePlayer.HasSpawnProtection = false;
             }
         }
@@ -535,6 +558,7 @@ namespace UnturnedBlackout.GameTypes
                 if (!cPlayer.Team.HasFlag)
                 {
                     Utility.Debug($"{player.Player.CharacterName} is saving their flag, clearing the flag and putting it back into position");
+                    Utility.Debug($"Spawning their team's flag at {cPlayer.Team.FlagSP} for location {Location.LocationName}");
                     ItemManager.ServerClearItemsInSphere(itemData.point, 1);
                     ItemManager.dropItem(new Item(cPlayer.Team.FlagID, true), cPlayer.Team.FlagSP, true, true, true);
                     cPlayer.Team.HasFlag = true;
@@ -571,6 +595,7 @@ namespace UnturnedBlackout.GameTypes
                     player.Player.Player.clothing.askWearBackpack(0, 0, new byte[0], true);
 
                     ItemManager.dropItem(new Item(otherTeam.FlagID, true), otherTeam.FlagSP, true, true, true);
+                    Utility.Debug($"Spawning the other team's flag at {otherTeam.FlagSP} for location {Location.LocationName}");
                     otherTeam.HasFlag = true;
                     cPlayer.Team.Score++;
                     cPlayer.Score += Config.FlagCapturedPoints;
@@ -598,13 +623,15 @@ namespace UnturnedBlackout.GameTypes
                         await Plugin.Instance.DBManager.IncreasePlayerFlagsCapturedAsync(cPlayer.GamePlayer.SteamID, 1);
                         await Plugin.Instance.DBManager.IncreasePlayerXPAsync(cPlayer.GamePlayer.SteamID, (uint)Config.CTF.XPPerFlagCaptured);
                     });
-                } else
+                }
+                else
                 {
                     Utility.Debug($"[ERROR] Could'nt find the other team's flag as the player's backpack");
                 }
 
                 cPlayer.IsCarryingFlag = false;
-            } else if (otherTeam.FlagID == itemData.item.id)
+            }
+            else if (otherTeam.FlagID == itemData.item.id)
             {
                 Utility.Debug($"{player.Player.CharacterName} is trying to pick up the other team's flag, checking if they have their own flag");
                 if (!cPlayer.Team.HasFlag)
@@ -621,7 +648,8 @@ namespace UnturnedBlackout.GameTypes
                         Plugin.Instance.UIManager.SendCTFFlagStates(cPlayer.Team, (ETeam)otherTeam.TeamID, Players, EFlagState.Taken);
                     });
                     otherTeam.HasFlag = false;
-                } else
+                }
+                else
                 {
                     TaskDispatcher.QueueOnMainThread(() =>
                     {
@@ -638,7 +666,8 @@ namespace UnturnedBlackout.GameTypes
                         if (secondary != null)
                         {
                             ply.equipment.tryEquip(1, secondary.x, secondary.y);
-                        } else
+                        }
+                        else
                         {
                             ply.equipment.dequip();
                         }
@@ -730,8 +759,15 @@ namespace UnturnedBlackout.GameTypes
         public override void PlayerChangeFiremode(GamePlayer player)
         {
             var cPlayer = GetCTFPlayer(player.Player);
-            if (cPlayer == null) return;
-            if (GamePhase == EGamePhase.Ending || GamePhase == EGamePhase.Starting) return;
+            if (cPlayer == null)
+            {
+                return;
+            }
+
+            if (GamePhase == EGamePhase.Ending || GamePhase == EGamePhase.Starting)
+            {
+                return;
+            }
 
             if (cPlayer.GamePlayer.HasScoreboard)
             {

@@ -39,7 +39,6 @@ namespace UnturnedBlackout.Instances
         public void ShowUI()
         {
             EffectManager.sendUIEffect(ID, Key, TransportConnection, true);
-            //Plugin.Instance.HUDManager.HideHUD(Player);
             Player.Player.enablePluginWidgetFlag(EPluginWidgetFlags.Modal);
             ResetUIValues();
             ShowGames();
@@ -49,7 +48,6 @@ namespace UnturnedBlackout.Instances
         public void HideUI()
         {
             EffectManager.askEffectClearByID(ID, TransportConnection);
-            //Plugin.Instance.HUDManager.ShowHUD(Player);
             Player.Player.disablePluginWidgetFlag(EPluginWidgetFlags.Modal);
             ResetUIValues();
         }
@@ -63,7 +61,6 @@ namespace UnturnedBlackout.Instances
         {
             if (!Plugin.Instance.DBManager.PlayerCache.TryGetValue(SteamID, out PlayerData data))
             {
-                Utility.Debug("Could'nt find data, returning");
                 return;
             }
 
@@ -222,7 +219,6 @@ namespace UnturnedBlackout.Instances
             {
                 spaces = Math.Min(96, neededXP == 0 ? 0 : (int)(data.XP * 96 / neededXP));
             }
-            Utility.Debug($"XP changed {Player.CharacterName}, XP: {data.XP}, Needed XP: {neededXP}, Spaces: {spaces}");
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "XPBarFill", spaces == 0 ? " " : new string(' ', spaces));
         }
 

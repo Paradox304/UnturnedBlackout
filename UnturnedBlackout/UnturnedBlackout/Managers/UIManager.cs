@@ -2,7 +2,6 @@
 using SDG.Unturned;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using UnturnedBlackout.Database;
 using UnturnedBlackout.Enums;
@@ -28,6 +27,9 @@ namespace UnturnedBlackout.Managers
 
         public List<UIHandler> UIHandlers { get; set; }
 
+        public const ushort WaitingForPlayersID = 1111;
+        public const short WaitingForPlayersKey = 1111;
+
         public const ushort FFAID = 27620;
         public const short FFAKey = 27620;
 
@@ -50,6 +52,9 @@ namespace UnturnedBlackout.Managers
 
         public const ushort LevelUpID = 27638;
         public const short LevelUpKey = 27638;
+
+        public const ushort LoadingUIID = 27640;
+        public const short LoadingUIKey = 27640;
 
         public UIManager()
         {
@@ -97,6 +102,16 @@ namespace UnturnedBlackout.Managers
         }
 
         // ALL GAMES RELATED UI
+        public void SendWaitingForPlayersUI(GamePlayer player)
+        {
+
+        }
+
+        public void ClearWaitingForPlayersUI(GamePlayer player)
+        {
+
+        }
+
         public void ShowCountdownUI(GamePlayer player)
         {
             EffectManager.sendUIEffect(27633, 27633, player.TransportConnection, true);
@@ -171,7 +186,7 @@ namespace UnturnedBlackout.Managers
             EffectManager.sendUIEffectImageURL(LevelUpKey, player.TransportConnection, true, "LevelUpIcon", icon.IconLink);
             EffectManager.sendUIEffectText(LevelUpKey, player.TransportConnection, true, "LevelUpDesc", Plugin.Instance.Translate("Level_Up_Desc", newRank).ToRich());
             EffectManager.sendUIEffectText(LevelUpKey, player.TransportConnection, true, "LevelUpText", Plugin.Instance.Translate("Level_Up_Text").ToRich());
-        } 
+        }
 
         public void SendHitmarkerSound(GamePlayer player)
         {
@@ -210,7 +225,7 @@ namespace UnturnedBlackout.Managers
             }
             foreach (var player in players)
             {
-                EffectManager.sendUIEffectText(key, player.TransportConnection, true, "Killfeed", feedText); 
+                EffectManager.sendUIEffectText(key, player.TransportConnection, true, "Killfeed", feedText);
             }
         }
 
@@ -274,6 +289,22 @@ namespace UnturnedBlackout.Managers
         {
             player.Player.Player.disablePluginWidgetFlag(EPluginWidgetFlags.Modal);
             EffectManager.askEffectClearByID(DeathID, player.TransportConnection);
+        }
+
+        public void SendLoadingUI(GamePlayer player, EGameType gameMode, ArenaLocation location)
+        {
+            player.Player.Player.enablePluginWidgetFlag(EPluginWidgetFlags.Modal);
+            EffectManager.sendUIEffect(LoadingUIID, LoadingUIKey, player.TransportConnection, true);
+            EffectManager.sendUIEffectImageURL(LoadingUIKey, player.TransportConnection, true, "MapIMG", location.ImageLink);
+            EffectManager.sendUIEffectVisibility(LoadingUIKey, player.TransportConnection, true, $"Gamemode{gameMode}Icon", true);
+            EffectManager.sendUIEffectText(LoadingUIKey, player.TransportConnection, true, "MapTxt", location.LocationName);
+            EffectManager.sendUIEffectText(LoadingUIKey, player.TransportConnection, true, "GamemodeTxt", Plugin.Instance.Translate($"{gameMode}_Name_Full").ToRich());
+        }
+
+        public void ClearLoadingUI(GamePlayer player)
+        {
+            player.Player.Player.disablePluginWidgetFlag(EPluginWidgetFlags.Modal);
+            EffectManager.askEffectClearByID(LoadingUIID, player.TransportConnection);
         }
 
         public void SendPreEndingUI(GamePlayer player)
