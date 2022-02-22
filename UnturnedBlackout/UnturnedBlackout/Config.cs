@@ -18,7 +18,6 @@ namespace UnturnedBlackout
         public string DatabaseName { get; set; }
         public string DatabasePassword { get; set; }
         public string DatabasePort { get; set; }
-        public string PlayersTableName { get; set; }
         public int CacheRefreshSeconds { get; set; }
 
         public string PlayerColorHexCode { get; set; }
@@ -81,7 +80,6 @@ namespace UnturnedBlackout
             DatabaseName = "s476_deathmatch";
             DatabasePassword = "k8gxtTbytcA5DXlqbn86e@+1";
             DatabasePort = "3306";
-            PlayersTableName = "UB_Players";
             CacheRefreshSeconds = 600;
 
             PlayerColorHexCode = "#FFFF00";
