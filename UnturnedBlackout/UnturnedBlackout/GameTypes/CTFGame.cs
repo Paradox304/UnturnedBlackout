@@ -81,6 +81,8 @@ namespace UnturnedBlackout.GameTypes
             foreach (var player in Players)
             {
                 Plugin.Instance.UIManager.ClearWaitingForPlayersUI(player.GamePlayer);
+                player.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(0);
+                Plugin.Instance.UIManager.ShowCountdownUI(player.GamePlayer);
             }
 
             for (int seconds = Config.CTF.StartSeconds; seconds >= 0; seconds--)
