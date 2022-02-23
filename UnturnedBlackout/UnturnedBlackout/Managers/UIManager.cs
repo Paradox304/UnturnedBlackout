@@ -27,8 +27,8 @@ namespace UnturnedBlackout.Managers
 
         public List<UIHandler> UIHandlers { get; set; }
 
-        public const ushort WaitingForPlayersID = 1111;
-        public const short WaitingForPlayersKey = 1111;
+        public const ushort WaitingForPlayersID = 27641;
+        public const short WaitingForPlayersKey = 27641;
 
         public const ushort FFAID = 27620;
         public const short FFAKey = 27620;
@@ -102,14 +102,19 @@ namespace UnturnedBlackout.Managers
         }
 
         // ALL GAMES RELATED UI
-        public void SendWaitingForPlayersUI(GamePlayer player)
+        public void SendWaitingForPlayersUI(GamePlayer player, int playerCount, int waitingPlayers)
+        {
+            EffectManager.sendUIEffect(WaitingForPlayersID, WaitingForPlayersKey, player.TransportConnection, true, Plugin.Instance.Translate("Waiting_For_Players_Show", playerCount, waitingPlayers));
+        }
+
+        public void UpdateWaitingForPlayersUI(GamePlayer player, int playerCount, int waitingPlayers)
         {
 
         }
 
         public void ClearWaitingForPlayersUI(GamePlayer player)
         {
-
+            EffectManager.askEffectClearByID(WaitingForPlayersID, player.TransportConnection);
         }
 
         public void ShowCountdownUI(GamePlayer player)

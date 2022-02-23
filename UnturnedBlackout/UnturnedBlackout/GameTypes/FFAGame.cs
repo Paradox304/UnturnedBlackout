@@ -158,10 +158,18 @@ namespace UnturnedBlackout.GameTypes
             switch (GamePhase)
             {
                 case EGamePhase.WaitingForPlayers:
-                    Plugin.Instance.UIManager.SendWaitingForPlayersUI(player);
-                    if (Players.Count >= Location.GetMinPlayers(GameMode))
+                    var minPlayers = Location.GetMinPlayers(GameMode);
+                    if (Players.Count >= minPlayers)
                     {
                         GameStarter = Plugin.Instance.StartCoroutine(StartGame());
+                    }
+                    else
+                    {
+                        Plugin.Instance.UIManager.SendWaitingForPlayersUI(player, Players.Count, minPlayers);
+                        foreach (var ply in Players)
+                        {
+                            Plugin.Instance.UIManager.SendWaitingForPlayersUI(ply.GamePlayer, Players.Count, minPlayers);
+                        }
                     }
                     break;
                 case EGamePhase.Starting:
