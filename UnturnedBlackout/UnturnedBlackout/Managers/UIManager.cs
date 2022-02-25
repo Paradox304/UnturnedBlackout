@@ -104,12 +104,12 @@ namespace UnturnedBlackout.Managers
         // ALL GAMES RELATED UI
         public void SendWaitingForPlayersUI(GamePlayer player, int playerCount, int waitingPlayers)
         {
-            EffectManager.sendUIEffect(WaitingForPlayersID, WaitingForPlayersKey, player.TransportConnection, true, Plugin.Instance.Translate("Waiting_For_Players_Show", playerCount, waitingPlayers));
+            EffectManager.sendUIEffect(WaitingForPlayersID, WaitingForPlayersKey, player.TransportConnection, true, Plugin.Instance.Translate("Waiting_For_Players_Show", playerCount, waitingPlayers).ToRich());
         }
 
         public void UpdateWaitingForPlayersUI(GamePlayer player, int playerCount, int waitingPlayers)
         {
-
+            EffectManager.sendUIEffectText(WaitingForPlayersKey, player.TransportConnection, true, "Waiting", Plugin.Instance.Translate("Waiting_For_Players_Show", playerCount, waitingPlayers).ToRich());
         }
 
         public void ClearWaitingForPlayersUI(GamePlayer player)
