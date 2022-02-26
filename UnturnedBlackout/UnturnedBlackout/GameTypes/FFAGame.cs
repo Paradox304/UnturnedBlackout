@@ -174,6 +174,7 @@ namespace UnturnedBlackout.GameTypes
                             Plugin.Instance.UIManager.UpdateWaitingForPlayersUI(ply.GamePlayer, Players.Count, minPlayers);
                         }
                     }
+                    SpawnPlayer(fPlayer, true);
                     break;
                 case EGamePhase.Starting:
                     player.Player.Player.movement.sendPluginSpeedMultiplier(0);
