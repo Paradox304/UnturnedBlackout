@@ -2,6 +2,7 @@
 using Rocket.Unturned.Player;
 using SDG.Unturned;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Logger = Rocket.Core.Logging.Logger;
 
@@ -110,6 +111,26 @@ namespace UnturnedBlackout
                     return freq;
                 }
             }
+        }
+
+        public static List<int> GetIntListFromReaderResult(this object readerResult)
+        {
+            var readerText = readerResult.ToString();
+            if (readerText == "")
+                return new List<int>();
+
+            return readerText.Split(',').Select(k => int.TryParse(k, out var id) ? id : -1).Where(k => k != -1).ToList();
+        }
+
+        public static string GetStringFromIntList(this List<int> ids)
+        {
+            var skinsText = "";
+            foreach (var id in ids)
+            {
+                skinsText += $"{id},";
+            }
+
+            return skinsText;
         }
 
         public static string ToColor(this object value, bool isPlayer)
