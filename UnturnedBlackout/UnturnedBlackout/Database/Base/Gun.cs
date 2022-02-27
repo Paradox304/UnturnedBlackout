@@ -20,9 +20,9 @@ namespace UnturnedBlackout.Database.Base
         public List<GunAttachment> DefaultAttachments { get; set; }
         public int MaxLevel { get; set; }
         public List<int> LevelXPNeeded { get; set; }
-        public List<int> LevelReward { get; set; }
+        public List<int> LevelRewards { get; set; }
 
-        public Gun(ushort gunID, string gunName, string gunDesc, string iconLink, int magAmount, int scrapAmount, int buyPrice, bool isDefault, bool isPrimary, List<GunAttachment> defaultAttachments, int maxLevel, List<int> levelXPNeeded, List<int> levelReward)
+        public Gun(ushort gunID, string gunName, string gunDesc, string iconLink, int magAmount, int scrapAmount, int buyPrice, bool isDefault, bool isPrimary, List<GunAttachment> defaultAttachments, int maxLevel, List<int> levelXPNeeded, List<int> levelRewards)
         {
             GunID = gunID;
             GunName = gunName;
@@ -36,7 +36,7 @@ namespace UnturnedBlackout.Database.Base
             DefaultAttachments = defaultAttachments;
             MaxLevel = maxLevel;
             LevelXPNeeded = levelXPNeeded;
-            LevelReward = levelReward;
+            LevelRewards = levelRewards;
         }
     }
 }
