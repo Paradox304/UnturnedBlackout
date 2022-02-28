@@ -133,6 +133,20 @@ namespace UnturnedBlackout
             return skinsText;
         }
 
+        public static int GetLoadoutAmount(UnturnedPlayer player)
+        {
+            var amount = Plugin.Instance.Configuration.Instance.DefaultLoadoutAmount;
+            foreach (var loadoutAmount in Plugin.Instance.Configuration.Instance.LoadoutAmounts.OrderByDescending(k => k.Amount))
+            {
+                if (player.HasPermission(loadoutAmount.Permission))
+                {
+                    amount = loadoutAmount.Amount;
+                    break;
+                }
+            }
+            return amount;
+        }
+
         public static string ToColor(this object value, bool isPlayer)
         {
             return isPlayer ? $"<color={Plugin.Instance.Configuration.Instance.PlayerColorHexCode}>{value}</color>" : value.ToString();

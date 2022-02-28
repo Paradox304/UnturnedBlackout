@@ -60,6 +60,9 @@ namespace UnturnedBlackout
 
         public ushort KnifeID { get; set; }
 
+        public int DefaultLoadoutAmount { get; set; }
+        public List<LoadoutAmount> LoadoutAmounts { get; set; }
+
         public FFAConfig FFA { get; set; }
         public TDMConfig TDM { get; set; }
         public KCConfig KC { get; set; }
@@ -121,6 +124,12 @@ namespace UnturnedBlackout
 
             KnifeID = 58129;
 
+            DefaultLoadoutAmount = 4;
+            LoadoutAmounts = new List<LoadoutAmount>
+            {
+                new LoadoutAmount("VIP", 5),
+                new LoadoutAmount("MVP", 6)
+            };
             FFA = new FFAConfig(15, 600, "FFA", "white", "#dcb4ff", "#dcb4ff", 50, 60, 50, 20, 10, 5, 10, 15, 15, 1.5f, 15, 2, 4);
             TDM = new TDMConfig(15, 600, 50, 60, 50, 20, 10, 5, 10, 15, 15, 1.5f, 15, 2, 4);
             KC = new KCConfig(15, 600, 50, 60, 50, 20, 10, 10, 10, 5, 10, 15, 15, 1.5f, 15, 2, 4, 26820, 26821);

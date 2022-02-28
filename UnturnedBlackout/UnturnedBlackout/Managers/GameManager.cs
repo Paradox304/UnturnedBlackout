@@ -169,7 +169,7 @@ namespace UnturnedBlackout.Managers
                         await db.UpdatePlayerAsync(player.CSteamID, player.CharacterName.ToUnrich(), avatarURL);
                     } else
                     {
-                        await db.AddPlayerAsync(player.CSteamID, player.CharacterName.ToUnrich(), avatarURL);
+                        await db.AddPlayerAsync(player, player.CharacterName.ToUnrich(), avatarURL);
                         await db.GetPlayerDataAsync(player.CSteamID);
                     }
                 }

@@ -47,5 +47,17 @@ namespace UnturnedBlackout.Managers
             var serialized = JsonConvert.SerializeObject(data, Formatting.Indented);
             return serialized;
         }
+
+        public string ConvertLoadoutToJson(LoadoutData data)
+        {
+            var serialized = JsonConvert.SerializeObject(data, Formatting.None);
+            return serialized;
+        }
+
+        public LoadoutData ConvertLoadoutFromJson(string serialized)
+        {
+            var deserialized = JsonConvert.DeserializeObject<LoadoutData>(serialized);
+            return deserialized;
+        }
     }
 }

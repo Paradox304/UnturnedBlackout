@@ -16,8 +16,9 @@ namespace UnturnedBlackout.Database.Base
         public int BuyPrice { get; set; }
         public int GiveSeconds { get; set; }
         public bool IsDefault { get; set; }
+        public bool IsTactical { get; set; }
 
-        public Gadget(ushort gadgetID, string gadgetName, string gadgetDesc, string iconLink, int scrapAmount, int buyPrice, int giveSeconds, bool isDefault)
+        public Gadget(ushort gadgetID, string gadgetName, string gadgetDesc, string iconLink, int scrapAmount, int buyPrice, int giveSeconds, bool isDefault, bool isTactical)
         {
             GadgetID = gadgetID;
             GadgetName = gadgetName;
@@ -27,6 +28,7 @@ namespace UnturnedBlackout.Database.Base
             BuyPrice = buyPrice;
             GiveSeconds = giveSeconds;
             IsDefault = isDefault;
+            IsTactical = isTactical;
         }
     }
 }

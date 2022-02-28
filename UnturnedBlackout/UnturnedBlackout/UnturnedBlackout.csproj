@@ -161,7 +161,6 @@
     <Compile Include="Enums\EFlagState.cs" />
     <Compile Include="Enums\EGamePhase.cs" />
     <Compile Include="Enums\EGameType.cs" />
-    <Compile Include="Enums\EKillstreak.cs" />
     <Compile Include="Enums\EPage.cs" />
     <Compile Include="Enums\ETeam.cs" />
     <Compile Include="GameTypes\CTFGame.cs" />
@@ -184,6 +183,7 @@
     <Compile Include="Models\Feed\Feed.cs" />
     <Compile Include="Models\Feed\FeedIcon.cs" />
     <Compile Include="Models\FFA\FFAConfig.cs" />
+    <Compile Include="Models\Global\LoadoutAmount.cs" />
     <Compile Include="Models\KC\KCConfig.cs" />
     <Compile Include="Models\KC\KCPlayer.cs" />
     <Compile Include="Models\KC\KCTeam.cs" />
