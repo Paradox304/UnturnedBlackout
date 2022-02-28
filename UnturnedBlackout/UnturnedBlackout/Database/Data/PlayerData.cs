@@ -2,7 +2,7 @@
 using System.Threading;
 using UnturnedBlackout.Models.Level;
 
-namespace UnturnedBlackout.Database
+namespace UnturnedBlackout.Database.Data
 {
     public class PlayerData
     {

@@ -146,7 +146,9 @@
     <Compile Include="Database\Base\Knife.cs" />
     <Compile Include="Database\Base\KnifeSkin.cs" />
     <Compile Include="Database\Base\Perk.cs" />
-    <Compile Include="Database\PlayerData.cs" />
+    <Compile Include="Database\Data\LoadoutGun.cs" />
+    <Compile Include="Database\Data\PlayerData.cs" />
+    <Compile Include="Database\Data\PlayerLoadout.cs" />
     <Compile Include="Enums\EAttachment.cs" />
     <Compile Include="Enums\EFlagState.cs" />
     <Compile Include="Enums\EGamePhase.cs" />

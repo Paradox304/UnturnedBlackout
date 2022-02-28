@@ -8,7 +8,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Timers;
 using UnityEngine;
-using UnturnedBlackout.Database;
+using UnturnedBlackout.Database.Data;
 using UnturnedBlackout.GameTypes;
 
 namespace UnturnedBlackout.Models.Global
@@ -122,7 +122,7 @@ namespace UnturnedBlackout.Models.Global
         // Death screen
         public void OnDeath(CSteamID killer, int respawnSeconds)
         {
-            if (!Plugin.Instance.DBManager.PlayerCache.TryGetValue(killer, out PlayerData killerData))
+            if (!Plugin.Instance.DBManager.PlayerData.TryGetValue(killer, out PlayerData killerData))
             {
                 TaskDispatcher.QueueOnMainThread(() => Player.Player.life.ServerRespawn(false));
                 return;

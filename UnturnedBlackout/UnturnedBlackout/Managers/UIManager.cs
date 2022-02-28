@@ -3,7 +3,7 @@ using SDG.Unturned;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnturnedBlackout.Database;
+using UnturnedBlackout.Database.Data;
 using UnturnedBlackout.Enums;
 using UnturnedBlackout.GameTypes;
 using UnturnedBlackout.Instances;
@@ -406,7 +406,7 @@ namespace UnturnedBlackout.Managers
             {
                 var player = players[i];
                 bool isPlayer = player == ply;
-                if (!Plugin.Instance.DBManager.PlayerCache.TryGetValue(player.GamePlayer.SteamID, out PlayerData data))
+                if (!Plugin.Instance.DBManager.PlayerData.TryGetValue(player.GamePlayer.SteamID, out PlayerData data))
                 {
                     return;
                 }
@@ -515,7 +515,7 @@ namespace UnturnedBlackout.Managers
             {
                 var ply = bluePlayers[i];
                 bool isPlayer = player == ply;
-                if (!Plugin.Instance.DBManager.PlayerCache.TryGetValue(ply.GamePlayer.SteamID, out PlayerData data))
+                if (!Plugin.Instance.DBManager.PlayerData.TryGetValue(ply.GamePlayer.SteamID, out PlayerData data))
                 {
                     continue;
                 }
@@ -540,7 +540,7 @@ namespace UnturnedBlackout.Managers
             {
                 var ply = redPlayers[i];
                 bool isPlayer = player == ply;
-                if (!Plugin.Instance.DBManager.PlayerCache.TryGetValue(ply.GamePlayer.SteamID, out PlayerData data))
+                if (!Plugin.Instance.DBManager.PlayerData.TryGetValue(ply.GamePlayer.SteamID, out PlayerData data))
                 {
                     continue;
                 }
@@ -648,7 +648,7 @@ namespace UnturnedBlackout.Managers
             {
                 var ply = bluePlayers[i];
                 bool isPlayer = player == ply;
-                if (!Plugin.Instance.DBManager.PlayerCache.TryGetValue(ply.GamePlayer.SteamID, out PlayerData data))
+                if (!Plugin.Instance.DBManager.PlayerData.TryGetValue(ply.GamePlayer.SteamID, out PlayerData data))
                 {
                     continue;
                 }
@@ -675,7 +675,7 @@ namespace UnturnedBlackout.Managers
             {
                 var ply = redPlayers[i];
                 bool isPlayer = player == ply;
-                if (!Plugin.Instance.DBManager.PlayerCache.TryGetValue(ply.GamePlayer.SteamID, out PlayerData data))
+                if (!Plugin.Instance.DBManager.PlayerData.TryGetValue(ply.GamePlayer.SteamID, out PlayerData data))
                 {
                     continue;
                 }
@@ -834,7 +834,7 @@ namespace UnturnedBlackout.Managers
             {
                 var ply = bluePlayers[i];
                 bool isPlayer = player == ply;
-                if (!Plugin.Instance.DBManager.PlayerCache.TryGetValue(ply.GamePlayer.SteamID, out PlayerData data))
+                if (!Plugin.Instance.DBManager.PlayerData.TryGetValue(ply.GamePlayer.SteamID, out PlayerData data))
                 {
                     continue;
                 }
@@ -861,7 +861,7 @@ namespace UnturnedBlackout.Managers
             {
                 var ply = redPlayers[i];
                 bool isPlayer = player == ply;
-                if (!Plugin.Instance.DBManager.PlayerCache.TryGetValue(ply.GamePlayer.SteamID, out PlayerData data))
+                if (!Plugin.Instance.DBManager.PlayerData.TryGetValue(ply.GamePlayer.SteamID, out PlayerData data))
                 {
                     continue;
                 }

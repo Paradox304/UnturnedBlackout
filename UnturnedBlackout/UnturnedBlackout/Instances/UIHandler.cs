@@ -5,7 +5,7 @@ using Steamworks;
 using System;
 using System.Threading;
 using UnityEngine;
-using UnturnedBlackout.Database;
+using UnturnedBlackout.Database.Data;
 using UnturnedBlackout.Enums;
 using UnturnedBlackout.GameTypes;
 using UnturnedBlackout.Models.Level;
@@ -59,7 +59,7 @@ namespace UnturnedBlackout.Instances
 
         public void SetupUI()
         {
-            if (!Plugin.Instance.DBManager.PlayerCache.TryGetValue(SteamID, out PlayerData data))
+            if (!Plugin.Instance.DBManager.PlayerData.TryGetValue(SteamID, out PlayerData data))
             {
                 return;
             }
@@ -206,7 +206,7 @@ namespace UnturnedBlackout.Instances
 
         public void OnXPChanged()
         {
-            if (!Plugin.Instance.DBManager.PlayerCache.TryGetValue(SteamID, out PlayerData data))
+            if (!Plugin.Instance.DBManager.PlayerData.TryGetValue(SteamID, out PlayerData data))
             {
                 return;
             }

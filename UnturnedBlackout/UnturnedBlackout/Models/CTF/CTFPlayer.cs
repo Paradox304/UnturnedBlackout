@@ -1,7 +1,7 @@
 ﻿using Steamworks;
 using System;
 using System.Collections.Generic;
-using UnturnedBlackout.Database;
+using UnturnedBlackout.Database.Data;
 using UnturnedBlackout.Models.Global;
 
 namespace UnturnedBlackout.Models.CTF
@@ -59,7 +59,7 @@ namespace UnturnedBlackout.Models.CTF
 
         public void CheckKills()
         {
-            if (!Plugin.Instance.DBManager.PlayerCache.TryGetValue(GamePlayer.SteamID, out PlayerData data))
+            if (!Plugin.Instance.DBManager.PlayerData.TryGetValue(GamePlayer.SteamID, out PlayerData data))
             {
                 return;
             }
