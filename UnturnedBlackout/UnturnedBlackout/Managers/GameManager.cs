@@ -148,6 +148,7 @@ namespace UnturnedBlackout.Managers
 
         private void OnPlayerJoined(UnturnedPlayer player)
         {
+            var db = Plugin.Instance.DBManager;
             ThreadPool.QueueUserWorkItem(async (o) =>
             {
                 var avatarURL = "";
@@ -162,8 +163,15 @@ namespace UnturnedBlackout.Managers
                 }
                 finally
                 {
-                    await Plugin.Instance.DBManager.AddOrUpdatePlayerAsync(player.CSteamID, player.CharacterName.ToUnrich(), avatarURL);
-                    await Plugin.Instance.DBManager.GetPlayerDataAsync(player.CSteamID);
+                    await db.GetPlayerDataAsync(player.CSteamID);
+                    if (db.PlayerData.ContainsKey(player.CSteamID))
+                    {
+                        await db.UpdatePlayerAsync(player.CSteamID, player.CharacterName.ToUnrich(), avatarURL);
+                    } else
+                    {
+                        await db.AddPlayerAsync(player.CSteamID, player.CharacterName.ToUnrich(), avatarURL);
+                        await db.GetPlayerDataAsync(player.CSteamID);
+                    }
                 }
 
                 TaskDispatcher.QueueOnMainThread(() =>

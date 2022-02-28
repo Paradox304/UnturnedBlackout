@@ -3,7 +3,7 @@ using UnturnedBlackout.Models.CTF;
 using UnturnedBlackout.Models.FFA;
 using UnturnedBlackout.Models.TDM;
 
-namespace UnturnedBlackout.Models
+namespace UnturnedBlackout.Models.Data
 {
     public class PositionsData
     {

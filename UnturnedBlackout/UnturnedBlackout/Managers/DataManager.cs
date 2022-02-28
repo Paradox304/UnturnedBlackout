@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System.IO;
-using UnturnedBlackout.Models;
+using UnturnedBlackout.Models.Data;
 
 namespace UnturnedBlackout.Managers
 {

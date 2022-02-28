@@ -40,6 +40,7 @@ namespace UnturnedBlackout.Managers
         // Players Data
         // MAIN
         public const string PlayersTableName = "UB_Players";
+        public const string PlayersLoadoutsTableName = "UB_Players_Loadouts";
 
         // GUNS
         public const string PlayersGunsTableName = "UB_Players_Guns";
@@ -122,6 +123,7 @@ namespace UnturnedBlackout.Managers
                     await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PlayersKillstreaksTableName}` (`SteamID` BIGINT UNSIGNED NOT NULL , `KillstreakID` INT UNSIGNED NOT NULl , `KillstreakKills` INT UNSIGNED NOT NULL , `IsBought` BOOLEAN NOT NULL , CONSTRAINT `ub_steam_id_6` FOREIGN KEY (`SteamID`) REFERENCES `{PlayersTableName}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_killstreak_id` FOREIGN KEY (`KillstreakID`) REFERENCES `{KillstreaksTableName}` (`KillstreakID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `KillstreakID`));", Conn).ExecuteScalarAsync();
                     await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PlayersCardsTableName}` (`SteamID` BIGINT UNSIGNED NOT NULL , `CardID` INT UNSIGNED NOT NULL , `IsBought` BOOLEAN NOT NULL , CONSTRAINT `ub_steam_id_7` FOREIGN KEY (`SteamID`) REFERENCES `{PlayersTableName}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_card_id` FOREIGN KEY (`CardID`) REFERENCES `{CardsTableName}` (`CardID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `CardID`));", Conn).ExecuteScalarAsync();
                     await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PlayersGlovesTableName}` (`SteamID` BIGINT UNSIGNED NOT NULL , `GloveID` SMALLINT UNSIGNED NOT NULL , `IsBought` BOOLEAN NOT NULl , CONSTRAINT `ub_steam_id_8` FOREIGN KEY (`SteamID`) REFERENCES `{PlayersTableName}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_glove_id` FOREIGN KEY (`GloveID`) REFERENCES `{GlovesTableName}` (`GloveID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `GloveID`));", Conn).ExecuteScalarAsync();
+                    await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PlayersLoadoutsTableName}` (`SteamID` BIGINT UNSIGNED NOT NULL , `LoadoutID` INT UNSIGNED NOT NULL , `Loadout` TEXT NOT NULL , CONSTRAINT `ub_steam_id_9` FOREIGN KEY (`SteamID`) REFERENCES `{PlayersTableName}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID`, `LoadoutID`));", Conn).ExecuteScalarAsync();
 
                     // BASE DATA
                     await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{GunsTableName}` ( `GunID` SMALLINT UNSIGNED NOT NULL , `GunName` VARCHAR(255) NOT NULL , `GunDesc` TEXT NOT NULL , `IconLink` TEXT NOT NULL , `MagAmount` TINYINT UNSIGNED NOT NULL , `ScrapAmount` INT UNSIGNED NOT NULL , `BuyPrice` INT UNSIGNED NOT NULL , `IsDefault` BOOLEAN NOT NULL , `IsPrimary` BOOLEAN NOT NULL , `DefaultAttachments` TEXT NOT NULL , `MaxLevel` INT UNSIGNED NOT NULL , `LevelXPNeeded` TEXT NOT NULL , `LevelRewards` TEXT NOT NULL , PRIMARY KEY (`GunID`));", Conn).ExecuteScalarAsync();
@@ -131,7 +133,7 @@ namespace UnturnedBlackout.Managers
                     await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{KnivesSkinsTableName}` ( `ID` INT UNSIGNED NOT NULL AUTO_INCREMENT , `KnifeID` SMALLINT UNSIGNED NOT NULL , `SkinID` SMALLINT UNSIGNED NOT NULL , `SkinName` VARCHAR(255) NOT NULL , `SkinDesc` TEXT NOT NULL , `IconLink` TEXT NOT NULL , `ScrapAmount` INT UNSIGNED NOT NULL , CONSTRAINT `ub_knife_id` FOREIGN KEY (`KnifeID`) REFERENCES `{KnivesTableName}` (`KnifeID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`ID`));", Conn).ExecuteScalarAsync();
                     await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PerksTableName}` ( `PerkID` INT UNSIGNED NOT NULL , `PerkName` VARCHAR(255) NOT NULL , `PerkDesc` TEXT NOT NULL , `IconLink` TEXT NOT NULL , `SkillType` ENUM('OVERKILL','SHARPSHOOTER','DEXTERITY','CARDIO','EXERCISE','DIVING','PARKOUR','SNEAKYBEAKY','TOUGHNESS') NOT NULL , `SkillLevel` INT UNSIGNED NOT NULL , `ScrapAmount` INT UNSIGNED NOT NULL , `BuyPrice` INT UNSIGNED NOT NULL , `IsDefault` BOOLEAN NOT NULL , PRIMARY KEY (`PerkID`));", Conn).ExecuteScalarAsync();
                     await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{GadgetsTableName}` ( `GadgetID` SMALLINT UNSIGNED NOT NULL , `GadgetName` VARCHAR(255) NOT NULL , `GadgetDesc` TEXT NOT NULL , `IconLink` TEXT NOT NULL , `ScrapAmount` INT UNSIGNED NOT NULL , `BuyPrice` INT UNSIGNED NOT NULL , `GiveSeconds` INT UNSIGNED NOT NULL , `IsDefault` BOOLEAN NOT NULL , PRIMARY KEY (`GadgetID`));", Conn).ExecuteScalarAsync();
-                    await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{KillstreaksTableName}` ( `KillstreakID` INT UNSIGNED NOT NULL , `KillstreakName` VARCHAR(255) NOT NULL , `KillstreakDesc` TEXT NOT NULL , `IconLink` TEXT NOT NULL , `KillstreakRequired` INT UNSIGNED NOT NULL , `BuyPrice` INT UNSIGNED NOT NULL , `ScrapAmount` INT UNSIGNED NOT NULL , `IsDefault` BOOLEAN NOT NULL , PRIMARY KEY (`KillstreakID`));", Conn).ExecuteScalarAsync();
+                    await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{KillstreaksTableName}` ( `KillstreakID` INT UNSIGNED NOT NULL , `KillstreakName` VARCHAR(255) NOT NULL , `KillstreakDesc` TEXT NOT NULL , `IconLink` TEXT NOT NULL , `KillstreakType` ENUM('Small','Medium','Large') NOT NULL , `KillstreakRequired` INT UNSIGNED NOT NULL , `BuyPrice` INT UNSIGNED NOT NULL , `ScrapAmount` INT UNSIGNED NOT NULL , `IsDefault` BOOLEAN NOT NULL , PRIMARY KEY (`KillstreakID`));", Conn).ExecuteScalarAsync();
                     await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{CardsTableName}` ( `CardID` INT UNSIGNED NOT NULL , `CardName` VARCHAR(255) NOT NULL , `CardDesc` TEXT NOT NULL , `IconLink` TEXT NOT NULL , `CardLink` TEXT NOT NULL , `BuyPrice` INT UNSIGNED NOT NULL , `ScrapAmount` INT UNSIGNED NOT NULL , `IsDefault` BOOLEAN NOT NULL , PRIMARY KEY (`CardID`));", Conn).ExecuteScalarAsync();
                     await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{GlovesTableName}` ( `GloveID` SMALLINT UNSIGNED NOT NULL , `GloveName` VARCHAR(255) NOT NULL , `GloveDesc` TEXT NOT NULL , `IconLink` TEXT NOT NULL , `BuyPrice` INT UNSIGNED NOT NULL , `ScrapAmount` INT UNSIGNED NOT NULL , `IsDefault` BOOLEAN NOT NULL , PRIMARY KEY (`GloveID`));", Conn).ExecuteScalarAsync();
                 }
@@ -147,14 +149,515 @@ namespace UnturnedBlackout.Managers
             }
         }
 
-        public async Task AddOrUpdatePlayerAsync(CSteamID steamID, string steamName, string avatarLink)
+        public async Task GetBaseDataAsync()
         {
             using (MySqlConnection Conn = new MySqlConnection(ConnectionString))
             {
                 try
                 {
                     await Conn.OpenAsync();
-                    var cmd = new MySqlCommand($"INSERT INTO `{PlayersTableName}` ( `SteamID` , `SteamName` , `AvatarLink` ) VALUES ({steamID}, @name, '{avatarLink}') ON DUPLICATE KEY UPDATE `SteamName` = @name, `AvatarLink` = '{avatarLink}';", Conn);
+
+                    Utility.Debug("Getting base data");
+                    Utility.Debug("Reading attachments from the base data");
+                    var rdr = (MySqlDataReader)await new MySqlCommand($"SELECT `AttachmentID`, `AttachmentName`, `AttachmentDesc`, `AttachmentType`-1, `IconLink`, `BuyPrice` FROM `{AttachmentsTableName}`;", Conn).ExecuteReaderAsync();
+                    try
+                    {
+                        var gunAttachments = new Dictionary<ushort, GunAttachment>();
+                        while (rdr.Read())
+                        {
+                            if (!ushort.TryParse(rdr[0].ToString(), out ushort attachmentID)) continue;
+                            var attachmentName = rdr[1].ToString();
+                            var attachmentDesc = rdr[2].ToString();
+                            if (!int.TryParse(rdr[3].ToString(), out int attachmentTypeInt)) continue;
+                            var attachmentType = (EAttachment)attachmentTypeInt;
+                            var iconLink = rdr[4].ToString();
+                            if (!int.TryParse(rdr[5].ToString(), out int buyPrice)) continue;
+                            if (!gunAttachments.ContainsKey(attachmentID))
+                            {
+                                gunAttachments.Add(attachmentID, new GunAttachment(attachmentID, attachmentName, attachmentDesc, attachmentType, iconLink, buyPrice));
+                            }
+                            else
+                            {
+                                Utility.Debug($"Found a duplicate attachment with id {attachmentID}, ignoring this");
+                            }
+                        }
+
+                        Utility.Debug($"Successfully read {gunAttachments.Count} attachments from the table");
+                        GunAttachments = gunAttachments;
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Log("Error reading data from attachments table");
+                        Logger.Log(ex);
+                    }
+                    finally
+                    {
+                        rdr.Close();
+                    }
+
+                    Utility.Debug("Reading guns from the base data");
+                    rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{GunsTableName}`;", Conn).ExecuteReaderAsync();
+                    try
+                    {
+                        var guns = new Dictionary<ushort, Gun>();
+                        while (await rdr.ReadAsync())
+                        {
+                            if (!ushort.TryParse(rdr[0].ToString(), out ushort gunID)) continue;
+                            var gunName = rdr[1].ToString();
+                            var gunDesc = rdr[2].ToString();
+                            var iconLink = rdr[3].ToString();
+                            if (!int.TryParse(rdr[4].ToString(), out int magAmount)) continue;
+                            if (!int.TryParse(rdr[5].ToString(), out int scrapAmount)) continue;
+                            if (!int.TryParse(rdr[6].ToString(), out int buyPrice)) continue;
+                            if (!bool.TryParse(rdr[7].ToString(), out bool isDefault)) continue;
+                            if (!bool.TryParse(rdr[8].ToString(), out bool isPrimary)) continue;
+                            var attachments = new List<GunAttachment>();
+                            foreach (var id in rdr[9].GetIntListFromReaderResult())
+                            {
+                                if (GunAttachments.TryGetValue((ushort)id, out GunAttachment gunAttachment))
+                                {
+                                    attachments.Add(gunAttachment);
+                                }
+                                else
+                                {
+                                    Utility.Debug($"Could'nt find default attachment with id {id} for gun {gunID} with name {gunName}");
+                                }
+                            }
+                            if (!int.TryParse(rdr[10].ToString(), out int maxLevel)) continue;
+                            var levelXPNeeded = rdr[11].GetIntListFromReaderResult();
+                            var levelRewards = rdr[12].GetIntListFromReaderResult();
+                            if (!guns.ContainsKey(gunID))
+                            {
+                                guns.Add(gunID, new Gun(gunID, gunName, gunDesc, iconLink, magAmount, scrapAmount, buyPrice, isDefault, isPrimary, attachments, maxLevel, levelXPNeeded, levelRewards));
+                            }
+                            else
+                            {
+                                Utility.Debug($"Found a duplicate with id {gunID}, ignoring this");
+                            }
+                        }
+
+                        Utility.Debug($"Successfully read {guns.Count} guns from the table");
+                        Guns = guns;
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Log("Error reading data from guns table");
+                        Logger.Log(ex);
+                    }
+                    finally
+                    {
+                        rdr.Close();
+                    }
+
+                    Utility.Debug("Reading gun skins from the base table");
+                    rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{GunsSkinsTableName}`;", Conn).ExecuteReaderAsync();
+                    try
+                    {
+                        var gunSkinsSearchByID = new Dictionary<int, GunSkin>();
+                        var gunSkinsSearchByGunID = new Dictionary<ushort, List<GunSkin>>();
+                        var gunSkinsSearchBySkinID = new Dictionary<ushort, GunSkin>();
+
+                        while (rdr.Read())
+                        {
+                            if (!int.TryParse(rdr[0].ToString(), out int id)) continue;
+                            if (!ushort.TryParse(rdr[1].ToString(), out ushort gunID)) continue;
+                            if (!Guns.TryGetValue(gunID, out Gun gun))
+                            {
+                                Utility.Debug($"Could'nt find gun id with {gunID} for skin with id {id}");
+                                continue;
+                            }
+                            if (!ushort.TryParse(rdr[2].ToString(), out ushort skinID)) continue;
+                            var skinName = rdr[3].ToString();
+                            var skinDesc = rdr[4].ToString();
+                            var iconLink = rdr[5].ToString();
+                            if (!int.TryParse(rdr[6].ToString(), out int scrapAmount)) continue;
+
+                            var skin = new GunSkin(id, gun, skinID, skinName, skinDesc, iconLink, scrapAmount);
+                            if (gunSkinsSearchByID.ContainsKey(id))
+                            {
+                                Utility.Debug($"Found a duplicate skin with id {id}, ignoring this");
+                                continue;
+                            }
+                            else
+                            {
+                                gunSkinsSearchByID.Add(id, skin);
+                            }
+
+                            if (gunSkinsSearchByGunID.TryGetValue(gunID, out List<GunSkin> skins))
+                            {
+                                if (skins.Exists(k => k.ID == id))
+                                {
+                                    Utility.Debug($"Found a duplicate skin with id {id}, ignoring this");
+                                    continue;
+                                }
+                                else
+                                {
+                                    skins.Add(skin);
+                                }
+                            }
+                            else
+                            {
+                                gunSkinsSearchByGunID.Add(gunID, new List<GunSkin> { skin });
+                            }
+
+                            if (gunSkinsSearchBySkinID.ContainsKey(skinID))
+                            {
+                                Utility.Debug($"Found a duplicate skin with id {id}, ignoring this");
+                                continue;
+                            }
+                            else
+                            {
+                                gunSkinsSearchBySkinID.Add(skinID, skin);
+                            }
+                        }
+
+                        Utility.Debug($"Successfully read {gunSkinsSearchByID.Count} gun skins from the table");
+                        GunSkinsSearchByID = gunSkinsSearchByID;
+                        GunSkinsSearchByGunID = gunSkinsSearchByGunID;
+                        GunSkinsSearchBySkinID = gunSkinsSearchBySkinID;
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Log("Error reading data from the guns skins table");
+                        Logger.Log(ex);
+                    }
+                    finally
+                    {
+                        rdr.Close();
+                    }
+
+                    Utility.Debug("Reading knives from the base data");
+                    rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{KnivesTableName}`;", Conn).ExecuteReaderAsync();
+                    try
+                    {
+                        var knives = new Dictionary<ushort, Knife>();
+                        while (rdr.Read())
+                        {
+                            if (!ushort.TryParse(rdr[0].ToString(), out ushort knifeID)) continue;
+                            var knifeName = rdr[1].ToString();
+                            var knifeDesc = rdr[2].ToString();
+                            var iconLink = rdr[3].ToString();
+                            if (!int.TryParse(rdr[4].ToString(), out int scrapAmount)) continue;
+                            if (!int.TryParse(rdr[5].ToString(), out int buyPrice)) continue;
+                            if (!bool.TryParse(rdr[6].ToString(), out bool isDefault)) continue;
+
+                            if (!knives.ContainsKey(knifeID))
+                            {
+                                knives.Add(knifeID, new Knife(knifeID, knifeName, knifeDesc, iconLink, scrapAmount, buyPrice, isDefault));
+                            }
+                            else
+                            {
+                                Utility.Debug($"Found a duplicate knife with id {knifeID}, ignoring this");
+                            }
+                        }
+
+                        Utility.Debug($"Successfully read {knives.Count} knives from the table");
+                        Knives = knives;
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Log("Error reading data from the knives table");
+                        Logger.Log(ex);
+                    }
+                    finally
+                    {
+                        rdr.Close();
+                    }
+
+                    Utility.Debug("Reading knife skins from the base data");
+                    rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{KnivesSkinsTableName}`;", Conn).ExecuteReaderAsync();
+                    try
+                    {
+                        var knifeSkinsSearchByID = new Dictionary<int, KnifeSkin>();
+                        var knifeSkinsSearchByKnifeID = new Dictionary<ushort, List<KnifeSkin>>();
+                        var knifeSkinsSearchBySkinID = new Dictionary<ushort, KnifeSkin>();
+
+                        while (rdr.Read())
+                        {
+                            if (!int.TryParse(rdr[0].ToString(), out int id)) continue;
+                            if (!ushort.TryParse(rdr[1].ToString(), out ushort knifeID)) continue;
+                            if (!Knives.TryGetValue(knifeID, out Knife knife))
+                            {
+                                Utility.Debug($"Could'nt find knife id with {knifeID} for skin with id {id}");
+                                continue;
+                            }
+                            if (!ushort.TryParse(rdr[2].ToString(), out ushort skinID)) continue;
+                            var skinName = rdr[3].ToString();
+                            var skinDesc = rdr[4].ToString();
+                            var iconLink = rdr[5].ToString();
+                            if (!int.TryParse(rdr[6].ToString(), out int scrapAmount)) continue;
+
+                            var skin = new KnifeSkin(id, knife, skinID, skinName, skinDesc, iconLink, scrapAmount);
+                            if (knifeSkinsSearchByID.ContainsKey(id))
+                            {
+                                Utility.Debug($"Found a duplicate skin with id {id}, ignoring this");
+                                continue;
+                            }
+                            else
+                            {
+                                knifeSkinsSearchByID.Add(id, skin);
+                            }
+
+                            if (knifeSkinsSearchByKnifeID.TryGetValue(knifeID, out List<KnifeSkin> skins))
+                            {
+                                if (skins.Exists(k => k.ID == id))
+                                {
+                                    Utility.Debug($"Found a duplicate skin with id {id}, ignoring this");
+                                    continue;
+                                }
+                                else
+                                {
+                                    skins.Add(skin);
+                                }
+                            }
+                            else
+                            {
+                                knifeSkinsSearchByKnifeID.Add(knifeID, new List<KnifeSkin> { skin });
+                            }
+
+                            if (knifeSkinsSearchBySkinID.ContainsKey(skinID))
+                            {
+                                Utility.Debug($"Found a duplicate skin with id {id}, ignoring this");
+                                continue;
+                            }
+                            else
+                            {
+                                knifeSkinsSearchBySkinID.Add(skinID, skin);
+                            }
+                        }
+
+                        Utility.Debug($"Successfully read {knifeSkinsSearchByID.Count} knife skins from the table");
+                        KnifeSkinsSearchByID = knifeSkinsSearchByID;
+                        KnifeSkinsSearchByKnifeID = knifeSkinsSearchByKnifeID;
+                        KnifeSkinsSearchBySkinID = knifeSkinsSearchBySkinID;
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Log("Error reading data from knife skins table");
+                        Logger.Log(ex);
+                    }
+                    finally
+                    {
+                        rdr.Close();
+                    }
+
+                    Utility.Debug("Reading gadgets from base data");
+                    rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{GadgetsTableName}`;", Conn).ExecuteReaderAsync();
+                    try
+                    {
+                        var gadgets = new Dictionary<ushort, Gadget>();
+                        while (rdr.Read())
+                        {
+                            if (!ushort.TryParse(rdr[0].ToString(), out ushort gadgetID)) continue;
+                            var gadgetName = rdr[1].ToString();
+                            var gadgetDesc = rdr[2].ToString();
+                            var iconLink = rdr[3].ToString();
+                            if (!int.TryParse(rdr[4].ToString(), out int scrapAmount)) continue;
+                            if (!int.TryParse(rdr[5].ToString(), out int buyPrice)) continue;
+                            if (!int.TryParse(rdr[6].ToString(), out int giveSeconds)) continue;
+                            if (!bool.TryParse(rdr[7].ToString(), out bool isDefault)) continue;
+
+                            if (!gadgets.ContainsKey(gadgetID))
+                            {
+                                gadgets.Add(gadgetID, new Gadget(gadgetID, gadgetName, gadgetDesc, iconLink, scrapAmount, buyPrice, giveSeconds, isDefault));
+                            }
+                            else
+                            {
+                                Utility.Debug($"Found a duplicate gadget with id {gadgetID}, ignoring this");
+                            }
+                        }
+
+                        Utility.Debug($"Successfully read {gadgets.Count} gadgets from the table");
+                        Gadgets = gadgets;
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Log("Error reading data from gadgets table");
+                        Logger.Log(ex);
+                    }
+                    finally
+                    {
+                        rdr.Close();
+                    }
+
+                    Utility.Debug("Reading killstreaks from base data");
+                    rdr = (MySqlDataReader)await new MySqlCommand($"SELECT `KillstreakID`, `KillstreakName`, `KillstreakDesc`, `IconLink`, `KillstreakType`-1, `KillstreakRequired`, `BuyPrice`, `ScrapAmount`, `IsDefault` FROM `{KillstreaksTableName}`;", Conn).ExecuteReaderAsync();
+                    try
+                    {
+                        var killstreaks = new Dictionary<int, Killstreak>();
+                        while (rdr.Read())
+                        {
+                            if (!int.TryParse(rdr[0].ToString(), out int killstreakID)) continue;
+                            var killstreakName = rdr[1].ToString();
+                            var killstreakDesc = rdr[2].ToString();
+                            var iconLink = rdr[3].ToString();
+                            if (!int.TryParse(rdr[4].ToString(), out int killstreakTypeInt)) continue;
+                            var killstreakType = (EKillstreak)killstreakTypeInt;
+                            if (!int.TryParse(rdr[5].ToString(), out int killstreakRequired)) continue;
+                            if (!int.TryParse(rdr[6].ToString(), out int buyPrice)) continue;
+                            if (!int.TryParse(rdr[7].ToString(), out int scrapAmount)) continue;
+                            if (!bool.TryParse(rdr[8].ToString(), out bool isDefault)) continue;
+
+                            if (!killstreaks.ContainsKey(killstreakID))
+                            {
+                                killstreaks.Add(killstreakID, new Killstreak(killstreakID, killstreakName, iconLink, killstreakType, killstreakRequired, buyPrice, scrapAmount, isDefault));
+                            }
+                            else
+                            {
+                                Utility.Debug($"Found a duplicate killstrea with id {killstreakID}, ignoring it");
+                            }
+                        }
+
+                        Utility.Debug($"Successfully read {killstreaks.Count} killstreaks from table");
+                        Killstreaks = killstreaks;
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Log("Error reading data from gadgets table");
+                        Logger.Log(ex);
+                    }
+                    finally
+                    {
+                        rdr.Close();
+                    }
+
+                    Utility.Debug("Reading perks from base data");
+                    rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PerksTableName}`;", Conn).ExecuteReaderAsync();
+                    try
+                    {
+                        var perks = new Dictionary<int, Perk>();
+                        while (rdr.Read())
+                        {
+                            if (!int.TryParse(rdr[0].ToString(), out int perkID)) continue;
+                            var perkName = rdr[1].ToString();
+                            var perkDesc = rdr[2].ToString();
+                            var iconLink = rdr[3].ToString();
+                            var skillType = rdr[4].ToString();
+                            if (!int.TryParse(rdr[5].ToString(), out int skillLevel)) continue;
+                            if (!int.TryParse(rdr[6].ToString(), out int scrapAmount)) continue;
+                            if (!int.TryParse(rdr[7].ToString(), out int buyPrice)) continue;
+                            if (!bool.TryParse(rdr[8].ToString(), out bool isDefault)) continue;
+
+                            if (!perks.ContainsKey(perkID))
+                            {
+                                perks.Add(perkID, new Perk(perkID, perkName, perkDesc, iconLink, skillType, skillLevel, scrapAmount, buyPrice, isDefault));
+                            }
+                            else
+                            {
+                                Utility.Debug($"Found a duplicate perk with id {perkID}, ignoring this");
+                            }
+                        }
+
+                        Utility.Debug($"Successfully read {perks.Count} perks from the table");
+                        Perks = perks;
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Log("Error reading from perks table");
+                        Logger.Log(ex);
+                    }
+                    finally
+                    {
+                        rdr.Close();
+                    }
+
+                    Utility.Debug("Reading gloves from base data");
+                    rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{GlovesTableName}`;", Conn).ExecuteReaderAsync();
+                    try
+                    {
+                        var gloves = new Dictionary<ushort, Glove>();
+                        while (rdr.Read())
+                        {
+                            if (!ushort.TryParse(rdr[0].ToString(), out ushort gloveID)) continue;
+                            var gloveName = rdr[1].ToString();
+                            var gloveDesc = rdr[2].ToString();
+                            var iconLink = rdr[3].ToString();
+                            if (!int.TryParse(rdr[4].ToString(), out int buyPrice)) continue;
+                            if (!int.TryParse(rdr[5].ToString(), out int scrapAmount)) continue;
+                            if (!bool.TryParse(rdr[6].ToString(), out bool isDefault)) continue;
+
+                            if (!gloves.ContainsKey(gloveID))
+                            {
+                                gloves.Add(gloveID, new Glove(gloveID, gloveName, iconLink, buyPrice, scrapAmount, isDefault));
+                            }
+                            else
+                            {
+                                Utility.Debug($"Found a duplicate glove with id {gloveID}");
+                            }
+                        }
+
+                        Utility.Debug($"Successfully read {gloves.Count} gloves from the table");
+                        Gloves = gloves;
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Log("Error reading from gloves table");
+                        Logger.Log(ex);
+                    }
+                    finally
+                    {
+                        rdr.Close();
+                    }
+
+                    Utility.Debug("Reading cards from base data");
+                    rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{CardsTableName}`;", Conn).ExecuteReaderAsync();
+                    try
+                    {
+                        var cards = new Dictionary<int, Card>();
+                        while (rdr.Read())
+                        {
+                            if (!int.TryParse(rdr[0].ToString(), out int cardID)) continue;
+                            var cardName = rdr[1].ToString();
+                            var cardDesc = rdr[2].ToString();
+                            var iconLink = rdr[3].ToString();
+                            var cardLink = rdr[4].ToString();
+                            if (!int.TryParse(rdr[5].ToString(), out int buyPrice)) continue;
+                            if (!int.TryParse(rdr[6].ToString(), out int scrapAmount)) continue;
+                            if (!bool.TryParse(rdr[7].ToString(), out bool isDefault)) continue;
+
+                            if (!cards.ContainsKey(cardID))
+                            {
+                                cards.Add(cardID, new Card(cardID, cardName, cardDesc, iconLink, cardLink, buyPrice, scrapAmount, isDefault));
+                            }
+                            else
+                            {
+                                Utility.Debug($"Found a duplicate card with id {cardID}, ignoring this");
+                            }
+                        }
+
+                        Utility.Debug($"Successfully read {cards.Count} cards from the table");
+                        Cards = cards;
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Log("Error reading data from cards table");
+                        Logger.Log(ex);
+                    }
+                    finally
+                    {
+                        rdr.Close();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log("Error getting base data");
+                    Logger.Log(ex);
+                }
+                finally
+                {
+                    await Conn.CloseAsync();
+                }
+            }
+        }
+
+        public async Task AddPlayerAsync(CSteamID steamID, string steamName, string avatarLink)
+        {
+            using (MySqlConnection Conn = new MySqlConnection(ConnectionString))
+            {
+                try
+                {
+                    await Conn.OpenAsync();
+                    var cmd = new MySqlCommand($"INSERT IGNORE INTO `{PlayersTableName}` ( `SteamID` , `SteamName` , `AvatarLink` ) VALUES ({steamID}, @name, '{avatarLink}');", Conn);
                     cmd.Parameters.AddWithValue("@name", steamName);
                     await cmd.ExecuteScalarAsync();
                 }
@@ -164,6 +667,27 @@ namespace UnturnedBlackout.Managers
                     Logger.Log(ex);
                 }
                 finally
+                {
+                    await Conn.CloseAsync();
+                }
+            }
+        }
+        
+        public async Task UpdatePlayerAsync(CSteamID steamID, string steamName, string avatarLink)
+        {
+            using (MySqlConnection Conn = new MySqlConnection(ConnectionString))
+            {
+                try
+                {
+                    await Conn.OpenAsync();
+                    var cmd = new MySqlCommand($"UPDATE `{PlayersTableName}` SET `SteamName` = @name, AvatarLink = '{avatarLink}';", Conn);
+                    cmd.Parameters.AddWithValue("@name", steamName);
+                    await cmd.ExecuteScalarAsync();
+                } catch (Exception ex)
+                {
+                    Logger.Log($"Error updating player with steam id {steamID}, steam name {steamName}, avatar link {avatarLink}");
+                    Logger.Log(ex);
+                } finally
                 {
                     await Conn.CloseAsync();
                 }
@@ -642,468 +1166,6 @@ namespace UnturnedBlackout.Managers
             }
         }
 
-        public async Task GetBaseDataAsync()
-        {
-            using (MySqlConnection Conn = new MySqlConnection(ConnectionString))
-            {
-                try
-                {
-                    await Conn.OpenAsync();
 
-                    Utility.Debug("Getting base data");
-                    Utility.Debug("Reading attachments from the base data");
-                    var rdr = (MySqlDataReader)await new MySqlCommand($"SELECT `AttachmentID`, `AttachmentName`, `AttachmentDesc`, `AttachmentType`-1, `IconLink`, `BuyPrice` FROM `{AttachmentsTableName}`;", Conn).ExecuteReaderAsync();
-                    try
-                    {
-                        var gunAttachments = new Dictionary<ushort, GunAttachment>();
-                        while (rdr.Read())
-                        {
-                            if (!ushort.TryParse(rdr[0].ToString(), out ushort attachmentID)) continue;
-                            var attachmentName = rdr[1].ToString();
-                            var attachmentDesc = rdr[2].ToString();
-                            if (!int.TryParse(rdr[3].ToString(), out int attachmentTypeInt)) continue;
-                            var attachmentType = (EAttachment)attachmentTypeInt;
-                            var iconLink = rdr[4].ToString();
-                            if (!int.TryParse(rdr[5].ToString(), out int buyPrice)) continue;
-                            if (!gunAttachments.ContainsKey(attachmentID))
-                            {
-                                gunAttachments.Add(attachmentID, new GunAttachment(attachmentID, attachmentName, attachmentDesc, attachmentType, iconLink, buyPrice));
-                            } else
-                            {
-                                Utility.Debug($"Found a duplicate attachment with id {attachmentID}, ignoring this");
-                            }
-                        }
-
-                        Utility.Debug($"Successfully read {gunAttachments.Count} attachments from the table");
-                        GunAttachments = gunAttachments;
-                    } catch (Exception ex)
-                    {
-                        Logger.Log("Error reading data from attachments table");
-                        Logger.Log(ex);
-                    } finally
-                    {
-                        rdr.Close();
-                    }
-
-                    Utility.Debug("Reading guns from the base data");
-                    rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{GunsTableName}`;", Conn).ExecuteReaderAsync();
-                    try
-                    {
-                        var guns = new Dictionary<ushort, Gun>();
-                        while (await rdr.ReadAsync())
-                        {
-                            if (!ushort.TryParse(rdr[0].ToString(), out ushort gunID)) continue;
-                            var gunName = rdr[1].ToString();
-                            var gunDesc = rdr[2].ToString();
-                            var iconLink = rdr[3].ToString();
-                            if (!int.TryParse(rdr[4].ToString(), out int magAmount)) continue;
-                            if (!int.TryParse(rdr[5].ToString(), out int scrapAmount)) continue;
-                            if (!int.TryParse(rdr[6].ToString(), out int buyPrice)) continue;
-                            if (!bool.TryParse(rdr[7].ToString(), out bool isDefault)) continue;
-                            if (!bool.TryParse(rdr[8].ToString(), out bool isPrimary)) continue;
-                            var attachments = new List<GunAttachment>();
-                            foreach (var id in rdr[9].GetIntListFromReaderResult())
-                            {
-                                if (GunAttachments.TryGetValue((ushort)id, out GunAttachment gunAttachment))
-                                {
-                                    attachments.Add(gunAttachment);
-                                } else
-                                {
-                                    Utility.Debug($"Could'nt find default attachment with id {id} for gun {gunID} with name {gunName}");
-                                }
-                            }
-                            if (!int.TryParse(rdr[10].ToString(), out int maxLevel)) continue;
-                            var levelXPNeeded = rdr[11].GetIntListFromReaderResult();
-                            var levelRewards = rdr[12].GetIntListFromReaderResult();
-                            if (!guns.ContainsKey(gunID))
-                            {
-                                guns.Add(gunID, new Gun(gunID, gunName, gunDesc, iconLink, magAmount, scrapAmount, buyPrice, isDefault, isPrimary, attachments, maxLevel, levelXPNeeded, levelRewards));
-                            } else
-                            {
-                                Utility.Debug($"Found a duplicate with id {gunID}, ignoring this");
-                            }
-                        }
-
-                        Utility.Debug($"Successfully read {guns.Count} guns from the table");
-                        Guns = guns;
-                    } catch (Exception ex)
-                    {
-                        Logger.Log("Error reading data from guns table");
-                        Logger.Log(ex);
-                    } finally
-                    {
-                        rdr.Close();
-                    }
-
-                    Utility.Debug("Reading gun skins from the base table");
-                    rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{GunsSkinsTableName}`;", Conn).ExecuteReaderAsync();
-                    try
-                    {
-                        var gunSkinsSearchByID = new Dictionary<int, GunSkin>();
-                        var gunSkinsSearchByGunID = new Dictionary<ushort, List<GunSkin>>();
-                        var gunSkinsSearchBySkinID = new Dictionary<ushort, GunSkin>();
-
-                        while (rdr.Read())
-                        {
-                            if (!int.TryParse(rdr[0].ToString(), out int id)) continue;
-                            if (!ushort.TryParse(rdr[1].ToString(), out ushort gunID)) continue;
-                            if (!Guns.TryGetValue(gunID, out Gun gun))
-                            {
-                                Utility.Debug($"Could'nt find gun id with {gunID} for skin with id {id}");
-                                continue;
-                            }
-                            if (!ushort.TryParse(rdr[2].ToString(), out ushort skinID)) continue;
-                            var skinName = rdr[3].ToString();
-                            var skinDesc = rdr[4].ToString();
-                            var iconLink = rdr[5].ToString();
-                            if (!int.TryParse(rdr[6].ToString(), out int scrapAmount)) continue;
-
-                            var skin = new GunSkin(id, gun, skinID, skinName, skinDesc, iconLink, scrapAmount);
-                            if (gunSkinsSearchByID.ContainsKey(id))
-                            {
-                                Utility.Debug($"Found a duplicate skin with id {id}, ignoring this");
-                                continue;
-                            } else
-                            {
-                                gunSkinsSearchByID.Add(id, skin);
-                            }
-
-                            if (gunSkinsSearchByGunID.TryGetValue(gunID, out List<GunSkin> skins))
-                            {
-                                if (skins.Exists(k => k.ID == id))
-                                {
-                                    Utility.Debug($"Found a duplicate skin with id {id}, ignoring this");
-                                    continue;
-                                } else
-                                {
-                                    skins.Add(skin);
-                                }
-                            } else
-                            {
-                                gunSkinsSearchByGunID.Add(gunID, new List<GunSkin> { skin });
-                            }
-
-                            if (gunSkinsSearchBySkinID.ContainsKey(skinID))
-                            {
-                                Utility.Debug($"Found a duplicate skin with id {id}, ignoring this");
-                                continue;
-                            } else
-                            {
-                                gunSkinsSearchBySkinID.Add(skinID, skin);
-                            }
-                        }
-
-                        Utility.Debug($"Successfully read {gunSkinsSearchByID.Count} gun skins from the table");
-                        GunSkinsSearchByID = gunSkinsSearchByID;
-                        GunSkinsSearchByGunID = gunSkinsSearchByGunID;
-                        GunSkinsSearchBySkinID = gunSkinsSearchBySkinID;
-                    } catch (Exception ex)
-                    {
-                        Logger.Log("Error reading data from the guns skins table");
-                        Logger.Log(ex);
-                    } finally
-                    {
-                        rdr.Close();
-                    }
-
-                    Utility.Debug("Reading knives from the base data");
-                    rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{KnivesTableName}`;", Conn).ExecuteReaderAsync();
-                    try
-                    {
-                        var knives = new Dictionary<ushort, Knife>();
-                        while (rdr.Read())
-                        {
-                            if (!ushort.TryParse(rdr[0].ToString(), out ushort knifeID)) continue;
-                            var knifeName = rdr[1].ToString();
-                            var knifeDesc = rdr[2].ToString();
-                            var iconLink = rdr[3].ToString();
-                            if (!int.TryParse(rdr[4].ToString(), out int scrapAmount)) continue;
-                            if (!int.TryParse(rdr[5].ToString(), out int buyPrice)) continue;
-                            if (!bool.TryParse(rdr[6].ToString(), out bool isDefault)) continue;
-
-                            if (!knives.ContainsKey(knifeID))
-                            {
-                                knives.Add(knifeID, new Knife(knifeID, knifeName, knifeDesc, iconLink, scrapAmount, buyPrice, isDefault));
-                            } else
-                            {
-                                Utility.Debug($"Found a duplicate knife with id {knifeID}, ignoring this");
-                            }
-                        }
-
-                        Utility.Debug($"Successfully read {knives.Count} knives from the table");
-                        Knives = knives;
-                    } catch (Exception ex)
-                    {
-                        Logger.Log("Error reading data from the knives table");
-                        Logger.Log(ex);
-                    } finally
-                    {
-                        rdr.Close();
-                    }
-
-                    Utility.Debug("Reading knife skins from the base data");
-                    rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{KnivesSkinsTableName}`;", Conn).ExecuteReaderAsync();
-                    try
-                    {
-                        var knifeSkinsSearchByID = new Dictionary<int, KnifeSkin>();
-                        var knifeSkinsSearchByKnifeID = new Dictionary<ushort, List<KnifeSkin>>();
-                        var knifeSkinsSearchBySkinID = new Dictionary<ushort, KnifeSkin>();
-
-                        while (rdr.Read())
-                        {
-                            if (!int.TryParse(rdr[0].ToString(), out int id)) continue;
-                            if (!ushort.TryParse(rdr[1].ToString(), out ushort knifeID)) continue;
-                            if (!Knives.TryGetValue(knifeID, out Knife knife))
-                            {
-                                Utility.Debug($"Could'nt find knife id with {knifeID} for skin with id {id}");
-                                continue;
-                            }
-                            if (!ushort.TryParse(rdr[2].ToString(), out ushort skinID)) continue;
-                            var skinName = rdr[3].ToString();
-                            var skinDesc = rdr[4].ToString();
-                            var iconLink = rdr[5].ToString();
-                            if (!int.TryParse(rdr[6].ToString(), out int scrapAmount)) continue;
-
-                            var skin = new KnifeSkin(id, knife, skinID, skinName, skinDesc, iconLink, scrapAmount);
-                            if (knifeSkinsSearchByID.ContainsKey(id))
-                            {
-                                Utility.Debug($"Found a duplicate skin with id {id}, ignoring this");
-                                continue;
-                            }
-                            else
-                            {
-                                knifeSkinsSearchByID.Add(id, skin);
-                            }
-
-                            if (knifeSkinsSearchByKnifeID.TryGetValue(knifeID, out List<KnifeSkin> skins))
-                            {
-                                if (skins.Exists(k => k.ID == id))
-                                {
-                                    Utility.Debug($"Found a duplicate skin with id {id}, ignoring this");
-                                    continue;
-                                }
-                                else
-                                {
-                                    skins.Add(skin);
-                                }
-                            }
-                            else
-                            {
-                                knifeSkinsSearchByKnifeID.Add(knifeID, new List<KnifeSkin> { skin });
-                            }
-
-                            if (knifeSkinsSearchBySkinID.ContainsKey(skinID))
-                            {
-                                Utility.Debug($"Found a duplicate skin with id {id}, ignoring this");
-                                continue;
-                            }
-                            else
-                            {
-                                knifeSkinsSearchBySkinID.Add(skinID, skin);
-                            }
-                        }
-
-                        Utility.Debug($"Successfully read {knifeSkinsSearchByID.Count} knife skins from the table");
-                        KnifeSkinsSearchByID = knifeSkinsSearchByID;
-                        KnifeSkinsSearchByKnifeID = knifeSkinsSearchByKnifeID;
-                        KnifeSkinsSearchBySkinID = knifeSkinsSearchBySkinID;
-                    } catch (Exception ex)
-                    {
-                        Logger.Log("Error reading data from knife skins table");
-                        Logger.Log(ex);
-                    } finally
-                    {
-                        rdr.Close();
-                    }
-
-                    Utility.Debug("Reading gadgets from base data");
-                    rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{GadgetsTableName}`;", Conn).ExecuteReaderAsync();
-                    try
-                    {
-                        var gadgets = new Dictionary<ushort, Gadget>();
-                        while (rdr.Read())
-                        {
-                            if (!ushort.TryParse(rdr[0].ToString(), out ushort gadgetID)) continue;
-                            var gadgetName = rdr[1].ToString();
-                            var gadgetDesc = rdr[2].ToString();
-                            var iconLink = rdr[3].ToString();
-                            if (!int.TryParse(rdr[4].ToString(), out int scrapAmount)) continue;
-                            if (!int.TryParse(rdr[5].ToString(), out int buyPrice)) continue;
-                            if (!int.TryParse(rdr[6].ToString(), out int giveSeconds)) continue;
-                            if (!bool.TryParse(rdr[7].ToString(), out bool isDefault)) continue;
-
-                            if (!gadgets.ContainsKey(gadgetID))
-                            {
-                                gadgets.Add(gadgetID, new Gadget(gadgetID, gadgetName, gadgetDesc, iconLink, scrapAmount, buyPrice, giveSeconds, isDefault));
-                            } else
-                            {
-                                Utility.Debug($"Found a duplicate gadget with id {gadgetID}, ignoring this");
-                            }
-                        }
-
-                        Utility.Debug($"Successfully read {gadgets.Count} gadgets from the table");
-                        Gadgets = gadgets;
-                    } catch (Exception ex)
-                    {
-                        Logger.Log("Error reading data from gadgets table");
-                        Logger.Log(ex);
-                    } finally
-                    {
-                        rdr.Close();
-                    }
-
-                    Utility.Debug("Reading killstreaks from base data");
-                    rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{KillstreaksTableName}`;", Conn).ExecuteReaderAsync();
-                    try
-                    {
-                        var killstreaks = new Dictionary<int, Killstreak>();
-                        while (rdr.Read())
-                        {
-                            if (!int.TryParse(rdr[0].ToString(), out int killstreakID)) continue;
-                            var killstreakName = rdr[1].ToString();
-                            var killstreakDesc = rdr[2].ToString();
-                            var iconLink = rdr[3].ToString();
-                            if (!int.TryParse(rdr[4].ToString(), out int killstreakRequired)) continue;
-                            if (!int.TryParse(rdr[5].ToString(), out int buyPrice)) continue;
-                            if (!int.TryParse(rdr[6].ToString(), out int scrapAmount)) continue;
-                            if (!bool.TryParse(rdr[7].ToString(), out bool isDefault)) continue;
-
-                            if (!killstreaks.ContainsKey(killstreakID))
-                            {
-                                killstreaks.Add(killstreakID, new Killstreak(killstreakID, killstreakName, iconLink, killstreakRequired, buyPrice, scrapAmount, isDefault));
-                            } else
-                            {
-                                Utility.Debug($"Found a duplicate killstrea with id {killstreakID}, ignoring it");
-                            }
-                        }
-
-                        Utility.Debug($"Successfully read {killstreaks.Count} killstreaks from table");
-                        Killstreaks = killstreaks;
-                    } catch (Exception ex)
-                    {
-                        Logger.Log("Error reading data from gadgets table");
-                        Logger.Log(ex);
-                    } finally
-                    {
-                        rdr.Close();
-                    }
-
-                    Utility.Debug("Reading perks from base data");
-                    rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PerksTableName}`;", Conn).ExecuteReaderAsync();
-                    try
-                    {
-                        var perks = new Dictionary<int, Perk>();
-                        while (rdr.Read())
-                        {
-                            if (!int.TryParse(rdr[0].ToString(), out int perkID)) continue;
-                            var perkName = rdr[1].ToString();
-                            var perkDesc = rdr[2].ToString();
-                            var iconLink = rdr[3].ToString();
-                            var skillType = rdr[4].ToString();
-                            if (!int.TryParse(rdr[5].ToString(), out int skillLevel)) continue;
-                            if (!int.TryParse(rdr[6].ToString(), out int scrapAmount)) continue;
-                            if (!int.TryParse(rdr[7].ToString(), out int buyPrice)) continue;
-                            if (!bool.TryParse(rdr[8].ToString(), out bool isDefault)) continue;
-
-                            if (!perks.ContainsKey(perkID))
-                            {
-                                perks.Add(perkID, new Perk(perkID, perkName, perkDesc, iconLink, skillType, skillLevel, scrapAmount, buyPrice, isDefault));
-                            } else
-                            {
-                                Utility.Debug($"Found a duplicate perk with id {perkID}, ignoring this");
-                            }
-                        }
-
-                        Utility.Debug($"Successfully read {perks.Count} perks from the table");
-                        Perks = perks;
-                    } catch (Exception ex)
-                    {
-                        Logger.Log("Error reading from perks table");
-                        Logger.Log(ex);
-                    } finally
-                    {
-                        rdr.Close();
-                    }
-
-                    Utility.Debug("Reading gloves from base data");
-                    rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{GlovesTableName}`;", Conn).ExecuteReaderAsync();
-                    try
-                    {
-                        var gloves = new Dictionary<ushort, Glove>();
-                        while (rdr.Read())
-                        {
-                            if (!ushort.TryParse(rdr[0].ToString(), out ushort gloveID)) continue;
-                            var gloveName = rdr[1].ToString();
-                            var gloveDesc = rdr[2].ToString();
-                            var iconLink = rdr[3].ToString();
-                            if (!int.TryParse(rdr[4].ToString(), out int buyPrice)) continue;
-                            if (!int.TryParse(rdr[5].ToString(), out int scrapAmount)) continue;
-                            if (!bool.TryParse(rdr[6].ToString(), out bool isDefault)) continue;
-
-                            if (!gloves.ContainsKey(gloveID))
-                            {
-                                gloves.Add(gloveID, new Glove(gloveID, gloveName, iconLink, buyPrice, scrapAmount, isDefault));
-                            } else
-                            {
-                                Utility.Debug($"Found a duplicate glove with id {gloveID}");
-                            }
-                        }
-
-                        Utility.Debug($"Successfully read {gloves.Count} gloves from the table");
-                        Gloves = gloves;
-                    } catch (Exception ex)
-                    {
-                        Logger.Log("Error reading from gloves table");
-                        Logger.Log(ex);
-                    } finally
-                    {
-                        rdr.Close();
-                    }
-
-                    Utility.Debug("Reading cards from base data");
-                    rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{CardsTableName}`;", Conn).ExecuteReaderAsync();
-                    try
-                    {
-                        var cards = new Dictionary<int, Card>();
-                        while (rdr.Read())
-                        {
-                            if (!int.TryParse(rdr[0].ToString(), out int cardID)) continue;
-                            var cardName = rdr[1].ToString();
-                            var cardDesc = rdr[2].ToString();
-                            var iconLink = rdr[3].ToString();
-                            var cardLink = rdr[4].ToString();
-                            if (!int.TryParse(rdr[5].ToString(), out int buyPrice)) continue;
-                            if (!int.TryParse(rdr[6].ToString(), out int scrapAmount)) continue;
-                            if (!bool.TryParse(rdr[7].ToString(), out bool isDefault)) continue;
-
-                            if (!cards.ContainsKey(cardID))
-                            {
-                                cards.Add(cardID, new Card(cardID, cardName, cardDesc, iconLink, cardLink, buyPrice, scrapAmount, isDefault));
-                            } else
-                            {
-                                Utility.Debug($"Found a duplicate card with id {cardID}, ignoring this");
-                            }
-                        }
-
-                        Utility.Debug($"Successfully read {cards.Count} cards from the table");
-                        Cards = cards;
-                    } catch (Exception ex)
-                    {
-                        Logger.Log("Error reading data from cards table");
-                        Logger.Log(ex);
-                    } finally
-                    {
-                        rdr.Close();
-                    }
-                } catch (Exception ex)
-                {
-                    Logger.Log("Error getting base data");
-                    Logger.Log(ex);
-                } finally
-                {
-                    await Conn.CloseAsync();
-                }
-            }
-        }
     }
 }
