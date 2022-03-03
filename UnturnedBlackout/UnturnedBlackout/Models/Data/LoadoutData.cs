@@ -10,7 +10,6 @@ namespace UnturnedBlackout.Models.Data
     public class LoadoutData
     {
         public string LoadoutName { get; set; }
-        public bool IsActive { get; set; }
         public ushort Primary { get; set; }
         public List<ushort> PrimaryAttachments { get; set; }
         public ushort Secondary { get; set; }
@@ -26,7 +25,6 @@ namespace UnturnedBlackout.Models.Data
         public LoadoutData(Loadout loadout)
         {
             LoadoutName = loadout.LoadoutName;
-            IsActive = loadout.IsActive;
             Primary = loadout.Primary?.Gun?.GunID ?? 0;
             PrimaryAttachments = loadout.PrimaryAttachments.Values.Select(k => k.Attachment.AttachmentID).ToList();
             Secondary = loadout.Secondary?.Gun?.GunID ?? 0;
@@ -40,10 +38,9 @@ namespace UnturnedBlackout.Models.Data
             Card = loadout.Card?.Card?.CardID ?? 0;
         }
 
-        public LoadoutData(string loadoutName, bool isActive, ushort primary, List<ushort> primaryAttachments, ushort secondary, List<ushort> secondaryAttachments, ushort knife, ushort tactical, ushort lethal, List<int> killstreaks, List<int> perks, ushort glove, int card)
+        public LoadoutData(string loadoutName, ushort primary, List<ushort> primaryAttachments, ushort secondary, List<ushort> secondaryAttachments, ushort knife, ushort tactical, ushort lethal, List<int> killstreaks, List<int> perks, ushort glove, int card)
         {
             LoadoutName = loadoutName;
-            IsActive = isActive;
             Primary = primary;
             PrimaryAttachments = primaryAttachments;
             Secondary = secondary;

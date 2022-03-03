@@ -150,7 +150,7 @@ namespace UnturnedBlackout.Managers
                     await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PlayersKillstreaksTableName}` (`SteamID` BIGINT UNSIGNED NOT NULL , `KillstreakID` INT UNSIGNED NOT NULl , `KillstreakKills` INT UNSIGNED NOT NULL , `IsBought` BOOLEAN NOT NULL , CONSTRAINT `ub_steam_id_6` FOREIGN KEY (`SteamID`) REFERENCES `{PlayersTableName}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_killstreak_id` FOREIGN KEY (`KillstreakID`) REFERENCES `{KillstreaksTableName}` (`KillstreakID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `KillstreakID`));", Conn).ExecuteScalarAsync();
                     await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PlayersCardsTableName}` (`SteamID` BIGINT UNSIGNED NOT NULL , `CardID` INT UNSIGNED NOT NULL , `IsBought` BOOLEAN NOT NULL , CONSTRAINT `ub_steam_id_7` FOREIGN KEY (`SteamID`) REFERENCES `{PlayersTableName}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_card_id` FOREIGN KEY (`CardID`) REFERENCES `{CardsTableName}` (`CardID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `CardID`));", Conn).ExecuteScalarAsync();
                     await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PlayersGlovesTableName}` (`SteamID` BIGINT UNSIGNED NOT NULL , `GloveID` SMALLINT UNSIGNED NOT NULL , `IsBought` BOOLEAN NOT NULl , CONSTRAINT `ub_steam_id_8` FOREIGN KEY (`SteamID`) REFERENCES `{PlayersTableName}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_glove_id` FOREIGN KEY (`GloveID`) REFERENCES `{GlovesTableName}` (`GloveID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `GloveID`));", Conn).ExecuteScalarAsync();
-                    await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PlayersLoadoutsTableName}` (`SteamID` BIGINT UNSIGNED NOT NULL , `LoadoutID` INT UNSIGNED NOT NULL , `Loadout` TEXT NOT NULL , CONSTRAINT `ub_steam_id_9` FOREIGN KEY (`SteamID`) REFERENCES `{PlayersTableName}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID`, `LoadoutID`));", Conn).ExecuteScalarAsync();
+                    await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PlayersLoadoutsTableName}` (`SteamID` BIGINT UNSIGNED NOT NULL , `LoadoutID` INT UNSIGNED NOT NULL , `IsActive` BOOLEAN NOT NULL , `Loadout` TEXT NOT NULL , CONSTRAINT `ub_steam_id_9` FOREIGN KEY (`SteamID`) REFERENCES `{PlayersTableName}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID`, `LoadoutID`));", Conn).ExecuteScalarAsync();
                 }
                 catch (Exception ex)
                 {
@@ -730,7 +730,7 @@ namespace UnturnedBlackout.Managers
                         Utility.Debug($"Found default glove with id {defaultGlove?.GloveID ?? 0}");
                         var defaultCard = defaultCards.FirstOrDefault();
                         Utility.Debug($"Found default card with id {defaultCard?.CardID ?? 0}");
-                        DefaultLoadout = new LoadoutData("DEFAULT LOADOUT", false, defaultPrimary?.GunID ?? 0, defaultPrimaryAttachments, defaultSecondary?.GunID ?? 0, defaultSecondaryAttachments, defaultKnife?.KnifeID ?? 0, defaultTactical?.GadgetID ?? 0, defaultLethal?.GadgetID ?? 0, defaultKillstreak, defaultPerk, defaultGlove?.GloveID ?? 0, defaultCard?.CardID ?? 0);
+                        DefaultLoadout = new LoadoutData("DEFAULT LOADOUT", defaultPrimary?.GunID ?? 0, defaultPrimaryAttachments, defaultSecondary?.GunID ?? 0, defaultSecondaryAttachments, defaultKnife?.KnifeID ?? 0, defaultTactical?.GadgetID ?? 0, defaultLethal?.GadgetID ?? 0, defaultKillstreak, defaultPerk, defaultGlove?.GloveID ?? 0, defaultCard?.CardID ?? 0);
                         Utility.Debug("Built a default loadout to give to the players when they join");
                     }
                     catch (Exception ex)
@@ -829,7 +829,7 @@ namespace UnturnedBlackout.Managers
                     for (int i = 1; i <= loadoutAmount; i++)
                     {
                         Utility.Debug($"Adding loadout with id {i} for {steamName}");
-                        await new MySqlCommand($"INSERT INTO `{PlayersLoadoutsTableName}` (`SteamID` , `LoadoutID` , `Loadout`) VALUES ({player.CSteamID}, {i}, '{data}');", Conn).ExecuteScalarAsync();
+                        await new MySqlCommand($"INSERT INTO `{PlayersLoadoutsTableName}` (`SteamID` , `LoadoutID` , `IsActive` , `Loadout`) VALUES ({player.CSteamID}, {i}, {(i == 1 ? 1 : 0)}, '{data}');", Conn).ExecuteScalarAsync();
                     }
                 }
                 catch (Exception ex)
@@ -1021,35 +1021,79 @@ namespace UnturnedBlackout.Managers
                                 newText = gunSkinText.Replace("UE.", "");
                             }
 
-                            if (!int.TryParse(gunSkinText, out int skinID)) continue;
-                            if (GunSkinsSearchByID.TryGetValue(skinID, out GunSkin skin))
-                            {
-                                gunSkins.Add(skinID, skin);
-                            } else
+                            if (!int.TryParse(newText, out int skinID)) continue;
+                            if (!GunSkinsSearchByID.TryGetValue(skinID, out GunSkin skin))
                             {
                                 Utility.Debug($"Error finding gun skin with id {skinID}, ignoring it");
+                                continue;
                             }
+
+                            if (gunSkinsSearchByID.ContainsKey(skinID))
+                            {
+                                Utility.Debug($"Found a duplicate gun skin with id {skinID} registered for {player.CharacterName}, ignoring this");
+                                continue;
+                            }
+
+                            var gunSkin = new LoadoutGunSkin(skin, isEquipped);
+                            gunSkinsSearchByID.Add(skinID, gunSkin);
+                            if (gunSkinsSearchByGunID.TryGetValue(skin.Gun.GunID, out List<LoadoutGunSkin> gunSkins))
+                            {
+                                gunSkins.Add(gunSkin);
+                            }
+                            else
+                            {
+                                gunSkinsSearchByGunID.Add(skin.Gun.GunID, new List<LoadoutGunSkin> { gunSkin });
+                            }
+                            gunSkinsSearchBySkinID.Add(skin.SkinID, gunSkin);
                         }
-                        Utility.Debug($"Successfully got {gunSkins.Count} gun skins for {player.CharacterName}");
+                        Utility.Debug($"Successfully got {gunSkinsSearchByID.Count} gun skins for {player.CharacterName}");
                     }
 
                     Utility.Debug($"Getting knife skins for {player.CharacterName}");
                     var knifeSkinsTxt = await new MySqlCommand($"SELECT `SkinIDs` FROM `{PlayersKnivesSkinsTableName}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteScalarAsync();
-                    if (gunSkinsTxt is string knifeSkinsText)
+                    if (knifeSkinsTxt is string knifeSkinsText)
                     {
                         foreach (var knifeSkinText in knifeSkinsText.Split(','))
                         {
-                            if (!int.TryParse(knifeSkinText, out int skinID)) continue;
-                            if (KnifeSkinsSearchByID.TryGetValue(skinID, out KnifeSkin skin))
+                            var isEquipped = false;
+                            var newText = "";
+                            if (knifeSkinText.StartsWith("E."))
                             {
-                                knifeSkins.Add(skinID, skin);
+                                isEquipped = true;
+                                newText = knifeSkinText.Replace("E.", "");
+                            }
+                            else if (knifeSkinText.StartsWith("UE."))
+                            {
+                                isEquipped = false;
+                                newText = knifeSkinText.Replace("UE.", "");
+                            }
+
+                            if (!int.TryParse(newText, out int skinID)) continue;
+                            if (!KnifeSkinsSearchByID.TryGetValue(skinID, out KnifeSkin skin))
+                            {
+                                Utility.Debug($"Error finding knife skin with id {skinID}, ignoring it");
+                                continue;
+                            }
+
+                            if (knifeSkinsSearchByID.ContainsKey(skinID))
+                            {
+                                Utility.Debug($"Found a duplicate knife skin with id {skinID} registered for {player.CharacterName}, ignoring this");
+                                continue;
+                            }
+
+                            var knifeSkin = new LoadoutKnifeSkin(skin, isEquipped);
+                            knifeSkinsSearchByID.Add(skinID, knifeSkin);
+                            if (knifeSkinsSearchByKnifeID.TryGetValue(skin.Knife.KnifeID, out List<LoadoutKnifeSkin> knifeSkins))
+                            {
+                                knifeSkins.Add(knifeSkin);
                             }
                             else
                             {
-                                Utility.Debug($"Error finding knife skin with id {skinID}, ignoring it");
+                                knifeSkinsSearchByKnifeID.Add(skin.Knife.KnifeID, new List<LoadoutKnifeSkin> { knifeSkin });
                             }
+                            knifeSkinsSearchBySkinID.Add(skin.SkinID, knifeSkin);
                         }
-                        Utility.Debug($"Successfully got {knifeSkins.Count} knife skins for {player.CharacterName}");
+                        Utility.Debug($"Successfully got {knifeSkinsSearchByID.Count} knife skins for {player.CharacterName}");
                     }
 
                     Utility.Debug($"Getting perks for {player.CharacterName}");
@@ -1217,8 +1261,116 @@ namespace UnturnedBlackout.Managers
                     {
                         while (await rdr.ReadAsync())
                         {
-                             
+                            var shouldContinue = true;
+                            if (!int.TryParse(rdr[1].ToString(), out int loadoutID)) continue;
+                            if (!bool.TryParse(rdr[2].ToString(), out bool isActive)) continue;
+
+                            if (loadouts.ContainsKey(loadoutID))
+                            {
+                                Utility.Debug($"Found a duplicate loadout with id {loadoutID} for {player.CharacterName}, ignoring it");
+                                continue;
+                            }
+
+                            var loadoutData = Plugin.Instance.DataManager.ConvertLoadoutFromJson(rdr[3].ToString());
+                            if (!guns.TryGetValue(loadoutData.Primary, out LoadoutGun primary) && loadoutData.Primary != 0)
+                            {
+                                Utility.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a primary with id {loadoutData.Primary} which is not owned by the player, not counting this loadout");
+                                continue;
+                            }
+
+                            var primaryAttachments = new Dictionary<EAttachment, LoadoutAttachment>();
+                            foreach (var primaryAttachment in loadoutData.PrimaryAttachments)
+                            {
+                                if (primary.Attachments.TryGetValue(primaryAttachment, out LoadoutAttachment attachment))
+                                {
+                                    primaryAttachments.Add(attachment.Attachment.AttachmentType, attachment);
+                                } else
+                                {
+                                    Utility.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a primary attachment id with {primaryAttachment} which is not owned by the player, not counting it");
+                                }
+                            }
+
+                            if (!guns.TryGetValue(loadoutData.Secondary, out LoadoutGun secondary) && loadoutData.Secondary != 0)
+                            {
+                                Utility.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a secondary with id {loadoutData.Secondary} which is not owned by the player, not counting this loadout");
+                                continue;
+                            }
+
+                            var secondaryAttachments = new Dictionary<EAttachment, LoadoutAttachment>();
+                            foreach (var secondaryAttachment in loadoutData.SecondaryAttachments)
+                            {
+                                if (secondary.Attachments.TryGetValue(secondaryAttachment, out LoadoutAttachment attachment))
+                                {
+                                    secondaryAttachments.Add(attachment.Attachment.AttachmentType, attachment);
+                                } else
+                                {
+                                    Utility.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a secondary attachment id with {secondaryAttachment} which is not owned by the player, not counting it");
+                                }
+                            }
+
+                            if (!knives.TryGetValue(loadoutData.Knife, out LoadoutKnife knife) && loadoutData.Knife != 0)
+                            {
+                                Utility.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a knife with id {loadoutData.Knife} which is not owned by the player, not counting this loadout");
+                                continue;
+                            }
+
+                            if (!gadgets.TryGetValue(loadoutData.Tactical, out LoadoutGadget tactical) && loadoutData.Tactical != 0)
+                            {
+                                Utility.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a tactical with id {loadoutData.Tactical} which is not owned by the player, not counting this loadout");
+                                continue;
+                            }
+
+                            if (!gadgets.TryGetValue(loadoutData.Lethal, out LoadoutGadget lethal) && loadoutData.Lethal != 0)
+                            {
+                                Utility.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a lethal with id {loadoutData.Lethal} which is not owned by the player, not counting this loadout");
+                                continue;
+                            }
+
+                            var loadoutKillstreaks = new List<LoadoutKillstreak>();
+                            foreach (var killstreakID in loadoutData.Killstreaks)
+                            {
+                                if (killstreaks.TryGetValue(killstreakID, out LoadoutKillstreak killstreak))
+                                {
+                                    loadoutKillstreaks.Add(killstreak);
+                                } else
+                                {
+                                    Utility.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a killstreak with id {killstreakID} which is not owned by the player, not counting this loadout");
+                                    shouldContinue = false;
+                                    break;
+                                }
+                            }
+                            if (!shouldContinue) continue;
+
+                            var loadoutPerks = new List<LoadoutPerk>();
+                            foreach (var perkID in loadoutData.Perks)
+                            {
+                                if (perks.TryGetValue(perkID, out LoadoutPerk perk))
+                                {
+                                    loadoutPerks.Add(perk);
+                                } else
+                                {
+                                    Utility.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a perk with id {perkID} which is not owned by the player, not counting this loadout");
+                                    shouldContinue = false;
+                                    break;
+                                }
+                            }
+                            if (!shouldContinue) continue;
+
+                            if (!gloves.TryGetValue(loadoutData.Glove, out LoadoutGlove glove) && loadoutData.Glove != 0)
+                            {
+                                Utility.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a glove with id {loadoutData.Glove} which is not owned by the player, not counting this loadout");
+                                continue;
+                            }
+
+                            if (!cards.TryGetValue(loadoutData.Card, out LoadoutCard card) && loadoutData.Card != 0)
+                            {
+                                Utility.Debug($"Loadout with id {loadoutID} has a card with id {loadoutData.Card} which is not owned by the player, not counting this loadout");
+                                continue;
+                            }
+
+                            loadouts.Add(loadoutID, new Loadout(loadoutID, loadoutData.LoadoutName, isActive, primary, primaryAttachments, secondary, secondaryAttachments, knife, tactical, lethal, loadoutKillstreaks, loadoutPerks, glove, card));
                         }
+                        Utility.Debug($"Successfully got {loadouts.Count} loadouts for {player.CharacterName}");
                     } catch (Exception ex)
                     {
                         Logger.Log($"Error reading loadouts data for {player.CharacterName}");
@@ -1227,6 +1379,144 @@ namespace UnturnedBlackout.Managers
                     {
                         rdr.Close();
                     }
+
+                    Utility.Debug($"Checking loadouts for {player.CharacterName}");
+                    try
+                    {
+                        var loadoutAmount = Utility.GetLoadoutAmount(player);
+                        Utility.Debug($"{player.CharacterName} should have {loadoutAmount} loadouts, he has {loadouts.Count} registered");
+                        var data = Plugin.Instance.DataManager.ConvertLoadoutToJson(DefaultLoadout);
+                        if (loadoutAmount > loadouts.Count)
+                        {
+                            if (!guns.TryGetValue(DefaultLoadout.Primary, out LoadoutGun primary) && DefaultLoadout.Primary != 0)
+                            {
+                                Utility.Debug($"Default Loadout for {player.CharacterName} has a primary with id {DefaultLoadout.Primary} which is not owned by the player, not counting this loadout");
+                                return;
+                            }
+
+                            var primaryAttachments = new Dictionary<EAttachment, LoadoutAttachment>();
+                            foreach (var primaryAttachment in DefaultLoadout.PrimaryAttachments)
+                            {
+                                if (primary.Attachments.TryGetValue(primaryAttachment, out LoadoutAttachment attachment))
+                                {
+                                    primaryAttachments.Add(attachment.Attachment.AttachmentType, attachment);
+                                }
+                                else
+                                {
+                                    Utility.Debug($"Default loadout for {player.CharacterName} has a primary attachment id with {primaryAttachment} which is not owned by the player, not counting it");
+                                    return;
+                                }
+                            }
+
+                            if (!guns.TryGetValue(DefaultLoadout.Secondary, out LoadoutGun secondary) && DefaultLoadout.Secondary != 0)
+                            {
+                                Utility.Debug($"Default Loadout for {player.CharacterName} has a secondary with id {DefaultLoadout.Secondary} which is not owned by the player, not counting this loadout");
+                                return;
+                            }
+
+                            var secondaryAttachments = new Dictionary<EAttachment, LoadoutAttachment>();
+                            foreach (var secondaryAttachment in DefaultLoadout.SecondaryAttachments)
+                            {
+                                if (secondary.Attachments.TryGetValue(secondaryAttachment, out LoadoutAttachment attachment))
+                                {
+                                    secondaryAttachments.Add(attachment.Attachment.AttachmentType, attachment);
+                                }
+                                else
+                                {
+                                    Utility.Debug($"Default Loadout for {player.CharacterName} has a secondary attachment id with {secondaryAttachment} which is not owned by the player, not counting it");
+                                    return;
+                                }
+                            }
+
+                            if (!knives.TryGetValue(DefaultLoadout.Knife, out LoadoutKnife knife) && DefaultLoadout.Knife != 0)
+                            {
+                                Utility.Debug($"Default Loadout for {player.CharacterName} has a knife with id {DefaultLoadout.Knife} which is not owned by the player, not counting this loadout");
+                                return;
+                            }
+
+                            if (!gadgets.TryGetValue(DefaultLoadout.Tactical, out LoadoutGadget tactical) && DefaultLoadout.Tactical != 0)
+                            {
+                                Utility.Debug($"Default Loadout for {player.CharacterName} has a tactical with id {DefaultLoadout.Tactical} which is not owned by the player, not counting this loadout");
+                                return;
+                            }
+
+                            if (!gadgets.TryGetValue(DefaultLoadout.Lethal, out LoadoutGadget lethal) && DefaultLoadout.Lethal != 0)
+                            {
+                                Utility.Debug($"Default Loadout for {player.CharacterName} has a lethal with id {DefaultLoadout.Lethal} which is not owned by the player, not counting this loadout");
+                                return;
+                            }
+
+                            var loadoutKillstreaks = new List<LoadoutKillstreak>();
+                            foreach (var killstreakID in DefaultLoadout.Killstreaks)
+                            {
+                                if (killstreaks.TryGetValue(killstreakID, out LoadoutKillstreak killstreak))
+                                {
+                                    loadoutKillstreaks.Add(killstreak);
+                                }
+                                else
+                                {
+                                    Utility.Debug($"Default Loadout for {player.CharacterName} has a killstreak with id {killstreakID} which is not owned by the player, not counting this loadout");
+                                    return;
+                                }
+                            }
+
+                            var loadoutPerks = new List<LoadoutPerk>();
+                            foreach (var perkID in DefaultLoadout.Perks)
+                            {
+                                if (perks.TryGetValue(perkID, out LoadoutPerk perk))
+                                {
+                                    loadoutPerks.Add(perk);
+                                }
+                                else
+                                {
+                                    Utility.Debug($"Default Loadout for {player.CharacterName} has a perk with id {perkID} which is not owned by the player, not counting this loadout");
+                                    return;
+                                }
+                            }
+
+                            if (!gloves.TryGetValue(DefaultLoadout.Glove, out LoadoutGlove glove) && DefaultLoadout.Glove != 0)
+                            {
+                                Utility.Debug($"Default Loadout for {player.CharacterName} has a glove with id {DefaultLoadout.Glove} which is not owned by the player, not counting this loadout");
+                                return;
+                            }
+
+                            if (!cards.TryGetValue(DefaultLoadout.Card, out LoadoutCard card) && DefaultLoadout.Card != 0)
+                            {
+                                Utility.Debug($"Default Loadout has a card with id {DefaultLoadout.Card} which is not owned by the player, not counting this loadout");
+                                return;
+                            }
+
+                            Utility.Debug($"{player.CharacterName} has less loadouts than he should have, creating more");
+                            var defaultLoadout = new Loadout(0, DefaultLoadout.LoadoutName, false, primary, primaryAttachments, secondary, secondaryAttachments, knife, tactical, lethal, loadoutKillstreaks, loadoutPerks, glove, card);
+                            for (int i = loadouts.Count + 1; i <= loadoutAmount; i++)
+                            {
+                                Utility.Debug($"Adding loadout with id {i} for {player.CharacterName}");
+                                await new MySqlCommand($"INSERT INTO `{PlayersLoadoutsTableName}` (`SteamID` , `LoadoutID` , `IsActive` , `Loadout`) VALUES ({player.CSteamID}, {i}, {(i == 1 ? 1 : 0)}, '{data}');", Conn).ExecuteScalarAsync();
+                                loadouts.Add(i, new Loadout(i, defaultLoadout.LoadoutName, i == 1, defaultLoadout.Primary, defaultLoadout.PrimaryAttachments, defaultLoadout.Secondary, defaultLoadout.SecondaryAttachments, defaultLoadout.Knife, defaultLoadout.Tactical, defaultLoadout.Lethal, defaultLoadout.Killstreaks, defaultLoadout.Perks, defaultLoadout.Glove, defaultLoadout.Card));
+                            }
+                        }
+                        else if (loadoutAmount < loadouts.Count)
+                        {
+                            Utility.Debug($"{player.CharacterName} has more loadouts than he should have, deleting the last ones");
+                            for (int i = loadouts.Count; i >= 1; i--)
+                            {
+                                if (loadouts.Count == loadoutAmount) break;
+                                Utility.Debug($"Removing loadout with id {i} for {player.CharacterName}");
+                                await new MySqlCommand($"DELETE FROM `{PlayersLoadoutsTableName}` WHERE `SteamID` = {player.CSteamID} AND `LoadoutID` = {i}", Conn).ExecuteScalarAsync();
+                                loadouts.Remove(i);
+                            }
+                        }
+                    } catch (Exception ex)
+                    {
+                        Logger.Log("Error checking the loadout amounts for player");
+                        Logger.Log(ex);
+                    }
+
+                    if (!PlayerLoadouts.ContainsKey(player.CSteamID))
+                    {
+                        PlayerLoadouts.Remove(player.CSteamID);
+                    }
+                    PlayerLoadouts.Add(player.CSteamID, new PlayerLoadout(guns, knives, gunSkinsSearchByID, knifeSkinsSearchByID, gunSkinsSearchByGunID, knifeSkinsSearchByKnifeID, gunSkinsSearchBySkinID, knifeSkinsSearchBySkinID, perks, gadgets, killstreaks, cards, gloves, loadouts));
                 }
                 catch (Exception ex)
                 {

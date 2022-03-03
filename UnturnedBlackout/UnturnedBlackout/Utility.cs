@@ -124,19 +124,9 @@ namespace UnturnedBlackout
             return readerText.Split(',').Select(k => int.TryParse(k, out var id) ? id : -1).Where(k => k != -1).ToList();
         }
 
-        public static string GetStringFromIntList(this List<int> ids)
+        public static Dictionary<ushort, LoadoutAttachment> GetAttachmentsFromString(string text)
         {
-            var skinsText = "";
-            foreach (var id in ids)
-            {
-                skinsText += $"{id},";
-            }
-            return skinsText.Remove(skinsText.Length - 1, 1);
-        }
-
-        public static List<LoadoutAttachment> GetAttachmentsFromString(string text)
-        {
-            var attachments = new List<LoadoutAttachment>();
+            var attachments = new Dictionary<ushort, LoadoutAttachment>();
             var attachmentsText = text.Split(',');
             foreach (var attachmentText in attachmentsText)
             {
@@ -154,7 +144,10 @@ namespace UnturnedBlackout
                 }
                 if (!Plugin.Instance.DBManager.GunAttachments.TryGetValue(attachmentID, out GunAttachment gunAttachment))
                 {
-                    attachments.Add(new LoadoutAttachment(gunAttachment, isBought));
+                    if (!attachments.ContainsKey(gunAttachment.AttachmentID))
+                    {
+                        attachments.Add(gunAttachment.AttachmentID, new LoadoutAttachment(gunAttachment, isBought));
+                    }
                 }
             }
             return attachments;
