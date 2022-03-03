@@ -152,8 +152,10 @@
     <Compile Include="Database\Data\LoadoutGadget.cs" />
     <Compile Include="Database\Data\LoadoutGlove.cs" />
     <Compile Include="Database\Data\LoadoutGun.cs" />
+    <Compile Include="Database\Data\LoadoutGunSkin.cs" />
     <Compile Include="Database\Data\LoadoutKillstreak.cs" />
     <Compile Include="Database\Data\LoadoutKnife.cs" />
+    <Compile Include="Database\Data\LoadoutKnifeSkin.cs" />
     <Compile Include="Database\Data\LoadoutPerk.cs" />
     <Compile Include="Database\Data\PlayerData.cs" />
     <Compile Include="Database\Data\PlayerLoadout.cs" />

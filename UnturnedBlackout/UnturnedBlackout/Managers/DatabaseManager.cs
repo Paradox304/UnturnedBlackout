@@ -20,8 +20,11 @@ namespace UnturnedBlackout.Managers
         public string ConnectionString { get; set; }
         public Config Config { get; set; }
 
+        // Players Data
         public Dictionary<CSteamID, PlayerData> PlayerData { get; set; }
+        public Dictionary<CSteamID, PlayerLoadout> PlayerLoadouts { get; set; }
 
+        // Base Data
         public Dictionary<ushort, Gun> Guns { get; set; }
         public Dictionary<ushort, GunAttachment> GunAttachments { get; set; }
         public Dictionary<int, GunSkin> GunSkinsSearchByID { get; set; }
@@ -39,6 +42,7 @@ namespace UnturnedBlackout.Managers
         public Dictionary<ushort, Glove> Gloves { get; set; }
         public Dictionary<int, Card> Cards { get; set; }
 
+        // Default Data
         public LoadoutData DefaultLoadout { get; set; }
         public List<Gun> DefaultGuns { get; set; }
         public List<Knife> DefaultKnives { get; set; }
@@ -107,6 +111,7 @@ namespace UnturnedBlackout.Managers
             ConnectionString = $"server={Config.DatabaseHost};user={Config.DatabaseUsername};database={Config.DatabaseName};port={Config.DatabasePort};password={Config.DatabasePassword}";
 
             PlayerData = new Dictionary<CSteamID, PlayerData>();
+            PlayerLoadouts = new Dictionary<CSteamID, PlayerLoadout>();
 
             ThreadPool.QueueUserWorkItem(async (o) =>
             {
@@ -691,48 +696,57 @@ namespace UnturnedBlackout.Managers
                     }
 
                     Utility.Debug("Building a default loadout for new players");
-                    var defaultPrimary = defaultGuns.FirstOrDefault(k => k.IsPrimary);
-                    Utility.Debug($"Found default primary with id {defaultPrimary?.GunID ?? 0}");
-                    var defaultPrimaryAttachments = defaultPrimary?.DefaultAttachments.Select(k => k.AttachmentID).ToList() ?? new List<ushort>();
-                    Utility.Debug($"Found {defaultPrimaryAttachments.Count} default primary attachments");
-                    var defaultSecondary = defaultGuns.FirstOrDefault(k => !k.IsPrimary);
-                    Utility.Debug($"Found default secondary with id {defaultSecondary?.GunID ?? 0}");
-                    var defaultSecondaryAttachments = defaultSecondary?.DefaultAttachments.Select(k => k.AttachmentID).ToList() ?? new List<ushort>();
-                    Utility.Debug($"Found {defaultSecondaryAttachments.Count} default secondary attachments");
-                    var defaultPerk = new List<int>();
-                    foreach (var perk in defaultPerks)
+                    try
                     {
-                        defaultPerk.Add(perk.PerkID);
-                        if (defaultPerk.Count == 3) break;
+                        var defaultPrimary = defaultGuns.FirstOrDefault(k => k.IsPrimary);
+                        Utility.Debug($"Found default primary with id {defaultPrimary?.GunID ?? 0}");
+                        var defaultPrimaryAttachments = defaultPrimary?.DefaultAttachments.Select(k => k.AttachmentID).ToList() ?? new List<ushort>();
+                        Utility.Debug($"Found {defaultPrimaryAttachments.Count} default primary attachments");
+                        var defaultSecondary = defaultGuns.FirstOrDefault(k => !k.IsPrimary);
+                        Utility.Debug($"Found default secondary with id {defaultSecondary?.GunID ?? 0}");
+                        var defaultSecondaryAttachments = defaultSecondary?.DefaultAttachments.Select(k => k.AttachmentID).ToList() ?? new List<ushort>();
+                        Utility.Debug($"Found {defaultSecondaryAttachments.Count} default secondary attachments");
+                        var defaultPerk = new List<int>();
+                        foreach (var perk in defaultPerks)
+                        {
+                            defaultPerk.Add(perk.PerkID);
+                            if (defaultPerk.Count == 3) break;
+                        }
+                        Utility.Debug($"Found {defaultPerk.Count} default perks");
+                        var defaultKnife = defaultKnives.Count > 0 ? defaultKnives[0] : null;
+                        Utility.Debug($"Found default knife with id {defaultKnife?.KnifeID ?? 0}");
+                        var defaultTactical = defaultGadgets.FirstOrDefault(k => k.IsTactical);
+                        Utility.Debug($"Found default tactical with id {defaultTactical?.GadgetID ?? 0}");
+                        var defaultLethal = defaultGadgets.FirstOrDefault(k => !k.IsTactical);
+                        Utility.Debug($"Found default lethal with id {defaultLethal?.GadgetID ?? 0}");
+                        var defaultKillstreak = new List<int>();
+                        foreach (var killstreak in defaultKillstreaks)
+                        {
+                            defaultKillstreak.Add(killstreak.KillstreakID);
+                            if (defaultKillstreaks.Count == 3) break;
+                        }
+                        Utility.Debug($"Found {defaultKillstreak.Count} default killstreaks");
+                        var defaultGlove = defaultGloves.FirstOrDefault();
+                        Utility.Debug($"Found default glove with id {defaultGlove?.GloveID ?? 0}");
+                        var defaultCard = defaultCards.FirstOrDefault();
+                        Utility.Debug($"Found default card with id {defaultCard?.CardID ?? 0}");
+                        DefaultLoadout = new LoadoutData("DEFAULT LOADOUT", false, defaultPrimary?.GunID ?? 0, defaultPrimaryAttachments, defaultSecondary?.GunID ?? 0, defaultSecondaryAttachments, defaultKnife?.KnifeID ?? 0, defaultTactical?.GadgetID ?? 0, defaultLethal?.GadgetID ?? 0, defaultKillstreak, defaultPerk, defaultGlove?.GloveID ?? 0, defaultCard?.CardID ?? 0);
+                        Utility.Debug("Built a default loadout to give to the players when they join");
                     }
-                    Utility.Debug($"Found {defaultPerk.Count} default perks");
-                    var defaultKnife = defaultKnives.Count > 0 ? defaultKnives[0] : null;
-                    Utility.Debug($"Found default knife with id {defaultKnife?.KnifeID ?? 0}");
-                    var defaultTactical = defaultGadgets.FirstOrDefault(k => k.IsTactical);
-                    Utility.Debug($"Found default tactical with id {defaultTactical?.GadgetID ?? 0}");
-                    var defaultLethal = defaultGadgets.FirstOrDefault(k => !k.IsTactical);
-                    Utility.Debug($"Found default lethal with id {defaultLethal?.GadgetID ?? 0}");
-                    var defaultKillstreak = new List<int>();
-                    foreach (var killstreak in defaultKillstreaks)
+                    catch (Exception ex)
                     {
-                        defaultKillstreak.Add(killstreak.KillstreakID);
-                        if (defaultKillstreaks.Count == 3) break;
+                        Logger.Log("Error building default loadout for players");
+                        Logger.Log(ex);
+                    } finally
+                    {
+                        DefaultGuns = defaultGuns;
+                        DefaultKnives = defaultKnives;
+                        DefaultGadgets = defaultGadgets;
+                        DefaultKillstreaks = defaultKillstreaks;
+                        DefaultPerks = defaultPerks;
+                        DefaultGloves = defaultGloves;
+                        DefaultCards = defaultCards;
                     }
-                    Utility.Debug($"Found {defaultKillstreak.Count} default killstreaks");
-                    var defaultGlove = defaultGloves.FirstOrDefault();
-                    Utility.Debug($"Found default glove with id {defaultGlove?.GloveID ?? 0}");
-                    var defaultCard = defaultCards.FirstOrDefault();
-                    Utility.Debug($"Found default card with id {defaultCard?.CardID ?? 0}");
-                    DefaultLoadout = new LoadoutData("DEFAULT LOADOUT", false, defaultPrimary?.GunID ?? 0, defaultPrimaryAttachments, defaultSecondary?.GunID ?? 0, defaultSecondaryAttachments, defaultKnife?.KnifeID ?? 0, defaultTactical?.GadgetID ?? 0, defaultLethal?.GadgetID ?? 0, defaultKillstreak, defaultPerk, defaultGlove?.GloveID ?? 0, defaultCard?.CardID ?? 0);
-                    Utility.Debug("Built a default loadout to give to the players when they join");
-
-                    DefaultGuns = defaultGuns;
-                    DefaultKnives = defaultKnives;
-                    DefaultGadgets = defaultGadgets;
-                    DefaultKillstreaks = defaultKillstreaks;
-                    DefaultPerks = defaultPerks;
-                    DefaultGloves = defaultGloves;
-                    DefaultCards = defaultCards;
                 }
                 catch (Exception ex)
                 {
@@ -752,17 +766,70 @@ namespace UnturnedBlackout.Managers
             {
                 try
                 {
-                    Utility.Debug($"Adding player with steam id {player.CSteamID} and steam name {steamName} and avatar link {avatarLink}");
+                    Utility.Debug($"Adding {steamName} to the DB");
                     await Conn.OpenAsync();
                     var cmd = new MySqlCommand($"INSERT INTO `{PlayersTableName}` ( `SteamID` , `SteamName` , `AvatarLink` ) VALUES ({player.CSteamID}, @name, '{avatarLink}');", Conn);
                     cmd.Parameters.AddWithValue("@name", steamName);
                     await cmd.ExecuteScalarAsync();
+
+                    Utility.Debug($"Giving {steamName} the default guns");
+                    foreach (var gun in DefaultGuns)
+                    {
+                        Utility.Debug($"Adding gun with id {gun.GunID}");
+                        await new MySqlCommand($"INSERT INTO `{PlayersGunsTableName}` (`SteamID` , `GunID` , `Level` , `XP` , `GunKills` , `IsBought` , `Attachments`) VALUES ({player.CSteamID} , {gun.GunID} , 0 , 0 , 0 , 1 , '{Utility.CreateStringFromDefaultAttachments(gun.DefaultAttachments)}');", Conn).ExecuteScalarAsync();
+                    }
+                    await new MySqlCommand($"INSERT INTO `{PlayersGunsSkinsTableName}` (`SteamID` , `SkinIDs`) VALUES ({player.CSteamID}, '');", Conn).ExecuteScalarAsync();
+
+                    Utility.Debug($"Giving {steamName} the default knives");
+                    foreach (var knife in DefaultKnives)
+                    {
+                        Utility.Debug($"Adding knife with id {knife.KnifeID}");
+                        await new MySqlCommand($"INSERT INTO `{PlayersKnivesTableName}` (`SteamID` , `KnifeID` , `KnifeKills` , `IsBought`) VALUES ({player.CSteamID} , {knife.KnifeID} , 0 , 1);", Conn).ExecuteScalarAsync();
+                    }
+                    await new MySqlCommand($"INSERT INTO `{PlayersKnivesSkinsTableName}` (`SteamID` , `SkinIDs`) VALUES ({player.CSteamID}, '');", Conn).ExecuteScalarAsync();
+
+                    Utility.Debug($"Giving {steamName} the default gadgets");
+                    foreach (var gadget in DefaultGadgets)
+                    {
+                        Utility.Debug($"Adding gadget with id {gadget.GadgetID}");
+                        await new MySqlCommand($"INSERT INTO `{PlayersGadgetsTableName}` (`SteamID` , `GadgetID` , `GadgetKills` , `IsBought`) VALUES ({player.CSteamID} , {gadget.GadgetID} , 0 , 1);", Conn).ExecuteScalarAsync();
+                    }
+
+                    Utility.Debug($"Giving {steamName} the default killstreaks");
+                    foreach (var killstreak in DefaultKillstreaks)
+                    {
+                        Utility.Debug($"Adding killstreak with id {killstreak.KillstreakID}");
+                        await new MySqlCommand($"INSERT INTO `{PlayersKillstreaksTableName}` (`SteamID` , `KillstreakID` , `KillstreakKills` , `IsBought`) VALUES ({player.CSteamID} , {killstreak.KillstreakID} , 0 , 1);", Conn).ExecuteScalarAsync();
+                    }
+
+                    Utility.Debug($"Giving {steamName} the default perks");
+                    foreach (var perk in DefaultPerks)
+                    {
+                        Utility.Debug($"Adding perk with id {perk.PerkID}");
+                        await new MySqlCommand($"INSERT INTO `{PlayersPerksTableName}` (`SteamID` , `PerkID` , `IsBought`) VALUES ({player.CSteamID} , {perk.PerkID} , 1);", Conn).ExecuteScalarAsync();
+                    }
+
+                    Utility.Debug($"Giving {steamName} the default gloves");
+                    foreach (var glove in DefaultGloves)
+                    {
+                        Utility.Debug($"Adding glove with id {glove.GloveID}");
+                        await new MySqlCommand($"INSERT INTO `{PlayersGlovesTableName}` (`SteamID` , `GloveID` , `IsBought`) VALUES ({player.CSteamID} , {glove.GloveID} , 1);", Conn).ExecuteScalarAsync();
+                    }
+
+                    Utility.Debug($"Giving {steamName} the default cards");
+                    foreach (var card in DefaultCards)
+                    {
+                        Utility.Debug($"Adding card with id {card.CardID}");
+                        await new MySqlCommand($"INSERT INTO `{PlayersCardsTableName}` (`SteamID` , `CardID` , `IsBought`) VALUES ({player.CSteamID} , {card.CardID} , 1);", Conn).ExecuteScalarAsync();
+                    }
+
                     var loadoutAmount = Utility.GetLoadoutAmount(player);
-                    Utility.Debug($"Player should have {loadoutAmount} loadouts, adding them");
+                    Utility.Debug($"{steamName} should have {loadoutAmount} loadouts, adding them");
+                    var data = Plugin.Instance.DataManager.ConvertLoadoutToJson(DefaultLoadout);
                     for (int i = 1; i <= loadoutAmount; i++)
                     {
-                        Utility.Debug($"Adding loadout with id {i}");
-                        //await new MySqlCommand($"INSERT INTO `{PlayersLoadoutsTableName}` (`SteamID` , `LoadoutID` , `Loadout`) VALUES ({player.CSteamID}, ")
+                        Utility.Debug($"Adding loadout with id {i} for {steamName}");
+                        await new MySqlCommand($"INSERT INTO `{PlayersLoadoutsTableName}` (`SteamID` , `LoadoutID` , `Loadout`) VALUES ({player.CSteamID}, {i}, '{data}');", Conn).ExecuteScalarAsync();
                     }
                 }
                 catch (Exception ex)
@@ -798,15 +865,15 @@ namespace UnturnedBlackout.Managers
             }
         }
 
-        public async Task GetPlayerDataAsync(CSteamID steamID)
+        public async Task GetPlayerDataAsync(UnturnedPlayer player)
         {
             using (MySqlConnection Conn = new MySqlConnection(ConnectionString))
             {
                 try
                 {
+                    Utility.Debug($"Getting data for {player.CharacterName} from the main table");
                     await Conn.OpenAsync();
-                    var rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PlayersTableName}` WHERE `SteamID` = {steamID};", Conn).ExecuteReaderAsync();
-
+                    var rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PlayersTableName}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
                     try
                     {
                         while (await rdr.ReadAsync())
@@ -828,27 +895,342 @@ namespace UnturnedBlackout.Managers
                             if (!uint.TryParse(rdr[15].ToString(), out uint deaths)) continue;
                             if (!bool.TryParse(rdr[16].ToString(), out bool music)) continue;
 
-                            if (PlayerData.ContainsKey(steamID))
+                            if (PlayerData.ContainsKey(player.CSteamID))
                             {
-                                PlayerData.Remove(steamID);
+                                PlayerData.Remove(player.CSteamID);
                             }
 
-                            PlayerData.Add(steamID, new PlayerData(steamID, steamName, avatarLink, xp, level, credits, kills, headshotKills, highestKillstreak, highestMultiKills, killsConfirmed, killsDenied, flagsCaptured, flagsSaved, areasTaken, deaths, music));
+                            PlayerData.Add(player.CSteamID, new PlayerData(player.CSteamID, steamName, avatarLink, xp, level, credits, kills, headshotKills, highestKillstreak, highestMultiKills, killsConfirmed, killsDenied, flagsCaptured, flagsSaved, areasTaken, deaths, music));
                         }
                     }
                     catch (Exception ex)
                     {
-                        Logger.Log($"Error reading player data with Steam ID {steamID}");
+                        Logger.Log($"Error reading player data for {player.CharacterName}");
                         Logger.Log(ex);
                     }
                     finally
                     {
                         rdr.Close();
                     }
+
+                    if (!PlayerData.ContainsKey(player.CSteamID))
+                    {
+                        Utility.Debug("Error finding player data, returning");
+                        return;
+                    }
+
+                    Dictionary<ushort, LoadoutGun> guns = new Dictionary<ushort, LoadoutGun>();
+                    Dictionary<ushort, LoadoutKnife> knives = new Dictionary<ushort, LoadoutKnife>();
+                    Dictionary<int, LoadoutGunSkin> gunSkinsSearchByID = new Dictionary<int, LoadoutGunSkin>();
+                    Dictionary<int, LoadoutKnifeSkin> knifeSkinsSearchByID = new Dictionary<int, LoadoutKnifeSkin>();
+                    Dictionary<ushort, List<LoadoutGunSkin>> gunSkinsSearchByGunID = new Dictionary<ushort, List<LoadoutGunSkin>>();
+                    Dictionary<ushort, List<LoadoutKnifeSkin>> knifeSkinsSearchByKnifeID = new Dictionary<ushort, List<LoadoutKnifeSkin>>();
+                    Dictionary<ushort, LoadoutGunSkin> gunSkinsSearchBySkinID = new Dictionary<ushort, LoadoutGunSkin>();
+                    Dictionary<ushort, LoadoutKnifeSkin> knifeSkinsSearchBySkinID = new Dictionary<ushort, LoadoutKnifeSkin>();
+                    Dictionary<int, LoadoutPerk> perks = new Dictionary<int, LoadoutPerk>();
+                    Dictionary<int, LoadoutGadget> gadgets = new Dictionary<int, LoadoutGadget>();
+                    Dictionary<int, LoadoutKillstreak> killstreaks = new Dictionary<int, LoadoutKillstreak>();
+                    Dictionary<int, LoadoutCard> cards = new Dictionary<int, LoadoutCard>();
+                    Dictionary<int, LoadoutGlove> gloves = new Dictionary<int, LoadoutGlove>();
+                    Dictionary<int, Loadout> loadouts = new Dictionary<int, Loadout>();
+
+                    Utility.Debug($"Getting guns for {player.CharacterName}");
+                    rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PlayersGunsTableName}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
+                    try
+                    {
+                        while (await rdr.ReadAsync())
+                        {
+                            if (!ushort.TryParse(rdr[1].ToString(), out ushort gunID)) continue;
+                            if (!Guns.TryGetValue(gunID, out Gun gun))
+                            {
+                                Utility.Debug($"Error finding gun with id {gunID}, ignoring it");
+                                continue;
+                            }
+
+                            if (!int.TryParse(rdr[2].ToString(), out int level)) continue;
+                            if (!int.TryParse(rdr[3].ToString(), out int xp)) continue;
+                            if (!int.TryParse(rdr[4].ToString(), out int gunKills)) continue;
+                            if (!bool.TryParse(rdr[5].ToString(), out bool isBought)) continue;
+                            var attachments = Utility.GetAttachmentsFromString(rdr[6].ToString());
+                            if (!guns.ContainsKey(gunID))
+                            {
+                                guns.Add(gunID, new LoadoutGun(gun, level, xp, gunKills, isBought, attachments));
+                            } else
+                            {
+                                Utility.Debug($"Found a duplicate gun with id {gunID} registered for the player, ignoring it");
+                            }
+                        }
+                        Utility.Debug($"Successfully got {guns.Count} guns registered to the player");
+                    } catch (Exception ex)
+                    {
+                        Logger.Log($"Error reading gun data for {player.CharacterName}");
+                        Logger.Log(ex);
+                    } finally
+                    {
+                        rdr.Close();
+                    }
+
+                    Utility.Debug($"Getting knives for {player.CharacterName}");
+                    rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PlayersKnivesTableName}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
+                    try
+                    {
+                        while (await rdr.ReadAsync())
+                        {
+                            if (!ushort.TryParse(rdr[1].ToString(), out ushort knifeID)) continue;
+                            if (!Knives.TryGetValue(knifeID, out Knife knife))
+                            {
+                                Utility.Debug($"Error finding knife with id {knifeID}, ignoring it");
+                                continue;
+                            }
+                            if (!int.TryParse(rdr[2].ToString(), out int knifeKills)) continue;
+                            if (!bool.TryParse(rdr[3].ToString(), out bool isBought)) continue;
+                            
+                            if (!knives.ContainsKey(knifeID))
+                            {
+                                knives.Add(knifeID, new LoadoutKnife(knife, knifeKills, isBought));
+                            } else
+                            {
+                                Utility.Debug($"Found a duplicate knife with id {knifeID} registered for {player.CharacterName}, ignoring it");
+                            }
+                        }
+                        Utility.Debug($"Successfully got {knives.Count} knives for {player.CharacterName}");
+                    } catch (Exception ex)
+                    {
+                        Logger.Log($"Error reading knife data for {player.CharacterName}");
+                        Logger.Log(ex);
+                    } finally
+                    {
+                        rdr.Close();
+                    }
+
+                    Utility.Debug($"Getting gun skins for {player.CharacterName}");
+                    var gunSkinsTxt = await new MySqlCommand($"SELECT `SkinIDs` FROM `{PlayersGunsSkinsTableName}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteScalarAsync();
+                    if (gunSkinsTxt is string gunSkinsText)
+                    {
+                        foreach (var gunSkinText in gunSkinsText.Split(','))
+                        {
+                            var isEquipped = false;
+                            var newText = "";
+                            if (gunSkinText.StartsWith("E."))
+                            {
+                                isEquipped = true;
+                                newText = gunSkinText.Replace("E.", "");
+                            } else if (gunSkinText.StartsWith("UE."))
+                            {
+                                isEquipped = false;
+                                newText = gunSkinText.Replace("UE.", "");
+                            }
+
+                            if (!int.TryParse(gunSkinText, out int skinID)) continue;
+                            if (GunSkinsSearchByID.TryGetValue(skinID, out GunSkin skin))
+                            {
+                                gunSkins.Add(skinID, skin);
+                            } else
+                            {
+                                Utility.Debug($"Error finding gun skin with id {skinID}, ignoring it");
+                            }
+                        }
+                        Utility.Debug($"Successfully got {gunSkins.Count} gun skins for {player.CharacterName}");
+                    }
+
+                    Utility.Debug($"Getting knife skins for {player.CharacterName}");
+                    var knifeSkinsTxt = await new MySqlCommand($"SELECT `SkinIDs` FROM `{PlayersKnivesSkinsTableName}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteScalarAsync();
+                    if (gunSkinsTxt is string knifeSkinsText)
+                    {
+                        foreach (var knifeSkinText in knifeSkinsText.Split(','))
+                        {
+                            if (!int.TryParse(knifeSkinText, out int skinID)) continue;
+                            if (KnifeSkinsSearchByID.TryGetValue(skinID, out KnifeSkin skin))
+                            {
+                                knifeSkins.Add(skinID, skin);
+                            }
+                            else
+                            {
+                                Utility.Debug($"Error finding knife skin with id {skinID}, ignoring it");
+                            }
+                        }
+                        Utility.Debug($"Successfully got {knifeSkins.Count} knife skins for {player.CharacterName}");
+                    }
+
+                    Utility.Debug($"Getting perks for {player.CharacterName}");
+                    rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PlayersPerksTableName}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
+                    try
+                    {
+                        while (await rdr.ReadAsync())
+                        {
+                            if (!int.TryParse(rdr[1].ToString(), out int perkID)) continue;
+                            if (!Perks.TryGetValue(perkID, out Perk perk))
+                            {
+                                Utility.Debug($"Error finding perk with id {perkID}, ignoring this");
+                                continue;
+                            }
+                            if (!bool.TryParse(rdr[2].ToString(), out bool isBought)) continue;
+                            if (!perks.ContainsKey(perkID))
+                            {
+                                perks.Add(perkID, new LoadoutPerk(perk, isBought));
+                            } else
+                            {
+                                Utility.Debug($"Found a duplicate perk with id {perkID} registered for {player.CharacterName}, ignoring it");
+                            }
+                        }
+                        Utility.Debug($"Successfully got {perks.Count} perks for {player.CharacterName}");
+                    } catch (Exception ex)
+                    {
+                        Logger.Log($"Error reading perk data for {player.CharacterName}");
+                        Logger.Log(ex);
+                    } finally
+                    {
+                        rdr.Close();
+                    }
+
+                    Utility.Debug($"Getting gadgets for {player.CharacterName}");
+                    rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PlayersPerksTableName}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
+                    try
+                    {
+                        while (await rdr.ReadAsync())
+                        {
+                            if (!ushort.TryParse(rdr[1].ToString(), out ushort gadgetID)) continue;
+                            if (!Gadgets.TryGetValue(gadgetID, out Gadget gadget))
+                            {
+                                Utility.Debug($"Error finding gadget with id {gadgetID} for {player.CharacterName}, ignoring it");
+                                continue;
+                            }
+                            if (!int.TryParse(rdr[2].ToString(), out int gadgetKills)) continue;
+                            if (!bool.TryParse(rdr[3].ToString(), out bool isBought)) continue;
+                            if (!gadgets.ContainsKey(gadgetID))
+                            {
+                                gadgets.Add(gadgetID, new LoadoutGadget(gadget, gadgetKills, isBought));
+                            } else
+                            {
+                                Utility.Debug($"Found duplicate gadget with id {gadgetID} registered for {player.CharacterName}, ignoring it");
+                            }
+                        }
+                        Utility.Debug($"Successfully got {gadgets.Count} for {player.CharacterName}");
+                    } catch (Exception ex)
+                    {
+                        Logger.Log($"Error reading gadgets data for {player.CharacterName}");
+                        Logger.Log(ex);
+                    } finally
+                    {
+                        rdr.Close();
+                    }
+
+                    Utility.Debug($"Getting killstreaks for {player.CharacterName}");
+                    rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PlayersKillstreaksTableName}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
+                    try
+                    {
+                        while (await rdr.ReadAsync())
+                        {
+                            if (!int.TryParse(rdr[1].ToString(), out int killstreakID)) continue;
+                            if (!Killstreaks.TryGetValue(killstreakID, out Killstreak killstreak))
+                            {
+                                Utility.Debug($"Error finding killstreak with id {killstreakID} for {player.CharacterName}, ignoring it");
+                                continue;
+                            }
+                            if (!int.TryParse(rdr[2].ToString(), out int killstreakKills)) continue;
+                            if (!bool.TryParse(rdr[3].ToString(), out bool isBought)) continue;
+
+                            if (!killstreaks.ContainsKey(killstreakID))
+                            {
+                                killstreaks.Add(killstreakID, new LoadoutKillstreak(killstreak, killstreakKills, isBought));
+                            } else
+                            {
+                                Utility.Debug($"Found a duplicate killstreak with id {killstreakID} for {player.CharacterName}, ignoring it");
+                            }
+                        }
+                        Utility.Debug($"Successfully got {killstreaks.Count} for {player.CharacterName}");
+                    } catch (Exception ex)
+                    {
+                        Logger.Log($"Error reading killstreaks data for {player.CharacterName}");
+                        Logger.Log(ex);
+                    } finally
+                    {
+                        rdr.Close();
+                    }
+
+                    Utility.Debug($"Getting cards for {player.CharacterName}");
+                    rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PlayersCardsTableName}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
+                    try
+                    {
+                        while (await rdr.ReadAsync())
+                        {
+                            if (!int.TryParse(rdr[1].ToString(), out int cardID)) continue;
+                            if (!Cards.TryGetValue(cardID, out Card card))
+                            {
+                                Utility.Debug($"Error finding card with id {cardID} for {player.CharacterName}, ignoring it");
+                                continue;
+                            }
+
+                            if (!bool.TryParse(rdr[2].ToString(), out bool isBought)) continue;
+                            if (!cards.ContainsKey(cardID))
+                            {
+                                cards.Add(cardID, new LoadoutCard(card, isBought));
+                            } else
+                            {
+                                Utility.Debug($"Found duplicate card with id {cardID} for {player.CharacterName}, ignoring it");
+                            }
+                        }
+                        Utility.Debug($"Successfully got {cards.Count} for {player.CharacterName}");
+                    } catch (Exception ex)
+                    {
+                        Logger.Log($"Error reading cards data for {player.CharacterName}");
+                        Logger.Log(ex);
+                    } finally
+                    {
+                        rdr.Close();
+                    }
+
+                    Utility.Debug($"Getting gloves for {player.CharacterName}");
+                    rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PlayersGlovesTableName}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
+                    try
+                    {
+                        while (await rdr.ReadAsync())
+                        {
+                            if (!ushort.TryParse(rdr[1].ToString(), out ushort gloveID)) continue;
+                            if (!Gloves.TryGetValue(gloveID, out Glove glove))
+                            {
+                                Utility.Debug($"Error finding glove with id {gloveID} for {player.CharacterName}, ignoring it");
+                                continue;
+                            }
+                            if (!bool.TryParse(rdr[2].ToString(), out bool isBought)) continue;
+                            if (!gloves.ContainsKey(gloveID))
+                            {
+                                gloves.Add(gloveID, new LoadoutGlove(glove, isBought));
+                            } else
+                            {
+                                Utility.Debug($"Found duplicate glove with id {gloveID} for {player.CharacterName}, ignoring it");
+                            }
+                        }
+                        Utility.Debug($"Successfully got {gloves.Count} gloves for {player.CharacterName}");
+                    } catch (Exception ex)
+                    {
+                        Logger.Log($"Error reading gloves data for {player.CharacterName}");
+                        Logger.Log(ex);
+                    } finally
+                    {
+                        rdr.Close();
+                    }
+
+                    Utility.Debug($"Getting loadouts for {player.CharacterName}");
+                    rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PlayersLoadoutsTableName}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
+                    try
+                    {
+                        while (await rdr.ReadAsync())
+                        {
+                             
+                        }
+                    } catch (Exception ex)
+                    {
+                        Logger.Log($"Error reading loadouts data for {player.CharacterName}");
+                        Logger.Log(ex);
+                    } finally
+                    {
+                        rdr.Close();
+                    }
                 }
                 catch (Exception ex)
                 {
-                    Logger.Log($"Error getting player data with Steam ID {steamID}");
+                    Logger.Log($"Error getting player data with Steam ID {player.CSteamID}");
                     Logger.Log(ex);
                 }
                 finally
@@ -1269,7 +1651,5 @@ namespace UnturnedBlackout.Managers
                 }
             }
         }
-
-
     }
 }

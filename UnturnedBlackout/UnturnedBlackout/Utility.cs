@@ -4,6 +4,8 @@ using SDG.Unturned;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnturnedBlackout.Database.Base;
+using UnturnedBlackout.Database.Data;
 using Logger = Rocket.Core.Logging.Logger;
 
 namespace UnturnedBlackout
@@ -129,8 +131,53 @@ namespace UnturnedBlackout
             {
                 skinsText += $"{id},";
             }
+            return skinsText.Remove(skinsText.Length - 1, 1);
+        }
 
-            return skinsText;
+        public static List<LoadoutAttachment> GetAttachmentsFromString(string text)
+        {
+            var attachments = new List<LoadoutAttachment>();
+            var attachmentsText = text.Split(',');
+            foreach (var attachmentText in attachmentsText)
+            {
+                var isBought = false;
+                ushort attachmentID = 0;
+                if (attachmentText.Contains("B."))
+                {
+                    isBought = true;
+                    if (!ushort.TryParse(attachmentText.Replace("B.", ""), out attachmentID)) continue;
+                }
+                else if (attachmentsText.Contains("UB."))
+                {
+                    isBought = false;
+                    if (!ushort.TryParse(attachmentText.Replace("UB.", ""), out attachmentID)) continue;
+                }
+                if (!Plugin.Instance.DBManager.GunAttachments.TryGetValue(attachmentID, out GunAttachment gunAttachment))
+                {
+                    attachments.Add(new LoadoutAttachment(gunAttachment, isBought));
+                }
+            }
+            return attachments;
+        }
+
+        public static string GetStringFromAttachments(List<LoadoutAttachment> attachments)
+        {
+            var text = "";
+            foreach (var attachment in attachments)
+            {
+                text += $"{(attachment.IsBought ? "B." : "UB.")}{attachment.Attachment.AttachmentID},";
+            }
+            return text.Remove(text.Length - 1, 1);
+        }
+
+        public static string CreateStringFromDefaultAttachments(List<GunAttachment> gunAttachments)
+        {
+            var text = "";
+            foreach (var attachment in gunAttachments)
+            {
+                text += $"B.{attachment.AttachmentID},";
+            }
+            return text.Remove(text.Length - 1, 1);
         }
 
         public static int GetLoadoutAmount(UnturnedPlayer player)

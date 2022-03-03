@@ -11,8 +11,12 @@ namespace UnturnedBlackout.Database.Data
     {
         public Dictionary<ushort, LoadoutGun> Guns { get; set; }
         public Dictionary<ushort, LoadoutKnife> Knives { get; set; }
-        public Dictionary<int, GunSkin> GunSkins { get; set; }
-        public Dictionary<int, KnifeSkin> KnifeSkins { get; set; }
+        public Dictionary<int, GunSkin> GunSkinsSearchByID { get; set; }
+        public Dictionary<int, KnifeSkin> KnifeSkinsSearchByID { get; set; }
+        public Dictionary<ushort, List<GunSkin>> GunsSkinsSearchByGunID { get; set; }
+        public Dictionary<ushort, List<KnifeSkin>> KnifeSkinsSearchByKnifeID { get; set; }
+        public Dictionary<ushort, GunSkin> GunSkinsSearchBySkinID { get; set; }
+        public Dictionary<ushort, KnifeSkin> KnifeSkinsSearchBySkinID { get; set; }
         public Dictionary<int, LoadoutPerk> Perks { get; set; }
         public Dictionary<int, LoadoutGadget> Gadgets { get; set; }
         public Dictionary<int, LoadoutKillstreak> Killstreaks { get; set; }
@@ -20,12 +24,16 @@ namespace UnturnedBlackout.Database.Data
         public Dictionary<int, LoadoutGlove> Gloves { get; set; }
         public Dictionary<int, Loadout> Loadouts { get; set; }
 
-        public PlayerLoadout(Dictionary<ushort, LoadoutGun> guns, Dictionary<ushort, LoadoutKnife> knives, Dictionary<int, GunSkin> gunSkins, Dictionary<int, KnifeSkin> knifeSkins, Dictionary<int, LoadoutPerk> perks, Dictionary<int, LoadoutGadget> gadgets, Dictionary<int, LoadoutKillstreak> killstreaks, Dictionary<int, LoadoutCard> cards, Dictionary<int, LoadoutGlove> gloves, Dictionary<int, Loadout> loadouts)
+        public PlayerLoadout(Dictionary<ushort, LoadoutGun> guns, Dictionary<ushort, LoadoutKnife> knives, Dictionary<int, GunSkin> gunSkinsSearchByID, Dictionary<int, KnifeSkin> knifeSkinsSearchByID, Dictionary<ushort, List<GunSkin>> gunsSkinsSearchByGunID, Dictionary<ushort, List<KnifeSkin>> knifeSkinsSearchByKnifeID, Dictionary<ushort, GunSkin> gunSkinsSearchBySkinID, Dictionary<ushort, KnifeSkin> knifeSkinsSearchBySkinID, Dictionary<int, LoadoutPerk> perks, Dictionary<int, LoadoutGadget> gadgets, Dictionary<int, LoadoutKillstreak> killstreaks, Dictionary<int, LoadoutCard> cards, Dictionary<int, LoadoutGlove> gloves, Dictionary<int, Loadout> loadouts)
         {
             Guns = guns;
             Knives = knives;
-            GunSkins = gunSkins;
-            KnifeSkins = knifeSkins;
+            GunSkinsSearchByID = gunSkinsSearchByID;
+            KnifeSkinsSearchByID = knifeSkinsSearchByID;
+            GunsSkinsSearchByGunID = gunsSkinsSearchByGunID;
+            KnifeSkinsSearchByKnifeID = knifeSkinsSearchByKnifeID;
+            GunSkinsSearchBySkinID = gunSkinsSearchBySkinID;
+            KnifeSkinsSearchBySkinID = knifeSkinsSearchBySkinID;
             Perks = perks;
             Gadgets = gadgets;
             Killstreaks = killstreaks;
