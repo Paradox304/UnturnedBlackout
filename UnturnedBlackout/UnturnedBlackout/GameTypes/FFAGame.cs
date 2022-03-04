@@ -245,7 +245,7 @@ namespace UnturnedBlackout.GameTypes
 
             var victimKS = fPlayer.KillStreak;
 
-            Utility.Debug($"Game player died, player name: {fPlayer.GamePlayer.Player.CharacterName}");
+            Logging.Debug($"Game player died, player name: {fPlayer.GamePlayer.Player.CharacterName}");
             fPlayer.OnDeath(killer);
             fPlayer.GamePlayer.OnDeath(killer, Config.FFA.RespawnSeconds);
 
@@ -261,11 +261,11 @@ namespace UnturnedBlackout.GameTypes
 
                 if (kPlayer.GamePlayer.SteamID == fPlayer.GamePlayer.SteamID)
                 {
-                    Utility.Debug("Player killed themselves, returning");
+                    Logging.Debug("Player killed themselves, returning");
                     return;
                 }
 
-                Utility.Debug($"Killer found, killer name: {kPlayer.GamePlayer.Player.CharacterName}");
+                Logging.Debug($"Killer found, killer name: {kPlayer.GamePlayer.Player.CharacterName}");
                 if (fPlayer.GamePlayer.LastDamager.Peek() == kPlayer.GamePlayer.SteamID)
                 {
                     fPlayer.GamePlayer.LastDamager.Pop();

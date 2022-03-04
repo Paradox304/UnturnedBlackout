@@ -1003,7 +1003,7 @@ namespace UnturnedBlackout.Managers
 
         private void OnButtonClicked(Player player, string buttonName)
         {
-            Utility.Debug($"{player.channel.owner.playerID.characterName} clicked {buttonName}");
+            Logging.Debug($"{player.channel.owner.playerID.characterName} clicked {buttonName}");
             var ply = UnturnedPlayer.FromPlayer(player);
 
             switch (buttonName)

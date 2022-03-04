@@ -25,5 +25,16 @@ namespace UnturnedBlackout.Database.Data
             IsBought = isBought;
             Attachments = attachments;
         }
+
+        public bool TryGetNeededXP(out int neededXP)
+        {
+            neededXP = 0;
+            if (Gun.LevelXPNeeded.Count < (Level - 1))
+            {
+                neededXP = Gun.LevelXPNeeded[Level - 1];
+                return true;
+            }
+            return false;
+        }
     }
 }

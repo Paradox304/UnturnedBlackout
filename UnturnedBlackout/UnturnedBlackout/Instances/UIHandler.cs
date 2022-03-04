@@ -27,7 +27,7 @@ namespace UnturnedBlackout.Instances
 
         public UIHandler(UnturnedPlayer player)
         {
-            Utility.Debug($"Creating UIHandler for {player.CSteamID}");
+            Logging.Debug($"Creating UIHandler for {player.CSteamID}");
             SteamID = player.CSteamID;
             Player = player;
             TransportConnection = player.Player.channel.GetOwnerTransportConnection();
@@ -85,7 +85,7 @@ namespace UnturnedBlackout.Instances
 
         public void ShowGames()
         {
-            Utility.Debug($"Showing games for {Player.CharacterName}");
+            Logging.Debug($"Showing games for {Player.CharacterName}");
             CurrentPage = EPage.Play;
 
             for (int i = 0; i <= 9; i++)
@@ -97,7 +97,7 @@ namespace UnturnedBlackout.Instances
             for (int i = 0; i < games.Count; i++)
             {
                 var game = games[i];
-                Utility.Debug($"i: {i}, players: {game.GetPlayerCount()}, max players: {game.Location.GetMaxPlayers(game.GameMode)}, phase: {game.GamePhase}");
+                Logging.Debug($"i: {i}, players: {game.GetPlayerCount()}, max players: {game.Location.GetMaxPlayers(game.GameMode)}, phase: {game.GamePhase}");
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"Lobby{i}", true);
                 ShowGame(game);
             }

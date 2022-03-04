@@ -62,7 +62,7 @@ namespace UnturnedBlackout.GameTypes
 
         public void OnTrapTriggered(GamePlayer player, int trapID)
         {
-            Utility.Debug($"TRAP TRIGGERED BY {player.Player.CharacterName} with id {trapID}");
+            Logging.Debug($"TRAP TRIGGERED BY {player.Player.CharacterName} with id {trapID}");
         }
 
         private void OnPlayerRespawning(PlayerLife sender, bool wantsToSpawnAtHome, ref Vector3 position, ref float yaw)

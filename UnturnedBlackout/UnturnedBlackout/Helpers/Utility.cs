@@ -60,14 +60,6 @@ namespace UnturnedBlackout
             ChatManager.serverSendMessage(message, Color.green, useRichTextFormatting: true);
         }
 
-        public static void Debug(string message)
-        {
-            if (Plugin.Instance.Configuration.Instance.EnableDebugLogs == true)
-            {
-                Logger.Log($"[DEBUG] {message}");
-            }
-        }
-
         public static void ClearInventory(this PlayerInventory inv)
         {
             inv.player.equipment.sendSlot(0);

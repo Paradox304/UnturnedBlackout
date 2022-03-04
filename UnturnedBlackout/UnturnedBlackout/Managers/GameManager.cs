@@ -43,20 +43,20 @@ namespace UnturnedBlackout.Managers
 
             for (int i = 1; i <= Config.GamesCount; i++)
             {
-                Utility.Debug($"Getting the location");
-                Utility.Debug($"{AvailableLocations.Count} locations to choose from");
+                Logging.Debug($"Getting the location");
+                Logging.Debug($"{AvailableLocations.Count} locations to choose from");
                 var locationID = AvailableLocations[UnityEngine.Random.Range(0, AvailableLocations.Count)];
                 var location = Config.ArenaLocations.FirstOrDefault(k => k.LocationID == locationID);
                 var gameMode = (EGameType)gameModes[UnityEngine.Random.Range(0, gameModes.Count)];
-                Utility.Debug($"Found {gameMode}");
-                Utility.Debug($"Found {location.LocationName}");
+                Logging.Debug($"Found {gameMode}");
+                Logging.Debug($"Found {location.LocationName}");
                 StartGame(location, gameMode);
             }
         }
 
         public void StartGame(ArenaLocation location, EGameType gameMode)
         {
-            Utility.Debug($"Starting game with location {location.LocationID} for gamemode {gameMode}");
+            Logging.Debug($"Starting game with location {location.LocationID} for gamemode {gameMode}");
             Game game = null;
             switch (gameMode)
             {
@@ -76,7 +76,7 @@ namespace UnturnedBlackout.Managers
                     break;
             }
 
-            Utility.Debug("Game is created, adding the game to the list, and releasing the location from available locations");
+            Logging.Debug("Game is created, adding the game to the list, and releasing the location from available locations");
             Games.Add(game);
             AvailableLocations.Remove(location.LocationID);
             Plugin.Instance.UIManager.OnGamesUpdated();
@@ -84,8 +84,8 @@ namespace UnturnedBlackout.Managers
 
         public void EndGame(Game game)
         {
-            Utility.Debug($"Ending game for location {game.Location.LocationName} for gamemode {game.GameMode}");
-            Utility.Debug("Destroying the game, removing the game from the list, and adding the location to available locations");
+            Logging.Debug($"Ending game for location {game.Location.LocationName} for gamemode {game.GameMode}");
+            Logging.Debug("Destroying the game, removing the game from the list, and adding the location to available locations");
             game.Destroy();
             Games.Remove(game);
             AvailableLocations.Add(game.Location.LocationID);

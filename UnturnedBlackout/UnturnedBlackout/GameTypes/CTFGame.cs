@@ -107,7 +107,7 @@ namespace UnturnedBlackout.GameTypes
                 WipeItems();
                 ItemManager.dropItem(new Item(RedTeam.FlagID, true), RedTeam.FlagSP, true, true, true);
                 ItemManager.dropItem(new Item(BlueTeam.FlagID, true), BlueTeam.FlagSP, true, true, true);
-                Utility.Debug($"Dropping red flag at {RedTeam.FlagSP} and blue flag at {BlueTeam.FlagSP} for location {Location.LocationName}");
+                Logging.Debug($"Dropping red flag at {RedTeam.FlagSP} and blue flag at {BlueTeam.FlagSP} for location {Location.LocationName}");
             });
 
             GameEnder = Plugin.Instance.StartCoroutine(EndGame());
@@ -325,7 +325,7 @@ namespace UnturnedBlackout.GameTypes
 
             var victimKS = cPlayer.KillStreak;
 
-            Utility.Debug($"Game player died, player name: {cPlayer.GamePlayer.Player.CharacterName}");
+            Logging.Debug($"Game player died, player name: {cPlayer.GamePlayer.Player.CharacterName}");
             cPlayer.OnDeath(killer);
             cPlayer.GamePlayer.OnDeath(killer, Config.CTF.RespawnSeconds);
 
@@ -357,11 +357,11 @@ namespace UnturnedBlackout.GameTypes
 
                 if (kPlayer.GamePlayer.SteamID == cPlayer.GamePlayer.SteamID)
                 {
-                    Utility.Debug("Player killed themselves, returning");
+                    Logging.Debug("Player killed themselves, returning");
                     return;
                 }
 
-                Utility.Debug($"Killer found, killer name: {kPlayer.GamePlayer.Player.CharacterName}");
+                Logging.Debug($"Killer found, killer name: {kPlayer.GamePlayer.Player.CharacterName}");
                 if (cPlayer.GamePlayer.LastDamager.Peek() == kPlayer.GamePlayer.SteamID)
                 {
                     cPlayer.GamePlayer.LastDamager.Pop();
@@ -557,18 +557,18 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
-            Utility.Debug($"{player.Player.CharacterName} is trying to pick up item {itemData.item.id}");
+            Logging.Debug($"{player.Player.CharacterName} is trying to pick up item {itemData.item.id}");
             var otherTeam = cPlayer.Team == BlueTeam ? RedTeam : BlueTeam;
 
             if (cPlayer.Team.FlagID == itemData.item.id)
             {
-                Utility.Debug($"{player.Player.CharacterName} is trying to pick up their own flag, checking if they are saving the flag");
+                Logging.Debug($"{player.Player.CharacterName} is trying to pick up their own flag, checking if they are saving the flag");
                 shouldAllow = false;
 
                 if (!cPlayer.Team.HasFlag)
                 {
-                    Utility.Debug($"{player.Player.CharacterName} is saving their flag, clearing the flag and putting it back into position");
-                    Utility.Debug($"Spawning their team's flag at {cPlayer.Team.FlagSP} for location {Location.LocationName}");
+                    Logging.Debug($"{player.Player.CharacterName} is saving their flag, clearing the flag and putting it back into position");
+                    Logging.Debug($"Spawning their team's flag at {cPlayer.Team.FlagSP} for location {Location.LocationName}");
                     ItemManager.ServerClearItemsInSphere(itemData.point, 1);
                     ItemManager.dropItem(new Item(cPlayer.Team.FlagID, true), cPlayer.Team.FlagSP, true, true, true);
                     cPlayer.Team.HasFlag = true;
@@ -594,18 +594,18 @@ namespace UnturnedBlackout.GameTypes
 
                 if (!cPlayer.IsCarryingFlag)
                 {
-                    Utility.Debug($"{player.Player.CharacterName} is not carrying an enemy's flag");
+                    Logging.Debug($"{player.Player.CharacterName} is not carrying an enemy's flag");
                     return;
                 }
 
-                Utility.Debug($"{player.Player.CharacterName} is carrying the enemy's flag, getting the flag, other team lost flag {otherTeam.HasFlag}");
+                Logging.Debug($"{player.Player.CharacterName} is carrying the enemy's flag, getting the flag, other team lost flag {otherTeam.HasFlag}");
                 if (player.Player.Player.clothing.backpack == otherTeam.FlagID && !otherTeam.HasFlag)
                 {
                     player.Player.Player.clothing.thirdClothes.backpack = 0;
                     player.Player.Player.clothing.askWearBackpack(0, 0, new byte[0], true);
 
                     ItemManager.dropItem(new Item(otherTeam.FlagID, true), otherTeam.FlagSP, true, true, true);
-                    Utility.Debug($"Spawning the other team's flag at {otherTeam.FlagSP} for location {Location.LocationName}");
+                    Logging.Debug($"Spawning the other team's flag at {otherTeam.FlagSP} for location {Location.LocationName}");
                     otherTeam.HasFlag = true;
                     cPlayer.Team.Score++;
                     cPlayer.Score += Config.FlagCapturedPoints;
@@ -636,17 +636,17 @@ namespace UnturnedBlackout.GameTypes
                 }
                 else
                 {
-                    Utility.Debug($"[ERROR] Could'nt find the other team's flag as the player's backpack");
+                    Logging.Debug($"[ERROR] Could'nt find the other team's flag as the player's backpack");
                 }
 
                 cPlayer.IsCarryingFlag = false;
             }
             else if (otherTeam.FlagID == itemData.item.id)
             {
-                Utility.Debug($"{player.Player.CharacterName} is trying to pick up the other team's flag, checking if they have their own flag");
+                Logging.Debug($"{player.Player.CharacterName} is trying to pick up the other team's flag, checking if they have their own flag");
                 if (!cPlayer.Team.HasFlag)
                 {
-                    Utility.Debug($"Their own team doesn't have their flag, don't allow to pickup flag");
+                    Logging.Debug($"Their own team doesn't have their flag, don't allow to pickup flag");
                     shouldAllow = false;
                     return;
                 }
