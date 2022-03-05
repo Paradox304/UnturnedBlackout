@@ -2143,10 +2143,98 @@ namespace UnturnedBlackout.Managers
                         throw new Exception();
                     }
 
-
+                    await new MySqlCommand($"UPDATE `{PlayersGunsTableName}` SET `Attachments` = '{Utility.GetStringFromAttachments(gun.Attachments.Values.ToList())}' WHERE `SteamID` = {steamID} AND `GunID` = {gunID};", Conn).ExecuteScalarAsync();
                 } catch (Exception ex)
                 {
                     Logger.Log($"Error adding gun attachment with id {attachmentID} to gun with id {gunID}, is bought {isBought} for player with steam id {steamID}");
+                    Logger.Log(ex);
+                } finally
+                {
+                    await Conn.CloseAsync();
+                }
+            }
+        }
+
+        public async Task UpdatePlayerGunAttachmentBoughtAsync(CSteamID steamID, ushort gunID, ushort attachmentID, bool isBought)
+        {
+            using (MySqlConnection Conn = new MySqlConnection(ConnectionString))
+            {
+                try
+                {
+                    await Conn.OpenAsync();
+                   
+                    if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                    {
+                        Logging.Debug($"Error finding loadout for player with steam id {steamID}");
+                        throw new Exception();
+                    }
+
+                    if (!loadout.Guns.TryGetValue(gunID, out LoadoutGun gun))
+                    {
+                        Logging.Debug($"Error finding loadout gun with id {gunID} for player with steam id {steamID}");
+                        throw new Exception();
+                    }
+
+                    if (!gun.Attachments.TryGetValue(attachmentID, out LoadoutAttachment attachment))
+                    {
+                        Logging.Debug($"Error finding loadout attachment with id {attachmentID} for loadout gun with id {gunID} for player with steam id {steamID}");
+                        throw new Exception();
+                    }
+
+                    attachment.IsBought = isBought;
+                    await new MySqlCommand($"UPDATE `{PlayersGunsTableName}` SET `Attachments` = '{Utility.GetStringFromAttachments(gun.Attachments.Values.ToList())}' WHERE `SteamID` = {steamID} AND `GunID` = {gunID};", Conn).ExecuteScalarAsync();
+                } catch (Exception ex)
+                {
+                    Logger.Log($"Error changing is bought to {isBought} for attachment with id {attachmentID} for gun with id {gunID} for player with steam id");
+                    Logger.Log(ex);
+                } finally
+                {
+                    await Conn.CloseAsync();
+                }
+            }
+        }
+
+        public async Task AddPlayerGunSkinAsync(CSteamID steamID, int id)
+        {
+            using (MySqlConnection Conn = new MySqlConnection(ConnectionString))
+            {
+                try
+                {
+                    await Conn.OpenAsync();
+                    if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                    {
+                        Logging.Debug($"Error finding loadout for player with steam id {steamID}");
+                        throw new Exception();
+                    }
+
+                    if (!GunSkinsSearchByID.TryGetValue(id, out GunSkin skin))
+                    {
+                        Logging.Debug($"Error finding gun skin with id {id}");
+                        throw new Exception();
+                    }
+                     
+                    if (loadout.GunSkinsSearchByID.ContainsKey(id))
+                    {
+                        Logging.Debug($"Found gun skin with id {id} already registered to player with steam id {steamID}");
+                        throw new Exception();
+                    }
+
+                    var loadoutSkin = new LoadoutGunSkin(skin, false);
+                    loadout.GunSkinsSearchByID.Add(id, loadoutSkin);
+                    if (loadout.GunSkinsSearchByGunID.TryGetValue(skin.Gun.GunID, out List<LoadoutGunSkin> gunSkins))
+                    {
+                        gunSkins.Add(loadoutSkin);
+                    }
+                    else
+                    {
+                        loadout.GunSkinsSearchByGunID.Add(skin.Gun.GunID, new List<LoadoutGunSkin> { loadoutSkin });
+                    }
+                    loadout.GunSkinsSearchBySkinID.Add(skin.SkinID, loadoutSkin);
+
+                    await new MySqlCommand($"UPDATE `{PlayersGunsSkinsTableName}` SET `SkinIDs` = '{Utility.GetStringFromGunSkins(loadout.GunSkinsSearchByID.Values.ToList())}' WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                } catch (Exception ex)
+                {
+                    Logger.Log($"Error adding skin with id {id} to player with steam id {steamID}");
                     Logger.Log(ex);
                 } finally
                 {

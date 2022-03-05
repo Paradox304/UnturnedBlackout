@@ -165,6 +165,16 @@ namespace UnturnedBlackout
             return text.Remove(text.Length - 1, 1);
         }
 
+        public static string GetStringFromGunSkins(List<LoadoutGunSkin> gunSkins)
+        {
+            var text = "";
+            foreach (var skin in gunSkins)
+            {
+                text += $"{(skin.IsEquipped ? "E." : "UE.")}{skin.Skin.ID}";
+            }
+            return text.Remove(text.Length - 1, 1);
+        }
+
         public static int GetLoadoutAmount(UnturnedPlayer player)
         {
             var amount = Plugin.Instance.Configuration.Instance.DefaultLoadoutAmount;
