@@ -175,6 +175,15 @@ namespace UnturnedBlackout
             return text.Remove(text.Length - 1, 1);
         }
 
+        public static string GetStringFromKnifeSkins(List<LoadoutKnifeSkin> knifeSkins)
+        {
+            var text = "";
+            foreach (var skin in knifeSkins)
+            {
+                text += $"{(skin.IsEquipped ? "E." : "UE.")}{skin.Skin.ID}";
+            }
+            return text.Remove(text.Length - 1, 1);
+        }
         public static int GetLoadoutAmount(UnturnedPlayer player)
         {
             var amount = Plugin.Instance.Configuration.Instance.DefaultLoadoutAmount;

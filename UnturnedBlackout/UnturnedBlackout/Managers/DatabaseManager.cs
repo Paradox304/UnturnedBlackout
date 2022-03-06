@@ -1924,7 +1924,7 @@ namespace UnturnedBlackout.Managers
                 {
                     await Conn.OpenAsync();
 
-                    await new MySqlCommand($"UPDATE `{PlayersTableName}` SET `Music` = {(isMusic ? 1 : 0)} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                    await new MySqlCommand($"UPDATE `{PlayersTableName}` SET `Music` = {isMusic} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
                     if (PlayerData.TryGetValue(steamID, out PlayerData data))
                     {
                         data.Music = isMusic;
@@ -1955,7 +1955,7 @@ namespace UnturnedBlackout.Managers
                         throw new Exception();
                     }
 
-                    await new MySqlCommand($"INSERT INTO `{PlayersGunsTableName}` (`SteamID` , `GunID` , `Level` , `XP` , `GunKills` , `IsBought` , `Attachments`) VALUES ({steamID} , {gunID} , 1 , 0 , 0 , {(isBought ? 1 : 0)} , '{Utility.CreateStringFromDefaultAttachments(gun.DefaultAttachments)}');", Conn).ExecuteScalarAsync();
+                    await new MySqlCommand($"INSERT INTO `{PlayersGunsTableName}` (`SteamID` , `GunID` , `Level` , `XP` , `GunKills` , `IsBought` , `Attachments`) VALUES ({steamID} , {gunID} , 1 , 0 , 0 , {isBought} , '{Utility.CreateStringFromDefaultAttachments(gun.DefaultAttachments)}');", Conn).ExecuteScalarAsync();
                     var loadoutAttachments = new Dictionary<ushort, LoadoutAttachment>();
                     foreach (var attachment in gun.DefaultAttachments)
                     {
@@ -2085,7 +2085,7 @@ namespace UnturnedBlackout.Managers
                 try
                 {
                     await Conn.OpenAsync();
-                    await new MySqlCommand($"UPDATE `{PlayersGunsTableName}` SET `IsBought` = {(isBought ? 1 : 0)} WHERE `SteamID` = {steamID} AND `GunID` = {gunID};", Conn).ExecuteScalarAsync();
+                    await new MySqlCommand($"UPDATE `{PlayersGunsTableName}` SET `IsBought` = {isBought} WHERE `SteamID` = {steamID} AND `GunID` = {gunID};", Conn).ExecuteScalarAsync();
 
                     if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
                     {
@@ -2234,7 +2234,7 @@ namespace UnturnedBlackout.Managers
                     await new MySqlCommand($"UPDATE `{PlayersGunsSkinsTableName}` SET `SkinIDs` = '{Utility.GetStringFromGunSkins(loadout.GunSkinsSearchByID.Values.ToList())}' WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
                 } catch (Exception ex)
                 {
-                    Logger.Log($"Error adding skin with id {id} to player with steam id {steamID}");
+                    Logger.Log($"Error adding gun skin with id {id} to player with steam id {steamID}");
                     Logger.Log(ex);
                 } finally
                 {
@@ -2245,7 +2245,34 @@ namespace UnturnedBlackout.Managers
 
         public async Task UpdatePlayerGunSkinEquipAsync(CSteamID steamID, int id, bool isEquip)
         {
+            using (MySqlConnection Conn = new MySqlConnection(ConnectionString))
+            {
+                try
+                {
+                    await Conn.OpenAsync();
+                    if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                    {
+                        Logging.Debug($"Error finding loadout for player with steam id {steamID}");
+                        throw new Exception();
+                    }
 
+                    if (!loadout.GunSkinsSearchByID.TryGetValue(id, out LoadoutGunSkin loadoutGunSkin))
+                    {
+                        Logging.Debug($"Error finding loadout gun skin with id {id} for player with steam id {steamID}");
+                        throw new Exception();
+                    }
+
+                    loadoutGunSkin.IsEquipped = isEquip;
+                    await new MySqlCommand($"UPDATE `{PlayersGunsSkinsTableName}` SET `SkinIDs` = '{Utility.GetStringFromGunSkins(loadout.GunSkinsSearchByID.Values.ToList())}' WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                } catch (Exception ex)
+                {
+                    Logger.Log($"Error changing gun skip equip to {isEquip} for skin with id {id} for player with steam id {steamID}");
+                    Logger.Log(ex);
+                } finally
+                {
+                    await Conn.CloseAsync();
+                }
+            }
         }
 
         public async Task AddPlayerKnifeAsync(CSteamID steamID, ushort knifeID, bool isBought)
@@ -2261,7 +2288,7 @@ namespace UnturnedBlackout.Managers
                         throw new Exception();
                     }
 
-                    await new MySqlCommand($"INSERT INTO `{PlayersKnivesTableName}` (`SteamID` , `KnifeID` , `KnifeKills` , `IsBought`) VALUES ({steamID} , {knifeID} , {(isBought ? 1 : 0)});", Conn).ExecuteScalarAsync();
+                    await new MySqlCommand($"INSERT INTO `{PlayersKnivesTableName}` (`SteamID` , `KnifeID` , `KnifeKills` , `IsBought`) VALUES ({steamID} , {knifeID} , {isBought});", Conn).ExecuteScalarAsync();
 
                     var loadoutKnife = new LoadoutKnife(knife, 0, isBought);
                     if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
@@ -2344,7 +2371,7 @@ namespace UnturnedBlackout.Managers
                     }
 
                     knife.IsBought = isBought;
-                    await new MySqlCommand($"UPDATE `{PlayersKnivesTableName}` SET `IsBought` = {(isBought ? 1 : 0)} WHERE `SteamID` = {steamID} AND `KnifeID` = {knifeID};", Conn).ExecuteScalarAsync();
+                    await new MySqlCommand($"UPDATE `{PlayersKnivesTableName}` SET `IsBought` = {isBought} WHERE `SteamID` = {steamID} AND `KnifeID` = {knifeID};", Conn).ExecuteScalarAsync();
                 } catch (Exception ex)
                 {
                     Logger.Log($"Error changing is bought to {isBought} for knife with id {knifeID} for player with steam id {steamID}");
@@ -2356,6 +2383,587 @@ namespace UnturnedBlackout.Managers
             }
         }
 
+        public async Task AddPlayerKnifeSkinAsync(CSteamID steamID, int id)
+        {
+            using (MySqlConnection Conn = new MySqlConnection(ConnectionString))
+            {
+                try
+                {
+                    await Conn.OpenAsync();
+                    if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                    {
+                        Logging.Debug($"Error finding loadout for player with steam id {steamID}");
+                        throw new Exception();
+                    }
 
+                    if (!KnifeSkinsSearchByID.TryGetValue(id, out KnifeSkin skin))
+                    {
+                        Logging.Debug($"Error finding knife skin with id {id}");
+                        throw new Exception();
+                    }
+
+                    if (loadout.KnifeSkinsSearchByID.ContainsKey(id))
+                    {
+                        Logging.Debug($"Found knife skin with id {id} already registered to player with steam id {steamID}");
+                        throw new Exception();
+                    }
+
+                    var loadoutSkin = new LoadoutKnifeSkin(skin, false);
+                    loadout.KnifeSkinsSearchByID.Add(id, loadoutSkin);
+                    if (loadout.KnifeSkinsSearchByKnifeID.TryGetValue(skin.Knife.KnifeID, out List<LoadoutKnifeSkin> knifeSkins))
+                    {
+                        knifeSkins.Add(loadoutSkin);
+                    }
+                    else
+                    {
+                        loadout.KnifeSkinsSearchByKnifeID.Add(skin.Knife.KnifeID, new List<LoadoutKnifeSkin> { loadoutSkin });
+                    }
+                    loadout.KnifeSkinsSearchBySkinID.Add(skin.SkinID, loadoutSkin);
+
+                    await new MySqlCommand($"UPDATE `{PlayersKnivesSkinsTableName}` SET `SkinIDs` = '{Utility.GetStringFromKnifeSkins(loadout.KnifeSkinsSearchByID.Values.ToList())}' WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log($"Error adding knife skin with id {id} to player with steam id {steamID}");
+                    Logger.Log(ex);
+                }
+                finally
+                {
+                    await Conn.CloseAsync();
+                }
+            }
+        }
+
+        public async Task UpdatePlayerKnifeSkinEquipAsync(CSteamID steamID, int id, bool isEquip)
+        {
+            using (MySqlConnection Conn = new MySqlConnection(ConnectionString))
+            {
+                try
+                {
+                    await Conn.OpenAsync();
+                    if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                    {
+                        Logging.Debug($"Error finding loadout for player with steam id {steamID}");
+                        throw new Exception();
+                    }
+
+                    if (!loadout.KnifeSkinsSearchByID.TryGetValue(id, out LoadoutKnifeSkin loadoutKnifeSkin))
+                    {
+                        Logging.Debug($"Error finding loadout knife skin with id {id} for player with steam id {steamID}");
+                        throw new Exception();
+                    }
+
+                    loadoutKnifeSkin.IsEquipped = isEquip;
+                    await new MySqlCommand($"UPDATE `{PlayersKnivesSkinsTableName}` SET `SkinIDs` = '{Utility.GetStringFromKnifeSkins(loadout.KnifeSkinsSearchByID.Values.ToList())}' WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log($"Error changing knife skip equip to {isEquip} for skin with id {id} for player with steam id {steamID}");
+                    Logger.Log(ex);
+                }
+                finally
+                {
+                    await Conn.CloseAsync();
+                }
+            }
+        }
+
+        public async Task AddPlayerPerkAsync(CSteamID steamID, int perkID, bool isBought)
+        {
+            using (MySqlConnection Conn = new MySqlConnection(ConnectionString))
+            {
+                try
+                {
+                    await Conn.OpenAsync();
+                    if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                    {
+                        Logging.Debug($"Error finding loadout for player with steam id {steamID}");
+                        throw new Exception();
+                    }
+
+                    if (!Perks.TryGetValue(perkID, out Perk perk))
+                    {
+                        Logging.Debug($"Error finding perk with id {perkID}");
+                        throw new Exception();
+                    }
+
+                    if (loadout.Perks.ContainsKey(perkID))
+                    {
+                        Logging.Debug($"Already found perk with id {perkID} registered to player with steam id {steamID}");
+                        throw new Exception();
+                    }
+
+                    var loadoutPerk = new LoadoutPerk(perk, isBought);
+                    loadout.Perks.Add(perkID, loadoutPerk);
+                    await new MySqlCommand($"INSERT INTO `{PlayersPerksTableName}` (`SteamID` , `PerkID` , `IsBought`) VALUES ({steamID} , {perkID} , {isBought});", Conn).ExecuteScalarAsync();
+                } catch (Exception ex)
+                {
+                    Logger.Log($"Error adding perk with id {perkID} to player with steam id {steamID}");
+                    Logger.Log(ex);
+                } finally
+                {
+                    await Conn.CloseAsync();
+                }
+            }
+        }
+
+        public async Task UpdatePlayerPerkBoughtAsync(CSteamID steamID, int perkID, bool isBought)
+        {
+            using (MySqlConnection Conn = new MySqlConnection(ConnectionString))
+            {
+                try
+                {
+                    await Conn.OpenAsync();
+                    if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                    {
+                        Logging.Debug($"Error finding loadout for player with steam id {steamID}");
+                        throw new Exception();
+                    }
+
+                    if (!loadout.Perks.TryGetValue(perkID, out LoadoutPerk perk))
+                    {
+                        Logging.Debug($"Error finding loadout perk with id {perkID} for player with steam id {steamID}");
+                        throw new Exception();
+                    }
+
+                    perk.IsBought = isBought;
+                    await new MySqlCommand($"UPDATE `{PlayersPerksTableName}` SET `IsBought` = {isBought} WHERE `SteamID` = {steamID} AND `PerkID` = {perkID};", Conn).ExecuteScalarAsync();
+                } catch (Exception ex)
+                {
+                    Logger.Log($"Error changing is bought of perk with id {perkID} of player with steam id {steamID}");
+                    Logger.Log(ex);
+                } finally
+                {
+                    await Conn.CloseAsync();
+                }
+            }
+        }
+
+        public async Task AddPlayerGadgetAsync(CSteamID steamID, ushort gadgetID, bool isBought)
+        {
+            using (MySqlConnection Conn = new MySqlConnection(ConnectionString))
+            {
+                try
+                {
+                    await Conn.OpenAsync();
+                    if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                    {
+                        Logging.Debug($"Error finding loadout for player with steam id {steamID}");
+                        throw new Exception();
+                    }
+
+                    if (!Gadgets.TryGetValue(gadgetID, out Gadget gadget))
+                    {
+                        Logging.Debug($"Error finding gadget with id {gadgetID}");
+                        throw new Exception();
+                    }
+
+                    var loadoutGadget = new LoadoutGadget(gadget, 0, isBought);
+                    loadout.Gadgets.Add(gadgetID, loadoutGadget);
+
+                    await new MySqlCommand($"INSERT INTO `{PlayersGadgetsTableName}` (`SteamID` , `GadgetID` , `GadgetKills` , `IsBought) VALUES ({steamID} , {gadgetID} , 0 , {(isBought ? 0 : 1)});", Conn).ExecuteScalarAsync();
+                } catch (Exception ex)
+                {
+                    Logger.Log($"Error adding gadget with id {gadgetID} to player with steam id {steamID}");
+                    Logger.Log(ex);
+                } finally
+                {
+                    await Conn.CloseAsync();
+                }
+            }
+        }
+
+        public async Task IncreasePlayerGadgetKillsAsync(CSteamID steamID, ushort gadgetID, int kills)
+        {
+            using (MySqlConnection Conn = new MySqlConnection(ConnectionString))
+            {
+                try
+                {
+                    await Conn.OpenAsync();
+                    if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                    {
+                        Logging.Debug($"Error finding loadout for player with steam id {steamID}");
+                        throw new Exception();
+                    }
+
+                    if (!loadout.Gadgets.TryGetValue(gadgetID, out LoadoutGadget gadget))
+                    {
+                        Logging.Debug($"Error finding loadout gadget with id {gadgetID} for player with steam id {steamID}");
+                        throw new Exception();
+                    }
+
+                    await new MySqlCommand($"UPDATE `{PlayersGadgetsTableName}` SET `GadgetKills` = `GadgetKills` + {kills} WHERE `SteamID` = {steamID} AND `GadgetID` = {gadgetID};", Conn).ExecuteScalarAsync();
+                    var obj = await new MySqlCommand($"SELECT `GadgetKills` FROM `{PlayersGadgetsTableName}` WHERE `SteamID` = {steamID} AND `GadgetID` = {gadgetID};", Conn).ExecuteScalarAsync();
+                    if (obj is int newKills)
+                    {
+                        gadget.GadgetKills = newKills;
+                    }
+                } catch (Exception ex)
+                {
+                    Logger.Log($"Error increasing {kills} gadget kills for gadget with id {gadgetID} for player with steam id {steamID}");
+                    Logger.Log(ex);
+                } finally
+                {
+                    await Conn.CloseAsync();
+                }
+            }
+        }
+
+        public async Task UpdatePlayerGadgetBoughtAsync(CSteamID steamID, ushort gadgetID, bool isBought)
+        {
+            using (MySqlConnection Conn = new MySqlConnection(ConnectionString))
+            {
+                try
+                {
+                    await Conn.OpenAsync();
+                    if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                    {
+                        Logging.Debug($"Error finding loadout for player with steam id {steamID}");
+                        throw new Exception();
+                    }
+
+                    if (!loadout.Gadgets.TryGetValue(gadgetID, out LoadoutGadget gadget))
+                    {
+                        Logging.Debug($"Error finding loadout gadget with id {gadgetID} for player with steam id {steamID}");
+                        throw new Exception();
+                    }
+
+                    gadget.IsBought = isBought;
+                    await new MySqlCommand($"UPDATE `{PlayersGadgetsTableName}` SET `IsBought` = {isBought} WHERE `SteamID` = {steamID} AND `GadgetID` = {gadgetID};", Conn).ExecuteScalarAsync();
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log($"Error changing is bought to {isBought} for gadget with id {gadgetID} for player with steam id {steamID}");
+                    Logger.Log(ex);
+                }
+                finally
+                {
+                    await Conn.CloseAsync();
+                }
+            }
+        }
+
+        public async Task AddPlayerKillstreakAsync(CSteamID steamID, int killstreakID, bool isBought)
+        {
+            using (MySqlConnection Conn = new MySqlConnection(ConnectionString))
+            {
+                try
+                {
+                    await Conn.OpenAsync();
+                    if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                    {
+                        Logging.Debug($"Error finding loadout for player with steam id {steamID}");
+                        throw new Exception();
+                    }
+
+                    if (!Killstreaks.TryGetValue(killstreakID, out Killstreak killstreak))
+                    {
+                        Logging.Debug($"Error finding killstreak with id {killstreakID}");
+                        throw new Exception();
+                    }
+
+                    if (loadout.Killstreaks.ContainsKey(killstreakID))
+                    {
+                        Logging.Debug($"Found killstreak with id {killstreakID} already registered to player with steam id {steamID}");
+                        throw new Exception();
+                    }
+
+                    var loadoutKillstreak = new LoadoutKillstreak(killstreak, 0, isBought);
+                    loadout.Killstreaks.Add(killstreakID, loadoutKillstreak);
+                    await new MySqlCommand($"INSERT INTO `{PlayersKillstreaksTableName}` (`SteamID` , `KillstreakID` , `KillstreakKills` , `IsBought) VALUES ({steamID} , {killstreakID} , 0 , {isBought});", Conn).ExecuteScalarAsync();
+                } catch (Exception ex)
+                {
+                    Logger.Log($"Error adding killstreak with id {killstreakID} to player with steam id {steamID}");
+                    Logger.Log(ex);
+                } finally
+                {
+                    await Conn.CloseAsync();
+                }
+            }
+        }
+
+        public async Task IncreasePlayerKillstreakKillsAsync(CSteamID steamID, int killstreakID, int kills)
+        {
+            using (MySqlConnection Conn = new MySqlConnection(ConnectionString))
+            {
+                try
+                {
+                    await Conn.OpenAsync();
+                    if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                    {
+                        Logging.Debug($"Error finding loadout for player with steam id {steamID}");
+                        throw new Exception();
+                    }
+
+                    if (!loadout.Killstreaks.TryGetValue(killstreakID, out LoadoutKillstreak killstreak))
+                    {
+                        Logging.Debug($"Error finding loadout killstreak with id {killstreakID} for player with steam id {steamID}");
+                        throw new Exception();
+                    }
+
+                    await new MySqlCommand($"UPDATE `{PlayersKillstreaksTableName}` SET `KillstreakKills` = `KillstreakKills` + {kills} WHERE `SteamID` = {steamID} AND `KillstreakID` = {killstreakID};", Conn).ExecuteScalarAsync();
+                    var obj = await new MySqlCommand($"SELECT `KillstreakKills` WHERE `SteamID` = {steamID} AND `KillstreakID` = {killstreakID};", Conn).ExecuteScalarAsync();
+                    if (obj is int newKills)
+                    {
+                        killstreak.KillstreakKills = newKills;
+                    }
+                } catch (Exception ex)
+                {
+                    Logger.Log($"Error increasing {kills} kills of killstreak with id {killstreakID} for player with steam id {steamID}");
+                    Logger.Log(ex);
+                } finally
+                {
+                    await Conn.CloseAsync();
+                }
+            }
+        }
+
+        public async Task UpdatePlayerKillstreakBoughtAsync(CSteamID steamID, int killstreakID, bool isBought)
+        {
+            using (MySqlConnection Conn = new MySqlConnection(ConnectionString))
+            {
+                try
+                {
+                    await Conn.OpenAsync();
+                    if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                    {
+                        Logging.Debug($"Error finding loadout for player with steam id {steamID}");
+                        throw new Exception();
+                    }
+
+                    if (!loadout.Killstreaks.TryGetValue(killstreakID, out LoadoutKillstreak killstreak))
+                    {
+                        Logging.Debug($"Error finding loadout killstreak with id {killstreakID} for player with steam id {steamID}");
+                        throw new Exception();
+                    }
+
+                    killstreak.IsBought = isBought;
+                    await new MySqlCommand($"UPDATE `{PlayersKillstreaksTableName}` SET `IsBought` = {isBought} WHERE `SteamID` = {steamID} AND `KillstreakID` = {killstreakID};", Conn).ExecuteScalarAsync();
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log($"Error changing is bought to {isBought} for killstreak with id {killstreakID} for player with steam id {steamID}");
+                    Logger.Log(ex);
+                }
+                finally
+                {
+                    await Conn.CloseAsync();
+                }
+            }
+        }
+
+        public async Task AddPlayerCardAsync(CSteamID steamID, int cardID, bool isBought)
+        {
+            using (MySqlConnection Conn = new MySqlConnection(ConnectionString))
+            {
+                try
+                {
+                    await Conn.OpenAsync();
+                    if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                    {
+                        Logging.Debug($"Error finding loadout for player with steam id {steamID}");
+                        throw new Exception();
+                    }
+
+                    if (!Cards.TryGetValue(cardID, out Card card))
+                    {
+                        Logging.Debug($"Error finding card with id {cardID}");
+                        throw new Exception();
+                    }
+
+                    if (loadout.Cards.ContainsKey(cardID))
+                    {
+                        Logging.Debug($"Card with id {cardID} is already registered to player with steam id {steamID}");
+                        throw new Exception();
+                    }
+
+                    var loadoutCard = new LoadoutCard(card, isBought);
+                    loadout.Cards.Add(cardID, loadoutCard);
+
+                    await new MySqlCommand($"INSERT INTO `{PlayersCardsTableName}` (`SteamID` , `CardID` , `IsBought`) VALUES ({steamID} , {cardID} , {isBought});", Conn).ExecuteScalarAsync();
+                } catch (Exception ex)
+                {
+                    Logger.Log($"Error adding card with id {cardID} to player with steam id {steamID}");
+                    Logger.Log(ex);
+                } finally
+                {
+                    await Conn.CloseAsync();
+                }
+            }
+        }
+
+        public async Task UpdatePlayerCardBoughtAsync(CSteamID steamID, int cardID, bool isBought)
+        {
+            using (MySqlConnection Conn = new MySqlConnection(ConnectionString))
+            {
+                try
+                {
+                    await Conn.OpenAsync();
+                    if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                    {
+                        Logging.Debug($"Error finding loadout for player with steam id {steamID}");
+                        throw new Exception();
+                    }
+
+                    if (!loadout.Cards.TryGetValue(cardID, out LoadoutCard card))
+                    {
+                        Logging.Debug($"Error finding loadout card with id {cardID} for player with steam id {steamID}");
+                        throw new Exception();
+                    }
+
+                    card.IsBought = isBought;
+                    await new MySqlCommand($"UPDATE `{PlayersCardsTableName}` SET `IsBought` = {isBought} WHERE `SteamID` = {steamID} AND `CardID` = {cardID};", Conn).ExecuteScalarAsync();
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log($"Error changing is bought to {isBought} for card with id {cardID} for player with steam id {steamID}");
+                    Logger.Log(ex);
+                }
+                finally
+                {
+                    await Conn.CloseAsync();
+                }
+            }
+        }
+
+        public async Task AddPlayerGloveAsync(CSteamID steamID, ushort gloveID, bool isBought)
+        {
+            using (MySqlConnection Conn = new MySqlConnection(ConnectionString))
+            {
+                try
+                {
+                    await Conn.OpenAsync();
+                    if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                    {
+                        Logging.Debug($"Error finding loadout for player with steam id {steamID}");
+                        throw new Exception();
+                    }
+
+                    if (!Gloves.TryGetValue(gloveID, out Glove glove))
+                    {
+                        Logging.Debug($"Error finding glove with id {gloveID}");
+                        throw new Exception();
+                    }
+
+                    if (loadout.Gloves.ContainsKey(gloveID))
+                    {
+                        Logging.Debug($"Glove with id {gloveID} is already registered to player with steam id {steamID}");
+                        throw new Exception();
+                    }
+
+                    var loadoutGlove = new LoadoutGlove(glove, isBought);
+                    loadout.Gloves.Add(gloveID, loadoutGlove);
+
+                    await new MySqlCommand($"INSERT INTO `{PlayersGlovesTableName}` (`SteamID` , `GloveID` , `IsBought`) VALUES ({steamID} , {gloveID} , {isBought});", Conn).ExecuteScalarAsync();
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log($"Error adding glove with id {gloveID} to player with steam id {steamID}");
+                    Logger.Log(ex);
+                }
+                finally
+                {
+                    await Conn.CloseAsync();
+                }
+            }
+        }
+
+        public async Task UpdatePlayerGloveBoughtAsync(CSteamID steamID, ushort gloveID, bool isBought)
+        {
+            using (MySqlConnection Conn = new MySqlConnection(ConnectionString))
+            {
+                try
+                {
+                    await Conn.OpenAsync();
+                    if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                    {
+                        Logging.Debug($"Error finding loadout for player with steam id {steamID}");
+                        throw new Exception();
+                    }
+
+                    if (!loadout.Gloves.TryGetValue(gloveID, out LoadoutGlove glove))
+                    {
+                        Logging.Debug($"Error finding loadout glove with id {gloveID} for player with steam id {steamID}");
+                        throw new Exception();
+                    }
+
+                    glove.IsBought = isBought;
+                    await new MySqlCommand($"UPDATE `{PlayersGlovesTableName}` SET `IsBought` = {isBought} WHERE `SteamID` = {steamID} AND `GloveID` = {gloveID};", Conn).ExecuteScalarAsync();
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log($"Error changing is bought to {isBought} for glove with id {gloveID} for player with steam id {steamID}");
+                    Logger.Log(ex);
+                }
+                finally
+                {
+                    await Conn.CloseAsync();
+                }
+            }
+        }
+
+        public async Task UpdatePlayerLoadoutAsync(CSteamID steamID, int loadoutID)
+        {
+            using (MySqlConnection Conn = new MySqlConnection(ConnectionString))
+            {
+                try
+                {
+                    await Conn.OpenAsync();
+                    if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                    {
+                        Logging.Debug($"Error finding loadout for player with steam id {steamID}");
+                        throw new Exception();
+                    }
+
+                    if (loadout.Loadouts.TryGetValue(loadoutID, out Loadout playerLoadout))
+                    {
+                        Logging.Debug($"Error finding loadout with id {loadoutID} for player with steam id {steamID}");
+                        throw new Exception();
+                    }
+
+                    var loadoutData = new LoadoutData(playerLoadout);
+                    await new MySqlCommand($"UPDATE `{PlayersLoadoutsTableName}` SET `Loadout` = '{Plugin.Instance.DataManager.ConvertLoadoutToJson(loadoutData)}' WHERE `SteamID` = {steamID} AND `LoadoutID` = {loadoutID};", Conn).ExecuteScalarAsync();
+                } catch (Exception ex)
+                {
+                    Logger.Log($"Error updating loadout with id {loadoutID} for player with id {steamID}");
+                    Logger.Log(ex);
+                } finally
+                {
+                    await Conn.CloseAsync();
+                }
+            }
+        }
+
+        public async Task UpdatePlayerLoadoutActiveAsync(CSteamID steamID, int loadoutID, bool isActive)
+        {
+            using (MySqlConnection Conn = new MySqlConnection(ConnectionString))
+            {
+                try
+                {
+                    await Conn.OpenAsync();
+                    if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                    {
+                        Logging.Debug($"Error finding loadout for player with steam id {steamID}");
+                        throw new Exception();
+                    }
+
+                    if (!loadout.Loadouts.TryGetValue(loadoutID, out Loadout playerLoadout))
+                    {
+                        Logging.Debug($"Error finding loadout for player with id {loadoutID}");
+                        throw new Exception();
+                    }
+
+                    playerLoadout.IsActive = isActive;
+                    await new MySqlCommand($"UPDATE `{PlayersLoadoutsTableName}` SET `IsActive` = {isActive} WHERE `SteamID` = {steamID} AND `LoadoutID` = {loadoutID};", Conn).ExecuteScalarAsync();
+                } catch (Exception ex)
+                {
+                    Logger.Log($"Error setting loadout is active to {isActive} for loadout with id {loadoutID} for player with steam id {steamID}");
+                    Logger.Log(ex);
+                } finally
+                {
+                    await Conn.CloseAsync();
+                }
+            }
+        }
     }
 }
