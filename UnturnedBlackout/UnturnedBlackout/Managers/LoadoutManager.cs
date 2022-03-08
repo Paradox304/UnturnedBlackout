@@ -47,12 +47,51 @@ namespace UnturnedBlackout.Managers
             });
         }
 
-        public void EquipPrimaryAttachment(UnturnedPlayer player, int attachmentID)
+        public void EquipAttachment(UnturnedPlayer player, ushort attachmentID, int loadoutID, bool isPrimary)
         {
+            Logging.Debug($"{player.CharacterName} is trying to equip attachment for {(isPrimary ? "Primary" : "Secondary")} with id {attachmentID} for loadout with id {loadoutID}");
+            if (!DB.PlayerLoadouts.TryGetValue(player.CSteamID, out PlayerLoadout loadout))
+            {
+                Logging.Debug($"Error finding loadout for {player.CharacterName}");
+                return;
+            }
 
+            if (!loadout.Loadouts.TryGetValue(loadoutID, out Loadout playerLoadout))
+            {
+                Logging.Debug($"Error finding loadout with id {loadoutID} for {player.CharacterName}");
+                return;
+            }
+
+            var gun = isPrimary ? playerLoadout.Primary : playerLoadout.Secondary;
+            if (gun == null)
+            {
+                Logging.Debug($"The gun which {player.CharacterName} is trying to equip an attachment on is null");
+                return;
+            }
+
+            if (!gun.Attachments.TryGetValue(attachmentID, out LoadoutAttachment attachment))
+            {
+                Logging.Debug($"Attachment with id {attachmentID} is not found on the gun that {player.CharacterName} is putting it on");
+                return;
+            }
+
+            var attachments = isPrimary ? playerLoadout.PrimaryAttachments : playerLoadout.SecondaryAttachments;
+            if (attachments.ContainsKey(attachment.Attachment.AttachmentType))
+            {
+                attachments[attachment.Attachment.AttachmentType] = attachment;
+            }
+            else
+            {
+                attachments.Add(attachment.Attachment.AttachmentType, attachment);
+            }
+
+            ThreadPool.QueueUserWorkItem(async (o) =>
+            {
+                await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
+            });
         }
 
-        public void DequipPrimaryAttachment(UnturnedPlayer player, int attachmentID)
+        public void DequipAttachment(UnturnedPlayer player, int attachmentID, int loadoutID, bool isPrimary)
         {
 
         }
