@@ -128,7 +128,7 @@ namespace UnturnedBlackout.Managers
                 {
                     await Conn.OpenAsync();
                     // BASE DATA
-                    await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{GunsTableName}` ( `GunID` SMALLINT UNSIGNED NOT NULL , `GunName` VARCHAR(255) NOT NULL , `GunDesc` TEXT NOT NULL , `IconLink` TEXT NOT NULL , `MagAmount` TINYINT UNSIGNED NOT NULL , `ScrapAmount` INT UNSIGNED NOT NULL , `BuyPrice` INT UNSIGNED NOT NULL , `IsDefault` BOOLEAN NOT NULL , `IsPrimary` BOOLEAN NOT NULL , `DefaultAttachments` TEXT NOT NULL , `MaxLevel` INT UNSIGNED NOT NULL , `LevelXPNeeded` TEXT NOT NULL , `LevelRewards` TEXT NOT NULL , PRIMARY KEY (`GunID`));", Conn).ExecuteScalarAsync();
+                    await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{GunsTableName}` ( `GunID` SMALLINT UNSIGNED NOT NULL , `GunName` VARCHAR(255) NOT NULL , `GunDesc` TEXT NOT NULL , `GunType` ENUM('Pistol','SMG','Shotgun','LMG','AR','SNIPER') NOT NULL , `IconLink` TEXT NOT NULL , `MagAmount` TINYINT UNSIGNED NOT NULL , `ScrapAmount` INT UNSIGNED NOT NULL , `BuyPrice` INT UNSIGNED NOT NULL , `IsDefault` BOOLEAN NOT NULL , `IsPrimary` BOOLEAN NOT NULL , `DefaultAttachments` TEXT NOT NULL , `MaxLevel` INT UNSIGNED NOT NULL , `LevelXPNeeded` TEXT NOT NULL , `LevelRewards` TEXT NOT NULL , PRIMARY KEY (`GunID`));", Conn).ExecuteScalarAsync();
                     await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{AttachmentsTableName}` ( `AttachmentID` SMALLINT UNSIGNED NOT NULL , `AttachmentName` VARCHAR(255) NOT NULL , `AttachmentDesc` TEXT NOT NULL , `AttachmentType` ENUM('Sights','Grip','Tactical','Barrel','Magazine') NOT NULL , `IconLink` TEXT NOT NULL , `BuyPrice` INT UNSIGNED NOT NULL , PRIMARY KEY (`AttachmentID`));", Conn).ExecuteScalarAsync();
                     await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{GunsSkinsTableName}` ( `ID` INT UNSIGNED NOT NULL AUTO_INCREMENT , `GunID` SMALLINT UNSIGNED NOT NULL , `SkinID` SMALLINT UNSIGNED NOT NULL , `SkinName` VARCHAR(255) NOT NULL , `SkinDesc` TEXT NOT NULL , `IconLink` TEXT NOT NULL , `ScrapAmount` INT UNSIGNED NOT NULL , CONSTRAINT `ub_gun_id` FOREIGN KEY (`GunID`) REFERENCES `{GunsTableName}` (`GunID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`ID`));", Conn).ExecuteScalarAsync();
                     await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{KnivesTableName}` ( `KnifeID` SMALLINT UNSIGNED NOT NULL , `KnifeName` VARCHAR(255) NOT NULL , `KnifeDesc` TEXT NOT NULL , `IconLink` TEXT NOT NULL , `ScrapAmount` INT UNSIGNED NOT NULL , `BuyPrice` INT UNSIGNED NOT NULL , `IsDefault` BOOLEAN NOT NULL , PRIMARY KEY (`KnifeID`));", Conn).ExecuteScalarAsync();
@@ -219,7 +219,7 @@ namespace UnturnedBlackout.Managers
                     }
 
                     Logging.Debug("Reading guns from the base data");
-                    rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{GunsTableName}`;", Conn).ExecuteReaderAsync();
+                    rdr = (MySqlDataReader)await new MySqlCommand($"SELECT `GunID`, `GunName`, `GunDesc`, `GunType`-1, `IconLink`, `MagAmount`, `ScrapAmount`, `BuyPrice`, `IsDefault`, `IsPrimary`, `DefaultAttachments`, `MaxLevel`, `LevelXPNeeded`, `LevelRewards` FROM `{GunsTableName}`;", Conn).ExecuteReaderAsync();
                     try
                     {
                         var guns = new Dictionary<ushort, Gun>();
@@ -228,14 +228,16 @@ namespace UnturnedBlackout.Managers
                             if (!ushort.TryParse(rdr[0].ToString(), out ushort gunID)) continue;
                             var gunName = rdr[1].ToString();
                             var gunDesc = rdr[2].ToString();
-                            var iconLink = rdr[3].ToString();
-                            if (!int.TryParse(rdr[4].ToString(), out int magAmount)) continue;
-                            if (!int.TryParse(rdr[5].ToString(), out int scrapAmount)) continue;
-                            if (!int.TryParse(rdr[6].ToString(), out int buyPrice)) continue;
-                            if (!bool.TryParse(rdr[7].ToString(), out bool isDefault)) continue;
-                            if (!bool.TryParse(rdr[8].ToString(), out bool isPrimary)) continue;
+                            if (!byte.TryParse(rdr[3].ToString(), out byte gunTypeInt)) continue;
+                            var gunType = (EGun)gunTypeInt;
+                            var iconLink = rdr[4].ToString();
+                            if (!int.TryParse(rdr[5].ToString(), out int magAmount)) continue;
+                            if (!int.TryParse(rdr[6].ToString(), out int scrapAmount)) continue;
+                            if (!int.TryParse(rdr[7].ToString(), out int buyPrice)) continue;
+                            if (!bool.TryParse(rdr[8].ToString(), out bool isDefault)) continue;
+                            if (!bool.TryParse(rdr[9].ToString(), out bool isPrimary)) continue;
                             var attachments = new List<GunAttachment>();
-                            foreach (var id in rdr[9].GetIntListFromReaderResult())
+                            foreach (var id in rdr[10].GetIntListFromReaderResult())
                             {
                                 if (GunAttachments.TryGetValue((ushort)id, out GunAttachment gunAttachment))
                                 {
@@ -246,10 +248,10 @@ namespace UnturnedBlackout.Managers
                                     Logging.Debug($"Could'nt find default attachment with id {id} for gun {gunID} with name {gunName}");
                                 }
                             }
-                            if (!int.TryParse(rdr[10].ToString(), out int maxLevel)) continue;
-                            var levelXPNeeded = rdr[11].GetIntListFromReaderResult();
-                            var levelRewards = rdr[12].GetIntListFromReaderResult();
-                            var gun = new Gun(gunID, gunName, gunDesc, iconLink, magAmount, scrapAmount, buyPrice, isDefault, isPrimary, attachments, maxLevel, levelXPNeeded, levelRewards);
+                            if (!int.TryParse(rdr[11].ToString(), out int maxLevel)) continue;
+                            var levelXPNeeded = rdr[12].GetIntListFromReaderResult();
+                            var levelRewards = rdr[13].GetIntListFromReaderResult();
+                            var gun = new Gun(gunID, gunName, gunDesc, gunType, iconLink, magAmount, scrapAmount, buyPrice, isDefault, isPrimary, attachments, maxLevel, levelXPNeeded, levelRewards);
                             if (!guns.ContainsKey(gunID))
                             {
                                 guns.Add(gunID, gun);

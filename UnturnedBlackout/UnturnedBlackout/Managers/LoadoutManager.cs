@@ -336,7 +336,8 @@ namespace UnturnedBlackout.Managers
 
             if (playerLoadout.Perks.Count == 3)
             {
-                playerLoadout.Perks[0] = perk;
+                playerLoadout.Perks.RemoveAt(0);
+                playerLoadout.Perks.Add(perk);
             } else
             {
                 playerLoadout.Perks.Add(perk);
@@ -404,7 +405,8 @@ namespace UnturnedBlackout.Managers
 
             if (playerLoadout.Killstreaks.Count == 3)
             {
-                playerLoadout.Killstreaks[0] = killstreak;
+                playerLoadout.Killstreaks.RemoveAt(0);
+                playerLoadout.Killstreaks.Add(killstreak);
             }
             else
             {

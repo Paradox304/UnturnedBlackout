@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UnturnedBlackout.Enums;
 
 namespace UnturnedBlackout.Database.Base
 {
@@ -11,6 +12,7 @@ namespace UnturnedBlackout.Database.Base
         public ushort GunID { get; set; }
         public string GunName { get; set; }
         public string GunDesc { get; set; }
+        public EGun GunType { get; set; }
         public string IconLink { get; set; }
         public int MagAmount { get; set; }
         public int ScrapAmount { get; set; }
@@ -22,11 +24,12 @@ namespace UnturnedBlackout.Database.Base
         public List<int> LevelXPNeeded { get; set; }
         public List<int> LevelRewards { get; set; }
 
-        public Gun(ushort gunID, string gunName, string gunDesc, string iconLink, int magAmount, int scrapAmount, int buyPrice, bool isDefault, bool isPrimary, List<GunAttachment> defaultAttachments, int maxLevel, List<int> levelXPNeeded, List<int> levelRewards)
+        public Gun(ushort gunID, string gunName, string gunDesc, EGun gunType, string iconLink, int magAmount, int scrapAmount, int buyPrice, bool isDefault, bool isPrimary, List<GunAttachment> defaultAttachments, int maxLevel, List<int> levelXPNeeded, List<int> levelRewards)
         {
             GunID = gunID;
             GunName = gunName;
             GunDesc = gunDesc;
+            GunType = gunType;
             IconLink = iconLink;
             MagAmount = magAmount;
             ScrapAmount = scrapAmount;
