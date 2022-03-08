@@ -351,5 +351,14 @@ namespace UnturnedBlackout.Managers
                 await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
             });
         }
+
+        public void EquipGunSkin(UnturnedPlayer player, int id)
+        {
+            Logging.Debug($"{player.CharacterName} trying to equip gun skin with id {id}");
+            if (!DB.PlayerLoadouts.TryGetValue(player.CSteamID, out PlayerLoadout loadout))
+            {
+                Logging.Debug()
+            }
+        }
     }
 }
