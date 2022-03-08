@@ -19,18 +19,18 @@ namespace UnturnedBlackout.Managers
             DB = Plugin.Instance.DBManager;
         }
 
-        public void EquipPrimary(UnturnedPlayer player, int loadoutID, ushort newPrimary)
+        public void EquipGun(UnturnedPlayer player, int loadoutID, ushort newGun, bool isPrimary)
         {
-            Logging.Debug($"{player.CharacterName} is trying to switch primary to {newPrimary} for loadout with id {loadoutID}");
+            Logging.Debug($"{player.CharacterName} is trying to switch {(isPrimary ? "Primary" : "Secondary")} to {newGun} for loadout with id {loadoutID}");
             if (!DB.PlayerLoadouts.TryGetValue(player.CSteamID, out PlayerLoadout loadout))
             {
                 Logging.Debug($"Error finding loadout for {player.CharacterName}");
                 return;
             }
 
-            if (!loadout.Guns.TryGetValue(newPrimary, out LoadoutGun gun) && newPrimary != 0)
+            if (!loadout.Guns.TryGetValue(newGun, out LoadoutGun gun) && newGun != 0)
             {
-                Logging.Debug($"Error finding loadout gun with id {newPrimary} for {player.CharacterName}");
+                Logging.Debug($"Error finding loadout gun with id {newGun} for {player.CharacterName}");
                 return;
             }
 
@@ -40,7 +40,46 @@ namespace UnturnedBlackout.Managers
                 return;
             }
 
-            playerLoadout.Primary = gun;
+            var gunSlot = isPrimary ? playerLoadout.Primary : playerLoadout.Secondary;
+            var gunSlotAttachments = isPrimary ? playerLoadout.PrimaryAttachments : playerLoadout.SecondaryAttachments;
+
+            if (isPrimary)
+            {
+                playerLoadout.Primary = gun;
+                playerLoadout.PrimaryAttachments.Clear();
+                if (gun != null)
+                {
+                    foreach (var defaultAttachment in gun.Gun.DefaultAttachments)
+                    {
+                        if (gun.Attachments.TryGetValue(defaultAttachment.AttachmentID, out LoadoutAttachment attachment))
+                        {
+                            if (!playerLoadout.PrimaryAttachments.ContainsKey(attachment.Attachment.AttachmentType))
+                            {
+                                playerLoadout.PrimaryAttachments.Add(attachment.Attachment.AttachmentType, attachment);
+                            }
+                        }
+                    }
+                }
+            } else
+            {
+                playerLoadout.Secondary = gun;
+                playerLoadout.SecondaryAttachments.Clear();
+                if (gun != null)
+                {
+                    foreach (var defaultAttachment in gun.Gun.DefaultAttachments)
+                    {
+                        if (gun.Attachments.TryGetValue(defaultAttachment.AttachmentID, out LoadoutAttachment attachment))
+                        {
+                            if (!playerLoadout.SecondaryAttachments.ContainsKey(attachment.Attachment.AttachmentType))
+                            {
+                                playerLoadout.SecondaryAttachments.Add(attachment.Attachment.AttachmentType, attachment);
+                            }
+                        }
+                    }
+                }
+            }
+
+
             ThreadPool.QueueUserWorkItem(async (o) =>
             {
                 await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
@@ -91,23 +130,12 @@ namespace UnturnedBlackout.Managers
             });
         }
 
-        public void DequipAttachment(UnturnedPlayer player, int attachmentID, int loadoutID, bool isPrimary)
+        public void DequipAttachment(UnturnedPlayer player, ushort attachmentID, int loadoutID, bool isPrimary)
         {
-
-        }
-
-        public void EquipSecondary(UnturnedPlayer player, int loadoutID, ushort newSecondary)
-        {
-            Logging.Debug($"{player.CharacterName} is trying to switch secondary to {newSecondary} for loadout with id {loadoutID}");
+            Logging.Debug($"{player.CharacterName} is trying to dequip attachment for {(isPrimary ? "Primary" : "Secondary")} with id {attachmentID} for loadout with id {loadoutID}");
             if (!DB.PlayerLoadouts.TryGetValue(player.CSteamID, out PlayerLoadout loadout))
             {
                 Logging.Debug($"Error finding loadout for {player.CharacterName}");
-                return;
-            }
-
-            if (!loadout.Guns.TryGetValue(newSecondary, out LoadoutGun gun) && newSecondary != 0)
-            {
-                Logging.Debug($"Error finding loadout gun with id {newSecondary} for {player.CharacterName}");
                 return;
             }
 
@@ -117,11 +145,32 @@ namespace UnturnedBlackout.Managers
                 return;
             }
 
-            playerLoadout.Secondary = gun;
-            ThreadPool.QueueUserWorkItem(async (o) =>
+            var gun = isPrimary ? playerLoadout.Primary : playerLoadout.Secondary;
+            if (gun == null)
             {
-                await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
-            });
+                Logging.Debug($"The gun which {player.CharacterName} is trying to dequip an attachment on is null");
+                return;
+            }
+
+            if (!gun.Attachments.TryGetValue(attachmentID, out LoadoutAttachment attachment))
+            {
+                Logging.Debug($"Attachment with id {attachmentID} is not found on the gun that {player.CharacterName} is dequipping on");
+                return;
+            }
+
+            var attachments = isPrimary ? playerLoadout.PrimaryAttachments : playerLoadout.SecondaryAttachments;
+            if (attachments.ContainsValue(attachment))
+            {
+                attachments.Remove(attachment.Attachment.AttachmentType);
+
+                ThreadPool.QueueUserWorkItem(async (o) =>
+                {
+                    await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
+                });
+            } else
+            {
+                Logging.Debug($"Attachment was not found equipped on the gun");
+            }
         }
 
         public void EquipKnife(UnturnedPlayer player, int loadoutID, ushort newKnife)
