@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using UnturnedBlackout.Database.Data;
+using UnturnedBlackout.Models.Global;
 
 namespace UnturnedBlackout.Managers
 {
@@ -558,6 +559,11 @@ namespace UnturnedBlackout.Managers
             {
                 await DB.UpdatePlayerGunSkinEquipAsync(player.CSteamID, id, false);
             });
+        }
+
+        public void GiveLoadout(GamePlayer player)
+        {
+            // Code to give the active loadout to player
         }
     }
 }

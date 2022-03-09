@@ -3,27 +3,39 @@ using SDG.NetTransport;
 using SDG.Unturned;
 using Steamworks;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 using UnturnedBlackout.Database.Data;
 using UnturnedBlackout.Enums;
 using UnturnedBlackout.GameTypes;
 using UnturnedBlackout.Models.Level;
+using UnturnedBlackout.Models.UI;
 
 namespace UnturnedBlackout.Instances
 {
     public class UIHandler
     {
+        public const ushort ID = 27632;
+        public const short Key = 27632;
+
         public CSteamID SteamID { get; set; }
         public UnturnedPlayer Player { get; set; }
 
         public ITransportConnection TransportConnection { get; set; }
         public Config Config { get; set; }
 
-        public EPage CurrentPage { get; set; }
+        public EMainPage MainPage { get; set; }
 
-        public const ushort ID = 27632;
-        public const short Key = 27632;
+        // Loadout
+        public ELoadoutPage LoadoutPage { get; set; }
+        public int LoadoutPageID { get; set; }
+        public int LoadoutID { get; set; }
+        public string LoadoutNameText { get; set; }
+
+        public ELoadoutSubPage LoadoutSubPage { get; set; }
+        public int LoadoutSubPageID { get; set; }
+        public object SelectedItemID { get; set; }
 
         public UIHandler(UnturnedPlayer player)
         {
@@ -54,7 +66,7 @@ namespace UnturnedBlackout.Instances
 
         public void ResetUIValues()
         {
-            CurrentPage = EPage.None;
+            MainPage = EMainPage.None;
         }
 
         public void SetupUI()
@@ -86,7 +98,7 @@ namespace UnturnedBlackout.Instances
         public void ShowGames()
         {
             Logging.Debug($"Showing games for {Player.CharacterName}");
-            CurrentPage = EPage.Play;
+            MainPage = EMainPage.Play;
 
             for (int i = 0; i <= 9; i++)
             {
@@ -201,6 +213,66 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"Lobby{index}VoteTimer", timer);
             }
         }
+
+        // Loadout Page
+
+        public void ShowLoadouts()
+        {
+
+        }
+
+        public void ShowLoadout()
+        {
+
+        }
+
+        public void ForwardLoadoutPage()
+        {
+
+        }
+
+        public void BackwardLoadoutPage()
+        {
+
+        }
+
+        // Loadout Sub Page
+
+        public void ShowLoadoutSubPage()
+        {
+
+        }
+
+        public void ShowSelectedItem()
+        {
+
+        }
+
+        public void BuySelectedItem()
+        {
+
+        }
+
+        public void EquipSelectedItem()
+        {
+
+        }
+
+        public void DequipSelectedItem()
+        {
+
+        }
+
+        public void ForwardLoadoutSubPage()
+        {
+
+        }
+
+        public void BackwardLoadoutSubPage()
+        {
+
+        }
+
 
         // Events
 

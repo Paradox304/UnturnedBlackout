@@ -164,7 +164,9 @@
     <Compile Include="Enums\EGamePhase.cs" />
     <Compile Include="Enums\EGameType.cs" />
     <Compile Include="Enums\EGun.cs" />
-    <Compile Include="Enums\EPage.cs" />
+    <Compile Include="Enums\ELoadoutPage.cs" />
+    <Compile Include="Enums\ELoadoutSubPage.cs" />
+    <Compile Include="Enums\EMainPage.cs" />
     <Compile Include="Enums\ETeam.cs" />
     <Compile Include="GameTypes\CTFGame.cs" />
     <Compile Include="GameTypes\FFAGame.cs" />
@@ -198,6 +200,7 @@
     <Compile Include="Models\TDM\TDMPlayer.cs" />
     <Compile Include="Models\Global\TeamInfo.cs" />
     <Compile Include="Models\Global\VoteChoice.cs" />
+    <Compile Include="Models\UI\PageLoadout.cs" />
     <Compile Include="Patches\ClothingPatches.cs" />
     <Compile Include="Models\FFA\FFAPlayer.cs" />
     <Compile Include="Models\Global\GamePlayer.cs" />
