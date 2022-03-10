@@ -200,7 +200,15 @@
     <Compile Include="Models\TDM\TDMPlayer.cs" />
     <Compile Include="Models\Global\TeamInfo.cs" />
     <Compile Include="Models\Global\VoteChoice.cs" />
+    <Compile Include="Models\UI\PageAttachment.cs" />
+    <Compile Include="Models\UI\PageCard.cs" />
+    <Compile Include="Models\UI\PageGadget.cs" />
+    <Compile Include="Models\UI\PageGlove.cs" />
+    <Compile Include="Models\UI\PageGun.cs" />
+    <Compile Include="Models\UI\PageKillstreak.cs" />
+    <Compile Include="Models\UI\PageKnife.cs" />
     <Compile Include="Models\UI\PageLoadout.cs" />
+    <Compile Include="Models\UI\PagePerk.cs" />
     <Compile Include="Patches\ClothingPatches.cs" />
     <Compile Include="Models\FFA\FFAPlayer.cs" />
     <Compile Include="Models\Global\GamePlayer.cs" />

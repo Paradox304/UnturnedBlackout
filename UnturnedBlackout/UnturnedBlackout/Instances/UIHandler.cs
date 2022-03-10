@@ -9,6 +9,7 @@ using UnityEngine;
 using UnturnedBlackout.Database.Data;
 using UnturnedBlackout.Enums;
 using UnturnedBlackout.GameTypes;
+using UnturnedBlackout.Managers;
 using UnturnedBlackout.Models.Level;
 using UnturnedBlackout.Models.UI;
 
@@ -19,8 +20,10 @@ namespace UnturnedBlackout.Instances
         public const ushort ID = 27632;
         public const short Key = 27632;
 
+        public DatabaseManager DB { get; set; }
         public CSteamID SteamID { get; set; }
         public UnturnedPlayer Player { get; set; }
+        public PlayerLoadout PlayerLoadout { get; set; }
 
         public ITransportConnection TransportConnection { get; set; }
         public Config Config { get; set; }
@@ -37,6 +40,21 @@ namespace UnturnedBlackout.Instances
         public int LoadoutSubPageID { get; set; }
         public object SelectedItemID { get; set; }
 
+        public Dictionary<int, PageLoadout> LoadoutPages { get; set; }
+        public Dictionary<int, PageGun> PistolPages { get; set; }
+        public Dictionary<int, PageGun> SMGPages { get; set; }
+        public Dictionary<int, PageGun> ShotgunPages { get; set; }
+        public Dictionary<int, PageGun> ARPages { get; set; }
+        public Dictionary<int, PageGun> SniperPages { get; set; }
+        public Dictionary<ushort, Dictionary<int, PageAttachment>> AttachmentPages { get; set; }
+        public Dictionary<int, PageKnife> KnifePages { get; set; }
+        public Dictionary<int, PagePerk> PerkPages { get; set; }
+        public Dictionary<int, PageGadget> TacticalPages { get; set; }
+        public Dictionary<int, PageGadget> LethalPages { get; set; }
+        public Dictionary<int, PageCard> CardPages { get; set; }
+        public Dictionary<int, PageGlove> GlovePages { get; set; }
+        public Dictionary<int, PageKillstreak> KillstreakPages { get; set; }
+
         public UIHandler(UnturnedPlayer player)
         {
             Logging.Debug($"Creating UIHandler for {player.CSteamID}");
@@ -44,7 +62,15 @@ namespace UnturnedBlackout.Instances
             Player = player;
             TransportConnection = player.Player.channel.GetOwnerTransportConnection();
             Config = Plugin.Instance.Configuration.Instance;
+            DB = Plugin.Instance.DBManager;
+            if (!DB.PlayerLoadouts.TryGetValue(player.CSteamID, out PlayerLoadout loadout))
+            {
+                Logging.Debug($"Error finding player loadout for {player.CharacterName}, failed to initialize UIHandler for player");
+                return;
+            }
 
+            PlayerLoadout = loadout;
+            BuildPages();
             ResetUIValues();
         }
 
@@ -92,6 +118,71 @@ namespace UnturnedBlackout.Instances
                 ChatManager.serverSendMessage("", Color.white, toPlayer: steamPlayer);
             }
         }
+
+        public void BuildPages()
+        {
+            BuildLoadoutPages();
+            BuildGunPages();
+            BuildAttachmentPages();
+            BuildKnifePages();
+            BuildPerkPages();
+            BuildTacticalPages();
+            BuildLethalPages();
+            BuildCardPages();
+            BuildGlovePages();
+            BuildKillstreakPages();
+        }
+
+        public void BuildLoadoutPages()
+        {
+
+        }
+
+        public void BuildGunPages()
+        {
+
+        }
+
+        public void BuildAttachmentPages()
+        {
+
+        }
+
+        public void BuildKnifePages()
+        {
+
+        }
+
+        public void BuildPerkPages()
+        {
+
+        }
+
+        public void BuildTacticalPages()
+        {
+
+        }
+
+        public void BuildLethalPages()
+        {
+
+        }
+
+        public void BuildCardPages()
+        {
+
+        }
+
+        public void BuildGlovePages()
+        {
+
+        }
+
+        public void BuildKillstreakPages()
+        {
+
+        }
+
 
         // Play Page
 
