@@ -3,19 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using UnturnedBlackout.Database.Data;
+using UnturnedBlackout.Database.Base;
 
 namespace UnturnedBlackout.Models.UI
 {
-    public class PageGlove
+    public class PageGunSkin
     {
         public int PageID { get; set; }
-        public Dictionary<int, LoadoutGlove> Gloves { get; set; }
+        public Dictionary<int, GunSkin> GunSkins { get; set; }
 
-        public PageGlove(int pageID, Dictionary<int, LoadoutGlove> gloves)
+        public PageGunSkin(int pageID, Dictionary<int, GunSkin> gunSkins)
         {
             PageID = pageID;
-            Gloves = gloves;
+            GunSkins = gunSkins;
         }
     }
 }

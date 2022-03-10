@@ -116,6 +116,16 @@ namespace UnturnedBlackout
             return readerText.Split(',').Select(k => int.TryParse(k, out var id) ? id : -1).Where(k => k != -1).ToList();
         }
 
+        public static string GetStringFromIntList(this List<int> listInt)
+        {
+            var text = "";
+            foreach (var id in listInt)
+            {
+                text += $"{id},";
+            }
+            return text.Length > 0 ? text.Remove(text.Length - 1, 1) : text;
+        }
+
         public static Dictionary<ushort, LoadoutAttachment> GetAttachmentsFromString(string text)
         {
             var attachments = new Dictionary<ushort, LoadoutAttachment>();
@@ -152,7 +162,7 @@ namespace UnturnedBlackout
             {
                 text += $"{(attachment.IsBought ? "B." : "UB.")}{attachment.Attachment.AttachmentID},";
             }
-            return text.Remove(text.Length - 1, 1);
+            return text.Length > 0 ? text.Remove(text.Length - 1, 1) : text;
         }
 
         public static string CreateStringFromDefaultAttachments(List<GunAttachment> gunAttachments)
@@ -162,28 +172,9 @@ namespace UnturnedBlackout
             {
                 text += $"B.{attachment.AttachmentID},";
             }
-            return text.Remove(text.Length - 1, 1);
+            return text.Length > 0 ? text.Remove(text.Length - 1, 1) : text;
         }
 
-        public static string GetStringFromGunSkins(List<LoadoutGunSkin> gunSkins)
-        {
-            var text = "";
-            foreach (var skin in gunSkins)
-            {
-                text += $"{(skin.IsEquipped ? "E." : "UE.")}{skin.Skin.ID}";
-            }
-            return text.Remove(text.Length - 1, 1);
-        }
-
-        public static string GetStringFromKnifeSkins(List<LoadoutKnifeSkin> knifeSkins)
-        {
-            var text = "";
-            foreach (var skin in knifeSkins)
-            {
-                text += $"{(skin.IsEquipped ? "E." : "UE.")}{skin.Skin.ID}";
-            }
-            return text.Remove(text.Length - 1, 1);
-        }
         public static int GetLoadoutAmount(UnturnedPlayer player)
         {
             var amount = Plugin.Instance.Configuration.Instance.DefaultLoadoutAmount;

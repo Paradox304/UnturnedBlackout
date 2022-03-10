@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using UnityEngine;
+using UnturnedBlackout.Database.Base;
 using UnturnedBlackout.Database.Data;
 using UnturnedBlackout.Enums;
 using UnturnedBlackout.GameTypes;
@@ -49,7 +50,9 @@ namespace UnturnedBlackout.Instances
         public Dictionary<int, PageGun> ARPages { get; set; }
         public Dictionary<int, PageGun> SniperPages { get; set; }
         public Dictionary<ushort, Dictionary<int, PageAttachment>> AttachmentPages { get; set; }
+        public Dictionary<ushort, Dictionary<int, PageGunSkin>> GunSkinPages { get; set; }
         public Dictionary<int, PageKnife> KnifePages { get; set; }
+        public Dictionary<ushort, Dictionary<int, PageKnifeSkin>> KnifeSkinPages { get; set; }
         public Dictionary<int, PagePerk> PerkPages { get; set; }
         public Dictionary<int, PageGadget> TacticalPages { get; set; }
         public Dictionary<int, PageGadget> LethalPages { get; set; }
@@ -124,9 +127,16 @@ namespace UnturnedBlackout.Instances
         public void BuildPages()
         {
             BuildLoadoutPages();
-            BuildGunPages();
+            BuildPistolPages();
+            BuildSMGPages();
+            BuildShotgunPages();
+            BuildSniperPages();
+            BuildLMGPages();
+            BuildARPages();
+            BuildGunSkinPages();
             BuildAttachmentPages();
             BuildKnifePages();
+            BuildKnifeSkinPages();
             BuildPerkPages();
             BuildTacticalPages();
             BuildLethalPages();
@@ -137,19 +147,19 @@ namespace UnturnedBlackout.Instances
 
         public void BuildLoadoutPages()
         {
-            Logging.Debug($"Building loadout pages for {Player.CharacterName}, found {PlayerLoadout.Loadouts.Count} loadouts for player");
+            Logging.Debug($"Creating loadout pages for {Player.CharacterName}, found {PlayerLoadout.Loadouts.Count} loadouts for player");
             LoadoutPages = new Dictionary<int, PageLoadout>();
-            int index = 1;
+            int index = 0;
             int page = 1;
             var loadouts = new Dictionary<int, Loadout>();
 
             foreach (var loadout in PlayerLoadout.Loadouts)
             {
                 loadouts.Add(index, loadout.Value);
-                if (index == 8)
+                if (index == 7)
                 {
                     LoadoutPages.Add(page, new PageLoadout(page, loadouts));
-                    index = 1;
+                    index = 0;
                     page++;
                     loadouts = new Dictionary<int, Loadout>();
                     continue;
@@ -168,17 +178,17 @@ namespace UnturnedBlackout.Instances
             var guns = PlayerLoadout.Guns.Values.Where(k => k.Gun.GunType == EGun.PISTOL).ToList();
             var gunItems = new Dictionary<int, LoadoutGun>();
             PistolPages = new Dictionary<int, PageGun>();
-            int index = 1;
+            int index = 0;
             int page = 1;
             Logging.Debug($"Creating pistol pages for {Player.CharacterName}, found {guns.Count()} pistols");
 
             foreach (var gun in guns)
             {
                 gunItems.Add(index, gun);
-                if (index == 5)
+                if (index == 4)
                 {
                     PistolPages.Add(page, new PageGun(page, gunItems));
-                    index = 1;
+                    index = 0;
                     page++;
                     gunItems = new Dictionary<int, LoadoutGun>();
                     continue;
@@ -197,17 +207,17 @@ namespace UnturnedBlackout.Instances
             var guns = PlayerLoadout.Guns.Values.Where(k => k.Gun.GunType == EGun.SUBMACHINE_GUNS).ToList();
             var gunItems = new Dictionary<int, LoadoutGun>();
             SMGPages = new Dictionary<int, PageGun>();
-            int index = 1;
+            int index = 0;
             int page = 1;
             Logging.Debug($"Creating SMG pages for {Player.CharacterName}, found {guns.Count()} SMGs");
 
             foreach (var gun in guns)
             {
                 gunItems.Add(index, gun);
-                if (index == 5)
+                if (index == 4)
                 {
                     SMGPages.Add(page, new PageGun(page, gunItems));
-                    index = 1;
+                    index = 0;
                     page++;
                     gunItems = new Dictionary<int, LoadoutGun>();
                     continue;
@@ -226,17 +236,17 @@ namespace UnturnedBlackout.Instances
             var guns = PlayerLoadout.Guns.Values.Where(k => k.Gun.GunType == EGun.SHOTGUNS).ToList();
             var gunItems = new Dictionary<int, LoadoutGun>();
             ShotgunPages = new Dictionary<int, PageGun>();
-            int index = 1;
+            int index = 0;
             int page = 1;
             Logging.Debug($"Creating shotgun pages for {Player.CharacterName}, found {guns.Count()} shotguns");
 
             foreach (var gun in guns)
             {
                 gunItems.Add(index, gun);
-                if (index == 5)
+                if (index == 4)
                 {
                     ShotgunPages.Add(page, new PageGun(page, gunItems));
-                    index = 1;
+                    index = 0;
                     page++;
                     gunItems = new Dictionary<int, LoadoutGun>();
                     continue;
@@ -255,17 +265,17 @@ namespace UnturnedBlackout.Instances
             var guns = PlayerLoadout.Guns.Values.Where(k => k.Gun.GunType == EGun.LIGHT_MACHINE_GUNS).ToList();
             var gunItems = new Dictionary<int, LoadoutGun>();
             LMGPages = new Dictionary<int, PageGun>();
-            int index = 1;
+            int index = 0;
             int page = 1;
             Logging.Debug($"Creating LMG pages for {Player.CharacterName}, found {guns.Count()} LMGs");
 
             foreach (var gun in guns)
             {
                 gunItems.Add(index, gun);
-                if (index == 5)
+                if (index == 4)
                 {
                     LMGPages.Add(page, new PageGun(page, gunItems));
-                    index = 1;
+                    index = 0;
                     page++;
                     gunItems = new Dictionary<int, LoadoutGun>();
                     continue;
@@ -284,17 +294,17 @@ namespace UnturnedBlackout.Instances
             var guns = PlayerLoadout.Guns.Values.Where(k => k.Gun.GunType == EGun.ASSAULT_RIFLES).ToList();
             var gunItems = new Dictionary<int, LoadoutGun>();
             ARPages = new Dictionary<int, PageGun>();
-            int index = 1;
+            int index = 0;
             int page = 1;
             Logging.Debug($"Creating AR pages for {Player.CharacterName}, found {guns.Count()} ARs");
 
             foreach (var gun in guns)
             {
                 gunItems.Add(index, gun);
-                if (index == 5)
+                if (index == 4)
                 {
                     ARPages.Add(page, new PageGun(page, gunItems));
-                    index = 1;
+                    index = 0;
                     page++;
                     gunItems = new Dictionary<int, LoadoutGun>();
                     continue;
@@ -313,17 +323,17 @@ namespace UnturnedBlackout.Instances
             var guns = PlayerLoadout.Guns.Values.Where(k => k.Gun.GunType == EGun.SNIPER_RIFLES).ToList();
             var gunItems = new Dictionary<int, LoadoutGun>();
             PistolPages = new Dictionary<int, PageGun>();
-            int index = 1;
+            int index = 0;
             int page = 1;
             Logging.Debug($"Creating sniper pages for {Player.CharacterName}, found {guns.Count()} snipers");
 
             foreach (var gun in guns)
             {
                 gunItems.Add(index, gun);
-                if (index == 5)
+                if (index == 4)
                 {
                     SniperPages.Add(page, new PageGun(page, gunItems));
-                    index = 1;
+                    index = 0;
                     page++;
                     gunItems = new Dictionary<int, LoadoutGun>();
                     continue;
@@ -337,6 +347,37 @@ namespace UnturnedBlackout.Instances
             Logging.Debug($"Created {SniperPages.Count} sniper pages for {Player.CharacterName}");
         }
 
+        public void BuildGunSkinPages()
+        {
+            GunSkinPages = new Dictionary<ushort, Dictionary<int, PageGunSkin>>();
+            Logging.Debug($"Creating gun skin pages for {Player.CharacterName}, found {PlayerLoadout.GunSkinsSearchByGunID.Count} guns which have skins");
+            foreach (var gun in PlayerLoadout.GunSkinsSearchByGunID)
+            {
+                Logging.Debug($"Creating gun skin pages for gun with id {gun.Key} for {Player.CharacterName}, found {gun.Value.Count} gun skins for that gun");
+                int index = 0;
+                int page = 1;
+                var gunSkins = new Dictionary<int, GunSkin>();
+                GunSkinPages.Add(gun.Key, new Dictionary<int, PageGunSkin>());
+                foreach (var gunSkin in gun.Value)
+                {
+                    gunSkins.Add(index, gunSkin);
+                    if (index == 4)
+                    {
+                        GunSkinPages[gun.Key].Add(page, new PageGunSkin(page, gunSkins));
+                        gunSkins = new Dictionary<int, GunSkin>();
+                        index = 0;
+                        page++;
+                    }
+                    index++;
+                }
+                if (gunSkins.Count != 0)
+                {
+                    GunSkinPages[gun.Key].Add(page, new PageGunSkin(page, gunSkins));
+                }
+                Logging.Debug($"Created {GunSkinPages[gun.Key].Count} gun skin pages for gun with id {gun.Key} for {Player.CharacterName}");
+            }
+        }
+
         public void BuildAttachmentPages()
         {
             AttachmentPages = new Dictionary<ushort, Dictionary<int, PageAttachment>>();
@@ -344,18 +385,18 @@ namespace UnturnedBlackout.Instances
             foreach (var gun in PlayerLoadout.Guns)
             {
                 Logging.Debug($"Creating attachment pages for gun with id {gun.Key} for {Player.CharacterName}");
-                int index = 1;
+                int index = 0;
                 int page = 1;
                 var attachments = new Dictionary<int, LoadoutAttachment>();
                 AttachmentPages.Add(gun.Key, new Dictionary<int, PageAttachment>());
                 foreach (var attachment in gun.Value.Attachments)
                 {
                     attachments.Add(index, attachment.Value);
-                    if (index == 5)
+                    if (index == 4)
                     {
                         AttachmentPages[gun.Key].Add(page, new PageAttachment(page, attachments));
                         attachments = new Dictionary<int, LoadoutAttachment>();
-                        index = 1;
+                        index = 0;
                         page++;
                     }
                     index++;
@@ -372,42 +413,209 @@ namespace UnturnedBlackout.Instances
         {
             KnifePages = new Dictionary<int, PageKnife>();
             Logging.Debug($"Creating knife pages for {Player.CharacterName}, found {PlayerLoadout.Knives.Count} knives");
-            int index = 1;
+            int index = 0;
             int page = 1;
             var knives = new Dictionary<int, LoadoutKnife>();
+            foreach (var knife in PlayerLoadout.Knives)
+            {
+                knives.Add(index, knife.Value);
+                if (index == 4)
+                {
+                    KnifePages.Add(page, new PageKnife(page, knives));
+                    knives = new Dictionary<int, LoadoutKnife>();
+                    index = 0;
+                    page++;
+                }
+            }
+            if (knives.Count != 0)
+            {
+                KnifePages.Add(page, new PageKnife(page, knives));
+            }
+            Logging.Debug($"Created {KnifePages.Count} knife pages for {Player.CharacterName}");
+        }
 
+        public void BuildKnifeSkinPages()
+        {
+            KnifeSkinPages = new Dictionary<ushort, Dictionary<int, PageKnifeSkin>>();
+            Logging.Debug($"Creating knife skin pages for {Player.CharacterName}, found {PlayerLoadout.KnifeSkinsSearchByKnifeID.Count} knives which have skins");
+            foreach (var knife in PlayerLoadout.KnifeSkinsSearchByKnifeID)
+            {
+                Logging.Debug($"Creating knife skin pages for knife with id {knife.Key} for {Player.CharacterName}, found {knife.Value.Count} knife skins for that knife");
+                int index = 0;
+                int page = 1;
+                var knifeSkins = new Dictionary<int, KnifeSkin>();
+                KnifeSkinPages.Add(knife.Key, new Dictionary<int, PageKnifeSkin>());
+                foreach (var knifeSkin in knife.Value)
+                {
+                    knifeSkins.Add(index, knifeSkin);
+                    if (index == 4)
+                    {
+                        KnifeSkinPages[knife.Key].Add(page, new PageKnifeSkin(page, knifeSkins));
+                        knifeSkins = new Dictionary<int, KnifeSkin>();
+                        index = 0;
+                        page++;
+                    }
+                    index++;
+                }
+                if (knifeSkins.Count != 0)
+                {
+                    KnifeSkinPages[knife.Key].Add(page, new PageKnifeSkin(page, knifeSkins));
+                }
+                Logging.Debug($"Created {GunSkinPages[knife.Key].Count} knife skin pages for knife with id {knife.Key} for {Player.CharacterName}");
+            }
         }
 
         public void BuildPerkPages()
         {
-
+            PerkPages = new Dictionary<int, PagePerk>();
+            Logging.Debug($"Creating perk pages for {Player.CharacterName}, found {PlayerLoadout.Perks.Count} perks");
+            int index = 0;
+            int page = 1;
+            var perks = new Dictionary<int, LoadoutPerk>();
+            foreach (var perk in PlayerLoadout.Perks)
+            {
+                perks.Add(index, perk.Value);
+                if (index == 4)
+                {
+                    PerkPages.Add(page, new PagePerk(page, perks));
+                    perks = new Dictionary<int, LoadoutPerk>();
+                    index = 0;
+                    page++;
+                }
+            }
+            if (perks.Count != 0)
+            {
+                PerkPages.Add(page, new PagePerk(page, perks));
+            }
+            Logging.Debug($"Created {PerkPages.Count} perk pages for {Player.CharacterName}");
         }
 
         public void BuildTacticalPages()
         {
-
+            TacticalPages = new Dictionary<int, PageGadget>();
+            var gadgets = PlayerLoadout.Gadgets.Values.Where(k => k.Gadget.IsTactical).ToList();
+            Logging.Debug($"Creating tactical pages for {Player.CharacterName}, found {gadgets.Count} tacticals");
+            int index = 0;
+            int page = 1;
+            var gadgetItems = new Dictionary<int, LoadoutGadget>();
+            foreach (var gadget in gadgets)
+            {
+                gadgetItems.Add(index, gadget);
+                if (index == 4)
+                {
+                    TacticalPages.Add(page, new PageGadget(page, gadgetItems));
+                    gadgetItems = new Dictionary<int, LoadoutGadget>();
+                    index = 0;
+                    page++;
+                }
+            }
+            if (gadgetItems.Count != 0)
+            {
+                TacticalPages.Add(page, new PageGadget(page, gadgetItems));
+            }
+            Logging.Debug($"Created {TacticalPages.Count} tactical pages for {Player.CharacterName}");
         }
 
         public void BuildLethalPages()
         {
-
+            LethalPages = new Dictionary<int, PageGadget>();
+            var gadgets = PlayerLoadout.Gadgets.Values.Where(k => !k.Gadget.IsTactical).ToList();
+            Logging.Debug($"Creating lethal pages for {Player.CharacterName}, found {gadgets.Count} lethals");
+            int index = 0;
+            int page = 1;
+            var gadgetItems = new Dictionary<int, LoadoutGadget>();
+            foreach (var gadget in gadgets)
+            {
+                gadgetItems.Add(index, gadget);
+                if (index == 4)
+                {
+                    LethalPages.Add(page, new PageGadget(page, gadgetItems));
+                    gadgetItems = new Dictionary<int, LoadoutGadget>();
+                    index = 0;
+                    page++;
+                }
+            }
+            if (gadgetItems.Count != 0)
+            {
+                LethalPages.Add(page, new PageGadget(page, gadgetItems));
+            }
+            Logging.Debug($"Created {LethalPages.Count} lethal pages for {Player.CharacterName}");
         }
 
         public void BuildCardPages()
         {
-
+            CardPages = new Dictionary<int, PageCard>();
+            Logging.Debug($"Creating card pages for {Player.CharacterName}, found {PlayerLoadout.Cards.Count} cards");
+            int index = 0;
+            int page = 1;
+            var cards = new Dictionary<int, LoadoutCard>();
+            foreach (var card in PlayerLoadout.Cards)
+            {
+                cards.Add(index, card.Value);
+                if (index == 4)
+                {
+                    CardPages.Add(page, new PageCard(page, cards));
+                    cards = new Dictionary<int, LoadoutCard>();
+                    index = 0;
+                    page++;
+                }
+            }
+            if (cards.Count != 0)
+            {
+                CardPages.Add(page, new PageCard(page, cards));
+            }
+            Logging.Debug($"Created {CardPages.Count} card pages for {Player.CharacterName}");
         }
 
         public void BuildGlovePages()
         {
-
+            GlovePages = new Dictionary<int, PageGlove>();
+            Logging.Debug($"Creating glove pages for {Player.CharacterName}, found {PlayerLoadout.Cards.Count} gloves");
+            int index = 0;
+            int page = 1;
+            var gloves = new Dictionary<int, LoadoutGlove>();
+            foreach (var glove in PlayerLoadout.Gloves)
+            {
+                gloves.Add(index, glove.Value);
+                if (index == 4)
+                {
+                    GlovePages.Add(page, new PageGlove(page, gloves));
+                    gloves = new Dictionary<int, LoadoutGlove>();
+                    index = 0;
+                    page++;
+                }
+            }
+            if (gloves.Count != 0)
+            {
+                GlovePages.Add(page, new PageGlove(page, gloves));
+            }
+            Logging.Debug($"Created {GlovePages.Count} glove pages for {Player.CharacterName}");
         }
 
         public void BuildKillstreakPages()
         {
-
+            KillstreakPages = new Dictionary<int, PageKillstreak>();
+            Logging.Debug($"Creating killstreak pages for {Player.CharacterName}, found {PlayerLoadout.Killstreaks.Count} killstreaks");
+            int index = 0;
+            int page = 1;
+            var killstreaks = new Dictionary<int, LoadoutKillstreak>();
+            foreach (var killstreak in PlayerLoadout.Killstreaks)
+            {
+                killstreaks.Add(index, killstreak.Value);
+                if (index == 4)
+                {
+                    KillstreakPages.Add(page, new PageKillstreak(page, killstreaks));
+                    killstreaks = new Dictionary<int, LoadoutKillstreak>();
+                    index = 0;
+                    page++;
+                }
+            }
+            if (killstreaks.Count != 0)
+            {
+                KillstreakPages.Add(page, new PageKillstreak(page, killstreaks));
+            }
+            Logging.Debug($"Created {KillstreakPages.Count} killstreak pages for {Player.CharacterName}");
         }
-
 
         // Play Page
 
@@ -588,7 +796,6 @@ namespace UnturnedBlackout.Instances
         {
 
         }
-
 
         // Events
 

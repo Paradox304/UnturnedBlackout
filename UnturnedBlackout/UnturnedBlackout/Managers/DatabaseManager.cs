@@ -732,7 +732,7 @@ namespace UnturnedBlackout.Managers
                         Logging.Debug($"Found default glove with id {defaultGlove?.GloveID ?? 0}");
                         var defaultCard = defaultCards.FirstOrDefault();
                         Logging.Debug($"Found default card with id {defaultCard?.CardID ?? 0}");
-                        DefaultLoadout = new LoadoutData("DEFAULT LOADOUT", defaultPrimary?.GunID ?? 0, defaultPrimaryAttachments, defaultSecondary?.GunID ?? 0, defaultSecondaryAttachments, defaultKnife?.KnifeID ?? 0, defaultTactical?.GadgetID ?? 0, defaultLethal?.GadgetID ?? 0, defaultKillstreak, defaultPerk, defaultGlove?.GloveID ?? 0, defaultCard?.CardID ?? 0);
+                        DefaultLoadout = new LoadoutData("DEFAULT LOADOUT", defaultPrimary?.GunID ?? 0, 0, defaultPrimaryAttachments, defaultSecondary?.GunID ?? 0, 0, defaultSecondaryAttachments, defaultKnife?.KnifeID ?? 0, 0, defaultTactical?.GadgetID ?? 0, defaultLethal?.GadgetID ?? 0, defaultKillstreak, defaultPerk, defaultGlove?.GloveID ?? 0, defaultCard?.CardID ?? 0);
                         Logging.Debug("Built a default loadout to give to the players when they join");
                     }
                     catch (Exception ex)
@@ -923,12 +923,12 @@ namespace UnturnedBlackout.Managers
 
                     Dictionary<ushort, LoadoutGun> guns = new Dictionary<ushort, LoadoutGun>();
                     Dictionary<ushort, LoadoutKnife> knives = new Dictionary<ushort, LoadoutKnife>();
-                    Dictionary<int, LoadoutGunSkin> gunSkinsSearchByID = new Dictionary<int, LoadoutGunSkin>();
-                    Dictionary<int, LoadoutKnifeSkin> knifeSkinsSearchByID = new Dictionary<int, LoadoutKnifeSkin>();
-                    Dictionary<ushort, List<LoadoutGunSkin>> gunSkinsSearchByGunID = new Dictionary<ushort, List<LoadoutGunSkin>>();
-                    Dictionary<ushort, List<LoadoutKnifeSkin>> knifeSkinsSearchByKnifeID = new Dictionary<ushort, List<LoadoutKnifeSkin>>();
-                    Dictionary<ushort, LoadoutGunSkin> gunSkinsSearchBySkinID = new Dictionary<ushort, LoadoutGunSkin>();
-                    Dictionary<ushort, LoadoutKnifeSkin> knifeSkinsSearchBySkinID = new Dictionary<ushort, LoadoutKnifeSkin>();
+                    Dictionary<int, GunSkin> gunSkinsSearchByID = new Dictionary<int, GunSkin>();
+                    Dictionary<int, KnifeSkin> knifeSkinsSearchByID = new Dictionary<int, KnifeSkin>();
+                    Dictionary<ushort, List<GunSkin>> gunSkinsSearchByGunID = new Dictionary<ushort, List<GunSkin>>();
+                    Dictionary<ushort, List<KnifeSkin>> knifeSkinsSearchByKnifeID = new Dictionary<ushort, List<KnifeSkin>>();
+                    Dictionary<ushort, GunSkin> gunSkinsSearchBySkinID = new Dictionary<ushort, GunSkin>();
+                    Dictionary<ushort, KnifeSkin> knifeSkinsSearchBySkinID = new Dictionary<ushort, KnifeSkin>();
                     Dictionary<int, LoadoutPerk> perks = new Dictionary<int, LoadoutPerk>();
                     Dictionary<int, LoadoutGadget> gadgets = new Dictionary<int, LoadoutGadget>();
                     Dictionary<int, LoadoutKillstreak> killstreaks = new Dictionary<int, LoadoutKillstreak>();
@@ -1009,44 +1009,30 @@ namespace UnturnedBlackout.Managers
                     var gunSkinsTxt = await new MySqlCommand($"SELECT `SkinIDs` FROM `{PlayersGunsSkinsTableName}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteScalarAsync();
                     if (gunSkinsTxt is string gunSkinsText)
                     {
-                        foreach (var gunSkinText in gunSkinsText.Split(','))
+                        foreach (var id in gunSkinsText.GetIntListFromReaderResult())
                         {
-                            var isEquipped = false;
-                            var newText = "";
-                            if (gunSkinText.StartsWith("E."))
+                            if (!GunSkinsSearchByID.TryGetValue(id, out GunSkin skin))
                             {
-                                isEquipped = true;
-                                newText = gunSkinText.Replace("E.", "");
-                            } else if (gunSkinText.StartsWith("UE."))
-                            {
-                                isEquipped = false;
-                                newText = gunSkinText.Replace("UE.", "");
-                            }
-
-                            if (!int.TryParse(newText, out int skinID)) continue;
-                            if (!GunSkinsSearchByID.TryGetValue(skinID, out GunSkin skin))
-                            {
-                                Logging.Debug($"Error finding gun skin with id {skinID}, ignoring it");
+                                Logging.Debug($"Error finding gun skin with id {id}, ignoring it");
                                 continue;
                             }
 
-                            if (gunSkinsSearchByID.ContainsKey(skinID))
+                            if (gunSkinsSearchByID.ContainsKey(id))
                             {
-                                Logging.Debug($"Found a duplicate gun skin with id {skinID} registered for {player.CharacterName}, ignoring this");
+                                Logging.Debug($"Found a duplicate gun skin with id {id} registered for {player.CharacterName}, ignoring this");
                                 continue;
                             }
 
-                            var gunSkin = new LoadoutGunSkin(skin, isEquipped);
-                            gunSkinsSearchByID.Add(skinID, gunSkin);
-                            if (gunSkinsSearchByGunID.TryGetValue(skin.Gun.GunID, out List<LoadoutGunSkin> gunSkins))
+                            gunSkinsSearchByID.Add(id, skin);
+                            if (gunSkinsSearchByGunID.TryGetValue(skin.Gun.GunID, out List<GunSkin> gunSkins))
                             {
-                                gunSkins.Add(gunSkin);
+                                gunSkins.Add(skin);
                             }
                             else
                             {
-                                gunSkinsSearchByGunID.Add(skin.Gun.GunID, new List<LoadoutGunSkin> { gunSkin });
+                                gunSkinsSearchByGunID.Add(skin.Gun.GunID, new List<GunSkin> { skin });
                             }
-                            gunSkinsSearchBySkinID.Add(skin.SkinID, gunSkin);
+                            gunSkinsSearchBySkinID.Add(skin.SkinID, skin);
                         }
                         Logging.Debug($"Successfully got {gunSkinsSearchByID.Count} gun skins for {player.CharacterName}");
                     }
@@ -1055,45 +1041,30 @@ namespace UnturnedBlackout.Managers
                     var knifeSkinsTxt = await new MySqlCommand($"SELECT `SkinIDs` FROM `{PlayersKnivesSkinsTableName}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteScalarAsync();
                     if (knifeSkinsTxt is string knifeSkinsText)
                     {
-                        foreach (var knifeSkinText in knifeSkinsText.Split(','))
+                        foreach (var id in knifeSkinsText.GetIntListFromReaderResult())
                         {
-                            var isEquipped = false;
-                            var newText = "";
-                            if (knifeSkinText.StartsWith("E."))
+                            if (!KnifeSkinsSearchByID.TryGetValue(id, out KnifeSkin skin))
                             {
-                                isEquipped = true;
-                                newText = knifeSkinText.Replace("E.", "");
-                            }
-                            else if (knifeSkinText.StartsWith("UE."))
-                            {
-                                isEquipped = false;
-                                newText = knifeSkinText.Replace("UE.", "");
-                            }
-
-                            if (!int.TryParse(newText, out int skinID)) continue;
-                            if (!KnifeSkinsSearchByID.TryGetValue(skinID, out KnifeSkin skin))
-                            {
-                                Logging.Debug($"Error finding knife skin with id {skinID}, ignoring it");
+                                Logging.Debug($"Error finding knife skin with id {id}, ignoring it");
                                 continue;
                             }
 
-                            if (knifeSkinsSearchByID.ContainsKey(skinID))
+                            if (knifeSkinsSearchByID.ContainsKey(id))
                             {
-                                Logging.Debug($"Found a duplicate knife skin with id {skinID} registered for {player.CharacterName}, ignoring this");
+                                Logging.Debug($"Found a duplicate knife skin with id {id} registered for {player.CharacterName}, ignoring this");
                                 continue;
                             }
 
-                            var knifeSkin = new LoadoutKnifeSkin(skin, isEquipped);
-                            knifeSkinsSearchByID.Add(skinID, knifeSkin);
-                            if (knifeSkinsSearchByKnifeID.TryGetValue(skin.Knife.KnifeID, out List<LoadoutKnifeSkin> knifeSkins))
+                            knifeSkinsSearchByID.Add(id, skin);
+                            if (knifeSkinsSearchByKnifeID.TryGetValue(skin.Knife.KnifeID, out List<KnifeSkin> knifeSkins))
                             {
-                                knifeSkins.Add(knifeSkin);
+                                knifeSkins.Add(skin);
                             }
                             else
                             {
-                                knifeSkinsSearchByKnifeID.Add(skin.Knife.KnifeID, new List<LoadoutKnifeSkin> { knifeSkin });
+                                knifeSkinsSearchByKnifeID.Add(skin.Knife.KnifeID, new List<KnifeSkin> { skin });
                             }
-                            knifeSkinsSearchBySkinID.Add(skin.SkinID, knifeSkin);
+                            knifeSkinsSearchBySkinID.Add(skin.SkinID, skin);
                         }
                         Logging.Debug($"Successfully got {knifeSkinsSearchByID.Count} knife skins for {player.CharacterName}");
                     }
@@ -1280,6 +1251,12 @@ namespace UnturnedBlackout.Managers
                                 continue;
                             }
 
+                            if (!gunSkinsSearchByID.TryGetValue(loadoutData.PrimarySkin, out GunSkin primarySkin) && loadoutData.PrimarySkin != 0)
+                            {
+                                Logging.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a primary skin with id {loadoutData.PrimarySkin} which is not owned by the player, not counting this loadout");
+                                continue;
+                            }
+
                             var primaryAttachments = new Dictionary<EAttachment, LoadoutAttachment>();
                             foreach (var primaryAttachment in loadoutData.PrimaryAttachments)
                             {
@@ -1298,6 +1275,12 @@ namespace UnturnedBlackout.Managers
                                 continue;
                             }
 
+                            if (!gunSkinsSearchByID.TryGetValue(loadoutData.SecondarySkin, out GunSkin secondarySkin) && loadoutData.SecondarySkin != 0)
+                            {
+                                Logging.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a secondary skin with id {loadoutData.SecondarySkin} which is not owned by the player, not counting this loadout");
+                                continue;
+                            }
+
                             var secondaryAttachments = new Dictionary<EAttachment, LoadoutAttachment>();
                             foreach (var secondaryAttachment in loadoutData.SecondaryAttachments)
                             {
@@ -1313,6 +1296,12 @@ namespace UnturnedBlackout.Managers
                             if (!knives.TryGetValue(loadoutData.Knife, out LoadoutKnife knife) && loadoutData.Knife != 0)
                             {
                                 Logging.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a knife with id {loadoutData.Knife} which is not owned by the player, not counting this loadout");
+                                continue;
+                            }
+
+                            if (!knifeSkinsSearchByID.TryGetValue(loadoutData.KnifeSkin, out KnifeSkin knifeSkin) && loadoutData.KnifeSkin != 0)
+                            {
+                                Logging.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a knife skin with id {loadoutData.KnifeSkin} which is not owned by t he player, not counting this loadout");
                                 continue;
                             }
 
@@ -1370,7 +1359,7 @@ namespace UnturnedBlackout.Managers
                                 continue;
                             }
 
-                            loadouts.Add(loadoutID, new Loadout(loadoutID, loadoutData.LoadoutName, isActive, primary, primaryAttachments, secondary, secondaryAttachments, knife, tactical, lethal, loadoutKillstreaks, loadoutPerks, glove, card));
+                            loadouts.Add(loadoutID, new Loadout(loadoutID, loadoutData.LoadoutName, isActive, primary, primarySkin, primaryAttachments, secondary, secondarySkin, secondaryAttachments, knife, knifeSkin, tactical, lethal, loadoutKillstreaks, loadoutPerks, glove, card));
                         }
                         Logging.Debug($"Successfully got {loadouts.Count} loadouts for {player.CharacterName}");
                     } catch (Exception ex)
@@ -1489,12 +1478,12 @@ namespace UnturnedBlackout.Managers
                             }
 
                             Logging.Debug($"{player.CharacterName} has less loadouts than he should have, creating more");
-                            var defaultLoadout = new Loadout(0, DefaultLoadout.LoadoutName, false, primary, primaryAttachments, secondary, secondaryAttachments, knife, tactical, lethal, loadoutKillstreaks, loadoutPerks, glove, card);
+                            var defaultLoadout = new Loadout(0, DefaultLoadout.LoadoutName, false, primary, null, primaryAttachments, secondary, null, secondaryAttachments, knife, null, tactical, lethal, loadoutKillstreaks, loadoutPerks, glove, card);
                             for (int i = loadouts.Count + 1; i <= loadoutAmount; i++)
                             {
                                 Logging.Debug($"Adding loadout with id {i} for {player.CharacterName}");
                                 await new MySqlCommand($"INSERT INTO `{PlayersLoadoutsTableName}` (`SteamID` , `LoadoutID` , `IsActive` , `Loadout`) VALUES ({player.CSteamID}, {i}, {(i == 1 ? 1 : 0)}, '{data}');", Conn).ExecuteScalarAsync();
-                                loadouts.Add(i, new Loadout(i, defaultLoadout.LoadoutName, i == 1, defaultLoadout.Primary, defaultLoadout.PrimaryAttachments, defaultLoadout.Secondary, defaultLoadout.SecondaryAttachments, defaultLoadout.Knife, defaultLoadout.Tactical, defaultLoadout.Lethal, defaultLoadout.Killstreaks, defaultLoadout.Perks, defaultLoadout.Glove, defaultLoadout.Card));
+                                loadouts.Add(i, new Loadout(i, defaultLoadout.LoadoutName, i == 1, defaultLoadout.Primary, defaultLoadout.PrimarySkin, defaultLoadout.PrimaryAttachments, defaultLoadout.Secondary, defaultLoadout.SecondarySkin, defaultLoadout.SecondaryAttachments, defaultLoadout.Knife, defaultLoadout.KnifeSkin, defaultLoadout.Tactical, defaultLoadout.Lethal, defaultLoadout.Killstreaks, defaultLoadout.Perks, defaultLoadout.Glove, defaultLoadout.Card));
                             }
                         }
                         else if (loadoutAmount < loadouts.Count)
@@ -2221,54 +2210,21 @@ namespace UnturnedBlackout.Managers
                         throw new Exception();
                     }
 
-                    var loadoutSkin = new LoadoutGunSkin(skin, false);
-                    loadout.GunSkinsSearchByID.Add(id, loadoutSkin);
-                    if (loadout.GunSkinsSearchByGunID.TryGetValue(skin.Gun.GunID, out List<LoadoutGunSkin> gunSkins))
+                    loadout.GunSkinsSearchByID.Add(id, skin);
+                    if (loadout.GunSkinsSearchByGunID.TryGetValue(skin.Gun.GunID, out List<GunSkin> gunSkins))
                     {
-                        gunSkins.Add(loadoutSkin);
+                        gunSkins.Add(skin);
                     }
                     else
                     {
-                        loadout.GunSkinsSearchByGunID.Add(skin.Gun.GunID, new List<LoadoutGunSkin> { loadoutSkin });
+                        loadout.GunSkinsSearchByGunID.Add(skin.Gun.GunID, new List<GunSkin> { skin });
                     }
-                    loadout.GunSkinsSearchBySkinID.Add(skin.SkinID, loadoutSkin);
+                    loadout.GunSkinsSearchBySkinID.Add(skin.SkinID, skin);
 
-                    await new MySqlCommand($"UPDATE `{PlayersGunsSkinsTableName}` SET `SkinIDs` = '{Utility.GetStringFromGunSkins(loadout.GunSkinsSearchByID.Values.ToList())}' WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                    await new MySqlCommand($"UPDATE `{PlayersGunsSkinsTableName}` SET `SkinIDs` = '{loadout.GunSkinsSearchByID.Keys.ToList().GetStringFromIntList()}' WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
                 } catch (Exception ex)
                 {
                     Logger.Log($"Error adding gun skin with id {id} to player with steam id {steamID}");
-                    Logger.Log(ex);
-                } finally
-                {
-                    await Conn.CloseAsync();
-                }
-            }
-        }
-
-        public async Task UpdatePlayerGunSkinEquipAsync(CSteamID steamID, int id, bool isEquip)
-        {
-            using (MySqlConnection Conn = new MySqlConnection(ConnectionString))
-            {
-                try
-                {
-                    await Conn.OpenAsync();
-                    if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
-                    {
-                        Logging.Debug($"Error finding loadout for player with steam id {steamID}");
-                        throw new Exception();
-                    }
-
-                    if (!loadout.GunSkinsSearchByID.TryGetValue(id, out LoadoutGunSkin loadoutGunSkin))
-                    {
-                        Logging.Debug($"Error finding loadout gun skin with id {id} for player with steam id {steamID}");
-                        throw new Exception();
-                    }
-
-                    loadoutGunSkin.IsEquipped = isEquip;
-                    await new MySqlCommand($"UPDATE `{PlayersGunsSkinsTableName}` SET `SkinIDs` = '{Utility.GetStringFromGunSkins(loadout.GunSkinsSearchByID.Values.ToList())}' WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-                } catch (Exception ex)
-                {
-                    Logger.Log($"Error changing gun skip equip to {isEquip} for skin with id {id} for player with steam id {steamID}");
                     Logger.Log(ex);
                 } finally
                 {
@@ -2410,57 +2366,22 @@ namespace UnturnedBlackout.Managers
                         throw new Exception();
                     }
 
-                    var loadoutSkin = new LoadoutKnifeSkin(skin, false);
-                    loadout.KnifeSkinsSearchByID.Add(id, loadoutSkin);
-                    if (loadout.KnifeSkinsSearchByKnifeID.TryGetValue(skin.Knife.KnifeID, out List<LoadoutKnifeSkin> knifeSkins))
+                    loadout.KnifeSkinsSearchByID.Add(id, skin);
+                    if (loadout.KnifeSkinsSearchByKnifeID.TryGetValue(skin.Knife.KnifeID, out List<KnifeSkin> knifeSkins))
                     {
-                        knifeSkins.Add(loadoutSkin);
+                        knifeSkins.Add(skin);
                     }
                     else
                     {
-                        loadout.KnifeSkinsSearchByKnifeID.Add(skin.Knife.KnifeID, new List<LoadoutKnifeSkin> { loadoutSkin });
+                        loadout.KnifeSkinsSearchByKnifeID.Add(skin.Knife.KnifeID, new List<KnifeSkin> { skin });
                     }
-                    loadout.KnifeSkinsSearchBySkinID.Add(skin.SkinID, loadoutSkin);
+                    loadout.KnifeSkinsSearchBySkinID.Add(skin.SkinID, skin);
 
-                    await new MySqlCommand($"UPDATE `{PlayersKnivesSkinsTableName}` SET `SkinIDs` = '{Utility.GetStringFromKnifeSkins(loadout.KnifeSkinsSearchByID.Values.ToList())}' WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                    await new MySqlCommand($"UPDATE `{PlayersKnivesSkinsTableName}` SET `SkinIDs` = '{loadout.KnifeSkinsSearchByID.Keys.ToList().GetStringFromIntList()}' WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
                 }
                 catch (Exception ex)
                 {
                     Logger.Log($"Error adding knife skin with id {id} to player with steam id {steamID}");
-                    Logger.Log(ex);
-                }
-                finally
-                {
-                    await Conn.CloseAsync();
-                }
-            }
-        }
-
-        public async Task UpdatePlayerKnifeSkinEquipAsync(CSteamID steamID, int id, bool isEquip)
-        {
-            using (MySqlConnection Conn = new MySqlConnection(ConnectionString))
-            {
-                try
-                {
-                    await Conn.OpenAsync();
-                    if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
-                    {
-                        Logging.Debug($"Error finding loadout for player with steam id {steamID}");
-                        throw new Exception();
-                    }
-
-                    if (!loadout.KnifeSkinsSearchByID.TryGetValue(id, out LoadoutKnifeSkin loadoutKnifeSkin))
-                    {
-                        Logging.Debug($"Error finding loadout knife skin with id {id} for player with steam id {steamID}");
-                        throw new Exception();
-                    }
-
-                    loadoutKnifeSkin.IsEquipped = isEquip;
-                    await new MySqlCommand($"UPDATE `{PlayersKnivesSkinsTableName}` SET `SkinIDs` = '{Utility.GetStringFromKnifeSkins(loadout.KnifeSkinsSearchByID.Values.ToList())}' WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-                }
-                catch (Exception ex)
-                {
-                    Logger.Log($"Error changing knife skip equip to {isEquip} for skin with id {id} for player with steam id {steamID}");
                     Logger.Log(ex);
                 }
                 finally

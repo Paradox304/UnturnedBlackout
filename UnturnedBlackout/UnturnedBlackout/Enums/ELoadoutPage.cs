@@ -13,6 +13,8 @@ namespace UnturnedBlackout.Enums
         Secondary,
         PrimaryAttachment,
         SecondaryAttachment,
+        PrimarySkin,
+        SecondarySkin,
         Knife,
         Perk,
         Killstreak,

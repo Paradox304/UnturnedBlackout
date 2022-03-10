@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using UnturnedBlackout.Database.Base;
 using UnturnedBlackout.Database.Data;
 using UnturnedBlackout.Models.Global;
 
@@ -14,7 +15,7 @@ namespace UnturnedBlackout.Managers
     public class LoadoutManager
     {
         public DatabaseManager DB { get; set; }
-        
+
         public LoadoutManager()
         {
             DB = Plugin.Instance.DBManager;
@@ -453,7 +454,7 @@ namespace UnturnedBlackout.Managers
             });
         }
 
-        public void EquipGunSkin(UnturnedPlayer player, int id)
+        public void EquipGunSkin(UnturnedPlayer player, int loadoutID, int id, bool isPrimary)
         {
             Logging.Debug($"{player.CharacterName} trying to equip gun skin with id {id}");
             if (!DB.PlayerLoadouts.TryGetValue(player.CSteamID, out PlayerLoadout loadout))
@@ -462,52 +463,72 @@ namespace UnturnedBlackout.Managers
                 return;
             }
 
-            if (!loadout.GunSkinsSearchByID.TryGetValue(id, out LoadoutGunSkin gunSkin))
+            if (!loadout.GunSkinsSearchByID.TryGetValue(id, out GunSkin gunSkin))
             {
                 Logging.Debug($"Error finding gun skin with id {id} for {player.CharacterName}");
                 return;
             }
 
-            if (!loadout.GunSkinsSearchByGunID.TryGetValue(gunSkin.Skin.Gun.GunID, out List<LoadoutGunSkin> gunSkins))
+            if (!loadout.Loadouts.TryGetValue(loadoutID, out Loadout playerLoadout))
             {
-                Logging.Debug($"Error finding gun skins for gun with id {gunSkin.Skin.Gun.GunID} for {player.CharacterName}");
+                Logging.Debug($"Error finding loadout with id {loadoutID} for {player.CharacterName}");
                 return;
             }
+            
+            if (isPrimary)
+            {
+                if (playerLoadout.Primary.Gun.GunID != gunSkin.Gun.GunID)
+                {
+                    Logging.Debug($"{player.CharacterName} is trying to set skin with id {gunSkin.ID} which is not available for the primary that he has equipped with id {playerLoadout.Primary.Gun.GunID}");
+                    return;
+                }
+                playerLoadout.PrimarySkin = gunSkin;
+            } else
+            {
+                if (playerLoadout.Secondary.Gun.GunID != gunSkin.Gun.GunID)
+                {
+                    Logging.Debug($"{player.CharacterName} is trying to set skin with id {gunSkin.ID} which is not available for the secondary that he has equipped with id {playerLoadout.Primary.Gun.GunID}");
+                    return;
+                }
+                playerLoadout.SecondarySkin = gunSkin;
+            }
 
-            var otherSameSkinEquipped = gunSkins.FirstOrDefault(k => k.IsEquipped);
             ThreadPool.QueueUserWorkItem(async (o) =>
             {
-                await DB.UpdatePlayerGunSkinEquipAsync(player.CSteamID, id, true);
-                if  (otherSameSkinEquipped != null)
-                {
-                    Logging.Debug($"{player.CharacterName} has another skin equipped of the same gun with id {otherSameSkinEquipped.Skin.ID}, dequippinhg it");
-                    await DB.UpdatePlayerGunSkinEquipAsync(player.CSteamID, otherSameSkinEquipped.Skin.ID, false);
-                }
+                await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
             });
         }
 
-        public void DequipGunSkin(UnturnedPlayer player, int id)
+        public void DequipGunSkin(UnturnedPlayer player, int loadoutID, bool isPrimary)
         {
-            Logging.Debug($"{player.CharacterName} trying to dequip gun skin with id {id}");
+            Logging.Debug($"{player.CharacterName} trying to dequip gun skin for loadout with id {loadoutID}");
             if (!DB.PlayerLoadouts.TryGetValue(player.CSteamID, out PlayerLoadout loadout))
             {
                 Logging.Debug($"Error finding loadout for {player.CharacterName}");
                 return;
             }
 
-            if (!loadout.GunSkinsSearchByID.ContainsKey(id))
+            if (!loadout.Loadouts.TryGetValue(loadoutID, out Loadout playerLoadout))
             {
-                Logging.Debug($"Error finding gun skin with id {id} for {player.CharacterName}");
+                Logging.Debug($"Error finding loadout id with {loadoutID} for {player.CharacterName}");
                 return;
+            }
+
+            if (isPrimary)
+            {
+                playerLoadout.PrimarySkin = null;
+            } else
+            {
+                playerLoadout.SecondarySkin = null;
             }
 
             ThreadPool.QueueUserWorkItem(async (o) =>
             {
-                await DB.UpdatePlayerGunSkinEquipAsync(player.CSteamID, id, false);
+                await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
             });
         }
 
-        public void EquipKnifeSkin(UnturnedPlayer player, int id)
+        public void EquipKnifeSkin(UnturnedPlayer player, int loadoutID, int id)
         {
             Logging.Debug($"{player.CharacterName} trying to equip knife skin with id {id}");
             if (!DB.PlayerLoadouts.TryGetValue(player.CSteamID, out PlayerLoadout loadout))
@@ -516,36 +537,44 @@ namespace UnturnedBlackout.Managers
                 return;
             }
 
-            if (!loadout.KnifeSkinsSearchByID.TryGetValue(id, out LoadoutKnifeSkin knifeSkin))
+            if (!loadout.Loadouts.TryGetValue(loadoutID, out Loadout playerLoadout))
+            {
+                Logging.Debug($"Error finding loadout with id {loadoutID} for {player.CharacterName}");
+                return;
+            }
+
+            if (!loadout.KnifeSkinsSearchByID.TryGetValue(id, out KnifeSkin knifeSkin))
             {
                 Logging.Debug($"Error finding knife skin with id {id} for {player.CharacterName}");
                 return;
             }
 
-            if (!loadout.KnifeSkinsSearchByKnifeID.TryGetValue(knifeSkin.Skin.Knife.KnifeID, out List<LoadoutKnifeSkin> knifeSkins))
+            if (playerLoadout.Knife.Knife.KnifeID != knifeSkin.Knife.KnifeID)
             {
-                Logging.Debug($"Error finding knife skins for knife with id {knifeSkin.Skin.Knife.KnifeID} for {player.CharacterName}");
+                Logging.Debug($"{player.CharacterName} is trying to set skin with id {id} which is not of the knife that player has equipped");
                 return;
             }
 
-            var otherSameSkinEquipped = knifeSkins.FirstOrDefault(k => k.IsEquipped);
+            playerLoadout.KnifeSkin = knifeSkin;
+
             ThreadPool.QueueUserWorkItem(async (o) =>
             {
-                await DB.UpdatePlayerKnifeSkinEquipAsync(player.CSteamID, id, true);
-                if (otherSameSkinEquipped != null)
-                {
-                    Logging.Debug($"{player.CharacterName} has another skin equipped of the same knife with id {otherSameSkinEquipped.Skin.ID}, dequippinhg it");
-                    await DB.UpdatePlayerKnifeSkinEquipAsync(player.CSteamID, otherSameSkinEquipped.Skin.ID, false);
-                }
+                await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
             });
         }
 
-        public void DequipKnifeSkin(UnturnedPlayer player, int id)
+        public void DequipKnifeSkin(UnturnedPlayer player, int loadoutID, int id)
         {
             Logging.Debug($"{player.CharacterName} trying to dequip knife skin with id {id}");
             if (!DB.PlayerLoadouts.TryGetValue(player.CSteamID, out PlayerLoadout loadout))
             {
                 Logging.Debug($"Error finding loadout for {player.CharacterName}");
+                return;
+            }
+                
+            if (loadout.Loadouts.TryGetValue(loadoutID, out Loadout playerLoadout))
+            {
+                Logging.Debug($"Error finding loadout with id {loadoutID} for {player.CharacterName}");
                 return;
             }
 
@@ -555,9 +584,11 @@ namespace UnturnedBlackout.Managers
                 return;
             }
 
+            playerLoadout.KnifeSkin = null;
+
             ThreadPool.QueueUserWorkItem(async (o) =>
             {
-                await DB.UpdatePlayerGunSkinEquipAsync(player.CSteamID, id, false);
+                await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
             });
         }
 

@@ -152,10 +152,8 @@
     <Compile Include="Database\Data\LoadoutGadget.cs" />
     <Compile Include="Database\Data\LoadoutGlove.cs" />
     <Compile Include="Database\Data\LoadoutGun.cs" />
-    <Compile Include="Database\Data\LoadoutGunSkin.cs" />
     <Compile Include="Database\Data\LoadoutKillstreak.cs" />
     <Compile Include="Database\Data\LoadoutKnife.cs" />
-    <Compile Include="Database\Data\LoadoutKnifeSkin.cs" />
     <Compile Include="Database\Data\LoadoutPerk.cs" />
     <Compile Include="Database\Data\PlayerData.cs" />
     <Compile Include="Database\Data\PlayerLoadout.cs" />
@@ -205,8 +203,10 @@
     <Compile Include="Models\UI\PageGadget.cs" />
     <Compile Include="Models\UI\PageGlove.cs" />
     <Compile Include="Models\UI\PageGun.cs" />
+    <Compile Include="Models\UI\PageGunSkin.cs" />
     <Compile Include="Models\UI\PageKillstreak.cs" />
     <Compile Include="Models\UI\PageKnife.cs" />
+    <Compile Include="Models\UI\PageKnifeSkin.cs" />
     <Compile Include="Models\UI\PageLoadout.cs" />
     <Compile Include="Models\UI\PagePerk.cs" />
     <Compile Include="Patches\ClothingPatches.cs" />
