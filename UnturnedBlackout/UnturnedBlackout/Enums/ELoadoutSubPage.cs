@@ -8,7 +8,7 @@ namespace UnturnedBlackout.Enums
 {
     public enum ELoadoutSubPage
     {
-        PISTOL,
+        PISTOLS,
         SUBMACHINE_GUNS,
         SHOTGUNS,
         LIGHT_MACHINE_GUNS,

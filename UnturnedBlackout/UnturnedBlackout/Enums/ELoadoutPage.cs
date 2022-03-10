@@ -17,6 +17,8 @@ namespace UnturnedBlackout.Enums
         Perk,
         Killstreak,
         Glove,
-        Card
+        Card,
+        Tactical,
+        Lethal
     }
 }
