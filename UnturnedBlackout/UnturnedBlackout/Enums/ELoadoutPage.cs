@@ -8,13 +8,10 @@ namespace UnturnedBlackout.Enums
 {
     public enum ELoadoutPage
     {
-        Main,
         Primary,
         Secondary,
         PrimaryAttachment,
         SecondaryAttachment,
-        PrimarySkin,
-        SecondarySkin,
         Knife,
         Perk,
         Killstreak,

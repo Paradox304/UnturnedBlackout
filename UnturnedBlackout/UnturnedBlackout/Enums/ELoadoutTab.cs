@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace UnturnedBlackout.Enums
 {
-    public enum ELoadoutSubPage
+    public enum ELoadoutTab
     {
         ALL,
         PISTOLS,

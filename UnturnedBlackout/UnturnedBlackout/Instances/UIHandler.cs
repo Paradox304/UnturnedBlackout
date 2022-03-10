@@ -36,10 +36,11 @@ namespace UnturnedBlackout.Instances
         public ELoadoutPage LoadoutPage { get; set; }
         public int LoadoutPageID { get; set; }
         public int LoadoutID { get; set; }
+
         public string LoadoutNameText { get; set; }
 
-        public ELoadoutSubPage LoadoutSubPage { get; set; }
-        public int LoadoutSubPageID { get; set; }
+        public ELoadoutTab LoadoutTab { get; set; }
+        public int LoadoutTabPageID { get; set; }
         public object SelectedItemID { get; set; }
 
         public Dictionary<int, PageLoadout> LoadoutPages { get; set; }
@@ -742,27 +743,954 @@ namespace UnturnedBlackout.Instances
 
         public void ShowLoadouts()
         {
+            Logging.Debug($"Showing loadouts to {Player.CharacterName}");
+            MainPage = EMainPage.Leaderboard;
 
+            // Code to turn off all side objects for loadout page
+            if (!LoadoutPages.TryGetValue(1, out PageLoadout firstPage))
+            {
+                Logging.Debug($"Error finding first page of loadouts for {Player.CharacterName}");
+                LoadoutPageID = 0;
+                // Code to turn off the page forward and backward button
+                return;
+            }
+
+            ShowLoadoutPage(firstPage);
         }
 
-        public void ShowLoadout()
+        public void ShowLoadoutPage(PageLoadout page)
         {
+            LoadoutPageID = page.PageID;
 
+            // Code to send all the UI objects
         }
 
         public void ForwardLoadoutPage()
         {
+            if (LoadoutPageID == 0)
+            {
+                return;
+            }
+            Logging.Debug($"Forwarding loadout page for {Player.CharacterName}, Current Page {LoadoutPageID}");
 
+            if (!LoadoutPages.TryGetValue(LoadoutPageID + 1, out PageLoadout nextPage) && !LoadoutPages.TryGetValue(1, out nextPage))
+            {
+                ShowLoadouts();
+                return;
+            }
+
+            ShowLoadoutPage(nextPage);
         }
 
         public void BackwardLoadoutPage()
         {
+            if (LoadoutPageID == 0)
+            {
+                return;
+            }
+            Logging.Debug($"Backwarding loadout page for {Player.CharacterName}, Current Page {LoadoutPageID}");
 
+            if (!LoadoutPages.TryGetValue(LoadoutPageID - 1, out PageLoadout prevPage) && !LoadoutPages.TryGetValue(LoadoutPages.Keys.Max(), out prevPage))
+            {
+                ShowLoadouts();
+                return;
+            }
+
+            ShowLoadoutPage(prevPage);
+        }
+
+        public void ReloadLoadout()
+        {
+            Logging.Debug($"Reloading loadout for {Player.CharacterName}");
+            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout currentLoadout))
+            {
+                Logging.Debug($"Couldnt find the current selected loadout");
+                return;
+            }
+
+            ShowLoadout(currentLoadout);
+        }
+
+        public void SelectedLoadout(int selected)
+        {
+            Logging.Debug($"{Player.CharacterName} selected loadout at {selected}");
+            if (!LoadoutPages.TryGetValue(LoadoutPageID, out PageLoadout currentPage))
+            {
+                Logging.Debug($"Couldnt find the current selected page at {LoadoutPageID}");
+                return;
+            }
+
+            if (!currentPage.Loadouts.TryGetValue(selected, out Loadout currentLoadout))
+            {
+                Logging.Debug($"Couldnt find the selected loadout at {selected}");
+                return;
+            }
+
+            ShowLoadout(currentLoadout);
+        }
+
+        public void ShowLoadout(Loadout loadout)
+        {
+            LoadoutID = loadout.LoadoutID;
+
+            // Code to show the objects
         }
 
         // Loadout Sub Page
 
-        public void ShowLoadoutSubPage()
+        public void ShowLoadoutSubPage(ELoadoutPage page)
+        {
+            Logging.Debug($"Showing loadout sub page {page} for {Player.CharacterName}");
+            LoadoutPage = page;
+            switch (page)
+            {
+                case ELoadoutPage.Primary:
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item ARs Button", true);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Pistols Button", true);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item SMGs Button", true);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item SRs Button", true);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Shotguns Button", true);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item LMGs Button", true);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Skins Button", true);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item All Button", false);
+                    break;
+                case ELoadoutPage.Secondary:
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item ARs Button", true);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Pistols Button", true);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item SMGs Button", true);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item SRs Button", true);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Shotguns Button", true);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item LMGs Button", true);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Skins Button", true);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item All Button", false);
+                    break;
+                case ELoadoutPage.Knife:
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item ARs Button", false);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Pistols Button", false);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item SMGs Button", false);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item SRs Button", false);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Shotguns Button", false);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item LMGs Button", false);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Skins Button", true);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item All Button", true);
+                    break;
+                default:
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item ARs Button", false);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Pistols Button", false);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item SMGs Button", false);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item SRs Button", false);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Shotguns Button", false);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item LMGs Button", false);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Skins Button", false);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item All Button", true);
+                    break;
+            }
+        }
+
+        public void ShowLoadoutTab(ELoadoutTab tab)
+        {
+            Logging.Debug($"Showing loadout tab {tab} for {Player.CharacterName}");
+            LoadoutTab = tab;
+            
+            if (LoadoutTab == ELoadoutTab.ALL)
+            {
+                if (LoadoutPage == ELoadoutPage.PrimaryAttachment)
+                {
+                    if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
+                    {
+                        Logging.Debug($"Error finding the selected loadout with id {LoadoutID} for {Player.CharacterName}");
+                        LoadoutTabPageID = 0;
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                        return;
+                    }
+
+                    if (!AttachmentPages.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out Dictionary<int, PageAttachment> attachmentPages))
+                    {
+                        Logging.Debug($"Error finding the primary attachment pages for gun with id {loadout.Primary?.Gun?.GunID ?? 0} for {Player.CharacterName}");
+                        LoadoutTabPageID = 0;
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                        return;
+                    }
+
+                    if (!attachmentPages.TryGetValue(1, out PageAttachment firstPage))
+                    {
+                        Logging.Debug($"Error finding the first attachment page for gun with id {loadout.Primary.Gun.GunID} for {Player.CharacterName}");
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                        return;
+                    }
+
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
+                    ShowAttachmentPage(firstPage);
+                }
+                else if (LoadoutPage == ELoadoutPage.SecondaryAttachment)
+                {
+                    if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
+                    {
+                        Logging.Debug($"Error finding the selected loadout with id {LoadoutID} for {Player.CharacterName}");
+                        LoadoutTabPageID = 0;
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                        return;
+                    }
+
+                    if (!AttachmentPages.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out Dictionary<int, PageAttachment> attachmentPages))
+                    {
+                        Logging.Debug($"Error finding the secondary attachment pages for gun with id {loadout.Secondary?.Gun?.GunID ?? 0} for {Player.CharacterName}");
+                        LoadoutTabPageID = 0;
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                        return;
+                    }
+
+                    if (!attachmentPages.TryGetValue(1, out PageAttachment firstPage))
+                    {
+                        Logging.Debug($"Error finding the first attachment page for gun with id {loadout.Primary.Gun.GunID} for {Player.CharacterName}");
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                        return;
+                    }
+
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
+                    ShowAttachmentPage(firstPage);
+                }
+                else if (LoadoutPage == ELoadoutPage.Perk)
+                {
+                    if (!PerkPages.TryGetValue(1, out PagePerk firstPage))
+                    {
+                        Logging.Debug($"Error getting first page for perks for {Player.CharacterName}");
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                        return;
+                    }
+
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+
+                    ShowPerkPage(firstPage);
+                }
+                else if (LoadoutPage == ELoadoutPage.Lethal)
+                {
+                    if (!LethalPages.TryGetValue(1, out PageGadget firstPage))
+                    {
+                        Logging.Debug($"Error finding the first page for lethals for {Player.CharacterName}");
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                        return;
+                    }
+
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
+                    ShowGadgetPage(firstPage);
+                }
+                else if (LoadoutPage == ELoadoutPage.Tactical)
+                {
+                    if (!TacticalPages.TryGetValue(1, out PageGadget firstPage))
+                    {
+                        Logging.Debug($"Error finding the first page for tacticals for {Player.CharacterName}");
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                        return;
+                    }
+
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
+                    ShowGadgetPage(firstPage);
+                }
+                else if (LoadoutPage == ELoadoutPage.Knife)
+                {
+                    if (!KnifePages.TryGetValue(1, out PageKnife firstPage))
+                    {
+                        Logging.Debug($"Error finding the first page for knives for {Player.CharacterName}");
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                        return;
+                    }
+
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
+                    ShowKnifePage(firstPage);
+                }
+                else if (LoadoutPage == ELoadoutPage.Killstreak)
+                {
+                    if (!KillstreakPages.TryGetValue(1, out PageKillstreak firstPage))
+                    {
+                        Logging.Debug($"Error finding the first page for killstreaks for {Player.CharacterName}");
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                        return;
+                    }
+
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
+                    ShowKillstreakPage(firstPage);
+                }
+                else if (LoadoutPage == ELoadoutPage.Glove)
+                {
+                    if (!GlovePages.TryGetValue(1, out PageGlove firstPage))
+                    {
+                        Logging.Debug($"Error finding the first page for gloves for {Player.CharacterName}");
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                        return;
+                    }
+
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
+                    ShowGlovePage(firstPage);
+                }
+                else if (LoadoutPage == ELoadoutPage.Card)
+                {
+                    if (!CardPages.TryGetValue(1, out PageCard firstPage))
+                    {
+                        Logging.Debug($"Error finding the first page for cards for {Player.CharacterName}");
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                        return;
+                    }
+
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
+                    ShowCardPage(firstPage);
+                }
+            }
+            else if (LoadoutTab == ELoadoutTab.SKINS)
+            {
+                if (LoadoutPage == ELoadoutPage.Primary)
+                {
+                    if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
+                    {
+                        Logging.Debug($"Error getting current loadout with id {LoadoutID} for {Player.CharacterName}");
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                        return;
+                    }
+
+                    if (!GunSkinPages.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out Dictionary<int, PageGunSkin> gunSkinPages))
+                    {
+                        Logging.Debug($"Error getting gun skin pages for gun with id {loadout.Primary?.Gun?.GunID ?? 0}");
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                        return;
+                    }
+
+                    if (!gunSkinPages.TryGetValue(1, out PageGunSkin firstPage))
+                    {
+                        Logging.Debug($"Error finding the first page for gun skins for gun with id {loadout.Primary.Gun.GunID} for {Player.CharacterName}");
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                        return;
+                    }
+
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
+                    ShowGunSkinPage(firstPage);
+                }
+                else if (LoadoutPage == ELoadoutPage.Secondary)
+                {
+                    if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
+                    {
+                        Logging.Debug($"Error getting current loadout with id {LoadoutID} for {Player.CharacterName}");
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                        return;
+                    }
+
+                    if (!GunSkinPages.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out Dictionary<int, PageGunSkin> gunSkinPages))
+                    {
+                        Logging.Debug($"Error getting gun skin pages for gun with id {loadout.Secondary?.Gun?.GunID ?? 0}");
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                        return;
+                    }
+
+                    if (!gunSkinPages.TryGetValue(1, out PageGunSkin firstPage))
+                    {
+                        Logging.Debug($"Error finding the first page for gun skins for gun with id {loadout.Secondary.Gun.GunID} for {Player.CharacterName}");
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                        return;
+                    }
+
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
+                    ShowGunSkinPage(firstPage);
+                }
+                else if (LoadoutPage == ELoadoutPage.Knife)
+                {
+                    if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
+                    {
+                        Logging.Debug($"Error getting current loadout with id {LoadoutID} for {Player.CharacterName}");
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                        return;
+                    }
+
+                    if (!KnifeSkinPages.TryGetValue(loadout.Knife?.Knife?.KnifeID ?? 0, out Dictionary<int, PageKnifeSkin> knifeSkinPages))
+                    {
+                        Logging.Debug($"Error getting gun skin pages for knife with id {loadout.Knife?.Knife?.KnifeID ?? 0}");
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                        return;
+                    }
+
+                    if (!knifeSkinPages.TryGetValue(1, out PageKnifeSkin firstPage))
+                    {
+                        Logging.Debug($"Error finding the first page for gun skins for gun with id {loadout.Knife.Knife.KnifeID} for {Player.CharacterName}");
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                        return;
+                    }
+
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
+                    ShowKnifeSkinPage(firstPage);
+                }
+            }
+            else if (LoadoutTab == ELoadoutTab.PISTOLS)
+            {
+                if (!PistolPages.TryGetValue(1, out PageGun firstPage))
+                {
+                    Logging.Debug($"Error finding first page for pistols for {Player.CharacterName}");
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+                    EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                    return;
+                }
+
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
+
+                ShowGunPage(firstPage);
+            }
+            else if (LoadoutTab == ELoadoutTab.SUBMACHINE_GUNS)
+            {
+                if (!SMGPages.TryGetValue(1, out PageGun firstPage))
+                {
+                    Logging.Debug($"Error finding first page for smgs for {Player.CharacterName}");
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+                    EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                    return;
+                }
+
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
+
+                ShowGunPage(firstPage);
+            }
+            else if (LoadoutTab == ELoadoutTab.SHOTGUNS)
+            {
+                if (!ShotgunPages.TryGetValue(1, out PageGun firstPage))
+                {
+                    Logging.Debug($"Error finding first page for shotguns for {Player.CharacterName}");
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+                    EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                    return;
+                }
+
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
+
+                ShowGunPage(firstPage);
+            }
+            else if (LoadoutTab == ELoadoutTab.LIGHT_MACHINE_GUNS)
+            {
+                if (!LMGPages.TryGetValue(1, out PageGun firstPage))
+                {
+                    Logging.Debug($"Error finding first page for lmgs for {Player.CharacterName}");
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+                    EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                    return;
+                }
+
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
+
+                ShowGunPage(firstPage);
+            }
+            else if (LoadoutTab == ELoadoutTab.ASSAULT_RIFLES)
+            {
+                if (!ARPages.TryGetValue(1, out PageGun firstPage))
+                {
+                    Logging.Debug($"Error finding first page for ARs for {Player.CharacterName}");
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+                    EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                    return;
+                }
+
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
+
+                ShowGunPage(firstPage);
+            }
+            else if (LoadoutTab == ELoadoutTab.SNIPER_RIFLES)
+            {
+                if (!SniperPages.TryGetValue(1, out PageGun firstPage))
+                {
+                    Logging.Debug($"Error finding first page for snipers for {Player.CharacterName}");
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+                    EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                    return;
+                }
+
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
+
+                ShowGunPage(firstPage);
+            }
+        }
+
+        public void ForwardLoadoutTab()
+        {
+            Logging.Debug($"{Player.CharacterName} is trying to forward the loadout tab {LoadoutTab}, Current Page {LoadoutTabPageID}");
+            if (LoadoutTab == ELoadoutTab.ALL)
+            {
+                if (LoadoutPage == ELoadoutPage.PrimaryAttachment)
+                {
+                    if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
+                    {
+                        Logging.Debug($"Error finding the selected loadout with id {LoadoutID} for {Player.CharacterName}");
+                        return;
+                    }
+
+                    if (!AttachmentPages.TryGetValue(loadout.Primary.Gun.GunID, out Dictionary<int, PageAttachment> attachmentPages))
+                    {
+                        Logging.Debug($"Error finding the primary attachment pages for gun with id {loadout.Primary.Gun.GunID} for {Player.CharacterName}");
+                        return;
+                    }
+
+                    if (!attachmentPages.TryGetValue(LoadoutTabPageID + 1, out PageAttachment nextPage) && !attachmentPages.TryGetValue(1, out nextPage))
+                    {
+                        Logging.Debug($"Error finding the next attachment page for gun with id {loadout.Primary.Gun.GunID} for {Player.CharacterName}");
+                        return;
+                    }
+
+                    ShowAttachmentPage(nextPage);
+                }
+                else if (LoadoutPage == ELoadoutPage.SecondaryAttachment)
+                {
+                    if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
+                    {
+                        Logging.Debug($"Error finding the selected loadout with id {LoadoutID} for {Player.CharacterName}");
+                        LoadoutTabPageID = 0;
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                        return;
+                    }
+
+                    if (!AttachmentPages.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out Dictionary<int, PageAttachment> attachmentPages))
+                    {
+                        Logging.Debug($"Error finding the secondary attachment pages for gun with id {loadout.Secondary?.Gun?.GunID ?? 0} for {Player.CharacterName}");
+                        LoadoutTabPageID = 0;
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                        return;
+                    }
+
+                    if (!attachmentPages.TryGetValue(1, out PageAttachment firstPage))
+                    {
+                        Logging.Debug($"Error finding the first attachment page for gun with id {loadout.Primary.Gun.GunID} for {Player.CharacterName}");
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                        return;
+                    }
+
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
+                    ShowAttachmentPage(firstPage);
+                }
+                else if (LoadoutPage == ELoadoutPage.Perk)
+                {
+                    if (!PerkPages.TryGetValue(1, out PagePerk firstPage))
+                    {
+                        Logging.Debug($"Error getting first page for perks for {Player.CharacterName}");
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                        return;
+                    }
+
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+
+                    ShowPerkPage(firstPage);
+                }
+                else if (LoadoutPage == ELoadoutPage.Lethal)
+                {
+                    if (!LethalPages.TryGetValue(1, out PageGadget firstPage))
+                    {
+                        Logging.Debug($"Error finding the first page for lethals for {Player.CharacterName}");
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                        return;
+                    }
+
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
+                    ShowGadgetPage(firstPage);
+                }
+                else if (LoadoutPage == ELoadoutPage.Tactical)
+                {
+                    if (!TacticalPages.TryGetValue(1, out PageGadget firstPage))
+                    {
+                        Logging.Debug($"Error finding the first page for tacticals for {Player.CharacterName}");
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                        return;
+                    }
+
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
+                    ShowGadgetPage(firstPage);
+                }
+                else if (LoadoutPage == ELoadoutPage.Knife)
+                {
+                    if (!KnifePages.TryGetValue(1, out PageKnife firstPage))
+                    {
+                        Logging.Debug($"Error finding the first page for knives for {Player.CharacterName}");
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                        return;
+                    }
+
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
+                    ShowKnifePage(firstPage);
+                }
+                else if (LoadoutPage == ELoadoutPage.Killstreak)
+                {
+                    if (!KillstreakPages.TryGetValue(1, out PageKillstreak firstPage))
+                    {
+                        Logging.Debug($"Error finding the first page for killstreaks for {Player.CharacterName}");
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                        return;
+                    }
+
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
+                    ShowKillstreakPage(firstPage);
+                }
+                else if (LoadoutPage == ELoadoutPage.Glove)
+                {
+                    if (!GlovePages.TryGetValue(1, out PageGlove firstPage))
+                    {
+                        Logging.Debug($"Error finding the first page for gloves for {Player.CharacterName}");
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                        return;
+                    }
+
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
+                    ShowGlovePage(firstPage);
+                }
+                else if (LoadoutPage == ELoadoutPage.Card)
+                {
+                    if (!CardPages.TryGetValue(1, out PageCard firstPage))
+                    {
+                        Logging.Debug($"Error finding the first page for cards for {Player.CharacterName}");
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                        return;
+                    }
+
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
+                    ShowCardPage(firstPage);
+                }
+            }
+            else if (LoadoutTab == ELoadoutTab.SKINS)
+            {
+                if (LoadoutPage == ELoadoutPage.Primary)
+                {
+                    if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
+                    {
+                        Logging.Debug($"Error getting current loadout with id {LoadoutID} for {Player.CharacterName}");
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                        return;
+                    }
+
+                    if (!GunSkinPages.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out Dictionary<int, PageGunSkin> gunSkinPages))
+                    {
+                        Logging.Debug($"Error getting gun skin pages for gun with id {loadout.Primary?.Gun?.GunID ?? 0}");
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                        return;
+                    }
+
+                    if (!gunSkinPages.TryGetValue(1, out PageGunSkin firstPage))
+                    {
+                        Logging.Debug($"Error finding the first page for gun skins for gun with id {loadout.Primary.Gun.GunID} for {Player.CharacterName}");
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                        return;
+                    }
+
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
+                    ShowGunSkinPage(firstPage);
+                }
+                else if (LoadoutPage == ELoadoutPage.Secondary)
+                {
+                    if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
+                    {
+                        Logging.Debug($"Error getting current loadout with id {LoadoutID} for {Player.CharacterName}");
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                        return;
+                    }
+
+                    if (!GunSkinPages.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out Dictionary<int, PageGunSkin> gunSkinPages))
+                    {
+                        Logging.Debug($"Error getting gun skin pages for gun with id {loadout.Secondary?.Gun?.GunID ?? 0}");
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                        return;
+                    }
+
+                    if (!gunSkinPages.TryGetValue(1, out PageGunSkin firstPage))
+                    {
+                        Logging.Debug($"Error finding the first page for gun skins for gun with id {loadout.Secondary.Gun.GunID} for {Player.CharacterName}");
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                        return;
+                    }
+
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
+                    ShowGunSkinPage(firstPage);
+                }
+                else if (LoadoutPage == ELoadoutPage.Knife)
+                {
+                    if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
+                    {
+                        Logging.Debug($"Error getting current loadout with id {LoadoutID} for {Player.CharacterName}");
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                        return;
+                    }
+
+                    if (!KnifeSkinPages.TryGetValue(loadout.Knife?.Knife?.KnifeID ?? 0, out Dictionary<int, PageKnifeSkin> knifeSkinPages))
+                    {
+                        Logging.Debug($"Error getting gun skin pages for knife with id {loadout.Knife?.Knife?.KnifeID ?? 0}");
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                        return;
+                    }
+
+                    if (!knifeSkinPages.TryGetValue(1, out PageKnifeSkin firstPage))
+                    {
+                        Logging.Debug($"Error finding the first page for gun skins for gun with id {loadout.Knife.Knife.KnifeID} for {Player.CharacterName}");
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                        return;
+                    }
+
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
+                    ShowKnifeSkinPage(firstPage);
+                }
+            }
+            else if (LoadoutTab == ELoadoutTab.PISTOLS)
+            {
+                if (!PistolPages.TryGetValue(1, out PageGun firstPage))
+                {
+                    Logging.Debug($"Error finding first page for pistols for {Player.CharacterName}");
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+                    EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                    return;
+                }
+
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
+
+                ShowGunPage(firstPage);
+            }
+            else if (LoadoutTab == ELoadoutTab.SUBMACHINE_GUNS)
+            {
+                if (!SMGPages.TryGetValue(1, out PageGun firstPage))
+                {
+                    Logging.Debug($"Error finding first page for smgs for {Player.CharacterName}");
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+                    EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                    return;
+                }
+
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
+
+                ShowGunPage(firstPage);
+            }
+            else if (LoadoutTab == ELoadoutTab.SHOTGUNS)
+            {
+                if (!ShotgunPages.TryGetValue(1, out PageGun firstPage))
+                {
+                    Logging.Debug($"Error finding first page for shotguns for {Player.CharacterName}");
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+                    EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                    return;
+                }
+
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
+
+                ShowGunPage(firstPage);
+            }
+            else if (LoadoutTab == ELoadoutTab.LIGHT_MACHINE_GUNS)
+            {
+                if (!LMGPages.TryGetValue(1, out PageGun firstPage))
+                {
+                    Logging.Debug($"Error finding first page for lmgs for {Player.CharacterName}");
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+                    EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                    return;
+                }
+
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
+
+                ShowGunPage(firstPage);
+            }
+            else if (LoadoutTab == ELoadoutTab.ASSAULT_RIFLES)
+            {
+                if (!ARPages.TryGetValue(1, out PageGun firstPage))
+                {
+                    Logging.Debug($"Error finding first page for ARs for {Player.CharacterName}");
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+                    EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                    return;
+                }
+
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
+
+                ShowGunPage(firstPage);
+            }
+            else if (LoadoutTab == ELoadoutTab.SNIPER_RIFLES)
+            {
+                if (!SniperPages.TryGetValue(1, out PageGun firstPage))
+                {
+                    Logging.Debug($"Error finding first page for snipers for {Player.CharacterName}");
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+                    EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                    return;
+                }
+
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
+
+                ShowGunPage(firstPage);
+            }
+        }
+
+        public void BackwardLoadoutTab()
+        {
+
+        }
+
+        public void ShowGunPage(PageGun page)
+        {
+
+        }
+
+        public void ShowAttachmentPage(PageAttachment page)
+        {
+
+        }
+
+        public void ShowGunSkinPage(PageGunSkin page)
+        {
+
+        }
+
+        public void ShowKnifePage(PageKnife page)
+        {
+
+        }
+
+        public void ShowKnifeSkinPage(PageKnifeSkin page)
+        {
+
+        }
+
+        public void ShowPerkPage(PagePerk page)
+        {
+
+        } 
+
+        public void ShowGadgetPage(PageGadget page)
+        {
+
+        }
+
+        public void ShowCardPage(PageCard page)
+        {
+
+        }
+
+        public void ShowGlovePage(PageGlove page)
+        {
+
+        }
+
+        public void ShowKillstreakPage(PageKillstreak page)
         {
 
         }
@@ -783,16 +1711,6 @@ namespace UnturnedBlackout.Instances
         }
 
         public void DequipSelectedItem()
-        {
-
-        }
-
-        public void ForwardLoadoutSubPage()
-        {
-
-        }
-
-        public void BackwardLoadoutSubPage()
         {
 
         }
