@@ -43,6 +43,7 @@ namespace UnturnedBlackout.Managers
             {
                 playerLoadout.Primary = gun;
                 playerLoadout.PrimaryAttachments.Clear();
+                playerLoadout.PrimarySkin = null;
                 if (gun != null)
                 {
                     foreach (var defaultAttachment in gun.Gun.DefaultAttachments)
@@ -61,6 +62,7 @@ namespace UnturnedBlackout.Managers
             {
                 playerLoadout.Secondary = gun;
                 playerLoadout.SecondaryAttachments.Clear();
+                playerLoadout.SecondarySkin = null;
                 if (gun != null)
                 {
                     foreach (var defaultAttachment in gun.Gun.DefaultAttachments)

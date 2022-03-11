@@ -932,7 +932,7 @@ namespace UnturnedBlackout.Managers
         {
             foreach (var handler in UIHandlers)
             {
-                if (handler.CurrentPage == EPage.Play)
+                if (handler.MainPage == EMainPage.Play)
                 {
                     handler.ShowGames();
                 }
@@ -943,7 +943,7 @@ namespace UnturnedBlackout.Managers
         {
             foreach (var handler in UIHandlers)
             {
-                if (handler.CurrentPage == EPage.Play)
+                if (handler.MainPage == EMainPage.Play)
                 {
                     handler.ShowGame(game);
                 }
@@ -954,7 +954,7 @@ namespace UnturnedBlackout.Managers
         {
             foreach (var handler in UIHandlers)
             {
-                if (handler.CurrentPage == EPage.Play)
+                if (handler.MainPage == EMainPage.Play)
                 {
                     handler.UpdateGamePlayerCount(game);
                 }
@@ -965,7 +965,7 @@ namespace UnturnedBlackout.Managers
         {
             foreach (var handler in UIHandlers)
             {
-                if (handler.CurrentPage == EPage.Play)
+                if (handler.MainPage == EMainPage.Play)
                 {
                     handler.UpdateVoteCount(game);
                 }
@@ -976,7 +976,7 @@ namespace UnturnedBlackout.Managers
         {
             foreach (var handler in UIHandlers)
             {
-                if (handler.CurrentPage == EPage.Play)
+                if (handler.MainPage == EMainPage.Play)
                 {
                     handler.UpdateVoteTimer(game, timer);
                 }
@@ -986,7 +986,7 @@ namespace UnturnedBlackout.Managers
         public void OnXPChanged(UnturnedPlayer player)
         {
             var handler = UIHandlers.FirstOrDefault(k => k.SteamID == player.CSteamID);
-            if (handler != null && handler.CurrentPage == EPage.Play)
+            if (handler != null && handler.MainPage == EMainPage.Play)
             {
                 handler.OnXPChanged();
             }
@@ -995,7 +995,7 @@ namespace UnturnedBlackout.Managers
         public void OnPlayerMusicChanged(Player player, bool isMusic)
         {
             var handler = UIHandlers.FirstOrDefault(k => k.SteamID == player.channel.owner.playerID.steamID);
-            if (handler != null && handler.CurrentPage == EPage.Play)
+            if (handler != null && handler.MainPage == EMainPage.Play)
             {
                 handler.OnMusicChanged(isMusic);
             }
