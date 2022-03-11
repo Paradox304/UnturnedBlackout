@@ -1981,6 +1981,36 @@ namespace UnturnedBlackout.Managers
             }
         }
 
+        public async Task DecreasePlayerCreditsAsync(CSteamID steamID, uint credits)
+        {
+            using (MySqlConnection Conn = new MySqlConnection(ConnectionString))
+            {
+                try
+                {
+                    await Conn.OpenAsync();
+
+                    await new MySqlCommand($"UPDATE `{PlayersTableName}` SET `Credits` = `Credits` - {credits} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                    var obj = await new MySqlCommand($"Select `Credits` FROM `{PlayersTableName}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                    if (PlayerData.TryGetValue(steamID, out PlayerData data))
+                    {
+                        if (obj is uint newCredits)
+                        {
+                            data.Credits = newCredits;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log($"Error removing {credits} credits for player with steam id {steamID}");
+                    Logger.Log(ex);
+                }
+                finally
+                {
+                    await Conn.CloseAsync();
+                }
+            }
+        }
+
         public async Task IncreasePlayerKillsAsync(CSteamID steamID, uint kills)
         {
             using (MySqlConnection Conn = new MySqlConnection(ConnectionString))

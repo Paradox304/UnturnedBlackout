@@ -1,4 +1,5 @@
-﻿using Rocket.Unturned.Player;
+﻿using Rocket.Core.Utils;
+using Rocket.Unturned.Player;
 using SDG.NetTransport;
 using SDG.Unturned;
 using Steamworks;
@@ -2374,7 +2375,7 @@ namespace UnturnedBlackout.Instances
                                         return;
                                     }
 
-                                    if (!page.Attachments.TryGetValue(LoadoutTabPageID, out LoadoutAttachment attachment))
+                                    if (!page.Attachments.TryGetValue(selected, out LoadoutAttachment attachment))
                                     {
                                         Logging.Debug($"Error finding attachment at {selected} at page {LoadoutTabPageID} for {Player.CharacterName}");
                                         return;
@@ -2727,6 +2728,7 @@ namespace UnturnedBlackout.Instances
 
         public void ShowGun(LoadoutGun gun)
         {
+            SelectedItemID = gun.Gun.GunID;
             Logging.Debug($"Showing gun with id {gun.Gun.GunID} to {Player.CharacterName}");
             if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
             {
@@ -2750,6 +2752,7 @@ namespace UnturnedBlackout.Instances
 
         public void ShowAttachment(LoadoutAttachment attachment)
         {
+            SelectedItemID = attachment.Attachment.AttachmentID;
             Logging.Debug($"Showing attachment with id {attachment.Attachment.AttachmentID} to {Player.CharacterName}");
             if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
             {
@@ -2769,6 +2772,7 @@ namespace UnturnedBlackout.Instances
 
         public void ShowGunSkin(GunSkin skin)
         {
+            SelectedItemID = skin.ID;
             Logging.Debug($"Showing gun skin with id {skin.ID} to {Player.CharacterName}");
             if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
             {
@@ -2788,6 +2792,7 @@ namespace UnturnedBlackout.Instances
 
         public void ShowKnife(LoadoutKnife knife)
         {
+            SelectedItemID = knife.Knife.KnifeID;
             Logging.Debug($"Showing knife with id {knife.Knife.KnifeID} to {Player.CharacterName}");
             if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
             {
@@ -2807,6 +2812,7 @@ namespace UnturnedBlackout.Instances
 
         public void ShowKnifeSkin(KnifeSkin skin)
         {
+            SelectedItemID = skin.ID;
             Logging.Debug($"Showing knife skin with id {skin.ID} to {Player.CharacterName}");
             if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
             {
@@ -2826,6 +2832,7 @@ namespace UnturnedBlackout.Instances
 
         public void ShowPerk(LoadoutPerk perk)
         {
+            SelectedItemID = perk.Perk.PerkID;
             Logging.Debug($"Showing perk with id {perk.Perk.PerkID} to {Player.CharacterName}");
             if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
             {
@@ -2845,6 +2852,7 @@ namespace UnturnedBlackout.Instances
 
         public void ShowGadget(LoadoutGadget gadget)
         {
+            SelectedItemID = gadget.Gadget.GadgetID;
             Logging.Debug($"Showing gadget with id {gadget.Gadget.GadgetID} to {Player.CharacterName}");
             if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
             {
@@ -2864,6 +2872,7 @@ namespace UnturnedBlackout.Instances
 
         public void ShowCard(LoadoutCard card)
         {
+            SelectedItemID = card.Card.CardID;
             Logging.Debug($"Showing card with id {card.Card.CardID} to {Player.CharacterName}");
             if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
             {
@@ -2883,6 +2892,7 @@ namespace UnturnedBlackout.Instances
 
         public void ShowGlove(LoadoutGlove glove)
         {
+            SelectedItemID = glove.Glove.GloveID;
             Logging.Debug($"Showing glove with id {glove.Glove.GloveID} to {Player.CharacterName}");
             if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
             {
@@ -2902,6 +2912,7 @@ namespace UnturnedBlackout.Instances
 
         public void ShowKillstreak(LoadoutKillstreak killstreak)
         {
+            SelectedItemID = killstreak.Killstreak.KillstreakID;
             Logging.Debug($"Showing killstreak with id {killstreak.Killstreak.KillstreakID} to {Player.CharacterName}");
             if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
             {
@@ -2921,7 +2932,251 @@ namespace UnturnedBlackout.Instances
 
         public void BuySelectedItem()
         {
+            Logging.Debug($"{Player.CharacterName} trying to buy selected item with id {SelectedItemID}, page {LoadoutPage}, tab {LoadoutTab}");
+            if (!DB.PlayerData.TryGetValue(Player.CSteamID, out PlayerData data))
+            {
+                Logging.Debug($"Error finding player data with steam id {Player.CSteamID}");
+                return;
+            }
 
+            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
+            {
+                Logging.Debug($"Error finding loadout with id {LoadoutID} for {Player.CharacterName}");
+                return;
+            }
+
+            switch (LoadoutPage)
+            {
+                case ELoadoutPage.Primary:
+                    {
+                        if (!PlayerLoadout.Guns.TryGetValue((ushort)SelectedItemID, out LoadoutGun gun))
+                        {
+                            Logging.Debug($"Error finding gun with id {SelectedItemID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        ThreadPool.QueueUserWorkItem(async (o) =>
+                        {
+                            if (data.Credits >= gun.Gun.BuyPrice && !gun.IsBought)
+                            {
+                                await DB.DecreasePlayerCreditsAsync(Player.CSteamID, (uint)gun.Gun.BuyPrice);
+                                await DB.UpdatePlayerGunBoughtAsync(Player.CSteamID, gun.Gun.GunID, true);
+                                TaskDispatcher.QueueOnMainThread(() => ReloadSelectedItem());
+                            }
+                        });
+                        break;
+                    }
+                case ELoadoutPage.PrimaryAttachment:
+                    {
+                        if (!PlayerLoadout.Guns.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out LoadoutGun gun))
+                        {
+                            Logging.Debug($"Error finding primary with id {SelectedItemID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        if (!gun.Attachments.TryGetValue((ushort)SelectedItemID, out LoadoutAttachment attachment))
+                        {
+                            Logging.Debug($"Error finding attachment with id {SelectedItemID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        ThreadPool.QueueUserWorkItem(async (o) =>
+                        {
+                            if (data.Credits >= attachment.Attachment.BuyPrice && !attachment.IsBought)
+                            {
+                                await DB.DecreasePlayerCreditsAsync(Player.CSteamID, (uint)attachment.Attachment.BuyPrice);
+                                await DB.UpdatePlayerGunAttachmentBoughtAsync(Player.CSteamID, gun.Gun.GunID, attachment.Attachment.AttachmentID, true);
+                                TaskDispatcher.QueueOnMainThread(() => ReloadSelectedItem());
+                            }
+                        });
+                        break;
+                    }
+
+                case ELoadoutPage.Secondary:
+                    {
+                        if (!PlayerLoadout.Guns.TryGetValue((ushort)SelectedItemID, out LoadoutGun gun))
+                        {
+                            Logging.Debug($"Error finding gun with id {SelectedItemID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        ThreadPool.QueueUserWorkItem(async (o) =>
+                        {
+                            if (data.Credits >= gun.Gun.BuyPrice && !gun.IsBought)
+                            {
+                                await DB.DecreasePlayerCreditsAsync(Player.CSteamID, (uint)gun.Gun.BuyPrice);
+                                await DB.UpdatePlayerGunBoughtAsync(Player.CSteamID, gun.Gun.GunID, true);
+                                TaskDispatcher.QueueOnMainThread(() => ReloadSelectedItem());
+                            }
+                        });
+                        break;
+                    }
+                case ELoadoutPage.SecondaryAttachment:
+                    {
+                        if (!PlayerLoadout.Guns.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out LoadoutGun gun))
+                        {
+                            Logging.Debug($"Error finding secondary with id {SelectedItemID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        if (!gun.Attachments.TryGetValue((ushort)SelectedItemID, out LoadoutAttachment attachment))
+                        {
+                            Logging.Debug($"Error finding attachment with id {SelectedItemID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        ThreadPool.QueueUserWorkItem(async (o) =>
+                        {
+                            if (data.Credits >= attachment.Attachment.BuyPrice && !attachment.IsBought)
+                            {
+                                await DB.DecreasePlayerCreditsAsync(Player.CSteamID, (uint)attachment.Attachment.BuyPrice);
+                                await DB.UpdatePlayerGunAttachmentBoughtAsync(Player.CSteamID, gun.Gun.GunID, attachment.Attachment.AttachmentID, true);
+                                TaskDispatcher.QueueOnMainThread(() => ReloadSelectedItem());
+                            }
+                        });
+                        break;
+                    }
+
+                case ELoadoutPage.Knife:
+                    {
+                        if (!PlayerLoadout.Knives.TryGetValue((ushort)SelectedItemID, out LoadoutKnife knife))
+                        {
+                            Logging.Debug($"Error finding knife with id {SelectedItemID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        ThreadPool.QueueUserWorkItem(async (o) =>
+                        {
+                            if (data.Credits >= knife.Knife.BuyPrice && !knife.IsBought)
+                            {
+                                await DB.DecreasePlayerCreditsAsync(Player.CSteamID, (uint)knife.Knife.BuyPrice);
+                                await DB.UpdatePlayerKnifeBoughtAsync(Player.CSteamID, knife.Knife.KnifeID, true);
+                                TaskDispatcher.QueueOnMainThread(() => ReloadSelectedItem());
+                            }
+                        });
+                        break;
+                    }
+
+                case ELoadoutPage.Tactical:
+                    {
+                        if (!PlayerLoadout.Gadgets.TryGetValue((ushort)SelectedItemID, out LoadoutGadget gadget))
+                        {
+                            Logging.Debug($"Error finding gadget with id {SelectedItemID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        ThreadPool.QueueUserWorkItem(async (o) =>
+                        {
+                            if (data.Credits >= gadget.Gadget.BuyPrice && !gadget.IsBought)
+                            {
+                                await DB.DecreasePlayerCreditsAsync(Player.CSteamID, (uint)gadget.Gadget.BuyPrice);
+                                await DB.UpdatePlayerGadgetBoughtAsync(Player.CSteamID, gadget.Gadget.GadgetID, true);
+                                TaskDispatcher.QueueOnMainThread(() => ReloadSelectedItem());
+                            }
+                        });
+                        break;
+                    }
+
+                case ELoadoutPage.Lethal:
+                    {
+                        if (!PlayerLoadout.Gadgets.TryGetValue((ushort)SelectedItemID, out LoadoutGadget gadget))
+                        {
+                            Logging.Debug($"Error finding gadget with id {SelectedItemID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        ThreadPool.QueueUserWorkItem(async (o) =>
+                        {
+                            if (data.Credits >= gadget.Gadget.BuyPrice && !gadget.IsBought)
+                            {
+                                await DB.DecreasePlayerCreditsAsync(Player.CSteamID, (uint)gadget.Gadget.BuyPrice);
+                                await DB.UpdatePlayerGadgetBoughtAsync(Player.CSteamID, gadget.Gadget.GadgetID, true);
+                                TaskDispatcher.QueueOnMainThread(() => ReloadSelectedItem());
+                            }
+                        });
+                        break;
+                    }
+
+                case ELoadoutPage.Perk:
+                    {
+                        if (!PlayerLoadout.Perks.TryGetValue((ushort)SelectedItemID, out LoadoutPerk perk))
+                        {
+                            Logging.Debug($"Error finding perk with id {SelectedItemID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        ThreadPool.QueueUserWorkItem(async (o) =>
+                        {
+                            if (data.Credits >= perk.Perk.BuyPrice && !perk.IsBought)
+                            {
+                                await DB.DecreasePlayerCreditsAsync(Player.CSteamID, (uint)perk.Perk.BuyPrice);
+                                await DB.UpdatePlayerPerkBoughtAsync(Player.CSteamID, perk.Perk.PerkID, true);
+                                TaskDispatcher.QueueOnMainThread(() => ReloadSelectedItem());
+                            }
+                        });
+                        break;
+                    }
+
+                case ELoadoutPage.Killstreak:
+                    {
+                        if (!PlayerLoadout.Killstreaks.TryGetValue((ushort)SelectedItemID, out LoadoutKillstreak killstreak))
+                        {
+                            Logging.Debug($"Error finding killstreak with id {SelectedItemID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        ThreadPool.QueueUserWorkItem(async (o) =>
+                        {
+                            if (data.Credits >= killstreak.Killstreak.BuyPrice && !killstreak.IsBought)
+                            {
+                                await DB.DecreasePlayerCreditsAsync(Player.CSteamID, (uint)killstreak.Killstreak.BuyPrice);
+                                await DB.UpdatePlayerKillstreakBoughtAsync(Player.CSteamID, killstreak.Killstreak.KillstreakID, true);
+                                TaskDispatcher.QueueOnMainThread(() => ReloadSelectedItem());
+                            }
+                        });
+                        break;
+                    }
+
+                case ELoadoutPage.Card:
+                    {
+                        if (!PlayerLoadout.Cards.TryGetValue((ushort)SelectedItemID, out LoadoutCard card))
+                        {
+                            Logging.Debug($"Error finding card with id {SelectedItemID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        ThreadPool.QueueUserWorkItem(async (o) =>
+                        {
+                            if (data.Credits >= card.Card.BuyPrice && !card.IsBought)
+                            {
+                                await DB.DecreasePlayerCreditsAsync(Player.CSteamID, (uint)card.Card.BuyPrice);
+                                await DB.UpdatePlayerCardBoughtAsync(Player.CSteamID, card.Card.CardID, true);
+                                TaskDispatcher.QueueOnMainThread(() => ReloadSelectedItem());
+                            }
+                        });
+                        break;
+                    }
+
+                case ELoadoutPage.Glove:
+                    {
+                        if (!PlayerLoadout.Gloves.TryGetValue((ushort)SelectedItemID, out LoadoutGlove glove))
+                        {
+                            Logging.Debug($"Error finding glove with id {SelectedItemID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        ThreadPool.QueueUserWorkItem(async (o) =>
+                        {
+                            if (data.Credits >= glove.Glove.BuyPrice && !glove.IsBought)
+                            {
+                                await DB.DecreasePlayerCreditsAsync(Player.CSteamID, (uint)glove.Glove.BuyPrice);
+                                await DB.UpdatePlayerGloveBoughtAsync(Player.CSteamID, glove.Glove.GloveID, true);
+                                TaskDispatcher.QueueOnMainThread(() => ReloadSelectedItem());
+                            }
+                        });
+                        break;
+                    }
+            }
         }
 
         public void EquipSelectedItem()
