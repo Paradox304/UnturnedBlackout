@@ -195,6 +195,7 @@ namespace UnturnedBlackout.Managers
             }
 
             playerLoadout.Knife = knife;
+            playerLoadout.KnifeSkin = null;
             ThreadPool.QueueUserWorkItem(async (o) =>
             {
                 await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);

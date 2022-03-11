@@ -1,5 +1,6 @@
 ﻿using Rocket.Unturned.Player;
 using SDG.Unturned;
+using Steamworks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,6 +27,7 @@ namespace UnturnedBlackout.Managers
         public Dictionary<ushort, FeedIcon> KillFeedIcons { get; set; }
 
         public List<UIHandler> UIHandlers { get; set; }
+        public Dictionary<CSteamID, UIHandler> UIHandlersLookup { get; set; }
 
         public const ushort WaitingForPlayersID = 27641;
         public const short WaitingForPlayersKey = 27641;
@@ -64,29 +66,30 @@ namespace UnturnedBlackout.Managers
             KillFeedIcons = Config.KillFeedIcons.ToDictionary(k => k.WeaponID);
 
             UIHandlers = new List<UIHandler>();
+            UIHandlersLookup = new Dictionary<CSteamID, UIHandler>();
 
             EffectManager.onEffectButtonClicked += OnButtonClicked;
         }
 
         public void RegisterUIHandler(UnturnedPlayer player)
         {
-            if (UIHandlers.Exists(k => k.SteamID == player.CSteamID))
-            {
-                UIHandlers.RemoveAll(k => k.SteamID == player.CSteamID);
-            }
+            UIHandlers.RemoveAll(k => k.SteamID == player.CSteamID);
+            UIHandlersLookup.Remove(player.CSteamID);
 
-            UIHandlers.Add(new UIHandler(player));
+            var handler = new UIHandler(player);
+            UIHandlersLookup.Add(player.CSteamID, handler);
+            UIHandlers.Add(handler);
         }
 
         public void UnregisterUIHandler(UnturnedPlayer player)
         {
             UIHandlers.RemoveAll(k => k.SteamID == player.CSteamID);
+            UIHandlersLookup.Remove(player.CSteamID);
         }
 
         public void ShowMenuUI(UnturnedPlayer player)
         {
-            var handler = UIHandlers.FirstOrDefault(k => k.SteamID == player.CSteamID);
-            if (handler != null)
+            if (UIHandlersLookup.TryGetValue(player.CSteamID, out UIHandler handler))
             {
                 handler.ShowUI();
             }
@@ -94,8 +97,7 @@ namespace UnturnedBlackout.Managers
 
         public void HideMenuUI(UnturnedPlayer player)
         {
-            var handler = UIHandlers.FirstOrDefault(k => k.SteamID == player.CSteamID);
-            if (handler != null)
+            if (UIHandlersLookup.TryGetValue(player.CSteamID, out UIHandler handler))
             {
                 handler.HideUI();
             }
@@ -985,19 +987,9 @@ namespace UnturnedBlackout.Managers
 
         public void OnXPChanged(UnturnedPlayer player)
         {
-            var handler = UIHandlers.FirstOrDefault(k => k.SteamID == player.CSteamID);
-            if (handler != null && handler.MainPage == EMainPage.Play)
+            if (UIHandlersLookup.TryGetValue(player.CSteamID, out UIHandler handler) && handler.MainPage == EMainPage.Play)
             {
                 handler.OnXPChanged();
-            }
-        }
-
-        public void OnPlayerMusicChanged(Player player, bool isMusic)
-        {
-            var handler = UIHandlers.FirstOrDefault(k => k.SteamID == player.channel.owner.playerID.steamID);
-            if (handler != null && handler.MainPage == EMainPage.Play)
-            {
-                handler.OnMusicChanged(isMusic);
             }
         }
 
@@ -1006,13 +998,111 @@ namespace UnturnedBlackout.Managers
             Logging.Debug($"{player.channel.owner.playerID.characterName} clicked {buttonName}");
             var ply = UnturnedPlayer.FromPlayer(player);
 
+            if (!UIHandlersLookup.TryGetValue(player.channel.owner.playerID.steamID, out UIHandler handler))
+            {
+                Logging.Debug($"Error finding handler for {player.channel.owner.playerID.characterName}");
+                return;
+            }
+
             switch (buttonName)
             {
+                case "SERVER Exit BUTTON":
+                    Provider.kick(player.channel.owner.playerID.steamID, "You exited");
+                    return;
+                case "SERVER Loadout BUTTON":
+                    handler.ShowLoadouts();
+                    return;
+                case "SERVER Loadout Next BUTTON":
+                    handler.ForwardLoadoutTab();
+                    return;
+                case "SERVER Loadout Previous BUTTON":
+                    handler.BackwardLoadoutTab();
+                    return;
+                case "SERVER Loadout Back BUTTON":
+                    return;
+                case "SERVER Loadout Equip BUTTON":
+                    handler.EquipLoadout();
+                    return;
+                case "SERVER Loadout Card BUTTON":
+                    handler.ShowLoadoutSubPage(ELoadoutPage.Card);
+                    return;
+                case "SERVER Loadout Glove BUTTON":
+                    handler.ShowLoadoutSubPage(ELoadoutPage.Glove);
+                    return;
+                case "SERVER Loadout Killstreak BUTTON":
+                    handler.ShowLoadoutSubPage(ELoadoutPage.Killstreak);
+                    return;
+                case "SERVER Loadout Perk BUTTON":
+                    handler.ShowLoadoutSubPage(ELoadoutPage.Perk);
+                    return;
+                case "SERVER Loadout Primary BUTTON":
+                    handler.ShowLoadoutSubPage(ELoadoutPage.Primary);
+                    return;
+                case "SERVER Loadout Primary Attachment BUTTON":
+                    handler.ShowLoadoutSubPage(ELoadoutPage.PrimaryAttachment);
+                    return;
+                case "SERVER Loadout Secondary BUTTON":
+                    handler.ShowLoadoutSubPage(ELoadoutPage.Secondary);
+                    return;
+                case "SERVER Loadout Secondary Attachment BUTTON":
+                    handler.ShowLoadoutSubPage(ELoadoutPage.SecondaryAttachment);
+                    return;
+                case "SERVER Loadout Knife BUTTON":
+                    handler.ShowLoadoutSubPage(ELoadoutPage.Knife);
+                    return;
+                case "SERVER Loadout Lethal BUTTON":
+                    handler.ShowLoadoutSubPage(ELoadoutPage.Lethal);
+                    return;
+                case "SERVER Loadout Tactical BUTTON":
+                    handler.ShowLoadoutSubPage(ELoadoutPage.Tactical);
+                    return;
+                case "SERVER Item All BUTTON":
+                    handler.ShowLoadoutTab(ELoadoutTab.ALL);
+                    return;
+                case "SERVER Item ARs BUTTON":
+                    handler.ShowLoadoutTab(ELoadoutTab.PISTOLS);
+                    return;
+                case "SERVER Item Pistols BUTTON":
+                    handler.ShowLoadoutTab(ELoadoutTab.PISTOLS);
+                    return;
+                case "SERVER Item Shotguns BUTTON":
+                    handler.ShowLoadoutTab(ELoadoutTab.SHOTGUNS);
+                    return;
+                case "SERVER Item SMGs BUTTON":
+                    handler.ShowLoadoutTab(ELoadoutTab.SUBMACHINE_GUNS);
+                    return;
+                case "SERVER Item LMGs BUTTON":
+                    handler.ShowLoadoutTab(ELoadoutTab.LIGHT_MACHINE_GUNS);
+                    return;
+                case "SERVER Item SRs BUTTON":
+                    handler.ShowLoadoutTab(ELoadoutTab.SNIPER_RIFLES);
+                    return;
+                case "SERVER Item Skins BUTTON":
+                    handler.ShowLoadoutTab(ELoadoutTab.SKINS);
+                    return;
+                case "SERVER Item Back BUTTON":
+                    handler.ReloadLoadout();
+                    return;
+                case "SERVER Item Buy BUTTON":
+                    handler.BuySelectedItem();
+                    return;
+                case "SERVER Item Dequip BUTTON":
+                    handler.DequipSelectedItem();
+                    return;
+                case "SERVER Item Equip BUTTON":
+                    handler.EquipSelectedItem();
+                    return;
+                case "SERVER Item Next BUTTON":
+                    handler.ForwardLoadoutTab();
+                    return;
+                case "SERVER Item Previous BUTTON":
+                    handler.BackwardLoadoutTab();
+                    return;
                 case "KnobOff":
-                    OnPlayerMusicChanged(player, true);
+                    handler.OnMusicChanged(true);
                     return;
                 case "KnobOn":
-                    OnPlayerMusicChanged(player, false);
+                    handler.OnMusicChanged(false);
                     return;
                 default:
                     break;
@@ -1037,6 +1127,18 @@ namespace UnturnedBlackout.Managers
                 if (int.TryParse(buttonName.Replace("Lobby", "").Replace("Vote1", ""), out int selected))
                 {
                     Plugin.Instance.GameManager.OnPlayerVoted(ply, selected, 1);
+                }
+            } else if (buttonName.StartsWith("SERVER Item BUTTON"))
+            {
+                if (int.TryParse(buttonName.Replace("SERVER Item BUTTON", ""), out int selected))
+                {
+                    handler.SelectedItem(selected);
+                }
+            } else if (buttonName.StartsWith("SERVER Loadout BUTTON"))
+            {
+                if (int.TryParse(buttonName.Replace("SERVER Loadout BUTTON", ""), out int selected))
+                {
+                    handler.SelectedLoadout(selected);
                 }
             }
         }
