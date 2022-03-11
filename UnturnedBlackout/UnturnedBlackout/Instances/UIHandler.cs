@@ -3181,12 +3181,361 @@ namespace UnturnedBlackout.Instances
 
         public void EquipSelectedItem()
         {
+            Logging.Debug($"{Player.CharacterName} trying to equip selected item with id {SelectedItemID}, page {LoadoutPage}, tab {LoadoutTab}");
+            var loadoutManager = Plugin.Instance.LoadoutManager;
+            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
+            {
+                Logging.Debug($"Error finding selected loadout with id {LoadoutID} for {Player.CharacterName}");
+                return;
+            }
 
+            if (LoadoutTab == ELoadoutTab.SKINS)
+            {
+                switch (LoadoutPage)
+                {
+                    case ELoadoutPage.Primary:
+                        {
+                            if (!PlayerLoadout.GunSkinsSearchByID.TryGetValue((int)SelectedItemID, out GunSkin skin))
+                            {
+                                Logging.Debug($"Error finding gun skin with id {SelectedItemID} for {Player.CharacterName}");
+                                return;
+                            }
+
+                            loadoutManager.EquipGunSkin(Player, LoadoutID, skin.ID, true);
+                            break;
+                        }
+
+                    case ELoadoutPage.Secondary:
+                        {
+                            if (!PlayerLoadout.GunSkinsSearchByID.TryGetValue((int)SelectedItemID, out GunSkin skin))
+                            {
+                                Logging.Debug($"Error finding gun skin with id {SelectedItemID} for {Player.CharacterName}");
+                                return;
+                            }
+
+                            loadoutManager.EquipGunSkin(Player, LoadoutID, skin.ID, false);
+                            break;
+                        }
+
+                    case ELoadoutPage.Knife:
+                        {
+                            if (!PlayerLoadout.KnifeSkinsSearchByID.TryGetValue((int)SelectedItemID, out KnifeSkin skin))
+                            {
+                                Logging.Debug($"Error finding knife skin with id {SelectedItemID} for {Player.CharacterName}");
+                                return;
+                            }
+
+                            loadoutManager.EquipKnifeSkin(Player, LoadoutID, skin.ID);
+                            break;
+                        }
+                }
+
+                ReloadLoadout();
+                return;
+            }
+
+            switch (LoadoutPage)
+            {
+                case ELoadoutPage.Primary:
+                    {
+                        if (!PlayerLoadout.Guns.TryGetValue((ushort)SelectedItemID, out LoadoutGun gun))
+                        {
+                            Logging.Debug($"Error finding gun with id {SelectedItemID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        if (gun.IsBought)
+                            loadoutManager.EquipGun(Player, LoadoutID, gun.Gun.GunID, true);
+                        break;
+                    }
+
+                case ELoadoutPage.PrimaryAttachment:
+                    {
+                        if (!PlayerLoadout.Guns.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out LoadoutGun gun))
+                        {
+                            Logging.Debug($"Error finding gun with id {loadout.Primary?.Gun?.GunID ?? 0} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        if (!gun.Attachments.TryGetValue((ushort)SelectedItemID, out LoadoutAttachment attachment))
+                        {
+                            Logging.Debug($"Error finding attachment with id {SelectedItemID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        if (attachment.IsBought)
+                            loadoutManager.EquipAttachment(Player, attachment.Attachment.AttachmentID, LoadoutID, true);
+                        break;
+                    }
+
+                case ELoadoutPage.Secondary:
+                    {
+                        if (!PlayerLoadout.Guns.TryGetValue((ushort)SelectedItemID, out LoadoutGun gun))
+                        {
+                            Logging.Debug($"Error finding primary with id {SelectedItemID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        if (gun.IsBought)
+                            loadoutManager.EquipGun(Player, LoadoutID, gun.Gun.GunID, false);
+                        break;
+                    }
+
+                case ELoadoutPage.SecondaryAttachment:
+                    {
+                        if (!PlayerLoadout.Guns.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out LoadoutGun gun))
+                        {
+                            Logging.Debug($"Error finding secondary with id {loadout.Secondary?.Gun?.GunID ?? 0} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        if (!gun.Attachments.TryGetValue((ushort)SelectedItemID, out LoadoutAttachment attachment))
+                        {
+                            Logging.Debug($"Error finding attachment with id {SelectedItemID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        if (attachment.IsBought)
+                            loadoutManager.EquipAttachment(Player, attachment.Attachment.AttachmentID, LoadoutID, false);
+                        break;
+                    }
+
+                case ELoadoutPage.Tactical:
+                    {
+                        if (!PlayerLoadout.Gadgets.TryGetValue((ushort)SelectedItemID, out LoadoutGadget gadget))
+                        {
+                            Logging.Debug($"Error finding tactical with id {SelectedItemID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        if (gadget.IsBought)
+                            loadoutManager.EquipTactical(Player, LoadoutID, gadget.Gadget.GadgetID);
+                        break;
+                    }
+
+                case ELoadoutPage.Lethal:
+                    {
+                        if (!PlayerLoadout.Gadgets.TryGetValue((ushort)SelectedItemID, out LoadoutGadget gadget))
+                        {
+                            Logging.Debug($"Error finding lethal with id {SelectedItemID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        if (gadget.IsBought)
+                            loadoutManager.EquipLethal(Player, LoadoutID, gadget.Gadget.GadgetID);
+                        break;
+                    }
+
+                case ELoadoutPage.Perk:
+                    {
+                        if (!PlayerLoadout.Perks.TryGetValue((int)SelectedItemID, out LoadoutPerk perk))
+                        {
+                            Logging.Debug($"Error finding perk with id {SelectedItemID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        if (perk.IsBought)
+                            loadoutManager.EquipPerk(Player, LoadoutID, perk.Perk.PerkID);
+                        break;
+                    }
+
+                case ELoadoutPage.Knife:
+                    {
+                        if (!PlayerLoadout.Knives.TryGetValue((ushort)SelectedItemID, out LoadoutKnife knife))
+                        {
+                            Logging.Debug($"Error finding knife with id {SelectedItemID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        if (knife.IsBought)
+                            loadoutManager.EquipKnife(Player, LoadoutID, knife.Knife.KnifeID);
+                        break;
+                    }
+
+                case ELoadoutPage.Killstreak:
+                    {
+                        if (!PlayerLoadout.Killstreaks.TryGetValue((int)SelectedItemID, out LoadoutKillstreak killstreak))
+                        {
+                            Logging.Debug($"Error finding killstreak with id {SelectedItemID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        if (killstreak.IsBought)
+                            loadoutManager.EquipKillstreak(Player, LoadoutID, killstreak.Killstreak.KillstreakID);
+                        break;
+                    }
+
+                case ELoadoutPage.Glove:
+                    {
+                        if (!PlayerLoadout.Gloves.TryGetValue((ushort)SelectedItemID, out LoadoutGlove glove))
+                        {
+                            Logging.Debug($"Error finding glove with id {SelectedItemID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        if (glove.IsBought)
+                            loadoutManager.EquipGlove(Player, LoadoutID, glove.Glove.GloveID);
+                        break;
+                    }
+
+                case ELoadoutPage.Card:
+                    {
+                        if (!PlayerLoadout.Cards.TryGetValue((int)SelectedItemID, out LoadoutCard card))
+                        {
+                            Logging.Debug($"Error finding card with id {SelectedItemID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        if (card.IsBought)
+                            loadoutManager.EquipCard(Player, LoadoutID, card.Card.CardID);
+                        break;
+                    }
+            }
+            ReloadLoadout();
         }
 
         public void DequipSelectedItem()
         {
+            Logging.Debug($"{Player.CharacterName} trying to dequip selected item with id {SelectedItemID}, page {LoadoutPage}, tab {LoadoutTab}");
+            var loadoutManager = Plugin.Instance.LoadoutManager;
+            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
+            {
+                Logging.Debug($"Error finding selected loadout with id {LoadoutID} for {Player.CharacterName}");
+                return;
+            }
 
+            if (LoadoutTab == ELoadoutTab.SKINS)
+            {
+                switch (LoadoutPage)
+                {
+                    case ELoadoutPage.Primary:
+                        {
+                            loadoutManager.DequipGunSkin(Player, LoadoutID, true);
+                            break;
+                        }
+
+                    case ELoadoutPage.Secondary:
+                        {
+                            loadoutManager.DequipGunSkin(Player, LoadoutID, false);
+                            break;
+                        }
+
+                    case ELoadoutPage.Knife:
+                        {
+                            loadoutManager.DequipKnifeSkin(Player, LoadoutID);
+                            break;
+                        }
+                }
+
+                ReloadLoadout();
+                return;
+            }
+
+            switch (LoadoutPage)
+            {
+                case ELoadoutPage.Primary:
+                    {
+                        loadoutManager.EquipGun(Player, LoadoutID, 0, true);
+                        break;
+                    }
+
+                case ELoadoutPage.PrimaryAttachment:
+                    {
+                        if (!PlayerLoadout.Guns.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out LoadoutGun gun))
+                        {
+                            Logging.Debug($"Error finding gun with id {loadout.Primary?.Gun?.GunID ?? 0} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        if (!gun.Attachments.TryGetValue((ushort)SelectedItemID, out LoadoutAttachment attachment))
+                        {
+                            Logging.Debug($"Error finding attachment with id {SelectedItemID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        loadoutManager.DequipAttachment(Player, attachment.Attachment.AttachmentID, LoadoutID, true);
+                        break;
+                    }
+
+                case ELoadoutPage.Secondary:
+                    {
+                        loadoutManager.EquipGun(Player, LoadoutID, 0, false);
+                        break;
+                    }
+
+                case ELoadoutPage.SecondaryAttachment:
+                    {
+                        if (!PlayerLoadout.Guns.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out LoadoutGun gun))
+                        {
+                            Logging.Debug($"Error finding secondary with id {loadout.Secondary?.Gun?.GunID ?? 0} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        if (!gun.Attachments.TryGetValue((ushort)SelectedItemID, out LoadoutAttachment attachment))
+                        {
+                            Logging.Debug($"Error finding attachment with id {SelectedItemID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        loadoutManager.DequipAttachment(Player, attachment.Attachment.AttachmentID, LoadoutID, false);
+                        break;
+                    }
+
+                case ELoadoutPage.Tactical:
+                    {
+                        loadoutManager.EquipTactical(Player, LoadoutID, 0);
+                        break;
+                    }
+
+                case ELoadoutPage.Lethal:
+                    {
+                        loadoutManager.EquipLethal(Player, LoadoutID, 0);
+                        break;
+                    }
+
+                case ELoadoutPage.Perk:
+                    {
+                        if (!PlayerLoadout.Perks.TryGetValue((int)SelectedItemID, out LoadoutPerk perk))
+                        {
+                            Logging.Debug($"Error finding perk with id {SelectedItemID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        loadoutManager.DequipPerk(Player, LoadoutID, perk.Perk.PerkID);
+                        break;
+                    }
+
+                case ELoadoutPage.Knife:
+                    {
+                        loadoutManager.EquipKnife(Player, LoadoutID, 0);
+                        break;
+                    }
+
+                case ELoadoutPage.Killstreak:
+                    {
+                        if (!PlayerLoadout.Killstreaks.TryGetValue((int)SelectedItemID, out LoadoutKillstreak killstreak))
+                        {
+                            Logging.Debug($"Error finding killstreak with id {SelectedItemID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        loadoutManager.DequipKillstreak(Player, LoadoutID, killstreak.Killstreak.KillstreakID);
+                        break;
+                    }
+
+                case ELoadoutPage.Glove:
+                    {
+                        loadoutManager.EquipGlove(Player, LoadoutID, 0);
+                        break;
+                    }
+
+                case ELoadoutPage.Card:
+                    {
+                        loadoutManager.EquipCard(Player, LoadoutID, 0);
+                        break;
+                    }
+            }
+            ReloadLoadout();
         }
 
         // Events

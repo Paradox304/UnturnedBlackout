@@ -564,9 +564,9 @@ namespace UnturnedBlackout.Managers
             });
         }
 
-        public void DequipKnifeSkin(UnturnedPlayer player, int loadoutID, int id)
+        public void DequipKnifeSkin(UnturnedPlayer player, int loadoutID)
         {
-            Logging.Debug($"{player.CharacterName} trying to dequip knife skin with id {id}");
+            Logging.Debug($"{player.CharacterName} trying to dequip knife skin");
             if (!DB.PlayerLoadouts.TryGetValue(player.CSteamID, out PlayerLoadout loadout))
             {
                 Logging.Debug($"Error finding loadout for {player.CharacterName}");
@@ -576,12 +576,6 @@ namespace UnturnedBlackout.Managers
             if (loadout.Loadouts.TryGetValue(loadoutID, out Loadout playerLoadout))
             {
                 Logging.Debug($"Error finding loadout with id {loadoutID} for {player.CharacterName}");
-                return;
-            }
-
-            if (!loadout.KnifeSkinsSearchByID.ContainsKey(id))
-            {
-                Logging.Debug($"Error finding gun skin with id {id} for {player.CharacterName}");
                 return;
             }
 

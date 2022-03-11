@@ -117,6 +117,8 @@ namespace UnturnedBlackout.Managers
             {
                 await LoadDatabaseAsync();
                 await GetBaseDataAsync();
+
+                Plugin.Instance.LoadoutManager = new LoadoutManager();
             });
         }
 

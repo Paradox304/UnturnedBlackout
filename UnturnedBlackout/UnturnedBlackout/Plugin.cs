@@ -202,6 +202,7 @@ namespace UnturnedBlackout
         public GameManager GameManager { get; set; }
         public DataManager DataManager { get; set; }
         public DatabaseManager DBManager { get; set; }
+        public LoadoutManager LoadoutManager { get; set; }
         public static Plugin Instance { get; set; }
     }
 }
