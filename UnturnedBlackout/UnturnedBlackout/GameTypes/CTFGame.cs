@@ -224,12 +224,17 @@ namespace UnturnedBlackout.GameTypes
                     if (Players.Count >= minPlayers)
                     {
                         GameStarter = Plugin.Instance.StartCoroutine(StartGame());
-                    } else
+                    }
+                    else
                     {
                         Plugin.Instance.UIManager.SendWaitingForPlayersUI(player, Players.Count, minPlayers);
                         foreach (var ply in Players)
                         {
-                            if (ply == cPlayer) continue;
+                            if (ply == cPlayer)
+                            {
+                                continue;
+                            }
+
                             Plugin.Instance.UIManager.UpdateWaitingForPlayersUI(ply.GamePlayer, Players.Count, minPlayers);
                         }
                     }

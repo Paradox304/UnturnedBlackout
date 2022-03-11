@@ -6,7 +6,6 @@ using System.Linq;
 using UnityEngine;
 using UnturnedBlackout.Database.Base;
 using UnturnedBlackout.Database.Data;
-using Logger = Rocket.Core.Logging.Logger;
 
 namespace UnturnedBlackout
 {
@@ -111,7 +110,9 @@ namespace UnturnedBlackout
         {
             var readerText = readerResult.ToString();
             if (readerText == "")
+            {
                 return new List<int>();
+            }
 
             return readerText.Split(',').Select(k => int.TryParse(k, out var id) ? id : -1).Where(k => k != -1).ToList();
         }
@@ -137,12 +138,18 @@ namespace UnturnedBlackout
                 if (attachmentText.Contains("B."))
                 {
                     isBought = true;
-                    if (!ushort.TryParse(attachmentText.Replace("B.", ""), out attachmentID)) continue;
+                    if (!ushort.TryParse(attachmentText.Replace("B.", ""), out attachmentID))
+                    {
+                        continue;
+                    }
                 }
                 else if (attachmentsText.Contains("UB."))
                 {
                     isBought = false;
-                    if (!ushort.TryParse(attachmentText.Replace("UB.", ""), out attachmentID)) continue;
+                    if (!ushort.TryParse(attachmentText.Replace("UB.", ""), out attachmentID))
+                    {
+                        continue;
+                    }
                 }
                 if (!Plugin.Instance.DBManager.GunAttachments.TryGetValue(attachmentID, out GunAttachment gunAttachment))
                 {

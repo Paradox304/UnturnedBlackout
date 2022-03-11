@@ -5,12 +5,12 @@ using Rocket.Unturned.Player;
 using Steamworks;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using UnturnedBlackout.Database.Data;
 using UnturnedBlackout.Database.Base;
+using UnturnedBlackout.Database.Data;
 using UnturnedBlackout.Enums;
-using System.Linq;
 using UnturnedBlackout.Models.Data;
 
 namespace UnturnedBlackout.Managers
@@ -30,7 +30,7 @@ namespace UnturnedBlackout.Managers
         public Dictionary<int, GunSkin> GunSkinsSearchByID { get; set; }
         public Dictionary<ushort, List<GunSkin>> GunSkinsSearchByGunID { get; set; }
         public Dictionary<ushort, GunSkin> GunSkinsSearchBySkinID { get; set; }
-        
+
         public Dictionary<ushort, Knife> Knives { get; set; }
         public Dictionary<int, KnifeSkin> KnifeSkinsSearchByID { get; set; }
         public Dictionary<ushort, List<KnifeSkin>> KnifeSkinsSearchByKnifeID { get; set; }
@@ -188,13 +188,25 @@ namespace UnturnedBlackout.Managers
                         var gunAttachments = new Dictionary<ushort, GunAttachment>();
                         while (await rdr.ReadAsync())
                         {
-                            if (!ushort.TryParse(rdr[0].ToString(), out ushort attachmentID)) continue;
+                            if (!ushort.TryParse(rdr[0].ToString(), out ushort attachmentID))
+                            {
+                                continue;
+                            }
+
                             var attachmentName = rdr[1].ToString();
                             var attachmentDesc = rdr[2].ToString();
-                            if (!int.TryParse(rdr[3].ToString(), out int attachmentTypeInt)) continue;
+                            if (!int.TryParse(rdr[3].ToString(), out int attachmentTypeInt))
+                            {
+                                continue;
+                            }
+
                             var attachmentType = (EAttachment)attachmentTypeInt;
                             var iconLink = rdr[4].ToString();
-                            if (!int.TryParse(rdr[5].ToString(), out int buyPrice)) continue;
+                            if (!int.TryParse(rdr[5].ToString(), out int buyPrice))
+                            {
+                                continue;
+                            }
+
                             if (!gunAttachments.ContainsKey(attachmentID))
                             {
                                 gunAttachments.Add(attachmentID, new GunAttachment(attachmentID, attachmentName, attachmentDesc, attachmentType, iconLink, buyPrice));
@@ -225,17 +237,45 @@ namespace UnturnedBlackout.Managers
                         var guns = new Dictionary<ushort, Gun>();
                         while (await rdr.ReadAsync())
                         {
-                            if (!ushort.TryParse(rdr[0].ToString(), out ushort gunID)) continue;
+                            if (!ushort.TryParse(rdr[0].ToString(), out ushort gunID))
+                            {
+                                continue;
+                            }
+
                             var gunName = rdr[1].ToString();
                             var gunDesc = rdr[2].ToString();
-                            if (!byte.TryParse(rdr[3].ToString(), out byte gunTypeInt)) continue;
+                            if (!byte.TryParse(rdr[3].ToString(), out byte gunTypeInt))
+                            {
+                                continue;
+                            }
+
                             var gunType = (EGun)gunTypeInt;
                             var iconLink = rdr[4].ToString();
-                            if (!int.TryParse(rdr[5].ToString(), out int magAmount)) continue;
-                            if (!int.TryParse(rdr[6].ToString(), out int scrapAmount)) continue;
-                            if (!int.TryParse(rdr[7].ToString(), out int buyPrice)) continue;
-                            if (!bool.TryParse(rdr[8].ToString(), out bool isDefault)) continue;
-                            if (!bool.TryParse(rdr[9].ToString(), out bool isPrimary)) continue;
+                            if (!int.TryParse(rdr[5].ToString(), out int magAmount))
+                            {
+                                continue;
+                            }
+
+                            if (!int.TryParse(rdr[6].ToString(), out int scrapAmount))
+                            {
+                                continue;
+                            }
+
+                            if (!int.TryParse(rdr[7].ToString(), out int buyPrice))
+                            {
+                                continue;
+                            }
+
+                            if (!bool.TryParse(rdr[8].ToString(), out bool isDefault))
+                            {
+                                continue;
+                            }
+
+                            if (!bool.TryParse(rdr[9].ToString(), out bool isPrimary))
+                            {
+                                continue;
+                            }
+
                             var attachments = new List<GunAttachment>();
                             foreach (var id in rdr[10].GetIntListFromReaderResult())
                             {
@@ -248,7 +288,11 @@ namespace UnturnedBlackout.Managers
                                     Logging.Debug($"Could'nt find default attachment with id {id} for gun {gunID} with name {gunName}");
                                 }
                             }
-                            if (!int.TryParse(rdr[11].ToString(), out int maxLevel)) continue;
+                            if (!int.TryParse(rdr[11].ToString(), out int maxLevel))
+                            {
+                                continue;
+                            }
+
                             var levelXPNeeded = rdr[12].GetIntListFromReaderResult();
                             var levelRewards = rdr[13].GetIntListFromReaderResult();
                             var gun = new Gun(gunID, gunName, gunDesc, gunType, iconLink, magAmount, scrapAmount, buyPrice, isDefault, isPrimary, attachments, maxLevel, levelXPNeeded, levelRewards);
@@ -289,18 +333,33 @@ namespace UnturnedBlackout.Managers
 
                         while (await rdr.ReadAsync())
                         {
-                            if (!int.TryParse(rdr[0].ToString(), out int id)) continue;
-                            if (!ushort.TryParse(rdr[1].ToString(), out ushort gunID)) continue;
+                            if (!int.TryParse(rdr[0].ToString(), out int id))
+                            {
+                                continue;
+                            }
+
+                            if (!ushort.TryParse(rdr[1].ToString(), out ushort gunID))
+                            {
+                                continue;
+                            }
+
                             if (!Guns.TryGetValue(gunID, out Gun gun))
                             {
                                 Logging.Debug($"Could'nt find gun id with {gunID} for skin with id {id}");
                                 continue;
                             }
-                            if (!ushort.TryParse(rdr[2].ToString(), out ushort skinID)) continue;
+                            if (!ushort.TryParse(rdr[2].ToString(), out ushort skinID))
+                            {
+                                continue;
+                            }
+
                             var skinName = rdr[3].ToString();
                             var skinDesc = rdr[4].ToString();
                             var iconLink = rdr[5].ToString();
-                            if (!int.TryParse(rdr[6].ToString(), out int scrapAmount)) continue;
+                            if (!int.TryParse(rdr[6].ToString(), out int scrapAmount))
+                            {
+                                continue;
+                            }
 
                             var skin = new GunSkin(id, gun, skinID, skinName, skinDesc, iconLink, scrapAmount);
                             if (gunSkinsSearchByID.ContainsKey(id))
@@ -363,13 +422,28 @@ namespace UnturnedBlackout.Managers
                         var knives = new Dictionary<ushort, Knife>();
                         while (await rdr.ReadAsync())
                         {
-                            if (!ushort.TryParse(rdr[0].ToString(), out ushort knifeID)) continue;
+                            if (!ushort.TryParse(rdr[0].ToString(), out ushort knifeID))
+                            {
+                                continue;
+                            }
+
                             var knifeName = rdr[1].ToString();
                             var knifeDesc = rdr[2].ToString();
                             var iconLink = rdr[3].ToString();
-                            if (!int.TryParse(rdr[4].ToString(), out int scrapAmount)) continue;
-                            if (!int.TryParse(rdr[5].ToString(), out int buyPrice)) continue;
-                            if (!bool.TryParse(rdr[6].ToString(), out bool isDefault)) continue;
+                            if (!int.TryParse(rdr[4].ToString(), out int scrapAmount))
+                            {
+                                continue;
+                            }
+
+                            if (!int.TryParse(rdr[5].ToString(), out int buyPrice))
+                            {
+                                continue;
+                            }
+
+                            if (!bool.TryParse(rdr[6].ToString(), out bool isDefault))
+                            {
+                                continue;
+                            }
 
                             var knife = new Knife(knifeID, knifeName, knifeDesc, iconLink, scrapAmount, buyPrice, isDefault);
                             if (!knives.ContainsKey(knifeID))
@@ -409,18 +483,33 @@ namespace UnturnedBlackout.Managers
 
                         while (await rdr.ReadAsync())
                         {
-                            if (!int.TryParse(rdr[0].ToString(), out int id)) continue;
-                            if (!ushort.TryParse(rdr[1].ToString(), out ushort knifeID)) continue;
+                            if (!int.TryParse(rdr[0].ToString(), out int id))
+                            {
+                                continue;
+                            }
+
+                            if (!ushort.TryParse(rdr[1].ToString(), out ushort knifeID))
+                            {
+                                continue;
+                            }
+
                             if (!Knives.TryGetValue(knifeID, out Knife knife))
                             {
                                 Logging.Debug($"Could'nt find knife id with {knifeID} for skin with id {id}");
                                 continue;
                             }
-                            if (!ushort.TryParse(rdr[2].ToString(), out ushort skinID)) continue;
+                            if (!ushort.TryParse(rdr[2].ToString(), out ushort skinID))
+                            {
+                                continue;
+                            }
+
                             var skinName = rdr[3].ToString();
                             var skinDesc = rdr[4].ToString();
                             var iconLink = rdr[5].ToString();
-                            if (!int.TryParse(rdr[6].ToString(), out int scrapAmount)) continue;
+                            if (!int.TryParse(rdr[6].ToString(), out int scrapAmount))
+                            {
+                                continue;
+                            }
 
                             var skin = new KnifeSkin(id, knife, skinID, skinName, skinDesc, iconLink, scrapAmount);
                             if (knifeSkinsSearchByID.ContainsKey(id))
@@ -483,15 +572,38 @@ namespace UnturnedBlackout.Managers
                         var gadgets = new Dictionary<ushort, Gadget>();
                         while (await rdr.ReadAsync())
                         {
-                            if (!ushort.TryParse(rdr[0].ToString(), out ushort gadgetID)) continue;
+                            if (!ushort.TryParse(rdr[0].ToString(), out ushort gadgetID))
+                            {
+                                continue;
+                            }
+
                             var gadgetName = rdr[1].ToString();
                             var gadgetDesc = rdr[2].ToString();
                             var iconLink = rdr[3].ToString();
-                            if (!int.TryParse(rdr[4].ToString(), out int scrapAmount)) continue;
-                            if (!int.TryParse(rdr[5].ToString(), out int buyPrice)) continue;
-                            if (!int.TryParse(rdr[6].ToString(), out int giveSeconds)) continue;
-                            if (!bool.TryParse(rdr[7].ToString(), out bool isDefault)) continue;
-                            if (!bool.TryParse(rdr[8].ToString(), out bool isTactical)) continue;
+                            if (!int.TryParse(rdr[4].ToString(), out int scrapAmount))
+                            {
+                                continue;
+                            }
+
+                            if (!int.TryParse(rdr[5].ToString(), out int buyPrice))
+                            {
+                                continue;
+                            }
+
+                            if (!int.TryParse(rdr[6].ToString(), out int giveSeconds))
+                            {
+                                continue;
+                            }
+
+                            if (!bool.TryParse(rdr[7].ToString(), out bool isDefault))
+                            {
+                                continue;
+                            }
+
+                            if (!bool.TryParse(rdr[8].ToString(), out bool isTactical))
+                            {
+                                continue;
+                            }
 
                             var gadget = new Gadget(gadgetID, gadgetName, gadgetDesc, iconLink, scrapAmount, buyPrice, giveSeconds, isDefault, isTactical);
                             if (!gadgets.ContainsKey(gadgetID))
@@ -528,16 +640,35 @@ namespace UnturnedBlackout.Managers
                         var killstreaks = new Dictionary<int, Killstreak>();
                         while (await rdr.ReadAsync())
                         {
-                            if (!int.TryParse(rdr[0].ToString(), out int killstreakID)) continue;
+                            if (!int.TryParse(rdr[0].ToString(), out int killstreakID))
+                            {
+                                continue;
+                            }
+
                             var killstreakName = rdr[1].ToString();
                             var killstreakDesc = rdr[2].ToString();
                             var iconLink = rdr[3].ToString();
-                            if (!int.TryParse(rdr[4].ToString(), out int killstreakRequired)) continue;
-                            if (!int.TryParse(rdr[5].ToString(), out int buyPrice)) continue;
-                            if (!int.TryParse(rdr[6].ToString(), out int scrapAmount)) continue;
-                            if (!bool.TryParse(rdr[7].ToString(), out bool isDefault)) continue;
+                            if (!int.TryParse(rdr[4].ToString(), out int killstreakRequired))
+                            {
+                                continue;
+                            }
 
-                            var killstreak = new Killstreak(killstreakID, killstreakName, iconLink, killstreakRequired, buyPrice, scrapAmount, isDefault);
+                            if (!int.TryParse(rdr[5].ToString(), out int buyPrice))
+                            {
+                                continue;
+                            }
+
+                            if (!int.TryParse(rdr[6].ToString(), out int scrapAmount))
+                            {
+                                continue;
+                            }
+
+                            if (!bool.TryParse(rdr[7].ToString(), out bool isDefault))
+                            {
+                                continue;
+                            }
+
+                            var killstreak = new Killstreak(killstreakID, killstreakName, killstreakDesc, iconLink, killstreakRequired, buyPrice, scrapAmount, isDefault);
                             if (!killstreaks.ContainsKey(killstreakID))
                             {
                                 killstreaks.Add(killstreakID, killstreak);
@@ -572,15 +703,34 @@ namespace UnturnedBlackout.Managers
                         var perks = new Dictionary<int, Perk>();
                         while (await rdr.ReadAsync())
                         {
-                            if (!int.TryParse(rdr[0].ToString(), out int perkID)) continue;
+                            if (!int.TryParse(rdr[0].ToString(), out int perkID))
+                            {
+                                continue;
+                            }
+
                             var perkName = rdr[1].ToString();
                             var perkDesc = rdr[2].ToString();
                             var iconLink = rdr[3].ToString();
                             var skillType = rdr[4].ToString();
-                            if (!int.TryParse(rdr[5].ToString(), out int skillLevel)) continue;
-                            if (!int.TryParse(rdr[6].ToString(), out int scrapAmount)) continue;
-                            if (!int.TryParse(rdr[7].ToString(), out int buyPrice)) continue;
-                            if (!bool.TryParse(rdr[8].ToString(), out bool isDefault)) continue;
+                            if (!int.TryParse(rdr[5].ToString(), out int skillLevel))
+                            {
+                                continue;
+                            }
+
+                            if (!int.TryParse(rdr[6].ToString(), out int scrapAmount))
+                            {
+                                continue;
+                            }
+
+                            if (!int.TryParse(rdr[7].ToString(), out int buyPrice))
+                            {
+                                continue;
+                            }
+
+                            if (!bool.TryParse(rdr[8].ToString(), out bool isDefault))
+                            {
+                                continue;
+                            }
 
                             var perk = new Perk(perkID, perkName, perkDesc, iconLink, skillType, skillLevel, scrapAmount, buyPrice, isDefault);
                             if (!perks.ContainsKey(perkID))
@@ -617,15 +767,30 @@ namespace UnturnedBlackout.Managers
                         var gloves = new Dictionary<ushort, Glove>();
                         while (await rdr.ReadAsync())
                         {
-                            if (!ushort.TryParse(rdr[0].ToString(), out ushort gloveID)) continue;
+                            if (!ushort.TryParse(rdr[0].ToString(), out ushort gloveID))
+                            {
+                                continue;
+                            }
+
                             var gloveName = rdr[1].ToString();
                             var gloveDesc = rdr[2].ToString();
                             var iconLink = rdr[3].ToString();
-                            if (!int.TryParse(rdr[4].ToString(), out int buyPrice)) continue;
-                            if (!int.TryParse(rdr[5].ToString(), out int scrapAmount)) continue;
-                            if (!bool.TryParse(rdr[6].ToString(), out bool isDefault)) continue;
+                            if (!int.TryParse(rdr[4].ToString(), out int buyPrice))
+                            {
+                                continue;
+                            }
 
-                            var glove = new Glove(gloveID, gloveName, iconLink, buyPrice, scrapAmount, isDefault);
+                            if (!int.TryParse(rdr[5].ToString(), out int scrapAmount))
+                            {
+                                continue;
+                            }
+
+                            if (!bool.TryParse(rdr[6].ToString(), out bool isDefault))
+                            {
+                                continue;
+                            }
+
+                            var glove = new Glove(gloveID, gloveName, gloveDesc, iconLink, buyPrice, scrapAmount, isDefault);
                             if (!gloves.ContainsKey(gloveID))
                             {
                                 gloves.Add(gloveID, glove);
@@ -660,14 +825,29 @@ namespace UnturnedBlackout.Managers
                         var cards = new Dictionary<int, Card>();
                         while (await rdr.ReadAsync())
                         {
-                            if (!int.TryParse(rdr[0].ToString(), out int cardID)) continue;
+                            if (!int.TryParse(rdr[0].ToString(), out int cardID))
+                            {
+                                continue;
+                            }
+
                             var cardName = rdr[1].ToString();
                             var cardDesc = rdr[2].ToString();
                             var iconLink = rdr[3].ToString();
                             var cardLink = rdr[4].ToString();
-                            if (!int.TryParse(rdr[5].ToString(), out int buyPrice)) continue;
-                            if (!int.TryParse(rdr[6].ToString(), out int scrapAmount)) continue;
-                            if (!bool.TryParse(rdr[7].ToString(), out bool isDefault)) continue;
+                            if (!int.TryParse(rdr[5].ToString(), out int buyPrice))
+                            {
+                                continue;
+                            }
+
+                            if (!int.TryParse(rdr[6].ToString(), out int scrapAmount))
+                            {
+                                continue;
+                            }
+
+                            if (!bool.TryParse(rdr[7].ToString(), out bool isDefault))
+                            {
+                                continue;
+                            }
 
                             var card = new Card(cardID, cardName, cardDesc, iconLink, cardLink, buyPrice, scrapAmount, isDefault);
                             if (!cards.ContainsKey(cardID))
@@ -712,7 +892,10 @@ namespace UnturnedBlackout.Managers
                         foreach (var perk in defaultPerks)
                         {
                             defaultPerk.Add(perk.PerkID);
-                            if (defaultPerk.Count == 3) break;
+                            if (defaultPerk.Count == 3)
+                            {
+                                break;
+                            }
                         }
                         Logging.Debug($"Found {defaultPerk.Count} default perks");
                         var defaultKnife = defaultKnives.Count > 0 ? defaultKnives[0] : null;
@@ -725,7 +908,10 @@ namespace UnturnedBlackout.Managers
                         foreach (var killstreak in defaultKillstreaks)
                         {
                             defaultKillstreak.Add(killstreak.KillstreakID);
-                            if (defaultKillstreaks.Count == 3) break;
+                            if (defaultKillstreaks.Count == 3)
+                            {
+                                break;
+                            }
                         }
                         Logging.Debug($"Found {defaultKillstreak.Count} default killstreaks");
                         var defaultGlove = defaultGloves.FirstOrDefault();
@@ -739,7 +925,8 @@ namespace UnturnedBlackout.Managers
                     {
                         Logger.Log("Error building default loadout for players");
                         Logger.Log(ex);
-                    } finally
+                    }
+                    finally
                     {
                         DefaultGuns = defaultGuns;
                         DefaultKnives = defaultKnives;
@@ -845,7 +1032,7 @@ namespace UnturnedBlackout.Managers
                 }
             }
         }
-        
+
         public async Task UpdatePlayerAsync(CSteamID steamID, string steamName, string avatarLink)
         {
             using (MySqlConnection Conn = new MySqlConnection(ConnectionString))
@@ -856,11 +1043,13 @@ namespace UnturnedBlackout.Managers
                     var cmd = new MySqlCommand($"UPDATE `{PlayersTableName}` SET `SteamName` = @name, AvatarLink = '{avatarLink}';", Conn);
                     cmd.Parameters.AddWithValue("@name", steamName);
                     await cmd.ExecuteScalarAsync();
-                } catch (Exception ex)
+                }
+                catch (Exception ex)
                 {
                     Logger.Log($"Error updating player with steam id {steamID}, steam name {steamName}, avatar link {avatarLink}");
                     Logger.Log(ex);
-                } finally
+                }
+                finally
                 {
                     await Conn.CloseAsync();
                 }
@@ -882,20 +1071,75 @@ namespace UnturnedBlackout.Managers
                         {
                             var steamName = rdr[1].ToString();
                             var avatarLink = rdr[2].ToString();
-                            if (!uint.TryParse(rdr[3].ToString(), out uint xp)) continue;
-                            if (!uint.TryParse(rdr[4].ToString(), out uint level)) continue;
-                            if (!uint.TryParse(rdr[5].ToString(), out uint credits)) continue;
-                            if (!uint.TryParse(rdr[6].ToString(), out uint kills)) continue;
-                            if (!uint.TryParse(rdr[7].ToString(), out uint headshotKills)) continue;
-                            if (!uint.TryParse(rdr[8].ToString(), out uint highestKillstreak)) continue;
-                            if (!uint.TryParse(rdr[9].ToString(), out uint highestMultiKills)) continue;
-                            if (!uint.TryParse(rdr[10].ToString(), out uint killsConfirmed)) continue;
-                            if (!uint.TryParse(rdr[11].ToString(), out uint killsDenied)) continue;
-                            if (!uint.TryParse(rdr[12].ToString(), out uint flagsCaptured)) continue;
-                            if (!uint.TryParse(rdr[13].ToString(), out uint flagsSaved)) continue;
-                            if (!uint.TryParse(rdr[14].ToString(), out uint areasTaken)) continue;
-                            if (!uint.TryParse(rdr[15].ToString(), out uint deaths)) continue;
-                            if (!bool.TryParse(rdr[16].ToString(), out bool music)) continue;
+                            if (!uint.TryParse(rdr[3].ToString(), out uint xp))
+                            {
+                                continue;
+                            }
+
+                            if (!uint.TryParse(rdr[4].ToString(), out uint level))
+                            {
+                                continue;
+                            }
+
+                            if (!uint.TryParse(rdr[5].ToString(), out uint credits))
+                            {
+                                continue;
+                            }
+
+                            if (!uint.TryParse(rdr[6].ToString(), out uint kills))
+                            {
+                                continue;
+                            }
+
+                            if (!uint.TryParse(rdr[7].ToString(), out uint headshotKills))
+                            {
+                                continue;
+                            }
+
+                            if (!uint.TryParse(rdr[8].ToString(), out uint highestKillstreak))
+                            {
+                                continue;
+                            }
+
+                            if (!uint.TryParse(rdr[9].ToString(), out uint highestMultiKills))
+                            {
+                                continue;
+                            }
+
+                            if (!uint.TryParse(rdr[10].ToString(), out uint killsConfirmed))
+                            {
+                                continue;
+                            }
+
+                            if (!uint.TryParse(rdr[11].ToString(), out uint killsDenied))
+                            {
+                                continue;
+                            }
+
+                            if (!uint.TryParse(rdr[12].ToString(), out uint flagsCaptured))
+                            {
+                                continue;
+                            }
+
+                            if (!uint.TryParse(rdr[13].ToString(), out uint flagsSaved))
+                            {
+                                continue;
+                            }
+
+                            if (!uint.TryParse(rdr[14].ToString(), out uint areasTaken))
+                            {
+                                continue;
+                            }
+
+                            if (!uint.TryParse(rdr[15].ToString(), out uint deaths))
+                            {
+                                continue;
+                            }
+
+                            if (!bool.TryParse(rdr[16].ToString(), out bool music))
+                            {
+                                continue;
+                            }
 
                             if (PlayerData.ContainsKey(player.CSteamID))
                             {
@@ -930,10 +1174,10 @@ namespace UnturnedBlackout.Managers
                     Dictionary<ushort, GunSkin> gunSkinsSearchBySkinID = new Dictionary<ushort, GunSkin>();
                     Dictionary<ushort, KnifeSkin> knifeSkinsSearchBySkinID = new Dictionary<ushort, KnifeSkin>();
                     Dictionary<int, LoadoutPerk> perks = new Dictionary<int, LoadoutPerk>();
-                    Dictionary<int, LoadoutGadget> gadgets = new Dictionary<int, LoadoutGadget>();
+                    Dictionary<ushort, LoadoutGadget> gadgets = new Dictionary<ushort, LoadoutGadget>();
                     Dictionary<int, LoadoutKillstreak> killstreaks = new Dictionary<int, LoadoutKillstreak>();
                     Dictionary<int, LoadoutCard> cards = new Dictionary<int, LoadoutCard>();
-                    Dictionary<int, LoadoutGlove> gloves = new Dictionary<int, LoadoutGlove>();
+                    Dictionary<ushort, LoadoutGlove> gloves = new Dictionary<ushort, LoadoutGlove>();
                     Dictionary<int, Loadout> loadouts = new Dictionary<int, Loadout>();
 
                     Logging.Debug($"Getting guns for {player.CharacterName}");
@@ -942,32 +1186,55 @@ namespace UnturnedBlackout.Managers
                     {
                         while (await rdr.ReadAsync())
                         {
-                            if (!ushort.TryParse(rdr[1].ToString(), out ushort gunID)) continue;
+                            if (!ushort.TryParse(rdr[1].ToString(), out ushort gunID))
+                            {
+                                continue;
+                            }
+
                             if (!Guns.TryGetValue(gunID, out Gun gun))
                             {
                                 Logging.Debug($"Error finding gun with id {gunID}, ignoring it");
                                 continue;
                             }
 
-                            if (!int.TryParse(rdr[2].ToString(), out int level)) continue;
-                            if (!int.TryParse(rdr[3].ToString(), out int xp)) continue;
-                            if (!int.TryParse(rdr[4].ToString(), out int gunKills)) continue;
-                            if (!bool.TryParse(rdr[5].ToString(), out bool isBought)) continue;
+                            if (!int.TryParse(rdr[2].ToString(), out int level))
+                            {
+                                continue;
+                            }
+
+                            if (!int.TryParse(rdr[3].ToString(), out int xp))
+                            {
+                                continue;
+                            }
+
+                            if (!int.TryParse(rdr[4].ToString(), out int gunKills))
+                            {
+                                continue;
+                            }
+
+                            if (!bool.TryParse(rdr[5].ToString(), out bool isBought))
+                            {
+                                continue;
+                            }
+
                             var attachments = Utility.GetAttachmentsFromString(rdr[6].ToString());
                             if (!guns.ContainsKey(gunID))
                             {
                                 guns.Add(gunID, new LoadoutGun(gun, level, xp, gunKills, isBought, attachments));
-                            } else
+                            }
+                            else
                             {
                                 Logging.Debug($"Found a duplicate gun with id {gunID} registered for the player, ignoring it");
                             }
                         }
                         Logging.Debug($"Successfully got {guns.Count} guns registered to the player");
-                    } catch (Exception ex)
+                    }
+                    catch (Exception ex)
                     {
                         Logger.Log($"Error reading gun data for {player.CharacterName}");
                         Logger.Log(ex);
-                    } finally
+                    }
+                    finally
                     {
                         rdr.Close();
                     }
@@ -978,29 +1245,43 @@ namespace UnturnedBlackout.Managers
                     {
                         while (await rdr.ReadAsync())
                         {
-                            if (!ushort.TryParse(rdr[1].ToString(), out ushort knifeID)) continue;
+                            if (!ushort.TryParse(rdr[1].ToString(), out ushort knifeID))
+                            {
+                                continue;
+                            }
+
                             if (!Knives.TryGetValue(knifeID, out Knife knife))
                             {
                                 Logging.Debug($"Error finding knife with id {knifeID}, ignoring it");
                                 continue;
                             }
-                            if (!int.TryParse(rdr[2].ToString(), out int knifeKills)) continue;
-                            if (!bool.TryParse(rdr[3].ToString(), out bool isBought)) continue;
-                            
+                            if (!int.TryParse(rdr[2].ToString(), out int knifeKills))
+                            {
+                                continue;
+                            }
+
+                            if (!bool.TryParse(rdr[3].ToString(), out bool isBought))
+                            {
+                                continue;
+                            }
+
                             if (!knives.ContainsKey(knifeID))
                             {
                                 knives.Add(knifeID, new LoadoutKnife(knife, knifeKills, isBought));
-                            } else
+                            }
+                            else
                             {
                                 Logging.Debug($"Found a duplicate knife with id {knifeID} registered for {player.CharacterName}, ignoring it");
                             }
                         }
                         Logging.Debug($"Successfully got {knives.Count} knives for {player.CharacterName}");
-                    } catch (Exception ex)
+                    }
+                    catch (Exception ex)
                     {
                         Logger.Log($"Error reading knife data for {player.CharacterName}");
                         Logger.Log(ex);
-                    } finally
+                    }
+                    finally
                     {
                         rdr.Close();
                     }
@@ -1075,27 +1356,38 @@ namespace UnturnedBlackout.Managers
                     {
                         while (await rdr.ReadAsync())
                         {
-                            if (!int.TryParse(rdr[1].ToString(), out int perkID)) continue;
+                            if (!int.TryParse(rdr[1].ToString(), out int perkID))
+                            {
+                                continue;
+                            }
+
                             if (!Perks.TryGetValue(perkID, out Perk perk))
                             {
                                 Logging.Debug($"Error finding perk with id {perkID}, ignoring this");
                                 continue;
                             }
-                            if (!bool.TryParse(rdr[2].ToString(), out bool isBought)) continue;
+                            if (!bool.TryParse(rdr[2].ToString(), out bool isBought))
+                            {
+                                continue;
+                            }
+
                             if (!perks.ContainsKey(perkID))
                             {
                                 perks.Add(perkID, new LoadoutPerk(perk, isBought));
-                            } else
+                            }
+                            else
                             {
                                 Logging.Debug($"Found a duplicate perk with id {perkID} registered for {player.CharacterName}, ignoring it");
                             }
                         }
                         Logging.Debug($"Successfully got {perks.Count} perks for {player.CharacterName}");
-                    } catch (Exception ex)
+                    }
+                    catch (Exception ex)
                     {
                         Logger.Log($"Error reading perk data for {player.CharacterName}");
                         Logger.Log(ex);
-                    } finally
+                    }
+                    finally
                     {
                         rdr.Close();
                     }
@@ -1106,28 +1398,43 @@ namespace UnturnedBlackout.Managers
                     {
                         while (await rdr.ReadAsync())
                         {
-                            if (!ushort.TryParse(rdr[1].ToString(), out ushort gadgetID)) continue;
+                            if (!ushort.TryParse(rdr[1].ToString(), out ushort gadgetID))
+                            {
+                                continue;
+                            }
+
                             if (!Gadgets.TryGetValue(gadgetID, out Gadget gadget))
                             {
                                 Logging.Debug($"Error finding gadget with id {gadgetID} for {player.CharacterName}, ignoring it");
                                 continue;
                             }
-                            if (!int.TryParse(rdr[2].ToString(), out int gadgetKills)) continue;
-                            if (!bool.TryParse(rdr[3].ToString(), out bool isBought)) continue;
+                            if (!int.TryParse(rdr[2].ToString(), out int gadgetKills))
+                            {
+                                continue;
+                            }
+
+                            if (!bool.TryParse(rdr[3].ToString(), out bool isBought))
+                            {
+                                continue;
+                            }
+
                             if (!gadgets.ContainsKey(gadgetID))
                             {
                                 gadgets.Add(gadgetID, new LoadoutGadget(gadget, gadgetKills, isBought));
-                            } else
+                            }
+                            else
                             {
                                 Logging.Debug($"Found duplicate gadget with id {gadgetID} registered for {player.CharacterName}, ignoring it");
                             }
                         }
                         Logging.Debug($"Successfully got {gadgets.Count} for {player.CharacterName}");
-                    } catch (Exception ex)
+                    }
+                    catch (Exception ex)
                     {
                         Logger.Log($"Error reading gadgets data for {player.CharacterName}");
                         Logger.Log(ex);
-                    } finally
+                    }
+                    finally
                     {
                         rdr.Close();
                     }
@@ -1138,29 +1445,43 @@ namespace UnturnedBlackout.Managers
                     {
                         while (await rdr.ReadAsync())
                         {
-                            if (!int.TryParse(rdr[1].ToString(), out int killstreakID)) continue;
+                            if (!int.TryParse(rdr[1].ToString(), out int killstreakID))
+                            {
+                                continue;
+                            }
+
                             if (!Killstreaks.TryGetValue(killstreakID, out Killstreak killstreak))
                             {
                                 Logging.Debug($"Error finding killstreak with id {killstreakID} for {player.CharacterName}, ignoring it");
                                 continue;
                             }
-                            if (!int.TryParse(rdr[2].ToString(), out int killstreakKills)) continue;
-                            if (!bool.TryParse(rdr[3].ToString(), out bool isBought)) continue;
+                            if (!int.TryParse(rdr[2].ToString(), out int killstreakKills))
+                            {
+                                continue;
+                            }
+
+                            if (!bool.TryParse(rdr[3].ToString(), out bool isBought))
+                            {
+                                continue;
+                            }
 
                             if (!killstreaks.ContainsKey(killstreakID))
                             {
                                 killstreaks.Add(killstreakID, new LoadoutKillstreak(killstreak, killstreakKills, isBought));
-                            } else
+                            }
+                            else
                             {
                                 Logging.Debug($"Found a duplicate killstreak with id {killstreakID} for {player.CharacterName}, ignoring it");
                             }
                         }
                         Logging.Debug($"Successfully got {killstreaks.Count} for {player.CharacterName}");
-                    } catch (Exception ex)
+                    }
+                    catch (Exception ex)
                     {
                         Logger.Log($"Error reading killstreaks data for {player.CharacterName}");
                         Logger.Log(ex);
-                    } finally
+                    }
+                    finally
                     {
                         rdr.Close();
                     }
@@ -1171,28 +1492,39 @@ namespace UnturnedBlackout.Managers
                     {
                         while (await rdr.ReadAsync())
                         {
-                            if (!int.TryParse(rdr[1].ToString(), out int cardID)) continue;
+                            if (!int.TryParse(rdr[1].ToString(), out int cardID))
+                            {
+                                continue;
+                            }
+
                             if (!Cards.TryGetValue(cardID, out Card card))
                             {
                                 Logging.Debug($"Error finding card with id {cardID} for {player.CharacterName}, ignoring it");
                                 continue;
                             }
 
-                            if (!bool.TryParse(rdr[2].ToString(), out bool isBought)) continue;
+                            if (!bool.TryParse(rdr[2].ToString(), out bool isBought))
+                            {
+                                continue;
+                            }
+
                             if (!cards.ContainsKey(cardID))
                             {
                                 cards.Add(cardID, new LoadoutCard(card, isBought));
-                            } else
+                            }
+                            else
                             {
                                 Logging.Debug($"Found duplicate card with id {cardID} for {player.CharacterName}, ignoring it");
                             }
                         }
                         Logging.Debug($"Successfully got {cards.Count} for {player.CharacterName}");
-                    } catch (Exception ex)
+                    }
+                    catch (Exception ex)
                     {
                         Logger.Log($"Error reading cards data for {player.CharacterName}");
                         Logger.Log(ex);
-                    } finally
+                    }
+                    finally
                     {
                         rdr.Close();
                     }
@@ -1203,27 +1535,38 @@ namespace UnturnedBlackout.Managers
                     {
                         while (await rdr.ReadAsync())
                         {
-                            if (!ushort.TryParse(rdr[1].ToString(), out ushort gloveID)) continue;
+                            if (!ushort.TryParse(rdr[1].ToString(), out ushort gloveID))
+                            {
+                                continue;
+                            }
+
                             if (!Gloves.TryGetValue(gloveID, out Glove glove))
                             {
                                 Logging.Debug($"Error finding glove with id {gloveID} for {player.CharacterName}, ignoring it");
                                 continue;
                             }
-                            if (!bool.TryParse(rdr[2].ToString(), out bool isBought)) continue;
+                            if (!bool.TryParse(rdr[2].ToString(), out bool isBought))
+                            {
+                                continue;
+                            }
+
                             if (!gloves.ContainsKey(gloveID))
                             {
                                 gloves.Add(gloveID, new LoadoutGlove(glove, isBought));
-                            } else
+                            }
+                            else
                             {
                                 Logging.Debug($"Found duplicate glove with id {gloveID} for {player.CharacterName}, ignoring it");
                             }
                         }
                         Logging.Debug($"Successfully got {gloves.Count} gloves for {player.CharacterName}");
-                    } catch (Exception ex)
+                    }
+                    catch (Exception ex)
                     {
                         Logger.Log($"Error reading gloves data for {player.CharacterName}");
                         Logger.Log(ex);
-                    } finally
+                    }
+                    finally
                     {
                         rdr.Close();
                     }
@@ -1235,8 +1578,15 @@ namespace UnturnedBlackout.Managers
                         while (await rdr.ReadAsync())
                         {
                             var shouldContinue = true;
-                            if (!int.TryParse(rdr[1].ToString(), out int loadoutID)) continue;
-                            if (!bool.TryParse(rdr[2].ToString(), out bool isActive)) continue;
+                            if (!int.TryParse(rdr[1].ToString(), out int loadoutID))
+                            {
+                                continue;
+                            }
+
+                            if (!bool.TryParse(rdr[2].ToString(), out bool isActive))
+                            {
+                                continue;
+                            }
 
                             if (loadouts.ContainsKey(loadoutID))
                             {
@@ -1263,7 +1613,8 @@ namespace UnturnedBlackout.Managers
                                 if (primary.Attachments.TryGetValue(primaryAttachment, out LoadoutAttachment attachment))
                                 {
                                     primaryAttachments.Add(attachment.Attachment.AttachmentType, attachment);
-                                } else
+                                }
+                                else
                                 {
                                     Logging.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a primary attachment id with {primaryAttachment} which is not owned by the player, not counting it");
                                 }
@@ -1287,7 +1638,8 @@ namespace UnturnedBlackout.Managers
                                 if (secondary.Attachments.TryGetValue(secondaryAttachment, out LoadoutAttachment attachment))
                                 {
                                     secondaryAttachments.Add(attachment.Attachment.AttachmentType, attachment);
-                                } else
+                                }
+                                else
                                 {
                                     Logging.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a secondary attachment id with {secondaryAttachment} which is not owned by the player, not counting it");
                                 }
@@ -1323,14 +1675,18 @@ namespace UnturnedBlackout.Managers
                                 if (killstreaks.TryGetValue(killstreakID, out LoadoutKillstreak killstreak))
                                 {
                                     loadoutKillstreaks.Add(killstreak);
-                                } else
+                                }
+                                else
                                 {
                                     Logging.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a killstreak with id {killstreakID} which is not owned by the player, not counting this loadout");
                                     shouldContinue = false;
                                     break;
                                 }
                             }
-                            if (!shouldContinue) continue;
+                            if (!shouldContinue)
+                            {
+                                continue;
+                            }
 
                             var loadoutPerks = new List<LoadoutPerk>();
                             foreach (var perkID in loadoutData.Perks)
@@ -1338,14 +1694,18 @@ namespace UnturnedBlackout.Managers
                                 if (perks.TryGetValue(perkID, out LoadoutPerk perk))
                                 {
                                     loadoutPerks.Add(perk);
-                                } else
+                                }
+                                else
                                 {
                                     Logging.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a perk with id {perkID} which is not owned by the player, not counting this loadout");
                                     shouldContinue = false;
                                     break;
                                 }
                             }
-                            if (!shouldContinue) continue;
+                            if (!shouldContinue)
+                            {
+                                continue;
+                            }
 
                             if (!gloves.TryGetValue(loadoutData.Glove, out LoadoutGlove glove) && loadoutData.Glove != 0)
                             {
@@ -1362,11 +1722,13 @@ namespace UnturnedBlackout.Managers
                             loadouts.Add(loadoutID, new Loadout(loadoutID, loadoutData.LoadoutName, isActive, primary, primarySkin, primaryAttachments, secondary, secondarySkin, secondaryAttachments, knife, knifeSkin, tactical, lethal, loadoutKillstreaks, loadoutPerks, glove, card));
                         }
                         Logging.Debug($"Successfully got {loadouts.Count} loadouts for {player.CharacterName}");
-                    } catch (Exception ex)
+                    }
+                    catch (Exception ex)
                     {
                         Logger.Log($"Error reading loadouts data for {player.CharacterName}");
                         Logger.Log(ex);
-                    } finally
+                    }
+                    finally
                     {
                         rdr.Close();
                     }
@@ -1491,13 +1853,18 @@ namespace UnturnedBlackout.Managers
                             Logging.Debug($"{player.CharacterName} has more loadouts than he should have, deleting the last ones");
                             for (int i = loadouts.Count; i >= 1; i--)
                             {
-                                if (loadouts.Count == loadoutAmount) break;
+                                if (loadouts.Count == loadoutAmount)
+                                {
+                                    break;
+                                }
+
                                 Logging.Debug($"Removing loadout with id {i} for {player.CharacterName}");
                                 await new MySqlCommand($"DELETE FROM `{PlayersLoadoutsTableName}` WHERE `SteamID` = {player.CSteamID} AND `LoadoutID` = {i}", Conn).ExecuteScalarAsync();
                                 loadouts.Remove(i);
                             }
                         }
-                    } catch (Exception ex)
+                    }
+                    catch (Exception ex)
                     {
                         Logger.Log("Error checking the loadout amounts for player");
                         Logger.Log(ex);
@@ -1971,11 +2338,13 @@ namespace UnturnedBlackout.Managers
                         throw new Exception();
                     }
                     loadout.Guns.Add(loadoutGun.Gun.GunID, loadoutGun);
-                } catch (Exception ex)
+                }
+                catch (Exception ex)
                 {
                     Logger.Log($"Error adding gun to {steamID} with gun id {gunID} and is bought {isBought}");
                     Logger.Log(ex);
-                } finally
+                }
+                finally
                 {
                     await Conn.CloseAsync();
                 }
@@ -2022,11 +2391,13 @@ namespace UnturnedBlackout.Managers
                             }
                         }
                     }
-                } catch (Exception ex)
+                }
+                catch (Exception ex)
                 {
                     Logger.Log($"Error adding {xp} xp to gun with id {gunID} for {steamID}");
                     Logger.Log(ex);
-                } finally
+                }
+                finally
                 {
                     await Conn.CloseAsync();
                 }
@@ -2058,11 +2429,13 @@ namespace UnturnedBlackout.Managers
 
                         gun.GunKills = newKills;
                     }
-                } catch (Exception ex)
+                }
+                catch (Exception ex)
                 {
                     Logger.Log($"Error adding kills {kills} to gun with id {gunID} for steam id {steamID}");
                     Logger.Log(ex);
-                } finally
+                }
+                finally
                 {
                     await Conn.CloseAsync();
                 }
@@ -2091,11 +2464,13 @@ namespace UnturnedBlackout.Managers
                     }
 
                     gun.IsBought = isBought;
-                } catch (Exception ex)
+                }
+                catch (Exception ex)
                 {
                     Logger.Log($"Error changing bought to {isBought} for gun with id {gunID} for steam id {steamID}");
                     Logger.Log(ex);
-                } finally
+                }
+                finally
                 {
                     await Conn.CloseAsync();
                 }
@@ -2135,11 +2510,13 @@ namespace UnturnedBlackout.Managers
                     }
 
                     await new MySqlCommand($"UPDATE `{PlayersGunsTableName}` SET `Attachments` = '{Utility.GetStringFromAttachments(gun.Attachments.Values.ToList())}' WHERE `SteamID` = {steamID} AND `GunID` = {gunID};", Conn).ExecuteScalarAsync();
-                } catch (Exception ex)
+                }
+                catch (Exception ex)
                 {
                     Logger.Log($"Error adding gun attachment with id {attachmentID} to gun with id {gunID}, is bought {isBought} for player with steam id {steamID}");
                     Logger.Log(ex);
-                } finally
+                }
+                finally
                 {
                     await Conn.CloseAsync();
                 }
@@ -2153,7 +2530,7 @@ namespace UnturnedBlackout.Managers
                 try
                 {
                     await Conn.OpenAsync();
-                   
+
                     if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
                     {
                         Logging.Debug($"Error finding loadout for player with steam id {steamID}");
@@ -2174,11 +2551,13 @@ namespace UnturnedBlackout.Managers
 
                     attachment.IsBought = isBought;
                     await new MySqlCommand($"UPDATE `{PlayersGunsTableName}` SET `Attachments` = '{Utility.GetStringFromAttachments(gun.Attachments.Values.ToList())}' WHERE `SteamID` = {steamID} AND `GunID` = {gunID};", Conn).ExecuteScalarAsync();
-                } catch (Exception ex)
+                }
+                catch (Exception ex)
                 {
                     Logger.Log($"Error changing is bought to {isBought} for attachment with id {attachmentID} for gun with id {gunID} for player with steam id");
                     Logger.Log(ex);
-                } finally
+                }
+                finally
                 {
                     await Conn.CloseAsync();
                 }
@@ -2203,7 +2582,7 @@ namespace UnturnedBlackout.Managers
                         Logging.Debug($"Error finding gun skin with id {id}");
                         throw new Exception();
                     }
-                     
+
                     if (loadout.GunSkinsSearchByID.ContainsKey(id))
                     {
                         Logging.Debug($"Found gun skin with id {id} already registered to player with steam id {steamID}");
@@ -2222,11 +2601,13 @@ namespace UnturnedBlackout.Managers
                     loadout.GunSkinsSearchBySkinID.Add(skin.SkinID, skin);
 
                     await new MySqlCommand($"UPDATE `{PlayersGunsSkinsTableName}` SET `SkinIDs` = '{loadout.GunSkinsSearchByID.Keys.ToList().GetStringFromIntList()}' WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-                } catch (Exception ex)
+                }
+                catch (Exception ex)
                 {
                     Logger.Log($"Error adding gun skin with id {id} to player with steam id {steamID}");
                     Logger.Log(ex);
-                } finally
+                }
+                finally
                 {
                     await Conn.CloseAsync();
                 }
@@ -2262,11 +2643,13 @@ namespace UnturnedBlackout.Managers
                     }
 
                     loadout.Knives.Add(knifeID, loadoutKnife);
-                } catch (Exception ex)
+                }
+                catch (Exception ex)
                 {
                     Logger.Log($"Error adding knife with id {knifeID} to player with steam id {steamID}");
                     Logger.Log(ex);
-                } finally
+                }
+                finally
                 {
                     await Conn.CloseAsync();
                 }
@@ -2277,7 +2660,7 @@ namespace UnturnedBlackout.Managers
         {
             using (MySqlConnection Conn = new MySqlConnection(ConnectionString))
             {
-                try 
+                try
                 {
                     await Conn.OpenAsync();
                     if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
@@ -2298,11 +2681,13 @@ namespace UnturnedBlackout.Managers
                     {
                         knife.KnifeKills = newKills;
                     }
-                } catch (Exception ex)
+                }
+                catch (Exception ex)
                 {
                     Logger.Log($"Error adding {kills} kills to knife with id {knifeID} for player with steam id {steamID}");
                     Logger.Log(ex);
-                } finally
+                }
+                finally
                 {
                     await Conn.CloseAsync();
                 }
@@ -2330,11 +2715,13 @@ namespace UnturnedBlackout.Managers
 
                     knife.IsBought = isBought;
                     await new MySqlCommand($"UPDATE `{PlayersKnivesTableName}` SET `IsBought` = {isBought} WHERE `SteamID` = {steamID} AND `KnifeID` = {knifeID};", Conn).ExecuteScalarAsync();
-                } catch (Exception ex)
+                }
+                catch (Exception ex)
                 {
                     Logger.Log($"Error changing is bought to {isBought} for knife with id {knifeID} for player with steam id {steamID}");
                     Logger.Log(ex);
-                } finally
+                }
+                finally
                 {
                     await Conn.CloseAsync();
                 }
@@ -2419,11 +2806,13 @@ namespace UnturnedBlackout.Managers
                     var loadoutPerk = new LoadoutPerk(perk, isBought);
                     loadout.Perks.Add(perkID, loadoutPerk);
                     await new MySqlCommand($"INSERT INTO `{PlayersPerksTableName}` (`SteamID` , `PerkID` , `IsBought`) VALUES ({steamID} , {perkID} , {isBought});", Conn).ExecuteScalarAsync();
-                } catch (Exception ex)
+                }
+                catch (Exception ex)
                 {
                     Logger.Log($"Error adding perk with id {perkID} to player with steam id {steamID}");
                     Logger.Log(ex);
-                } finally
+                }
+                finally
                 {
                     await Conn.CloseAsync();
                 }
@@ -2451,11 +2840,13 @@ namespace UnturnedBlackout.Managers
 
                     perk.IsBought = isBought;
                     await new MySqlCommand($"UPDATE `{PlayersPerksTableName}` SET `IsBought` = {isBought} WHERE `SteamID` = {steamID} AND `PerkID` = {perkID};", Conn).ExecuteScalarAsync();
-                } catch (Exception ex)
+                }
+                catch (Exception ex)
                 {
                     Logger.Log($"Error changing is bought of perk with id {perkID} of player with steam id {steamID}");
                     Logger.Log(ex);
-                } finally
+                }
+                finally
                 {
                     await Conn.CloseAsync();
                 }
@@ -2485,11 +2876,13 @@ namespace UnturnedBlackout.Managers
                     loadout.Gadgets.Add(gadgetID, loadoutGadget);
 
                     await new MySqlCommand($"INSERT INTO `{PlayersGadgetsTableName}` (`SteamID` , `GadgetID` , `GadgetKills` , `IsBought) VALUES ({steamID} , {gadgetID} , 0 , {(isBought ? 0 : 1)});", Conn).ExecuteScalarAsync();
-                } catch (Exception ex)
+                }
+                catch (Exception ex)
                 {
                     Logger.Log($"Error adding gadget with id {gadgetID} to player with steam id {steamID}");
                     Logger.Log(ex);
-                } finally
+                }
+                finally
                 {
                     await Conn.CloseAsync();
                 }
@@ -2521,11 +2914,13 @@ namespace UnturnedBlackout.Managers
                     {
                         gadget.GadgetKills = newKills;
                     }
-                } catch (Exception ex)
+                }
+                catch (Exception ex)
                 {
                     Logger.Log($"Error increasing {kills} gadget kills for gadget with id {gadgetID} for player with steam id {steamID}");
                     Logger.Log(ex);
-                } finally
+                }
+                finally
                 {
                     await Conn.CloseAsync();
                 }
@@ -2594,11 +2989,13 @@ namespace UnturnedBlackout.Managers
                     var loadoutKillstreak = new LoadoutKillstreak(killstreak, 0, isBought);
                     loadout.Killstreaks.Add(killstreakID, loadoutKillstreak);
                     await new MySqlCommand($"INSERT INTO `{PlayersKillstreaksTableName}` (`SteamID` , `KillstreakID` , `KillstreakKills` , `IsBought) VALUES ({steamID} , {killstreakID} , 0 , {isBought});", Conn).ExecuteScalarAsync();
-                } catch (Exception ex)
+                }
+                catch (Exception ex)
                 {
                     Logger.Log($"Error adding killstreak with id {killstreakID} to player with steam id {steamID}");
                     Logger.Log(ex);
-                } finally
+                }
+                finally
                 {
                     await Conn.CloseAsync();
                 }
@@ -2630,11 +3027,13 @@ namespace UnturnedBlackout.Managers
                     {
                         killstreak.KillstreakKills = newKills;
                     }
-                } catch (Exception ex)
+                }
+                catch (Exception ex)
                 {
                     Logger.Log($"Error increasing {kills} kills of killstreak with id {killstreakID} for player with steam id {steamID}");
                     Logger.Log(ex);
-                } finally
+                }
+                finally
                 {
                     await Conn.CloseAsync();
                 }
@@ -2704,11 +3103,13 @@ namespace UnturnedBlackout.Managers
                     loadout.Cards.Add(cardID, loadoutCard);
 
                     await new MySqlCommand($"INSERT INTO `{PlayersCardsTableName}` (`SteamID` , `CardID` , `IsBought`) VALUES ({steamID} , {cardID} , {isBought});", Conn).ExecuteScalarAsync();
-                } catch (Exception ex)
+                }
+                catch (Exception ex)
                 {
                     Logger.Log($"Error adding card with id {cardID} to player with steam id {steamID}");
                     Logger.Log(ex);
-                } finally
+                }
+                finally
                 {
                     await Conn.CloseAsync();
                 }
@@ -2846,11 +3247,13 @@ namespace UnturnedBlackout.Managers
 
                     var loadoutData = new LoadoutData(playerLoadout);
                     await new MySqlCommand($"UPDATE `{PlayersLoadoutsTableName}` SET `Loadout` = '{Plugin.Instance.DataManager.ConvertLoadoutToJson(loadoutData)}' WHERE `SteamID` = {steamID} AND `LoadoutID` = {loadoutID};", Conn).ExecuteScalarAsync();
-                } catch (Exception ex)
+                }
+                catch (Exception ex)
                 {
                     Logger.Log($"Error updating loadout with id {loadoutID} for player with id {steamID}");
                     Logger.Log(ex);
-                } finally
+                }
+                finally
                 {
                     await Conn.CloseAsync();
                 }
@@ -2878,11 +3281,13 @@ namespace UnturnedBlackout.Managers
 
                     playerLoadout.IsActive = isActive;
                     await new MySqlCommand($"UPDATE `{PlayersLoadoutsTableName}` SET `IsActive` = {isActive} WHERE `SteamID` = {steamID} AND `LoadoutID` = {loadoutID};", Conn).ExecuteScalarAsync();
-                } catch (Exception ex)
+                }
+                catch (Exception ex)
                 {
                     Logger.Log($"Error setting loadout is active to {isActive} for loadout with id {loadoutID} for player with steam id {steamID}");
                     Logger.Log(ex);
-                } finally
+                }
+                finally
                 {
                     await Conn.CloseAsync();
                 }

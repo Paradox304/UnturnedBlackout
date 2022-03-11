@@ -1,11 +1,5 @@
 ﻿using Rocket.Unturned.Player;
-using Steamworks;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using UnturnedBlackout.Database.Base;
 using UnturnedBlackout.Database.Data;
 using UnturnedBlackout.Models.Global;
@@ -62,7 +56,8 @@ namespace UnturnedBlackout.Managers
                         }
                     }
                 }
-            } else
+            }
+            else
             {
                 playerLoadout.Secondary = gun;
                 playerLoadout.SecondaryAttachments.Clear();
@@ -169,7 +164,8 @@ namespace UnturnedBlackout.Managers
                 {
                     await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
                 });
-            } else
+            }
+            else
             {
                 Logging.Debug($"Attachment was not found equipped on the gun");
             }
@@ -340,7 +336,8 @@ namespace UnturnedBlackout.Managers
             {
                 playerLoadout.Perks.RemoveAt(0);
                 playerLoadout.Perks.Add(perk);
-            } else
+            }
+            else
             {
                 playerLoadout.Perks.Add(perk);
             }
@@ -474,7 +471,7 @@ namespace UnturnedBlackout.Managers
                 Logging.Debug($"Error finding loadout with id {loadoutID} for {player.CharacterName}");
                 return;
             }
-            
+
             if (isPrimary)
             {
                 if (playerLoadout.Primary.Gun.GunID != gunSkin.Gun.GunID)
@@ -483,7 +480,8 @@ namespace UnturnedBlackout.Managers
                     return;
                 }
                 playerLoadout.PrimarySkin = gunSkin;
-            } else
+            }
+            else
             {
                 if (playerLoadout.Secondary.Gun.GunID != gunSkin.Gun.GunID)
                 {
@@ -517,7 +515,8 @@ namespace UnturnedBlackout.Managers
             if (isPrimary)
             {
                 playerLoadout.PrimarySkin = null;
-            } else
+            }
+            else
             {
                 playerLoadout.SecondarySkin = null;
             }
@@ -571,7 +570,7 @@ namespace UnturnedBlackout.Managers
                 Logging.Debug($"Error finding loadout for {player.CharacterName}");
                 return;
             }
-                
+
             if (loadout.Loadouts.TryGetValue(loadoutID, out Loadout playerLoadout))
             {
                 Logging.Debug($"Error finding loadout with id {loadoutID} for {player.CharacterName}");
