@@ -4,6 +4,7 @@ using Steamworks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnturnedBlackout.Database.Base;
 using UnturnedBlackout.Database.Data;
 using UnturnedBlackout.Enums;
 using UnturnedBlackout.GameTypes;
@@ -13,7 +14,6 @@ using UnturnedBlackout.Models.Feed;
 using UnturnedBlackout.Models.FFA;
 using UnturnedBlackout.Models.Global;
 using UnturnedBlackout.Models.KC;
-using UnturnedBlackout.Models.Level;
 using UnturnedBlackout.Models.TDM;
 
 namespace UnturnedBlackout.Managers
@@ -22,8 +22,6 @@ namespace UnturnedBlackout.Managers
     {
         public Config Config { get; set; }
 
-        public Dictionary<uint, LevelIcon> Icons { get; set; }
-        public Dictionary<uint, LevelXP> LevelsXPNeeded { get; set; }
         public Dictionary<ushort, FeedIcon> KillFeedIcons { get; set; }
 
         public List<UIHandler> UIHandlers { get; set; }
@@ -61,14 +59,13 @@ namespace UnturnedBlackout.Managers
         public UIManager()
         {
             Config = Plugin.Instance.Configuration.Instance;
-            Icons = Config.LevelIcons.ToDictionary(k => k.Level);
-            LevelsXPNeeded = Config.LevelsXP.ToDictionary(k => k.Level);
             KillFeedIcons = Config.KillFeedIcons.ToDictionary(k => k.WeaponID);
 
             UIHandlers = new List<UIHandler>();
             UIHandlersLookup = new Dictionary<CSteamID, UIHandler>();
 
             EffectManager.onEffectButtonClicked += OnButtonClicked;
+            EffectManager.onEffectTextCommitted += OnTextCommitted;
         }
 
         public void RegisterUIHandler(UnturnedPlayer player)
@@ -181,16 +178,13 @@ namespace UnturnedBlackout.Managers
 
         public void SendLevelUpAnimation(GamePlayer player, uint newRank)
         {
-            if (!Icons.TryGetValue(newRank, out LevelIcon icon))
+            if (!Plugin.Instance.DBManager.Levels.TryGetValue((int)newRank, out XPLevel level))
             {
-                if (!Icons.TryGetValue(0, out icon))
-                {
-                    return;
-                }
+                return;
             }
 
             EffectManager.sendUIEffect(LevelUpID, LevelUpKey, player.TransportConnection, true);
-            EffectManager.sendUIEffectImageURL(LevelUpKey, player.TransportConnection, true, "LevelUpIcon", icon.IconLink);
+            EffectManager.sendUIEffectImageURL(LevelUpKey, player.TransportConnection, true, "LevelUpIcon", level.IconLinkLarge);
             EffectManager.sendUIEffectText(LevelUpKey, player.TransportConnection, true, "LevelUpDesc", Plugin.Instance.Translate("Level_Up_Desc", newRank).ToRich());
             EffectManager.sendUIEffectText(LevelUpKey, player.TransportConnection, true, "LevelUpText", Plugin.Instance.Translate("Level_Up_Text").ToRich());
         }
@@ -281,7 +275,7 @@ namespace UnturnedBlackout.Managers
 
             EffectManager.sendUIEffect(DeathID, DeathKey, victim.TransportConnection, true);
             EffectManager.sendUIEffectImageURL(DeathKey, victim.TransportConnection, true, "EnemyIcon", killerData.AvatarLink);
-            EffectManager.sendUIEffectImageURL(DeathKey, victim.TransportConnection, true, "EnemyXPIcon", Icons.TryGetValue(killerData.Level, out LevelIcon icon) ? icon.IconLink54 : (Icons.TryGetValue(0, out icon) ? icon.IconLink54 : ""));
+            EffectManager.sendUIEffectImageURL(DeathKey, victim.TransportConnection, true, "EnemyXPIcon", Plugin.Instance.DBManager.Levels.TryGetValue((int)killerData.Level, out XPLevel level) ? level.IconLinkMedium : "");
             EffectManager.sendUIEffectText(DeathKey, victim.TransportConnection, true, "EnemyName", killerData.SteamName.ToUpper());
             EffectManager.sendUIEffectText(DeathKey, victim.TransportConnection, true, "EnemyXPNum", Plugin.Instance.Translate("Level_Show", killerData.Level).ToRich());
             EffectManager.sendUIEffectImageURL(DeathKey, victim.TransportConnection, true, "DeathBanner", "https://cdn.discordapp.com/attachments/899796442649092119/927985217975758898/Senosan-85382-HG-Dark-grey-600x600.png");
@@ -425,7 +419,7 @@ namespace UnturnedBlackout.Managers
                 EffectManager.sendUIEffectText(PreEndingUIKey, ply.GamePlayer.TransportConnection, true, $"KDRTxt{i}", ratio.ToColor(isPlayer));
                 EffectManager.sendUIEffectText(PreEndingUIKey, ply.GamePlayer.TransportConnection, true, $"ScoreTxt{i}", player.Score.ToColor(isPlayer));
                 EffectManager.sendUIEffectText(PreEndingUIKey, ply.GamePlayer.TransportConnection, true, $"LvlTxt{i}", data.Level.ToColor(isPlayer));
-                EffectManager.sendUIEffectImageURL(PreEndingUIKey, ply.GamePlayer.TransportConnection, true, $"LvlIcon{i}", Icons.TryGetValue(data.Level, out LevelIcon icon) ? icon.IconLink28 : (Icons.TryGetValue(0, out icon) ? icon.IconLink28 : ""));
+                EffectManager.sendUIEffectImageURL(PreEndingUIKey, ply.GamePlayer.TransportConnection, true, $"LvlIcon{i}", Plugin.Instance.DBManager.Levels.TryGetValue((int)data.Level, out XPLevel level) ? level.IconLinkSmall : "");
                 EffectManager.sendUIEffectText(PreEndingUIKey, ply.GamePlayer.TransportConnection, true, $"AssistsTxt{i}", player.Assists.ToColor(isPlayer));
             }
         }
@@ -534,7 +528,7 @@ namespace UnturnedBlackout.Managers
                 EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"KDRTxt{i}B0", ratio.ToColor(isPlayer));
                 EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"ScoreTxt{i}B0", ply.Score.ToColor(isPlayer));
                 EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"LvlTxt{i}B0", data.Level.ToColor(isPlayer));
-                EffectManager.sendUIEffectImageURL(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"LvlIcon{i}B0", Icons.TryGetValue(data.Level, out LevelIcon icon) ? icon.IconLink28 : (Icons.TryGetValue(0, out icon) ? icon.IconLink28 : ""));
+                EffectManager.sendUIEffectImageURL(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"LvlIcon{i}B0", Plugin.Instance.DBManager.Levels.TryGetValue((int)data.Level, out XPLevel level) ? level.IconLinkSmall : "");
                 EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"AssistsTxt{i}B0", ply.Assists.ToColor(isPlayer));
             }
 
@@ -559,7 +553,7 @@ namespace UnturnedBlackout.Managers
                 EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"KDRTxt{i}R0", ratio.ToColor(isPlayer));
                 EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"ScoreTxt{i}R0", ply.Score.ToColor(isPlayer));
                 EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"LvlTxt{i}R0", data.Level.ToColor(isPlayer));
-                EffectManager.sendUIEffectImageURL(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"LvlIcon{i}R0", Icons.TryGetValue(data.Level, out LevelIcon icon) ? icon.IconLink28 : (Icons.TryGetValue(0, out icon) ? icon.IconLink28 : ""));
+                EffectManager.sendUIEffectImageURL(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"LvlIcon{i}R0", Plugin.Instance.DBManager.Levels.TryGetValue((int)data.Level, out XPLevel level) ? level.IconLinkSmall : "");
                 EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"AssistsTxt{i}R0", ply.Assists.ToColor(isPlayer));
             }
         }
@@ -668,7 +662,7 @@ namespace UnturnedBlackout.Managers
                 EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"KDRTxt{i}B1", ratio.ToColor(isPlayer));
                 EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"ScoreTxt{i}B1", ply.Score.ToColor(isPlayer));
                 EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"LvlTxt{i}B1", data.Level.ToColor(isPlayer));
-                EffectManager.sendUIEffectImageURL(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"LvlIcon{i}B1", Icons.TryGetValue(data.Level, out LevelIcon icon) ? icon.IconLink28 : (Icons.TryGetValue(0, out icon) ? icon.IconLink28 : ""));
+                EffectManager.sendUIEffectImageURL(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"LvlIcon{i}B1", Plugin.Instance.DBManager.Levels.TryGetValue((int)data.Level, out XPLevel level) ? level.IconLinkSmall : "");
                 EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"AssistsTxt{i}B1", ply.Assists.ToColor(isPlayer));
                 EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"ObjectiveTxt{i}B1", objective.ToColor(isPlayer));
             }
@@ -695,7 +689,7 @@ namespace UnturnedBlackout.Managers
                 EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"KDRTxt{i}R1", ratio.ToColor(isPlayer));
                 EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"ScoreTxt{i}R1", ply.Score.ToColor(isPlayer));
                 EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"LvlTxt{i}R1", data.Level.ToColor(isPlayer));
-                EffectManager.sendUIEffectImageURL(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"LvlIcon{i}R1", Icons.TryGetValue(data.Level, out LevelIcon icon) ? icon.IconLink28 : (Icons.TryGetValue(0, out icon) ? icon.IconLink28 : ""));
+                EffectManager.sendUIEffectImageURL(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"LvlIcon{i}R1", Plugin.Instance.DBManager.Levels.TryGetValue((int)data.Level, out XPLevel level) ? level.IconLinkSmall : "");
                 EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"AssistsTxt{i}R1", ply.Assists.ToColor(isPlayer));
                 EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"ObjectiveTxt{i}R1", objective.ToColor(isPlayer));
             }
@@ -854,7 +848,7 @@ namespace UnturnedBlackout.Managers
                 EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"KDRTxt{i}B1", ratio.ToColor(isPlayer));
                 EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"ScoreTxt{i}B1", ply.Score.ToColor(isPlayer));
                 EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"LvlTxt{i}B1", data.Level.ToColor(isPlayer));
-                EffectManager.sendUIEffectImageURL(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"LvlIcon{i}B1", Icons.TryGetValue(data.Level, out LevelIcon icon) ? icon.IconLink28 : (Icons.TryGetValue(0, out icon) ? icon.IconLink28 : ""));
+                EffectManager.sendUIEffectImageURL(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"LvlIcon{i}B1", Plugin.Instance.DBManager.Levels.TryGetValue((int)data.Level, out XPLevel level) ? level.IconLinkSmall : "");
                 EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"AssistsTxt{i}B1", ply.Assists.ToColor(isPlayer));
                 EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"ObjectiveTxt{i}B1", objective.ToColor(isPlayer));
             }
@@ -881,7 +875,7 @@ namespace UnturnedBlackout.Managers
                 EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"KDRTxt{i}R1", ratio.ToColor(isPlayer));
                 EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"ScoreTxt{i}R1", ply.Score.ToColor(isPlayer));
                 EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"LvlTxt{i}R1", data.Level.ToColor(isPlayer));
-                EffectManager.sendUIEffectImageURL(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"LvlIcon{i}R1", Icons.TryGetValue(data.Level, out LevelIcon icon) ? icon.IconLink28 : (Icons.TryGetValue(0, out icon) ? icon.IconLink28 : ""));
+                EffectManager.sendUIEffectImageURL(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"LvlIcon{i}R1", Plugin.Instance.DBManager.Levels.TryGetValue((int)data.Level, out XPLevel level) ? level.IconLinkSmall : "");
                 EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"AssistsTxt{i}R1", ply.Assists.ToColor(isPlayer));
                 EffectManager.sendUIEffectText(PreEndingUIKey, player.GamePlayer.TransportConnection, true, $"ObjectiveTxt{i}R1", objective.ToColor(isPlayer));
             }
@@ -1023,6 +1017,12 @@ namespace UnturnedBlackout.Managers
                 case "SERVER Loadout Equip BUTTON":
                     handler.EquipLoadout();
                     return;
+                case "SERVER Loadout Rename Confirm BUTTON":
+                    handler.RenameLoadout();
+                    return;
+                case "Cancel Button":
+                    handler.ExitRenameLoadout();
+                    return;
                 case "SERVER Loadout Card BUTTON":
                     handler.ShowLoadoutSubPage(ELoadoutPage.Card);
                     return;
@@ -1038,14 +1038,38 @@ namespace UnturnedBlackout.Managers
                 case "SERVER Loadout Primary BUTTON":
                     handler.ShowLoadoutSubPage(ELoadoutPage.Primary);
                     return;
-                case "SERVER Loadout Primary Attachment BUTTON":
-                    handler.ShowLoadoutSubPage(ELoadoutPage.PrimaryAttachment);
+                case "SERVER Loadout Primary Magazine BUTTON":
+                    handler.ShowLoadoutSubPage(ELoadoutPage.AttachmentPrimaryMagazine);
+                    return;
+                case "SERVER Loadout Primary Sights BUTTON":
+                    handler.ShowLoadoutSubPage(ELoadoutPage.AttachmentPrimarySights);
+                    return;
+                case "SERVER Loadout Primary Grip BUTTON":
+                    handler.ShowLoadoutSubPage(ELoadoutPage.AttachmentPrimaryGrip);
+                    return;
+                case "SERVER Loadout Primary Tactical BUTTON":
+                    handler.ShowLoadoutSubPage(ELoadoutPage.AttachmentPrimaryTactical);
+                    return;
+                case "SERVER Loadout Primary Barrel BUTTON":
+                    handler.ShowLoadoutSubPage(ELoadoutPage.AttachmentPrimaryBarrel);
                     return;
                 case "SERVER Loadout Secondary BUTTON":
                     handler.ShowLoadoutSubPage(ELoadoutPage.Secondary);
                     return;
-                case "SERVER Loadout Secondary Attachment BUTTON":
-                    handler.ShowLoadoutSubPage(ELoadoutPage.SecondaryAttachment);
+                case "SERVER Loadout Secondary Magazine BUTTON":
+                    handler.ShowLoadoutSubPage(ELoadoutPage.AttachmentSecondaryMagazine);
+                    return;
+                case "SERVER Loadout Secondary Sights BUTTON":
+                    handler.ShowLoadoutSubPage(ELoadoutPage.AttachmentSecondarySights);
+                    return;
+                case "SERVER Loadout Secondary Grip BUTTON":
+                    handler.ShowLoadoutSubPage(ELoadoutPage.AttachmentSecondaryGrip);
+                    return;
+                case "SERVER Loadout Secondary Tactical BUTTON":
+                    handler.ShowLoadoutSubPage(ELoadoutPage.AttachmentSecondaryTactical);
+                    return;
+                case "SERVER Loadout Secondary Barrel BUTTON":
+                    handler.ShowLoadoutSubPage(ELoadoutPage.AttachmentSecondaryBarrel);
                     return;
                 case "SERVER Loadout Knife BUTTON":
                     handler.ShowLoadoutSubPage(ELoadoutPage.Knife);
@@ -1060,7 +1084,7 @@ namespace UnturnedBlackout.Managers
                     handler.ShowLoadoutTab(ELoadoutTab.ALL);
                     return;
                 case "SERVER Item ARs BUTTON":
-                    handler.ShowLoadoutTab(ELoadoutTab.PISTOLS);
+                    handler.ShowLoadoutTab(ELoadoutTab.ASSAULT_RIFLES);
                     return;
                 case "SERVER Item Pistols BUTTON":
                     handler.ShowLoadoutTab(ELoadoutTab.PISTOLS);
@@ -1128,13 +1152,15 @@ namespace UnturnedBlackout.Managers
                 {
                     Plugin.Instance.GameManager.OnPlayerVoted(ply, selected, 1);
                 }
-            } else if (buttonName.StartsWith("SERVER Item BUTTON"))
+            }
+            else if (buttonName.StartsWith("SERVER Item BUTTON"))
             {
                 if (int.TryParse(buttonName.Replace("SERVER Item BUTTON", ""), out int selected))
                 {
                     handler.SelectedItem(selected);
                 }
-            } else if (buttonName.StartsWith("SERVER Loadout BUTTON"))
+            }
+            else if (buttonName.StartsWith("SERVER Loadout BUTTON"))
             {
                 if (int.TryParse(buttonName.Replace("SERVER Loadout BUTTON", ""), out int selected))
                 {
@@ -1143,9 +1169,27 @@ namespace UnturnedBlackout.Managers
             }
         }
 
+        private void OnTextCommitted(Player player, string buttonName, string text)
+        {
+            Logging.Debug($"{player.channel.owner.playerID.characterName} committed text to modal {buttonName} with text {text}");
+            if (!UIHandlersLookup.TryGetValue(player.channel.owner.playerID.steamID, out UIHandler handler))
+            {
+                Logging.Debug($"Error finding UI handler for player, returning");
+                return;
+            }
+
+            switch (buttonName)
+            {
+                case "SERVER Loadout Rename INPUTFIELD":
+                    handler.SendLoadoutName(text);
+                    return;
+            }
+        }
+
         public void Destroy()
         {
             EffectManager.onEffectButtonClicked -= OnButtonClicked;
+            EffectManager.onEffectTextCommitted -= OnTextCommitted;
         }
     }
 }

@@ -146,6 +146,7 @@
     <Compile Include="Database\Base\Knife.cs" />
     <Compile Include="Database\Base\KnifeSkin.cs" />
     <Compile Include="Database\Base\Perk.cs" />
+    <Compile Include="Database\Base\XPLevel.cs" />
     <Compile Include="Database\Data\Loadout.cs" />
     <Compile Include="Database\Data\LoadoutAttachment.cs" />
     <Compile Include="Database\Data\LoadoutCard.cs" />
@@ -192,8 +193,6 @@
     <Compile Include="Models\KC\KCConfig.cs" />
     <Compile Include="Models\KC\KCPlayer.cs" />
     <Compile Include="Models\KC\KCTeam.cs" />
-    <Compile Include="Models\Level\LevelIcon.cs" />
-    <Compile Include="Models\Level\LevelXP.cs" />
     <Compile Include="Models\TDM\TDMConfig.cs" />
     <Compile Include="Models\TDM\TDMPlayer.cs" />
     <Compile Include="Models\Global\TeamInfo.cs" />

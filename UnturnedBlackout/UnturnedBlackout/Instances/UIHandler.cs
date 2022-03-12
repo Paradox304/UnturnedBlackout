@@ -13,7 +13,6 @@ using UnturnedBlackout.Database.Data;
 using UnturnedBlackout.Enums;
 using UnturnedBlackout.GameTypes;
 using UnturnedBlackout.Managers;
-using UnturnedBlackout.Models.Level;
 using UnturnedBlackout.Models.UI;
 
 namespace UnturnedBlackout.Instances
@@ -86,7 +85,6 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffect(ID, Key, TransportConnection, true);
             Player.Player.enablePluginWidgetFlag(EPluginWidgetFlags.Modal);
             ResetUIValues();
-            ShowGames();
             SetupUI();
         }
 
@@ -109,8 +107,8 @@ namespace UnturnedBlackout.Instances
                 return;
             }
 
-            EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "PlayerIcon", data.AvatarLink);
-            EffectManager.sendUIEffectText(Key, TransportConnection, true, "PlayerName", data.SteamName);
+            EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Player Icon", data.AvatarLink);
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Player Name", data.SteamName);
 
             ClearChat();
             OnXPChanged();
@@ -324,7 +322,7 @@ namespace UnturnedBlackout.Instances
         {
             var guns = PlayerLoadout.Guns.Values.Where(k => k.Gun.GunType == EGun.SNIPER_RIFLES).ToList();
             var gunItems = new Dictionary<int, LoadoutGun>();
-            PistolPages = new Dictionary<int, PageGun>();
+            SniperPages = new Dictionary<int, PageGun>();
             int index = 0;
             int page = 1;
             Logging.Debug($"Creating sniper pages for {Player.CharacterName}, found {guns.Count()} snipers");
@@ -408,7 +406,7 @@ namespace UnturnedBlackout.Instances
                 int page = 1;
                 var attachments = new Dictionary<int, LoadoutAttachment>();
                 AttachmentPages[gun.Gun.GunID].Add(attachmentType, new Dictionary<int, PageAttachment>());
-                
+
                 foreach (var attachment in gun.Attachments.Values.Where(k => k.Attachment.AttachmentType == attachmentType))
                 {
                     attachments.Add(index, attachment);
@@ -771,13 +769,14 @@ namespace UnturnedBlackout.Instances
                 LoadoutPageID = 0;
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Loadout Next BUTTON", false);
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Loadout Previous Button", false);
-                EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Loadout Page TEXT", " ");
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Loadout Page TEXT", "");
                 return;
             }
 
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Loadout Next BUTTON", true);
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Loadout Previous Button", true);
             ShowLoadoutPage(firstPage);
+            SelectedLoadout(0);
         }
 
         public void ForwardLoadoutPage()
@@ -836,7 +835,7 @@ namespace UnturnedBlackout.Instances
                 if (!page.Loadouts.TryGetValue(i, out Loadout loadout))
                 {
                     EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Loadout BUTTON {i}", false);
-                    return;
+                    continue;
                 }
 
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Loadout BUTTON {i}", true);
@@ -882,6 +881,7 @@ namespace UnturnedBlackout.Instances
 
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Loadout Equip BUTTON", !loadout.IsActive);
             // Primary
+            Logging.Debug($"Primary is null {loadout.Primary == null}, is skin null {loadout.SecondarySkin == null}");
             EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Loadout Primary IMAGE", loadout.PrimarySkin == null ? (loadout.Primary == null ? "" : loadout.Primary.Gun.IconLink) : loadout.PrimarySkin.IconLink);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Loadout Primary TEXT", loadout.Primary == null ? "" : loadout.Primary.Gun.GunName);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Loadout Primary Level TEXT", loadout.Primary == null ? "" : loadout.Primary.Level.ToString());
@@ -889,35 +889,42 @@ namespace UnturnedBlackout.Instances
             {
                 var attachmentType = (EAttachment)i;
                 loadout.PrimaryAttachments.TryGetValue(attachmentType, out LoadoutAttachment attachment);
+                Logging.Debug($"Primary attachment {attachmentType} is null {attachment == null}");
                 EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Loadout Primary {attachmentType} IMAGE", attachment == null ? "" : attachment.Attachment.IconLink);
             }
 
             // Secondary
-            EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Loadout Primary IMAGE", loadout.SecondarySkin == null ? (loadout.Secondary == null ? "" : loadout.Secondary.Gun.IconLink) : loadout.SecondarySkin.IconLink);
-            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Loadout Primary TEXT", loadout.Secondary == null ? "" : loadout.Secondary.Gun.GunName);
-            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Loadout Primary Level TEXT", loadout.Secondary == null ? "" : loadout.Secondary.Level.ToString());
+            Logging.Debug($"Secondary is null {loadout.Secondary == null}, is skin null {loadout.SecondarySkin == null}");
+            EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Loadout Secondary IMAGE", loadout.SecondarySkin == null ? (loadout.Secondary == null ? "" : loadout.Secondary.Gun.IconLink) : loadout.SecondarySkin.IconLink);
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Loadout Secondary TEXT", loadout.Secondary == null ? "" : loadout.Secondary.Gun.GunName);
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Loadout Secondary Level TEXT", loadout.Secondary == null ? "" : loadout.Secondary.Level.ToString());
             for (int i = 0; i <= 4; i++)
             {
                 var attachmentType = (EAttachment)i;
                 loadout.SecondaryAttachments.TryGetValue(attachmentType, out LoadoutAttachment attachment);
+                Logging.Debug($"Secondary attachment {attachmentType} is null {attachment == null}");
                 EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Loadout Secondary {attachmentType} IMAGE", attachment == null ? "" : attachment.Attachment.IconLink);
             }
 
             // Knife
+            Logging.Debug($"Knife is null {loadout.Knife == null}, is skin null {loadout.KnifeSkin == null}");
             EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Loadout Knife IMAGE", loadout.KnifeSkin == null ? (loadout.Knife == null ? "" : loadout.Knife.Knife.IconLink) : loadout.KnifeSkin.IconLink);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Loadout Knife TEXT", loadout.Knife == null ? "" : loadout.Knife.Knife.KnifeName);
 
             // Tactical
+            Logging.Debug($"Tactical is null {loadout.Tactical == null}");
             EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Loadout Tactical IMAGE", loadout.Tactical == null ? "" : loadout.Tactical.Gadget.IconLink);
-            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Loadout Tactical IMAGE", loadout.Tactical == null ? "" : loadout.Tactical.Gadget.IconLink);
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Loadout Tactical TEXT", loadout.Tactical == null ? "" : loadout.Tactical.Gadget.GadgetName);
 
             // Lethal
+            Logging.Debug($"Lethal is null {loadout.Lethal == null}");
             EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Loadout Lethal IMAGE", loadout.Lethal == null ? "" : loadout.Lethal.Gadget.IconLink);
-            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Loadout Lethal IMAGE", loadout.Lethal == null ? "" : loadout.Lethal.Gadget.IconLink);
-        
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Loadout Lethal TEXT", loadout.Lethal == null ? "" : loadout.Lethal.Gadget.GadgetName);
+
             // Perk
             for (int i = 0; i <= 2; i++)
             {
+                Logging.Debug($"Perk at {i} is null {loadout.Perks.Count < (i + 1)}");
                 EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Loadout Perk IMAGE {i}", loadout.Perks.Count < (i + 1) ? "" : loadout.Perks[i].Perk.IconLink);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Loadout Perk TEXT {i}", loadout.Perks.Count < (i + 1) ? "" : loadout.Perks[i].Perk.PerkName);
             }
@@ -925,15 +932,18 @@ namespace UnturnedBlackout.Instances
             // Killstreak
             for (int i = 0; i <= 2; i++)
             {
+                Logging.Debug($"Killstreak at {i} is null {loadout.Killstreaks.Count < (i + 1)}");
                 EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Loadout Killstreak IMAGE {i}", loadout.Killstreaks.Count < (i + 1) ? "" : loadout.Killstreaks[i].Killstreak.IconLink);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Loadout Killstreak TEXT {i}", loadout.Killstreaks.Count < (i + 1) ? "" : loadout.Killstreaks[i].Killstreak.KillstreakName);
             }
 
             // Card
+            Logging.Debug($"Card is null {loadout.Card == null}");
             EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Loadout Card IMAGE", loadout.Card == null ? "" : loadout.Card.Card.IconLink);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Loadout Card TEXT", loadout.Card == null ? "" : loadout.Card.Card.CardName);
 
             // Glove
+            Logging.Debug($"Glove is null {loadout.Glove == null}");
             EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Loadout Glove IMAGE", loadout.Glove == null ? "" : loadout.Glove.Glove.IconLink);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Loadout Glove TEXT", loadout.Glove == null ? "" : loadout.Glove.Glove.GloveName);
         }
@@ -949,12 +959,12 @@ namespace UnturnedBlackout.Instances
 
             ThreadPool.QueueUserWorkItem(async (o) =>
             {
-                await DB.UpdatePlayerLoadoutActiveAsync(Player.CSteamID, LoadoutID, true);
                 foreach (var activeLoadout in PlayerLoadout.Loadouts.Values.Where(k => k.IsActive))
                 {
                     await DB.UpdatePlayerLoadoutActiveAsync(Player.CSteamID, activeLoadout.LoadoutID, false);
                 }
 
+                await DB.UpdatePlayerLoadoutActiveAsync(Player.CSteamID, LoadoutID, true);
                 TaskDispatcher.QueueOnMainThread(() =>
                 {
                     ReloadLoadoutPage();
@@ -988,7 +998,7 @@ namespace UnturnedBlackout.Instances
                 ReloadLoadoutPage();
             }
         }
-        
+
         public void ExitRenameLoadout()
         {
             LoadoutNameText = "";
@@ -999,52 +1009,8 @@ namespace UnturnedBlackout.Instances
         public void ShowLoadoutSubPage(ELoadoutPage page)
         {
             Logging.Debug($"Showing loadout sub page {page} for {Player.CharacterName}");
-            EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Item Type TEXT", page.ToString().StartsWith("AttachmentPrimary") || page.ToString().StartsWith("AttachmentSecondary") ? "ATTACHMENT" : page.ToString().ToUpper());
-
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Type TEXT", page.ToString().StartsWith("AttachmentPrimary") || page.ToString().StartsWith("AttachmentSecondary") ? "ATTACHMENT" : page.ToString().ToUpper());
             LoadoutPage = page;
-            switch (page)
-            {
-                case ELoadoutPage.Primary:
-                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item ARs Button", true);
-                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Pistols Button", false);
-                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item SMGs Button", true);
-                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item SRs Button", true);
-                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Shotguns Button", true);
-                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item LMGs Button", true);
-                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Skins Button", true);
-                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item All Button", false);
-                    break;
-                case ELoadoutPage.Secondary:
-                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item ARs Button", false);
-                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Pistols Button", true);
-                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item SMGs Button", false);
-                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item SRs Button", false);
-                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Shotguns Button", false);
-                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item LMGs Button", false);
-                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Skins Button", true);
-                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item All Button", false);
-                    break;
-                case ELoadoutPage.Knife:
-                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item ARs Button", false);
-                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Pistols Button", false);
-                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item SMGs Button", false);
-                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item SRs Button", false);
-                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Shotguns Button", false);
-                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item LMGs Button", false);
-                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Skins Button", true);
-                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item All Button", true);
-                    break;
-                default:
-                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item ARs Button", false);
-                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Pistols Button", false);
-                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item SMGs Button", false);
-                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item SRs Button", false);
-                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Shotguns Button", false);
-                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item LMGs Button", false);
-                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Skins Button", false);
-                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item All Button", true);
-                    break;
-            }
         }
 
         public void ShowLoadoutTab(ELoadoutTab tab)
@@ -1054,7 +1020,7 @@ namespace UnturnedBlackout.Instances
 
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
-            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", "");
             if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
             {
                 Logging.Debug($"Error finding current loadout with id {LoadoutID} for {Player.CharacterName}");
@@ -1331,7 +1297,7 @@ namespace UnturnedBlackout.Instances
                             Logging.Debug($"Error finding first page for pistols for {Player.CharacterName}");
                             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
                             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
-                            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", "");
                             return;
                         }
 
@@ -1349,7 +1315,7 @@ namespace UnturnedBlackout.Instances
                             Logging.Debug($"Error finding first page for smgs for {Player.CharacterName}");
                             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
                             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
-                            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", "");
                             return;
                         }
 
@@ -1367,7 +1333,7 @@ namespace UnturnedBlackout.Instances
                             Logging.Debug($"Error finding first page for shotguns for {Player.CharacterName}");
                             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
                             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
-                            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", "");
                             return;
                         }
 
@@ -1385,7 +1351,7 @@ namespace UnturnedBlackout.Instances
                             Logging.Debug($"Error finding first page for lmgs for {Player.CharacterName}");
                             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
                             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
-                            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", "");
                             return;
                         }
 
@@ -1403,7 +1369,7 @@ namespace UnturnedBlackout.Instances
                             Logging.Debug($"Error finding first page for ARs for {Player.CharacterName}");
                             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
                             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
-                            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", "");
                             return;
                         }
 
@@ -1421,7 +1387,7 @@ namespace UnturnedBlackout.Instances
                             Logging.Debug($"Error finding first page for snipers for {Player.CharacterName}");
                             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
                             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
-                            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", "");
                             return;
                         }
 
@@ -2133,7 +2099,7 @@ namespace UnturnedBlackout.Instances
                 }
 
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item BUTTON {i}", true);
-                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Equipped {i}", (LoadoutPage == ELoadoutPage.Primary && currentLoadout.PrimaryAttachments.ContainsValue(attachment)) || (LoadoutPage == ELoadoutPage.Secondary && currentLoadout.SecondaryAttachments.ContainsValue(attachment)));
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Equipped {i}", (LoadoutPage.ToString().StartsWith("AttachmentPrimary") && currentLoadout.PrimaryAttachments.ContainsValue(attachment)) || (LoadoutPage.ToString().StartsWith("AttachmentSecondary") && currentLoadout.SecondaryAttachments.ContainsValue(attachment)));
                 EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Item IMAGE {i}", attachment.Attachment.IconLink);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item TEXT {i}", attachment.Attachment.AttachmentName);
             }
@@ -2619,7 +2585,7 @@ namespace UnturnedBlackout.Instances
                                         return;
                                     }
 
-                                    if (page.Attachments.TryGetValue(selected, out LoadoutAttachment attachment))
+                                    if (!page.Attachments.TryGetValue(selected, out LoadoutAttachment attachment))
                                     {
                                         Logging.Debug($"Error finding attachment at page id {LoadoutTabPageID} with position {selected} for {Player.CharacterName}");
                                         return;
@@ -2665,7 +2631,7 @@ namespace UnturnedBlackout.Instances
                                         return;
                                     }
 
-                                    if (page.Attachments.TryGetValue(selected, out LoadoutAttachment attachment))
+                                    if (!page.Attachments.TryGetValue(selected, out LoadoutAttachment attachment))
                                     {
                                         Logging.Debug($"Error finding attachment at page id {LoadoutTabPageID} with position {selected} for {Player.CharacterName}");
                                         return;
@@ -3012,7 +2978,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Level TEXT", gun.Level.ToString());
             gun.TryGetNeededXP(out int neededXP);
             var spaces = neededXP != 0 ? (gun.XP * 97 / neededXP) : 0;
-            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item XP Bar Fill", spaces == 0 ? " " : new string(' ', spaces));
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item XP Bar Fill", spaces == 0 ? "" : new string(' ', spaces));
         }
 
         public void ShowAttachment(LoadoutAttachment attachment)
@@ -3063,7 +3029,7 @@ namespace UnturnedBlackout.Instances
 
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Buy BUTTON", !knife.IsBought);
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Equip BUTTON", knife.IsBought && loadout.Knife != knife);
-            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Dequip BUTTON", knife.IsBought && loadout.Knife == knife);
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Dequip BUTTON", false);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Description TEXT", knife.Knife.KnifeDesc);
             EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Item IMAGE", knife.Knife.IconLink);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item TEXT", knife.Knife.KnifeName);
@@ -3502,7 +3468,10 @@ namespace UnturnedBlackout.Instances
                         }
 
                         if (gun.IsBought)
+                        {
                             loadoutManager.EquipGun(Player, LoadoutID, gun.Gun.GunID, true);
+                        }
+
                         break;
                     }
 
@@ -3525,7 +3494,10 @@ namespace UnturnedBlackout.Instances
                         }
 
                         if (attachment.IsBought)
+                        {
                             loadoutManager.EquipAttachment(Player, attachment.Attachment.AttachmentID, LoadoutID, true);
+                        }
+
                         break;
                     }
 
@@ -3538,7 +3510,10 @@ namespace UnturnedBlackout.Instances
                         }
 
                         if (gun.IsBought)
+                        {
                             loadoutManager.EquipGun(Player, LoadoutID, gun.Gun.GunID, false);
+                        }
+
                         break;
                     }
 
@@ -3561,7 +3536,10 @@ namespace UnturnedBlackout.Instances
                         }
 
                         if (attachment.IsBought)
+                        {
                             loadoutManager.EquipAttachment(Player, attachment.Attachment.AttachmentID, LoadoutID, false);
+                        }
+
                         break;
                     }
 
@@ -3574,7 +3552,10 @@ namespace UnturnedBlackout.Instances
                         }
 
                         if (gadget.IsBought)
+                        {
                             loadoutManager.EquipTactical(Player, LoadoutID, gadget.Gadget.GadgetID);
+                        }
+
                         break;
                     }
 
@@ -3587,7 +3568,10 @@ namespace UnturnedBlackout.Instances
                         }
 
                         if (gadget.IsBought)
+                        {
                             loadoutManager.EquipLethal(Player, LoadoutID, gadget.Gadget.GadgetID);
+                        }
+
                         break;
                     }
 
@@ -3600,7 +3584,10 @@ namespace UnturnedBlackout.Instances
                         }
 
                         if (perk.IsBought)
+                        {
                             loadoutManager.EquipPerk(Player, LoadoutID, perk.Perk.PerkID);
+                        }
+
                         break;
                     }
 
@@ -3613,7 +3600,10 @@ namespace UnturnedBlackout.Instances
                         }
 
                         if (knife.IsBought)
+                        {
                             loadoutManager.EquipKnife(Player, LoadoutID, knife.Knife.KnifeID);
+                        }
+
                         break;
                     }
 
@@ -3626,7 +3616,10 @@ namespace UnturnedBlackout.Instances
                         }
 
                         if (killstreak.IsBought)
+                        {
                             loadoutManager.EquipKillstreak(Player, LoadoutID, killstreak.Killstreak.KillstreakID);
+                        }
+
                         break;
                     }
 
@@ -3639,7 +3632,10 @@ namespace UnturnedBlackout.Instances
                         }
 
                         if (glove.IsBought)
+                        {
                             loadoutManager.EquipGlove(Player, LoadoutID, glove.Glove.GloveID);
+                        }
+
                         break;
                     }
 
@@ -3652,7 +3648,10 @@ namespace UnturnedBlackout.Instances
                         }
 
                         if (card.IsBought)
+                        {
                             loadoutManager.EquipCard(Player, LoadoutID, card.Card.CardID);
+                        }
+
                         break;
                     }
             }
@@ -3821,14 +3820,14 @@ namespace UnturnedBlackout.Instances
             }
 
             var ui = Plugin.Instance.UIManager;
-            EffectManager.sendUIEffectText(Key, TransportConnection, true, "XPNum", Plugin.Instance.Translate("Level_Show", data.Level).ToRich());
-            EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "XPIcon", ui.Icons.TryGetValue(data.Level, out LevelIcon icon) ? icon.IconLink54 : (ui.Icons.TryGetValue(0, out icon) ? icon.IconLink54 : ""));
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER XP Num", Plugin.Instance.Translate("Level_Show", data.Level).ToRich());
+            EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER XP Icon", Plugin.Instance.DBManager.Levels.TryGetValue((int)data.Level, out XPLevel level) ? level.IconLinkMedium : "");
             int spaces = 0;
             if (data.TryGetNeededXP(out int neededXP))
             {
                 spaces = Math.Min(96, neededXP == 0 ? 0 : (int)(data.XP * 96 / neededXP));
             }
-            EffectManager.sendUIEffectText(Key, TransportConnection, true, "XPBarFill", spaces == 0 ? " " : new string(' ', spaces));
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER XP Bar Fill", spaces == 0 ? " " : new string(' ', spaces));
         }
 
         public void OnMusicChanged(bool isMusic)

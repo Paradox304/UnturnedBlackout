@@ -1,6 +1,6 @@
 ﻿using Steamworks;
 using System.Threading;
-using UnturnedBlackout.Models.Level;
+using UnturnedBlackout.Database.Base;
 
 namespace UnturnedBlackout.Database.Data
 {
@@ -47,10 +47,9 @@ namespace UnturnedBlackout.Database.Data
 
         public bool TryGetNeededXP(out int xp)
         {
-            var ui = Plugin.Instance.UIManager;
-            if (ui.LevelsXPNeeded.TryGetValue(Level + 1, out LevelXP xpNeeded))
+            if (Plugin.Instance.DBManager.Levels.TryGetValue((int)Level + 1, out XPLevel level))
             {
-                xp = xpNeeded.XPNeeded;
+                xp = level.XPNeeded;
                 return true;
             }
             xp = 0;

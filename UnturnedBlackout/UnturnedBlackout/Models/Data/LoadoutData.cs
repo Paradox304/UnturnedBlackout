@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Newtonsoft.Json;
+using System.Collections.Generic;
 using System.Linq;
 using UnturnedBlackout.Database.Data;
 
@@ -41,6 +42,7 @@ namespace UnturnedBlackout.Models.Data
             Card = loadout.Card?.Card?.CardID ?? 0;
         }
 
+        [JsonConstructor]
         public LoadoutData(string loadoutName, ushort primary, int primarySkin, List<ushort> primaryAttachments, ushort secondary, int secondarySkin, List<ushort> secondaryAttachments, ushort knife, int knifeSkin, ushort tactical, ushort lethal, List<int> killstreaks, List<int> perks, ushort glove, int card)
         {
             LoadoutName = loadoutName;

@@ -41,6 +41,7 @@ namespace UnturnedBlackout.Managers
         public Dictionary<int, Perk> Perks { get; set; }
         public Dictionary<ushort, Glove> Gloves { get; set; }
         public Dictionary<int, Card> Cards { get; set; }
+        public Dictionary<int, XPLevel> Levels { get; set; }
 
         // Default Data
         public LoadoutData DefaultLoadout { get; set; }
@@ -105,6 +106,9 @@ namespace UnturnedBlackout.Managers
         // GLOVES
         public const string GlovesTableName = "UB_Gloves";
 
+        // LEVELS
+        public const string LevelsTableName = "UB_Levels";
+
         public DatabaseManager()
         {
             Config = Plugin.Instance.Configuration.Instance;
@@ -140,7 +144,7 @@ namespace UnturnedBlackout.Managers
                     await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{KillstreaksTableName}` ( `KillstreakID` INT UNSIGNED NOT NULL , `KillstreakName` VARCHAR(255) NOT NULL , `KillstreakDesc` TEXT NOT NULL , `IconLink` TEXT NOT NULL , `KillstreakRequired` INT UNSIGNED NOT NULL , `BuyPrice` INT UNSIGNED NOT NULL , `ScrapAmount` INT UNSIGNED NOT NULL , `IsDefault` BOOLEAN NOT NULL , PRIMARY KEY (`KillstreakID`));", Conn).ExecuteScalarAsync();
                     await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{CardsTableName}` ( `CardID` INT UNSIGNED NOT NULL , `CardName` VARCHAR(255) NOT NULL , `CardDesc` TEXT NOT NULL , `IconLink` TEXT NOT NULL , `CardLink` TEXT NOT NULL , `BuyPrice` INT UNSIGNED NOT NULL , `ScrapAmount` INT UNSIGNED NOT NULL , `IsDefault` BOOLEAN NOT NULL , PRIMARY KEY (`CardID`));", Conn).ExecuteScalarAsync();
                     await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{GlovesTableName}` ( `GloveID` SMALLINT UNSIGNED NOT NULL , `GloveName` VARCHAR(255) NOT NULL , `GloveDesc` TEXT NOT NULL , `IconLink` TEXT NOT NULL , `BuyPrice` INT UNSIGNED NOT NULL , `ScrapAmount` INT UNSIGNED NOT NULL , `IsDefault` BOOLEAN NOT NULL , PRIMARY KEY (`GloveID`));", Conn).ExecuteScalarAsync();
-
+                    await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{LevelsTableName}` ( `Level` INT UNSIGNED NOT NULL , `XPNeeded` INT UNSIGNED NOT NULL , `IconLinkLarge` TEXT NOT NULL , `IconLinkMedium` TEXT NOT NULL , `IconLinkSmall` TEXT NOT NULL , PRIMARY KEY (`Level`));", Conn).ExecuteScalarAsync();
                     // PLAYERS DATA
                     await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PlayersTableName}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `SteamName` TEXT NOT NULL , `AvatarLink` VARCHAR(200) NOT NULL , `XP` INT UNSIGNED NOT NULL DEFAULT '0' , `Level` INT UNSIGNED NOT NULL DEFAULT '1' , `Credits` INT UNSIGNED NOT NULL DEFAULT '0' , `Kills` INT UNSIGNED NOT NULL DEFAULT '0' , `HeadshotKills` INT UNSIGNED NOT NULL DEFAULT '0' , `HighestKillstreak` INT UNSIGNED NOT NULL DEFAULT '0' , `HighestMultiKills` INT UNSIGNED NOT NULL DEFAULT '0' , `KillsConfirmed` INT UNSIGNED NOT NULL DEFAULT '0' , `KillsDenied` INT UNSIGNED NOT NULL DEFAULT '0' , `FlagsCaptured` INT UNSIGNED NOT NULL DEFAULT '0' , `FlagsSaved` INT UNSIGNED NOT NULL DEFAULT '0' , `AreasTaken` INT UNSIGNED NOT NULL DEFAULT '0' , `Deaths` INT UNSIGNED NOT NULL DEFAULT '0' , `Music` BOOLEAN NOT NULL DEFAULT TRUE , PRIMARY KEY (`SteamID`));", Conn).ExecuteScalarAsync();
                     await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PlayersGunsTableName}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `GunID` SMALLINT UNSIGNED NOT NULL , `Level` INT UNSIGNED NOT NULL , `XP` INT UNSIGNED NOT NULL , `GunKills` INT UNSIGNED NOT NULL , `IsBought` BOOLEAN NOT NULL , `Attachments` TEXT NOT NULL , CONSTRAINT `ub_steam_id` FOREIGN KEY (`SteamID`) REFERENCES `{PlayersTableName}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_gun_id_1` FOREIGN KEY (`GunID`) REFERENCES `{GunsTableName}` (`GunID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `GunID`));", Conn).ExecuteScalarAsync();
@@ -872,6 +876,44 @@ namespace UnturnedBlackout.Managers
                     catch (Exception ex)
                     {
                         Logger.Log("Error reading data from cards table");
+                        Logger.Log(ex);
+                    }
+                    finally
+                    {
+                        rdr.Close();
+                    }
+
+                    Logging.Debug("Reading levels from base data");
+                    rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{LevelsTableName}`;", Conn).ExecuteScalarAsync();
+                    try
+                    {
+                        var levels = new Dictionary<int, XPLevel>();
+                        while (await rdr.ReadAsync())
+                        {
+                            if (!int.TryParse(rdr[0].ToString(), out int level))
+                            {
+                                continue;
+                            }
+
+                            if (!int.TryParse(rdr[1].ToString(), out int xpNeeded))
+                            {
+                                continue;
+                            }
+
+                            var iconLinkLarge = rdr[2].ToString();
+                            var iconLinkMedium = rdr[3].ToString();
+                            var iconLinkSmall = rdr[4].ToString();
+
+                            if (!levels.ContainsKey(level))
+                            {
+                                levels.Add(level, new XPLevel(level, xpNeeded, iconLinkLarge, iconLinkMedium, iconLinkSmall));
+                            }
+                        }
+                        Levels = levels;
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Log($"Error reading data from levels table");
                         Logger.Log(ex);
                     }
                     finally
@@ -3271,7 +3313,7 @@ namespace UnturnedBlackout.Managers
                         throw new Exception();
                     }
 
-                    if (loadout.Loadouts.TryGetValue(loadoutID, out Loadout playerLoadout))
+                    if (!loadout.Loadouts.TryGetValue(loadoutID, out Loadout playerLoadout))
                     {
                         Logging.Debug($"Error finding loadout with id {loadoutID} for player with steam id {steamID}");
                         throw new Exception();

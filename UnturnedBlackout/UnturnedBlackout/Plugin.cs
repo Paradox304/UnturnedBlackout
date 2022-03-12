@@ -23,9 +23,9 @@ namespace UnturnedBlackout
                 Harmony.PatchAll(Assembly);
             }
 
+            UIManager = new UIManager();
             DBManager = new DatabaseManager();
             DataManager = new DataManager();
-            UIManager = new UIManager();
 
             StartCoroutine(Day());
 

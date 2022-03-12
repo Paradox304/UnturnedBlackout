@@ -124,7 +124,7 @@ namespace UnturnedBlackout
             {
                 text += $"{id},";
             }
-            return text.Length > 0 ? text.Remove(text.Length - 1, 1) : text;
+            return text;
         }
 
         public static Dictionary<ushort, LoadoutAttachment> GetAttachmentsFromString(string text)
@@ -133,6 +133,11 @@ namespace UnturnedBlackout
             var attachmentsText = text.Split(',');
             foreach (var attachmentText in attachmentsText)
             {
+                if (string.IsNullOrEmpty(attachmentText))
+                {
+                    continue;
+                }
+
                 var isBought = false;
                 ushort attachmentID = 0;
                 if (attachmentText.Contains("B."))
@@ -151,7 +156,7 @@ namespace UnturnedBlackout
                         continue;
                     }
                 }
-                if (!Plugin.Instance.DBManager.GunAttachments.TryGetValue(attachmentID, out GunAttachment gunAttachment))
+                if (Plugin.Instance.DBManager.GunAttachments.TryGetValue(attachmentID, out GunAttachment gunAttachment))
                 {
                     if (!attachments.ContainsKey(gunAttachment.AttachmentID))
                     {
@@ -169,7 +174,7 @@ namespace UnturnedBlackout
             {
                 text += $"{(attachment.IsBought ? "B." : "UB.")}{attachment.Attachment.AttachmentID},";
             }
-            return text.Length > 0 ? text.Remove(text.Length - 1, 1) : text;
+            return text;
         }
 
         public static string CreateStringFromDefaultAttachments(List<GunAttachment> gunAttachments)
@@ -179,7 +184,7 @@ namespace UnturnedBlackout
             {
                 text += $"B.{attachment.AttachmentID},";
             }
-            return text.Length > 0 ? text.Remove(text.Length - 1, 1) : text;
+            return text;
         }
 
         public static int GetLoadoutAmount(UnturnedPlayer player)

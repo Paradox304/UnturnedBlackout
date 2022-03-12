@@ -6,7 +6,6 @@ using UnturnedBlackout.Models.Feed;
 using UnturnedBlackout.Models.FFA;
 using UnturnedBlackout.Models.Global;
 using UnturnedBlackout.Models.KC;
-using UnturnedBlackout.Models.Level;
 using UnturnedBlackout.Models.TDM;
 
 namespace UnturnedBlackout
@@ -69,9 +68,7 @@ namespace UnturnedBlackout
         public CTFConfig CTF { get; set; }
 
         public List<ArenaLocation> ArenaLocations { get; set; }
-        public List<LevelIcon> LevelIcons { get; set; }
         public List<FeedIcon> KillFeedIcons { get; set; }
-        public List<LevelXP> LevelsXP { get; set; }
         public List<TeamInfo> TeamsInfo { get; set; }
 
         public List<ushort> AllowDamageBarricades { get; set; }
@@ -125,11 +122,13 @@ namespace UnturnedBlackout
             KnifeID = 58129;
 
             DefaultLoadoutAmount = 4;
+
             LoadoutAmounts = new List<LoadoutAmount>
             {
                 new LoadoutAmount("VIP", 5),
                 new LoadoutAmount("MVP", 6)
             };
+
             FFA = new FFAConfig(15, 600, "FFA", "white", "#dcb4ff", "#dcb4ff", 50, 60, 50, 20, 10, 5, 10, 15, 15, 1.5f, 15, 2, 4);
             TDM = new TDMConfig(15, 600, 50, 60, 50, 20, 10, 5, 10, 15, 15, 1.5f, 15, 2, 4);
             KC = new KCConfig(15, 600, 50, 60, 50, 20, 10, 10, 10, 5, 10, 15, 15, 1.5f, 15, 2, 4, 26820, 26821);
@@ -140,10 +139,6 @@ namespace UnturnedBlackout
                 new ArenaLocation(1, "Seattle", "", 0, 0, 1, 0, 0, 0, 0, 2, 2, 2, 2)
             };
 
-            LevelIcons = new List<LevelIcon>
-            {
-                new LevelIcon(0, "", "", "")
-            };
             KillFeedIcons = new List<FeedIcon>
             {
                 new FeedIcon(28090, ""),
@@ -154,15 +149,13 @@ namespace UnturnedBlackout
                 new FeedIcon(28810, ""),
                 new FeedIcon(28060, "")
             };
-            LevelsXP = new List<LevelXP>
-            {
-                new LevelXP(2, 100)
-            };
+
             TeamsInfo = new List<TeamInfo>
             {
                 new TeamInfo(1, "Turned Ops", "#9ac5ff", "#9ac5ff", "#9ac5ff", "#9ac5ff", new List<string> { "TurnedOps" }),
                 new TeamInfo(2, "Omega", "#ff7e7e", "#ff7e7e", "#ff7e7e", "#ff7e7e", new List<string> { "Omega" })
             };
+
             AllowDamageBarricades = new List<ushort> { 3, 4, 5 };
         }
     }
