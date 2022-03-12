@@ -46,13 +46,12 @@ namespace UnturnedBlackout.Instances
 
         public Dictionary<int, PageLoadout> LoadoutPages { get; set; }
         public Dictionary<int, PageGun> PistolPages { get; set; }
-        public Dictionary<int, PageGun> PistolPagesSecondary { get; set; }
         public Dictionary<int, PageGun> SMGPages { get; set; }
         public Dictionary<int, PageGun> LMGPages { get; set; }
         public Dictionary<int, PageGun> ShotgunPages { get; set; }
         public Dictionary<int, PageGun> ARPages { get; set; }
         public Dictionary<int, PageGun> SniperPages { get; set; }
-        public Dictionary<ushort, Dictionary<int, PageAttachment>> AttachmentPages { get; set; }
+        public Dictionary<ushort, Dictionary<EAttachment, Dictionary<int, PageAttachment>>> AttachmentPages { get; set; }
         public Dictionary<ushort, Dictionary<int, PageGunSkin>> GunSkinPages { get; set; }
         public Dictionary<int, PageKnife> KnifePages { get; set; }
         public Dictionary<ushort, Dictionary<int, PageKnifeSkin>> KnifeSkinPages { get; set; }
@@ -370,6 +369,7 @@ namespace UnturnedBlackout.Instances
                         gunSkins = new Dictionary<int, GunSkin>();
                         index = 0;
                         page++;
+                        continue;
                     }
                     index++;
                 }
@@ -383,32 +383,49 @@ namespace UnturnedBlackout.Instances
 
         public void BuildAttachmentPages()
         {
-            AttachmentPages = new Dictionary<ushort, Dictionary<int, PageAttachment>>();
+            AttachmentPages = new Dictionary<ushort, Dictionary<EAttachment, Dictionary<int, PageAttachment>>>();
             Logging.Debug($"Creating attachment pages for {Player.CharacterName}, found {PlayerLoadout.Guns.Count} guns");
             foreach (var gun in PlayerLoadout.Guns)
             {
-                Logging.Debug($"Creating attachment pages for gun with id {gun.Key} for {Player.CharacterName}");
+                BuildAttachmentPages(gun.Value);
+            }
+        }
+
+        public void BuildAttachmentPages(LoadoutGun gun)
+        {
+            Logging.Debug($"Creating attachment pages for gun with id {gun.Gun.GunID} for {Player.CharacterName}");
+            if (AttachmentPages.ContainsKey(gun.Gun.GunID))
+            {
+                AttachmentPages.Remove(gun.Gun.GunID);
+            }
+            AttachmentPages.Add(gun.Gun.GunID, new Dictionary<EAttachment, Dictionary<int, PageAttachment>>());
+
+            for (int i = 0; i <= 4; i++)
+            {
+                var attachmentType = (EAttachment)i;
+                Logging.Debug($"Creating {attachmentType} pages");
                 int index = 0;
                 int page = 1;
                 var attachments = new Dictionary<int, LoadoutAttachment>();
-                AttachmentPages.Add(gun.Key, new Dictionary<int, PageAttachment>());
-                foreach (var attachment in gun.Value.Attachments)
+                AttachmentPages[gun.Gun.GunID].Add(attachmentType, new Dictionary<int, PageAttachment>());
+                
+                foreach (var attachment in gun.Attachments.Values.Where(k => k.Attachment.AttachmentType == attachmentType))
                 {
-                    attachments.Add(index, attachment.Value);
+                    attachments.Add(index, attachment);
                     if (index == 4)
                     {
-                        AttachmentPages[gun.Key].Add(page, new PageAttachment(page, attachments));
-                        attachments = new Dictionary<int, LoadoutAttachment>();
+                        AttachmentPages[gun.Gun.GunID][attachmentType].Add(page, new PageAttachment(page, attachments));
                         index = 0;
                         page++;
+                        continue;
                     }
                     index++;
                 }
                 if (attachments.Count != 0)
                 {
-                    AttachmentPages[gun.Key].Add(page, new PageAttachment(page, attachments));
+                    AttachmentPages[gun.Gun.GunID][attachmentType].Add(page, new PageAttachment(page, attachments));
                 }
-                Logging.Debug($"Created {AttachmentPages[gun.Key].Count} attachment pages for gun with id {gun.Key} for {Player.CharacterName}");
+                Logging.Debug($"Created {AttachmentPages[gun.Gun.GunID][attachmentType].Count} {attachmentType} pages for gun with id {gun.Gun.GunID} for {Player.CharacterName}");
             }
         }
 
@@ -982,7 +999,7 @@ namespace UnturnedBlackout.Instances
         public void ShowLoadoutSubPage(ELoadoutPage page)
         {
             Logging.Debug($"Showing loadout sub page {page} for {Player.CharacterName}");
-            EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Item Type TEXT", page == ELoadoutPage.PrimaryAttachment || page == ELoadoutPage.SecondaryAttachment ? "ATTACHMENT" : page.ToString().ToUpper());
+            EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Item Type TEXT", page.ToString().StartsWith("AttachmentPrimary") || page.ToString().StartsWith("AttachmentSecondary") ? "ATTACHMENT" : page.ToString().ToUpper());
 
             LoadoutPage = page;
             switch (page)
@@ -1035,82 +1052,103 @@ namespace UnturnedBlackout.Instances
             Logging.Debug($"Showing loadout tab {tab} for {Player.CharacterName}");
             LoadoutTab = tab;
 
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
+            {
+                Logging.Debug($"Error finding current loadout with id {LoadoutID} for {Player.CharacterName}");
+                return;
+            }
+
             switch (LoadoutTab)
             {
                 case ELoadoutTab.ALL:
                     {
                         switch (LoadoutPage)
                         {
-                            case ELoadoutPage.PrimaryAttachment:
+                            case ELoadoutPage.AttachmentPrimaryBarrel:
+                            case ELoadoutPage.AttachmentPrimaryGrip:
+                            case ELoadoutPage.AttachmentPrimaryMagazine:
+                            case ELoadoutPage.AttachmentPrimarySights:
+                            case ELoadoutPage.AttachmentPrimaryTactical:
                                 {
-                                    if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
+                                    if (!Enum.TryParse(LoadoutPage.ToString().Replace("AttachmentPrimary", ""), false, out EAttachment attachmentType))
                                     {
-                                        Logging.Debug($"Error finding the selected loadout with id {LoadoutID} for {Player.CharacterName}");
-                                        LoadoutTabPageID = 0;
-                                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
-                                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
-                                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                                        Logging.Debug($"Error finding attachment type that {Player.CharacterName} has selected");
                                         return;
                                     }
 
-                                    if (!AttachmentPages.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out Dictionary<int, PageAttachment> attachmentPages))
+                                    if (!PlayerLoadout.Guns.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out LoadoutGun gun))
                                     {
-                                        Logging.Debug($"Error finding the primary attachment pages for gun with id {loadout.Primary?.Gun?.GunID ?? 0} for {Player.CharacterName}");
-                                        LoadoutTabPageID = 0;
-                                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
-                                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
-                                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                                        Logging.Debug($"Error finding primary that has been selected with id {loadout.Primary?.Gun?.GunID ?? 0} for {Player.CharacterName}");
+                                        return;
+                                    }
+
+                                    if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out var attachmentTypePages))
+                                    {
+                                        Logging.Debug($"Error finding primary attachments for {gun.Gun.GunID} for {Player.CharacterName}");
+                                        return;
+                                    }
+
+                                    if (!attachmentTypePages.TryGetValue(attachmentType, out Dictionary<int, PageAttachment> attachmentPages))
+                                    {
+                                        Logging.Debug($"Error finding attachments with type {attachmentType} for {Player.CharacterName}");
                                         return;
                                     }
 
                                     if (!attachmentPages.TryGetValue(1, out PageAttachment firstPage))
                                     {
-                                        Logging.Debug($"Error finding the first attachment page for gun with id {loadout.Primary.Gun.GunID} for {Player.CharacterName}");
-                                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
-                                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
-                                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                                        Logging.Debug($"Error finding first page of attachment with type {attachmentType} for gun with id {gun.Gun.GunID} for {Player.CharacterName}");
                                         return;
                                     }
 
                                     EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
                                     EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
+
                                     ShowAttachmentPage(firstPage);
                                     break;
                                 }
 
-                            case ELoadoutPage.SecondaryAttachment:
+                            case ELoadoutPage.AttachmentSecondaryBarrel:
+                            case ELoadoutPage.AttachmentSecondaryGrip:
+                            case ELoadoutPage.AttachmentSecondaryMagazine:
+                            case ELoadoutPage.AttachmentSecondarySights:
+                            case ELoadoutPage.AttachmentSecondaryTactical:
                                 {
-                                    if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
+                                    if (!Enum.TryParse(LoadoutPage.ToString().Replace("AttachmentSecondary", ""), false, out EAttachment attachmentType))
                                     {
-                                        Logging.Debug($"Error finding the selected loadout with id {LoadoutID} for {Player.CharacterName}");
-                                        LoadoutTabPageID = 0;
-                                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
-                                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
-                                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                                        Logging.Debug($"Error finding attachment type that {Player.CharacterName} has selected");
                                         return;
                                     }
 
-                                    if (!AttachmentPages.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out Dictionary<int, PageAttachment> attachmentPages))
+                                    if (!PlayerLoadout.Guns.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out LoadoutGun gun))
                                     {
-                                        Logging.Debug($"Error finding the secondary attachment pages for gun with id {loadout.Secondary?.Gun?.GunID ?? 0} for {Player.CharacterName}");
-                                        LoadoutTabPageID = 0;
-                                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
-                                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
-                                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                                        Logging.Debug($"Error finding secondary that has been selected with id {loadout.Secondary?.Gun?.GunID ?? 0} for {Player.CharacterName}");
+                                        return;
+                                    }
+
+                                    if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out var attachmentTypePages))
+                                    {
+                                        Logging.Debug($"Error finding secondary attachments for {gun.Gun.GunID} for {Player.CharacterName}");
+                                        return;
+                                    }
+
+                                    if (!attachmentTypePages.TryGetValue(attachmentType, out Dictionary<int, PageAttachment> attachmentPages))
+                                    {
+                                        Logging.Debug($"Error finding attachments with type {attachmentType} for {Player.CharacterName}");
                                         return;
                                     }
 
                                     if (!attachmentPages.TryGetValue(1, out PageAttachment firstPage))
                                     {
-                                        Logging.Debug($"Error finding the first attachment page for gun with id {loadout.Primary.Gun.GunID} for {Player.CharacterName}");
-                                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
-                                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
-                                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
+                                        Logging.Debug($"Error finding first page of attachment with type {attachmentType} for gun with id {gun.Gun.GunID} for {Player.CharacterName}");
                                         return;
                                     }
 
                                     EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
                                     EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
+
                                     ShowAttachmentPage(firstPage);
                                     break;
                                 }
@@ -1120,9 +1158,6 @@ namespace UnturnedBlackout.Instances
                                     if (!PerkPages.TryGetValue(1, out PagePerk firstPage))
                                     {
                                         Logging.Debug($"Error getting first page for perks for {Player.CharacterName}");
-                                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
-                                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
-                                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
                                         return;
                                     }
 
@@ -1138,9 +1173,6 @@ namespace UnturnedBlackout.Instances
                                     if (!LethalPages.TryGetValue(1, out PageGadget firstPage))
                                     {
                                         Logging.Debug($"Error finding the first page for lethals for {Player.CharacterName}");
-                                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
-                                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
-                                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
                                         return;
                                     }
 
@@ -1155,9 +1187,6 @@ namespace UnturnedBlackout.Instances
                                     if (!TacticalPages.TryGetValue(1, out PageGadget firstPage))
                                     {
                                         Logging.Debug($"Error finding the first page for tacticals for {Player.CharacterName}");
-                                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
-                                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
-                                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
                                         return;
                                     }
 
@@ -1172,9 +1201,6 @@ namespace UnturnedBlackout.Instances
                                     if (!KnifePages.TryGetValue(1, out PageKnife firstPage))
                                     {
                                         Logging.Debug($"Error finding the first page for knives for {Player.CharacterName}");
-                                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
-                                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
-                                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
                                         return;
                                     }
 
@@ -1189,9 +1215,6 @@ namespace UnturnedBlackout.Instances
                                     if (!KillstreakPages.TryGetValue(1, out PageKillstreak firstPage))
                                     {
                                         Logging.Debug($"Error finding the first page for killstreaks for {Player.CharacterName}");
-                                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
-                                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
-                                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
                                         return;
                                     }
 
@@ -1206,9 +1229,6 @@ namespace UnturnedBlackout.Instances
                                     if (!GlovePages.TryGetValue(1, out PageGlove firstPage))
                                     {
                                         Logging.Debug($"Error finding the first page for gloves for {Player.CharacterName}");
-                                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
-                                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
-                                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
                                         return;
                                     }
 
@@ -1223,9 +1243,6 @@ namespace UnturnedBlackout.Instances
                                     if (!CardPages.TryGetValue(1, out PageCard firstPage))
                                     {
                                         Logging.Debug($"Error finding the first page for cards for {Player.CharacterName}");
-                                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
-                                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
-                                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
                                         return;
                                     }
 
@@ -1245,30 +1262,15 @@ namespace UnturnedBlackout.Instances
                         {
                             case ELoadoutPage.Primary:
                                 {
-                                    if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
-                                    {
-                                        Logging.Debug($"Error getting current loadout with id {LoadoutID} for {Player.CharacterName}");
-                                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
-                                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
-                                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
-                                        return;
-                                    }
-
                                     if (!GunSkinPages.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out Dictionary<int, PageGunSkin> gunSkinPages))
                                     {
                                         Logging.Debug($"Error getting gun skin pages for gun with id {loadout.Primary?.Gun?.GunID ?? 0}");
-                                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
-                                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
-                                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
                                         return;
                                     }
 
                                     if (!gunSkinPages.TryGetValue(1, out PageGunSkin firstPage))
                                     {
                                         Logging.Debug($"Error finding the first page for gun skins for gun with id {loadout.Primary.Gun.GunID} for {Player.CharacterName}");
-                                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
-                                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
-                                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
                                         return;
                                     }
 
@@ -1280,30 +1282,15 @@ namespace UnturnedBlackout.Instances
 
                             case ELoadoutPage.Secondary:
                                 {
-                                    if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
-                                    {
-                                        Logging.Debug($"Error getting current loadout with id {LoadoutID} for {Player.CharacterName}");
-                                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
-                                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
-                                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
-                                        return;
-                                    }
-
                                     if (!GunSkinPages.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out Dictionary<int, PageGunSkin> gunSkinPages))
                                     {
                                         Logging.Debug($"Error getting gun skin pages for gun with id {loadout.Secondary?.Gun?.GunID ?? 0}");
-                                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
-                                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
-                                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
                                         return;
                                     }
 
                                     if (!gunSkinPages.TryGetValue(1, out PageGunSkin firstPage))
                                     {
                                         Logging.Debug($"Error finding the first page for gun skins for gun with id {loadout.Secondary.Gun.GunID} for {Player.CharacterName}");
-                                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
-                                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
-                                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
                                         return;
                                     }
 
@@ -1315,30 +1302,15 @@ namespace UnturnedBlackout.Instances
 
                             case ELoadoutPage.Knife:
                                 {
-                                    if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
-                                    {
-                                        Logging.Debug($"Error getting current loadout with id {LoadoutID} for {Player.CharacterName}");
-                                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
-                                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
-                                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
-                                        return;
-                                    }
-
                                     if (!KnifeSkinPages.TryGetValue(loadout.Knife?.Knife?.KnifeID ?? 0, out Dictionary<int, PageKnifeSkin> knifeSkinPages))
                                     {
                                         Logging.Debug($"Error getting gun skin pages for knife with id {loadout.Knife?.Knife?.KnifeID ?? 0}");
-                                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
-                                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
-                                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
                                         return;
                                     }
 
                                     if (!knifeSkinPages.TryGetValue(1, out PageKnifeSkin firstPage))
                                     {
                                         Logging.Debug($"Error finding the first page for gun skins for gun with id {loadout.Knife.Knife.KnifeID} for {Player.CharacterName}");
-                                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
-                                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
-                                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", " ");
                                         return;
                                     }
 
@@ -1465,55 +1437,99 @@ namespace UnturnedBlackout.Instances
         public void ForwardLoadoutTab()
         {
             Logging.Debug($"{Player.CharacterName} is trying to forward the loadout tab {LoadoutTab}, Current Page {LoadoutTabPageID}");
+            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
+            {
+                Logging.Debug($"Error finding loadout with id {LoadoutID} for {Player.CharacterName}");
+                return;
+            }
+
             switch (LoadoutTab)
             {
                 case ELoadoutTab.ALL:
                     {
                         switch (LoadoutPage)
                         {
-                            case ELoadoutPage.PrimaryAttachment:
+                            case ELoadoutPage.AttachmentPrimaryBarrel:
+                            case ELoadoutPage.AttachmentPrimaryGrip:
+                            case ELoadoutPage.AttachmentPrimaryMagazine:
+                            case ELoadoutPage.AttachmentPrimarySights:
+                            case ELoadoutPage.AttachmentPrimaryTactical:
                                 {
-                                    if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
+                                    if (!Enum.TryParse(LoadoutPage.ToString().Replace("AttachmentPrimary", ""), false, out EAttachment attachmentType))
                                     {
-                                        Logging.Debug($"Error finding the selected loadout with id {LoadoutID} for {Player.CharacterName}");
+                                        Logging.Debug($"Error finding attachment type that {Player.CharacterName} has selected");
                                         return;
                                     }
 
-                                    if (!AttachmentPages.TryGetValue(loadout.Primary.Gun.GunID, out Dictionary<int, PageAttachment> attachmentPages))
+                                    if (!PlayerLoadout.Guns.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out LoadoutGun gun))
                                     {
-                                        Logging.Debug($"Error finding the primary attachment pages for gun with id {loadout.Primary.Gun.GunID} for {Player.CharacterName}");
+                                        Logging.Debug($"Error finding primary that has been selected with id {loadout.Primary?.Gun?.GunID ?? 0} for {Player.CharacterName}");
                                         return;
                                     }
 
-                                    if (!attachmentPages.TryGetValue(LoadoutTabPageID + 1, out PageAttachment nextPage) && !attachmentPages.TryGetValue(1, out nextPage))
+                                    if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out var attachmentTypePages))
                                     {
-                                        Logging.Debug($"Error finding the next attachment page for gun with id {loadout.Primary.Gun.GunID} for {Player.CharacterName}");
+                                        Logging.Debug($"Error finding primary attachments for {gun.Gun.GunID} for {Player.CharacterName}");
                                         return;
                                     }
+
+                                    if (!attachmentTypePages.TryGetValue(attachmentType, out Dictionary<int, PageAttachment> attachmentPages))
+                                    {
+                                        Logging.Debug($"Error finding attachments with type {attachmentType} for {Player.CharacterName}");
+                                        return;
+                                    }
+
+                                    if (attachmentPages.TryGetValue(LoadoutTabPageID + 1, out PageAttachment nextPage) && !attachmentPages.TryGetValue(1, out nextPage))
+                                    {
+                                        Logging.Debug($"Error finding next page of attachment with type {attachmentType} for gun with id {gun.Gun.GunID} for {Player.CharacterName}");
+                                        return;
+                                    }
+
+                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
+                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
 
                                     ShowAttachmentPage(nextPage);
                                     break;
                                 }
 
-                            case ELoadoutPage.SecondaryAttachment:
+                            case ELoadoutPage.AttachmentSecondaryBarrel:
+                            case ELoadoutPage.AttachmentSecondaryGrip:
+                            case ELoadoutPage.AttachmentSecondaryMagazine:
+                            case ELoadoutPage.AttachmentSecondarySights:
+                            case ELoadoutPage.AttachmentSecondaryTactical:
                                 {
-                                    if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
+                                    if (!Enum.TryParse(LoadoutPage.ToString().Replace("AttachmentSecondary", ""), false, out EAttachment attachmentType))
                                     {
-                                        Logging.Debug($"Error finding the selected loadout with id {LoadoutID} for {Player.CharacterName}");
+                                        Logging.Debug($"Error finding attachment type that {Player.CharacterName} has selected");
                                         return;
                                     }
 
-                                    if (!AttachmentPages.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out Dictionary<int, PageAttachment> attachmentPages))
+                                    if (!PlayerLoadout.Guns.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out LoadoutGun gun))
                                     {
-                                        Logging.Debug($"Error finding the secondary attachment pages for gun with id {loadout.Secondary?.Gun?.GunID ?? 0} for {Player.CharacterName}");
+                                        Logging.Debug($"Error finding secondary that has been selected with id {loadout.Secondary?.Gun?.GunID ?? 0} for {Player.CharacterName}");
                                         return;
                                     }
 
-                                    if (!attachmentPages.TryGetValue(LoadoutTabPageID + 1, out PageAttachment nextPage) && !attachmentPages.TryGetValue(1, out nextPage))
+                                    if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out var attachmentTypePages))
                                     {
-                                        Logging.Debug($"Error finding the next attachment page for gun with id {loadout.Primary.Gun.GunID} for {Player.CharacterName}");
+                                        Logging.Debug($"Error finding secondary attachments for {gun.Gun.GunID} for {Player.CharacterName}");
                                         return;
                                     }
+
+                                    if (!attachmentTypePages.TryGetValue(attachmentType, out Dictionary<int, PageAttachment> attachmentPages))
+                                    {
+                                        Logging.Debug($"Error finding attachments with type {attachmentType} for {Player.CharacterName}");
+                                        return;
+                                    }
+
+                                    if (attachmentPages.TryGetValue(LoadoutTabPageID + 1, out PageAttachment nextPage) && !attachmentPages.TryGetValue(1, out nextPage))
+                                    {
+                                        Logging.Debug($"Error finding next page of attachment with type {attachmentType} for gun with id {gun.Gun.GunID} for {Player.CharacterName}");
+                                        return;
+                                    }
+
+                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
+                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
 
                                     ShowAttachmentPage(nextPage);
                                     break;
@@ -1613,12 +1629,6 @@ namespace UnturnedBlackout.Instances
                         {
                             case ELoadoutPage.Primary:
                                 {
-                                    if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
-                                    {
-                                        Logging.Debug($"Error getting current loadout with id {LoadoutID} for {Player.CharacterName}");
-                                        return;
-                                    }
-
                                     if (!GunSkinPages.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out Dictionary<int, PageGunSkin> gunSkinPages))
                                     {
                                         Logging.Debug($"Error getting gun skin pages for gun with id {loadout.Primary?.Gun?.GunID ?? 0}");
@@ -1637,12 +1647,6 @@ namespace UnturnedBlackout.Instances
 
                             case ELoadoutPage.Secondary:
                                 {
-                                    if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
-                                    {
-                                        Logging.Debug($"Error getting current loadout with id {LoadoutID} for {Player.CharacterName}");
-                                        return;
-                                    }
-
                                     if (!GunSkinPages.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out Dictionary<int, PageGunSkin> gunSkinPages))
                                     {
                                         Logging.Debug($"Error getting gun skin pages for gun with id {loadout.Secondary?.Gun?.GunID ?? 0}");
@@ -1661,12 +1665,6 @@ namespace UnturnedBlackout.Instances
 
                             case ELoadoutPage.Knife:
                                 {
-                                    if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
-                                    {
-                                        Logging.Debug($"Error getting current loadout with id {LoadoutID} for {Player.CharacterName}");
-                                        return;
-                                    }
-
                                     if (!KnifeSkinPages.TryGetValue(loadout.Knife?.Knife?.KnifeID ?? 0, out Dictionary<int, PageKnifeSkin> knifeSkinPages))
                                     {
                                         Logging.Debug($"Error getting gun skin pages for knife with id {loadout.Knife?.Knife?.KnifeID ?? 0}");
@@ -1764,55 +1762,100 @@ namespace UnturnedBlackout.Instances
         public void BackwardLoadoutTab()
         {
             Logging.Debug($"{Player.CharacterName} is trying to backward the loadout tab {LoadoutTab}, Current Page {LoadoutTabPageID}");
+
+            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
+            {
+                Logging.Debug($"Error finding current loadout with id {LoadoutID} for {Player.CharacterName}");
+                return;
+            }
+
             switch (LoadoutTab)
             {
                 case ELoadoutTab.ALL:
                     {
                         switch (LoadoutPage)
                         {
-                            case ELoadoutPage.PrimaryAttachment:
+                            case ELoadoutPage.AttachmentPrimaryBarrel:
+                            case ELoadoutPage.AttachmentPrimaryGrip:
+                            case ELoadoutPage.AttachmentPrimaryMagazine:
+                            case ELoadoutPage.AttachmentPrimarySights:
+                            case ELoadoutPage.AttachmentPrimaryTactical:
                                 {
-                                    if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
+                                    if (!Enum.TryParse(LoadoutPage.ToString().Replace("AttachmentPrimary", ""), false, out EAttachment attachmentType))
                                     {
-                                        Logging.Debug($"Error finding the selected loadout with id {LoadoutID} for {Player.CharacterName}");
+                                        Logging.Debug($"Error finding attachment type that {Player.CharacterName} has selected");
                                         return;
                                     }
 
-                                    if (!AttachmentPages.TryGetValue(loadout.Primary.Gun.GunID, out Dictionary<int, PageAttachment> attachmentPages))
+                                    if (!PlayerLoadout.Guns.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out LoadoutGun gun))
                                     {
-                                        Logging.Debug($"Error finding the primary attachment pages for gun with id {loadout.Primary.Gun.GunID} for {Player.CharacterName}");
+                                        Logging.Debug($"Error finding primary that has been selected with id {loadout.Primary?.Gun?.GunID ?? 0} for {Player.CharacterName}");
                                         return;
                                     }
 
-                                    if (!attachmentPages.TryGetValue(LoadoutTabPageID - 1, out PageAttachment prevPage) && !attachmentPages.TryGetValue(attachmentPages.Keys.Max(), out prevPage))
+                                    if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out var attachmentTypePages))
                                     {
-                                        Logging.Debug($"Error finding the prev attachment page for gun with id {loadout.Primary.Gun.GunID} for {Player.CharacterName}");
+                                        Logging.Debug($"Error finding primary attachments for {gun.Gun.GunID} for {Player.CharacterName}");
                                         return;
                                     }
+
+                                    if (!attachmentTypePages.TryGetValue(attachmentType, out Dictionary<int, PageAttachment> attachmentPages))
+                                    {
+                                        Logging.Debug($"Error finding attachments with type {attachmentType} for {Player.CharacterName}");
+                                        return;
+                                    }
+
+                                    if (attachmentPages.TryGetValue(LoadoutTabPageID - 1, out PageAttachment prevPage) && !attachmentPages.TryGetValue(attachmentPages.Keys.Max(), out prevPage))
+                                    {
+                                        Logging.Debug($"Error finding previous page of attachment with type {attachmentType} for gun with id {gun.Gun.GunID} for {Player.CharacterName}");
+                                        return;
+                                    }
+
+                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
+                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
 
                                     ShowAttachmentPage(prevPage);
                                     break;
                                 }
 
-                            case ELoadoutPage.SecondaryAttachment:
+                            case ELoadoutPage.AttachmentSecondaryBarrel:
+                            case ELoadoutPage.AttachmentSecondaryGrip:
+                            case ELoadoutPage.AttachmentSecondaryMagazine:
+                            case ELoadoutPage.AttachmentSecondarySights:
+                            case ELoadoutPage.AttachmentSecondaryTactical:
                                 {
-                                    if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
+                                    if (!Enum.TryParse(LoadoutPage.ToString().Replace("AttachmentSecondary", ""), false, out EAttachment attachmentType))
                                     {
-                                        Logging.Debug($"Error finding the selected loadout with id {LoadoutID} for {Player.CharacterName}");
+                                        Logging.Debug($"Error finding attachment type that {Player.CharacterName} has selected");
                                         return;
                                     }
 
-                                    if (!AttachmentPages.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out Dictionary<int, PageAttachment> attachmentPages))
+                                    if (!PlayerLoadout.Guns.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out LoadoutGun gun))
                                     {
-                                        Logging.Debug($"Error finding the secondary attachment pages for gun with id {loadout.Secondary?.Gun?.GunID ?? 0} for {Player.CharacterName}");
+                                        Logging.Debug($"Error finding Secondary that has been selected with id {loadout.Secondary?.Gun?.GunID ?? 0} for {Player.CharacterName}");
                                         return;
                                     }
 
-                                    if (!attachmentPages.TryGetValue(LoadoutTabPageID - 1, out PageAttachment prevPage) && !attachmentPages.TryGetValue(attachmentPages.Keys.Max(), out prevPage))
+                                    if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out var attachmentTypePages))
                                     {
-                                        Logging.Debug($"Error finding the prev attachment page for gun with id {loadout.Primary.Gun.GunID} for {Player.CharacterName}");
+                                        Logging.Debug($"Error finding Secondary attachments for {gun.Gun.GunID} for {Player.CharacterName}");
                                         return;
                                     }
+
+                                    if (!attachmentTypePages.TryGetValue(attachmentType, out Dictionary<int, PageAttachment> attachmentPages))
+                                    {
+                                        Logging.Debug($"Error finding attachments with type {attachmentType} for {Player.CharacterName}");
+                                        return;
+                                    }
+
+                                    if (attachmentPages.TryGetValue(LoadoutTabPageID - 1, out PageAttachment prevPage) && !attachmentPages.TryGetValue(attachmentPages.Keys.Max(), out prevPage))
+                                    {
+                                        Logging.Debug($"Error finding previous page of attachment with type {attachmentType} for gun with id {gun.Gun.GunID} for {Player.CharacterName}");
+                                        return;
+                                    }
+
+                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
+                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
 
                                     ShowAttachmentPage(prevPage);
                                     break;
@@ -1912,12 +1955,6 @@ namespace UnturnedBlackout.Instances
                         {
                             case ELoadoutPage.Primary:
                                 {
-                                    if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
-                                    {
-                                        Logging.Debug($"Error getting current loadout with id {LoadoutID} for {Player.CharacterName}");
-                                        return;
-                                    }
-
                                     if (!GunSkinPages.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out Dictionary<int, PageGunSkin> gunSkinPages))
                                     {
                                         Logging.Debug($"Error getting gun skin pages for gun with id {loadout.Primary?.Gun?.GunID ?? 0}");
@@ -1936,12 +1973,6 @@ namespace UnturnedBlackout.Instances
 
                             case ELoadoutPage.Secondary:
                                 {
-                                    if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
-                                    {
-                                        Logging.Debug($"Error getting current loadout with id {LoadoutID} for {Player.CharacterName}");
-                                        return;
-                                    }
-
                                     if (!GunSkinPages.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out Dictionary<int, PageGunSkin> gunSkinPages))
                                     {
                                         Logging.Debug($"Error getting gun skin pages for gun with id {loadout.Secondary?.Gun?.GunID ?? 0}");
@@ -1960,12 +1991,6 @@ namespace UnturnedBlackout.Instances
 
                             case ELoadoutPage.Knife:
                                 {
-                                    if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
-                                    {
-                                        Logging.Debug($"Error getting current loadout with id {LoadoutID} for {Player.CharacterName}");
-                                        return;
-                                    }
-
                                     if (!KnifeSkinPages.TryGetValue(loadout.Knife?.Knife?.KnifeID ?? 0, out Dictionary<int, PageKnifeSkin> knifeSkinPages))
                                     {
                                         Logging.Debug($"Error getting gun skin pages for knife with id {loadout.Knife?.Knife?.KnifeID ?? 0}");
@@ -2353,24 +2378,6 @@ namespace UnturnedBlackout.Instances
                         break;
                     }
 
-                case ELoadoutPage.PrimaryAttachment:
-                    {
-                        if (!PlayerLoadout.Guns.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out LoadoutGun gun))
-                        {
-                            Logging.Debug($"Error finding primary for player with id {loadout.Primary?.Gun?.GunID ?? 0} for {Player.CharacterName}");
-                            return;
-                        }
-
-                        if (!gun.Attachments.TryGetValue((ushort)SelectedItemID, out LoadoutAttachment attachment))
-                        {
-                            Logging.Debug($"Error finding primary attachment for player with id {SelectedItemID} for {Player.CharacterName}");
-                            return;
-                        }
-
-                        ShowAttachment(attachment);
-                        break;
-                    }
-
                 case ELoadoutPage.Secondary:
                     {
                         if (!PlayerLoadout.Guns.TryGetValue((ushort)SelectedItemID, out LoadoutGun gun))
@@ -2383,17 +2390,91 @@ namespace UnturnedBlackout.Instances
                         break;
                     }
 
-                case ELoadoutPage.SecondaryAttachment:
+                case ELoadoutPage.AttachmentPrimaryBarrel:
+                case ELoadoutPage.AttachmentPrimaryGrip:
+                case ELoadoutPage.AttachmentPrimaryMagazine:
+                case ELoadoutPage.AttachmentPrimarySights:
+                case ELoadoutPage.AttachmentPrimaryTactical:
                     {
-                        if (!PlayerLoadout.Guns.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out LoadoutGun gun))
+                        if (!Enum.TryParse(LoadoutPage.ToString().Replace("AttachmentPrimary", ""), false, out EAttachment attachmentType))
                         {
-                            Logging.Debug($"Error finding secondary for player with id {loadout.Secondary?.Gun?.GunID ?? 0} for {Player.CharacterName}");
+                            Logging.Debug($"Error finding attachment type that {Player.CharacterName} has selected");
                             return;
                         }
 
-                        if (!gun.Attachments.TryGetValue((ushort)SelectedItemID, out LoadoutAttachment attachment))
+                        if (!PlayerLoadout.Guns.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out LoadoutGun gun))
                         {
-                            Logging.Debug($"Error finding secondary attachment for player with id {SelectedItemID} for {Player.CharacterName}");
+                            Logging.Debug($"Error finding primary that has been selected with id {loadout.Primary?.Gun?.GunID ?? 0} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out var attachmentTypePages))
+                        {
+                            Logging.Debug($"Error finding primary attachments for {gun.Gun.GunID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        if (!attachmentTypePages.TryGetValue(attachmentType, out Dictionary<int, PageAttachment> attachmentPages))
+                        {
+                            Logging.Debug($"Error finding attachments with type {attachmentType} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        if (!attachmentPages.TryGetValue(LoadoutTabPageID, out PageAttachment page))
+                        {
+                            Logging.Debug($"Error finding page {LoadoutTabPageID} of attachment with type {attachmentType} for gun with id {gun.Gun.GunID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        if (page.Attachments.TryGetValue((int)SelectedItemID, out LoadoutAttachment attachment))
+                        {
+                            Logging.Debug($"Error finding attachment at page id {LoadoutTabPageID} with position {SelectedItemID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        ShowAttachment(attachment);
+                        break;
+                    }
+
+                case ELoadoutPage.AttachmentSecondaryBarrel:
+                case ELoadoutPage.AttachmentSecondaryGrip:
+                case ELoadoutPage.AttachmentSecondaryMagazine:
+                case ELoadoutPage.AttachmentSecondarySights:
+                case ELoadoutPage.AttachmentSecondaryTactical:
+                    {
+                        if (!Enum.TryParse(LoadoutPage.ToString().Replace("AttachmentSecondary", ""), false, out EAttachment attachmentType))
+                        {
+                            Logging.Debug($"Error finding attachment type that {Player.CharacterName} has selected");
+                            return;
+                        }
+
+                        if (!PlayerLoadout.Guns.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out LoadoutGun gun))
+                        {
+                            Logging.Debug($"Error finding Secondary that has been selected with id {loadout.Secondary?.Gun?.GunID ?? 0} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out var attachmentTypePages))
+                        {
+                            Logging.Debug($"Error finding Secondary attachments for {gun.Gun.GunID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        if (!attachmentTypePages.TryGetValue(attachmentType, out Dictionary<int, PageAttachment> attachmentPages))
+                        {
+                            Logging.Debug($"Error finding attachments with type {attachmentType} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        if (!attachmentPages.TryGetValue(LoadoutTabPageID, out PageAttachment page))
+                        {
+                            Logging.Debug($"Error finding page {LoadoutTabPageID} of attachment with type {attachmentType} for gun with id {gun.Gun.GunID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        if (page.Attachments.TryGetValue((int)SelectedItemID, out LoadoutAttachment attachment))
+                        {
+                            Logging.Debug($"Error finding attachment at page id {LoadoutTabPageID} with position {SelectedItemID} for {Player.CharacterName}");
                             return;
                         }
 
@@ -2502,23 +2583,45 @@ namespace UnturnedBlackout.Instances
                     {
                         switch (LoadoutPage)
                         {
-                            case ELoadoutPage.PrimaryAttachment:
+                            case ELoadoutPage.AttachmentPrimaryBarrel:
+                            case ELoadoutPage.AttachmentPrimaryGrip:
+                            case ELoadoutPage.AttachmentPrimaryMagazine:
+                            case ELoadoutPage.AttachmentPrimarySights:
+                            case ELoadoutPage.AttachmentPrimaryTactical:
                                 {
-                                    if (!AttachmentPages.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out Dictionary<int, PageAttachment> attachmentPages))
+                                    if (!Enum.TryParse(LoadoutPage.ToString().Replace("AttachmentPrimary", ""), false, out EAttachment attachmentType))
                                     {
-                                        Logging.Debug($"Error finding attachment pages for primary with id {loadout.Primary?.Gun?.GunID ?? 0} for {Player.CharacterName}");
+                                        Logging.Debug($"Error finding attachment type that {Player.CharacterName} has selected");
+                                        return;
+                                    }
+
+                                    if (!PlayerLoadout.Guns.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out LoadoutGun gun))
+                                    {
+                                        Logging.Debug($"Error finding primary that has been selected with id {loadout.Primary?.Gun?.GunID ?? 0} for {Player.CharacterName}");
+                                        return;
+                                    }
+
+                                    if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out var attachmentTypePages))
+                                    {
+                                        Logging.Debug($"Error finding primary attachments for {gun.Gun.GunID} for {Player.CharacterName}");
+                                        return;
+                                    }
+
+                                    if (!attachmentTypePages.TryGetValue(attachmentType, out Dictionary<int, PageAttachment> attachmentPages))
+                                    {
+                                        Logging.Debug($"Error finding attachments with type {attachmentType} for {Player.CharacterName}");
                                         return;
                                     }
 
                                     if (!attachmentPages.TryGetValue(LoadoutTabPageID, out PageAttachment page))
                                     {
-                                        Logging.Debug($"Error finding attachment page with id {LoadoutTabPageID} for gun with {loadout.Primary.Gun.GunID} for {Player.CharacterName}");
+                                        Logging.Debug($"Error finding page {LoadoutTabPageID} of attachment with type {attachmentType} for gun with id {gun.Gun.GunID} for {Player.CharacterName}");
                                         return;
                                     }
 
-                                    if (!page.Attachments.TryGetValue(selected, out LoadoutAttachment attachment))
+                                    if (page.Attachments.TryGetValue(selected, out LoadoutAttachment attachment))
                                     {
-                                        Logging.Debug($"Error finding attachment at {selected} at page {LoadoutTabPageID} for {Player.CharacterName}");
+                                        Logging.Debug($"Error finding attachment at page id {LoadoutTabPageID} with position {selected} for {Player.CharacterName}");
                                         return;
                                     }
 
@@ -2526,29 +2629,52 @@ namespace UnturnedBlackout.Instances
                                     break;
                                 }
 
-                            case ELoadoutPage.SecondaryAttachment:
+                            case ELoadoutPage.AttachmentSecondaryBarrel:
+                            case ELoadoutPage.AttachmentSecondaryGrip:
+                            case ELoadoutPage.AttachmentSecondaryMagazine:
+                            case ELoadoutPage.AttachmentSecondarySights:
+                            case ELoadoutPage.AttachmentSecondaryTactical:
                                 {
-                                    if (!AttachmentPages.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out Dictionary<int, PageAttachment> attachmentPages))
+                                    if (!Enum.TryParse(LoadoutPage.ToString().Replace("AttachmentSecondary", ""), false, out EAttachment attachmentType))
                                     {
-                                        Logging.Debug($"Error finding attachment pages for secondary with id {loadout.Primary?.Gun?.GunID ?? 0} for {Player.CharacterName}");
+                                        Logging.Debug($"Error finding attachment type that {Player.CharacterName} has selected");
+                                        return;
+                                    }
+
+                                    if (!PlayerLoadout.Guns.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out LoadoutGun gun))
+                                    {
+                                        Logging.Debug($"Error finding Secondary that has been selected with id {loadout.Secondary?.Gun?.GunID ?? 0} for {Player.CharacterName}");
+                                        return;
+                                    }
+
+                                    if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out var attachmentTypePages))
+                                    {
+                                        Logging.Debug($"Error finding Secondary attachments for {gun.Gun.GunID} for {Player.CharacterName}");
+                                        return;
+                                    }
+
+                                    if (!attachmentTypePages.TryGetValue(attachmentType, out Dictionary<int, PageAttachment> attachmentPages))
+                                    {
+                                        Logging.Debug($"Error finding attachments with type {attachmentType} for {Player.CharacterName}");
                                         return;
                                     }
 
                                     if (!attachmentPages.TryGetValue(LoadoutTabPageID, out PageAttachment page))
                                     {
-                                        Logging.Debug($"Error finding attachment page with id {LoadoutTabPageID} for gun with {loadout.Secondary.Gun.GunID} for {Player.CharacterName}");
+                                        Logging.Debug($"Error finding page {LoadoutTabPageID} of attachment with type {attachmentType} for gun with id {gun.Gun.GunID} for {Player.CharacterName}");
                                         return;
                                     }
 
-                                    if (!page.Attachments.TryGetValue(selected, out LoadoutAttachment attachment))
+                                    if (page.Attachments.TryGetValue(selected, out LoadoutAttachment attachment))
                                     {
-                                        Logging.Debug($"Error finding attachment at {selected} at page {LoadoutTabPageID} for {Player.CharacterName}");
+                                        Logging.Debug($"Error finding attachment at page id {LoadoutTabPageID} with position {selected} for {Player.CharacterName}");
                                         return;
                                     }
 
                                     ShowAttachment(attachment);
                                     break;
                                 }
+
                             case ELoadoutPage.Perk:
                                 {
                                     if (!PerkPages.TryGetValue(LoadoutTabPageID, out PagePerk page))
@@ -2900,8 +3026,8 @@ namespace UnturnedBlackout.Instances
             }
 
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Buy BUTTON", !attachment.IsBought);
-            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Equip BUTTON", attachment.IsBought && ((LoadoutPage == ELoadoutPage.Primary && !loadout.PrimaryAttachments.ContainsValue(attachment)) || (LoadoutPage == ELoadoutPage.Secondary && !loadout.SecondaryAttachments.ContainsValue(attachment))));
-            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Dequip BUTTON", attachment.IsBought && ((LoadoutPage == ELoadoutPage.Primary && loadout.PrimaryAttachments.ContainsValue(attachment)) || (LoadoutPage == ELoadoutPage.Secondary && loadout.SecondaryAttachments.ContainsValue(attachment))));
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Equip BUTTON", attachment.IsBought && ((LoadoutPage.ToString().StartsWith("AttachmentPrimary") && !loadout.PrimaryAttachments.ContainsValue(attachment)) || (LoadoutPage.ToString().StartsWith("AttachmentSecondary") && !loadout.SecondaryAttachments.ContainsValue(attachment))));
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Dequip BUTTON", attachment.IsBought && ((LoadoutPage.ToString().StartsWith("AttachmentPrimary") && loadout.PrimaryAttachments.ContainsValue(attachment)) || (LoadoutPage.ToString().StartsWith("AttachmentSecondary") && loadout.SecondaryAttachments.ContainsValue(attachment))));
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Description TEXT", attachment.Attachment.AttachmentDesc);
             EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Item IMAGE", attachment.Attachment.IconLink);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item TEXT", attachment.Attachment.AttachmentName);
@@ -3087,7 +3213,12 @@ namespace UnturnedBlackout.Instances
                         });
                         break;
                     }
-                case ELoadoutPage.PrimaryAttachment:
+
+                case ELoadoutPage.AttachmentPrimaryBarrel:
+                case ELoadoutPage.AttachmentPrimaryGrip:
+                case ELoadoutPage.AttachmentPrimaryMagazine:
+                case ELoadoutPage.AttachmentPrimarySights:
+                case ELoadoutPage.AttachmentPrimaryTactical:
                     {
                         if (!PlayerLoadout.Guns.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out LoadoutGun gun))
                         {
@@ -3132,7 +3263,12 @@ namespace UnturnedBlackout.Instances
                         });
                         break;
                     }
-                case ELoadoutPage.SecondaryAttachment:
+
+                case ELoadoutPage.AttachmentSecondaryBarrel:
+                case ELoadoutPage.AttachmentSecondaryGrip:
+                case ELoadoutPage.AttachmentSecondaryMagazine:
+                case ELoadoutPage.AttachmentSecondarySights:
+                case ELoadoutPage.AttachmentSecondaryTactical:
                     {
                         if (!PlayerLoadout.Guns.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out LoadoutGun gun))
                         {
@@ -3370,7 +3506,11 @@ namespace UnturnedBlackout.Instances
                         break;
                     }
 
-                case ELoadoutPage.PrimaryAttachment:
+                case ELoadoutPage.AttachmentPrimaryBarrel:
+                case ELoadoutPage.AttachmentPrimaryGrip:
+                case ELoadoutPage.AttachmentPrimaryMagazine:
+                case ELoadoutPage.AttachmentPrimarySights:
+                case ELoadoutPage.AttachmentPrimaryTactical:
                     {
                         if (!PlayerLoadout.Guns.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out LoadoutGun gun))
                         {
@@ -3402,7 +3542,11 @@ namespace UnturnedBlackout.Instances
                         break;
                     }
 
-                case ELoadoutPage.SecondaryAttachment:
+                case ELoadoutPage.AttachmentSecondaryBarrel:
+                case ELoadoutPage.AttachmentSecondaryGrip:
+                case ELoadoutPage.AttachmentSecondaryMagazine:
+                case ELoadoutPage.AttachmentSecondarySights:
+                case ELoadoutPage.AttachmentSecondaryTactical:
                     {
                         if (!PlayerLoadout.Guns.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out LoadoutGun gun))
                         {
@@ -3560,7 +3704,11 @@ namespace UnturnedBlackout.Instances
                         break;
                     }
 
-                case ELoadoutPage.PrimaryAttachment:
+                case ELoadoutPage.AttachmentPrimaryBarrel:
+                case ELoadoutPage.AttachmentPrimaryGrip:
+                case ELoadoutPage.AttachmentPrimaryMagazine:
+                case ELoadoutPage.AttachmentPrimarySights:
+                case ELoadoutPage.AttachmentPrimaryTactical:
                     {
                         if (!PlayerLoadout.Guns.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out LoadoutGun gun))
                         {
@@ -3584,7 +3732,11 @@ namespace UnturnedBlackout.Instances
                         break;
                     }
 
-                case ELoadoutPage.SecondaryAttachment:
+                case ELoadoutPage.AttachmentSecondaryBarrel:
+                case ELoadoutPage.AttachmentSecondaryGrip:
+                case ELoadoutPage.AttachmentSecondaryMagazine:
+                case ELoadoutPage.AttachmentSecondarySights:
+                case ELoadoutPage.AttachmentSecondaryTactical:
                     {
                         if (!PlayerLoadout.Guns.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out LoadoutGun gun))
                         {
