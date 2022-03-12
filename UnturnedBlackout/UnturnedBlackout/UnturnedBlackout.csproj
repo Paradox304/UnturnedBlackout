@@ -190,6 +190,7 @@
     <Compile Include="Models\Feed\FeedIcon.cs" />
     <Compile Include="Models\FFA\FFAConfig.cs" />
     <Compile Include="Models\Global\LoadoutAmount.cs" />
+    <Compile Include="Models\Global\TeamKit.cs" />
     <Compile Include="Models\KC\KCConfig.cs" />
     <Compile Include="Models\KC\KCPlayer.cs" />
     <Compile Include="Models\KC\KCTeam.cs" />

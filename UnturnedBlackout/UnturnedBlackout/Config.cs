@@ -152,8 +152,8 @@ namespace UnturnedBlackout
 
             TeamsInfo = new List<TeamInfo>
             {
-                new TeamInfo(1, "Turned Ops", "#9ac5ff", "#9ac5ff", "#9ac5ff", "#9ac5ff", new List<string> { "TurnedOps" }),
-                new TeamInfo(2, "Omega", "#ff7e7e", "#ff7e7e", "#ff7e7e", "#ff7e7e", new List<string> { "Omega" })
+                new TeamInfo(1, "Turned Ops", "#9ac5ff", "#9ac5ff", "#9ac5ff", "#9ac5ff", new List<TeamKit> { new TeamKit(new List<ushort> { 173, 2, 1446 }) }),
+                new TeamInfo(2, "Omega", "#ff7e7e", "#ff7e7e", "#ff7e7e", "#ff7e7e", new List<TeamKit> { new TeamKit(new List<ushort> { 165, 2, 1446 }) })
             };
 
             AllowDamageBarricades = new List<ushort> { 3, 4, 5 };

@@ -884,7 +884,7 @@ namespace UnturnedBlackout.Managers
                     }
 
                     Logging.Debug("Reading levels from base data");
-                    rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{LevelsTableName}`;", Conn).ExecuteScalarAsync();
+                    rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{LevelsTableName}`;", Conn).ExecuteReaderAsync();
                     try
                     {
                         var levels = new Dictionary<int, XPLevel>();
@@ -894,12 +894,10 @@ namespace UnturnedBlackout.Managers
                             {
                                 continue;
                             }
-
                             if (!int.TryParse(rdr[1].ToString(), out int xpNeeded))
                             {
                                 continue;
                             }
-
                             var iconLinkLarge = rdr[2].ToString();
                             var iconLinkMedium = rdr[3].ToString();
                             var iconLinkSmall = rdr[4].ToString();
@@ -909,6 +907,7 @@ namespace UnturnedBlackout.Managers
                                 levels.Add(level, new XPLevel(level, xpNeeded, iconLinkLarge, iconLinkMedium, iconLinkSmall));
                             }
                         }
+                        Logging.Debug($"Successfully read {levels.Count} levels from the table");
                         Levels = levels;
                     }
                     catch (Exception ex)

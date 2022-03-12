@@ -751,7 +751,7 @@ namespace UnturnedBlackout.GameTypes
         public void GiveLoadout(CTFPlayer player)
         {
             player.GamePlayer.Player.Player.inventory.ClearInventory();
-            R.Commands.Execute(player.GamePlayer.Player, $"/kit {player.Team.Info.KitNames[UnityEngine.Random.Range(0, player.Team.Info.KitNames.Count)]}");
+            //R.Commands.Execute(player.GamePlayer.Player, $"/kit {player.Team.Info.KitNames[UnityEngine.Random.Range(0, player.Team.Info.KitNames.Count)]}");
         }
 
         public void SpawnPlayer(CTFPlayer player)
