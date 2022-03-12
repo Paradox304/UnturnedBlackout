@@ -1,7 +1,12 @@
 ﻿using Rocket.Unturned.Player;
+using SDG.Unturned;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using UnturnedBlackout.Database.Base;
 using UnturnedBlackout.Database.Data;
+using UnturnedBlackout.Enums;
 using UnturnedBlackout.Models.Global;
 
 namespace UnturnedBlackout.Managers
@@ -588,9 +593,163 @@ namespace UnturnedBlackout.Managers
             });
         }
 
-        public void GiveLoadout(GamePlayer player)
+        public void GiveLoadout(GamePlayer player, Kit kit)
         {
-            // Code to give the active loadout to player
+            Logging.Debug($"Giving loadout to {player.Player.CharacterName}");
+            var inv = player.Player.Player.inventory;
+            inv.ClearInventory();
+
+            // Adding clothes
+            foreach (var id in kit.ItemIDs)
+            {
+                inv.forceAddItem(new Item(id, true), true);
+            }
+
+            // Getting active loadout
+            if (!DB.PlayerLoadouts.TryGetValue(player.SteamID, out PlayerLoadout loadout))
+            {
+                Logging.Debug($"Error finding loadout for {player.Player.CharacterName}");
+                return;
+            }
+
+            var activeLoadout = loadout.Loadouts.Values.FirstOrDefault(k => k.IsActive);
+            if (activeLoadout == null)
+            {
+                Logging.Debug($"Error finding active loadout for {player.Player.CharacterName}");
+                player.SetActiveLoadout(null);
+                return;
+            }
+
+            // Giving glove to player
+            if (activeLoadout.Glove != null)
+            {
+                inv.forceAddItem(new Item(activeLoadout.Glove.Glove.GloveID, true), true);
+            }
+
+            // Giving primary to player
+            if (activeLoadout.Primary != null)
+            {
+                var item = new Item(activeLoadout.PrimarySkin == null ? activeLoadout.Primary.Gun.GunID : activeLoadout.PrimarySkin.SkinID, false);
+
+                // Setting up attachments
+                for (int i = 0; i <= 4; i++)
+                {
+                    var attachmentType = (EAttachment)i;
+                    var startingPos = Utility.GetStartingPos(attachmentType);
+                    if (activeLoadout.PrimaryAttachments.TryGetValue(attachmentType, out LoadoutAttachment attachment))
+                    {
+                        var bytes = BitConverter.GetBytes(attachment.Attachment.AttachmentID);
+                        item.state[startingPos] = bytes[0];
+                        item.state[startingPos + 1] = bytes[1];
+
+                        if (attachmentType == EAttachment.Magazine)
+                        {
+                            var asset = Assets.find(EAssetType.ITEM, attachment.Attachment.AttachmentID) as ItemMagazineAsset;
+                            item.state[10] = asset.amount;
+
+                            for (int i2 = 1; i2 <= activeLoadout.Primary.Gun.MagAmount; i2++)
+                            {
+                                inv.forceAddItem(new Item(attachment.Attachment.AttachmentID, true), false);
+                            }
+                        }
+                    } else
+                    {
+                        item.state[startingPos] = 0;
+                        item.state[startingPos + 1] = 0;
+                    }
+                }
+
+                inv.items[0].tryAddItem(item);
+                player.Player.Player.equipment.tryEquip(0, 0, 0);
+            }
+
+            // Giving secondary to player
+            if (activeLoadout.Secondary != null)
+            {
+                var item = new Item(activeLoadout.SecondarySkin == null ? activeLoadout.Secondary.Gun.GunID : activeLoadout.SecondarySkin.SkinID, true);
+
+                // Setting up attachments
+                for (int i = 0; i <= 4; i++)
+                {
+                    var attachmentType = (EAttachment)i;
+                    var startingPos = Utility.GetStartingPos(attachmentType);
+                    if (activeLoadout.SecondaryAttachments.TryGetValue(attachmentType, out LoadoutAttachment attachment))
+                    {
+                        var bytes = BitConverter.GetBytes(attachment.Attachment.AttachmentID);
+                        item.state[startingPos] = bytes[0];
+                        item.state[startingPos + 1] = bytes[1];
+
+                        if (attachmentType == EAttachment.Magazine)
+                        {
+                            var asset = Assets.find(EAssetType.ITEM, attachment.Attachment.AttachmentID) as ItemMagazineAsset;
+                            item.state[10] = asset.amount;
+
+                            for (int i2 = 1; i2 <= activeLoadout.Secondary.Gun.MagAmount; i2++)
+                            {
+                                inv.forceAddItem(new Item(attachment.Attachment.AttachmentID, true), false);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        item.state[startingPos] = 0;
+                        item.state[startingPos + 1] = 0;
+                    }
+                }
+
+                inv.items[1].tryAddItem(item);
+                if (activeLoadout.Primary == null)
+                {
+                    player.Player.Player.equipment.tryEquip(1, 0, 0);
+                }
+            }
+
+            // Giving knife to player
+            if (activeLoadout.Knife != null)
+            {
+                inv.forceAddItem(new Item(activeLoadout.KnifeSkin == null ? activeLoadout.Knife.Knife.KnifeID : activeLoadout.KnifeSkin.SkinID, true), activeLoadout.Primary == null && activeLoadout.Secondary == null);
+            }
+
+            // Giving perks to player
+            var skill = player.Player.Player.skills;
+            var skills = new Dictionary<(int, int), int>();
+            foreach (var defaultSkill in Plugin.Instance.Configuration.Instance.DefaultSkills)
+            {
+                if (PlayerSkills.TryParseIndices(defaultSkill.SkillName, out int specialtyIndex, out int skillIndex))
+                {
+                    if (skills.ContainsKey((specialtyIndex, skillIndex)))
+                    {
+                        skills[(specialtyIndex, skillIndex)] = defaultSkill.SkillLevel;
+                    } else
+                    {
+                        skills.Add((specialtyIndex, skillIndex), defaultSkill.SkillLevel);
+                    }
+                }
+            }
+            foreach (var perk in activeLoadout.Perks)
+            {
+                if (PlayerSkills.TryParseIndices(perk.Perk.SkillType, out int specialtyIndex, out int skillIndex))
+                {
+                    if (skills.ContainsKey((specialtyIndex, skillIndex)))
+                    {
+                        skills[(specialtyIndex, skillIndex)] = perk.Perk.SkillLevel;
+                    }
+                    else
+                    {
+                        skills.Add((specialtyIndex, skillIndex), perk.Perk.SkillLevel);
+                    }
+                }
+            }
+
+            for (int specialtyIndex = 0; specialtyIndex < skill.skills.Length; specialtyIndex++)
+            {
+                for (int skillIndex = 0; skillIndex < skill.skills[specialtyIndex].Length; skillIndex++)
+                {
+                    skill.ServerSetSkillLevel(specialtyIndex, skillIndex, skills.TryGetValue((specialtyIndex, skillIndex), out int level) ? level : 0);
+                }
+            }
+
+            player.SetActiveLoadout(activeLoadout);
         }
     }
 }

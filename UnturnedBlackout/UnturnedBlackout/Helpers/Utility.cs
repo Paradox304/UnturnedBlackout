@@ -6,6 +6,7 @@ using System.Linq;
 using UnityEngine;
 using UnturnedBlackout.Database.Base;
 using UnturnedBlackout.Database.Data;
+using UnturnedBlackout.Enums;
 
 namespace UnturnedBlackout
 {
@@ -199,6 +200,24 @@ namespace UnturnedBlackout
                 }
             }
             return amount;
+        }
+
+        public static int GetStartingPos(EAttachment attachment)
+        {
+            switch (attachment)
+            {
+                case EAttachment.Sights:
+                    return 0;
+                case EAttachment.Grip:
+                    return 4;
+                case EAttachment.Tactical:
+                    return 2;
+                case EAttachment.Barrel:
+                    return 6;
+                case EAttachment.Magazine:
+                    return 8;
+            }
+            return -1;
         }
 
         public static string ToColor(this object value, bool isPlayer)

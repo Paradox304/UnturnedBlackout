@@ -19,6 +19,8 @@ namespace UnturnedBlackout.Models.Global
         public UnturnedPlayer Player { get; set; }
         public ITransportConnection TransportConnection { get; set; }
 
+        public Loadout ActiveLoadout { get; set; }
+
         public bool HasScoreboard { get; set; }
         public bool HasSpawnProtection { get; set; }
         public Stack<CSteamID> LastDamager { get; set; }
@@ -26,6 +28,7 @@ namespace UnturnedBlackout.Models.Global
         public byte LastEquippedPage { get; set; }
         public byte LastEquippedX { get; set; }
         public byte LastEquippedY { get; set; }
+        public bool ForceEquip { get; set; }
 
         public EPlayerStance PreviousStance { get; set; }
 
@@ -66,6 +69,13 @@ namespace UnturnedBlackout.Models.Global
         {
             HasSpawnProtection = false;
             m_RemoveSpawnProtection.Stop();
+        }
+
+        // Loadout
+
+        public void SetActiveLoadout(Loadout loadout)
+        {
+            ActiveLoadout = loadout;
         }
 
         // Healing

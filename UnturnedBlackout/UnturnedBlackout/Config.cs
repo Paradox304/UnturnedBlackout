@@ -61,6 +61,7 @@ namespace UnturnedBlackout
 
         public int DefaultLoadoutAmount { get; set; }
         public List<LoadoutAmount> LoadoutAmounts { get; set; }
+        public List<DefaultSkill> DefaultSkills { get; set; }
 
         public FFAConfig FFA { get; set; }
         public TDMConfig TDM { get; set; }
@@ -129,6 +130,11 @@ namespace UnturnedBlackout
                 new LoadoutAmount("MVP", 6)
             };
 
+            DefaultSkills = new List<DefaultSkill>
+            {
+                new DefaultSkill("OVERKILL", 1)
+            };
+
             FFA = new FFAConfig(15, 600, "FFA", "white", "#dcb4ff", "#dcb4ff", 50, 60, 50, 20, 10, 5, 10, 15, 15, 1.5f, 15, 2, 4);
             TDM = new TDMConfig(15, 600, 50, 60, 50, 20, 10, 5, 10, 15, 15, 1.5f, 15, 2, 4);
             KC = new KCConfig(15, 600, 50, 60, 50, 20, 10, 10, 10, 5, 10, 15, 15, 1.5f, 15, 2, 4, 26820, 26821);
@@ -152,8 +158,8 @@ namespace UnturnedBlackout
 
             TeamsInfo = new List<TeamInfo>
             {
-                new TeamInfo(1, "Turned Ops", "#9ac5ff", "#9ac5ff", "#9ac5ff", "#9ac5ff", new List<TeamKit> { new TeamKit(new List<ushort> { 173, 2, 1446 }) }),
-                new TeamInfo(2, "Omega", "#ff7e7e", "#ff7e7e", "#ff7e7e", "#ff7e7e", new List<TeamKit> { new TeamKit(new List<ushort> { 165, 2, 1446 }) })
+                new TeamInfo(1, "Turned Ops", "#9ac5ff", "#9ac5ff", "#9ac5ff", "#9ac5ff", new List<Kit> { new Kit(new List<ushort> { 173, 2, 1446 }) }),
+                new TeamInfo(2, "Omega", "#ff7e7e", "#ff7e7e", "#ff7e7e", "#ff7e7e", new List<Kit> { new Kit(new List<ushort> { 165, 2, 1446 }) })
             };
 
             AllowDamageBarricades = new List<ushort> { 3, 4, 5 };
