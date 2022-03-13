@@ -188,6 +188,15 @@ namespace UnturnedBlackout
             return text;
         }
 
+        public static string CreateStringFromRewardAttachments(List<GunAttachment> gunAttachments)
+        {
+            var text = "";
+            foreach (var attachment in gunAttachments)
+            {
+                text += $"UB.{attachment.AttachmentID}";
+            }
+            return text;
+        }
         public static int GetLoadoutAmount(UnturnedPlayer player)
         {
             var amount = Plugin.Instance.Configuration.Instance.DefaultLoadoutAmount;
