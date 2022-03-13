@@ -7,20 +7,22 @@
         public string CardDesc { get; set; }
         public string IconLink { get; set; }
         public string CardLink { get; set; }
-        public int BuyPrice { get; set; }
         public int ScrapAmount { get; set; }
-        public bool IsDefault { get; set; }
+        public int BuyPrice { get; set; }
+        public int Coins { get; set; }
+        public int LevelRequirement { get; set; }
 
-        public Card(int cardID, string cardName, string cardDesc, string iconLink, string cardLink, int buyPrice, int scrapAmount, bool isDefault)
+        public Card(int cardID, string cardName, string cardDesc, string iconLink, string cardLink, int scrapAmount, int buyPrice, int coins, int levelRequirement)
         {
             CardID = cardID;
             CardName = cardName;
             CardDesc = cardDesc;
             IconLink = iconLink;
             CardLink = cardLink;
-            BuyPrice = buyPrice;
             ScrapAmount = scrapAmount;
-            IsDefault = isDefault;
+            BuyPrice = buyPrice;
+            Coins = coins;
+            LevelRequirement = levelRequirement;
         }
     }
 }

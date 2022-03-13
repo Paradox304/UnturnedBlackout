@@ -990,6 +990,10 @@ namespace UnturnedBlackout.Instances
 
             if (!string.IsNullOrEmpty(LoadoutNameText))
             {
+                if (LoadoutNameText.Length > 40)
+                {
+                    return;
+                }
                 loadout.LoadoutName = LoadoutNameText;
                 ThreadPool.QueueUserWorkItem(async (o) =>
                 {

@@ -72,7 +72,6 @@ namespace UnturnedBlackout.Managers
         protected void OnEquip(PlayerEquipment equipment, ItemJar jar, ItemAsset asset, ref bool shouldAllow)
         {
             var player = Plugin.Instance.GameManager.GetGamePlayer(equipment.player);
-
             if (Plugin.Instance.GameManager.TryGetCurrentGame(player.SteamID, out Game game) && game.GameMode == Enums.EGameType.CTF)
             {
                 if (game.IsPlayerCarryingFlag(player))
@@ -87,7 +86,7 @@ namespace UnturnedBlackout.Managers
 
             TaskDispatcher.QueueOnMainThread(() =>
             {
-                var connection = equipment.player.channel.GetOwnerTransportConnection();
+                var connection = player.TransportConnection;
                 EffectManager.sendUIEffectVisibility(Key, connection, true, "RightSide", true);
                 if (asset == null)
                 {
@@ -97,60 +96,87 @@ namespace UnturnedBlackout.Managers
                 if (asset.type == EItemType.GUN)
                 {
                     var gAsset = asset as ItemGunAsset;
-                    var mAsset = Assets.find(EAssetType.ITEM, BitConverter.ToUInt16(equipment.state, 8)) as ItemMagazineAsset;
                     int currentAmmo = equipment.state[10];
+                    var ammo = 0;
+                    if (Assets.find(EAssetType.ITEM, BitConverter.ToUInt16(equipment.state, 8)) is ItemMagazineAsset mAsset)
+                    {
+                        ammo = mAsset.amount;
+                    }
 
                     EffectManager.sendUIEffectText(Key, connection, true, "WeaponName", gAsset.itemName);
                     EffectManager.sendUIEffectText(Key, connection, true, "AmmoNum", currentAmmo.ToString());
-                    EffectManager.sendUIEffectText(Key, connection, true, "ReserveNum", $" / {mAsset.amount}");
+                    EffectManager.sendUIEffectText(Key, connection, true, "ReserveNum", $" / {ammo}");
                 }
-                else
+                else if (asset.type == EItemType.MELEE)
                 {
                     EffectManager.sendUIEffectText(Key, connection, true, "WeaponName", asset.itemName);
-                    EffectManager.sendUIEffectText(Key, connection, true, "AmmoNum", "1");
-                    EffectManager.sendUIEffectText(Key, connection, true, "ReserveNum", " / 0");
+                    EffectManager.sendUIEffectText(Key, connection, true, "AmmoNum", " ");
+                    EffectManager.sendUIEffectText(Key, connection, true, "ReserveNum", " ");
+                } else
+                {
+                    EffectManager.sendUIEffectText(Key, connection, true, "WeaponName", asset.itemName);
+                    EffectManager.sendUIEffectText(Key, connection, true, "AmmoNum", " ");
+                    EffectManager.sendUIEffectText(Key, connection, true, "ReserveNum", " ");
+                    player.ForceEquip = true;
+                    return;
                 }
 
-                if (player != null)
-                {
-                    player.LastEquippedPage = equipment.equippedPage;
-                    player.LastEquippedX = equipment.equipped_x;
-                    player.LastEquippedY = equipment.equipped_y;
-                }
+                player.LastEquippedPage = equipment.equippedPage;
+                player.LastEquippedX = equipment.equipped_x;
+                player.LastEquippedY = equipment.equipped_y;
             });
         }
 
         public void OnDequip(PlayerEquipment obj)
         {
-            Plugin.Instance.StartCoroutine(EquipKnife(obj));
+            var player = Plugin.Instance.GameManager.GetGamePlayer(obj.player);
+            if (player != null)
+            {
+                if (!Plugin.Instance.GameManager.TryGetCurrentGame(player.SteamID, out _))
+                {
+                    return;
+                }
+
+                if (player.ActiveLoadout == null)
+                {
+                    return;
+                }
+
+                EffectManager.sendUIEffectVisibility(Key, player.TransportConnection, true, "RightSide", obj != null);
+                if (obj.useable == null && player.ForceEquip)
+                {
+                    Plugin.Instance.StartCoroutine(Equip(player.Player.Player.equipment, player.LastEquippedPage, player.LastEquippedX, player.LastEquippedY));
+                } else if (obj.useable == null && !player.ForceEquip)
+                {
+                    var inv = player.Player.Player.inventory;
+                    for (byte page = 0; page < PlayerInventory.PAGES - 2; page++)
+                    {
+                        for (int index = inv.getItemCount(page) - 1; index >= 0; index--)
+                        {
+                            var item = inv.getItem(page, (byte)index);
+                            if (item != null && item.item.id == (player.ActiveLoadout.KnifeSkin == null ? player.ActiveLoadout.Knife?.Knife?.KnifeID ?? 0 : player.ActiveLoadout.KnifeSkin.SkinID))
+                            {
+                                Plugin.Instance.StartCoroutine(Equip(player.Player.Player.equipment, page, item.x, item.y));
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        public IEnumerator Equip(PlayerEquipment equipment, byte page, byte x, byte y)
+        {
+            yield return new WaitForSeconds(0.2f);
+            if (equipment.useable == null && equipment.canEquip)
+            {
+                equipment.tryEquip(page, x, y);
+            }
         }
 
         public void ClearGunUI(Player player)
         {
             EffectManager.sendUIEffectVisibility(Key, player.channel.GetOwnerTransportConnection(), true, "RightSide", false);
-        }
-
-        public IEnumerator EquipKnife(PlayerEquipment obj)
-        {
-            yield return new WaitForSeconds(0.2f);
-            if (obj.useable == null && obj.canEquip && Plugin.Instance.GameManager.TryGetCurrentGame(obj.player.channel.owner.playerID.steamID, out _))
-            {
-                EffectManager.sendUIEffectVisibility(Key, obj.player.channel.GetOwnerTransportConnection(), true, "RightSide", false);
-                var inv = obj.player.inventory;
-                for (byte page = 0; page < PlayerInventory.PAGES - 2; page++)
-                {
-                    for (int index = inv.getItemCount(page) - 1; index >= 0; index--)
-                    {
-                        var item = inv.getItem(page, (byte)index);
-                        if (item != null && item.item.id == Plugin.Instance.Configuration.Instance.KnifeID)
-                        {
-                            var asset = Assets.find(EAssetType.ITEM, item.item.id) as ItemAsset;
-                            TaskDispatcher.QueueOnMainThread(() => obj.tryEquip(page, item.x, item.y));
-                            yield break;
-                        }
-                    }
-                }
-            }
         }
 
         private void OnMagazineChanged(PlayerEquipment equipment, UseableGun gun, Item oldItem, ItemJar newItem, ref bool shouldAllow)

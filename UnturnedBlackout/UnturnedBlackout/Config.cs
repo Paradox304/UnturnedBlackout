@@ -135,7 +135,7 @@ namespace UnturnedBlackout
                 new DefaultSkill("OVERKILL", 1)
             };
 
-            FFA = new FFAConfig(15, 600, "FFA", "white", "#dcb4ff", "#dcb4ff", 50, 60, 50, 20, 10, 5, 10, 15, 15, 1.5f, 15, 2, 4);
+            FFA = new FFAConfig(15, 600, new Kit(new List<ushort> { 173, 2, 1446 }), "white", "#dcb4ff", "#dcb4ff", 50, 60, 50, 20, 10, 5, 10, 15, 15, 1.5f, 15, 2, 4);
             TDM = new TDMConfig(15, 600, 50, 60, 50, 20, 10, 5, 10, 15, 15, 1.5f, 15, 2, 4);
             KC = new KCConfig(15, 600, 50, 60, 50, 20, 10, 10, 10, 5, 10, 15, 15, 1.5f, 15, 2, 4, 26820, 26821);
             CTF = new CTFConfig(15, 600, 50, 60, 50, 20, 10, 10, 10, 5, 10, 15, 15, 1.5f, 3, 2, 4, 26820, 26821, 0.75f);

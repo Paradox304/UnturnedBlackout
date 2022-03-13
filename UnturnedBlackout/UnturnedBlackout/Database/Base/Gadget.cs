@@ -6,22 +6,22 @@
         public string GadgetName { get; set; }
         public string GadgetDesc { get; set; }
         public string IconLink { get; set; }
-        public int ScrapAmount { get; set; }
+        public int Coins { get; set; }
         public int BuyPrice { get; set; }
         public int GiveSeconds { get; set; }
-        public bool IsDefault { get; set; }
+        public int LevelRequirement { get; set; }
         public bool IsTactical { get; set; }
 
-        public Gadget(ushort gadgetID, string gadgetName, string gadgetDesc, string iconLink, int scrapAmount, int buyPrice, int giveSeconds, bool isDefault, bool isTactical)
+        public Gadget(ushort gadgetID, string gadgetName, string gadgetDesc, string iconLink, int coins, int buyPrice, int giveSeconds, int levelRequirement, bool isTactical)
         {
             GadgetID = gadgetID;
             GadgetName = gadgetName;
             GadgetDesc = gadgetDesc;
             IconLink = iconLink;
-            ScrapAmount = scrapAmount;
+            Coins = coins;
             BuyPrice = buyPrice;
             GiveSeconds = giveSeconds;
-            IsDefault = isDefault;
+            LevelRequirement = levelRequirement;
             IsTactical = isTactical;
         }
     }

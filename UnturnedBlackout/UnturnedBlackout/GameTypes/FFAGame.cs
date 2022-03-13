@@ -496,7 +496,7 @@ namespace UnturnedBlackout.GameTypes
         public void GiveLoadout(FFAPlayer player)
         {
             player.GamePlayer.Player.Player.inventory.ClearInventory();
-            R.Commands.Execute(player.GamePlayer.Player, $"/kit {Config.FFA.KitName}");
+            //R.Commands.Execute(player.GamePlayer.Player, $"/kit {Config.FFA.KitName}");
         }
 
         public void SpawnPlayer(FFAPlayer player, bool seperateSpawnPoint)

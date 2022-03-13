@@ -144,7 +144,6 @@
     <Compile Include="Database\Base\GunSkin.cs" />
     <Compile Include="Database\Base\Killstreak.cs" />
     <Compile Include="Database\Base\Knife.cs" />
-    <Compile Include="Database\Base\KnifeSkin.cs" />
     <Compile Include="Database\Base\Perk.cs" />
     <Compile Include="Database\Base\XPLevel.cs" />
     <Compile Include="Database\Data\Loadout.cs" />

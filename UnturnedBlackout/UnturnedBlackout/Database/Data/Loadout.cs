@@ -16,7 +16,6 @@ namespace UnturnedBlackout.Database.Data
         public GunSkin SecondarySkin { get; set; }
         public Dictionary<EAttachment, LoadoutAttachment> SecondaryAttachments { get; set; }
         public LoadoutKnife Knife { get; set; }
-        public KnifeSkin KnifeSkin { get; set; }
         public LoadoutGadget Tactical { get; set; }
         public LoadoutGadget Lethal { get; set; }
         public List<LoadoutKillstreak> Killstreaks { get; set; }
@@ -24,7 +23,7 @@ namespace UnturnedBlackout.Database.Data
         public LoadoutGlove Glove { get; set; }
         public LoadoutCard Card { get; set; }
 
-        public Loadout(int loadoutID, string loadoutName, bool isActive, LoadoutGun primary, GunSkin primarySkin, Dictionary<EAttachment, LoadoutAttachment> primaryAttachments, LoadoutGun secondary, GunSkin secondarySkin, Dictionary<EAttachment, LoadoutAttachment> secondaryAttachments, LoadoutKnife knife, KnifeSkin knifeSkin, LoadoutGadget tactical, LoadoutGadget lethal, List<LoadoutKillstreak> killstreaks, List<LoadoutPerk> perks, LoadoutGlove glove, LoadoutCard card)
+        public Loadout(int loadoutID, string loadoutName, bool isActive, LoadoutGun primary, GunSkin primarySkin, Dictionary<EAttachment, LoadoutAttachment> primaryAttachments, LoadoutGun secondary, GunSkin secondarySkin, Dictionary<EAttachment, LoadoutAttachment> secondaryAttachments, LoadoutKnife knife, LoadoutGadget tactical, LoadoutGadget lethal, List<LoadoutKillstreak> killstreaks, List<LoadoutPerk> perks, LoadoutGlove glove, LoadoutCard card)
         {
             LoadoutID = loadoutID;
             LoadoutName = loadoutName;
@@ -36,7 +35,6 @@ namespace UnturnedBlackout.Database.Data
             SecondarySkin = secondarySkin;
             SecondaryAttachments = secondaryAttachments;
             Knife = knife;
-            KnifeSkin = knifeSkin;
             Tactical = tactical;
             Lethal = lethal;
             Killstreaks = killstreaks;

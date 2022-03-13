@@ -15,7 +15,6 @@ namespace UnturnedBlackout.Models.Data
         public int SecondarySkin { get; set; }
         public List<ushort> SecondaryAttachments { get; set; }
         public ushort Knife { get; set; }
-        public int KnifeSkin { get; set; }
         public ushort Tactical { get; set; }
         public ushort Lethal { get; set; }
         public List<int> Killstreaks { get; set; }
@@ -33,7 +32,6 @@ namespace UnturnedBlackout.Models.Data
             SecondarySkin = loadout.SecondarySkin?.ID ?? 0;
             SecondaryAttachments = loadout.SecondaryAttachments.Values.Select(k => k.Attachment.AttachmentID).ToList();
             Knife = loadout.Knife?.Knife?.KnifeID ?? 0;
-            KnifeSkin = loadout.KnifeSkin?.ID ?? 0;
             Tactical = loadout.Tactical?.Gadget?.GadgetID ?? 0;
             Lethal = loadout.Lethal?.Gadget?.GadgetID ?? 0;
             Killstreaks = loadout.Killstreaks.Select(k => k.Killstreak.KillstreakID).ToList();
@@ -43,7 +41,7 @@ namespace UnturnedBlackout.Models.Data
         }
 
         [JsonConstructor]
-        public LoadoutData(string loadoutName, ushort primary, int primarySkin, List<ushort> primaryAttachments, ushort secondary, int secondarySkin, List<ushort> secondaryAttachments, ushort knife, int knifeSkin, ushort tactical, ushort lethal, List<int> killstreaks, List<int> perks, ushort glove, int card)
+        public LoadoutData(string loadoutName, ushort primary, int primarySkin, List<ushort> primaryAttachments, ushort secondary, int secondarySkin, List<ushort> secondaryAttachments, ushort knife, ushort tactical, ushort lethal, List<int> killstreaks, List<int> perks, ushort glove, int card)
         {
             LoadoutName = loadoutName;
             Primary = primary;
@@ -53,7 +51,6 @@ namespace UnturnedBlackout.Models.Data
             SecondarySkin = secondarySkin;
             SecondaryAttachments = secondaryAttachments;
             Knife = knife;
-            KnifeSkin = knifeSkin;
             Tactical = tactical;
             Lethal = lethal;
             Killstreaks = killstreaks;

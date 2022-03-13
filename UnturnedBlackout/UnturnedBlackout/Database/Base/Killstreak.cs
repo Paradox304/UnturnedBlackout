@@ -8,10 +8,10 @@
         public string IconLink { get; set; }
         public int KillstreakRequired { get; set; }
         public int BuyPrice { get; set; }
-        public int ScrapAmount { get; set; }
-        public bool IsDefault { get; set; }
+        public int Coins { get; set; }
+        public int LevelRequirement { get; set; }
 
-        public Killstreak(int killstreakID, string killstreakName, string killstreakDesc, string iconLink, int killstreakRequired, int buyPrice, int scrapAmount, bool isDefault)
+        public Killstreak(int killstreakID, string killstreakName, string killstreakDesc, string iconLink, int killstreakRequired, int buyPrice, int coins, int levelRequirement)
         {
             KillstreakID = killstreakID;
             KillstreakName = killstreakName;
@@ -19,8 +19,8 @@
             IconLink = iconLink;
             KillstreakRequired = killstreakRequired;
             BuyPrice = buyPrice;
-            ScrapAmount = scrapAmount;
-            IsDefault = isDefault;
+            Coins = coins;
+            LevelRequirement = levelRequirement;
         }
     }
 }

@@ -8,11 +8,11 @@
         public string IconLink { get; set; }
         public string SkillType { get; set; }
         public int SkillLevel { get; set; }
-        public int ScrapAmount { get; set; }
+        public int Coins { get; set; }
         public int BuyPrice { get; set; }
-        public bool IsDefault { get; set; }
+        public int LevelRequirement { get; set; }
 
-        public Perk(int perkID, string perkName, string perkDesc, string iconLink, string skillType, int skillLevel, int scrapAmount, int buyPrice, bool isDefault)
+        public Perk(int perkID, string perkName, string perkDesc, string iconLink, string skillType, int skillLevel, int coins, int buyPrice, int levelRequirement)
         {
             PerkID = perkID;
             PerkName = perkName;
@@ -20,9 +20,9 @@
             IconLink = iconLink;
             SkillType = skillType;
             SkillLevel = skillLevel;
-            ScrapAmount = scrapAmount;
+            Coins = coins;
             BuyPrice = buyPrice;
-            IsDefault = isDefault;
+            LevelRequirement = levelRequirement;
         }
     }
 }
