@@ -1192,7 +1192,18 @@ namespace UnturnedBlackout.Managers
                     }
 
                     Logging.Debug($"Checking gun attachments for {player.CharacterName}");
-                    
+                    try
+                    {
+                        foreach (var gun in guns.Values)
+                        {
+                            foreach (var gun)
+                        }
+                    } catch (Exception ex)
+                    {
+                        Logger.Log("Error while checking gun attachments");
+                        Logger.Log(ex);
+                    } 
+
                     Logging.Debug($"Getting knives for {player.CharacterName}");
                     rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PlayersKnivesTableName}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
                     try
