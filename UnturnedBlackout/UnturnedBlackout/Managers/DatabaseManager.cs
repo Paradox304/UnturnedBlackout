@@ -1573,12 +1573,6 @@ namespace UnturnedBlackout.Managers
                                 continue;
                             }
 
-                            if (!knifeSkinsSearchByID.TryGetValue(loadoutData.KnifeSkin, out KnifeSkin knifeSkin) && loadoutData.KnifeSkin != 0)
-                            {
-                                Logging.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a knife skin with id {loadoutData.KnifeSkin} which is not owned by t he player, not counting this loadout");
-                                continue;
-                            }
-
                             if (!gadgets.TryGetValue(loadoutData.Tactical, out LoadoutGadget tactical) && loadoutData.Tactical != 0)
                             {
                                 Logging.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a tactical with id {loadoutData.Tactical} which is not owned by the player, not counting this loadout");
@@ -1641,7 +1635,7 @@ namespace UnturnedBlackout.Managers
                                 continue;
                             }
 
-                            loadouts.Add(loadoutID, new Loadout(loadoutID, loadoutData.LoadoutName, isActive, primary, primarySkin, primaryAttachments, secondary, secondarySkin, secondaryAttachments, knife, knifeSkin, tactical, lethal, loadoutKillstreaks, loadoutPerks, glove, card));
+                            loadouts.Add(loadoutID, new Loadout(loadoutID, loadoutData.LoadoutName, isActive, primary, primarySkin, primaryAttachments, secondary, secondarySkin, secondaryAttachments, knife, tactical, lethal, loadoutKillstreaks, loadoutPerks, glove, card));
                         }
                         Logging.Debug($"Successfully got {loadouts.Count} loadouts for {player.CharacterName}");
                     }
@@ -1687,7 +1681,7 @@ namespace UnturnedBlackout.Managers
                     {
                         PlayerLoadouts.Remove(player.CSteamID);
                     }
-                    PlayerLoadouts.Add(player.CSteamID, new PlayerLoadout(guns, knives, gunSkinsSearchByID, knifeSkinsSearchByID, gunSkinsSearchByGunID, knifeSkinsSearchByKnifeID, gunSkinsSearchBySkinID, knifeSkinsSearchBySkinID, perks, gadgets, killstreaks, cards, gloves, loadouts));
+                    PlayerLoadouts.Add(player.CSteamID, new PlayerLoadout(guns, knives, gunSkinsSearchByID, gunSkinsSearchByGunID, gunSkinsSearchBySkinID, perks, gadgets, killstreaks, cards, gloves, loadouts));
                 }
                 catch (Exception ex)
                 {
