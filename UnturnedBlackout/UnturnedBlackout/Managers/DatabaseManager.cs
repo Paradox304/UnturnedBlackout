@@ -27,6 +27,7 @@ namespace UnturnedBlackout.Managers
         // Base Data
         public Dictionary<ushort, Gun> Guns { get; set; }
         public Dictionary<ushort, GunAttachment> GunAttachments { get; set; }
+        public Dictionary<ushort, GunCharm> GunCharms { get; set; }
         public Dictionary<int, GunSkin> GunSkinsSearchByID { get; set; }
         public Dictionary<ushort, List<GunSkin>> GunSkinsSearchByGunID { get; set; }
         public Dictionary<ushort, GunSkin> GunSkinsSearchBySkinID { get; set; }
@@ -58,6 +59,7 @@ namespace UnturnedBlackout.Managers
         // GUNS
         public const string PlayersGunsTableName = "UB_Players_Guns";
         public const string PlayersGunsSkinsTableName = "UB_Players_Guns_Skins";
+        public const string PlayersGunsCharmsTableName = "UB_Players_Guns_Charms";
 
         // KNIVES
         public const string PlayersKnivesTableName = "UB_Players_Knives";
@@ -82,6 +84,7 @@ namespace UnturnedBlackout.Managers
         public const string GunsTableName = "UB_Guns";
         public const string AttachmentsTableName = "UB_Guns_Attachments";
         public const string GunsSkinsTableName = "UB_Guns_Skins";
+        public const string GunsCharmsTableName = "UB_Guns_Charms";
 
         // KNIVES
         public const string KnivesTableName = "UB_Knives";
@@ -129,13 +132,14 @@ namespace UnturnedBlackout.Managers
                 {
                     await Conn.OpenAsync();
                     // BASE DATA
-                    await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{GunsTableName}` ( `GunID` SMALLINT UNSIGNED NOT NULL , `GunName` VARCHAR(255) NOT NULL , `GunDesc` TEXT NOT NULL , `GunType` ENUM('Pistol','SMG','Shotgun','LMG','AR','SNIPER') NOT NULL , `IconLink` TEXT NOT NULL , `MagAmount` TINYINT UNSIGNED NOT NULL , `Coins` INT UNSIGNED NOT NULL , `BuyPrice` INT UNSIGNED NOT NULL , `LevelRequirement` INT UNSIGNED NOT NULL , `IsPrimary` BOOLEAN NOT NULL , `DefaultAttachments` TEXT NOT NULL , `LevelXPNeeded` TEXT NOT NULL , `LevelRewards` TEXT NOT NULL , PRIMARY KEY (`GunID`));", Conn).ExecuteScalarAsync();
-                    await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{AttachmentsTableName}` ( `AttachmentID` SMALLINT UNSIGNED NOT NULL , `AttachmentName` VARCHAR(255) NOT NULL , `AttachmentDesc` TEXT NOT NULL , `AttachmentType` ENUM('Sights','Grip','Tactical','Barrel','Magazine') NOT NULL , `IconLink` TEXT NOT NULL , `BuyPrice` INT UNSIGNED NOT NULL , `Coins` INT UNSIGNED NOT NULL , PRIMARY KEY (`AttachmentID`));", Conn).ExecuteScalarAsync();
+                    await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{GunsTableName}` ( `GunID` SMALLINT UNSIGNED NOT NULL , `GunName` VARCHAR(255) NOT NULL , `GunDesc` TEXT NOT NULL , `GunType` ENUM('Pistol','SMG','Shotgun','LMG','AR','SNIPER') NOT NULL , `IconLink` TEXT NOT NULL , `MagAmount` TINYINT UNSIGNED NOT NULL , `Coins` INT UNSIGNED NOT NULL , `BuyPrice` INT UNSIGNED NOT NULL ,  `ScrapAmount` INT UNSIGNED NOT NULL , `LevelRequirement` INT UNSIGNED NOT NULL , `IsPrimary` BOOLEAN NOT NULL , `DefaultAttachments` TEXT NOT NULL , `LevelXPNeeded` TEXT NOT NULL , `LevelRewards` TEXT NOT NULL , PRIMARY KEY (`GunID`));", Conn).ExecuteScalarAsync();
+                    await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{AttachmentsTableName}` ( `AttachmentID` SMALLINT UNSIGNED NOT NULL , `AttachmentName` VARCHAR(255) NOT NULL , `AttachmentDesc` TEXT NOT NULL , `AttachmentType` ENUM('Sights','Grip','Barrel','Magazine') NOT NULL , `IconLink` TEXT NOT NULL , `BuyPrice` INT UNSIGNED NOT NULL , `Coins` INT UNSIGNED NOT NULL , PRIMARY KEY (`AttachmentID`));", Conn).ExecuteScalarAsync();
                     await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{GunsSkinsTableName}` ( `ID` INT UNSIGNED NOT NULL AUTO_INCREMENT , `GunID` SMALLINT UNSIGNED NOT NULL , `SkinID` SMALLINT UNSIGNED NOT NULL , `SkinName` VARCHAR(255) NOT NULL , `SkinDesc` TEXT NOT NULL , `IconLink` TEXT NOT NULL , `ScrapAmount` INT UNSIGNED NOT NULL , CONSTRAINT `ub_gun_id` FOREIGN KEY (`GunID`) REFERENCES `{GunsTableName}` (`GunID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`ID`));", Conn).ExecuteScalarAsync();
+                    await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{GunsCharmsTableName}` ( `CharmID` SMALLINT UNSIGNED NOT NULL , `CharmName` VARCHAR(255) NOT NULL , `CharmDesc` TEXT NOT NULL , `IconLink` TEXT NOT NULL , `BuyPrice` INT UNSIGNED NOT NULL , `Coins` INT UNSIGNED NOT NULL , `ScrapAmount` INT UNSIGNED NOT NULL , `LevelRequired` INT UNSIGNED NOT NULL , PRIMARY KEY (`CharmID`));", Conn).ExecuteScalarAsync();
                     await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{KnivesTableName}` ( `KnifeID` SMALLINT UNSIGNED NOT NULL , `KnifeName` VARCHAR(255) NOT NULL , `KnifeDesc` TEXT NOT NULL , `IconLink` TEXT NOT NULL , `ScrapAmount` INT UNSIGNED NOT NULL , `Coins` INT UNSIGNED NOT NULL , `BuyPrice` INT UNSIGNED NOT NULL , `LevelRequirement` INT UNSIGNED NOT NULL , PRIMARY KEY (`KnifeID`));", Conn).ExecuteScalarAsync();
-                    await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PerksTableName}` ( `PerkID` INT UNSIGNED NOT NULL , `PerkName` VARCHAR(255) NOT NULL , `PerkDesc` TEXT NOT NULL , `IconLink` TEXT NOT NULL , `SkillType` ENUM('OVERKILL','SHARPSHOOTER','DEXTERITY','CARDIO','EXERCISE','DIVING','PARKOUR','SNEAKYBEAKY','TOUGHNESS') NOT NULL , `SkillLevel` INT UNSIGNED NOT NULL , `Coins` INT UNSIGNED NOT NULL , `BuyPrice` INT UNSIGNED NOT NULL , `LevelRequirement` INT UNSIGNED NOT NULL , PRIMARY KEY (`PerkID`));", Conn).ExecuteScalarAsync();
-                    await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{GadgetsTableName}` ( `GadgetID` SMALLINT UNSIGNED NOT NULL , `GadgetName` VARCHAR(255) NOT NULL , `GadgetDesc` TEXT NOT NULL , `IconLink` TEXT NOT NULL , `Coins` INT UNSIGNED NOT NULL , `BuyPrice` INT UNSIGNED NOT NULL , `GiveSeconds` INT UNSIGNED NOT NULL , `LevelRequirement` INT UNSIGNED NOT NULL , `IsTactical` BOOLEAN NOT NULL , PRIMARY KEY (`GadgetID`));", Conn).ExecuteScalarAsync();
-                    await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{KillstreaksTableName}` ( `KillstreakID` INT UNSIGNED NOT NULL , `KillstreakName` VARCHAR(255) NOT NULL , `KillstreakDesc` TEXT NOT NULL , `IconLink` TEXT NOT NULL , `KillstreakRequired` INT UNSIGNED NOT NULL , `BuyPrice` INT UNSIGNED NOT NULL , `Coins` INT UNSIGNED NOT NULL , `LevelRequirement` INT UNSIGNED NOT NULL , PRIMARY KEY (`KillstreakID`));", Conn).ExecuteScalarAsync();
+                    await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PerksTableName}` ( `PerkID` INT UNSIGNED NOT NULL , `PerkName` VARCHAR(255) NOT NULL , `PerkDesc` TEXT NOT NULL , `IconLink` TEXT NOT NULL , `SkillType` TEXT NOT NULL , `SkillLevel` INT UNSIGNED NOT NULL , `Coins` INT UNSIGNED NOT NULL , `BuyPrice` INT UNSIGNED NOT NULL , `ScrapAmount` INT UNSIGNED NOT NULL , `LevelRequirement` INT UNSIGNED NOT NULL , PRIMARY KEY (`PerkID`));", Conn).ExecuteScalarAsync();
+                    await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{GadgetsTableName}` ( `GadgetID` SMALLINT UNSIGNED NOT NULL , `GadgetName` VARCHAR(255) NOT NULL , `GadgetDesc` TEXT NOT NULL , `IconLink` TEXT NOT NULL , `Coins` INT UNSIGNED NOT NULL , `BuyPrice` INT UNSIGNED NOT NULL , `ScrapAmount` INT UNSIGNED NOT NULL , `GiveSeconds` INT UNSIGNED NOT NULL , `LevelRequirement` INT UNSIGNED NOT NULL , `IsTactical` BOOLEAN NOT NULL , PRIMARY KEY (`GadgetID`));", Conn).ExecuteScalarAsync();
+                    await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{KillstreaksTableName}` ( `KillstreakID` INT UNSIGNED NOT NULL , `KillstreakName` VARCHAR(255) NOT NULL , `KillstreakDesc` TEXT NOT NULL , `IconLink` TEXT NOT NULL , `KillstreakRequired` INT UNSIGNED NOT NULL , `BuyPrice` INT UNSIGNED NOT NULL , `Coins` INT UNSIGNED NOT NULL , `ScrapAmount` INT UNSIGNED NOT NULL , `LevelRequirement` INT UNSIGNED NOT NULL , PRIMARY KEY (`KillstreakID`));", Conn).ExecuteScalarAsync();
                     await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{CardsTableName}` ( `CardID` INT UNSIGNED NOT NULL , `CardName` VARCHAR(255) NOT NULL , `CardDesc` TEXT NOT NULL , `IconLink` TEXT NOT NULL , `CardLink` TEXT NOT NULL , `ScrapAmount` INT UNSIGNED NOT NULL , `BuyPrice` INT UNSIGNED NOT NULL , `Coins` INT UNSIGNED NOT NULL , `LevelRequirement` INT UNSIGNED NOT NULL , PRIMARY KEY (`CardID`));", Conn).ExecuteScalarAsync();
                     await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{GlovesTableName}` ( `GloveID` SMALLINT UNSIGNED NOT NULL , `GloveName` VARCHAR(255) NOT NULL , `GloveDesc` TEXT NOT NULL , `IconLink` TEXT NOT NULL , `ScrapAmount` INT UNSIGNED NOT NULL , `BuyPrice` INT UNSIGNED NOT NULL , `Coins` INT UNSIGNED NOT NULL , `LevelRequirement` INT UNSIGNED NOT NULL , PRIMARY KEY (`GloveID`));", Conn).ExecuteScalarAsync();
                     await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{LevelsTableName}` ( `Level` INT UNSIGNED NOT NULL , `XPNeeded` INT UNSIGNED NOT NULL , `IconLinkLarge` TEXT NOT NULL , `IconLinkMedium` TEXT NOT NULL , `IconLinkSmall` TEXT NOT NULL , PRIMARY KEY (`Level`));", Conn).ExecuteScalarAsync();
@@ -143,6 +147,7 @@ namespace UnturnedBlackout.Managers
                     await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PlayersTableName}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `SteamName` TEXT NOT NULL , `AvatarLink` VARCHAR(200) NOT NULL , `XP` INT UNSIGNED NOT NULL DEFAULT '0' , `Level` INT UNSIGNED NOT NULL DEFAULT '1' , `Credits` INT UNSIGNED NOT NULL DEFAULT '0' , `Kills` INT UNSIGNED NOT NULL DEFAULT '0' , `HeadshotKills` INT UNSIGNED NOT NULL DEFAULT '0' , `HighestKillstreak` INT UNSIGNED NOT NULL DEFAULT '0' , `HighestMultiKills` INT UNSIGNED NOT NULL DEFAULT '0' , `KillsConfirmed` INT UNSIGNED NOT NULL DEFAULT '0' , `KillsDenied` INT UNSIGNED NOT NULL DEFAULT '0' , `FlagsCaptured` INT UNSIGNED NOT NULL DEFAULT '0' , `FlagsSaved` INT UNSIGNED NOT NULL DEFAULT '0' , `AreasTaken` INT UNSIGNED NOT NULL DEFAULT '0' , `Deaths` INT UNSIGNED NOT NULL DEFAULT '0' , `Music` BOOLEAN NOT NULL DEFAULT TRUE , PRIMARY KEY (`SteamID`));", Conn).ExecuteScalarAsync();
                     await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PlayersGunsTableName}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `GunID` SMALLINT UNSIGNED NOT NULL , `Level` INT UNSIGNED NOT NULL , `XP` INT UNSIGNED NOT NULL , `GunKills` INT UNSIGNED NOT NULL , `IsBought` BOOLEAN NOT NULL , `Attachments` TEXT NOT NULL , CONSTRAINT `ub_steam_id` FOREIGN KEY (`SteamID`) REFERENCES `{PlayersTableName}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_gun_id_1` FOREIGN KEY (`GunID`) REFERENCES `{GunsTableName}` (`GunID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `GunID`));", Conn).ExecuteScalarAsync();
                     await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PlayersGunsSkinsTableName}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `SkinIDs` TEXT NOT NULL , CONSTRAINT `ub_steam_id_1` FOREIGN KEY (`SteamID`) REFERENCES `{PlayersTableName}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID`));", Conn).ExecuteScalarAsync();
+                    await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PlayersGunsCharmsTableName}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `CharmID` SMALLINT UNSIGNED NOT NULL , `IsBought` BOOLEAN NOT NULL , CONSTRAINT `ub_steam_id_10` FOREIGN KEY (`SteamID`) REFERENCES `{PlayersTableName}` (`SteamID`) , CONSTRAINT `ub_charm_id` FOREIGN KEY (`CharmID`) REFERENCES `{GunsCharmsTableName}` (`CharmID`) , Primary Key (`SteamID`, `CharmID`));", Conn).ExecuteScalarAsync();
                     await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PlayersKnivesTableName}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `KnifeID` SMALLINT UNSIGNED NOT NULL , `KnifeKills` INT UNSIGNED NOT NULL , `IsBought` BOOLEAN NOT NULL , CONSTRAINT `ub_steam_id_2` FOREIGN KEY (`SteamID`) REFERENCES `{PlayersTableName}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_knife_id_1` FOREIGN KEY (`KnifeID`) REFERENCES `{KnivesTableName}` (`KnifeID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `KnifeID`));", Conn).ExecuteScalarAsync();
                     await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PlayersPerksTableName}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `PerkID` INT UNSIGNED NOT NULL , `IsBought` BOOLEAN NOT NULL , CONSTRAINT `ub_steam_id_4` FOREIGN KEY (`SteamID`) REFERENCES `{PlayersTableName}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_perk_id` FOREIGN KEY (`PerkID`) REFERENCES `{PerksTableName}` (`PerkID`) ON DELETE CASCADE ON UPDATE CASCADE, PRIMARY KEY (`SteamID` , `PerkID`));", Conn).ExecuteScalarAsync();
                     await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PlayersGadgetsTableName}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `GadgetID` SMALLINT UNSIGNED NOT NULL , `GadgetKills` INT UNSIGNED NOT NULL , `IsBought` BOOLEAN NOT NULL , CONSTRAINT `ub_steam_id_5` FOREIGN KEY (`SteamID`) REFERENCES `{PlayersTableName}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_gadget_id` FOREIGN KEY (`GadgetID`) REFERENCES `{GadgetsTableName}` (`GadgetID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `GadgetID`));", Conn).ExecuteScalarAsync();
@@ -234,7 +239,7 @@ namespace UnturnedBlackout.Managers
                     }
 
                     Logging.Debug("Reading guns from the base data");
-                    rdr = (MySqlDataReader)await new MySqlCommand($"SELECT `GunID`, `GunName`, `GunDesc`, `GunType`-1, `IconLink`, `MagAmount`, `Coins`, `BuyPrice`, `LevelRequirement`, `IsPrimary`, `DefaultAttachments`, `LevelXPNeeded`, `LevelRewards` FROM `{GunsTableName}`;", Conn).ExecuteReaderAsync();
+                    rdr = (MySqlDataReader)await new MySqlCommand($"SELECT `GunID`, `GunName`, `GunDesc`, `GunType`-1, `IconLink`, `MagAmount`, `Coins`, `BuyPrice`, `ScrapAmount`, `LevelRequirement`, `IsPrimary`, `DefaultAttachments`, `LevelXPNeeded`, `LevelRewards` FROM `{GunsTableName}`;", Conn).ExecuteReaderAsync();
                     try
                     {
                         var guns = new Dictionary<ushort, Gun>();
@@ -269,18 +274,23 @@ namespace UnturnedBlackout.Managers
                                 continue;
                             }
 
-                            if (!int.TryParse(rdr[8].ToString(), out int levelRequirement))
+                            if (!int.TryParse(rdr[8].ToString(), out int scrapAmount))
                             {
                                 continue;
                             }
 
-                            if (!bool.TryParse(rdr[9].ToString(), out bool isPrimary))
+                            if (!int.TryParse(rdr[9].ToString(), out int levelRequirement))
+                            {
+                                continue;
+                            }
+
+                            if (!bool.TryParse(rdr[10].ToString(), out bool isPrimary))
                             {
                                 continue;
                             }
 
                             var defaultAttachments = new List<GunAttachment>();
-                            foreach (var id in rdr[10].GetIntListFromReaderResult())
+                            foreach (var id in rdr[11].GetIntListFromReaderResult())
                             {
                                 if (GunAttachments.TryGetValue((ushort)id, out GunAttachment gunAttachment))
                                 {
@@ -292,20 +302,22 @@ namespace UnturnedBlackout.Managers
                                 }
                             }
 
-                            var levelXPNeeded = rdr[11].GetIntListFromReaderResult();
-                            var levelRewards = rdr[12].GetIntListFromReaderResult();
+                            var levelXPNeeded = rdr[12].GetIntListFromReaderResult();
+                            var levelRewards = rdr[13].GetIntListFromReaderResult();
                             var rewardAttachments = new Dictionary<int, GunAttachment>();
+                            var rewardAttachmentsInverse = new Dictionary<GunAttachment, int>();
                             foreach (var id in levelRewards)
                             {
                                 if (GunAttachments.TryGetValue((ushort)id, out GunAttachment gunAttachment))
                                 {
                                     rewardAttachments.Add(levelRewards.IndexOf(id) + 2, gunAttachment);
+                                    rewardAttachmentsInverse.Add(gunAttachment, levelRewards.IndexOf(id) + 2);
                                 } else
                                 {
                                     Logging.Debug($"Could'nt find reward attachment with id {id} for gun {gunID} with name {gunName}");
                                 }
                             }
-                            var gun = new Gun(gunID, gunName, gunDesc, gunType, iconLink, magAmount, coins, buyPrice, levelRequirement, isPrimary, defaultAttachments, rewardAttachments, levelXPNeeded);
+                            var gun = new Gun(gunID, gunName, gunDesc, gunType, iconLink, magAmount, coins, buyPrice, scrapAmount, levelRequirement, isPrimary, defaultAttachments, rewardAttachments, rewardAttachmentsInverse, levelXPNeeded);
                             if (!guns.ContainsKey(gunID))
                             {
                                 guns.Add(gunID, gun);
@@ -426,6 +438,41 @@ namespace UnturnedBlackout.Managers
                         rdr.Close();
                     }
 
+                    Logging.Debug("Reading guns charms from the base table");
+                    rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{GunsCharmsTableName}`;", Conn).ExecuteReaderAsync();
+                    try
+                    {
+                        var gunCharms = new Dictionary<ushort, GunCharm>();
+                        while (await rdr.ReadAsync())
+                        {
+                            if (!ushort.TryParse(rdr[0].ToString(), out ushort charmID)) continue;
+                            var charmName = rdr[1].ToString();
+                            var charmDesc = rdr[2].ToString();
+                            var iconLink = rdr[3].ToString();
+                            if (!int.TryParse(rdr[4].ToString(), out int buyPrice)) continue;
+                            if (!int.TryParse(rdr[5].ToString(), out int coins)) continue;
+                            if (!int.TryParse(rdr[6].ToString(), out int scrapAmount)) continue;
+                            if (!int.TryParse(rdr[7].ToString(), out int levelRequired)) continue;
+
+                            if (gunCharms.ContainsKey(charmID))
+                            {
+                                Logging.Debug($"Found a duplicate charm with id {charmID} registered");
+                                continue;
+                            }
+                            gunCharms.Add(charmID, new GunCharm(charmID, charmName, charmDesc, iconLink, buyPrice, coins, scrapAmount, levelRequired));
+                        }
+
+                        Logging.Debug($"Successfully read {gunCharms.Count} gun charms");
+                        GunCharms = gunCharms;
+                    } catch (Exception ex)
+                    {
+                        Logger.Log($"Error finding data from guns charms table");
+                        Logger.Log(ex);
+                    } finally
+                    {
+                        rdr.Close();
+                    }
+
                     Logging.Debug("Reading knives from the base data");
                     rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{KnivesTableName}`;", Conn).ExecuteReaderAsync();
                     try
@@ -514,22 +561,27 @@ namespace UnturnedBlackout.Managers
                                 continue;
                             }
 
-                            if (!int.TryParse(rdr[6].ToString(), out int giveSeconds))
+                            if (!int.TryParse(rdr[6].ToString(), out int scrapAmount))
                             {
                                 continue;
                             }
 
-                            if (!int.TryParse(rdr[7].ToString(), out int levelRequirement))
+                            if (!int.TryParse(rdr[7].ToString(), out int giveSeconds))
                             {
                                 continue;
                             }
 
-                            if (!bool.TryParse(rdr[8].ToString(), out bool isTactical))
+                            if (!int.TryParse(rdr[8].ToString(), out int levelRequirement))
                             {
                                 continue;
                             }
 
-                            var gadget = new Gadget(gadgetID, gadgetName, gadgetDesc, iconLink, coins, buyPrice, giveSeconds, levelRequirement, isTactical);
+                            if (!bool.TryParse(rdr[9].ToString(), out bool isTactical))
+                            {
+                                continue;
+                            }
+
+                            var gadget = new Gadget(gadgetID, gadgetName, gadgetDesc, iconLink, coins, buyPrice, scrapAmount, giveSeconds, levelRequirement, isTactical);
                             if (!gadgets.ContainsKey(gadgetID))
                             {
                                 gadgets.Add(gadgetID, gadget);
@@ -587,12 +639,17 @@ namespace UnturnedBlackout.Managers
                                 continue;
                             }
 
-                            if (!int.TryParse(rdr[7].ToString(), out int levelRequirement))
+                            if (!int.TryParse(rdr[7].ToString(), out int scrapAmount))
                             {
                                 continue;
                             }
 
-                            var killstreak = new Killstreak(killstreakID, killstreakName, killstreakDesc, iconLink, killstreakRequired, buyPrice, coins, levelRequirement);
+                            if (!int.TryParse(rdr[8].ToString(), out int levelRequirement))
+                            {
+                                continue;
+                            }
+
+                            var killstreak = new Killstreak(killstreakID, killstreakName, killstreakDesc, iconLink, killstreakRequired, buyPrice, coins, scrapAmount, levelRequirement);
                             if (!killstreaks.ContainsKey(killstreakID))
                             {
                                 killstreaks.Add(killstreakID, killstreak);
@@ -651,12 +708,17 @@ namespace UnturnedBlackout.Managers
                                 continue;
                             }
 
-                            if (!int.TryParse(rdr[8].ToString(), out int levelRequirement))
+                            if (!int.TryParse(rdr[8].ToString(), out int scrapAmount))
                             {
                                 continue;
                             }
 
-                            var perk = new Perk(perkID, perkName, perkDesc, iconLink, skillType, skillLevel, coins, buyPrice, levelRequirement);
+                            if (!int.TryParse(rdr[9].ToString(), out int levelRequirement))
+                            {
+                                continue;
+                            }
+
+                            var perk = new Perk(perkID, perkName, perkDesc, iconLink, skillType, skillLevel, coins, buyPrice, scrapAmount, levelRequirement);
                             if (!perks.ContainsKey(perkID))
                             {
                                 perks.Add(perkID, perk);
@@ -889,7 +951,7 @@ namespace UnturnedBlackout.Managers
                         Logging.Debug($"Found default glove with id {defaultGlove?.GloveID ?? 0}");
                         var defaultCard = defaultCards.FirstOrDefault();
                         Logging.Debug($"Found default card with id {defaultCard?.CardID ?? 0}");
-                        DefaultLoadout = new LoadoutData("DEFAULT LOADOUT", defaultPrimary?.GunID ?? 0, 0, defaultPrimaryAttachments, defaultSecondary?.GunID ?? 0, 0, defaultSecondaryAttachments, defaultKnife?.KnifeID ?? 0, defaultTactical?.GadgetID ?? 0, defaultLethal?.GadgetID ?? 0, defaultKillstreak, defaultPerk, defaultGlove?.GloveID ?? 0, defaultCard?.CardID ?? 0);
+                        DefaultLoadout = new LoadoutData("DEFAULT LOADOUT", defaultPrimary?.GunID ?? 0, 0, 0, defaultPrimaryAttachments, defaultSecondary?.GunID ?? 0, 0, 0, defaultSecondaryAttachments, defaultKnife?.KnifeID ?? 0, defaultTactical?.GadgetID ?? 0, defaultLethal?.GadgetID ?? 0, defaultKillstreak, defaultPerk, defaultGlove?.GloveID ?? 0, defaultCard?.CardID ?? 0);
                         Logging.Debug("Built a default loadout to give to the players when they join");
                     }
                     catch (Exception ex)
@@ -941,6 +1003,14 @@ namespace UnturnedBlackout.Managers
                     }
                     await new MySqlCommand($"INSERT IGNORE INTO `{PlayersGunsSkinsTableName}` (`SteamID` , `SkinIDs`) VALUES ({player.CSteamID}, '');", Conn).ExecuteScalarAsync();
 
+                    Logging.Debug($"Giving {steamName} the gun charms");
+                    foreach (var gunCharm in GunCharms.Values)
+                    {
+                        Logging.Debug($"Adding gun charm with id {gunCharm.CharmID}");
+                        if (gunCharm.LevelRequired < 0) continue;
+                        await new MySqlCommand($"INSERT IGNORE INTO `{PlayersGunsCharmsTableName}` (`SteamID` , `CharmID` , `IsBought`) VALUES ({player.CSteamID} , {gunCharm.CharmID} , {gunCharm.LevelRequired == 0});", Conn).ExecuteScalarAsync();
+                    }
+
                     Logging.Debug($"Giving {steamName} the knives");
                     foreach (var knife in Knives.Values)
                     {
@@ -981,7 +1051,7 @@ namespace UnturnedBlackout.Managers
                         await new MySqlCommand($"INSERT IGNORE INTO `{PlayersGlovesTableName}` (`SteamID` , `GloveID` , `IsBought`) VALUES ({player.CSteamID} , {glove.GloveID} , {glove.LevelRequirement == 0});", Conn).ExecuteScalarAsync();
                     }
 
-                    Logging.Debug($"Giving {steamName} the default cards");
+                    Logging.Debug($"Giving {steamName} the cards");
                     foreach (var card in Cards.Values)
                     {
                         Logging.Debug($"Adding card with id {card.CardID}");
@@ -995,7 +1065,7 @@ namespace UnturnedBlackout.Managers
                     for (int i = 1; i <= loadoutAmount; i++)
                     {
                         Logging.Debug($"Adding loadout with id {i} for {steamName}");
-                        await new MySqlCommand($"INSERT IGNORE INTO `{PlayersLoadoutsTableName}` (`SteamID` , `LoadoutID` , `IsActive` , `Loadout`) VALUES ({player.CSteamID}, {i}, {(i == 1 ? 1 : 0)}, '{data}');", Conn).ExecuteScalarAsync();
+                        await new MySqlCommand($"INSERT IGNORE INTO `{PlayersLoadoutsTableName}` (`SteamID` , `LoadoutID` , `IsActive` , `Loadout`) VALUES ({player.CSteamID}, {i}, {i == 1}, '{data}');", Conn).ExecuteScalarAsync();
                     }
                 }
                 catch (Exception ex)
@@ -1010,7 +1080,6 @@ namespace UnturnedBlackout.Managers
             }
         }
 
-        // Needs to be changed
         public async Task GetPlayerDataAsync(UnturnedPlayer player)
         {
             using (MySqlConnection Conn = new MySqlConnection(ConnectionString))
@@ -1121,6 +1190,7 @@ namespace UnturnedBlackout.Managers
                     }
 
                     Dictionary<ushort, LoadoutGun> guns = new Dictionary<ushort, LoadoutGun>();
+                    Dictionary<ushort, LoadoutGunCharm> gunCharms = new Dictionary<ushort, LoadoutGunCharm>();
                     Dictionary<ushort, LoadoutKnife> knives = new Dictionary<ushort, LoadoutKnife>();
                     Dictionary<int, GunSkin> gunSkinsSearchByID = new Dictionary<int, GunSkin>();
                     Dictionary<ushort, List<GunSkin>> gunSkinsSearchByGunID = new Dictionary<ushort, List<GunSkin>>();
@@ -1169,7 +1239,7 @@ namespace UnturnedBlackout.Managers
                                 continue;
                             }
 
-                            var attachments = Utility.GetAttachmentsFromString(rdr[6].ToString());
+                            var attachments = Utility.GetAttachmentsFromString(rdr[6].ToString(), gun, player);
                             if (!guns.ContainsKey(gunID))
                             {
                                 guns.Add(gunID, new LoadoutGun(gun, level, xp, gunKills, isBought, attachments));
@@ -1196,13 +1266,94 @@ namespace UnturnedBlackout.Managers
                     {
                         foreach (var gun in guns.Values)
                         {
-                            foreach (var gun)
+                            foreach (var rewardAttachment in gun.Gun.RewardAttachments)
+                            {
+                                if (!gun.Attachments.ContainsKey(rewardAttachment.Value.AttachmentID))
+                                {
+                                    gun.Attachments.Add(rewardAttachment.Value.AttachmentID, new LoadoutAttachment(rewardAttachment.Value, rewardAttachment.Key, false));
+                                    Logging.Debug($"Gun with name {gun.Gun.GunName} doesn't have a reward attachment with id {rewardAttachment.Value.AttachmentID} that comes with the gun, adding it for {player.CharacterName}");
+                                }
+                            }
+                            await new MySqlCommand($"UPDATE `{PlayersGunsTableName}` SET `Attachments` = '{Utility.GetStringFromAttachments(gun.Attachments.Values.ToList())}' WHERE `SteamID` = {player.CSteamID}` AND `GunID` = {gun.Gun.GunID};", Conn).ExecuteScalarAsync();
                         }
                     } catch (Exception ex)
                     {
                         Logger.Log("Error while checking gun attachments");
                         Logger.Log(ex);
-                    } 
+                    }
+
+                    Logging.Debug($"Getting gun skins for {player.CharacterName}");
+                    var gunSkinsTxt = await new MySqlCommand($"SELECT `SkinIDs` FROM `{PlayersGunsSkinsTableName}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteScalarAsync();
+                    if (gunSkinsTxt is string gunSkinsText)
+                    {
+                        foreach (var id in gunSkinsText.GetIntListFromReaderResult())
+                        {
+                            if (!GunSkinsSearchByID.TryGetValue(id, out GunSkin skin))
+                            {
+                                Logging.Debug($"Error finding gun skin with id {id}, ignoring it");
+                                continue;
+                            }
+
+                            if (gunSkinsSearchByID.ContainsKey(id))
+                            {
+                                Logging.Debug($"Found a duplicate gun skin with id {id} registered for {player.CharacterName}, ignoring this");
+                                continue;
+                            }
+
+                            gunSkinsSearchByID.Add(id, skin);
+                            if (gunSkinsSearchByGunID.TryGetValue(skin.Gun.GunID, out List<GunSkin> gunSkins))
+                            {
+                                gunSkins.Add(skin);
+                            }
+                            else
+                            {
+                                gunSkinsSearchByGunID.Add(skin.Gun.GunID, new List<GunSkin> { skin });
+                            }
+                            gunSkinsSearchBySkinID.Add(skin.SkinID, skin);
+                        }
+                        Logging.Debug($"Successfully got {gunSkinsSearchByID.Count} gun skins for {player.CharacterName}");
+                    }
+
+                    Logging.Debug($"Getting gun charms for {player.CharacterName}");
+                    rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PlayersGunsCharmsTableName}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
+                    try
+                    {
+                        while (await rdr.ReadAsync())
+                        {
+                            if (!ushort.TryParse(rdr[1].ToString(), out ushort charmID))
+                            {
+                                continue;
+                            }
+
+                            if (!GunCharms.TryGetValue(charmID, out GunCharm gunCharm))
+                            {
+                                Logging.Debug($"Error finding gun charm with id {charmID} for {player.CharacterName}, ignoring it");
+                                continue;
+                            }
+
+                            if (!bool.TryParse(rdr[2].ToString(), out bool isBought))
+                            {
+                                continue;
+                            }
+
+                            if (!gunCharms.ContainsKey(charmID))
+                            {
+                                gunCharms.Add(charmID, new LoadoutGunCharm(gunCharm, isBought));
+                            }
+                            else
+                            {
+                                Logging.Debug($"Found duplicate gun charm with id {charmID} for {player.CharacterName}, ignoring it");
+                            }
+                        }
+                        Logging.Debug($"Successfully got {gunCharms.Count} for {player.CharacterName}");
+                    } catch (Exception ex)
+                    {
+                        Logger.Log($"Error reading gun charms data for {player.CharacterName}");
+                        Logger.Log(ex);
+                    } finally
+                    {
+                        rdr.Close();
+                    }
 
                     Logging.Debug($"Getting knives for {player.CharacterName}");
                     rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PlayersKnivesTableName}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
@@ -1249,38 +1400,6 @@ namespace UnturnedBlackout.Managers
                     finally
                     {
                         rdr.Close();
-                    }
-
-                    Logging.Debug($"Getting gun skins for {player.CharacterName}");
-                    var gunSkinsTxt = await new MySqlCommand($"SELECT `SkinIDs` FROM `{PlayersGunsSkinsTableName}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteScalarAsync();
-                    if (gunSkinsTxt is string gunSkinsText)
-                    {
-                        foreach (var id in gunSkinsText.GetIntListFromReaderResult())
-                        {
-                            if (!GunSkinsSearchByID.TryGetValue(id, out GunSkin skin))
-                            {
-                                Logging.Debug($"Error finding gun skin with id {id}, ignoring it");
-                                continue;
-                            }
-
-                            if (gunSkinsSearchByID.ContainsKey(id))
-                            {
-                                Logging.Debug($"Found a duplicate gun skin with id {id} registered for {player.CharacterName}, ignoring this");
-                                continue;
-                            }
-
-                            gunSkinsSearchByID.Add(id, skin);
-                            if (gunSkinsSearchByGunID.TryGetValue(skin.Gun.GunID, out List<GunSkin> gunSkins))
-                            {
-                                gunSkins.Add(skin);
-                            }
-                            else
-                            {
-                                gunSkinsSearchByGunID.Add(skin.Gun.GunID, new List<GunSkin> { skin });
-                            }
-                            gunSkinsSearchBySkinID.Add(skin.SkinID, skin);
-                        }
-                        Logging.Debug($"Successfully got {gunSkinsSearchByID.Count} gun skins for {player.CharacterName}");
                     }
 
                     Logging.Debug($"Getting perks for {player.CharacterName}");
@@ -1534,6 +1653,12 @@ namespace UnturnedBlackout.Managers
                                 continue;
                             }
 
+                            if (!gunCharms.TryGetValue(loadoutData.PrimaryGunCharm, out LoadoutGunCharm primaryGunCharm) && loadoutData.PrimaryGunCharm != 0)
+                            {
+                                Logging.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a primary gun charm with id {loadoutData.PrimaryGunCharm} which is not owned by the player, not counting this loadout");
+                                continue;
+                            }
+
                             if (!gunSkinsSearchByID.TryGetValue(loadoutData.PrimarySkin, out GunSkin primarySkin) && loadoutData.PrimarySkin != 0)
                             {
                                 Logging.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a primary skin with id {loadoutData.PrimarySkin} which is not owned by the player, not counting this loadout");
@@ -1556,6 +1681,12 @@ namespace UnturnedBlackout.Managers
                             if (!guns.TryGetValue(loadoutData.Secondary, out LoadoutGun secondary) && loadoutData.Secondary != 0)
                             {
                                 Logging.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a secondary with id {loadoutData.Secondary} which is not owned by the player, not counting this loadout");
+                                continue;
+                            }
+
+                            if (!gunCharms.TryGetValue(loadoutData.SecondaryGunCharm, out LoadoutGunCharm secondaryGunCharm) && loadoutData.SecondaryGunCharm != 0)
+                            {
+                                Logging.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a secondary gun charm with id {loadoutData.SecondaryGunCharm} which is not owned by the player, not counting this loadout");
                                 continue;
                             }
 
@@ -1646,7 +1777,7 @@ namespace UnturnedBlackout.Managers
                                 continue;
                             }
 
-                            loadouts.Add(loadoutID, new Loadout(loadoutID, loadoutData.LoadoutName, isActive, primary, primarySkin, primaryAttachments, secondary, secondarySkin, secondaryAttachments, knife, tactical, lethal, loadoutKillstreaks, loadoutPerks, glove, card));
+                            loadouts.Add(loadoutID, new Loadout(loadoutID, loadoutData.LoadoutName, isActive, primary, primarySkin, primaryGunCharm, primaryAttachments, secondary, secondarySkin, secondaryGunCharm, secondaryAttachments, knife, tactical, lethal, loadoutKillstreaks, loadoutPerks, glove, card));
                         }
                         Logging.Debug($"Successfully got {loadouts.Count} loadouts for {player.CharacterName}");
                     }
@@ -1692,7 +1823,7 @@ namespace UnturnedBlackout.Managers
                     {
                         PlayerLoadouts.Remove(player.CSteamID);
                     }
-                    PlayerLoadouts.Add(player.CSteamID, new PlayerLoadout(guns, knives, gunSkinsSearchByID, gunSkinsSearchByGunID, gunSkinsSearchBySkinID, perks, gadgets, killstreaks, cards, gloves, loadouts));
+                    PlayerLoadouts.Add(player.CSteamID, new PlayerLoadout(guns, gunCharms, knives, gunSkinsSearchByID, gunSkinsSearchByGunID, gunSkinsSearchBySkinID, perks, gadgets, killstreaks, cards, gloves, loadouts));
                 }
                 catch (Exception ex)
                 {
@@ -2148,6 +2279,8 @@ namespace UnturnedBlackout.Managers
             }
         }
 
+        // Player Guns
+
         public async Task AddPlayerGunAsync(CSteamID steamID, ushort gunID, bool isBought)
         {
             using (MySqlConnection Conn = new MySqlConnection(ConnectionString))
@@ -2161,7 +2294,7 @@ namespace UnturnedBlackout.Managers
                         throw new Exception();
                     }
 
-                    await new MySqlCommand($"INSERT INTO `{PlayersGunsTableName}` (`SteamID` , `GunID` , `Level` , `XP` , `GunKills` , `IsBought` , `Attachments`) VALUES ({steamID} , {gunID} , 1 , 0 , 0 , {isBought} , '{Utility.CreateStringFromDefaultAttachments(gun.DefaultAttachments)}');", Conn).ExecuteScalarAsync();
+                    await new MySqlCommand($"INSERT INTO `{PlayersGunsTableName}` (`SteamID` , `GunID` , `Level` , `XP` , `GunKills` , `IsBought` , `Attachments`) VALUES ({steamID} , {gunID} , 1 , 0 , 0 , {isBought} , '{Utility.CreateStringFromDefaultAttachments(gun.DefaultAttachments) + Utility.CreateStringFromRewardAttachments(gun.RewardAttachments.Values.ToList())}');", Conn).ExecuteScalarAsync();
                     var loadoutAttachments = new Dictionary<ushort, LoadoutAttachment>();
                     foreach (var attachment in gun.DefaultAttachments)
                     {
@@ -2170,8 +2303,19 @@ namespace UnturnedBlackout.Managers
                             Logging.Debug($"Duplicate default attachment found for gun {gunID} with id {attachment.AttachmentID}, ignoring it");
                             continue;
                         }
-                        loadoutAttachments.Add(attachment.AttachmentID, new LoadoutAttachment(attachment, true));
+                        loadoutAttachments.Add(attachment.AttachmentID, new LoadoutAttachment(attachment, 0, true));
                     }
+
+                    foreach (var attachment in gun.RewardAttachments)
+                    {
+                        if (loadoutAttachments.ContainsKey(attachment.Value.AttachmentID))
+                        {
+                            Logging.Debug($"Duplicate reward attachment found for gun {gunID} with id {attachment.Value.AttachmentID}, ignoring it");
+                            continue;
+                        }
+                        loadoutAttachments.Add(attachment.Value.AttachmentID, new LoadoutAttachment(attachment.Value, attachment.Key, true));
+                    }
+
                     var loadoutGun = new LoadoutGun(gun, 1, 0, 0, isBought, loadoutAttachments);
 
                     if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
@@ -2325,51 +2469,7 @@ namespace UnturnedBlackout.Managers
             }
         }
 
-        public async Task AddPlayerGunAttachmentAsync(CSteamID steamID, ushort gunID, ushort attachmentID, bool isBought)
-        {
-            using (MySqlConnection Conn = new MySqlConnection(ConnectionString))
-            {
-                try
-                {
-                    await Conn.OpenAsync();
-                    if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
-                    {
-                        Logging.Debug($"Error finding loadout for player with steam id {steamID}");
-                        throw new Exception();
-                    }
-
-                    if (!loadout.Guns.TryGetValue(gunID, out LoadoutGun gun))
-                    {
-                        Logging.Debug($"Error finding loadout gun with id {gunID} for player with steam id {steamID}");
-                        throw new Exception();
-                    }
-
-                    if (!GunAttachments.TryGetValue(attachmentID, out GunAttachment attachment))
-                    {
-                        Logging.Debug($"Error finding attachment with id {attachmentID}");
-                        throw new Exception();
-                    }
-
-                    var loadoutAttachment = new LoadoutAttachment(attachment, isBought);
-                    if (!gun.Attachments.ContainsKey(attachmentID))
-                    {
-                        Logging.Debug($"Attachment already registered to gun with id {gunID} for player with steam id {steamID}");
-                        throw new Exception();
-                    }
-
-                    await new MySqlCommand($"UPDATE `{PlayersGunsTableName}` SET `Attachments` = '{Utility.GetStringFromAttachments(gun.Attachments.Values.ToList())}' WHERE `SteamID` = {steamID} AND `GunID` = {gunID};", Conn).ExecuteScalarAsync();
-                }
-                catch (Exception ex)
-                {
-                    Logger.Log($"Error adding gun attachment with id {attachmentID} to gun with id {gunID}, is bought {isBought} for player with steam id {steamID}");
-                    Logger.Log(ex);
-                }
-                finally
-                {
-                    await Conn.CloseAsync();
-                }
-            }
-        }
+        // Player Guns Attachments
 
         public async Task UpdatePlayerGunAttachmentBoughtAsync(CSteamID steamID, ushort gunID, ushort attachmentID, bool isBought)
         {
@@ -2411,6 +2511,8 @@ namespace UnturnedBlackout.Managers
                 }
             }
         }
+
+        // Player Guns Skins
 
         public async Task AddPlayerGunSkinAsync(CSteamID steamID, int id)
         {
@@ -2461,6 +2563,86 @@ namespace UnturnedBlackout.Managers
                 }
             }
         }
+
+        // Player Guns Charms
+
+        public async Task AddPlayerGunCharmAsync(CSteamID steamID, ushort gunCharmID, bool isBought)
+        {
+            using (MySqlConnection Conn = new MySqlConnection(ConnectionString))
+            {
+                try
+                {
+                    await Conn.OpenAsync();
+                    if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                    {
+                        Logging.Debug($"Error finding loadout for player with steam id {steamID}");
+                        throw new Exception();
+                    }
+
+                    if (!GunCharms.TryGetValue(gunCharmID, out GunCharm gunCharm))
+                    {
+                        Logging.Debug($"Error finding gun charm with id {gunCharmID}");
+                        throw new Exception();
+                    }
+
+                    if (loadout.GunCharms.ContainsKey(gunCharmID))
+                    {
+                        Logging.Debug($"Gun charm with id {gunCharmID} is already registered to player with steam id {steamID}");
+                        throw new Exception();
+                    }
+
+                    var loadoutGunCharm = new LoadoutGunCharm(gunCharm, isBought);
+                    loadout.GunCharms.Add(gunCharmID, loadoutGunCharm);
+
+                    await new MySqlCommand($"INSERT INTO `{PlayersGunsCharmsTableName}` (`SteamID` , `CharmID` , `IsBought`) VALUES ({steamID} , {gunCharmID} , {isBought});", Conn).ExecuteScalarAsync();
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log($"Error adding gun charm with id {gunCharmID} to player with steam id {steamID}");
+                    Logger.Log(ex);
+                }
+                finally
+                {
+                    await Conn.CloseAsync();
+                }
+            }
+        }
+
+        public async Task UpdatePlayerGunCharmBoughtAsync(CSteamID steamID, ushort gunCharmID, bool isBought)
+        {
+            using (MySqlConnection Conn = new MySqlConnection(ConnectionString))
+            {
+                try
+                {
+                    await Conn.OpenAsync();
+                    if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                    {
+                        Logging.Debug($"Error finding loadout for player with steam id {steamID}");
+                        throw new Exception();
+                    }
+
+                    if (!loadout.GunCharms.TryGetValue(gunCharmID, out LoadoutGunCharm gunCharm))
+                    {
+                        Logging.Debug($"Error finding loadout gun charm with id {gunCharmID} for player with steam id {steamID}");
+                        throw new Exception();
+                    }
+
+                    gunCharm.IsBought = isBought;
+                    await new MySqlCommand($"UPDATE `{PlayersGunsCharmsTableName}` SET `IsBought` = {isBought} WHERE `SteamID` = {steamID} AND `CharmID` = {gunCharmID};", Conn).ExecuteScalarAsync();
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log($"Error changing is bought to {isBought} for gun charm with id {gunCharmID} for player with steam id {steamID}");
+                    Logger.Log(ex);
+                }
+                finally
+                {
+                    await Conn.CloseAsync();
+                }
+            }
+        }
+
+        // Player Knives
 
         public async Task AddPlayerKnifeAsync(CSteamID steamID, ushort knifeID, bool isBought)
         {
@@ -2576,6 +2758,8 @@ namespace UnturnedBlackout.Managers
             }
         }
 
+        // Player Perks
+
         public async Task AddPlayerPerkAsync(CSteamID steamID, int perkID, bool isBought)
         {
             using (MySqlConnection Conn = new MySqlConnection(ConnectionString))
@@ -2650,6 +2834,8 @@ namespace UnturnedBlackout.Managers
                 }
             }
         }
+
+        // Player Gadgets
 
         public async Task AddPlayerGadgetAsync(CSteamID steamID, ushort gadgetID, bool isBought)
         {
@@ -2758,6 +2944,8 @@ namespace UnturnedBlackout.Managers
                 }
             }
         }
+
+        // Player Killstreaks
 
         public async Task AddPlayerKillstreakAsync(CSteamID steamID, int killstreakID, bool isBought)
         {
@@ -2872,6 +3060,8 @@ namespace UnturnedBlackout.Managers
             }
         }
 
+        // Player Cards
+
         public async Task AddPlayerCardAsync(CSteamID steamID, int cardID, bool isBought)
         {
             using (MySqlConnection Conn = new MySqlConnection(ConnectionString))
@@ -2948,6 +3138,8 @@ namespace UnturnedBlackout.Managers
             }
         }
 
+        // Player Gloves
+
         public async Task AddPlayerGloveAsync(CSteamID steamID, ushort gloveID, bool isBought)
         {
             using (MySqlConnection Conn = new MySqlConnection(ConnectionString))
@@ -3023,6 +3215,8 @@ namespace UnturnedBlackout.Managers
                 }
             }
         }
+
+        // Player Loadouts
 
         public async Task UpdatePlayerLoadoutAsync(CSteamID steamID, int loadoutID)
         {

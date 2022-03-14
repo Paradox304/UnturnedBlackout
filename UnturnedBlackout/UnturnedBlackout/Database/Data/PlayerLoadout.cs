@@ -6,6 +6,7 @@ namespace UnturnedBlackout.Database.Data
     public class PlayerLoadout
     {
         public Dictionary<ushort, LoadoutGun> Guns { get; set; }
+        public Dictionary<ushort, LoadoutGunCharm> GunCharms { get; set; }
         public Dictionary<ushort, LoadoutKnife> Knives { get; set; }
         public Dictionary<int, GunSkin> GunSkinsSearchByID { get; set; }
         public Dictionary<ushort, List<GunSkin>> GunSkinsSearchByGunID { get; set; }
@@ -17,9 +18,10 @@ namespace UnturnedBlackout.Database.Data
         public Dictionary<ushort, LoadoutGlove> Gloves { get; set; }
         public Dictionary<int, Loadout> Loadouts { get; set; }
 
-        public PlayerLoadout(Dictionary<ushort, LoadoutGun> guns, Dictionary<ushort, LoadoutKnife> knives, Dictionary<int, GunSkin> gunSkinsSearchByID, Dictionary<ushort, List<GunSkin>> gunSkinsSearchByGunID, Dictionary<ushort, GunSkin> gunSkinsSearchBySkinID, Dictionary<int, LoadoutPerk> perks, Dictionary<ushort, LoadoutGadget> gadgets, Dictionary<int, LoadoutKillstreak> killstreaks, Dictionary<int, LoadoutCard> cards, Dictionary<ushort, LoadoutGlove> gloves, Dictionary<int, Loadout> loadouts)
+        public PlayerLoadout(Dictionary<ushort, LoadoutGun> guns, Dictionary<ushort, LoadoutGunCharm> gunCharms, Dictionary<ushort, LoadoutKnife> knives, Dictionary<int, GunSkin> gunSkinsSearchByID, Dictionary<ushort, List<GunSkin>> gunSkinsSearchByGunID, Dictionary<ushort, GunSkin> gunSkinsSearchBySkinID, Dictionary<int, LoadoutPerk> perks, Dictionary<ushort, LoadoutGadget> gadgets, Dictionary<int, LoadoutKillstreak> killstreaks, Dictionary<int, LoadoutCard> cards, Dictionary<ushort, LoadoutGlove> gloves, Dictionary<int, Loadout> loadouts)
         {
             Guns = guns;
+            GunCharms = gunCharms;
             Knives = knives;
             GunSkinsSearchByID = gunSkinsSearchByID;
             GunSkinsSearchByGunID = gunSkinsSearchByGunID;

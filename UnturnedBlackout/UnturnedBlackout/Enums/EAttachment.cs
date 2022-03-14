@@ -4,8 +4,8 @@
     {
         Sights,
         Grip,
-        Tactical,
         Barrel,
-        Magazine
+        Magazine,
+        Charm
     }
 }

@@ -128,7 +128,7 @@ namespace UnturnedBlackout
             return text;
         }
 
-        public static Dictionary<ushort, LoadoutAttachment> GetAttachmentsFromString(string text)
+        public static Dictionary<ushort, LoadoutAttachment> GetAttachmentsFromString(string text, Gun gun, UnturnedPlayer player)
         {
             var attachments = new Dictionary<ushort, LoadoutAttachment>();
             var attachmentsText = text.Split(',');
@@ -157,13 +157,28 @@ namespace UnturnedBlackout
                         continue;
                     }
                 }
-                if (Plugin.Instance.DBManager.GunAttachments.TryGetValue(attachmentID, out GunAttachment gunAttachment))
+                if (!Plugin.Instance.DBManager.GunAttachments.TryGetValue(attachmentID, out GunAttachment gunAttachment))
                 {
-                    if (!attachments.ContainsKey(gunAttachment.AttachmentID))
-                    {
-                        attachments.Add(gunAttachment.AttachmentID, new LoadoutAttachment(gunAttachment, isBought));
-                    }
+                    Logging.Debug($"Gun with name {gun.GunName} has an attachment with id {attachmentID} which is not registered in attachments table for {player.CharacterName}");
+                    continue;
                 }
+
+                if (attachments.ContainsKey(attachmentID))
+                {
+                    Logging.Debug($"Gun with name {gun.GunName} has a duplicate attachment with id {attachmentID} for {player.CharacterName}");
+                    continue;
+                }
+                var levelRequired = -1;
+                if (gun.DefaultAttachments.Contains(gunAttachment))
+                {
+                    levelRequired = 0;
+                }
+                else if (!gun.RewardAttachmentsInverse.TryGetValue(gunAttachment, out levelRequired))
+                {
+                    Logging.Debug($"Gun with name {gun.GunName} has an attachment with name {gunAttachment.AttachmentName} which is not in the default attachments list for the gun or reward attachments list for {player.CharacterName}");
+                    continue;
+                }
+                attachments.Add(gunAttachment.AttachmentID, new LoadoutAttachment(gunAttachment, levelRequired, isBought));
             }
             return attachments;
         }
@@ -197,6 +212,7 @@ namespace UnturnedBlackout
             }
             return text;
         }
+
         public static int GetLoadoutAmount(UnturnedPlayer player)
         {
             var amount = Plugin.Instance.Configuration.Instance.DefaultLoadoutAmount;

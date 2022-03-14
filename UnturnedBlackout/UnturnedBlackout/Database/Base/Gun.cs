@@ -13,13 +13,15 @@ namespace UnturnedBlackout.Database.Base
         public int MagAmount { get; set; }
         public int Coins { get; set; }
         public int BuyPrice { get; set; }
+        public int ScrapAmount { get; set; }
         public int LevelRequirement { get; set; }
         public bool IsPrimary { get; set; }
         public List<GunAttachment> DefaultAttachments { get; set; }
         public Dictionary<int, GunAttachment> RewardAttachments { get; set; }
+        public Dictionary<GunAttachment, int> RewardAttachmentsInverse { get; set; }
         public List<int> LevelXPNeeded { get; set; }
 
-        public Gun(ushort gunID, string gunName, string gunDesc, EGun gunType, string iconLink, int magAmount, int coins, int buyPrice, int levelRequirement, bool isPrimary, List<GunAttachment> defaultAttachments, Dictionary<int, GunAttachment> rewardAttachments, List<int> levelXPNeeded)
+        public Gun(ushort gunID, string gunName, string gunDesc, EGun gunType, string iconLink, int magAmount, int coins, int buyPrice, int scrapAmount, int levelRequirement, bool isPrimary, List<GunAttachment> defaultAttachments, Dictionary<int, GunAttachment> rewardAttachments, Dictionary<GunAttachment, int> rewardAttachmentsInverse, List<int> levelXPNeeded)
         {
             GunID = gunID;
             GunName = gunName;
@@ -29,10 +31,12 @@ namespace UnturnedBlackout.Database.Base
             MagAmount = magAmount;
             Coins = coins;
             BuyPrice = buyPrice;
+            ScrapAmount = scrapAmount;
             LevelRequirement = levelRequirement;
             IsPrimary = isPrimary;
             DefaultAttachments = defaultAttachments;
             RewardAttachments = rewardAttachments;
+            RewardAttachmentsInverse = rewardAttachmentsInverse;
             LevelXPNeeded = levelXPNeeded;
         }
     }

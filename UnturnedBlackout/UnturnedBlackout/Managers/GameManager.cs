@@ -163,16 +163,8 @@ namespace UnturnedBlackout.Managers
                 }
                 finally
                 {
+                    await db.AddPlayerAsync(player, player.CharacterName, avatarURL);
                     await db.GetPlayerDataAsync(player);
-                    if (db.PlayerData.ContainsKey(player.CSteamID))
-                    {
-                        await db.UpdatePlayerAsync(player.CSteamID, player.CharacterName.ToUnrich(), avatarURL);
-                    }
-                    else
-                    {
-                        await db.AddPlayerAsync(player, player.CharacterName.ToUnrich(), avatarURL);
-                        await db.GetPlayerDataAsync(player);
-                    }
                 }
 
                 TaskDispatcher.QueueOnMainThread(() =>
