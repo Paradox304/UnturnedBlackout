@@ -15,9 +15,9 @@ namespace UnturnedBlackout.Database.Base
         public int BuyPrice { get; set; }
         public int Coins { get; set; }
         public int ScrapAmount { get; set; }
-        public int LevelRequired { get; set; }
+        public int LevelRequirement { get; set; }
 
-        public GunCharm(ushort charmID, string charmName, string charmDesc, string iconLink, int buyPrice, int coins, int scrapAmount, int levelRequired)
+        public GunCharm(ushort charmID, string charmName, string charmDesc, string iconLink, int buyPrice, int coins, int scrapAmount, int levelRequirement)
         {
             CharmID = charmID;
             CharmName = charmName;
@@ -26,7 +26,7 @@ namespace UnturnedBlackout.Database.Base
             BuyPrice = buyPrice;
             Coins = coins;
             ScrapAmount = scrapAmount;
-            LevelRequired = levelRequired;
+            LevelRequirement = levelRequirement;
         }
     }
 }

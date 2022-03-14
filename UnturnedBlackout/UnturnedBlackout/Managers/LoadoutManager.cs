@@ -41,14 +41,15 @@ namespace UnturnedBlackout.Managers
                 return;
             }
 
-            var gunSlot = isPrimary ? playerLoadout.Primary : playerLoadout.Secondary;
-            var gunSlotAttachments = isPrimary ? playerLoadout.PrimaryAttachments : playerLoadout.SecondaryAttachments;
-
             if (isPrimary)
             {
                 playerLoadout.Primary = gun;
                 playerLoadout.PrimaryAttachments.Clear();
                 playerLoadout.PrimarySkin = null;
+                if (gun == null)
+                {
+                    playerLoadout.PrimaryGunCharm = null;
+                }
                 if (gun != null)
                 {
                     foreach (var defaultAttachment in gun.Gun.DefaultAttachments)
@@ -68,6 +69,10 @@ namespace UnturnedBlackout.Managers
                 playerLoadout.Secondary = gun;
                 playerLoadout.SecondaryAttachments.Clear();
                 playerLoadout.SecondarySkin = null;
+                if (gun == null)
+                {
+                    playerLoadout.SecondaryGunCharm = null;
+                }
                 if (gun != null)
                 {
                     foreach (var defaultAttachment in gun.Gun.DefaultAttachments)
@@ -178,6 +183,43 @@ namespace UnturnedBlackout.Managers
             }
         }
 
+        public void EquipGunCharm(UnturnedPlayer player, int loadoutID, ushort newGunCharm, bool isPrimary)
+        {
+            Logging.Debug($"{player.CharacterName} is trying to switch {(isPrimary ? "Primary Gun Charm" : "Secondary Gun Charm")} to {newGunCharm} for loadout with id {loadoutID}");
+            if (!DB.PlayerLoadouts.TryGetValue(player.CSteamID, out PlayerLoadout loadout))
+            {
+                Logging.Debug($"Error finding loadout for {player.CharacterName}");
+                return;
+            }
+
+            if (!loadout.GunCharms.TryGetValue(newGunCharm, out LoadoutGunCharm gunCharm) && newGunCharm != 0)
+            {
+                Logging.Debug($"Error finding loadout gun charm with id {newGunCharm} for {player.CharacterName}");
+                return;
+            }
+
+            if (!loadout.Loadouts.TryGetValue(loadoutID, out Loadout playerLoadout))
+            {
+                Logging.Debug($"Error finding loadout with id {loadoutID} for {player.CharacterName}");
+                return;
+            }
+
+            if (isPrimary)
+            {
+                playerLoadout.PrimaryGunCharm = gunCharm;
+            }
+            else
+            {
+                playerLoadout.SecondaryGunCharm = gunCharm;
+            }
+
+
+            ThreadPool.QueueUserWorkItem(async (o) =>
+            {
+                await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
+            });
+        }
+
         public void EquipKnife(UnturnedPlayer player, int loadoutID, ushort newKnife)
         {
             Logging.Debug($"{player.CharacterName} is trying to switch knife to {newKnife} for loadout with id {loadoutID}");
@@ -200,7 +242,6 @@ namespace UnturnedBlackout.Managers
             }
 
             playerLoadout.Knife = knife;
-            playerLoadout.KnifeSkin = null;
             ThreadPool.QueueUserWorkItem(async (o) =>
             {
                 await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
@@ -535,64 +576,6 @@ namespace UnturnedBlackout.Managers
             });
         }
 
-        public void EquipKnifeSkin(UnturnedPlayer player, int loadoutID, int id)
-        {
-            Logging.Debug($"{player.CharacterName} trying to equip knife skin with id {id}");
-            if (!DB.PlayerLoadouts.TryGetValue(player.CSteamID, out PlayerLoadout loadout))
-            {
-                Logging.Debug($"Error finding loadout for {player.CharacterName}");
-                return;
-            }
-
-            if (!loadout.Loadouts.TryGetValue(loadoutID, out Loadout playerLoadout))
-            {
-                Logging.Debug($"Error finding loadout with id {loadoutID} for {player.CharacterName}");
-                return;
-            }
-
-            if (!loadout.KnifeSkinsSearchByID.TryGetValue(id, out KnifeSkin knifeSkin))
-            {
-                Logging.Debug($"Error finding knife skin with id {id} for {player.CharacterName}");
-                return;
-            }
-
-            if (playerLoadout.Knife.Knife.KnifeID != knifeSkin.Knife.KnifeID)
-            {
-                Logging.Debug($"{player.CharacterName} is trying to set skin with id {id} which is not of the knife that player has equipped");
-                return;
-            }
-
-            playerLoadout.KnifeSkin = knifeSkin;
-
-            ThreadPool.QueueUserWorkItem(async (o) =>
-            {
-                await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
-            });
-        }
-
-        public void DequipKnifeSkin(UnturnedPlayer player, int loadoutID)
-        {
-            Logging.Debug($"{player.CharacterName} trying to dequip knife skin");
-            if (!DB.PlayerLoadouts.TryGetValue(player.CSteamID, out PlayerLoadout loadout))
-            {
-                Logging.Debug($"Error finding loadout for {player.CharacterName}");
-                return;
-            }
-
-            if (loadout.Loadouts.TryGetValue(loadoutID, out Loadout playerLoadout))
-            {
-                Logging.Debug($"Error finding loadout with id {loadoutID} for {player.CharacterName}");
-                return;
-            }
-
-            playerLoadout.KnifeSkin = null;
-
-            ThreadPool.QueueUserWorkItem(async (o) =>
-            {
-                await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
-            });
-        }
-
         public void GiveLoadout(GamePlayer player, Kit kit)
         {
             Logging.Debug($"Giving loadout to {player.Player.CharacterName}");
@@ -632,7 +615,7 @@ namespace UnturnedBlackout.Managers
                 var item = new Item(activeLoadout.PrimarySkin == null ? activeLoadout.Primary.Gun.GunID : activeLoadout.PrimarySkin.SkinID, false);
 
                 // Setting up attachments
-                for (int i = 0; i <= 4; i++)
+                for (int i = 0; i <= 3; i++)
                 {
                     var attachmentType = (EAttachment)i;
                     var startingPos = Utility.GetStartingPos(attachmentType);
@@ -659,6 +642,17 @@ namespace UnturnedBlackout.Managers
                     }
                 }
 
+                if (activeLoadout.PrimaryGunCharm != null)
+                {
+                    var bytes = BitConverter.GetBytes(activeLoadout.PrimaryGunCharm.GunCharm.CharmID);
+                    item.state[2] = bytes[0];
+                    item.state[3] = bytes[1];
+                } else
+                {
+                    item.state[2] = 0;
+                    item.state[3] = 0;
+                }
+
                 inv.items[0].tryAddItem(item);
                 player.Player.Player.equipment.tryEquip(0, 0, 0);
             }
@@ -669,7 +663,7 @@ namespace UnturnedBlackout.Managers
                 var item = new Item(activeLoadout.SecondarySkin == null ? activeLoadout.Secondary.Gun.GunID : activeLoadout.SecondarySkin.SkinID, true);
 
                 // Setting up attachments
-                for (int i = 0; i <= 4; i++)
+                for (int i = 0; i <= 3; i++)
                 {
                     var attachmentType = (EAttachment)i;
                     var startingPos = Utility.GetStartingPos(attachmentType);
@@ -697,6 +691,18 @@ namespace UnturnedBlackout.Managers
                     }
                 }
 
+                if (activeLoadout.SecondaryGunCharm != null)
+                {
+                    var bytes = BitConverter.GetBytes(activeLoadout.SecondaryGunCharm.GunCharm.CharmID);
+                    item.state[2] = bytes[0];
+                    item.state[3] = bytes[1];
+                }
+                else
+                {
+                    item.state[2] = 0;
+                    item.state[3] = 0;
+                }
+
                 inv.items[1].tryAddItem(item);
                 if (activeLoadout.Primary == null)
                 {
@@ -707,7 +713,7 @@ namespace UnturnedBlackout.Managers
             // Giving knife to player
             if (activeLoadout.Knife != null)
             {
-                inv.forceAddItem(new Item(activeLoadout.KnifeSkin == null ? activeLoadout.Knife.Knife.KnifeID : activeLoadout.KnifeSkin.SkinID, true), activeLoadout.Primary == null && activeLoadout.Secondary == null);
+                inv.forceAddItem(new Item(activeLoadout.Knife.Knife.KnifeID, true), activeLoadout.Primary == null && activeLoadout.Secondary == null);
             }
 
             // Giving perks to player
@@ -717,12 +723,13 @@ namespace UnturnedBlackout.Managers
             {
                 if (PlayerSkills.TryParseIndices(defaultSkill.SkillName, out int specialtyIndex, out int skillIndex))
                 {
+                    var max = skill.skills[specialtyIndex][skillIndex].max;
                     if (skills.ContainsKey((specialtyIndex, skillIndex)))
                     {
-                        skills[(specialtyIndex, skillIndex)] = defaultSkill.SkillLevel;
+                        skills[(specialtyIndex, skillIndex)] = defaultSkill.SkillLevel < max ? defaultSkill.SkillLevel : max;
                     } else
                     {
-                        skills.Add((specialtyIndex, skillIndex), defaultSkill.SkillLevel);
+                        skills.Add((specialtyIndex, skillIndex), defaultSkill.SkillLevel < max ? defaultSkill.SkillLevel : max);
                     }
                 }
             }
@@ -730,13 +737,20 @@ namespace UnturnedBlackout.Managers
             {
                 if (PlayerSkills.TryParseIndices(perk.Perk.SkillType, out int specialtyIndex, out int skillIndex))
                 {
+                    var max = skill.skills[specialtyIndex][skillIndex].max;
                     if (skills.ContainsKey((specialtyIndex, skillIndex)))
                     {
-                        skills[(specialtyIndex, skillIndex)] = perk.Perk.SkillLevel;
+                        if (skills[(specialtyIndex, skillIndex)] + perk.Perk.SkillLevel > max)
+                        {
+                            skills[(specialtyIndex, skillIndex)] = max;
+                        } else
+                        {
+                            skills[(specialtyIndex, skillIndex)] += perk.Perk.SkillLevel;
+                        }
                     }
                     else
                     {
-                        skills.Add((specialtyIndex, skillIndex), perk.Perk.SkillLevel);
+                        skills.Add((specialtyIndex, skillIndex), perk.Perk.SkillLevel < max ? perk.Perk.SkillLevel : max);
                     }
                 }
             }

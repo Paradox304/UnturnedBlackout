@@ -1007,10 +1007,10 @@ namespace UnturnedBlackout.Managers
                     handler.ShowLoadouts();
                     return;
                 case "SERVER Loadout Next BUTTON":
-                    handler.ForwardLoadoutTab();
+                    handler.ForwardLoadoutPage();
                     return;
                 case "SERVER Loadout Previous BUTTON":
-                    handler.BackwardLoadoutTab();
+                    handler.BackwardLoadoutPage();
                     return;
                 case "SERVER Loadout Back BUTTON":
                     return;
@@ -1047,8 +1047,8 @@ namespace UnturnedBlackout.Managers
                 case "SERVER Loadout Primary Grip BUTTON":
                     handler.ShowLoadoutSubPage(ELoadoutPage.AttachmentPrimaryGrip);
                     return;
-                case "SERVER Loadout Primary Tactical BUTTON":
-                    handler.ShowLoadoutSubPage(ELoadoutPage.AttachmentPrimaryTactical);
+                case "SERVER Loadout Primary Charm BUTTON":
+                    handler.ShowLoadoutSubPage(ELoadoutPage.AttachmentPrimaryCharm);
                     return;
                 case "SERVER Loadout Primary Barrel BUTTON":
                     handler.ShowLoadoutSubPage(ELoadoutPage.AttachmentPrimaryBarrel);
@@ -1062,11 +1062,8 @@ namespace UnturnedBlackout.Managers
                 case "SERVER Loadout Secondary Sights BUTTON":
                     handler.ShowLoadoutSubPage(ELoadoutPage.AttachmentSecondarySights);
                     return;
-                case "SERVER Loadout Secondary Grip BUTTON":
-                    handler.ShowLoadoutSubPage(ELoadoutPage.AttachmentSecondaryGrip);
-                    return;
-                case "SERVER Loadout Secondary Tactical BUTTON":
-                    handler.ShowLoadoutSubPage(ELoadoutPage.AttachmentSecondaryTactical);
+                case "SERVER Loadout Secondary Charm BUTTON":
+                    handler.ShowLoadoutSubPage(ELoadoutPage.AttachmentSecondaryCharm);
                     return;
                 case "SERVER Loadout Secondary Barrel BUTTON":
                     handler.ShowLoadoutSubPage(ELoadoutPage.AttachmentSecondaryBarrel);
@@ -1109,6 +1106,9 @@ namespace UnturnedBlackout.Managers
                     return;
                 case "SERVER Item Buy BUTTON":
                     handler.BuySelectedItem();
+                    return;
+                case "SERVER Item Unlock BUTTON":
+                    handler.UnlockSelectedItem();
                     return;
                 case "SERVER Item Dequip BUTTON":
                     handler.DequipSelectedItem();

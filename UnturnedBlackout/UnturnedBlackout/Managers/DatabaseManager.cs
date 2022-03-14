@@ -135,7 +135,7 @@ namespace UnturnedBlackout.Managers
                     await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{GunsTableName}` ( `GunID` SMALLINT UNSIGNED NOT NULL , `GunName` VARCHAR(255) NOT NULL , `GunDesc` TEXT NOT NULL , `GunType` ENUM('Pistol','SMG','Shotgun','LMG','AR','SNIPER') NOT NULL , `IconLink` TEXT NOT NULL , `MagAmount` TINYINT UNSIGNED NOT NULL , `Coins` INT UNSIGNED NOT NULL , `BuyPrice` INT UNSIGNED NOT NULL ,  `ScrapAmount` INT UNSIGNED NOT NULL , `LevelRequirement` INT UNSIGNED NOT NULL , `IsPrimary` BOOLEAN NOT NULL , `DefaultAttachments` TEXT NOT NULL , `LevelXPNeeded` TEXT NOT NULL , `LevelRewards` TEXT NOT NULL , PRIMARY KEY (`GunID`));", Conn).ExecuteScalarAsync();
                     await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{AttachmentsTableName}` ( `AttachmentID` SMALLINT UNSIGNED NOT NULL , `AttachmentName` VARCHAR(255) NOT NULL , `AttachmentDesc` TEXT NOT NULL , `AttachmentType` ENUM('Sights','Grip','Barrel','Magazine') NOT NULL , `IconLink` TEXT NOT NULL , `BuyPrice` INT UNSIGNED NOT NULL , `Coins` INT UNSIGNED NOT NULL , PRIMARY KEY (`AttachmentID`));", Conn).ExecuteScalarAsync();
                     await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{GunsSkinsTableName}` ( `ID` INT UNSIGNED NOT NULL AUTO_INCREMENT , `GunID` SMALLINT UNSIGNED NOT NULL , `SkinID` SMALLINT UNSIGNED NOT NULL , `SkinName` VARCHAR(255) NOT NULL , `SkinDesc` TEXT NOT NULL , `IconLink` TEXT NOT NULL , `ScrapAmount` INT UNSIGNED NOT NULL , CONSTRAINT `ub_gun_id` FOREIGN KEY (`GunID`) REFERENCES `{GunsTableName}` (`GunID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`ID`));", Conn).ExecuteScalarAsync();
-                    await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{GunsCharmsTableName}` ( `CharmID` SMALLINT UNSIGNED NOT NULL , `CharmName` VARCHAR(255) NOT NULL , `CharmDesc` TEXT NOT NULL , `IconLink` TEXT NOT NULL , `BuyPrice` INT UNSIGNED NOT NULL , `Coins` INT UNSIGNED NOT NULL , `ScrapAmount` INT UNSIGNED NOT NULL , `LevelRequired` INT UNSIGNED NOT NULL , PRIMARY KEY (`CharmID`));", Conn).ExecuteScalarAsync();
+                    await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{GunsCharmsTableName}` ( `CharmID` SMALLINT UNSIGNED NOT NULL , `CharmName` VARCHAR(255) NOT NULL , `CharmDesc` TEXT NOT NULL , `IconLink` TEXT NOT NULL , `BuyPrice` INT UNSIGNED NOT NULL , `Coins` INT UNSIGNED NOT NULL , `ScrapAmount` INT UNSIGNED NOT NULL , `LevelRequirement` INT UNSIGNED NOT NULL , PRIMARY KEY (`CharmID`));", Conn).ExecuteScalarAsync();
                     await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{KnivesTableName}` ( `KnifeID` SMALLINT UNSIGNED NOT NULL , `KnifeName` VARCHAR(255) NOT NULL , `KnifeDesc` TEXT NOT NULL , `IconLink` TEXT NOT NULL , `ScrapAmount` INT UNSIGNED NOT NULL , `Coins` INT UNSIGNED NOT NULL , `BuyPrice` INT UNSIGNED NOT NULL , `LevelRequirement` INT UNSIGNED NOT NULL , PRIMARY KEY (`KnifeID`));", Conn).ExecuteScalarAsync();
                     await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PerksTableName}` ( `PerkID` INT UNSIGNED NOT NULL , `PerkName` VARCHAR(255) NOT NULL , `PerkDesc` TEXT NOT NULL , `IconLink` TEXT NOT NULL , `SkillType` TEXT NOT NULL , `SkillLevel` INT UNSIGNED NOT NULL , `Coins` INT UNSIGNED NOT NULL , `BuyPrice` INT UNSIGNED NOT NULL , `ScrapAmount` INT UNSIGNED NOT NULL , `LevelRequirement` INT UNSIGNED NOT NULL , PRIMARY KEY (`PerkID`));", Conn).ExecuteScalarAsync();
                     await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{GadgetsTableName}` ( `GadgetID` SMALLINT UNSIGNED NOT NULL , `GadgetName` VARCHAR(255) NOT NULL , `GadgetDesc` TEXT NOT NULL , `IconLink` TEXT NOT NULL , `Coins` INT UNSIGNED NOT NULL , `BuyPrice` INT UNSIGNED NOT NULL , `ScrapAmount` INT UNSIGNED NOT NULL , `GiveSeconds` INT UNSIGNED NOT NULL , `LevelRequirement` INT UNSIGNED NOT NULL , `IsTactical` BOOLEAN NOT NULL , PRIMARY KEY (`GadgetID`));", Conn).ExecuteScalarAsync();
@@ -144,7 +144,7 @@ namespace UnturnedBlackout.Managers
                     await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{GlovesTableName}` ( `GloveID` SMALLINT UNSIGNED NOT NULL , `GloveName` VARCHAR(255) NOT NULL , `GloveDesc` TEXT NOT NULL , `IconLink` TEXT NOT NULL , `ScrapAmount` INT UNSIGNED NOT NULL , `BuyPrice` INT UNSIGNED NOT NULL , `Coins` INT UNSIGNED NOT NULL , `LevelRequirement` INT UNSIGNED NOT NULL , PRIMARY KEY (`GloveID`));", Conn).ExecuteScalarAsync();
                     await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{LevelsTableName}` ( `Level` INT UNSIGNED NOT NULL , `XPNeeded` INT UNSIGNED NOT NULL , `IconLinkLarge` TEXT NOT NULL , `IconLinkMedium` TEXT NOT NULL , `IconLinkSmall` TEXT NOT NULL , PRIMARY KEY (`Level`));", Conn).ExecuteScalarAsync();
                     // PLAYERS DATA
-                    await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PlayersTableName}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `SteamName` TEXT NOT NULL , `AvatarLink` VARCHAR(200) NOT NULL , `XP` INT UNSIGNED NOT NULL DEFAULT '0' , `Level` INT UNSIGNED NOT NULL DEFAULT '1' , `Credits` INT UNSIGNED NOT NULL DEFAULT '0' , `Kills` INT UNSIGNED NOT NULL DEFAULT '0' , `HeadshotKills` INT UNSIGNED NOT NULL DEFAULT '0' , `HighestKillstreak` INT UNSIGNED NOT NULL DEFAULT '0' , `HighestMultiKills` INT UNSIGNED NOT NULL DEFAULT '0' , `KillsConfirmed` INT UNSIGNED NOT NULL DEFAULT '0' , `KillsDenied` INT UNSIGNED NOT NULL DEFAULT '0' , `FlagsCaptured` INT UNSIGNED NOT NULL DEFAULT '0' , `FlagsSaved` INT UNSIGNED NOT NULL DEFAULT '0' , `AreasTaken` INT UNSIGNED NOT NULL DEFAULT '0' , `Deaths` INT UNSIGNED NOT NULL DEFAULT '0' , `Music` BOOLEAN NOT NULL DEFAULT TRUE , PRIMARY KEY (`SteamID`));", Conn).ExecuteScalarAsync();
+                    await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PlayersTableName}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `SteamName` TEXT NOT NULL , `AvatarLink` VARCHAR(200) NOT NULL , `XP` INT UNSIGNED NOT NULL DEFAULT '0' , `Level` INT UNSIGNED NOT NULL DEFAULT '1' , `Credits` INT UNSIGNED NOT NULL DEFAULT '0' , `Scrap` INT UNSIGNED NOT NULL DEFAULT '0' , `Coins` INT UNSIGNED NOT NULL DEFAULT '0' , `Kills` INT UNSIGNED NOT NULL DEFAULT '0' , `HeadshotKills` INT UNSIGNED NOT NULL DEFAULT '0' , `HighestKillstreak` INT UNSIGNED NOT NULL DEFAULT '0' , `HighestMultiKills` INT UNSIGNED NOT NULL DEFAULT '0' , `KillsConfirmed` INT UNSIGNED NOT NULL DEFAULT '0' , `KillsDenied` INT UNSIGNED NOT NULL DEFAULT '0' , `FlagsCaptured` INT UNSIGNED NOT NULL DEFAULT '0' , `FlagsSaved` INT UNSIGNED NOT NULL DEFAULT '0' , `AreasTaken` INT UNSIGNED NOT NULL DEFAULT '0' , `Deaths` INT UNSIGNED NOT NULL DEFAULT '0' , `Music` BOOLEAN NOT NULL DEFAULT TRUE , PRIMARY KEY (`SteamID`));", Conn).ExecuteScalarAsync();
                     await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PlayersGunsTableName}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `GunID` SMALLINT UNSIGNED NOT NULL , `Level` INT UNSIGNED NOT NULL , `XP` INT UNSIGNED NOT NULL , `GunKills` INT UNSIGNED NOT NULL , `IsBought` BOOLEAN NOT NULL , `Attachments` TEXT NOT NULL , CONSTRAINT `ub_steam_id` FOREIGN KEY (`SteamID`) REFERENCES `{PlayersTableName}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_gun_id_1` FOREIGN KEY (`GunID`) REFERENCES `{GunsTableName}` (`GunID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `GunID`));", Conn).ExecuteScalarAsync();
                     await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PlayersGunsSkinsTableName}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `SkinIDs` TEXT NOT NULL , CONSTRAINT `ub_steam_id_1` FOREIGN KEY (`SteamID`) REFERENCES `{PlayersTableName}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID`));", Conn).ExecuteScalarAsync();
                     await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PlayersGunsCharmsTableName}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `CharmID` SMALLINT UNSIGNED NOT NULL , `IsBought` BOOLEAN NOT NULL , CONSTRAINT `ub_steam_id_10` FOREIGN KEY (`SteamID`) REFERENCES `{PlayersTableName}` (`SteamID`) , CONSTRAINT `ub_charm_id` FOREIGN KEY (`CharmID`) REFERENCES `{GunsCharmsTableName}` (`CharmID`) , Primary Key (`SteamID`, `CharmID`));", Conn).ExecuteScalarAsync();
@@ -452,14 +452,14 @@ namespace UnturnedBlackout.Managers
                             if (!int.TryParse(rdr[4].ToString(), out int buyPrice)) continue;
                             if (!int.TryParse(rdr[5].ToString(), out int coins)) continue;
                             if (!int.TryParse(rdr[6].ToString(), out int scrapAmount)) continue;
-                            if (!int.TryParse(rdr[7].ToString(), out int levelRequired)) continue;
+                            if (!int.TryParse(rdr[7].ToString(), out int levelRequirement)) continue;
 
                             if (gunCharms.ContainsKey(charmID))
                             {
                                 Logging.Debug($"Found a duplicate charm with id {charmID} registered");
                                 continue;
                             }
-                            gunCharms.Add(charmID, new GunCharm(charmID, charmName, charmDesc, iconLink, buyPrice, coins, scrapAmount, levelRequired));
+                            gunCharms.Add(charmID, new GunCharm(charmID, charmName, charmDesc, iconLink, buyPrice, coins, scrapAmount, levelRequirement));
                         }
 
                         Logging.Debug($"Successfully read {gunCharms.Count} gun charms");
@@ -1007,8 +1007,8 @@ namespace UnturnedBlackout.Managers
                     foreach (var gunCharm in GunCharms.Values)
                     {
                         Logging.Debug($"Adding gun charm with id {gunCharm.CharmID}");
-                        if (gunCharm.LevelRequired < 0) continue;
-                        await new MySqlCommand($"INSERT IGNORE INTO `{PlayersGunsCharmsTableName}` (`SteamID` , `CharmID` , `IsBought`) VALUES ({player.CSteamID} , {gunCharm.CharmID} , {gunCharm.LevelRequired == 0});", Conn).ExecuteScalarAsync();
+                        if (gunCharm.LevelRequirement < 0) continue;
+                        await new MySqlCommand($"INSERT IGNORE INTO `{PlayersGunsCharmsTableName}` (`SteamID` , `CharmID` , `IsBought`) VALUES ({player.CSteamID} , {gunCharm.CharmID} , {gunCharm.LevelRequirement == 0});", Conn).ExecuteScalarAsync();
                     }
 
                     Logging.Debug($"Giving {steamName} the knives");
@@ -1110,57 +1110,67 @@ namespace UnturnedBlackout.Managers
                                 continue;
                             }
 
-                            if (!uint.TryParse(rdr[6].ToString(), out uint kills))
+                            if (!uint.TryParse(rdr[6].ToString(), out uint scrap))
                             {
                                 continue;
                             }
 
-                            if (!uint.TryParse(rdr[7].ToString(), out uint headshotKills))
+                            if (!uint.TryParse(rdr[7].ToString(), out uint coins))
                             {
                                 continue;
                             }
 
-                            if (!uint.TryParse(rdr[8].ToString(), out uint highestKillstreak))
+                            if (!uint.TryParse(rdr[8].ToString(), out uint kills))
                             {
                                 continue;
                             }
 
-                            if (!uint.TryParse(rdr[9].ToString(), out uint highestMultiKills))
+                            if (!uint.TryParse(rdr[9].ToString(), out uint headshotKills))
                             {
                                 continue;
                             }
 
-                            if (!uint.TryParse(rdr[10].ToString(), out uint killsConfirmed))
+                            if (!uint.TryParse(rdr[10].ToString(), out uint highestKillstreak))
                             {
                                 continue;
                             }
 
-                            if (!uint.TryParse(rdr[11].ToString(), out uint killsDenied))
+                            if (!uint.TryParse(rdr[11].ToString(), out uint highestMultiKills))
                             {
                                 continue;
                             }
 
-                            if (!uint.TryParse(rdr[12].ToString(), out uint flagsCaptured))
+                            if (!uint.TryParse(rdr[12].ToString(), out uint killsConfirmed))
                             {
                                 continue;
                             }
 
-                            if (!uint.TryParse(rdr[13].ToString(), out uint flagsSaved))
+                            if (!uint.TryParse(rdr[13].ToString(), out uint killsDenied))
                             {
                                 continue;
                             }
 
-                            if (!uint.TryParse(rdr[14].ToString(), out uint areasTaken))
+                            if (!uint.TryParse(rdr[14].ToString(), out uint flagsCaptured))
                             {
                                 continue;
                             }
 
-                            if (!uint.TryParse(rdr[15].ToString(), out uint deaths))
+                            if (!uint.TryParse(rdr[15].ToString(), out uint flagsSaved))
                             {
                                 continue;
                             }
 
-                            if (!bool.TryParse(rdr[16].ToString(), out bool music))
+                            if (!uint.TryParse(rdr[16].ToString(), out uint areasTaken))
+                            {
+                                continue;
+                            }
+
+                            if (!uint.TryParse(rdr[17].ToString(), out uint deaths))
+                            {
+                                continue;
+                            }
+
+                            if (!bool.TryParse(rdr[18].ToString(), out bool music))
                             {
                                 continue;
                             }
@@ -1170,7 +1180,7 @@ namespace UnturnedBlackout.Managers
                                 PlayerData.Remove(player.CSteamID);
                             }
 
-                            PlayerData.Add(player.CSteamID, new PlayerData(player.CSteamID, steamName, avatarLink, xp, level, credits, kills, headshotKills, highestKillstreak, highestMultiKills, killsConfirmed, killsDenied, flagsCaptured, flagsSaved, areasTaken, deaths, music));
+                            PlayerData.Add(player.CSteamID, new PlayerData(player.CSteamID, steamName, avatarLink, xp, level, credits, scrap, coins, kills, headshotKills, highestKillstreak, highestMultiKills, killsConfirmed, killsDenied, flagsCaptured, flagsSaved, areasTaken, deaths, music));
                         }
                     }
                     catch (Exception ex)
@@ -1274,7 +1284,7 @@ namespace UnturnedBlackout.Managers
                                     Logging.Debug($"Gun with name {gun.Gun.GunName} doesn't have a reward attachment with id {rewardAttachment.Value.AttachmentID} that comes with the gun, adding it for {player.CharacterName}");
                                 }
                             }
-                            await new MySqlCommand($"UPDATE `{PlayersGunsTableName}` SET `Attachments` = '{Utility.GetStringFromAttachments(gun.Attachments.Values.ToList())}' WHERE `SteamID` = {player.CSteamID}` AND `GunID` = {gun.Gun.GunID};", Conn).ExecuteScalarAsync();
+                            await new MySqlCommand($"UPDATE `{PlayersGunsTableName}` SET `Attachments` = '{Utility.GetStringFromAttachments(gun.Attachments.Values.ToList())}' WHERE `SteamID` = {player.CSteamID} AND `GunID` = {gun.Gun.GunID};", Conn).ExecuteScalarAsync();
                         }
                     } catch (Exception ex)
                     {
@@ -1951,6 +1961,126 @@ namespace UnturnedBlackout.Managers
                 catch (Exception ex)
                 {
                     Logger.Log($"Error removing {credits} credits for player with steam id {steamID}");
+                    Logger.Log(ex);
+                }
+                finally
+                {
+                    await Conn.CloseAsync();
+                }
+            }
+        }
+
+        public async Task IncreasePlayerScrapAsync(CSteamID steamID, uint scrap)
+        {
+            using (MySqlConnection Conn = new MySqlConnection(ConnectionString))
+            {
+                try
+                {
+                    await Conn.OpenAsync();
+
+                    await new MySqlCommand($"UPDATE `{PlayersTableName}` SET `Scrap` = `Scrap` + {scrap} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                    var obj = await new MySqlCommand($"Select `Scrap` FROM `{PlayersTableName}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                    if (PlayerData.TryGetValue(steamID, out PlayerData data))
+                    {
+                        if (obj is uint newScrap)
+                        {
+                            data.Scrap = newScrap;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log($"Error adding {scrap} scrap for player with steam id {steamID}");
+                    Logger.Log(ex);
+                }
+                finally
+                {
+                    await Conn.CloseAsync();
+                }
+            }
+        }
+
+        public async Task DecreasePlayerScrapAsync(CSteamID steamID, uint scrap)
+        {
+            using (MySqlConnection Conn = new MySqlConnection(ConnectionString))
+            {
+                try
+                {
+                    await Conn.OpenAsync();
+
+                    await new MySqlCommand($"UPDATE `{PlayersTableName}` SET `Scrap` = `Scrap` - {scrap} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                    var obj = await new MySqlCommand($"Select `Scrap` FROM `{PlayersTableName}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                    if (PlayerData.TryGetValue(steamID, out PlayerData data))
+                    {
+                        if (obj is uint newScrap)
+                        {
+                            data.Scrap = newScrap;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log($"Error removing {scrap} scrap for player with steam id {steamID}");
+                    Logger.Log(ex);
+                }
+                finally
+                {
+                    await Conn.CloseAsync();
+                }
+            }
+        }
+
+        public async Task IncreasePlayerCoinsAsync(CSteamID steamID, uint coins)
+        {
+            using (MySqlConnection Conn = new MySqlConnection(ConnectionString))
+            {
+                try
+                {
+                    await Conn.OpenAsync();
+
+                    await new MySqlCommand($"UPDATE `{PlayersTableName}` SET `Coins` = `Coins` + {coins} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                    var obj = await new MySqlCommand($"Select `Coins` FROM `{PlayersTableName}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                    if (PlayerData.TryGetValue(steamID, out PlayerData data))
+                    {
+                        if (obj is uint newCoins)
+                        {
+                            data.Coins = newCoins;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log($"Error adding {coins} coins for player with steam id {steamID}");
+                    Logger.Log(ex);
+                }
+                finally
+                {
+                    await Conn.CloseAsync();
+                }
+            }
+        }
+
+        public async Task DecreasePlayerCoinsAsync(CSteamID steamID, uint coins)
+        {
+            using (MySqlConnection Conn = new MySqlConnection(ConnectionString))
+            {
+                try
+                {
+                    await Conn.OpenAsync();
+
+                    await new MySqlCommand($"UPDATE `{PlayersTableName}` SET `Coins` = `Coins` - {coins} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                    var obj = await new MySqlCommand($"Select `Coins` FROM `{PlayersTableName}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                    if (PlayerData.TryGetValue(steamID, out PlayerData data))
+                    {
+                        if (obj is uint newCoins)
+                        {
+                            data.Coins = newCoins;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log($"Error removing {coins} coins for player with steam id {steamID}");
                     Logger.Log(ex);
                 }
                 finally

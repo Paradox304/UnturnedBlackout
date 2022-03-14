@@ -12,6 +12,8 @@ namespace UnturnedBlackout.Database.Data
         public uint XP { get; set; }
         public uint Level { get; set; }
         public uint Credits { get; set; }
+        public uint Scrap { get; set; }
+        public uint Coins { get; set; }
         public uint Kills { get; set; }
         public uint HeadshotKills { get; set; }
         public uint HighestKillstreak { get; set; }
@@ -24,7 +26,7 @@ namespace UnturnedBlackout.Database.Data
         public uint Deaths { get; set; }
         public bool Music { get; set; }
 
-        public PlayerData(CSteamID steamID, string steamName, string avatarLink, uint xP, uint level, uint credits, uint kills, uint headshotKills, uint highestKillstreak, uint highestMultiKills, uint killsConfirmed, uint killsDenied, uint flagsCaptured, uint flagsSaved, uint areasTaken, uint deaths, bool music)
+        public PlayerData(CSteamID steamID, string steamName, string avatarLink, uint xP, uint level, uint credits, uint scrap, uint coins, uint kills, uint headshotKills, uint highestKillstreak, uint highestMultiKills, uint killsConfirmed, uint killsDenied, uint flagsCaptured, uint flagsSaved, uint areasTaken, uint deaths, bool music)
         {
             SteamID = steamID;
             SteamName = steamName;
@@ -32,6 +34,8 @@ namespace UnturnedBlackout.Database.Data
             XP = xP;
             Level = level;
             Credits = credits;
+            Scrap = scrap;
+            Coins = coins;
             Kills = kills;
             HeadshotKills = headshotKills;
             HighestKillstreak = highestKillstreak;

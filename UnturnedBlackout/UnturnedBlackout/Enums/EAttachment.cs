@@ -5,7 +5,6 @@
         Sights,
         Grip,
         Barrel,
-        Magazine,
-        Charm
+        Magazine
     }
 }

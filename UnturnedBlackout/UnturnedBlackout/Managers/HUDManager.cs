@@ -154,7 +154,7 @@ namespace UnturnedBlackout.Managers
                         for (int index = inv.getItemCount(page) - 1; index >= 0; index--)
                         {
                             var item = inv.getItem(page, (byte)index);
-                            if (item != null && item.item.id == (player.ActiveLoadout.KnifeSkin == null ? player.ActiveLoadout.Knife?.Knife?.KnifeID ?? 0 : player.ActiveLoadout.KnifeSkin.SkinID))
+                            if (item != null && item.item.id == (player.ActiveLoadout.Knife?.Knife?.KnifeID ?? 0))
                             {
                                 Plugin.Instance.StartCoroutine(Equip(player.Player.Player.equipment, page, item.x, item.y));
                                 break;

@@ -205,10 +205,10 @@
     <Compile Include="Models\UI\PageGadget.cs" />
     <Compile Include="Models\UI\PageGlove.cs" />
     <Compile Include="Models\UI\PageGun.cs" />
+    <Compile Include="Models\UI\PageGunCharm.cs" />
     <Compile Include="Models\UI\PageGunSkin.cs" />
     <Compile Include="Models\UI\PageKillstreak.cs" />
     <Compile Include="Models\UI\PageKnife.cs" />
-    <Compile Include="Models\UI\PageKnifeSkin.cs" />
     <Compile Include="Models\UI\PageLoadout.cs" />
     <Compile Include="Models\UI\PagePerk.cs" />
     <Compile Include="Patches\ClothingPatches.cs" />

@@ -235,8 +235,6 @@ namespace UnturnedBlackout
                     return 0;
                 case EAttachment.Grip:
                     return 4;
-                case EAttachment.Tactical:
-                    return 2;
                 case EAttachment.Barrel:
                     return 6;
                 case EAttachment.Magazine:

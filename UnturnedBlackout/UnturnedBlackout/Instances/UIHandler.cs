@@ -26,6 +26,7 @@ namespace UnturnedBlackout.Instances
         public CSteamID SteamID { get; set; }
         public UnturnedPlayer Player { get; set; }
         public PlayerLoadout PlayerLoadout { get; set; }
+        public PlayerData PlayerData { get; set; }
 
         public ITransportConnection TransportConnection { get; set; }
         public Config Config { get; set; }
@@ -51,9 +52,9 @@ namespace UnturnedBlackout.Instances
         public Dictionary<int, PageGun> ARPages { get; set; }
         public Dictionary<int, PageGun> SniperPages { get; set; }
         public Dictionary<ushort, Dictionary<EAttachment, Dictionary<int, PageAttachment>>> AttachmentPages { get; set; }
+        public Dictionary<int, PageGunCharm> GunCharmPages { get; set; }
         public Dictionary<ushort, Dictionary<int, PageGunSkin>> GunSkinPages { get; set; }
         public Dictionary<int, PageKnife> KnifePages { get; set; }
-        public Dictionary<ushort, Dictionary<int, PageKnifeSkin>> KnifeSkinPages { get; set; }
         public Dictionary<int, PagePerk> PerkPages { get; set; }
         public Dictionary<int, PageGadget> TacticalPages { get; set; }
         public Dictionary<int, PageGadget> LethalPages { get; set; }
@@ -74,7 +75,13 @@ namespace UnturnedBlackout.Instances
                 Logging.Debug($"Error finding player loadout for {player.CharacterName}, failed to initialize UIHandler for player");
                 return;
             }
+            if (!DB.PlayerData.TryGetValue(player.CSteamID, out PlayerData data))
+            {
+                Logging.Debug($"Error finding player data for {player.CharacterName}, failed to initialize UIHandler for player");
+                return;
+            }
 
+            PlayerData = data;
             PlayerLoadout = loadout;
             BuildPages();
             ResetUIValues();
@@ -136,7 +143,6 @@ namespace UnturnedBlackout.Instances
             BuildGunSkinPages();
             BuildAttachmentPages();
             BuildKnifePages();
-            BuildKnifeSkinPages();
             BuildPerkPages();
             BuildTacticalPages();
             BuildLethalPages();
@@ -175,7 +181,7 @@ namespace UnturnedBlackout.Instances
 
         public void BuildPistolPages()
         {
-            var guns = PlayerLoadout.Guns.Values.Where(k => k.Gun.GunType == EGun.PISTOL).ToList();
+            var guns = PlayerLoadout.Guns.Values.Where(k => k.Gun.GunType == EGun.PISTOL).OrderBy(k => k.Gun.LevelRequirement).ToList();
             var gunItems = new Dictionary<int, LoadoutGun>();
             PistolPages = new Dictionary<int, PageGun>();
             int index = 0;
@@ -204,7 +210,7 @@ namespace UnturnedBlackout.Instances
 
         public void BuildSMGPages()
         {
-            var guns = PlayerLoadout.Guns.Values.Where(k => k.Gun.GunType == EGun.SUBMACHINE_GUNS).ToList();
+            var guns = PlayerLoadout.Guns.Values.Where(k => k.Gun.GunType == EGun.SUBMACHINE_GUNS).OrderBy(k => k.Gun.LevelRequirement).ToList();
             var gunItems = new Dictionary<int, LoadoutGun>();
             SMGPages = new Dictionary<int, PageGun>();
             int index = 0;
@@ -233,7 +239,7 @@ namespace UnturnedBlackout.Instances
 
         public void BuildShotgunPages()
         {
-            var guns = PlayerLoadout.Guns.Values.Where(k => k.Gun.GunType == EGun.SHOTGUNS).ToList();
+            var guns = PlayerLoadout.Guns.Values.Where(k => k.Gun.GunType == EGun.SHOTGUNS).OrderBy(k => k.Gun.LevelRequirement).ToList();
             var gunItems = new Dictionary<int, LoadoutGun>();
             ShotgunPages = new Dictionary<int, PageGun>();
             int index = 0;
@@ -262,7 +268,7 @@ namespace UnturnedBlackout.Instances
 
         public void BuildLMGPages()
         {
-            var guns = PlayerLoadout.Guns.Values.Where(k => k.Gun.GunType == EGun.LIGHT_MACHINE_GUNS).ToList();
+            var guns = PlayerLoadout.Guns.Values.Where(k => k.Gun.GunType == EGun.LIGHT_MACHINE_GUNS).OrderBy(k => k.Gun.LevelRequirement).ToList();
             var gunItems = new Dictionary<int, LoadoutGun>();
             LMGPages = new Dictionary<int, PageGun>();
             int index = 0;
@@ -291,7 +297,7 @@ namespace UnturnedBlackout.Instances
 
         public void BuildARPages()
         {
-            var guns = PlayerLoadout.Guns.Values.Where(k => k.Gun.GunType == EGun.ASSAULT_RIFLES).ToList();
+            var guns = PlayerLoadout.Guns.Values.Where(k => k.Gun.GunType == EGun.ASSAULT_RIFLES).OrderBy(k => k.Gun.LevelRequirement).ToList();
             var gunItems = new Dictionary<int, LoadoutGun>();
             ARPages = new Dictionary<int, PageGun>();
             int index = 0;
@@ -320,7 +326,7 @@ namespace UnturnedBlackout.Instances
 
         public void BuildSniperPages()
         {
-            var guns = PlayerLoadout.Guns.Values.Where(k => k.Gun.GunType == EGun.SNIPER_RIFLES).ToList();
+            var guns = PlayerLoadout.Guns.Values.Where(k => k.Gun.GunType == EGun.SNIPER_RIFLES).OrderBy(k => k.Gun.LevelRequirement).ToList();
             var gunItems = new Dictionary<int, LoadoutGun>();
             SniperPages = new Dictionary<int, PageGun>();
             int index = 0;
@@ -398,7 +404,7 @@ namespace UnturnedBlackout.Instances
             }
             AttachmentPages.Add(gun.Gun.GunID, new Dictionary<EAttachment, Dictionary<int, PageAttachment>>());
 
-            for (int i = 0; i <= 4; i++)
+            for (int i = 0; i <= 3; i++)
             {
                 var attachmentType = (EAttachment)i;
                 Logging.Debug($"Creating {attachmentType} pages");
@@ -407,7 +413,7 @@ namespace UnturnedBlackout.Instances
                 var attachments = new Dictionary<int, LoadoutAttachment>();
                 AttachmentPages[gun.Gun.GunID].Add(attachmentType, new Dictionary<int, PageAttachment>());
 
-                foreach (var attachment in gun.Attachments.Values.Where(k => k.Attachment.AttachmentType == attachmentType))
+                foreach (var attachment in gun.Attachments.Values.Where(k => k.Attachment.AttachmentType == attachmentType).OrderBy(k => k.LevelRequirement))
                 {
                     attachments.Add(index, attachment);
                     if (index == 4)
@@ -427,6 +433,31 @@ namespace UnturnedBlackout.Instances
             }
         }
 
+        public void BuildGunCharmPages()
+        {
+            GunCharmPages = new Dictionary<int, PageGunCharm>();
+            Logging.Debug($"Creating gun charm pages for {Player.CharacterName}, found {PlayerLoadout.GunCharms.Count} gun charms");
+            int index = 0;
+            int page = 1;
+            var gunCharms = new Dictionary<int, LoadoutGunCharm>();
+            foreach (var gunCharm in PlayerLoadout.GunCharms.Values.OrderBy(k => k.GunCharm.LevelRequirement))
+            {
+                gunCharms.Add(index, gunCharm);
+                if (index == 4)
+                {
+                    GunCharmPages.Add(page, new PageGunCharm(page, gunCharms));
+                    gunCharms = new Dictionary<int, LoadoutGunCharm>();
+                    index = 0;
+                    page++;
+                }
+            }
+            if (gunCharms.Count != 0)
+            {
+                GunCharmPages.Add(page, new PageGunCharm(page, gunCharms));
+            }
+            Logging.Debug($"Created {GunCharmPages.Count} gun charm pages for {Player.CharacterName}");
+        }
+
         public void BuildKnifePages()
         {
             KnifePages = new Dictionary<int, PageKnife>();
@@ -434,9 +465,9 @@ namespace UnturnedBlackout.Instances
             int index = 0;
             int page = 1;
             var knives = new Dictionary<int, LoadoutKnife>();
-            foreach (var knife in PlayerLoadout.Knives)
+            foreach (var knife in PlayerLoadout.Knives.Values.OrderBy(k => k.Knife.LevelRequirement))
             {
-                knives.Add(index, knife.Value);
+                knives.Add(index, knife);
                 if (index == 4)
                 {
                     KnifePages.Add(page, new PageKnife(page, knives));
@@ -452,37 +483,6 @@ namespace UnturnedBlackout.Instances
             Logging.Debug($"Created {KnifePages.Count} knife pages for {Player.CharacterName}");
         }
 
-        public void BuildKnifeSkinPages()
-        {
-            KnifeSkinPages = new Dictionary<ushort, Dictionary<int, PageKnifeSkin>>();
-            Logging.Debug($"Creating knife skin pages for {Player.CharacterName}, found {PlayerLoadout.KnifeSkinsSearchByKnifeID.Count} knives which have skins");
-            foreach (var knife in PlayerLoadout.KnifeSkinsSearchByKnifeID)
-            {
-                Logging.Debug($"Creating knife skin pages for knife with id {knife.Key} for {Player.CharacterName}, found {knife.Value.Count} knife skins for that knife");
-                int index = 0;
-                int page = 1;
-                var knifeSkins = new Dictionary<int, KnifeSkin>();
-                KnifeSkinPages.Add(knife.Key, new Dictionary<int, PageKnifeSkin>());
-                foreach (var knifeSkin in knife.Value)
-                {
-                    knifeSkins.Add(index, knifeSkin);
-                    if (index == 4)
-                    {
-                        KnifeSkinPages[knife.Key].Add(page, new PageKnifeSkin(page, knifeSkins));
-                        knifeSkins = new Dictionary<int, KnifeSkin>();
-                        index = 0;
-                        page++;
-                    }
-                    index++;
-                }
-                if (knifeSkins.Count != 0)
-                {
-                    KnifeSkinPages[knife.Key].Add(page, new PageKnifeSkin(page, knifeSkins));
-                }
-                Logging.Debug($"Created {GunSkinPages[knife.Key].Count} knife skin pages for knife with id {knife.Key} for {Player.CharacterName}");
-            }
-        }
-
         public void BuildPerkPages()
         {
             PerkPages = new Dictionary<int, PagePerk>();
@@ -490,9 +490,9 @@ namespace UnturnedBlackout.Instances
             int index = 0;
             int page = 1;
             var perks = new Dictionary<int, LoadoutPerk>();
-            foreach (var perk in PlayerLoadout.Perks)
+            foreach (var perk in PlayerLoadout.Perks.Values.OrderBy(k => k.Perk.LevelRequirement))
             {
-                perks.Add(index, perk.Value);
+                perks.Add(index, perk);
                 if (index == 4)
                 {
                     PerkPages.Add(page, new PagePerk(page, perks));
@@ -511,7 +511,7 @@ namespace UnturnedBlackout.Instances
         public void BuildTacticalPages()
         {
             TacticalPages = new Dictionary<int, PageGadget>();
-            var gadgets = PlayerLoadout.Gadgets.Values.Where(k => k.Gadget.IsTactical).ToList();
+            var gadgets = PlayerLoadout.Gadgets.Values.Where(k => k.Gadget.IsTactical).OrderBy(k => k.Gadget.LevelRequirement).ToList();
             Logging.Debug($"Creating tactical pages for {Player.CharacterName}, found {gadgets.Count} tacticals");
             int index = 0;
             int page = 1;
@@ -537,7 +537,7 @@ namespace UnturnedBlackout.Instances
         public void BuildLethalPages()
         {
             LethalPages = new Dictionary<int, PageGadget>();
-            var gadgets = PlayerLoadout.Gadgets.Values.Where(k => !k.Gadget.IsTactical).ToList();
+            var gadgets = PlayerLoadout.Gadgets.Values.Where(k => !k.Gadget.IsTactical).OrderBy(k => k.Gadget.LevelRequirement).ToList();
             Logging.Debug($"Creating lethal pages for {Player.CharacterName}, found {gadgets.Count} lethals");
             int index = 0;
             int page = 1;
@@ -567,9 +567,9 @@ namespace UnturnedBlackout.Instances
             int index = 0;
             int page = 1;
             var cards = new Dictionary<int, LoadoutCard>();
-            foreach (var card in PlayerLoadout.Cards)
+            foreach (var card in PlayerLoadout.Cards.Values.OrderBy(k => k.Card.LevelRequirement))
             {
-                cards.Add(index, card.Value);
+                cards.Add(index, card);
                 if (index == 4)
                 {
                     CardPages.Add(page, new PageCard(page, cards));
@@ -592,9 +592,9 @@ namespace UnturnedBlackout.Instances
             int index = 0;
             int page = 1;
             var gloves = new Dictionary<int, LoadoutGlove>();
-            foreach (var glove in PlayerLoadout.Gloves)
+            foreach (var glove in PlayerLoadout.Gloves.Values.OrderBy(k => k.Glove.LevelRequirement))
             {
-                gloves.Add(index, glove.Value);
+                gloves.Add(index, glove);
                 if (index == 4)
                 {
                     GlovePages.Add(page, new PageGlove(page, gloves));
@@ -617,9 +617,9 @@ namespace UnturnedBlackout.Instances
             int index = 0;
             int page = 1;
             var killstreaks = new Dictionary<int, LoadoutKillstreak>();
-            foreach (var killstreak in PlayerLoadout.Killstreaks)
+            foreach (var killstreak in PlayerLoadout.Killstreaks.Values.OrderBy(k => k.Killstreak.LevelRequirement))
             {
-                killstreaks.Add(index, killstreak.Value);
+                killstreaks.Add(index, killstreak);
                 if (index == 4)
                 {
                     KillstreakPages.Add(page, new PageKillstreak(page, killstreaks));
@@ -885,30 +885,32 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Loadout Primary IMAGE", loadout.PrimarySkin == null ? (loadout.Primary == null ? "" : loadout.Primary.Gun.IconLink) : loadout.PrimarySkin.IconLink);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Loadout Primary TEXT", loadout.Primary == null ? "" : loadout.Primary.Gun.GunName);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Loadout Primary Level TEXT", loadout.Primary == null ? "" : loadout.Primary.Level.ToString());
-            for (int i = 0; i <= 4; i++)
+            for (int i = 0; i <= 3; i++)
             {
                 var attachmentType = (EAttachment)i;
                 loadout.PrimaryAttachments.TryGetValue(attachmentType, out LoadoutAttachment attachment);
                 Logging.Debug($"Primary attachment {attachmentType} is null {attachment == null}");
                 EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Loadout Primary {attachmentType} IMAGE", attachment == null ? "" : attachment.Attachment.IconLink);
             }
-
+            EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Loadout Primary Charm IMAGE", loadout.PrimaryGunCharm == null ? "" : loadout.PrimaryGunCharm.GunCharm.IconLink);
+            
             // Secondary
             Logging.Debug($"Secondary is null {loadout.Secondary == null}, is skin null {loadout.SecondarySkin == null}");
             EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Loadout Secondary IMAGE", loadout.SecondarySkin == null ? (loadout.Secondary == null ? "" : loadout.Secondary.Gun.IconLink) : loadout.SecondarySkin.IconLink);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Loadout Secondary TEXT", loadout.Secondary == null ? "" : loadout.Secondary.Gun.GunName);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Loadout Secondary Level TEXT", loadout.Secondary == null ? "" : loadout.Secondary.Level.ToString());
-            for (int i = 0; i <= 4; i++)
+            for (int i = 0; i <= 3; i++)
             {
                 var attachmentType = (EAttachment)i;
                 loadout.SecondaryAttachments.TryGetValue(attachmentType, out LoadoutAttachment attachment);
                 Logging.Debug($"Secondary attachment {attachmentType} is null {attachment == null}");
                 EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Loadout Secondary {attachmentType} IMAGE", attachment == null ? "" : attachment.Attachment.IconLink);
             }
-
-            // Knife
-            Logging.Debug($"Knife is null {loadout.Knife == null}, is skin null {loadout.KnifeSkin == null}");
-            EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Loadout Knife IMAGE", loadout.KnifeSkin == null ? (loadout.Knife == null ? "" : loadout.Knife.Knife.IconLink) : loadout.KnifeSkin.IconLink);
+            EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Loadout Secondary Charm IMAGE", loadout.SecondaryGunCharm == null ? "" : loadout.SecondaryGunCharm.GunCharm.IconLink);
+            
+                // Knife
+            Logging.Debug($"Knife is null {loadout.Knife == null}");
+            EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Loadout Knife IMAGE", loadout.Knife == null ? "" : loadout.Knife.Knife.IconLink);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Loadout Knife TEXT", loadout.Knife == null ? "" : loadout.Knife.Knife.KnifeName);
 
             // Tactical
@@ -1015,6 +1017,19 @@ namespace UnturnedBlackout.Instances
             Logging.Debug($"Showing loadout sub page {page} for {Player.CharacterName}");
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Type TEXT", page.ToString().StartsWith("AttachmentPrimary") || page.ToString().StartsWith("AttachmentSecondary") ? "ATTACHMENT" : page.ToString().ToUpper());
             LoadoutPage = page;
+
+            switch (LoadoutPage)
+            {
+                case ELoadoutPage.Primary:
+                    ShowLoadoutTab(ELoadoutTab.SUBMACHINE_GUNS);
+                    break;
+                case ELoadoutPage.Secondary:
+                    ShowLoadoutTab(ELoadoutTab.PISTOLS);
+                    break;
+                default:
+                    ShowLoadoutTab(ELoadoutTab.ALL);
+                    break;
+            }
         }
 
         public void ShowLoadoutTab(ELoadoutTab tab)
@@ -1031,6 +1046,11 @@ namespace UnturnedBlackout.Instances
                 return;
             }
 
+            for (int i = 0; i <= 4; i++)
+            {
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item BUTTON {i}", false);
+            }
+
             switch (LoadoutTab)
             {
                 case ELoadoutTab.ALL:
@@ -1041,7 +1061,6 @@ namespace UnturnedBlackout.Instances
                             case ELoadoutPage.AttachmentPrimaryGrip:
                             case ELoadoutPage.AttachmentPrimaryMagazine:
                             case ELoadoutPage.AttachmentPrimarySights:
-                            case ELoadoutPage.AttachmentPrimaryTactical:
                                 {
                                     if (!Enum.TryParse(LoadoutPage.ToString().Replace("AttachmentPrimary", ""), false, out EAttachment attachmentType))
                                     {
@@ -1076,15 +1095,29 @@ namespace UnturnedBlackout.Instances
                                     EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
                                     EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
 
-                                    ShowAttachmentPage(firstPage);
+                                    ShowAttachmentPage(firstPage, gun);
+                                    break;
+                                }
+
+                            case ELoadoutPage.AttachmentPrimaryCharm:
+                            case ELoadoutPage.AttachmentSecondaryCharm:
+                                {
+                                    if (!GunCharmPages.TryGetValue(1, out PageGunCharm firstPage))
+                                    {
+                                        Logging.Debug($"Error getting first page for gun charms for {Player.CharacterName}");
+                                        return;
+                                    }
+
+                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+
+                                    ShowGunCharmPage(firstPage);
                                     break;
                                 }
 
                             case ELoadoutPage.AttachmentSecondaryBarrel:
-                            case ELoadoutPage.AttachmentSecondaryGrip:
                             case ELoadoutPage.AttachmentSecondaryMagazine:
                             case ELoadoutPage.AttachmentSecondarySights:
-                            case ELoadoutPage.AttachmentSecondaryTactical:
                                 {
                                     if (!Enum.TryParse(LoadoutPage.ToString().Replace("AttachmentSecondary", ""), false, out EAttachment attachmentType))
                                     {
@@ -1119,7 +1152,7 @@ namespace UnturnedBlackout.Instances
                                     EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
                                     EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
 
-                                    ShowAttachmentPage(firstPage);
+                                    ShowAttachmentPage(firstPage, gun);
                                     break;
                                 }
 
@@ -1269,26 +1302,6 @@ namespace UnturnedBlackout.Instances
                                     ShowGunSkinPage(firstPage);
                                     break;
                                 }
-
-                            case ELoadoutPage.Knife:
-                                {
-                                    if (!KnifeSkinPages.TryGetValue(loadout.Knife?.Knife?.KnifeID ?? 0, out Dictionary<int, PageKnifeSkin> knifeSkinPages))
-                                    {
-                                        Logging.Debug($"Error getting gun skin pages for knife with id {loadout.Knife?.Knife?.KnifeID ?? 0}");
-                                        return;
-                                    }
-
-                                    if (!knifeSkinPages.TryGetValue(1, out PageKnifeSkin firstPage))
-                                    {
-                                        Logging.Debug($"Error finding the first page for gun skins for gun with id {loadout.Knife.Knife.KnifeID} for {Player.CharacterName}");
-                                        return;
-                                    }
-
-                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
-                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
-                                    ShowKnifeSkinPage(firstPage);
-                                    break;
-                                }
                         }
 
                         break;
@@ -1423,7 +1436,6 @@ namespace UnturnedBlackout.Instances
                             case ELoadoutPage.AttachmentPrimaryGrip:
                             case ELoadoutPage.AttachmentPrimaryMagazine:
                             case ELoadoutPage.AttachmentPrimarySights:
-                            case ELoadoutPage.AttachmentPrimaryTactical:
                                 {
                                     if (!Enum.TryParse(LoadoutPage.ToString().Replace("AttachmentPrimary", ""), false, out EAttachment attachmentType))
                                     {
@@ -1458,15 +1470,26 @@ namespace UnturnedBlackout.Instances
                                     EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
                                     EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
 
-                                    ShowAttachmentPage(nextPage);
+                                    ShowAttachmentPage(nextPage, gun);
+                                    break;
+                                }
+
+                            case ELoadoutPage.AttachmentPrimaryCharm:
+                            case ELoadoutPage.AttachmentSecondaryCharm:
+                                {
+                                    if (!GunCharmPages.TryGetValue(LoadoutTabPageID + 1, out PageGunCharm nextPage) && !GunCharmPages.TryGetValue(1, out nextPage))
+                                    {
+                                        Logging.Debug($"Error getting next page for gun charms for {Player.CharacterName}");
+                                        return;
+                                    }
+
+                                    ShowGunCharmPage(nextPage);
                                     break;
                                 }
 
                             case ELoadoutPage.AttachmentSecondaryBarrel:
-                            case ELoadoutPage.AttachmentSecondaryGrip:
                             case ELoadoutPage.AttachmentSecondaryMagazine:
                             case ELoadoutPage.AttachmentSecondarySights:
-                            case ELoadoutPage.AttachmentSecondaryTactical:
                                 {
                                     if (!Enum.TryParse(LoadoutPage.ToString().Replace("AttachmentSecondary", ""), false, out EAttachment attachmentType))
                                     {
@@ -1501,7 +1524,7 @@ namespace UnturnedBlackout.Instances
                                     EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
                                     EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
 
-                                    ShowAttachmentPage(nextPage);
+                                    ShowAttachmentPage(nextPage, gun);
                                     break;
                                 }
 
@@ -1632,24 +1655,6 @@ namespace UnturnedBlackout.Instances
                                     ShowGunSkinPage(nextPage);
                                     break;
                                 }
-
-                            case ELoadoutPage.Knife:
-                                {
-                                    if (!KnifeSkinPages.TryGetValue(loadout.Knife?.Knife?.KnifeID ?? 0, out Dictionary<int, PageKnifeSkin> knifeSkinPages))
-                                    {
-                                        Logging.Debug($"Error getting gun skin pages for knife with id {loadout.Knife?.Knife?.KnifeID ?? 0}");
-                                        return;
-                                    }
-
-                                    if (!knifeSkinPages.TryGetValue(LoadoutTabPageID + 1, out PageKnifeSkin nextPage) && !knifeSkinPages.TryGetValue(1, out nextPage))
-                                    {
-                                        Logging.Debug($"Error finding the next page for gun skins for gun with id {loadout.Knife.Knife.KnifeID} for {Player.CharacterName}");
-                                        return;
-                                    }
-
-                                    ShowKnifeSkinPage(nextPage);
-                                    break;
-                                }
                         }
 
                         break;
@@ -1749,7 +1754,6 @@ namespace UnturnedBlackout.Instances
                             case ELoadoutPage.AttachmentPrimaryGrip:
                             case ELoadoutPage.AttachmentPrimaryMagazine:
                             case ELoadoutPage.AttachmentPrimarySights:
-                            case ELoadoutPage.AttachmentPrimaryTactical:
                                 {
                                     if (!Enum.TryParse(LoadoutPage.ToString().Replace("AttachmentPrimary", ""), false, out EAttachment attachmentType))
                                     {
@@ -1784,15 +1788,26 @@ namespace UnturnedBlackout.Instances
                                     EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
                                     EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
 
-                                    ShowAttachmentPage(prevPage);
+                                    ShowAttachmentPage(prevPage, gun);
+                                    break;
+                                }
+
+                            case ELoadoutPage.AttachmentPrimaryCharm:
+                            case ELoadoutPage.AttachmentSecondaryCharm:
+                                {
+                                    if (!GunCharmPages.TryGetValue(LoadoutTabPageID - 1, out PageGunCharm prevPage) && !GunCharmPages.TryGetValue(GunCharmPages.Keys.Max(), out prevPage))
+                                    {
+                                        Logging.Debug($"Error getting prev page for gun charms for {Player.CharacterName}");
+                                        return;
+                                    }
+
+                                    ShowGunCharmPage(prevPage);
                                     break;
                                 }
 
                             case ELoadoutPage.AttachmentSecondaryBarrel:
-                            case ELoadoutPage.AttachmentSecondaryGrip:
                             case ELoadoutPage.AttachmentSecondaryMagazine:
                             case ELoadoutPage.AttachmentSecondarySights:
-                            case ELoadoutPage.AttachmentSecondaryTactical:
                                 {
                                     if (!Enum.TryParse(LoadoutPage.ToString().Replace("AttachmentSecondary", ""), false, out EAttachment attachmentType))
                                     {
@@ -1827,7 +1842,7 @@ namespace UnturnedBlackout.Instances
                                     EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
                                     EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
 
-                                    ShowAttachmentPage(prevPage);
+                                    ShowAttachmentPage(prevPage, gun);
                                     break;
                                 }
 
@@ -1835,7 +1850,7 @@ namespace UnturnedBlackout.Instances
                                 {
                                     if (!PerkPages.TryGetValue(LoadoutTabPageID - 1, out PagePerk prevPage) && !PerkPages.TryGetValue(PerkPages.Keys.Max(), out prevPage))
                                     {
-                                        Logging.Debug($"Error getting next page for perks for {Player.CharacterName}");
+                                        Logging.Debug($"Error getting prev page for perks for {Player.CharacterName}");
                                         return;
                                     }
 
@@ -1958,24 +1973,6 @@ namespace UnturnedBlackout.Instances
                                     ShowGunSkinPage(prevPage);
                                     break;
                                 }
-
-                            case ELoadoutPage.Knife:
-                                {
-                                    if (!KnifeSkinPages.TryGetValue(loadout.Knife?.Knife?.KnifeID ?? 0, out Dictionary<int, PageKnifeSkin> knifeSkinPages))
-                                    {
-                                        Logging.Debug($"Error getting gun skin pages for knife with id {loadout.Knife?.Knife?.KnifeID ?? 0}");
-                                        return;
-                                    }
-
-                                    if (!knifeSkinPages.TryGetValue(LoadoutTabPageID - 1, out PageKnifeSkin prevPage) && !knifeSkinPages.TryGetValue(knifeSkinPages.Keys.Max(), out prevPage))
-                                    {
-                                        Logging.Debug($"Error finding the prev page for gun skins for gun with id {loadout.Knife.Knife.KnifeID} for {Player.CharacterName}");
-                                        return;
-                                    }
-
-                                    ShowKnifeSkinPage(prevPage);
-                                    break;
-                                }
                         }
 
                         break;
@@ -2055,6 +2052,323 @@ namespace UnturnedBlackout.Instances
             }
         }
 
+        public void ReloadLoadoutTab()
+        {
+            Logging.Debug($"Reloading current loadout tab page for {Player.CharacterName}, Current Page {LoadoutTabPageID}");
+            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
+            {
+                Logging.Debug($"Error finding loadout with id {LoadoutID} for {Player.CharacterName}");
+                return;
+            }
+
+            switch (LoadoutTab)
+            {
+                case ELoadoutTab.ALL:
+                    {
+                        switch (LoadoutPage)
+                        {
+                            case ELoadoutPage.AttachmentPrimaryBarrel:
+                            case ELoadoutPage.AttachmentPrimaryGrip:
+                            case ELoadoutPage.AttachmentPrimaryMagazine:
+                            case ELoadoutPage.AttachmentPrimarySights:
+                                {
+                                    if (!Enum.TryParse(LoadoutPage.ToString().Replace("AttachmentPrimary", ""), false, out EAttachment attachmentType))
+                                    {
+                                        Logging.Debug($"Error finding attachment type that {Player.CharacterName} has selected");
+                                        return;
+                                    }
+
+                                    if (!PlayerLoadout.Guns.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out LoadoutGun gun))
+                                    {
+                                        Logging.Debug($"Error finding primary that has been selected with id {loadout.Primary?.Gun?.GunID ?? 0} for {Player.CharacterName}");
+                                        return;
+                                    }
+
+                                    if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out var attachmentTypePages))
+                                    {
+                                        Logging.Debug($"Error finding primary attachments for {gun.Gun.GunID} for {Player.CharacterName}");
+                                        return;
+                                    }
+
+                                    if (!attachmentTypePages.TryGetValue(attachmentType, out Dictionary<int, PageAttachment> attachmentPages))
+                                    {
+                                        Logging.Debug($"Error finding attachments with type {attachmentType} for {Player.CharacterName}");
+                                        return;
+                                    }
+
+                                    if (attachmentPages.TryGetValue(LoadoutTabPageID, out PageAttachment page))
+                                    {
+                                        Logging.Debug($"Error finding current page of attachment with type {attachmentType} for gun with id {gun.Gun.GunID} for {Player.CharacterName}");
+                                        return;
+                                    }
+
+                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
+                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
+
+                                    ShowAttachmentPage(page, gun);
+                                    break;
+                                }
+
+                            case ELoadoutPage.AttachmentPrimaryCharm:
+                            case ELoadoutPage.AttachmentSecondaryCharm:
+                                {
+                                    if (!GunCharmPages.TryGetValue(LoadoutTabPageID, out PageGunCharm page))
+                                    {
+                                        Logging.Debug($"Error getting current page for gun charms for {Player.CharacterName}");
+                                        return;
+                                    }
+
+                                    ShowGunCharmPage(page);
+                                    break;
+                                }
+
+                            case ELoadoutPage.AttachmentSecondaryBarrel:
+                            case ELoadoutPage.AttachmentSecondaryMagazine:
+                            case ELoadoutPage.AttachmentSecondarySights:
+                                {
+                                    if (!Enum.TryParse(LoadoutPage.ToString().Replace("AttachmentSecondary", ""), false, out EAttachment attachmentType))
+                                    {
+                                        Logging.Debug($"Error finding attachment type that {Player.CharacterName} has selected");
+                                        return;
+                                    }
+
+                                    if (!PlayerLoadout.Guns.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out LoadoutGun gun))
+                                    {
+                                        Logging.Debug($"Error finding secondary that has been selected with id {loadout.Secondary?.Gun?.GunID ?? 0} for {Player.CharacterName}");
+                                        return;
+                                    }
+
+                                    if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out var attachmentTypePages))
+                                    {
+                                        Logging.Debug($"Error finding secondary attachments for {gun.Gun.GunID} for {Player.CharacterName}");
+                                        return;
+                                    }
+
+                                    if (!attachmentTypePages.TryGetValue(attachmentType, out Dictionary<int, PageAttachment> attachmentPages))
+                                    {
+                                        Logging.Debug($"Error finding attachments with type {attachmentType} for {Player.CharacterName}");
+                                        return;
+                                    }
+
+                                    if (attachmentPages.TryGetValue(LoadoutTabPageID, out PageAttachment page))
+                                    {
+                                        Logging.Debug($"Error finding current page of attachment with type {attachmentType} for gun with id {gun.Gun.GunID} for {Player.CharacterName}");
+                                        return;
+                                    }
+
+                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
+                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
+
+                                    ShowAttachmentPage(page, gun);
+                                    break;
+                                }
+
+                            case ELoadoutPage.Perk:
+                                {
+                                    if (!PerkPages.TryGetValue(LoadoutTabPageID, out PagePerk page))
+                                    {
+                                        Logging.Debug($"Error getting current page for perks for {Player.CharacterName}");
+                                        return;
+                                    }
+
+                                    ShowPerkPage(page);
+                                    break;
+                                }
+
+                            case ELoadoutPage.Lethal:
+                                {
+                                    if (!LethalPages.TryGetValue(LoadoutTabPageID, out PageGadget page))
+                                    {
+                                        Logging.Debug($"Error finding the current page for lethals for {Player.CharacterName}");
+                                        return;
+                                    }
+
+                                    ShowGadgetPage(page);
+                                    break;
+                                }
+
+                            case ELoadoutPage.Tactical:
+                                {
+                                    if (!TacticalPages.TryGetValue(LoadoutTabPageID, out PageGadget page))
+                                    {
+                                        Logging.Debug($"Error finding the current page for tacticals for {Player.CharacterName}");
+                                        return;
+                                    }
+
+                                    ShowGadgetPage(page);
+                                    break;
+                                }
+
+                            case ELoadoutPage.Knife:
+                                {
+                                    if (!KnifePages.TryGetValue(LoadoutTabPageID, out PageKnife page))
+                                    {
+                                        Logging.Debug($"Error finding the current page for knives for {Player.CharacterName}");
+                                        return;
+                                    }
+
+                                    ShowKnifePage(page);
+                                    break;
+                                }
+
+                            case ELoadoutPage.Killstreak:
+                                {
+                                    if (!KillstreakPages.TryGetValue(LoadoutTabPageID, out PageKillstreak page))
+                                    {
+                                        Logging.Debug($"Error finding the current page for killstreaks for {Player.CharacterName}");
+                                        return;
+                                    }
+
+                                    ShowKillstreakPage(page);
+                                    break;
+                                }
+
+                            case ELoadoutPage.Glove:
+                                {
+                                    if (!GlovePages.TryGetValue(LoadoutTabPageID, out PageGlove page))
+                                    {
+                                        Logging.Debug($"Error finding the current page for gloves for {Player.CharacterName}");
+                                        return;
+                                    }
+
+                                    ShowGlovePage(page);
+                                    break;
+                                }
+
+                            case ELoadoutPage.Card:
+                                {
+                                    if (!CardPages.TryGetValue(LoadoutTabPageID, out PageCard page))
+                                    {
+                                        Logging.Debug($"Error finding the current page for cards for {Player.CharacterName}");
+                                        return;
+                                    }
+
+                                    ShowCardPage(page);
+                                    break;
+                                }
+                        }
+
+                        break;
+                    }
+
+                case ELoadoutTab.SKINS:
+                    {
+                        switch (LoadoutPage)
+                        {
+                            case ELoadoutPage.Primary:
+                                {
+                                    if (!GunSkinPages.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out Dictionary<int, PageGunSkin> gunSkinPages))
+                                    {
+                                        Logging.Debug($"Error getting gun skin pages for gun with id {loadout.Primary?.Gun?.GunID ?? 0}");
+                                        return;
+                                    }
+
+                                    if (!gunSkinPages.TryGetValue(LoadoutTabPageID, out PageGunSkin page))
+                                    {
+                                        Logging.Debug($"Error finding the current page for gun skins for gun with id {loadout.Primary.Gun.GunID} for {Player.CharacterName}");
+                                        return;
+                                    }
+
+                                    ShowGunSkinPage(page);
+                                    break;
+                                }
+
+                            case ELoadoutPage.Secondary:
+                                {
+                                    if (!GunSkinPages.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out Dictionary<int, PageGunSkin> gunSkinPages))
+                                    {
+                                        Logging.Debug($"Error getting gun skin pages for gun with id {loadout.Secondary?.Gun?.GunID ?? 0}");
+                                        return;
+                                    }
+
+                                    if (!gunSkinPages.TryGetValue(LoadoutTabPageID, out PageGunSkin page))
+                                    {
+                                        Logging.Debug($"Error finding the current page for gun skins for gun with id {loadout.Secondary.Gun.GunID} for {Player.CharacterName}");
+                                        return;
+                                    }
+
+                                    ShowGunSkinPage(page);
+                                    break;
+                                }
+                        }
+
+                        break;
+                    }
+
+                case ELoadoutTab.PISTOLS:
+                    {
+                        if (!PistolPages.TryGetValue(LoadoutTabPageID, out PageGun page))
+                        {
+                            Logging.Debug($"Error finding current page for pistols for {Player.CharacterName}");
+                            return;
+                        }
+
+                        ShowGunPage(page);
+                        break;
+                    }
+
+                case ELoadoutTab.SUBMACHINE_GUNS:
+                    {
+                        if (!SMGPages.TryGetValue(LoadoutTabPageID, out PageGun page))
+                        {
+                            Logging.Debug($"Error finding current page for smgs for {Player.CharacterName}");
+                            return;
+                        }
+
+                        ShowGunPage(page);
+                        break;
+                    }
+
+                case ELoadoutTab.SHOTGUNS:
+                    {
+                        if (!ShotgunPages.TryGetValue(LoadoutTabPageID, out PageGun page))
+                        {
+                            Logging.Debug($"Error finding current page for shotguns for {Player.CharacterName}");
+                            return;
+                        }
+
+                        ShowGunPage(page);
+                        break;
+                    }
+
+                case ELoadoutTab.LIGHT_MACHINE_GUNS:
+                    {
+                        if (!LMGPages.TryGetValue(LoadoutTabPageID, out PageGun page))
+                        {
+                            Logging.Debug($"Error finding current page for lmgs for {Player.CharacterName}");
+                            return;
+                        }
+
+                        ShowGunPage(page);
+                        break;
+                    }
+
+                case ELoadoutTab.ASSAULT_RIFLES:
+                    {
+                        if (!ARPages.TryGetValue(LoadoutTabPageID, out PageGun page))
+                        {
+                            Logging.Debug($"Error finding current page for ARs for {Player.CharacterName}");
+                            return;
+                        }
+
+                        ShowGunPage(page);
+                        break;
+                    }
+
+                case ELoadoutTab.SNIPER_RIFLES:
+                    {
+                        if (!SniperPages.TryGetValue(LoadoutTabPageID, out PageGun page))
+                        {
+                            Logging.Debug($"Error finding current page for snipers for {Player.CharacterName}");
+                            return;
+                        }
+
+                        ShowGunPage(page);
+                        break;
+                    }
+            }
+        }
+
         public void ShowGunPage(PageGun page)
         {
             Logging.Debug($"Showing gun page to {Player.CharacterName} with page id {page.PageID}");
@@ -2079,10 +2393,12 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Equipped {i}", (LoadoutPage == ELoadoutPage.Primary && currentLoadout.Primary == gun) || (LoadoutPage == ELoadoutPage.Secondary && currentLoadout.Secondary == gun));
                 EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Item IMAGE {i}", gun.Gun.IconLink);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item TEXT {i}", gun.Gun.GunName);
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Lock Overlay {i}", !gun.IsBought && gun.Gun.LevelRequirement > PlayerData.Level);
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", !gun.IsBought && gun.Gun.LevelRequirement > PlayerData.Level ? $"UNLOCK WITH LEVEL {gun.Gun.LevelRequirement}" : "");
             }
         }
 
-        public void ShowAttachmentPage(PageAttachment page)
+        public void ShowAttachmentPage(PageAttachment page, LoadoutGun gun)
         {
             Logging.Debug($"Showing attachment page to {Player.CharacterName} with page id {page.PageID}");
             LoadoutTabPageID = page.PageID;
@@ -2106,6 +2422,37 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Equipped {i}", (LoadoutPage.ToString().StartsWith("AttachmentPrimary") && currentLoadout.PrimaryAttachments.ContainsValue(attachment)) || (LoadoutPage.ToString().StartsWith("AttachmentSecondary") && currentLoadout.SecondaryAttachments.ContainsValue(attachment)));
                 EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Item IMAGE {i}", attachment.Attachment.IconLink);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item TEXT {i}", attachment.Attachment.AttachmentName);
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Lock Overlay {i}", !attachment.IsBought && attachment.LevelRequirement > gun.Level);
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", !attachment.IsBought && attachment.LevelRequirement > gun.Level ? $"UNLOCK WITH GUN LEVEL {attachment.LevelRequirement}" : "");
+            }
+        }
+
+        public void ShowGunCharmPage(PageGunCharm page)
+        {
+            Logging.Debug($"Showing gun charm page to {Player.CharacterName} with page id {page.PageID}");
+            LoadoutTabPageID = page.PageID;
+
+            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout currentLoadout))
+            {
+                Logging.Debug($"Error finding current loadout for {Player.CharacterName} with id {LoadoutID}");
+                return;
+            }
+
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item Page TEXT", $"Page {page.PageID}");
+            for (int i = 0; i <= 4; i++)
+            {
+                if (!page.GunCharms.TryGetValue(i, out LoadoutGunCharm gunCharm))
+                {
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item BUTTON {i}", false);
+                    continue;
+                }
+
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item BUTTON {i}", true);
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Equipped {i}", (LoadoutPage.ToString().StartsWith("AttachmentPrimary") && currentLoadout.PrimaryGunCharm == gunCharm) || (LoadoutPage.ToString().StartsWith("AttachmentSecondary") && currentLoadout.SecondaryGunCharm == gunCharm));
+                EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Item IMAGE {i}", gunCharm.GunCharm.IconLink);
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item TEXT {i}", gunCharm.GunCharm.CharmName);
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Lock Overlay {i}", !gunCharm.IsBought && gunCharm.GunCharm.LevelRequirement > PlayerData.Level);
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", !gunCharm.IsBought && gunCharm.GunCharm.LevelRequirement > PlayerData.Level ? $"UNLOCK WITH LEVEL {gunCharm.GunCharm.LevelRequirement}" : "");
             }
         }
 
@@ -2133,6 +2480,8 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Equipped {i}", (LoadoutPage == ELoadoutPage.Primary && currentLoadout.PrimarySkin == skin) || (LoadoutPage == ELoadoutPage.Secondary && currentLoadout.SecondarySkin == skin));
                 EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Item IMAGE {i}", skin.IconLink);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item TEXT {i}", skin.SkinName);
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Lock Overlay {i}", false);
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", "");
             }
         }
 
@@ -2160,33 +2509,8 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Equipped {i}", currentLoadout.Knife == knife);
                 EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Item IMAGE {i}", knife.Knife.IconLink);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item TEXT {i}", knife.Knife.KnifeName);
-            }
-        }
-
-        public void ShowKnifeSkinPage(PageKnifeSkin page)
-        {
-            Logging.Debug($"Showing knife skin page to {Player.CharacterName} with page id {page.PageID}");
-            LoadoutTabPageID = page.PageID;
-
-            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout currentLoadout))
-            {
-                Logging.Debug($"Error finding current loadout for {Player.CharacterName} with id {LoadoutID}");
-                return;
-            }
-
-            EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item Page TEXT", $"Page {page.PageID}");
-            for (int i = 0; i <= 4; i++)
-            {
-                if (!page.KnifeSkins.TryGetValue(i, out KnifeSkin skin))
-                {
-                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item BUTTON {i}", false);
-                    continue;
-                }
-
-                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item BUTTON {i}", true);
-                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Equipped {i}", currentLoadout.KnifeSkin == skin);
-                EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Item IMAGE {i}", skin.IconLink);
-                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item TEXT {i}", skin.SkinName);
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Lock Overlay {i}", !knife.IsBought && knife.Knife.LevelRequirement > PlayerData.Level);
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", !knife.IsBought && knife.Knife.LevelRequirement > PlayerData.Level ? $"UNLOCK WITH LEVEL {knife.Knife.LevelRequirement}" : "");
             }
         }
 
@@ -2214,6 +2538,8 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Equipped {i}", currentLoadout.Perks.Contains(perk));
                 EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Item IMAGE {i}", perk.Perk.IconLink);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item TEXT {i}", perk.Perk.PerkName);
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Lock Overlay {i}", !perk.IsBought && perk.Perk.LevelRequirement > PlayerData.Level);
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", !perk.IsBought && perk.Perk.LevelRequirement > PlayerData.Level ? $"UNLOCK WITH LEVEL {perk.Perk.LevelRequirement}" : "");
             }
         }
 
@@ -2241,6 +2567,8 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Equipped {i}", (LoadoutPage == ELoadoutPage.Tactical && currentLoadout.Tactical == gadget) || (LoadoutPage == ELoadoutPage.Lethal && currentLoadout.Lethal == gadget));
                 EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Item IMAGE {i}", gadget.Gadget.IconLink);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item TEXT {i}", gadget.Gadget.GadgetName);
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Lock Overlay {i}", !gadget.IsBought && gadget.Gadget.LevelRequirement > PlayerData.Level);
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", !gadget.IsBought && gadget.Gadget.LevelRequirement > PlayerData.Level ? $"UNLOCK WITH LEVEL {gadget.Gadget.LevelRequirement}" : "");
             }
         }
 
@@ -2268,6 +2596,8 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Equipped {i}", currentLoadout.Card == card);
                 EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Item IMAGE {i}", card.Card.IconLink);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item TEXT {i}", card.Card.CardName);
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Lock Overlay {i}", !card.IsBought && card.Card.LevelRequirement > PlayerData.Level);
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", !card.IsBought && card.Card.LevelRequirement > PlayerData.Level ? $"UNLOCK WITH LEVEL {card.Card.LevelRequirement}" : "");
             }
         }
 
@@ -2295,6 +2625,8 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Equipped {i}", currentLoadout.Glove == glove);
                 EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Item IMAGE {i}", glove.Glove.IconLink);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item TEXT {i}", glove.Glove.GloveName);
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Lock Overlay {i}", !glove.IsBought && glove.Glove.LevelRequirement > PlayerData.Level);
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", !glove.IsBought && glove.Glove.LevelRequirement > PlayerData.Level ? $"UNLOCK WITH LEVEL {glove.Glove.LevelRequirement}" : "");
             }
         }
 
@@ -2322,6 +2654,8 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Equipped {i}", currentLoadout.Killstreaks.Contains(killstreak));
                 EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Item IMAGE {i}", killstreak.Killstreak.IconLink);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item TEXT {i}", killstreak.Killstreak.KillstreakName);
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Lock Overlay {i}", !killstreak.IsBought && killstreak.Killstreak.LevelRequirement > PlayerData.Level);
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", !killstreak.IsBought && killstreak.Killstreak.LevelRequirement > PlayerData.Level ? $"UNLOCK WITH LEVEL {killstreak.Killstreak.LevelRequirement}" : "");
             }
         }
 
@@ -2364,7 +2698,6 @@ namespace UnturnedBlackout.Instances
                 case ELoadoutPage.AttachmentPrimaryGrip:
                 case ELoadoutPage.AttachmentPrimaryMagazine:
                 case ELoadoutPage.AttachmentPrimarySights:
-                case ELoadoutPage.AttachmentPrimaryTactical:
                     {
                         if (!Enum.TryParse(LoadoutPage.ToString().Replace("AttachmentPrimary", ""), false, out EAttachment attachmentType))
                         {
@@ -2402,15 +2735,13 @@ namespace UnturnedBlackout.Instances
                             return;
                         }
 
-                        ShowAttachment(attachment);
+                        ShowAttachment(attachment, gun);
                         break;
                     }
 
                 case ELoadoutPage.AttachmentSecondaryBarrel:
-                case ELoadoutPage.AttachmentSecondaryGrip:
                 case ELoadoutPage.AttachmentSecondaryMagazine:
                 case ELoadoutPage.AttachmentSecondarySights:
-                case ELoadoutPage.AttachmentSecondaryTactical:
                     {
                         if (!Enum.TryParse(LoadoutPage.ToString().Replace("AttachmentSecondary", ""), false, out EAttachment attachmentType))
                         {
@@ -2448,7 +2779,20 @@ namespace UnturnedBlackout.Instances
                             return;
                         }
 
-                        ShowAttachment(attachment);
+                        ShowAttachment(attachment, gun);
+                        break;
+                    }
+
+                case ELoadoutPage.AttachmentPrimaryCharm:
+                case ELoadoutPage.AttachmentSecondaryCharm:
+                    {
+                        if (!PlayerLoadout.GunCharms.TryGetValue((ushort)SelectedItemID, out LoadoutGunCharm gunCharm))
+                        {
+                            Logging.Debug($"Error finding gun charm with id {SelectedItemID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        ShowGunCharm(gunCharm);
                         break;
                     }
 
@@ -2557,7 +2901,6 @@ namespace UnturnedBlackout.Instances
                             case ELoadoutPage.AttachmentPrimaryGrip:
                             case ELoadoutPage.AttachmentPrimaryMagazine:
                             case ELoadoutPage.AttachmentPrimarySights:
-                            case ELoadoutPage.AttachmentPrimaryTactical:
                                 {
                                     if (!Enum.TryParse(LoadoutPage.ToString().Replace("AttachmentPrimary", ""), false, out EAttachment attachmentType))
                                     {
@@ -2595,15 +2938,32 @@ namespace UnturnedBlackout.Instances
                                         return;
                                     }
 
-                                    ShowAttachment(attachment);
+                                    ShowAttachment(attachment, gun);
+                                    break;
+                                }
+
+                            case ELoadoutPage.AttachmentPrimaryCharm:
+                            case ELoadoutPage.AttachmentSecondaryCharm:
+                                {
+                                    if (!GunCharmPages.TryGetValue(LoadoutTabPageID, out PageGunCharm page))
+                                    {
+                                        Logging.Debug($"Error finding gun charm page with id {LoadoutTabPageID} for {Player.CharacterName}");
+                                        return;
+                                    }
+
+                                    if (!page.GunCharms.TryGetValue(selected, out LoadoutGunCharm gunCharm))
+                                    {
+                                        Logging.Debug($"Error finding gun charm at {selected} at page {LoadoutTabPageID} for {Player.CharacterName}");
+                                        return;
+                                    }
+
+                                    ShowGunCharm(gunCharm);
                                     break;
                                 }
 
                             case ELoadoutPage.AttachmentSecondaryBarrel:
-                            case ELoadoutPage.AttachmentSecondaryGrip:
                             case ELoadoutPage.AttachmentSecondaryMagazine:
                             case ELoadoutPage.AttachmentSecondarySights:
-                            case ELoadoutPage.AttachmentSecondaryTactical:
                                 {
                                     if (!Enum.TryParse(LoadoutPage.ToString().Replace("AttachmentSecondary", ""), false, out EAttachment attachmentType))
                                     {
@@ -2641,7 +3001,7 @@ namespace UnturnedBlackout.Instances
                                         return;
                                     }
 
-                                    ShowAttachment(attachment);
+                                    ShowAttachment(attachment, gun);
                                     break;
                                 }
 
@@ -2825,30 +3185,6 @@ namespace UnturnedBlackout.Instances
                                     ShowGunSkin(skin);
                                     break;
                                 }
-
-                            case ELoadoutPage.Knife:
-                                {
-                                    if (!KnifeSkinPages.TryGetValue(loadout.Knife?.Knife?.KnifeID ?? 0, out Dictionary<int, PageKnifeSkin> skinsPage))
-                                    {
-                                        Logging.Debug($"Error finding knife skin pages for knife with id {loadout.Knife?.Knife?.KnifeID ?? 0} for {Player.CharacterName}");
-                                        return;
-                                    }
-
-                                    if (!skinsPage.TryGetValue(LoadoutTabPageID, out PageKnifeSkin pageSkin))
-                                    {
-                                        Logging.Debug($"Error finding knife skin page at id {LoadoutTabPageID} for {Player.CharacterName}");
-                                        return;
-                                    }
-
-                                    if (!pageSkin.KnifeSkins.TryGetValue(selected, out KnifeSkin skin))
-                                    {
-                                        Logging.Debug($"Error finding skin at {selected} at page with id {LoadoutTabPageID} for {Player.CharacterName}");
-                                        return;
-                                    }
-
-                                    ShowKnifeSkin(skin);
-                                    break;
-                                }
                         }
                         break;
                     }
@@ -2973,7 +3309,10 @@ namespace UnturnedBlackout.Instances
                 return;
             }
 
-            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Buy BUTTON", !gun.IsBought);
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Buy BUTTON", !gun.IsBought && PlayerData.Level >= gun.Gun.LevelRequirement);
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Buy BUTTON TEXT", !gun.IsBought && PlayerData.Level >= gun.Gun.LevelRequirement ? $"BUY ({gun.Gun.BuyPrice} CREDITS)" : "");
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Unlock BUTTON", !gun.IsBought && gun.Gun.LevelRequirement > PlayerData.Level);
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Unlock BUTTON TEXT", !gun.IsBought && gun.Gun.LevelRequirement > PlayerData.Level ? $"UNLOCK ({gun.Gun.Coins} COINS)" : "");
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Equip BUTTON", gun.IsBought && ((LoadoutPage == ELoadoutPage.Primary && loadout.Primary != gun) || (LoadoutPage == ELoadoutPage.Secondary && loadout.Secondary != gun)));
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Dequip BUTTON", gun.IsBought && ((LoadoutPage == ELoadoutPage.Primary && loadout.Primary == gun) || (LoadoutPage == ELoadoutPage.Secondary && loadout.Secondary == gun)));
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Description TEXT", gun.Gun.GunDesc);
@@ -2985,7 +3324,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item XP Bar Fill", spaces == 0 ? "" : new string(' ', spaces));
         }
 
-        public void ShowAttachment(LoadoutAttachment attachment)
+        public void ShowAttachment(LoadoutAttachment attachment, LoadoutGun gun)
         {
             SelectedItemID = attachment.Attachment.AttachmentID;
             Logging.Debug($"Showing attachment with id {attachment.Attachment.AttachmentID} to {Player.CharacterName}");
@@ -2995,12 +3334,36 @@ namespace UnturnedBlackout.Instances
                 return;
             }
 
-            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Buy BUTTON", !attachment.IsBought);
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Buy BUTTON", !attachment.IsBought && gun.Level >= attachment.LevelRequirement);
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Buy BUTTON TEXT", !attachment.IsBought && gun.Level >= attachment.LevelRequirement ? $"BUY ({attachment.Attachment.BuyPrice} CREDITS)" : "");
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Unlock BUTTON", !attachment.IsBought && attachment.LevelRequirement > gun.Level);
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Unlock BUTTON TEXT", !attachment.IsBought && attachment.LevelRequirement > gun.Level ? $"UNLOCK ({attachment.Attachment.Coins} COINS)" : "");
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Equip BUTTON", attachment.IsBought && ((LoadoutPage.ToString().StartsWith("AttachmentPrimary") && !loadout.PrimaryAttachments.ContainsValue(attachment)) || (LoadoutPage.ToString().StartsWith("AttachmentSecondary") && !loadout.SecondaryAttachments.ContainsValue(attachment))));
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Dequip BUTTON", attachment.IsBought && ((LoadoutPage.ToString().StartsWith("AttachmentPrimary") && loadout.PrimaryAttachments.ContainsValue(attachment)) || (LoadoutPage.ToString().StartsWith("AttachmentSecondary") && loadout.SecondaryAttachments.ContainsValue(attachment))));
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Description TEXT", attachment.Attachment.AttachmentDesc);
             EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Item IMAGE", attachment.Attachment.IconLink);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item TEXT", attachment.Attachment.AttachmentName);
+        }
+
+        public void ShowGunCharm(LoadoutGunCharm gunCharm)
+        {
+            SelectedItemID = gunCharm.GunCharm.CharmID;
+            Logging.Debug($"Showing gun charm with id {gunCharm.GunCharm.CharmID} to {Player.CharacterName}");
+            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
+            {
+                Logging.Debug($"Error finding loadout with id {LoadoutID} for {Player.CharacterName}");
+                return;
+            }
+
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Buy BUTTON", !gunCharm.IsBought && PlayerData.Level >= gunCharm.GunCharm.LevelRequirement);
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Buy BUTTON TEXT", !gunCharm.IsBought && PlayerData.Level >= gunCharm.GunCharm.LevelRequirement ? $"BUY ({gunCharm.GunCharm.BuyPrice} CREDITS)" : "");
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Unlock BUTTON", !gunCharm.IsBought && gunCharm.GunCharm.LevelRequirement > PlayerData.Level);
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Unlock BUTTON TEXT", !gunCharm.IsBought && gunCharm.GunCharm.LevelRequirement > PlayerData.Level ? $"UNLOCK ({gunCharm.GunCharm.Coins} COINS)" : "");
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Equip BUTTON", gunCharm.IsBought && ((LoadoutPage.ToString().StartsWith("AttachmentPrimary") && loadout.PrimaryGunCharm != gunCharm) || (LoadoutPage.ToString().StartsWith("AttachmentSecondary") && loadout.SecondaryGunCharm != gunCharm)));
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Dequip BUTTON", gunCharm.IsBought && ((LoadoutPage.ToString().StartsWith("AttachmentPrimary") && loadout.PrimaryGunCharm == gunCharm) || (LoadoutPage.ToString().StartsWith("AttachmentSecondary") && loadout.SecondaryGunCharm == gunCharm)));
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Description TEXT", gunCharm.GunCharm.CharmDesc);
+            EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Item IMAGE", gunCharm.GunCharm.IconLink);
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item TEXT", gunCharm.GunCharm.CharmName);
         }
 
         public void ShowGunSkin(GunSkin skin)
@@ -3014,6 +3377,7 @@ namespace UnturnedBlackout.Instances
             }
 
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Buy BUTTON", false);
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Unlock BUTTON", false);
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Equip BUTTON", (LoadoutPage == ELoadoutPage.Primary && loadout.PrimarySkin != skin) || (LoadoutPage == ELoadoutPage.Secondary && loadout.SecondarySkin != skin));
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Dequip BUTTON", (LoadoutPage == ELoadoutPage.Primary && loadout.PrimarySkin == skin) || (LoadoutPage == ELoadoutPage.Secondary && loadout.SecondarySkin == skin));
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Description TEXT", skin.SkinDesc);
@@ -3031,30 +3395,15 @@ namespace UnturnedBlackout.Instances
                 return;
             }
 
-            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Buy BUTTON", !knife.IsBought);
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Buy BUTTON", !knife.IsBought && PlayerData.Level >= knife.Knife.LevelRequirement);
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Buy BUTTON TEXT", !knife.IsBought && PlayerData.Level >= knife.Knife.LevelRequirement ? $"BUY ({knife.Knife.BuyPrice} CREDITS)" : "");
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Unlock BUTTON", !knife.IsBought && knife.Knife.LevelRequirement > PlayerData.Level);
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Unlock BUTTON TEXT", !knife.IsBought && knife.Knife.LevelRequirement > PlayerData.Level ? $"UNLOCK ({knife.Knife.Coins} COINS)" : "");
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Equip BUTTON", knife.IsBought && loadout.Knife != knife);
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Dequip BUTTON", false);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Description TEXT", knife.Knife.KnifeDesc);
             EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Item IMAGE", knife.Knife.IconLink);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item TEXT", knife.Knife.KnifeName);
-        }
-
-        public void ShowKnifeSkin(KnifeSkin skin)
-        {
-            SelectedItemID = skin.ID;
-            Logging.Debug($"Showing knife skin with id {skin.ID} to {Player.CharacterName}");
-            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
-            {
-                Logging.Debug($"Error finding loadout with id {LoadoutID} for {Player.CharacterName}");
-                return;
-            }
-
-            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Buy BUTTON", false);
-            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Equip BUTTON", loadout.KnifeSkin != skin);
-            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Dequip BUTTON", loadout.KnifeSkin == skin);
-            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Description TEXT", skin.SkinDesc);
-            EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Item IMAGE", skin.IconLink);
-            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item TEXT", skin.SkinName);
         }
 
         public void ShowPerk(LoadoutPerk perk)
@@ -3067,7 +3416,10 @@ namespace UnturnedBlackout.Instances
                 return;
             }
 
-            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Buy BUTTON", !perk.IsBought);
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Buy BUTTON", !perk.IsBought && PlayerData.Level >= perk.Perk.LevelRequirement);
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Buy BUTTON TEXT", !perk.IsBought && PlayerData.Level >= perk.Perk.LevelRequirement ? $"BUY ({perk.Perk.BuyPrice} CREDITS)" : "");
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Unlock BUTTON", !perk.IsBought && perk.Perk.LevelRequirement > PlayerData.Level);
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Unlock BUTTON TEXT", !perk.IsBought && perk.Perk.LevelRequirement > PlayerData.Level ? $"UNLOCK ({perk.Perk.Coins} COINS)" : "");
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Equip BUTTON", perk.IsBought && !loadout.Perks.Contains(perk));
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Dequip BUTTON", perk.IsBought && loadout.Perks.Contains(perk));
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Description TEXT", perk.Perk.PerkDesc);
@@ -3085,7 +3437,10 @@ namespace UnturnedBlackout.Instances
                 return;
             }
 
-            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Buy BUTTON", !gadget.IsBought);
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Buy BUTTON", !gadget.IsBought && PlayerData.Level >= gadget.Gadget.LevelRequirement);
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Buy BUTTON TEXT", !gadget.IsBought && PlayerData.Level >= gadget.Gadget.LevelRequirement ? $"BUY ({gadget.Gadget.BuyPrice} CREDITS)" : "");
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Unlock BUTTON", !gadget.IsBought && gadget.Gadget.LevelRequirement > PlayerData.Level);
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Unlock BUTTON TEXT", !gadget.IsBought && gadget.Gadget.LevelRequirement > PlayerData.Level ? $"UNLOCK ({gadget.Gadget.Coins} COINS)" : "");
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Equip BUTTON", gadget.IsBought && ((LoadoutPage == ELoadoutPage.Tactical && loadout.Tactical != gadget) || (LoadoutPage == ELoadoutPage.Lethal && loadout.Lethal != gadget)));
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Dequip BUTTON", gadget.IsBought && ((LoadoutPage == ELoadoutPage.Tactical && loadout.Tactical == gadget) || (LoadoutPage == ELoadoutPage.Lethal && loadout.Lethal == gadget)));
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Description TEXT", gadget.Gadget.GadgetDesc);
@@ -3103,7 +3458,10 @@ namespace UnturnedBlackout.Instances
                 return;
             }
 
-            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Buy BUTTON", !card.IsBought);
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Buy BUTTON", !card.IsBought && PlayerData.Level >= card.Card.LevelRequirement);
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Buy BUTTON TEXT", !card.IsBought && PlayerData.Level >= card.Card.LevelRequirement ? $"BUY ({card.Card.BuyPrice} CREDITS)" : "");
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Unlock BUTTON", !card.IsBought && card.Card.LevelRequirement > PlayerData.Level);
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Unlock BUTTON TEXT", !card.IsBought && card.Card.LevelRequirement > PlayerData.Level ? $"UNLOCK ({card.Card.Coins} COINS)" : "");
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Equip BUTTON", card.IsBought && loadout.Card != card);
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Dequip BUTTON", card.IsBought && loadout.Card == card);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Description TEXT", card.Card.CardDesc);
@@ -3121,7 +3479,10 @@ namespace UnturnedBlackout.Instances
                 return;
             }
 
-            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Buy BUTTON", !glove.IsBought);
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Buy BUTTON", !glove.IsBought && PlayerData.Level >= glove.Glove.LevelRequirement);
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Buy BUTTON TEXT", !glove.IsBought && PlayerData.Level >= glove.Glove.LevelRequirement ? $"BUY ({glove.Glove.BuyPrice} CREDITS)" : "");
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Unlock BUTTON", !glove.IsBought && glove.Glove.LevelRequirement > PlayerData.Level);
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Unlock BUTTON TEXT", !glove.IsBought && glove.Glove.LevelRequirement > PlayerData.Level ? $"UNLOCK ({glove.Glove.Coins} COINS)" : "");
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Equip BUTTON", glove.IsBought && loadout.Glove != glove);
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Dequip BUTTON", glove.IsBought && loadout.Glove == glove);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Description TEXT", glove.Glove.GloveDesc);
@@ -3139,7 +3500,10 @@ namespace UnturnedBlackout.Instances
                 return;
             }
 
-            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Buy BUTTON", !killstreak.IsBought);
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Buy BUTTON", !killstreak.IsBought && PlayerData.Level >= killstreak.Killstreak.LevelRequirement);
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Buy BUTTON TEXT", !killstreak.IsBought && PlayerData.Level >= killstreak.Killstreak.LevelRequirement ? $"BUY ({killstreak.Killstreak.BuyPrice} CREDITS)" : "");
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Unlock BUTTON", !killstreak.IsBought && killstreak.Killstreak.LevelRequirement > PlayerData.Level);
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Unlock BUTTON TEXT", !killstreak.IsBought && killstreak.Killstreak.LevelRequirement > PlayerData.Level ? $"UNLOCK ({killstreak.Killstreak.Coins} COINS)" : "");
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Equip BUTTON", killstreak.IsBought && !loadout.Killstreaks.Contains(killstreak));
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Dequip BUTTON", killstreak.IsBought && loadout.Killstreaks.Contains(killstreak));
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Description TEXT", killstreak.Killstreak.KillstreakDesc);
@@ -3188,7 +3552,6 @@ namespace UnturnedBlackout.Instances
                 case ELoadoutPage.AttachmentPrimaryGrip:
                 case ELoadoutPage.AttachmentPrimaryMagazine:
                 case ELoadoutPage.AttachmentPrimarySights:
-                case ELoadoutPage.AttachmentPrimaryTactical:
                     {
                         if (!PlayerLoadout.Guns.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out LoadoutGun gun))
                         {
@@ -3235,10 +3598,8 @@ namespace UnturnedBlackout.Instances
                     }
 
                 case ELoadoutPage.AttachmentSecondaryBarrel:
-                case ELoadoutPage.AttachmentSecondaryGrip:
                 case ELoadoutPage.AttachmentSecondaryMagazine:
                 case ELoadoutPage.AttachmentSecondarySights:
-                case ELoadoutPage.AttachmentSecondaryTactical:
                     {
                         if (!PlayerLoadout.Guns.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out LoadoutGun gun))
                         {
@@ -3258,6 +3619,27 @@ namespace UnturnedBlackout.Instances
                             {
                                 await DB.DecreasePlayerCreditsAsync(Player.CSteamID, (uint)attachment.Attachment.BuyPrice);
                                 await DB.UpdatePlayerGunAttachmentBoughtAsync(Player.CSteamID, gun.Gun.GunID, attachment.Attachment.AttachmentID, true);
+                                TaskDispatcher.QueueOnMainThread(() => ReloadSelectedItem());
+                            }
+                        });
+                        break;
+                    }
+
+                case ELoadoutPage.AttachmentPrimaryCharm:
+                case ELoadoutPage.AttachmentSecondaryCharm:
+                    {
+                        if (!PlayerLoadout.GunCharms.TryGetValue((ushort)SelectedItemID, out LoadoutGunCharm gunCharm))
+                        {
+                            Logging.Debug($"Error finding gun charm with id {SelectedItemID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        ThreadPool.QueueUserWorkItem(async (o) =>
+                        {
+                            if (data.Credits >= gunCharm.GunCharm.BuyPrice && !gunCharm.IsBought)
+                            {
+                                await DB.DecreasePlayerCreditsAsync(Player.CSteamID, (uint)gunCharm.GunCharm.BuyPrice);
+                                await DB.UpdatePlayerGunCharmBoughtAsync(Player.CSteamID, gunCharm.GunCharm.CharmID, true);
                                 TaskDispatcher.QueueOnMainThread(() => ReloadSelectedItem());
                             }
                         });
@@ -3406,6 +3788,331 @@ namespace UnturnedBlackout.Instances
             }
         }
 
+        public void UnlockSelectedItem()
+        {
+            Logging.Debug($"{Player.CharacterName} trying to unlock selected item with id {SelectedItemID}, page {LoadoutPage}, tab {LoadoutTab}");
+            if (!DB.PlayerData.TryGetValue(Player.CSteamID, out PlayerData data))
+            {
+                Logging.Debug($"Error finding player data with steam id {Player.CSteamID}");
+                return;
+            }
+
+            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
+            {
+                Logging.Debug($"Error finding loadout with id {LoadoutID} for {Player.CharacterName}");
+                return;
+            }
+
+            switch (LoadoutPage)
+            {
+                case ELoadoutPage.Primary:
+                    {
+                        if (!PlayerLoadout.Guns.TryGetValue((ushort)SelectedItemID, out LoadoutGun gun))
+                        {
+                            Logging.Debug($"Error finding gun with id {SelectedItemID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        ThreadPool.QueueUserWorkItem(async (o) =>
+                        {
+                            if (data.Coins >= gun.Gun.Coins && !gun.IsBought && gun.Gun.LevelRequirement > PlayerData.Level)
+                            {
+                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, (uint)gun.Gun.Coins);
+                                await DB.UpdatePlayerGunBoughtAsync(Player.CSteamID, gun.Gun.GunID, true);
+                                TaskDispatcher.QueueOnMainThread(() =>
+                                {
+                                    ReloadSelectedItem();
+                                    ReloadLoadoutTab();
+                                });
+                            }
+                        });
+                        break;
+                    }
+
+                case ELoadoutPage.AttachmentPrimaryBarrel:
+                case ELoadoutPage.AttachmentPrimaryGrip:
+                case ELoadoutPage.AttachmentPrimaryMagazine:
+                case ELoadoutPage.AttachmentPrimarySights:
+                    {
+                        if (!PlayerLoadout.Guns.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out LoadoutGun gun))
+                        {
+                            Logging.Debug($"Error finding primary with id {SelectedItemID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        if (!gun.Attachments.TryGetValue((ushort)SelectedItemID, out LoadoutAttachment attachment))
+                        {
+                            Logging.Debug($"Error finding attachment with id {SelectedItemID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        ThreadPool.QueueUserWorkItem(async (o) =>
+                        {
+                            if (data.Coins >= attachment.Attachment.Coins && !attachment.IsBought && attachment.LevelRequirement > gun.Level)
+                            {
+                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, (uint)attachment.Attachment.Coins);
+                                await DB.UpdatePlayerGunAttachmentBoughtAsync(Player.CSteamID, gun.Gun.GunID, attachment.Attachment.AttachmentID, true);
+                                TaskDispatcher.QueueOnMainThread(() =>
+                                {
+                                    ReloadSelectedItem();
+                                    ReloadLoadoutTab();
+                                });
+                            }
+                        });
+                        break;
+                    }
+
+                case ELoadoutPage.Secondary:
+                    {
+                        if (!PlayerLoadout.Guns.TryGetValue((ushort)SelectedItemID, out LoadoutGun gun))
+                        {
+                            Logging.Debug($"Error finding gun with id {SelectedItemID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        ThreadPool.QueueUserWorkItem(async (o) =>
+                        {
+                            if (data.Coins >= gun.Gun.Coins && !gun.IsBought && gun.Gun.LevelRequirement > PlayerData.Level)
+                            {
+                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, (uint)gun.Gun.Coins);
+                                await DB.UpdatePlayerGunBoughtAsync(Player.CSteamID, gun.Gun.GunID, true);
+                                TaskDispatcher.QueueOnMainThread(() =>
+                                {
+                                    ReloadSelectedItem();
+                                    ReloadLoadoutTab();
+                                });
+                            }
+                        });
+                        break;
+                    }
+
+                case ELoadoutPage.AttachmentSecondaryBarrel:
+                case ELoadoutPage.AttachmentSecondaryMagazine:
+                case ELoadoutPage.AttachmentSecondarySights:
+                    {
+                        if (!PlayerLoadout.Guns.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out LoadoutGun gun))
+                        {
+                            Logging.Debug($"Error finding secondary with id {SelectedItemID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        if (!gun.Attachments.TryGetValue((ushort)SelectedItemID, out LoadoutAttachment attachment))
+                        {
+                            Logging.Debug($"Error finding attachment with id {SelectedItemID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        ThreadPool.QueueUserWorkItem(async (o) =>
+                        {
+                            if (data.Coins >= attachment.Attachment.Coins && !attachment.IsBought && attachment.LevelRequirement > gun.Level)
+                            {
+                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, (uint)attachment.Attachment.Coins);
+                                await DB.UpdatePlayerGunAttachmentBoughtAsync(Player.CSteamID, gun.Gun.GunID, attachment.Attachment.AttachmentID, true);
+                                TaskDispatcher.QueueOnMainThread(() =>
+                                {
+                                    ReloadSelectedItem();
+                                    ReloadLoadoutTab();
+                                });
+                            }
+                        });
+                        break;
+                    }
+
+                case ELoadoutPage.AttachmentPrimaryCharm:
+                case ELoadoutPage.AttachmentSecondaryCharm:
+                    {
+                        if (!PlayerLoadout.GunCharms.TryGetValue((ushort)SelectedItemID, out LoadoutGunCharm gunCharm))
+                        {
+                            Logging.Debug($"Error finding gun charm with id {SelectedItemID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        ThreadPool.QueueUserWorkItem(async (o) =>
+                        {
+                            if (data.Coins >= gunCharm.GunCharm.Coins && !gunCharm.IsBought && gunCharm.GunCharm.LevelRequirement > PlayerData.Level)
+                            {
+                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, (uint)gunCharm.GunCharm.Coins);
+                                await DB.UpdatePlayerGunCharmBoughtAsync(Player.CSteamID, gunCharm.GunCharm.CharmID, true);
+                                TaskDispatcher.QueueOnMainThread(() =>
+                                {
+                                    ReloadSelectedItem();
+                                    ReloadLoadoutTab();
+                                });
+                            }
+                        });
+                        break;
+                    }
+
+                case ELoadoutPage.Knife:
+                    {
+                        if (!PlayerLoadout.Knives.TryGetValue((ushort)SelectedItemID, out LoadoutKnife knife))
+                        {
+                            Logging.Debug($"Error finding knife with id {SelectedItemID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        ThreadPool.QueueUserWorkItem(async (o) =>
+                        {
+                            if (data.Coins >= knife.Knife.Coins && !knife.IsBought && knife.Knife.LevelRequirement > PlayerData.Level)
+                            {
+                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, (uint)knife.Knife.Coins);
+                                await DB.UpdatePlayerKnifeBoughtAsync(Player.CSteamID, knife.Knife.KnifeID, true);
+                                TaskDispatcher.QueueOnMainThread(() =>
+                                {
+                                    ReloadSelectedItem();
+                                    ReloadLoadoutTab();
+                                });
+                            }
+                        });
+                        break;
+                    }
+
+                case ELoadoutPage.Tactical:
+                    {
+                        if (!PlayerLoadout.Gadgets.TryGetValue((ushort)SelectedItemID, out LoadoutGadget gadget))
+                        {
+                            Logging.Debug($"Error finding gadget with id {SelectedItemID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        ThreadPool.QueueUserWorkItem(async (o) =>
+                        {
+                            if (data.Coins >= gadget.Gadget.Coins && !gadget.IsBought && gadget.Gadget.LevelRequirement > PlayerData.Level)
+                            {
+                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, (uint)gadget.Gadget.Coins);
+                                await DB.UpdatePlayerGadgetBoughtAsync(Player.CSteamID, gadget.Gadget.GadgetID, true);
+                                TaskDispatcher.QueueOnMainThread(() =>
+                                {
+                                    ReloadSelectedItem();
+                                    ReloadLoadoutTab();
+                                });
+                            }
+                        });
+                        break;
+                    }
+
+                case ELoadoutPage.Lethal:
+                    {
+                        if (!PlayerLoadout.Gadgets.TryGetValue((ushort)SelectedItemID, out LoadoutGadget gadget))
+                        {
+                            Logging.Debug($"Error finding gadget with id {SelectedItemID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        ThreadPool.QueueUserWorkItem(async (o) =>
+                        {
+                            if (data.Coins >= gadget.Gadget.Coins && !gadget.IsBought && gadget.Gadget.LevelRequirement > PlayerData.Level)
+                            {
+                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, (uint)gadget.Gadget.Coins);
+                                await DB.UpdatePlayerGadgetBoughtAsync(Player.CSteamID, gadget.Gadget.GadgetID, true);
+                                TaskDispatcher.QueueOnMainThread(() =>
+                                {
+                                    ReloadSelectedItem();
+                                    ReloadLoadoutTab();
+                                });
+                            }
+                        });
+                        break;
+                    }
+
+                case ELoadoutPage.Perk:
+                    {
+                        if (!PlayerLoadout.Perks.TryGetValue((ushort)SelectedItemID, out LoadoutPerk perk))
+                        {
+                            Logging.Debug($"Error finding perk with id {SelectedItemID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        ThreadPool.QueueUserWorkItem(async (o) =>
+                        {
+                            if (data.Coins >= perk.Perk.Coins && !perk.IsBought && perk.Perk.LevelRequirement > PlayerData.Level)
+                            {
+                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, (uint)perk.Perk.Coins);
+                                await DB.UpdatePlayerPerkBoughtAsync(Player.CSteamID, perk.Perk.PerkID, true);
+                                TaskDispatcher.QueueOnMainThread(() =>
+                                {
+                                    ReloadSelectedItem();
+                                    ReloadLoadoutTab();
+                                });
+                            }
+                        });
+                        break;
+                    }
+
+                case ELoadoutPage.Killstreak:
+                    {
+                        if (!PlayerLoadout.Killstreaks.TryGetValue((ushort)SelectedItemID, out LoadoutKillstreak killstreak))
+                        {
+                            Logging.Debug($"Error finding killstreak with id {SelectedItemID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        ThreadPool.QueueUserWorkItem(async (o) =>
+                        {
+                            if (data.Coins >= killstreak.Killstreak.Coins && !killstreak.IsBought && killstreak.Killstreak.LevelRequirement > PlayerData.Level)
+                            {
+                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, (uint)killstreak.Killstreak.Coins);
+                                await DB.UpdatePlayerKillstreakBoughtAsync(Player.CSteamID, killstreak.Killstreak.KillstreakID, true);
+                                TaskDispatcher.QueueOnMainThread(() =>
+                                {
+                                    ReloadSelectedItem();
+                                    ReloadLoadoutTab();
+                                });
+                            }
+                        });
+                        break;
+                    }
+
+                case ELoadoutPage.Card:
+                    {
+                        if (!PlayerLoadout.Cards.TryGetValue((ushort)SelectedItemID, out LoadoutCard card))
+                        {
+                            Logging.Debug($"Error finding card with id {SelectedItemID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        ThreadPool.QueueUserWorkItem(async (o) =>
+                        {
+                            if (data.Coins >= card.Card.Coins && !card.IsBought && card.Card.LevelRequirement > PlayerData.Level)
+                            {
+                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, (uint)card.Card.Coins);
+                                await DB.UpdatePlayerCardBoughtAsync(Player.CSteamID, card.Card.CardID, true);
+                                TaskDispatcher.QueueOnMainThread(() =>
+                                {
+                                    ReloadSelectedItem();
+                                    ReloadLoadoutTab();
+                                });
+                            }
+                        });
+                        break;
+                    }
+
+                case ELoadoutPage.Glove:
+                    {
+                        if (!PlayerLoadout.Gloves.TryGetValue((ushort)SelectedItemID, out LoadoutGlove glove))
+                        {
+                            Logging.Debug($"Error finding glove with id {SelectedItemID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        ThreadPool.QueueUserWorkItem(async (o) =>
+                        {
+                            if (data.Coins >= glove.Glove.Coins && !glove.IsBought && glove.Glove.LevelRequirement > PlayerData.Level)
+                            {
+                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, (uint)glove.Glove.Coins);
+                                await DB.UpdatePlayerGloveBoughtAsync(Player.CSteamID, glove.Glove.GloveID, true);
+                                TaskDispatcher.QueueOnMainThread(() =>
+                                {
+                                    ReloadSelectedItem();
+                                    ReloadLoadoutTab();
+                                });
+                            }
+                        });
+                        break;
+                    }
+            }
+        }
+
         public void EquipSelectedItem()
         {
             Logging.Debug($"{Player.CharacterName} trying to equip selected item with id {SelectedItemID}, page {LoadoutPage}, tab {LoadoutTab}");
@@ -3443,18 +4150,6 @@ namespace UnturnedBlackout.Instances
                             loadoutManager.EquipGunSkin(Player, LoadoutID, skin.ID, false);
                             break;
                         }
-
-                    case ELoadoutPage.Knife:
-                        {
-                            if (!PlayerLoadout.KnifeSkinsSearchByID.TryGetValue((int)SelectedItemID, out KnifeSkin skin))
-                            {
-                                Logging.Debug($"Error finding knife skin with id {SelectedItemID} for {Player.CharacterName}");
-                                return;
-                            }
-
-                            loadoutManager.EquipKnifeSkin(Player, LoadoutID, skin.ID);
-                            break;
-                        }
                 }
 
                 ReloadLoadout();
@@ -3483,7 +4178,6 @@ namespace UnturnedBlackout.Instances
                 case ELoadoutPage.AttachmentPrimaryGrip:
                 case ELoadoutPage.AttachmentPrimaryMagazine:
                 case ELoadoutPage.AttachmentPrimarySights:
-                case ELoadoutPage.AttachmentPrimaryTactical:
                     {
                         if (!PlayerLoadout.Guns.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out LoadoutGun gun))
                         {
@@ -3522,10 +4216,8 @@ namespace UnturnedBlackout.Instances
                     }
 
                 case ELoadoutPage.AttachmentSecondaryBarrel:
-                case ELoadoutPage.AttachmentSecondaryGrip:
                 case ELoadoutPage.AttachmentSecondaryMagazine:
                 case ELoadoutPage.AttachmentSecondarySights:
-                case ELoadoutPage.AttachmentSecondaryTactical:
                     {
                         if (!PlayerLoadout.Guns.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out LoadoutGun gun))
                         {
@@ -3544,6 +4236,22 @@ namespace UnturnedBlackout.Instances
                             loadoutManager.EquipAttachment(Player, attachment.Attachment.AttachmentID, LoadoutID, false);
                         }
 
+                        break;
+                    }
+
+                case ELoadoutPage.AttachmentPrimaryCharm:
+                case ELoadoutPage.AttachmentSecondaryCharm:
+                    {
+                        if (!PlayerLoadout.GunCharms.TryGetValue((ushort)SelectedItemID, out LoadoutGunCharm gunCharm))
+                        {
+                            Logging.Debug($"Error finding gun charm with id {SelectedItemID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        if (gunCharm.IsBought)
+                        {
+                            loadoutManager.EquipGunCharm(Player, LoadoutID, gunCharm.GunCharm.CharmID, LoadoutPage.ToString().StartsWith("AttachmentPrimary"));
+                        }
                         break;
                     }
 
@@ -3687,12 +4395,6 @@ namespace UnturnedBlackout.Instances
                             loadoutManager.DequipGunSkin(Player, LoadoutID, false);
                             break;
                         }
-
-                    case ELoadoutPage.Knife:
-                        {
-                            loadoutManager.DequipKnifeSkin(Player, LoadoutID);
-                            break;
-                        }
                 }
 
                 ReloadLoadout();
@@ -3711,7 +4413,6 @@ namespace UnturnedBlackout.Instances
                 case ELoadoutPage.AttachmentPrimaryGrip:
                 case ELoadoutPage.AttachmentPrimaryMagazine:
                 case ELoadoutPage.AttachmentPrimarySights:
-                case ELoadoutPage.AttachmentPrimaryTactical:
                     {
                         if (!PlayerLoadout.Guns.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out LoadoutGun gun))
                         {
@@ -3736,10 +4437,8 @@ namespace UnturnedBlackout.Instances
                     }
 
                 case ELoadoutPage.AttachmentSecondaryBarrel:
-                case ELoadoutPage.AttachmentSecondaryGrip:
                 case ELoadoutPage.AttachmentSecondaryMagazine:
                 case ELoadoutPage.AttachmentSecondarySights:
-                case ELoadoutPage.AttachmentSecondaryTactical:
                     {
                         if (!PlayerLoadout.Guns.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out LoadoutGun gun))
                         {
@@ -3754,6 +4453,13 @@ namespace UnturnedBlackout.Instances
                         }
 
                         loadoutManager.DequipAttachment(Player, attachment.Attachment.AttachmentID, LoadoutID, false);
+                        break;
+                    }
+
+                case ELoadoutPage.AttachmentPrimaryCharm:
+                case ELoadoutPage.AttachmentSecondaryCharm:
+                    {
+                        loadoutManager.EquipGunCharm(Player, LoadoutID, 0, LoadoutPage.ToString().StartsWith("AttachmentPrimary"));
                         break;
                     }
 
