@@ -188,7 +188,12 @@ namespace UnturnedBlackout.GameTypes
             BlueTeam.Destroy();
             RedTeam.Destroy();
 
-            StartVoting();
+            var gameModes = new List<byte> { (byte)EGameType.CTF, (byte)EGameType.FFA, (byte)EGameType.TDM, (byte)EGameType.KC };
+            gameModes.Remove((byte)GameMode);
+            var gameMode = (EGameType)gameModes[UnityEngine.Random.Range(0, gameModes.Count)];
+            GamePhase = EGamePhase.Ended;
+            Plugin.Instance.GameManager.EndGame(this);
+            Plugin.Instance.GameManager.StartGame(Location, gameMode);
         }
 
         public override IEnumerator AddPlayerToGame(GamePlayer player)
@@ -751,7 +756,7 @@ namespace UnturnedBlackout.GameTypes
         public void GiveLoadout(CTFPlayer player)
         {
             player.GamePlayer.Player.Player.inventory.ClearInventory();
-            //R.Commands.Execute(player.GamePlayer.Player, $"/kit {player.Team.Info.KitNames[UnityEngine.Random.Range(0, player.Team.Info.KitNames.Count)]}");
+            Plugin.Instance.LoadoutManager.GiveLoadout(player.GamePlayer, player.Team.Info.TeamKits[UnityEngine.Random.Range(0, player.Team.Info.TeamKits.Count)]);
         }
 
         public void SpawnPlayer(CTFPlayer player)

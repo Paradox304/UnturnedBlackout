@@ -381,14 +381,12 @@ namespace UnturnedBlackout.Managers
                 return;
             }
 
-            if (playerLoadout.Perks.Count == 3)
+            if (playerLoadout.Perks.ContainsKey(perk.Perk.PerkType))
             {
-                playerLoadout.Perks.RemoveAt(0);
-                playerLoadout.Perks.Add(perk);
-            }
-            else
+                playerLoadout.Perks[perk.Perk.PerkType] = perk;
+            } else
             {
-                playerLoadout.Perks.Add(perk);
+                playerLoadout.Perks.Add(perk.Perk.PerkType, perk);
             }
 
             ThreadPool.QueueUserWorkItem(async (o) =>
@@ -418,7 +416,7 @@ namespace UnturnedBlackout.Managers
                 return;
             }
 
-            if (!playerLoadout.Perks.Remove(perk))
+            if (!playerLoadout.Perks.Remove(perk.Perk.PerkType))
             {
                 Logging.Debug($"Perk with id {oldPerk} was not equipped for {player.CharacterName} for loadout with id {loadoutID}");
                 return;
@@ -735,22 +733,22 @@ namespace UnturnedBlackout.Managers
             }
             foreach (var perk in activeLoadout.Perks)
             {
-                if (PlayerSkills.TryParseIndices(perk.Perk.SkillType, out int specialtyIndex, out int skillIndex))
+                if (PlayerSkills.TryParseIndices(perk.Value.Perk.SkillType, out int specialtyIndex, out int skillIndex))
                 {
                     var max = skill.skills[specialtyIndex][skillIndex].max;
                     if (skills.ContainsKey((specialtyIndex, skillIndex)))
                     {
-                        if (skills[(specialtyIndex, skillIndex)] + perk.Perk.SkillLevel > max)
+                        if (skills[(specialtyIndex, skillIndex)] + perk.Value.Perk.SkillLevel > max)
                         {
                             skills[(specialtyIndex, skillIndex)] = max;
                         } else
                         {
-                            skills[(specialtyIndex, skillIndex)] += perk.Perk.SkillLevel;
+                            skills[(specialtyIndex, skillIndex)] += perk.Value.Perk.SkillLevel;
                         }
                     }
                     else
                     {
-                        skills.Add((specialtyIndex, skillIndex), perk.Perk.SkillLevel < max ? perk.Perk.SkillLevel : max);
+                        skills.Add((specialtyIndex, skillIndex), perk.Value.Perk.SkillLevel < max ? perk.Value.Perk.SkillLevel : max);
                     }
                 }
             }

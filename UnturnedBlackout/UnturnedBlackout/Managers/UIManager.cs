@@ -928,7 +928,7 @@ namespace UnturnedBlackout.Managers
         {
             foreach (var handler in UIHandlers)
             {
-                if (handler.MainPage == EMainPage.Play)
+                if (handler.MainPage == EMainPage.Play && handler.PlayPage == EPlayPage.Games)
                 {
                     handler.ShowGames();
                 }
@@ -939,9 +939,9 @@ namespace UnturnedBlackout.Managers
         {
             foreach (var handler in UIHandlers)
             {
-                if (handler.MainPage == EMainPage.Play)
+                if (handler.MainPage == EMainPage.Play && handler.PlayPage == EPlayPage.Games)
                 {
-                    handler.ShowGame(game);
+                    handler.ShowGames();
                 }
             }
         }
@@ -950,40 +950,10 @@ namespace UnturnedBlackout.Managers
         {
             foreach (var handler in UIHandlers)
             {
-                if (handler.MainPage == EMainPage.Play)
+                if (handler.MainPage == EMainPage.Play && handler.PlayPage == EPlayPage.Games)
                 {
                     handler.UpdateGamePlayerCount(game);
                 }
-            }
-        }
-
-        public void OnGameVoteCountUpdated(Game game)
-        {
-            foreach (var handler in UIHandlers)
-            {
-                if (handler.MainPage == EMainPage.Play)
-                {
-                    handler.UpdateVoteCount(game);
-                }
-            }
-        }
-
-        public void OnGameVoteTimerUpdated(Game game, string timer)
-        {
-            foreach (var handler in UIHandlers)
-            {
-                if (handler.MainPage == EMainPage.Play)
-                {
-                    handler.UpdateVoteTimer(game, timer);
-                }
-            }
-        }
-
-        public void OnXPChanged(UnturnedPlayer player)
-        {
-            if (UIHandlersLookup.TryGetValue(player.CSteamID, out UIHandler handler) && handler.MainPage == EMainPage.Play)
-            {
-                handler.OnXPChanged();
             }
         }
 
@@ -1000,11 +970,29 @@ namespace UnturnedBlackout.Managers
 
             switch (buttonName)
             {
-                case "SERVER Exit BUTTON":
-                    Provider.kick(player.channel.owner.playerID.steamID, "You exited");
+                case "SERVER Play BUTTON":
+                    handler.ShowPlayPage();
                     return;
                 case "SERVER Loadout BUTTON":
                     handler.ShowLoadouts();
+                    return;
+                case "SERVER Exit BUTTON":
+                    Provider.kick(player.channel.owner.playerID.steamID, "You exited");
+                    return;
+                case "SERVER Play Games BUTTON":
+                    handler.ShowPlayPage(EPlayPage.Games);
+                    return;
+                case "SERVER Play Servers BUTTON":
+                    handler.ShowPlayPage(EPlayPage.Servers);
+                    return;
+                case "SERVER Play Refresh BUTTON":
+                    // Stuff here
+                    return;
+                case "SERVER Play Join BUTTON":
+                    handler.ClickedJoinButton();
+                    return;
+                case "SERVER Play Back BUTTON":
+                    handler.SetupMainMenu();
                     return;
                 case "SERVER Loadout Next BUTTON":
                     handler.ForwardLoadoutPage();
@@ -1013,6 +1001,7 @@ namespace UnturnedBlackout.Managers
                     handler.BackwardLoadoutPage();
                     return;
                 case "SERVER Loadout Back BUTTON":
+                    handler.SetupMainMenu();
                     return;
                 case "SERVER Loadout Equip BUTTON":
                     handler.EquipLoadout();
@@ -1032,8 +1021,14 @@ namespace UnturnedBlackout.Managers
                 case "SERVER Loadout Killstreak BUTTON":
                     handler.ShowLoadoutSubPage(ELoadoutPage.Killstreak);
                     return;
-                case "SERVER Loadout Perk BUTTON":
-                    handler.ShowLoadoutSubPage(ELoadoutPage.Perk);
+                case "SERVER Loadout Perk BUTTON 1":
+                    handler.ShowLoadoutSubPage(ELoadoutPage.Perk1);
+                    return;
+                case "SERVER Loadout Perk BUTTON 2":
+                    handler.ShowLoadoutSubPage(ELoadoutPage.Perk2);
+                    return;
+                case "SERVER Loadout Perk BUTTON 3":
+                    handler.ShowLoadoutSubPage(ELoadoutPage.Perk3);
                     return;
                 case "SERVER Loadout Primary BUTTON":
                     handler.ShowLoadoutSubPage(ELoadoutPage.Primary);
@@ -1139,20 +1134,6 @@ namespace UnturnedBlackout.Managers
                     Plugin.Instance.GameManager.AddPlayerToGame(ply, selected);
                 }
             }
-            else if (buttonName.EndsWith("Vote0"))
-            {
-                if (int.TryParse(buttonName.Replace("Lobby", "").Replace("Vote0", ""), out int selected))
-                {
-                    Plugin.Instance.GameManager.OnPlayerVoted(ply, selected, 0);
-                }
-            }
-            else if (buttonName.EndsWith("Vote1"))
-            {
-                if (int.TryParse(buttonName.Replace("Lobby", "").Replace("Vote1", ""), out int selected))
-                {
-                    Plugin.Instance.GameManager.OnPlayerVoted(ply, selected, 1);
-                }
-            }
             else if (buttonName.StartsWith("SERVER Item BUTTON"))
             {
                 if (int.TryParse(buttonName.Replace("SERVER Item BUTTON", ""), out int selected))
@@ -1165,6 +1146,12 @@ namespace UnturnedBlackout.Managers
                 if (int.TryParse(buttonName.Replace("SERVER Loadout BUTTON", ""), out int selected))
                 {
                     handler.SelectedLoadout(selected);
+                }
+            } else if (buttonName.StartsWith("SERVER Play BUTTON"))
+            {
+                if (int.TryParse(buttonName.Replace("SERVER Play BUTTON", ""), out int selected))
+                {
+                    handler.SelectedPlayButton(selected);
                 }
             }
         }

@@ -6,8 +6,6 @@
         Starting,
         Started,
         Ending,
-        WaitingForVoting,
-        Voting,
         Ended
     }
 }

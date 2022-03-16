@@ -167,6 +167,7 @@
     <Compile Include="Enums\ELoadoutPage.cs" />
     <Compile Include="Enums\ELoadoutTab.cs" />
     <Compile Include="Enums\EMainPage.cs" />
+    <Compile Include="Enums\EPlayPage.cs" />
     <Compile Include="Enums\ETeam.cs" />
     <Compile Include="GameTypes\CTFGame.cs" />
     <Compile Include="GameTypes\FFAGame.cs" />

@@ -64,11 +64,6 @@ namespace UnturnedBlackout.Managers
             }
         }
 
-        public void OnXPChanged(UnturnedPlayer player)
-        {
-            Plugin.Instance.UIManager.OnXPChanged(player);
-        }
-
         protected void OnEquip(PlayerEquipment equipment, ItemJar jar, ItemAsset asset, ref bool shouldAllow)
         {
             var player = Plugin.Instance.GameManager.GetGamePlayer(equipment.player);
@@ -106,12 +101,14 @@ namespace UnturnedBlackout.Managers
                     EffectManager.sendUIEffectText(Key, connection, true, "WeaponName", gAsset.itemName);
                     EffectManager.sendUIEffectText(Key, connection, true, "AmmoNum", currentAmmo.ToString());
                     EffectManager.sendUIEffectText(Key, connection, true, "ReserveNum", $" / {ammo}");
+                    player.ForceEquip = false;
                 }
                 else if (asset.type == EItemType.MELEE)
                 {
                     EffectManager.sendUIEffectText(Key, connection, true, "WeaponName", asset.itemName);
                     EffectManager.sendUIEffectText(Key, connection, true, "AmmoNum", " ");
                     EffectManager.sendUIEffectText(Key, connection, true, "ReserveNum", " ");
+                    player.ForceEquip = false;
                 } else
                 {
                     EffectManager.sendUIEffectText(Key, connection, true, "WeaponName", asset.itemName);

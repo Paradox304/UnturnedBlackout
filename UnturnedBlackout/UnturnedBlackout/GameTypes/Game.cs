@@ -25,10 +25,6 @@ namespace UnturnedBlackout.GameTypes
 
         public List<Feed> Killfeed { get; set; }
 
-        public Dictionary<int, VoteChoice> VoteChoices { get; set; }
-        public List<GamePlayer> Vote0 { get; set; }
-        public List<GamePlayer> Vote1 { get; set; }
-
         public List<GamePlayer> PlayersTalking { get; set; }
 
         public Coroutine VoteEnder { get; set; }
@@ -42,10 +38,6 @@ namespace UnturnedBlackout.GameTypes
 
             GamePhase = EGamePhase.WaitingForPlayers;
             Killfeed = new List<Feed>();
-
-            VoteChoices = new Dictionary<int, VoteChoice>();
-            Vote0 = new List<GamePlayer>();
-            Vote1 = new List<GamePlayer>();
 
             PlayersTalking = new List<GamePlayer>();
 
@@ -155,98 +147,6 @@ namespace UnturnedBlackout.GameTypes
             PlayerPickupItem(player, inventoryGroup, inventoryIndex, P);
         }
 
-        public void StartVoting()
-        {
-            if (KillFeedChecker != null)
-            {
-                Plugin.Instance.StopCoroutine(KillFeedChecker);
-            }
-            if (!Plugin.Instance.GameManager.CanStartVoting())
-            {
-                GamePhase = EGamePhase.WaitingForVoting;
-                Plugin.Instance.UIManager.OnGameUpdated(this);
-                return;
-            }
-
-            GamePhase = EGamePhase.Voting;
-
-            var locations = Plugin.Instance.GameManager.AvailableLocations.ToList();
-            locations.Add(Location.LocationID);
-            var gameModes = new List<byte> { (byte)EGameType.CTF, (byte)EGameType.FFA, (byte)EGameType.TDM, (byte)EGameType.KC };
-
-            for (int i = 0; i <= 1; i++)
-            {
-                var locationID = locations[UnityEngine.Random.Range(0, locations.Count)];
-                var location = Config.ArenaLocations.FirstOrDefault(k => k.LocationID == locationID);
-                var gameMode = (EGameType)gameModes[UnityEngine.Random.Range(0, gameModes.Count)];
-
-                var voteChoice = new VoteChoice(location, gameMode);
-                gameModes.Remove((byte)gameMode);
-                VoteChoices.Add(i, voteChoice);
-            }
-
-            VoteEnder = Plugin.Instance.StartCoroutine(EndVoter());
-            Plugin.Instance.UIManager.OnGameUpdated(this);
-        }
-
-        public IEnumerator EndVoter()
-        {
-            for (int seconds = Config.VoteSeconds; seconds >= 0; seconds--)
-            {
-                TimeSpan span = TimeSpan.FromSeconds(seconds);
-                Plugin.Instance.UIManager.OnGameVoteTimerUpdated(this, span.ToString(@"m\:ss"));
-                yield return new WaitForSeconds(1);
-            }
-
-            VoteChoice choice;
-            if (Vote0.Count >= Vote1.Count)
-            {
-                choice = VoteChoices[0];
-            }
-            else
-            {
-                choice = VoteChoices[1];
-            }
-
-            EndVoting(choice);
-        }
-
-        public void OnVoted(GamePlayer player, int choice)
-        {
-            if (Vote0.Contains(player))
-            {
-                if (choice == 0)
-                {
-                    return;
-                }
-
-                Vote0.Remove(player);
-                Vote1.Add(player);
-            }
-            else if (Vote1.Contains(player))
-            {
-                if (choice == 1)
-                {
-                    return;
-                }
-
-                Vote1.Remove(player);
-                Vote0.Add(player);
-            }
-            else
-            {
-                if (choice == 1)
-                {
-                    Vote1.Add(player);
-                }
-                else
-                {
-                    Vote0.Add(player);
-                }
-            }
-            Plugin.Instance.UIManager.OnGameVoteCountUpdated(this);
-        }
-
         public void OnKill(GamePlayer killer, GamePlayer victim, ushort weaponID, string killerColor, string victimColor)
         {
             if (!Plugin.Instance.UIManager.KillFeedIcons.TryGetValue(weaponID, out FeedIcon icon))
@@ -284,14 +184,6 @@ namespace UnturnedBlackout.GameTypes
                     OnKillfeedUpdated();
                 }
             }
-        }
-
-        public void EndVoting(VoteChoice choice)
-        {
-            GamePhase = EGamePhase.Ended;
-            Plugin.Instance.GameManager.EndGame(this);
-            Plugin.Instance.GameManager.StartGame(choice.Location, choice.GameMode);
-            Plugin.Instance.GameManager.OnVotingEnded();
         }
 
         private void OnPlayerDamaged(ref DamagePlayerParameters parameters, ref bool shouldAllow)
