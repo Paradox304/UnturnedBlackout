@@ -123,6 +123,7 @@ namespace UnturnedBlackout.Models.Global
                 m_TacticalChecker.Stop();
             }
             m_TacticalChecker.Start();
+            Player.Player.inventory.forceAddItem(new Item(ActiveLoadout.Tactical.Gadget.GadgetID, false), false);
         }
 
         public void UsedLethal()
@@ -133,6 +134,7 @@ namespace UnturnedBlackout.Models.Global
                 m_LethalChecker.Stop();
             }
             m_LethalChecker.Start();
+            Player.Player.inventory.forceAddItem(new Item(ActiveLoadout.Lethal.Gadget.GadgetID, false), false);
         }
 
         private void EnableLethal(object sender, ElapsedEventArgs e)
