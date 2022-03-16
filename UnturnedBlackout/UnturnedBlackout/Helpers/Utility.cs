@@ -243,6 +243,17 @@ namespace UnturnedBlackout
             return -1;
         }
 
+        public static string ToFriendlyName(this EGamePhase gamePhase)
+        {
+            switch (gamePhase)
+            {
+                case EGamePhase.WaitingForPlayers:
+                    return "Waiting For Players";
+                default:
+                    return gamePhase.ToString();
+            }
+        }
+
         public static string ToColor(this object value, bool isPlayer)
         {
             return isPlayer ? $"<color={Plugin.Instance.Configuration.Instance.PlayerColorHexCode}>{value}</color>" : value.ToString();

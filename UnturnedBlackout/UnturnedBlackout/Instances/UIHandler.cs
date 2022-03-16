@@ -33,6 +33,11 @@ namespace UnturnedBlackout.Instances
 
         public EMainPage MainPage { get; set; }
 
+        // Play 
+
+        public EPlayPage PlayPage { get; set; }
+        public int SelectedGameID { get; set; }
+
         // Loadout
         public ELoadoutPage LoadoutPage { get; set; }
         public int LoadoutPageID { get; set; }
@@ -91,8 +96,7 @@ namespace UnturnedBlackout.Instances
         {
             EffectManager.sendUIEffect(ID, Key, TransportConnection, true);
             Player.Player.enablePluginWidgetFlag(EPluginWidgetFlags.Modal);
-            ResetUIValues();
-            SetupUI();
+            SetupMainMenu();
         }
 
         public void HideUI()
@@ -107,7 +111,7 @@ namespace UnturnedBlackout.Instances
             MainPage = EMainPage.None;
         }
 
-        public void SetupUI()
+        public void SetupMainMenu()
         {
             if (!Plugin.Instance.DBManager.PlayerData.TryGetValue(SteamID, out PlayerData data))
             {
@@ -118,8 +122,31 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Player Name", data.SteamName);
 
             ClearChat();
-            OnXPChanged();
+            ShowXP();
             OnMusicChanged(data.Music);
+        }
+
+        public void ReloadMainMenu()
+        {
+            // Code to update the balance or sumthin
+        }
+
+        public void ShowXP()
+        {
+            if (!Plugin.Instance.DBManager.PlayerData.TryGetValue(SteamID, out PlayerData data))
+            {
+                return;
+            }
+
+            var ui = Plugin.Instance.UIManager;
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER XP Num", Plugin.Instance.Translate("Level_Show", data.Level).ToRich());
+            EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER XP Icon", Plugin.Instance.DBManager.Levels.TryGetValue((int)data.Level, out XPLevel level) ? level.IconLinkMedium : "");
+            int spaces = 0;
+            if (data.TryGetNeededXP(out int neededXP))
+            {
+                spaces = Math.Min(96, neededXP == 0 ? 0 : (int)(data.XP * 96 / neededXP));
+            }
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER XP Bar Fill", spaces == 0 ? " " : new string(' ', spaces));
         }
 
         public void ClearChat()
@@ -638,123 +665,87 @@ namespace UnturnedBlackout.Instances
 
         // Play Page
 
+        public void ShowPlayPage()
+        {
+            MainPage = EMainPage.Play;
+            ShowGames();
+            SelectedGameID = 0;
+        }
+
+        public void ShowPlayPage(EPlayPage playPage)
+        {
+            if (playPage == EPlayPage.Games)
+            {
+                ShowGames();
+                SelectedGameID = 0;
+            }
+        }
+
+        public void SelectedPlayButton(int selected)
+        {
+            var games = Plugin.Instance.GameManager.Games;
+            if (PlayPage == EPlayPage.Games)
+            {
+                if ((selected + 1) > games.Count)
+                {
+                    return;
+                }
+                ShowGame(games[selected]);
+            }
+        }
+
+        public void ClickedJoinButton()
+        {
+            if (PlayPage == EPlayPage.Games)
+            {
+                Plugin.Instance.GameManager.AddPlayerToGame(Player, SelectedGameID);
+            }
+        }
+
+        // Play Games Page
+
         public void ShowGames()
         {
             Logging.Debug($"Showing games for {Player.CharacterName}");
-            MainPage = EMainPage.Play;
-
-            for (int i = 0; i <= 9; i++)
-            {
-                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"Lobby{i}", false);
-            }
-
             var games = Plugin.Instance.GameManager.Games;
-            for (int i = 0; i < games.Count; i++)
+            PlayPage = EPlayPage.Games;
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Play Refresh BUTTON", false);
+            for (int index = 0; index <= 13; index++)
             {
-                var game = games[i];
-                Logging.Debug($"i: {i}, players: {game.GetPlayerCount()}, max players: {game.Location.GetMaxPlayers(game.GameMode)}, phase: {game.GamePhase}");
-                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"Lobby{i}", true);
-                ShowGame(game);
+                if ((index + 1) > games.Count)
+                {
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Play BUTTON {index}", false);
+                    continue;
+                }
+
+                var game = games[index];
+                Logging.Debug($"Index: {index}, players: {game.GetPlayerCount()}, max players: {game.Location.GetMaxPlayers(game.GameMode)}, phase: {game.GamePhase}");
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Play BUTTON {index}", true);
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Play Map TEXT {index}", game.Location.LocationName);
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Play Mode TEXT {index}", Plugin.Instance.Translate($"{game.GameMode}_Name_Full"));
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Play Players TEXT {index}", $"{game.GetPlayerCount()}/{game.Location.GetMaxPlayers(game.GameMode)}");
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Play Status TEXT {index}", game.GamePhase.ToFriendlyName());
             }
+
+            SelectedPlayButton(SelectedGameID);
         }
 
         public void ShowGame(Game game)
         {
-            int index = Plugin.Instance.GameManager.Games.IndexOf(game);
+            SelectedGameID = Plugin.Instance.GameManager.Games.IndexOf(game);
 
-            if (index == -1)
-            {
-                return;
-            }
-
-            if (game.GamePhase == EGamePhase.Starting || game.GamePhase == EGamePhase.Started || game.GamePhase == EGamePhase.Ending || game.GamePhase == EGamePhase.WaitingForPlayers)
-            {
-                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"Lobby{index}Join", true);
-                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"Lobby{index}Vote", false);
-                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"Lobby{index}Waiting", false);
-
-                EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"Lobby{index}IMG", game.Location.ImageLink);
-                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"Lobby{index}Map", game.Location.LocationName);
-                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"Lobby{index}Mode", Plugin.Instance.Translate($"{game.GameMode}_Name").ToRich());
-                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"Lobby{index}Count", $"{game.GetPlayerCount()}/{game.Location.GetMaxPlayers(game.GameMode)}");
-
-                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, game.GamePhase == EGamePhase.Ending ? $"Lobby{index}EndingButton" : $"Lobby{index}JoinButton", true);
-                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, game.GamePhase == EGamePhase.Ending ? $"Lobby{index}JoinButton" : $"Lobby{index}EndingButton", false);
-                return;
-            }
-
-            if (game.GamePhase == EGamePhase.WaitingForVoting)
-            {
-                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"Lobby{index}Join", false);
-                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"Lobby{index}Vote", false);
-                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"Lobby{index}Waiting", true);
-                return;
-            }
-
-            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"Lobby{index}Join", false);
-            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"Lobby{index}Vote", true);
-            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"Lobby{index}Waiting", false);
-
-            for (int choice = 0; choice <= 1; choice++)
-            {
-                var vote = game.VoteChoices[choice];
-
-                EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"Lobby{index}IMG{choice}", vote.Location.ImageLink);
-                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"Lobby{index}VoteMapName{choice}", Plugin.Instance.Translate($"Vote{choice}_MapName", vote.Location.LocationName, choice == 0 ? game.Vote0.Count : game.Vote1.Count).ToRich());
-                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"Lobby{index}VoteMode{choice}", Plugin.Instance.Translate($"{vote.GameMode}_Name").ToRich());
-            }
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Play Server TEXT", "");
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Play Mode TEXT", Plugin.Instance.Translate($"{game.GameMode}_Name_Full"));
+            EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Play IMAGE", game.Location.ImageLink);
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Play Map TEXT", game.Location.LocationName);
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Play Description TEXT", Plugin.Instance.Translate($"{game.GameMode}_Description_Full"));
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Play Join BUTTON", game.GamePhase != EGamePhase.Ending && game.GamePhase != EGamePhase.Ended);
         }
 
         public void UpdateGamePlayerCount(Game game)
         {
             int index = Plugin.Instance.GameManager.Games.IndexOf(game);
-
-            if (index == -1)
-            {
-                return;
-            }
-
-            if (game.GamePhase == EGamePhase.Starting || game.GamePhase == EGamePhase.Started)
-            {
-                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"Lobby{index}Count", $"{game.GetPlayerCount()}/{game.Location.GetMaxPlayers(game.GameMode)}");
-            }
-        }
-
-        public void UpdateVoteCount(Game game)
-        {
-            int index = Plugin.Instance.GameManager.Games.IndexOf(game);
-
-            if (index == -1)
-            {
-                return;
-            }
-
-            if (game.GamePhase != EGamePhase.Voting)
-            {
-                return;
-            }
-
-            for (int choice = 0; choice <= 1; choice++)
-            {
-                var vote = game.VoteChoices[choice];
-
-                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"Lobby{index}VoteMapName{choice}", Plugin.Instance.Translate($"Vote{choice}_MapName", vote.Location.LocationName, choice == 0 ? game.Vote0.Count : game.Vote1.Count).ToRich());
-            }
-        }
-
-        public void UpdateVoteTimer(Game game, string timer)
-        {
-            int index = Plugin.Instance.GameManager.Games.IndexOf(game);
-
-            if (index == -1)
-            {
-                return;
-            }
-
-            if (game.GamePhase == EGamePhase.Voting)
-            {
-                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"Lobby{index}VoteTimer", timer);
-            }
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Play Players TEXT {index}", $"{game.GetPlayerCount()}/{game.Location.GetMaxPlayers(game.GameMode)}");
         }
 
         // Loadout Page
@@ -762,7 +753,7 @@ namespace UnturnedBlackout.Instances
         public void ShowLoadouts()
         {
             Logging.Debug($"Showing loadouts to {Player.CharacterName}");
-            MainPage = EMainPage.Leaderboard;
+            MainPage = EMainPage.Loadout;
 
             if (!LoadoutPages.TryGetValue(1, out PageLoadout firstPage))
             {
@@ -4522,24 +4513,6 @@ namespace UnturnedBlackout.Instances
         }
 
         // Events
-
-        public void OnXPChanged()
-        {
-            if (!Plugin.Instance.DBManager.PlayerData.TryGetValue(SteamID, out PlayerData data))
-            {
-                return;
-            }
-
-            var ui = Plugin.Instance.UIManager;
-            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER XP Num", Plugin.Instance.Translate("Level_Show", data.Level).ToRich());
-            EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER XP Icon", Plugin.Instance.DBManager.Levels.TryGetValue((int)data.Level, out XPLevel level) ? level.IconLinkMedium : "");
-            int spaces = 0;
-            if (data.TryGetNeededXP(out int neededXP))
-            {
-                spaces = Math.Min(96, neededXP == 0 ? 0 : (int)(data.XP * 96 / neededXP));
-            }
-            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER XP Bar Fill", spaces == 0 ? " " : new string(' ', spaces));
-        }
 
         public void OnMusicChanged(bool isMusic)
         {

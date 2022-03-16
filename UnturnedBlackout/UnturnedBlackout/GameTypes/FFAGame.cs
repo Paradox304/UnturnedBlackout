@@ -44,6 +44,7 @@ namespace UnturnedBlackout.GameTypes
         {
             TaskDispatcher.QueueOnMainThread(() => WipeItems());
             GamePhase = EGamePhase.Starting;
+            Plugin.Instance.UIManager.OnGameUpdated(this);
             foreach (var player in Players)
             {
                 Plugin.Instance.UIManager.ClearWaitingForPlayersUI(player.GamePlayer);
@@ -60,7 +61,7 @@ namespace UnturnedBlackout.GameTypes
                 }
             }
             GamePhase = EGamePhase.Started;
-
+            Plugin.Instance.UIManager.OnGameUpdated(this);
             foreach (var player in Players)
             {
                 player.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1);
@@ -131,7 +132,13 @@ namespace UnturnedBlackout.GameTypes
             }
 
             Players = new List<FFAPlayer>();
-            StartVoting();
+
+            var gameModes = new List<byte> { (byte)EGameType.CTF, (byte)EGameType.FFA, (byte)EGameType.TDM, (byte)EGameType.KC };
+            gameModes.Remove((byte)GameMode);
+            var gameMode = (EGameType)gameModes[UnityEngine.Random.Range(0, gameModes.Count)];
+            GamePhase = EGamePhase.Ended;
+            Plugin.Instance.GameManager.EndGame(this);
+            Plugin.Instance.GameManager.StartGame(Location, gameMode);
         }
 
         public override IEnumerator AddPlayerToGame(GamePlayer player)
@@ -496,7 +503,7 @@ namespace UnturnedBlackout.GameTypes
         public void GiveLoadout(FFAPlayer player)
         {
             player.GamePlayer.Player.Player.inventory.ClearInventory();
-            //R.Commands.Execute(player.GamePlayer.Player, $"/kit {Config.FFA.KitName}");
+            Plugin.Instance.LoadoutManager.GiveLoadout(player.GamePlayer, Config.FFA.Kit);
         }
 
         public void SpawnPlayer(FFAPlayer player, bool seperateSpawnPoint)

@@ -1455,7 +1455,7 @@ namespace UnturnedBlackout.Managers
                     }
 
                     Logging.Debug($"Getting gadgets for {player.CharacterName}");
-                    rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PlayersPerksTableName}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
+                    rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PlayersGadgetsTableName}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
                     try
                     {
                         while (await rdr.ReadAsync())
@@ -1888,15 +1888,6 @@ namespace UnturnedBlackout.Managers
                             }
                         }
                     }
-
-                    TaskDispatcher.QueueOnMainThread(() =>
-                    {
-                        var player = UnturnedPlayer.FromCSteamID(steamID);
-                        if (player != null)
-                        {
-                            Plugin.Instance.HUDManager.OnXPChanged(player);
-                        }
-                    });
                 }
                 catch (Exception ex)
                 {

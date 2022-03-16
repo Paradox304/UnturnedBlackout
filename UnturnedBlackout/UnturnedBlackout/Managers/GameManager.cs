@@ -112,12 +112,6 @@ namespace UnturnedBlackout.Managers
                 return;
             }
 
-            if (game.GamePhase == EGamePhase.Voting || game.GamePhase == EGamePhase.WaitingForVoting)
-            {
-                Utility.Say(player, Plugin.Instance.Translate("Game_Voting").ToRich());
-                return;
-            }
-
             var gPlayer = GetGamePlayer(player);
             if (gPlayer == null)
             {
@@ -170,7 +164,6 @@ namespace UnturnedBlackout.Managers
                 TaskDispatcher.QueueOnMainThread(() =>
                 {
                     Plugin.Instance.UIManager.RegisterUIHandler(player);
-                    Plugin.Instance.HUDManager.OnXPChanged(player);
 
                     player.Player.quests.leaveGroup(true);
                     if (!Players.ContainsKey(player.CSteamID))
@@ -198,57 +191,12 @@ namespace UnturnedBlackout.Managers
             }
         }
 
-        public void OnPlayerVoted(UnturnedPlayer player, int index, int choice)
-        {
-            if (index > (Games.Count - 1))
-            {
-                return;
-            }
-
-            var gPlayer = GetGamePlayer(player);
-            if (gPlayer == null)
-            {
-                return;
-            }
-
-            var game = Games[index];
-            if (game.GamePhase == EGamePhase.Voting)
-            {
-                game.OnVoted(gPlayer, choice);
-            }
-        }
-
-
         private void OnPlayerDeath(PlayerLife sender, EDeathCause cause, ELimb limb, CSteamID instigator)
         {
             if (!TryGetCurrentGame(sender.player.channel.owner.playerID.steamID, out _))
             {
                 SendPlayerToLobby(UnturnedPlayer.FromPlayer(sender.player));
             }
-        }
-
-        public void OnVotingEnded()
-        {
-            foreach (var game in Games)
-            {
-                if (game.GamePhase == EGamePhase.WaitingForVoting)
-                {
-                    game.StartVoting();
-                    break;
-                }
-            }
-        }
-
-        public bool CanStartVoting()
-        {
-            foreach (var game in Games)
-            {
-                if (game.GamePhase == EGamePhase.Voting)
-                {
-                    return false;
-                }
-            }
-            return true;
         }
 
         public void SendPlayerToLobby(UnturnedPlayer player)

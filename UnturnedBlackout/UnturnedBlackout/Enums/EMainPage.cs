@@ -6,6 +6,7 @@
         Play,
         Loadout,
         Unbox,
+        Shop,
         Achievements,
         Battlepass,
         Quests,
