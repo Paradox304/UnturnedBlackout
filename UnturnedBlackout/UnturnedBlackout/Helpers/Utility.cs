@@ -141,7 +141,7 @@ namespace UnturnedBlackout
 
                 var isBought = false;
                 ushort attachmentID = 0;
-                if (attachmentText.Contains("B."))
+                if (attachmentText.StartsWith("B."))
                 {
                     isBought = true;
                     if (!ushort.TryParse(attachmentText.Replace("B.", ""), out attachmentID))
@@ -149,7 +149,7 @@ namespace UnturnedBlackout
                         continue;
                     }
                 }
-                else if (attachmentsText.Contains("UB."))
+                else if (attachmentText.StartsWith("UB."))
                 {
                     isBought = false;
                     if (!ushort.TryParse(attachmentText.Replace("UB.", ""), out attachmentID))
@@ -157,6 +157,7 @@ namespace UnturnedBlackout
                         continue;
                     }
                 }
+
                 if (!Plugin.Instance.DBManager.GunAttachments.TryGetValue(attachmentID, out GunAttachment gunAttachment))
                 {
                     Logging.Debug($"Gun with name {gun.GunName} has an attachment with id {attachmentID} which is not registered in attachments table for {player.CharacterName}");
@@ -168,6 +169,7 @@ namespace UnturnedBlackout
                     Logging.Debug($"Gun with name {gun.GunName} has a duplicate attachment with id {attachmentID} for {player.CharacterName}");
                     continue;
                 }
+
                 var levelRequired = -1;
                 if (gun.DefaultAttachments.Contains(gunAttachment))
                 {
@@ -208,7 +210,7 @@ namespace UnturnedBlackout
             var text = "";
             foreach (var attachment in gunAttachments)
             {
-                text += $"UB.{attachment.AttachmentID}";
+                text += $"UB.{attachment.AttachmentID},";
             }
             return text;
         }
@@ -251,6 +253,25 @@ namespace UnturnedBlackout
                     return "Waiting For Players";
                 default:
                     return gamePhase.ToString();
+            }
+        }
+
+        public static string GetDefaultAttachmentImage(string attachmentType)
+        {
+            switch (attachmentType.ToLower())
+            {
+                case "sights":
+                    return "https://cdn.discordapp.com/attachments/458038940847439903/953635997751578624/sight.png";
+                case "grip":
+                    return "https://cdn.discordapp.com/attachments/458038940847439903/953635997533503579/grip.png";
+                case "barrel":
+                    return "https://cdn.discordapp.com/attachments/458038940847439903/953635997315391518/barrel.png";
+                case "magazine":
+                    return "https://cdn.discordapp.com/attachments/458038940847439903/953635997990670366/ammo.png";
+                case "charm":
+                    return "https://cdn.discordapp.com/attachments/458038940847439903/953635997097279488/charm.png";
+                default:
+                    return "";
             }
         }
 

@@ -60,7 +60,7 @@ namespace UnturnedBlackout.Instances
         public Dictionary<int, PageGunCharm> GunCharmPages { get; set; }
         public Dictionary<ushort, Dictionary<int, PageGunSkin>> GunSkinPages { get; set; }
         public Dictionary<int, PageKnife> KnifePages { get; set; }
-        public Dictionary<int, PagePerk> PerkPages { get; set; }
+        public Dictionary<int, Dictionary<int, PagePerk>> PerkPages { get; set; }
         public Dictionary<int, PageGadget> TacticalPages { get; set; }
         public Dictionary<int, PageGadget> LethalPages { get; set; }
         public Dictionary<int, PageCard> CardPages { get; set; }
@@ -440,13 +440,13 @@ namespace UnturnedBlackout.Instances
                 int page = 1;
                 var attachments = new Dictionary<int, LoadoutAttachment>();
                 AttachmentPages[gun.Gun.GunID].Add(attachmentType, new Dictionary<int, PageAttachment>());
-
                 foreach (var attachment in gun.Attachments.Values.Where(k => k.Attachment.AttachmentType == attachmentType).OrderBy(k => k.LevelRequirement))
                 {
                     attachments.Add(index, attachment);
                     if (index == 4)
                     {
                         AttachmentPages[gun.Gun.GunID][attachmentType].Add(page, new PageAttachment(page, attachments));
+                        attachments = new Dictionary<int, LoadoutAttachment>();
                         index = 0;
                         page++;
                         continue;
@@ -477,7 +477,9 @@ namespace UnturnedBlackout.Instances
                     gunCharms = new Dictionary<int, LoadoutGunCharm>();
                     index = 0;
                     page++;
+                    continue;
                 }
+                index++;
             }
             if (gunCharms.Count != 0)
             {
@@ -502,7 +504,9 @@ namespace UnturnedBlackout.Instances
                     knives = new Dictionary<int, LoadoutKnife>();
                     index = 0;
                     page++;
+                    continue;
                 }
+                index++;
             }
             if (knives.Count != 0)
             {
@@ -513,27 +517,34 @@ namespace UnturnedBlackout.Instances
 
         public void BuildPerkPages()
         {
-            PerkPages = new Dictionary<int, PagePerk>();
+            PerkPages = new Dictionary<int, Dictionary<int, PagePerk>>();
             Logging.Debug($"Creating perk pages for {Player.CharacterName}, found {PlayerLoadout.Perks.Count} perks");
-            int index = 0;
-            int page = 1;
-            var perks = new Dictionary<int, LoadoutPerk>();
-            foreach (var perk in PlayerLoadout.Perks.Values.OrderBy(k => k.Perk.LevelRequirement))
+            for (int i = 1; i <= 3; i++)
             {
-                perks.Add(index, perk);
-                if (index == 4)
+                Logging.Debug($"Creating perk pages for perk type {i} for {Player.CharacterName}");
+                PerkPages.Add(i, new Dictionary<int, PagePerk>());
+                int index = 0;
+                int page = 1;
+                var perks = new Dictionary<int, LoadoutPerk>();
+                foreach (var perk in PlayerLoadout.Perks.Values.Where(k => k.Perk.PerkType == i).OrderBy(k => k.Perk.LevelRequirement))
                 {
-                    PerkPages.Add(page, new PagePerk(page, perks));
-                    perks = new Dictionary<int, LoadoutPerk>();
-                    index = 0;
-                    page++;
+                    perks.Add(index, perk);
+                    if (index == 4)
+                    {
+                        PerkPages[i].Add(page, new PagePerk(page, perks));
+                        perks = new Dictionary<int, LoadoutPerk>();
+                        index = 0;
+                        page++;
+                        continue;
+                    }
+                    index++;
                 }
+                if (perks.Count != 0)
+                {
+                    PerkPages[i].Add(page, new PagePerk(page, perks));
+                }
+                Logging.Debug($"Created {PerkPages[i].Count} for perk type {i} for {Player.CharacterName}");
             }
-            if (perks.Count != 0)
-            {
-                PerkPages.Add(page, new PagePerk(page, perks));
-            }
-            Logging.Debug($"Created {PerkPages.Count} perk pages for {Player.CharacterName}");
         }
 
         public void BuildTacticalPages()
@@ -553,7 +564,9 @@ namespace UnturnedBlackout.Instances
                     gadgetItems = new Dictionary<int, LoadoutGadget>();
                     index = 0;
                     page++;
+                    continue;
                 }
+                index++;
             }
             if (gadgetItems.Count != 0)
             {
@@ -579,7 +592,9 @@ namespace UnturnedBlackout.Instances
                     gadgetItems = new Dictionary<int, LoadoutGadget>();
                     index = 0;
                     page++;
+                    continue;
                 }
+                index++;
             }
             if (gadgetItems.Count != 0)
             {
@@ -604,7 +619,9 @@ namespace UnturnedBlackout.Instances
                     cards = new Dictionary<int, LoadoutCard>();
                     index = 0;
                     page++;
+                    continue;
                 }
+                index++;
             }
             if (cards.Count != 0)
             {
@@ -629,7 +646,9 @@ namespace UnturnedBlackout.Instances
                     gloves = new Dictionary<int, LoadoutGlove>();
                     index = 0;
                     page++;
+                    continue;
                 }
+                index++;
             }
             if (gloves.Count != 0)
             {
@@ -654,7 +673,9 @@ namespace UnturnedBlackout.Instances
                     killstreaks = new Dictionary<int, LoadoutKillstreak>();
                     index = 0;
                     page++;
+                    continue;
                 }
+                index++;
             }
             if (killstreaks.Count != 0)
             {
@@ -882,9 +903,9 @@ namespace UnturnedBlackout.Instances
                 var attachmentType = (EAttachment)i;
                 loadout.PrimaryAttachments.TryGetValue(attachmentType, out LoadoutAttachment attachment);
                 Logging.Debug($"Primary attachment {attachmentType} is null {attachment == null}");
-                EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Loadout Primary {attachmentType} IMAGE", attachment == null ? "" : attachment.Attachment.IconLink);
+                EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Loadout Primary {attachmentType} IMAGE", attachment == null ? Utility.GetDefaultAttachmentImage(attachmentType.ToString()) : attachment.Attachment.IconLink);
             }
-            EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Loadout Primary Charm IMAGE", loadout.PrimaryGunCharm == null ? "" : loadout.PrimaryGunCharm.GunCharm.IconLink);
+            EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Loadout Primary Charm IMAGE", loadout.PrimaryGunCharm == null ? Utility.GetDefaultAttachmentImage("charm") : loadout.PrimaryGunCharm.GunCharm.IconLink);
             
             // Secondary
             Logging.Debug($"Secondary is null {loadout.Secondary == null}, is skin null {loadout.SecondarySkin == null}");
@@ -896,11 +917,11 @@ namespace UnturnedBlackout.Instances
                 var attachmentType = (EAttachment)i;
                 loadout.SecondaryAttachments.TryGetValue(attachmentType, out LoadoutAttachment attachment);
                 Logging.Debug($"Secondary attachment {attachmentType} is null {attachment == null}");
-                EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Loadout Secondary {attachmentType} IMAGE", attachment == null ? "" : attachment.Attachment.IconLink);
+                EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Loadout Secondary {attachmentType} IMAGE", attachment == null ? Utility.GetDefaultAttachmentImage(attachmentType.ToString()) : attachment.Attachment.IconLink);
             }
-            EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Loadout Secondary Charm IMAGE", loadout.SecondaryGunCharm == null ? "" : loadout.SecondaryGunCharm.GunCharm.IconLink);
+            EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Loadout Secondary Charm IMAGE", loadout.SecondaryGunCharm == null ? Utility.GetDefaultAttachmentImage("charm") : loadout.SecondaryGunCharm.GunCharm.IconLink);
             
-                // Knife
+             // Knife
             Logging.Debug($"Knife is null {loadout.Knife == null}");
             EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Loadout Knife IMAGE", loadout.Knife == null ? "" : loadout.Knife.Knife.IconLink);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Loadout Knife TEXT", loadout.Knife == null ? "" : loadout.Knife.Knife.KnifeName);
@@ -916,11 +937,11 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Loadout Lethal TEXT", loadout.Lethal == null ? "" : loadout.Lethal.Gadget.GadgetName);
 
             // Perk
-            for (int i = 0; i <= 2; i++)
+            for (int i = 1; i <= 3; i++)
             {
-                Logging.Debug($"Perk at {i} is null {loadout.Perks.Count < (i + 1)}");
-                EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Loadout Perk IMAGE {i}", loadout.Perks.Count < (i + 1) ? "" : loadout.Perks[i].Perk.IconLink);
-                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Loadout Perk TEXT {i}", loadout.Perks.Count < (i + 1) ? "" : loadout.Perks[i].Perk.PerkName);
+                loadout.Perks.TryGetValue(i, out LoadoutPerk perk);
+                EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Loadout Perk IMAGE {i}", perk == null ? "" : loadout.Perks[i].Perk.IconLink);
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Loadout Perk TEXT {i}", perk == null ? "" : loadout.Perks[i].Perk.PerkName);
             }
 
             // Killstreak
@@ -1007,7 +1028,7 @@ namespace UnturnedBlackout.Instances
         public void ShowLoadoutSubPage(ELoadoutPage page)
         {
             Logging.Debug($"Showing loadout sub page {page} for {Player.CharacterName}");
-            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Type TEXT", page.ToString().StartsWith("AttachmentPrimary") || page.ToString().StartsWith("AttachmentSecondary") ? "ATTACHMENT" : page.ToString().ToUpper());
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Type TEXT", page.ToString().Replace("AttachmentPrimary", "").Replace("AttachmentSecondary", "").ToUpper());
             LoadoutPage = page;
 
             switch (LoadoutPage)
@@ -1148,9 +1169,17 @@ namespace UnturnedBlackout.Instances
                                     break;
                                 }
 
-                            case ELoadoutPage.Perk:
+                            case ELoadoutPage.Perk1:
+                            case ELoadoutPage.Perk2:
+                            case ELoadoutPage.Perk3:
                                 {
-                                    if (!PerkPages.TryGetValue(1, out PagePerk firstPage))
+                                    if (!int.TryParse(LoadoutPage.ToString().Replace("Perk", ""), out int perkType))
+                                    {
+                                        Logging.Debug($"Error getting perk type from {LoadoutPage}");
+                                        return;
+                                    }
+
+                                    if (!PerkPages[perkType].TryGetValue(1, out PagePerk firstPage))
                                     {
                                         Logging.Debug($"Error getting first page for perks for {Player.CharacterName}");
                                         return;
@@ -1411,7 +1440,7 @@ namespace UnturnedBlackout.Instances
 
         public void ForwardLoadoutTab()
         {
-            Logging.Debug($"{Player.CharacterName} is trying to forward the loadout tab {LoadoutTab}, Current Page {LoadoutTabPageID}");
+            Logging.Debug($"{Player.CharacterName} is trying to forward the loadout tab {LoadoutTab}, Current Page {LoadoutPage}, Current Page ID {LoadoutTabPageID}");
             if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
             {
                 Logging.Debug($"Error finding loadout with id {LoadoutID} for {Player.CharacterName}");
@@ -1453,7 +1482,7 @@ namespace UnturnedBlackout.Instances
                                         return;
                                     }
 
-                                    if (attachmentPages.TryGetValue(LoadoutTabPageID + 1, out PageAttachment nextPage) && !attachmentPages.TryGetValue(1, out nextPage))
+                                    if (!attachmentPages.TryGetValue(LoadoutTabPageID + 1, out PageAttachment nextPage) && !attachmentPages.TryGetValue(1, out nextPage))
                                     {
                                         Logging.Debug($"Error finding next page of attachment with type {attachmentType} for gun with id {gun.Gun.GunID} for {Player.CharacterName}");
                                         return;
@@ -1507,7 +1536,7 @@ namespace UnturnedBlackout.Instances
                                         return;
                                     }
 
-                                    if (attachmentPages.TryGetValue(LoadoutTabPageID + 1, out PageAttachment nextPage) && !attachmentPages.TryGetValue(1, out nextPage))
+                                    if (!attachmentPages.TryGetValue(LoadoutTabPageID + 1, out PageAttachment nextPage) && !attachmentPages.TryGetValue(1, out nextPage))
                                     {
                                         Logging.Debug($"Error finding next page of attachment with type {attachmentType} for gun with id {gun.Gun.GunID} for {Player.CharacterName}");
                                         return;
@@ -1520,9 +1549,17 @@ namespace UnturnedBlackout.Instances
                                     break;
                                 }
 
-                            case ELoadoutPage.Perk:
+                            case ELoadoutPage.Perk1:
+                            case ELoadoutPage.Perk2:
+                            case ELoadoutPage.Perk3:
                                 {
-                                    if (!PerkPages.TryGetValue(LoadoutTabPageID + 1, out PagePerk nextPage) && !PerkPages.TryGetValue(1, out nextPage))
+                                    if (!int.TryParse(LoadoutPage.ToString().Replace("Perk", ""), out int perkType))
+                                    {
+                                        Logging.Debug($"Error getting perk type from {LoadoutPage}");
+                                        return;
+                                    }
+
+                                    if (!PerkPages[perkType].TryGetValue(LoadoutTabPageID + 1, out PagePerk nextPage) && !PerkPages[perkType].TryGetValue(1, out nextPage))
                                     {
                                         Logging.Debug($"Error getting next page for perks for {Player.CharacterName}");
                                         return;
@@ -1728,7 +1765,7 @@ namespace UnturnedBlackout.Instances
 
         public void BackwardLoadoutTab()
         {
-            Logging.Debug($"{Player.CharacterName} is trying to backward the loadout tab {LoadoutTab}, Current Page {LoadoutTabPageID}");
+            Logging.Debug($"{Player.CharacterName} is trying to backward the loadout tab {LoadoutTab}, Current Page {LoadoutPage}, Current Page ID {LoadoutTabPageID}");
 
             if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
             {
@@ -1771,7 +1808,7 @@ namespace UnturnedBlackout.Instances
                                         return;
                                     }
 
-                                    if (attachmentPages.TryGetValue(LoadoutTabPageID - 1, out PageAttachment prevPage) && !attachmentPages.TryGetValue(attachmentPages.Keys.Max(), out prevPage))
+                                    if (!attachmentPages.TryGetValue(LoadoutTabPageID - 1, out PageAttachment prevPage) && !attachmentPages.TryGetValue(attachmentPages.Keys.Max(), out prevPage))
                                     {
                                         Logging.Debug($"Error finding previous page of attachment with type {attachmentType} for gun with id {gun.Gun.GunID} for {Player.CharacterName}");
                                         return;
@@ -1825,7 +1862,7 @@ namespace UnturnedBlackout.Instances
                                         return;
                                     }
 
-                                    if (attachmentPages.TryGetValue(LoadoutTabPageID - 1, out PageAttachment prevPage) && !attachmentPages.TryGetValue(attachmentPages.Keys.Max(), out prevPage))
+                                    if (!attachmentPages.TryGetValue(LoadoutTabPageID - 1, out PageAttachment prevPage) && !attachmentPages.TryGetValue(attachmentPages.Keys.Max(), out prevPage))
                                     {
                                         Logging.Debug($"Error finding previous page of attachment with type {attachmentType} for gun with id {gun.Gun.GunID} for {Player.CharacterName}");
                                         return;
@@ -1838,9 +1875,17 @@ namespace UnturnedBlackout.Instances
                                     break;
                                 }
 
-                            case ELoadoutPage.Perk:
+                            case ELoadoutPage.Perk1:
+                            case ELoadoutPage.Perk2:
+                            case ELoadoutPage.Perk3:
                                 {
-                                    if (!PerkPages.TryGetValue(LoadoutTabPageID - 1, out PagePerk prevPage) && !PerkPages.TryGetValue(PerkPages.Keys.Max(), out prevPage))
+                                    if (!int.TryParse(LoadoutPage.ToString().Replace("Perk", ""), out int perkType))
+                                    {
+                                        Logging.Debug($"Error getting perk type from {LoadoutPage}");
+                                        return;
+                                    }
+
+                                    if (!PerkPages[perkType].TryGetValue(LoadoutTabPageID - 1, out PagePerk prevPage) && !PerkPages[perkType].TryGetValue(PerkPages.Keys.Max(), out prevPage))
                                     {
                                         Logging.Debug($"Error getting prev page for perks for {Player.CharacterName}");
                                         return;
@@ -2046,7 +2091,7 @@ namespace UnturnedBlackout.Instances
 
         public void ReloadLoadoutTab()
         {
-            Logging.Debug($"Reloading current loadout tab page for {Player.CharacterName}, Current Page {LoadoutTabPageID}");
+            Logging.Debug($"Reloading current loadout tab page for {Player.CharacterName}, Current Page {LoadoutPage}, Current Page ID {LoadoutTabPageID}");
             if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
             {
                 Logging.Debug($"Error finding loadout with id {LoadoutID} for {Player.CharacterName}");
@@ -2088,7 +2133,7 @@ namespace UnturnedBlackout.Instances
                                         return;
                                     }
 
-                                    if (attachmentPages.TryGetValue(LoadoutTabPageID, out PageAttachment page))
+                                    if (!attachmentPages.TryGetValue(LoadoutTabPageID, out PageAttachment page))
                                     {
                                         Logging.Debug($"Error finding current page of attachment with type {attachmentType} for gun with id {gun.Gun.GunID} for {Player.CharacterName}");
                                         return;
@@ -2142,7 +2187,7 @@ namespace UnturnedBlackout.Instances
                                         return;
                                     }
 
-                                    if (attachmentPages.TryGetValue(LoadoutTabPageID, out PageAttachment page))
+                                    if (!attachmentPages.TryGetValue(LoadoutTabPageID, out PageAttachment page))
                                     {
                                         Logging.Debug($"Error finding current page of attachment with type {attachmentType} for gun with id {gun.Gun.GunID} for {Player.CharacterName}");
                                         return;
@@ -2155,9 +2200,17 @@ namespace UnturnedBlackout.Instances
                                     break;
                                 }
 
-                            case ELoadoutPage.Perk:
+                            case ELoadoutPage.Perk1:
+                            case ELoadoutPage.Perk2:
+                            case ELoadoutPage.Perk3:
                                 {
-                                    if (!PerkPages.TryGetValue(LoadoutTabPageID, out PagePerk page))
+                                    if (!int.TryParse(LoadoutPage.ToString().Replace("Perk", ""), out int perkType))
+                                    {
+                                        Logging.Debug($"Error getting perk type from {LoadoutPage}");
+                                        return;
+                                    }
+
+                                    if (!PerkPages[perkType].TryGetValue(LoadoutTabPageID, out PagePerk page))
                                     {
                                         Logging.Debug($"Error getting current page for perks for {Player.CharacterName}");
                                         return;
@@ -2527,7 +2580,7 @@ namespace UnturnedBlackout.Instances
                 }
 
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item BUTTON {i}", true);
-                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Equipped {i}", currentLoadout.Perks.Contains(perk));
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Equipped {i}", currentLoadout.Perks.ContainsValue(perk));
                 EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Item IMAGE {i}", perk.Perk.IconLink);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item TEXT {i}", perk.Perk.PerkName);
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Lock Overlay {i}", !perk.IsBought && perk.Perk.LevelRequirement > PlayerData.Level);
@@ -2703,27 +2756,9 @@ namespace UnturnedBlackout.Instances
                             return;
                         }
 
-                        if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out var attachmentTypePages))
+                        if (!gun.Attachments.TryGetValue((ushort)SelectedItemID, out LoadoutAttachment attachment))
                         {
-                            Logging.Debug($"Error finding primary attachments for {gun.Gun.GunID} for {Player.CharacterName}");
-                            return;
-                        }
-
-                        if (!attachmentTypePages.TryGetValue(attachmentType, out Dictionary<int, PageAttachment> attachmentPages))
-                        {
-                            Logging.Debug($"Error finding attachments with type {attachmentType} for {Player.CharacterName}");
-                            return;
-                        }
-
-                        if (!attachmentPages.TryGetValue(LoadoutTabPageID, out PageAttachment page))
-                        {
-                            Logging.Debug($"Error finding page {LoadoutTabPageID} of attachment with type {attachmentType} for gun with id {gun.Gun.GunID} for {Player.CharacterName}");
-                            return;
-                        }
-
-                        if (page.Attachments.TryGetValue((int)SelectedItemID, out LoadoutAttachment attachment))
-                        {
-                            Logging.Debug($"Error finding attachment at page id {LoadoutTabPageID} with position {SelectedItemID} for {Player.CharacterName}");
+                            Logging.Debug($"Error finding attachment with attachment id {SelectedItemID} for gun {gun.Gun.GunName}");
                             return;
                         }
 
@@ -2743,31 +2778,13 @@ namespace UnturnedBlackout.Instances
 
                         if (!PlayerLoadout.Guns.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out LoadoutGun gun))
                         {
-                            Logging.Debug($"Error finding Secondary that has been selected with id {loadout.Secondary?.Gun?.GunID ?? 0} for {Player.CharacterName}");
+                            Logging.Debug($"Error finding secondary that has been selected with id {loadout.Secondary?.Gun?.GunID ?? 0} for {Player.CharacterName}");
                             return;
                         }
 
-                        if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out var attachmentTypePages))
+                        if (!gun.Attachments.TryGetValue((ushort)SelectedItemID, out LoadoutAttachment attachment))
                         {
-                            Logging.Debug($"Error finding Secondary attachments for {gun.Gun.GunID} for {Player.CharacterName}");
-                            return;
-                        }
-
-                        if (!attachmentTypePages.TryGetValue(attachmentType, out Dictionary<int, PageAttachment> attachmentPages))
-                        {
-                            Logging.Debug($"Error finding attachments with type {attachmentType} for {Player.CharacterName}");
-                            return;
-                        }
-
-                        if (!attachmentPages.TryGetValue(LoadoutTabPageID, out PageAttachment page))
-                        {
-                            Logging.Debug($"Error finding page {LoadoutTabPageID} of attachment with type {attachmentType} for gun with id {gun.Gun.GunID} for {Player.CharacterName}");
-                            return;
-                        }
-
-                        if (page.Attachments.TryGetValue((int)SelectedItemID, out LoadoutAttachment attachment))
-                        {
-                            Logging.Debug($"Error finding attachment at page id {LoadoutTabPageID} with position {SelectedItemID} for {Player.CharacterName}");
+                            Logging.Debug($"Error finding attachment with attachment id {SelectedItemID} for gun {gun.Gun.GunName}");
                             return;
                         }
 
@@ -2812,7 +2829,9 @@ namespace UnturnedBlackout.Instances
                         break;
                     }
 
-                case ELoadoutPage.Perk:
+                case ELoadoutPage.Perk1:
+                case ELoadoutPage.Perk2:
+                case ELoadoutPage.Perk3:
                     {
                         if (!PlayerLoadout.Perks.TryGetValue((int)SelectedItemID, out LoadoutPerk perk))
                         {
@@ -2997,9 +3016,17 @@ namespace UnturnedBlackout.Instances
                                     break;
                                 }
 
-                            case ELoadoutPage.Perk:
+                            case ELoadoutPage.Perk1:
+                            case ELoadoutPage.Perk2:
+                            case ELoadoutPage.Perk3:
                                 {
-                                    if (!PerkPages.TryGetValue(LoadoutTabPageID, out PagePerk page))
+                                    if (!int.TryParse(LoadoutPage.ToString().Replace("Perk", ""), out int perkType))
+                                    {
+                                        Logging.Debug($"Error getting perk type from {LoadoutPage}");
+                                        return;
+                                    }
+
+                                    if (!PerkPages[perkType].TryGetValue(LoadoutTabPageID, out PagePerk page))
                                     {
                                         Logging.Debug($"Error finding perk page with id {LoadoutTabPageID} for {Player.CharacterName}");
                                         return;
@@ -3412,8 +3439,8 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Buy TEXT", !perk.IsBought && PlayerData.Level >= perk.Perk.LevelRequirement ? $"BUY ({perk.Perk.BuyPrice} CREDITS)" : "");
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Unlock BUTTON", !perk.IsBought && perk.Perk.LevelRequirement > PlayerData.Level);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Unlock TEXT", !perk.IsBought && perk.Perk.LevelRequirement > PlayerData.Level ? $"UNLOCK ({perk.Perk.Coins} COINS)" : "");
-            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Equip BUTTON", perk.IsBought && !loadout.Perks.Contains(perk));
-            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Dequip BUTTON", perk.IsBought && loadout.Perks.Contains(perk));
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Equip BUTTON", perk.IsBought && !loadout.Perks.ContainsValue(perk));
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Dequip BUTTON", perk.IsBought && loadout.Perks.ContainsValue(perk));
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Description TEXT", perk.Perk.PerkDesc);
             EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Item IMAGE", perk.Perk.IconLink);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item TEXT", perk.Perk.PerkName);
@@ -3698,7 +3725,9 @@ namespace UnturnedBlackout.Instances
                         break;
                     }
 
-                case ELoadoutPage.Perk:
+                case ELoadoutPage.Perk1:
+                case ELoadoutPage.Perk2:
+                case ELoadoutPage.Perk3:
                     {
                         if (!PlayerLoadout.Perks.TryGetValue((int)SelectedItemID, out LoadoutPerk perk))
                         {
@@ -4007,7 +4036,9 @@ namespace UnturnedBlackout.Instances
                         break;
                     }
 
-                case ELoadoutPage.Perk:
+                case ELoadoutPage.Perk1:
+                case ELoadoutPage.Perk2:
+                case ELoadoutPage.Perk3:
                     {
                         if (!PlayerLoadout.Perks.TryGetValue((int)SelectedItemID, out LoadoutPerk perk))
                         {
@@ -4279,7 +4310,9 @@ namespace UnturnedBlackout.Instances
                         break;
                     }
 
-                case ELoadoutPage.Perk:
+                case ELoadoutPage.Perk1:
+                case ELoadoutPage.Perk2:
+                case ELoadoutPage.Perk3:
                     {
                         if (!PlayerLoadout.Perks.TryGetValue((int)SelectedItemID, out LoadoutPerk perk))
                         {
@@ -4467,7 +4500,9 @@ namespace UnturnedBlackout.Instances
                         break;
                     }
 
-                case ELoadoutPage.Perk:
+                case ELoadoutPage.Perk1:
+                case ELoadoutPage.Perk2:
+                case ELoadoutPage.Perk3:
                     {
                         if (!PlayerLoadout.Perks.TryGetValue((int)SelectedItemID, out LoadoutPerk perk))
                         {

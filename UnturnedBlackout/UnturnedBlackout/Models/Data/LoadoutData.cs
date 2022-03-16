@@ -39,7 +39,7 @@ namespace UnturnedBlackout.Models.Data
             Tactical = loadout.Tactical?.Gadget?.GadgetID ?? 0;
             Lethal = loadout.Lethal?.Gadget?.GadgetID ?? 0;
             Killstreaks = loadout.Killstreaks.Select(k => k.Killstreak.KillstreakID).ToList();
-            Perks = loadout.Perks.Select(k => k.Perk.PerkID).ToList();
+            Perks = loadout.Perks.Values.Select(k => k.Perk.PerkID).ToList();
             Glove = loadout.Glove?.Glove?.GloveID ?? 0;
             Card = loadout.Card?.Card?.CardID ?? 0;
         }

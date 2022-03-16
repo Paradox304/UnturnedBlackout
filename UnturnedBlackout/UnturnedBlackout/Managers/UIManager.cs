@@ -1021,8 +1021,14 @@ namespace UnturnedBlackout.Managers
                 case "SERVER Loadout Killstreak BUTTON":
                     handler.ShowLoadoutSubPage(ELoadoutPage.Killstreak);
                     return;
-                case "SERVER Loadout Perk BUTTON":
-                    handler.ShowLoadoutSubPage(ELoadoutPage.Perk);
+                case "SERVER Loadout Perk BUTTON 1":
+                    handler.ShowLoadoutSubPage(ELoadoutPage.Perk1);
+                    return;
+                case "SERVER Loadout Perk BUTTON 2":
+                    handler.ShowLoadoutSubPage(ELoadoutPage.Perk2);
+                    return;
+                case "SERVER Loadout Perk BUTTON 3":
+                    handler.ShowLoadoutSubPage(ELoadoutPage.Perk3);
                     return;
                 case "SERVER Loadout Primary BUTTON":
                     handler.ShowLoadoutSubPage(ELoadoutPage.Primary);
