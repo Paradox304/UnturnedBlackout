@@ -21,6 +21,8 @@ namespace UnturnedBlackout.Instances
     {
         public const ushort ID = 27632;
         public const short Key = 27632;
+        public const int MaxItemsPerPage = 9;
+        public const int MaxSkinsCharmsPerPage = 24;
 
         public DatabaseManager DB { get; set; }
         public CSteamID SteamID { get; set; }
@@ -190,7 +192,7 @@ namespace UnturnedBlackout.Instances
             foreach (var loadout in PlayerLoadout.Loadouts)
             {
                 loadouts.Add(index, loadout.Value);
-                if (index == 7)
+                if (index == 8)
                 {
                     LoadoutPages.Add(page, new PageLoadout(page, loadouts));
                     index = 0;
@@ -219,7 +221,7 @@ namespace UnturnedBlackout.Instances
             foreach (var gun in guns)
             {
                 gunItems.Add(index, gun);
-                if (index == 4)
+                if (index == MaxItemsPerPage)
                 {
                     PistolPages.Add(page, new PageGun(page, gunItems));
                     index = 0;
@@ -248,7 +250,7 @@ namespace UnturnedBlackout.Instances
             foreach (var gun in guns)
             {
                 gunItems.Add(index, gun);
-                if (index == 4)
+                if (index == MaxItemsPerPage)
                 {
                     SMGPages.Add(page, new PageGun(page, gunItems));
                     index = 0;
@@ -277,7 +279,7 @@ namespace UnturnedBlackout.Instances
             foreach (var gun in guns)
             {
                 gunItems.Add(index, gun);
-                if (index == 4)
+                if (index == MaxItemsPerPage)
                 {
                     ShotgunPages.Add(page, new PageGun(page, gunItems));
                     index = 0;
@@ -306,7 +308,7 @@ namespace UnturnedBlackout.Instances
             foreach (var gun in guns)
             {
                 gunItems.Add(index, gun);
-                if (index == 4)
+                if (index == MaxItemsPerPage)
                 {
                     LMGPages.Add(page, new PageGun(page, gunItems));
                     index = 0;
@@ -335,7 +337,7 @@ namespace UnturnedBlackout.Instances
             foreach (var gun in guns)
             {
                 gunItems.Add(index, gun);
-                if (index == 4)
+                if (index == MaxItemsPerPage)
                 {
                     ARPages.Add(page, new PageGun(page, gunItems));
                     index = 0;
@@ -364,7 +366,7 @@ namespace UnturnedBlackout.Instances
             foreach (var gun in guns)
             {
                 gunItems.Add(index, gun);
-                if (index == 4)
+                if (index == MaxItemsPerPage)
                 {
                     SniperPages.Add(page, new PageGun(page, gunItems));
                     index = 0;
@@ -395,7 +397,7 @@ namespace UnturnedBlackout.Instances
                 foreach (var gunSkin in gun.Value)
                 {
                     gunSkins.Add(index, gunSkin);
-                    if (index == 4)
+                    if (index == MaxSkinsCharmsPerPage)
                     {
                         GunSkinPages[gun.Key].Add(page, new PageGunSkin(page, gunSkins));
                         gunSkins = new Dictionary<int, GunSkin>();
@@ -443,7 +445,7 @@ namespace UnturnedBlackout.Instances
                 foreach (var attachment in gun.Attachments.Values.Where(k => k.Attachment.AttachmentType == attachmentType).OrderBy(k => k.LevelRequirement))
                 {
                     attachments.Add(index, attachment);
-                    if (index == 4)
+                    if (index == MaxItemsPerPage)
                     {
                         AttachmentPages[gun.Gun.GunID][attachmentType].Add(page, new PageAttachment(page, attachments));
                         attachments = new Dictionary<int, LoadoutAttachment>();
@@ -471,7 +473,7 @@ namespace UnturnedBlackout.Instances
             foreach (var gunCharm in PlayerLoadout.GunCharms.Values.OrderBy(k => k.GunCharm.LevelRequirement))
             {
                 gunCharms.Add(index, gunCharm);
-                if (index == 4)
+                if (index == MaxSkinsCharmsPerPage)
                 {
                     GunCharmPages.Add(page, new PageGunCharm(page, gunCharms));
                     gunCharms = new Dictionary<int, LoadoutGunCharm>();
@@ -498,7 +500,7 @@ namespace UnturnedBlackout.Instances
             foreach (var knife in PlayerLoadout.Knives.Values.OrderBy(k => k.Knife.LevelRequirement))
             {
                 knives.Add(index, knife);
-                if (index == 4)
+                if (index == MaxItemsPerPage)
                 {
                     KnifePages.Add(page, new PageKnife(page, knives));
                     knives = new Dictionary<int, LoadoutKnife>();
@@ -529,7 +531,7 @@ namespace UnturnedBlackout.Instances
                 foreach (var perk in PlayerLoadout.Perks.Values.Where(k => k.Perk.PerkType == i).OrderBy(k => k.Perk.LevelRequirement))
                 {
                     perks.Add(index, perk);
-                    if (index == 4)
+                    if (index == MaxItemsPerPage)
                     {
                         PerkPages[i].Add(page, new PagePerk(page, perks));
                         perks = new Dictionary<int, LoadoutPerk>();
@@ -558,7 +560,7 @@ namespace UnturnedBlackout.Instances
             foreach (var gadget in gadgets)
             {
                 gadgetItems.Add(index, gadget);
-                if (index == 4)
+                if (index == MaxItemsPerPage)
                 {
                     TacticalPages.Add(page, new PageGadget(page, gadgetItems));
                     gadgetItems = new Dictionary<int, LoadoutGadget>();
@@ -586,7 +588,7 @@ namespace UnturnedBlackout.Instances
             foreach (var gadget in gadgets)
             {
                 gadgetItems.Add(index, gadget);
-                if (index == 4)
+                if (index == MaxItemsPerPage)
                 {
                     LethalPages.Add(page, new PageGadget(page, gadgetItems));
                     gadgetItems = new Dictionary<int, LoadoutGadget>();
@@ -613,7 +615,7 @@ namespace UnturnedBlackout.Instances
             foreach (var card in PlayerLoadout.Cards.Values.OrderBy(k => k.Card.LevelRequirement))
             {
                 cards.Add(index, card);
-                if (index == 4)
+                if (index == MaxItemsPerPage)
                 {
                     CardPages.Add(page, new PageCard(page, cards));
                     cards = new Dictionary<int, LoadoutCard>();
@@ -640,7 +642,7 @@ namespace UnturnedBlackout.Instances
             foreach (var glove in PlayerLoadout.Gloves.Values.OrderBy(k => k.Glove.LevelRequirement))
             {
                 gloves.Add(index, glove);
-                if (index == 4)
+                if (index == MaxItemsPerPage)
                 {
                     GlovePages.Add(page, new PageGlove(page, gloves));
                     gloves = new Dictionary<int, LoadoutGlove>();
@@ -667,7 +669,7 @@ namespace UnturnedBlackout.Instances
             foreach (var killstreak in PlayerLoadout.Killstreaks.Values.OrderBy(k => k.Killstreak.LevelRequirement))
             {
                 killstreaks.Add(index, killstreak);
-                if (index == 4)
+                if (index == MaxItemsPerPage)
                 {
                     KillstreakPages.Add(page, new PageKillstreak(page, killstreaks));
                     killstreaks = new Dictionary<int, LoadoutKillstreak>();
@@ -2426,7 +2428,7 @@ namespace UnturnedBlackout.Instances
             }
 
             EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item Page TEXT", $"Page {page.PageID}");
-            for (int i = 0; i <= 4; i++)
+            for (int i = 0; i <= MaxItemsPerPage; i++)
             {
                 if (!page.Guns.TryGetValue(i, out LoadoutGun gun))
                 {
@@ -2455,7 +2457,7 @@ namespace UnturnedBlackout.Instances
             }
 
             EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item Page TEXT", $"Page {page.PageID}");
-            for (int i = 0; i <= 4; i++)
+            for (int i = 0; i <= MaxItemsPerPage; i++)
             {
                 if (!page.Attachments.TryGetValue(i, out LoadoutAttachment attachment))
                 {
@@ -2484,7 +2486,7 @@ namespace UnturnedBlackout.Instances
             }
 
             EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item Page TEXT", $"Page {page.PageID}");
-            for (int i = 0; i <= 4; i++)
+            for (int i = 0; i <= MaxSkinsCharmsPerPage; i++)
             {
                 if (!page.GunCharms.TryGetValue(i, out LoadoutGunCharm gunCharm))
                 {
@@ -2513,7 +2515,7 @@ namespace UnturnedBlackout.Instances
             }
 
             EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item Page TEXT", $"Page {page.PageID}");
-            for (int i = 0; i <= 4; i++)
+            for (int i = 0; i <= MaxSkinsCharmsPerPage; i++)
             {
                 if (!page.GunSkins.TryGetValue(i, out GunSkin skin))
                 {
@@ -2542,7 +2544,7 @@ namespace UnturnedBlackout.Instances
             }
 
             EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item Page TEXT", $"Page {page.PageID}");
-            for (int i = 0; i <= 4; i++)
+            for (int i = 0; i <= MaxItemsPerPage; i++)
             {
                 if (!page.Knives.TryGetValue(i, out LoadoutKnife knife))
                 {
@@ -2571,7 +2573,7 @@ namespace UnturnedBlackout.Instances
             }
 
             EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item Page TEXT", $"Page {page.PageID}");
-            for (int i = 0; i <= 4; i++)
+            for (int i = 0; i <= MaxItemsPerPage; i++)
             {
                 if (!page.Perks.TryGetValue(i, out LoadoutPerk perk))
                 {
@@ -2600,7 +2602,7 @@ namespace UnturnedBlackout.Instances
             }
 
             EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item Page TEXT", $"Page {page.PageID}");
-            for (int i = 0; i <= 4; i++)
+            for (int i = 0; i <= MaxItemsPerPage; i++)
             {
                 if (!page.Gadgets.TryGetValue(i, out LoadoutGadget gadget))
                 {
@@ -2629,7 +2631,7 @@ namespace UnturnedBlackout.Instances
             }
 
             EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item Page TEXT", $"Page {page.PageID}");
-            for (int i = 0; i <= 4; i++)
+            for (int i = 0; i <= MaxItemsPerPage; i++)
             {
                 if (!page.Cards.TryGetValue(i, out LoadoutCard card))
                 {
@@ -2658,7 +2660,7 @@ namespace UnturnedBlackout.Instances
             }
 
             EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item Page TEXT", $"Page {page.PageID}");
-            for (int i = 0; i <= 4; i++)
+            for (int i = 0; i <= MaxItemsPerPage; i++)
             {
                 if (!page.Gloves.TryGetValue(i, out LoadoutGlove glove))
                 {
@@ -2687,7 +2689,7 @@ namespace UnturnedBlackout.Instances
             }
 
             EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item Page TEXT", $"Page {page.PageID}");
-            for (int i = 0; i <= 4; i++)
+            for (int i = 0; i <= MaxItemsPerPage; i++)
             {
                 if (!page.Killstreaks.TryGetValue(i, out LoadoutKillstreak killstreak))
                 {
