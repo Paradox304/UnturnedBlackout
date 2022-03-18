@@ -3,7 +3,9 @@
     public enum ELoadoutPage
     {
         Primary,
+        PrimarySkin,
         Secondary,
+        SecondarySkin,
         AttachmentPrimarySights,
         AttachmentPrimaryGrip,
         AttachmentPrimaryCharm,

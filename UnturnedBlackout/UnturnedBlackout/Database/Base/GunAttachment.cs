@@ -8,16 +8,18 @@ namespace UnturnedBlackout.Database.Base
         public string AttachmentName { get; set; }
         public string AttachmentDesc { get; set; }
         public EAttachment AttachmentType { get; set; }
+        public string AttachmentRarity { get; set; }
         public string IconLink { get; set; }
         public int BuyPrice { get; set; }
         public int Coins { get; set; }
 
-        public GunAttachment(ushort attachmentID, string attachmentName, string attachmentDesc, EAttachment attachmentType, string iconLink, int buyPrice, int coins)
+        public GunAttachment(ushort attachmentID, string attachmentName, string attachmentDesc, EAttachment attachmentType, string attachmentRarity, string iconLink, int buyPrice, int coins)
         {
             AttachmentID = attachmentID;
             AttachmentName = attachmentName;
             AttachmentDesc = attachmentDesc;
             AttachmentType = attachmentType;
+            AttachmentRarity = attachmentRarity;
             IconLink = iconLink;
             BuyPrice = buyPrice;
             Coins = coins;

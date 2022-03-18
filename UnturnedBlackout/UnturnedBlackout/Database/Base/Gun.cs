@@ -9,6 +9,7 @@ namespace UnturnedBlackout.Database.Base
         public string GunName { get; set; }
         public string GunDesc { get; set; }
         public EGun GunType { get; set; }
+        public string GunRarity { get; set; }
         public string IconLink { get; set; }
         public int MagAmount { get; set; }
         public int Coins { get; set; }
@@ -21,12 +22,13 @@ namespace UnturnedBlackout.Database.Base
         public Dictionary<GunAttachment, int> RewardAttachmentsInverse { get; set; }
         public List<int> LevelXPNeeded { get; set; }
 
-        public Gun(ushort gunID, string gunName, string gunDesc, EGun gunType, string iconLink, int magAmount, int coins, int buyPrice, int scrapAmount, int levelRequirement, bool isPrimary, List<GunAttachment> defaultAttachments, Dictionary<int, GunAttachment> rewardAttachments, Dictionary<GunAttachment, int> rewardAttachmentsInverse, List<int> levelXPNeeded)
+        public Gun(ushort gunID, string gunName, string gunDesc, EGun gunType, string gunRarity, string iconLink, int magAmount, int coins, int buyPrice, int scrapAmount, int levelRequirement, bool isPrimary, List<GunAttachment> defaultAttachments, Dictionary<int, GunAttachment> rewardAttachments, Dictionary<GunAttachment, int> rewardAttachmentsInverse, List<int> levelXPNeeded)
         {
             GunID = gunID;
             GunName = gunName;
             GunDesc = gunDesc;
             GunType = gunType;
+            GunRarity = gunRarity;
             IconLink = iconLink;
             MagAmount = magAmount;
             Coins = coins;

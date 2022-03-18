@@ -8,7 +8,6 @@
         SHOTGUNS,
         LIGHT_MACHINE_GUNS,
         ASSAULT_RIFLES,
-        SNIPER_RIFLES,
-        SKINS
+        SNIPER_RIFLES
     }
 }

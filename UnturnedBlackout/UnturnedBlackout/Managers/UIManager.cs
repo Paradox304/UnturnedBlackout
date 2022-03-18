@@ -1072,6 +1072,12 @@ namespace UnturnedBlackout.Managers
                 case "SERVER Loadout Tactical BUTTON":
                     handler.ShowLoadoutSubPage(ELoadoutPage.Tactical);
                     return;
+                case "SERVER Loadout Primary Skin BUTTON":
+                    handler.ShowLoadoutSubPage(ELoadoutPage.PrimarySkin);
+                    return;
+                case "SERVER Loadout Secondary Skin BUTTON":
+                    handler.ShowLoadoutSubPage(ELoadoutPage.SecondarySkin);
+                    return;
                 case "SERVER Item All BUTTON":
                     handler.ShowLoadoutTab(ELoadoutTab.ALL);
                     return;
@@ -1092,9 +1098,6 @@ namespace UnturnedBlackout.Managers
                     return;
                 case "SERVER Item SRs BUTTON":
                     handler.ShowLoadoutTab(ELoadoutTab.SNIPER_RIFLES);
-                    return;
-                case "SERVER Item Skins BUTTON":
-                    handler.ShowLoadoutTab(ELoadoutTab.SKINS);
                     return;
                 case "SERVER Item Back BUTTON":
                     handler.ReloadLoadout();

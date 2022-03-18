@@ -22,7 +22,7 @@ namespace UnturnedBlackout.Instances
         public const ushort ID = 27632;
         public const short Key = 27632;
         public const int MaxItemsPerPage = 9;
-        public const int MaxSkinsCharmsPerPage = 24;
+        public const int MaxSkinsCharmsPerPage = 15;
 
         public DatabaseManager DB { get; set; }
         public CSteamID SteamID { get; set; }
@@ -1061,9 +1061,14 @@ namespace UnturnedBlackout.Instances
                 return;
             }
 
-            for (int i = 0; i <= 4; i++)
+            for (int i = 0; i <= MaxItemsPerPage; i++)
             {
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item BUTTON {i}", false);
+            }
+
+            for (int i = 0; i <= MaxSkinsCharmsPerPage; i++)
+            {
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Grid BUTTON {i}", false);
             }
 
             switch (LoadoutTab)
@@ -1072,6 +1077,46 @@ namespace UnturnedBlackout.Instances
                     {
                         switch (LoadoutPage)
                         {
+                            case ELoadoutPage.PrimarySkin:
+                                {
+                                    if (!GunSkinPages.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out Dictionary<int, PageGunSkin> gunSkinPages))
+                                    {
+                                        Logging.Debug($"Error getting gun skin pages for gun with id {loadout.Primary?.Gun?.GunID ?? 0}");
+                                        return;
+                                    }
+
+                                    if (!gunSkinPages.TryGetValue(1, out PageGunSkin firstPage))
+                                    {
+                                        Logging.Debug($"Error finding the first page for gun skins for gun with id {loadout.Primary.Gun.GunID} for {Player.CharacterName}");
+                                        return;
+                                    }
+
+                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
+                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
+                                    ShowGunSkinPage(firstPage);
+                                    break;
+                                }
+
+                            case ELoadoutPage.SecondarySkin:
+                                {
+                                    if (!GunSkinPages.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out Dictionary<int, PageGunSkin> gunSkinPages))
+                                    {
+                                        Logging.Debug($"Error getting gun skin pages for gun with id {loadout.Secondary?.Gun?.GunID ?? 0}");
+                                        return;
+                                    }
+
+                                    if (!gunSkinPages.TryGetValue(1, out PageGunSkin firstPage))
+                                    {
+                                        Logging.Debug($"Error finding the first page for gun skins for gun with id {loadout.Secondary.Gun.GunID} for {Player.CharacterName}");
+                                        return;
+                                    }
+
+                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
+                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
+                                    ShowGunSkinPage(firstPage);
+                                    break;
+                                }
+
                             case ELoadoutPage.AttachmentPrimaryBarrel:
                             case ELoadoutPage.AttachmentPrimaryGrip:
                             case ELoadoutPage.AttachmentPrimaryMagazine:
@@ -1282,54 +1327,6 @@ namespace UnturnedBlackout.Instances
                         break;
                     }
 
-                case ELoadoutTab.SKINS:
-                    {
-                        switch (LoadoutPage)
-                        {
-                            case ELoadoutPage.Primary:
-                                {
-                                    if (!GunSkinPages.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out Dictionary<int, PageGunSkin> gunSkinPages))
-                                    {
-                                        Logging.Debug($"Error getting gun skin pages for gun with id {loadout.Primary?.Gun?.GunID ?? 0}");
-                                        return;
-                                    }
-
-                                    if (!gunSkinPages.TryGetValue(1, out PageGunSkin firstPage))
-                                    {
-                                        Logging.Debug($"Error finding the first page for gun skins for gun with id {loadout.Primary.Gun.GunID} for {Player.CharacterName}");
-                                        return;
-                                    }
-
-                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
-                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
-                                    ShowGunSkinPage(firstPage);
-                                    break;
-                                }
-
-                            case ELoadoutPage.Secondary:
-                                {
-                                    if (!GunSkinPages.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out Dictionary<int, PageGunSkin> gunSkinPages))
-                                    {
-                                        Logging.Debug($"Error getting gun skin pages for gun with id {loadout.Secondary?.Gun?.GunID ?? 0}");
-                                        return;
-                                    }
-
-                                    if (!gunSkinPages.TryGetValue(1, out PageGunSkin firstPage))
-                                    {
-                                        Logging.Debug($"Error finding the first page for gun skins for gun with id {loadout.Secondary.Gun.GunID} for {Player.CharacterName}");
-                                        return;
-                                    }
-
-                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
-                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
-                                    ShowGunSkinPage(firstPage);
-                                    break;
-                                }
-                        }
-
-                        break;
-                    }
-
                 case ELoadoutTab.PISTOLS:
                     {
                         if (!PistolPages.TryGetValue(1, out PageGun firstPage))
@@ -1455,6 +1452,42 @@ namespace UnturnedBlackout.Instances
                     {
                         switch (LoadoutPage)
                         {
+                            case ELoadoutPage.PrimarySkin:
+                                {
+                                    if (!GunSkinPages.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out Dictionary<int, PageGunSkin> gunSkinPages))
+                                    {
+                                        Logging.Debug($"Error getting gun skin pages for gun with id {loadout.Primary?.Gun?.GunID ?? 0}");
+                                        return;
+                                    }
+
+                                    if (!gunSkinPages.TryGetValue(LoadoutTabPageID + 1, out PageGunSkin nextPage) && !gunSkinPages.TryGetValue(1, out nextPage))
+                                    {
+                                        Logging.Debug($"Error finding the next page for gun skins for gun with id {loadout.Primary.Gun.GunID} for {Player.CharacterName}");
+                                        return;
+                                    }
+
+                                    ShowGunSkinPage(nextPage);
+                                    break;
+                                }
+
+                            case ELoadoutPage.SecondarySkin:
+                                {
+                                    if (!GunSkinPages.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out Dictionary<int, PageGunSkin> gunSkinPages))
+                                    {
+                                        Logging.Debug($"Error getting gun skin pages for gun with id {loadout.Secondary?.Gun?.GunID ?? 0}");
+                                        return;
+                                    }
+
+                                    if (!gunSkinPages.TryGetValue(LoadoutTabPageID + 1, out PageGunSkin nextPage) && !gunSkinPages.TryGetValue(1, out nextPage))
+                                    {
+                                        Logging.Debug($"Error finding the next page for gun skins for gun with id {loadout.Secondary.Gun.GunID} for {Player.CharacterName}");
+                                        return;
+                                    }
+
+                                    ShowGunSkinPage(nextPage);
+                                    break;
+                                }
+
                             case ELoadoutPage.AttachmentPrimaryBarrel:
                             case ELoadoutPage.AttachmentPrimaryGrip:
                             case ELoadoutPage.AttachmentPrimaryMagazine:
@@ -1647,50 +1680,6 @@ namespace UnturnedBlackout.Instances
                         break;
                     }
 
-                case ELoadoutTab.SKINS:
-                    {
-                        switch (LoadoutPage)
-                        {
-                            case ELoadoutPage.Primary:
-                                {
-                                    if (!GunSkinPages.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out Dictionary<int, PageGunSkin> gunSkinPages))
-                                    {
-                                        Logging.Debug($"Error getting gun skin pages for gun with id {loadout.Primary?.Gun?.GunID ?? 0}");
-                                        return;
-                                    }
-
-                                    if (!gunSkinPages.TryGetValue(LoadoutTabPageID + 1, out PageGunSkin nextPage) && !gunSkinPages.TryGetValue(1, out nextPage))
-                                    {
-                                        Logging.Debug($"Error finding the next page for gun skins for gun with id {loadout.Primary.Gun.GunID} for {Player.CharacterName}");
-                                        return;
-                                    }
-
-                                    ShowGunSkinPage(nextPage);
-                                    break;
-                                }
-
-                            case ELoadoutPage.Secondary:
-                                {
-                                    if (!GunSkinPages.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out Dictionary<int, PageGunSkin> gunSkinPages))
-                                    {
-                                        Logging.Debug($"Error getting gun skin pages for gun with id {loadout.Secondary?.Gun?.GunID ?? 0}");
-                                        return;
-                                    }
-
-                                    if (!gunSkinPages.TryGetValue(LoadoutTabPageID + 1, out PageGunSkin nextPage) && !gunSkinPages.TryGetValue(1, out nextPage))
-                                    {
-                                        Logging.Debug($"Error finding the next page for gun skins for gun with id {loadout.Secondary.Gun.GunID} for {Player.CharacterName}");
-                                        return;
-                                    }
-
-                                    ShowGunSkinPage(nextPage);
-                                    break;
-                                }
-                        }
-
-                        break;
-                    }
-
                 case ELoadoutTab.PISTOLS:
                     {
                         if (!PistolPages.TryGetValue(LoadoutTabPageID + 1, out PageGun nextPage) && !PistolPages.TryGetValue(1, out nextPage))
@@ -1781,6 +1770,42 @@ namespace UnturnedBlackout.Instances
                     {
                         switch (LoadoutPage)
                         {
+                            case ELoadoutPage.PrimarySkin:
+                                {
+                                    if (!GunSkinPages.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out Dictionary<int, PageGunSkin> gunSkinPages))
+                                    {
+                                        Logging.Debug($"Error getting gun skin pages for gun with id {loadout.Primary?.Gun?.GunID ?? 0}");
+                                        return;
+                                    }
+
+                                    if (!gunSkinPages.TryGetValue(LoadoutTabPageID - 1, out PageGunSkin prevPage) && !gunSkinPages.TryGetValue(gunSkinPages.Keys.Max(), out prevPage))
+                                    {
+                                        Logging.Debug($"Error finding the prev page for gun skins for gun with id {loadout.Primary.Gun.GunID} for {Player.CharacterName}");
+                                        return;
+                                    }
+
+                                    ShowGunSkinPage(prevPage);
+                                    break;
+                                }
+
+                            case ELoadoutPage.SecondarySkin:
+                                {
+                                    if (!GunSkinPages.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out Dictionary<int, PageGunSkin> gunSkinPages))
+                                    {
+                                        Logging.Debug($"Error getting gun skin pages for gun with id {loadout.Secondary?.Gun?.GunID ?? 0}");
+                                        return;
+                                    }
+
+                                    if (!gunSkinPages.TryGetValue(LoadoutTabPageID - 1, out PageGunSkin prevPage) && !gunSkinPages.TryGetValue(gunSkinPages.Keys.Max(), out prevPage))
+                                    {
+                                        Logging.Debug($"Error finding the prev page for gun skins for gun with id {loadout.Secondary.Gun.GunID} for {Player.CharacterName}");
+                                        return;
+                                    }
+
+                                    ShowGunSkinPage(prevPage);
+                                    break;
+                                }
+
                             case ELoadoutPage.AttachmentPrimaryBarrel:
                             case ELoadoutPage.AttachmentPrimaryGrip:
                             case ELoadoutPage.AttachmentPrimaryMagazine:
@@ -1973,50 +1998,6 @@ namespace UnturnedBlackout.Instances
                         break;
                     }
 
-                case ELoadoutTab.SKINS:
-                    {
-                        switch (LoadoutPage)
-                        {
-                            case ELoadoutPage.Primary:
-                                {
-                                    if (!GunSkinPages.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out Dictionary<int, PageGunSkin> gunSkinPages))
-                                    {
-                                        Logging.Debug($"Error getting gun skin pages for gun with id {loadout.Primary?.Gun?.GunID ?? 0}");
-                                        return;
-                                    }
-
-                                    if (!gunSkinPages.TryGetValue(LoadoutTabPageID - 1, out PageGunSkin prevPage) && !gunSkinPages.TryGetValue(gunSkinPages.Keys.Max(), out prevPage))
-                                    {
-                                        Logging.Debug($"Error finding the prev page for gun skins for gun with id {loadout.Primary.Gun.GunID} for {Player.CharacterName}");
-                                        return;
-                                    }
-
-                                    ShowGunSkinPage(prevPage);
-                                    break;
-                                }
-
-                            case ELoadoutPage.Secondary:
-                                {
-                                    if (!GunSkinPages.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out Dictionary<int, PageGunSkin> gunSkinPages))
-                                    {
-                                        Logging.Debug($"Error getting gun skin pages for gun with id {loadout.Secondary?.Gun?.GunID ?? 0}");
-                                        return;
-                                    }
-
-                                    if (!gunSkinPages.TryGetValue(LoadoutTabPageID - 1, out PageGunSkin prevPage) && !gunSkinPages.TryGetValue(gunSkinPages.Keys.Max(), out prevPage))
-                                    {
-                                        Logging.Debug($"Error finding the prev page for gun skins for gun with id {loadout.Secondary.Gun.GunID} for {Player.CharacterName}");
-                                        return;
-                                    }
-
-                                    ShowGunSkinPage(prevPage);
-                                    break;
-                                }
-                        }
-
-                        break;
-                    }
-
                 case ELoadoutTab.PISTOLS:
                     {
                         if (!PistolPages.TryGetValue(LoadoutTabPageID - 1, out PageGun prevPage) && !PistolPages.TryGetValue(PistolPages.Keys.Max(), out prevPage))
@@ -2106,6 +2087,41 @@ namespace UnturnedBlackout.Instances
                     {
                         switch (LoadoutPage)
                         {
+                            case ELoadoutPage.PrimarySkin:
+                                {
+                                    if (!GunSkinPages.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out Dictionary<int, PageGunSkin> gunSkinPages))
+                                    {
+                                        Logging.Debug($"Error getting gun skin pages for gun with id {loadout.Primary?.Gun?.GunID ?? 0}");
+                                        return;
+                                    }
+
+                                    if (!gunSkinPages.TryGetValue(LoadoutTabPageID, out PageGunSkin page))
+                                    {
+                                        Logging.Debug($"Error finding the current page for gun skins for gun with id {loadout.Primary.Gun.GunID} for {Player.CharacterName}");
+                                        return;
+                                    }
+
+                                    ShowGunSkinPage(page);
+                                    break;
+                                }
+
+                            case ELoadoutPage.SecondarySkin:
+                                {
+                                    if (!GunSkinPages.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out Dictionary<int, PageGunSkin> gunSkinPages))
+                                    {
+                                        Logging.Debug($"Error getting gun skin pages for gun with id {loadout.Secondary?.Gun?.GunID ?? 0}");
+                                        return;
+                                    }
+
+                                    if (!gunSkinPages.TryGetValue(LoadoutTabPageID, out PageGunSkin page))
+                                    {
+                                        Logging.Debug($"Error finding the current page for gun skins for gun with id {loadout.Secondary.Gun.GunID} for {Player.CharacterName}");
+                                        return;
+                                    }
+
+                                    ShowGunSkinPage(page);
+                                    break;
+                                }
                             case ELoadoutPage.AttachmentPrimaryBarrel:
                             case ELoadoutPage.AttachmentPrimaryGrip:
                             case ELoadoutPage.AttachmentPrimaryMagazine:
@@ -2298,50 +2314,6 @@ namespace UnturnedBlackout.Instances
                         break;
                     }
 
-                case ELoadoutTab.SKINS:
-                    {
-                        switch (LoadoutPage)
-                        {
-                            case ELoadoutPage.Primary:
-                                {
-                                    if (!GunSkinPages.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out Dictionary<int, PageGunSkin> gunSkinPages))
-                                    {
-                                        Logging.Debug($"Error getting gun skin pages for gun with id {loadout.Primary?.Gun?.GunID ?? 0}");
-                                        return;
-                                    }
-
-                                    if (!gunSkinPages.TryGetValue(LoadoutTabPageID, out PageGunSkin page))
-                                    {
-                                        Logging.Debug($"Error finding the current page for gun skins for gun with id {loadout.Primary.Gun.GunID} for {Player.CharacterName}");
-                                        return;
-                                    }
-
-                                    ShowGunSkinPage(page);
-                                    break;
-                                }
-
-                            case ELoadoutPage.Secondary:
-                                {
-                                    if (!GunSkinPages.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out Dictionary<int, PageGunSkin> gunSkinPages))
-                                    {
-                                        Logging.Debug($"Error getting gun skin pages for gun with id {loadout.Secondary?.Gun?.GunID ?? 0}");
-                                        return;
-                                    }
-
-                                    if (!gunSkinPages.TryGetValue(LoadoutTabPageID, out PageGunSkin page))
-                                    {
-                                        Logging.Debug($"Error finding the current page for gun skins for gun with id {loadout.Secondary.Gun.GunID} for {Player.CharacterName}");
-                                        return;
-                                    }
-
-                                    ShowGunSkinPage(page);
-                                    break;
-                                }
-                        }
-
-                        break;
-                    }
-
                 case ELoadoutTab.PISTOLS:
                     {
                         if (!PistolPages.TryGetValue(LoadoutTabPageID, out PageGun page))
@@ -2494,12 +2466,9 @@ namespace UnturnedBlackout.Instances
                     continue;
                 }
 
-                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item BUTTON {i}", true);
-                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Equipped {i}", (LoadoutPage.ToString().StartsWith("AttachmentPrimary") && currentLoadout.PrimaryGunCharm == gunCharm) || (LoadoutPage.ToString().StartsWith("AttachmentSecondary") && currentLoadout.SecondaryGunCharm == gunCharm));
-                EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Item IMAGE {i}", gunCharm.GunCharm.IconLink);
-                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item TEXT {i}", gunCharm.GunCharm.CharmName);
-                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Lock Overlay {i}", !gunCharm.IsBought && gunCharm.GunCharm.LevelRequirement > PlayerData.Level);
-                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", !gunCharm.IsBought && gunCharm.GunCharm.LevelRequirement > PlayerData.Level ? $"UNLOCK WITH LEVEL {gunCharm.GunCharm.LevelRequirement}" : "");
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Grid BUTTON {i}", true);
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Grid Equipped {i}", (LoadoutPage.ToString().StartsWith("AttachmentPrimary") && currentLoadout.PrimaryGunCharm == gunCharm) || (LoadoutPage.ToString().StartsWith("AttachmentSecondary") && currentLoadout.SecondaryGunCharm == gunCharm));
+                EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Item Grid IMAGE {i}", gunCharm.GunCharm.IconLink);
             }
         }
 
@@ -2523,12 +2492,9 @@ namespace UnturnedBlackout.Instances
                     continue;
                 }
 
-                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item BUTTON {i}", true);
-                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Equipped {i}", (LoadoutPage == ELoadoutPage.Primary && currentLoadout.PrimarySkin == skin) || (LoadoutPage == ELoadoutPage.Secondary && currentLoadout.SecondarySkin == skin));
-                EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Item IMAGE {i}", skin.IconLink);
-                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item TEXT {i}", skin.SkinName);
-                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Lock Overlay {i}", false);
-                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", "");
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Grid BUTTON {i}", true);
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Grid Equipped {i}", (LoadoutPage == ELoadoutPage.Primary && currentLoadout.PrimarySkin == skin) || (LoadoutPage == ELoadoutPage.Secondary && currentLoadout.SecondarySkin == skin));
+                EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Item Grid IMAGE {i}", skin.IconLink);
             }
         }
 
@@ -2910,6 +2876,54 @@ namespace UnturnedBlackout.Instances
                     {
                         switch (LoadoutPage)
                         {
+                            case ELoadoutPage.PrimarySkin:
+                                {
+                                    if (!GunSkinPages.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out Dictionary<int, PageGunSkin> skinsPage))
+                                    {
+                                        Logging.Debug($"Error finding gun skin pages for primary with id {loadout.Primary?.Gun?.GunID ?? 0} for {Player.CharacterName}");
+                                        return;
+                                    }
+
+                                    if (!skinsPage.TryGetValue(LoadoutTabPageID, out PageGunSkin pageSkin))
+                                    {
+                                        Logging.Debug($"Error finding gun skin page at id {LoadoutTabPageID} for {Player.CharacterName}");
+                                        return;
+                                    }
+
+                                    if (!pageSkin.GunSkins.TryGetValue(selected, out GunSkin skin))
+                                    {
+                                        Logging.Debug($"Error finding skin at {selected} at page with id {LoadoutTabPageID} for {Player.CharacterName}");
+                                        return;
+                                    }
+
+                                    ShowGunSkin(skin);
+                                    break;
+                                }
+
+                            case ELoadoutPage.SecondarySkin:
+                                {
+                                    if (!GunSkinPages.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out Dictionary<int, PageGunSkin> skinsPage))
+                                    {
+                                        Logging.Debug($"Error finding gun skin pages for secondary with id {loadout.Secondary?.Gun?.GunID ?? 0} for {Player.CharacterName}");
+                                        return;
+                                    }
+
+                                    if (!skinsPage.TryGetValue(LoadoutTabPageID, out PageGunSkin pageSkin))
+                                    {
+                                        Logging.Debug($"Error finding gun skin page at id {LoadoutTabPageID} for {Player.CharacterName}");
+                                        return;
+                                    }
+
+                                    if (!pageSkin.GunSkins.TryGetValue(selected, out GunSkin skin))
+                                    {
+                                        Logging.Debug($"Error finding skin at {selected} at page with id {LoadoutTabPageID} for {Player.CharacterName}");
+                                        return;
+                                    }
+
+                                    ShowGunSkin(skin);
+                                    break;
+                                }
+
                             case ELoadoutPage.AttachmentPrimaryBarrel:
                             case ELoadoutPage.AttachmentPrimaryGrip:
                             case ELoadoutPage.AttachmentPrimaryMagazine:
@@ -3149,61 +3163,6 @@ namespace UnturnedBlackout.Instances
                                     }
 
                                     ShowCard(card);
-                                    break;
-                                }
-                        }
-                        break;
-                    }
-
-                case ELoadoutTab.SKINS:
-                    {
-                        switch (LoadoutPage)
-                        {
-                            case ELoadoutPage.Primary:
-                                {
-                                    if (!GunSkinPages.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out Dictionary<int, PageGunSkin> skinsPage))
-                                    {
-                                        Logging.Debug($"Error finding gun skin pages for primary with id {loadout.Primary?.Gun?.GunID ?? 0} for {Player.CharacterName}");
-                                        return;
-                                    }
-
-                                    if (!skinsPage.TryGetValue(LoadoutTabPageID, out PageGunSkin pageSkin))
-                                    {
-                                        Logging.Debug($"Error finding gun skin page at id {LoadoutTabPageID} for {Player.CharacterName}");
-                                        return;
-                                    }
-
-                                    if (!pageSkin.GunSkins.TryGetValue(selected, out GunSkin skin))
-                                    {
-                                        Logging.Debug($"Error finding skin at {selected} at page with id {LoadoutTabPageID} for {Player.CharacterName}");
-                                        return;
-                                    }
-
-                                    ShowGunSkin(skin);
-                                    break;
-                                }
-
-                            case ELoadoutPage.Secondary:
-                                {
-                                    if (!GunSkinPages.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out Dictionary<int, PageGunSkin> skinsPage))
-                                    {
-                                        Logging.Debug($"Error finding gun skin pages for secondary with id {loadout.Secondary?.Gun?.GunID ?? 0} for {Player.CharacterName}");
-                                        return;
-                                    }
-
-                                    if (!skinsPage.TryGetValue(LoadoutTabPageID, out PageGunSkin pageSkin))
-                                    {
-                                        Logging.Debug($"Error finding gun skin page at id {LoadoutTabPageID} for {Player.CharacterName}");
-                                        return;
-                                    }
-
-                                    if (!pageSkin.GunSkins.TryGetValue(selected, out GunSkin skin))
-                                    {
-                                        Logging.Debug($"Error finding skin at {selected} at page with id {LoadoutTabPageID} for {Player.CharacterName}");
-                                        return;
-                                    }
-
-                                    ShowGunSkin(skin);
                                     break;
                                 }
                         }
@@ -3486,7 +3445,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Equip BUTTON", card.IsBought && loadout.Card != card);
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Dequip BUTTON", card.IsBought && loadout.Card == card);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Description TEXT", card.Card.CardDesc);
-            EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Item IMAGE", card.Card.IconLink);
+            EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Item Card IMAGE", card.Card.IconLink);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item TEXT", card.Card.CardName);
         }
 
@@ -4148,41 +4107,32 @@ namespace UnturnedBlackout.Instances
                 return;
             }
 
-            if (LoadoutTab == ELoadoutTab.SKINS)
-            {
-                switch (LoadoutPage)
-                {
-                    case ELoadoutPage.Primary:
-                        {
-                            if (!PlayerLoadout.GunSkinsSearchByID.TryGetValue((int)SelectedItemID, out GunSkin skin))
-                            {
-                                Logging.Debug($"Error finding gun skin with id {SelectedItemID} for {Player.CharacterName}");
-                                return;
-                            }
-
-                            loadoutManager.EquipGunSkin(Player, LoadoutID, skin.ID, true);
-                            break;
-                        }
-
-                    case ELoadoutPage.Secondary:
-                        {
-                            if (!PlayerLoadout.GunSkinsSearchByID.TryGetValue((int)SelectedItemID, out GunSkin skin))
-                            {
-                                Logging.Debug($"Error finding gun skin with id {SelectedItemID} for {Player.CharacterName}");
-                                return;
-                            }
-
-                            loadoutManager.EquipGunSkin(Player, LoadoutID, skin.ID, false);
-                            break;
-                        }
-                }
-
-                ReloadLoadout();
-                return;
-            }
-
             switch (LoadoutPage)
             {
+                case ELoadoutPage.PrimarySkin:
+                    {
+                        if (!PlayerLoadout.GunSkinsSearchByID.TryGetValue((int)SelectedItemID, out GunSkin skin))
+                        {
+                            Logging.Debug($"Error finding gun skin with id {SelectedItemID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        loadoutManager.EquipGunSkin(Player, LoadoutID, skin.ID, true);
+                        break;
+                    }
+
+                case ELoadoutPage.SecondarySkin:
+                    {
+                        if (!PlayerLoadout.GunSkinsSearchByID.TryGetValue((int)SelectedItemID, out GunSkin skin))
+                        {
+                            Logging.Debug($"Error finding gun skin with id {SelectedItemID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        loadoutManager.EquipGunSkin(Player, LoadoutID, skin.ID, false);
+                        break;
+                    }
+
                 case ELoadoutPage.Primary:
                     {
                         if (!PlayerLoadout.Guns.TryGetValue((ushort)SelectedItemID, out LoadoutGun gun))
@@ -4407,29 +4357,20 @@ namespace UnturnedBlackout.Instances
                 return;
             }
 
-            if (LoadoutTab == ELoadoutTab.SKINS)
-            {
-                switch (LoadoutPage)
-                {
-                    case ELoadoutPage.Primary:
-                        {
-                            loadoutManager.DequipGunSkin(Player, LoadoutID, true);
-                            break;
-                        }
-
-                    case ELoadoutPage.Secondary:
-                        {
-                            loadoutManager.DequipGunSkin(Player, LoadoutID, false);
-                            break;
-                        }
-                }
-
-                ReloadLoadout();
-                return;
-            }
-
             switch (LoadoutPage)
             {
+                case ELoadoutPage.PrimarySkin:
+                    {
+                        loadoutManager.DequipGunSkin(Player, LoadoutID, true);
+                        break;
+                    }
+
+                case ELoadoutPage.SecondarySkin:
+                    {
+                        loadoutManager.DequipGunSkin(Player, LoadoutID, false);
+                        break;
+                    }
+
                 case ELoadoutPage.Primary:
                     {
                         loadoutManager.EquipGun(Player, LoadoutID, 0, true);
