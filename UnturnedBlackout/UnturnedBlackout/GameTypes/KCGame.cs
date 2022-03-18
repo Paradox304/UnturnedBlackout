@@ -647,6 +647,38 @@ namespace UnturnedBlackout.GameTypes
             player.GamePlayer.GiveSpawnProtection(Config.KC.SpawnProtectionSeconds);
         }
 
+        public override void PlayerThrowableSpawned(GamePlayer player, UseableThrowable throwable)
+        {
+            var kPlayer = GetKCPlayer(player.Player);
+            if (kPlayer == null)
+            {
+                return;
+            }
+
+            var isTactical = true;
+            if (throwable.equippedThrowableAsset.id == (player.ActiveLoadout.Lethal?.Gadget?.GadgetID ?? 0))
+            {
+                isTactical = false;
+                player.UsedLethal();
+            }
+            else if (throwable.equippedThrowableAsset.id == (player.ActiveLoadout.Tactical?.Gadget?.GadgetID ?? 0))
+            {
+                player.UsedTactical();
+            }
+            else
+            {
+                return;
+            }
+
+            TaskDispatcher.QueueOnMainThread(() =>
+            {
+                if (player.Player.Player.equipment.itemID == (isTactical ? player.ActiveLoadout.Tactical.Gadget.GadgetID : player.ActiveLoadout.Lethal.Gadget.GadgetID))
+                {
+                    player.Player.Player.equipment.dequip();
+                }
+            });
+        }
+
         public override void PlayerChangeFiremode(GamePlayer player)
         {
             KCPlayer kPlayer = GetKCPlayer(player.Player);
@@ -655,7 +687,7 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
-            if (GamePhase == EGamePhase.Ending || GamePhase == EGamePhase.Starting)
+            if (GamePhase != EGamePhase.Started)
             {
                 return;
             }

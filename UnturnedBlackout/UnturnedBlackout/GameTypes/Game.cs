@@ -48,8 +48,20 @@ namespace UnturnedBlackout.GameTypes
             DamageTool.damagePlayerRequested += OnPlayerDamaged;
             ChatManager.onChatted += OnChatted;
             ItemManager.onTakeItemRequested += OnTakeItem;
+            UseableThrowable.onThrowableSpawned += OnThrowableSpawned;
 
             KillFeedChecker = Plugin.Instance.StartCoroutine(UpdateKillfeed());
+        }
+
+        private void OnThrowableSpawned(UseableThrowable useable, GameObject throwable)
+        {
+            var gPlayer = Plugin.Instance.GameManager.GetGamePlayer(useable.player);
+            if (gPlayer == null)
+            {
+                return;
+            }
+
+            PlayerThrowableSpawned(gPlayer, useable);
         }
 
         public void OnTrapTriggered(GamePlayer player, int trapID)
@@ -88,6 +100,7 @@ namespace UnturnedBlackout.GameTypes
                 isVisible = false;
                 return;
             }
+
             OnChatMessageSent(gPlayer, mode, text, ref isVisible);
         }
 
@@ -199,10 +212,13 @@ namespace UnturnedBlackout.GameTypes
         public void Destroy()
         {
             UnturnedPlayerEvents.OnPlayerDeath -= OnPlayerDeath;
+            PlayerLife.OnSelectingRespawnPoint -= OnPlayerRespawning;
             UnturnedPlayerEvents.OnPlayerRevive -= OnPlayerRevive;
             UnturnedPlayerEvents.OnPlayerInventoryAdded -= OnPlayerPickupItem;
             DamageTool.damagePlayerRequested -= OnPlayerDamaged;
             ChatManager.onChatted -= OnChatted;
+            ItemManager.onTakeItemRequested -= OnTakeItem;
+            UseableThrowable.onThrowableSpawned -= OnThrowableSpawned;
         }
 
         public abstract bool IsPlayerIngame(CSteamID steamID);
@@ -215,6 +231,7 @@ namespace UnturnedBlackout.GameTypes
         public abstract void PlayerPickupItem(UnturnedPlayer player, InventoryGroup inventoryGroup, byte inventoryIndex, ItemJar P);
         public abstract void PlayerChangeFiremode(GamePlayer player);
         public abstract void PlayerStanceChanged(PlayerStance obj);
+        public abstract void PlayerThrowableSpawned(GamePlayer player, UseableThrowable throwable);
         public abstract void OnChatMessageSent(GamePlayer player, EChatMode chatMode, string text, ref bool isVisible);
         public abstract void OnVoiceChatUpdated(GamePlayer player);
         public abstract void OnTakingItem(GamePlayer player, ItemData itemData, ref bool shouldAllow);

@@ -29,7 +29,10 @@ namespace UnturnedBlackout.Models.Global
         public byte LastEquippedX { get; set; }
         public byte LastEquippedY { get; set; }
         public bool ForceEquip { get; set; }
-
+        
+        public bool HasTactical { get; set; }
+        public bool HasLethal { get; set; }
+        
         public EPlayerStance PreviousStance { get; set; }
 
         public Coroutine Healer { get; set; }
@@ -37,6 +40,8 @@ namespace UnturnedBlackout.Models.Global
         public Coroutine VoiceChatChecker { get; set; }
         public Timer m_RemoveSpawnProtection { get; set; }
         public Timer m_DamageChecker { get; set; }
+        public Timer m_TacticalChecker { get; set; }
+        public Timer m_LethalChecker { get; set; }
 
         public GamePlayer(UnturnedPlayer player, ITransportConnection transportConnection)
         {
@@ -51,6 +56,12 @@ namespace UnturnedBlackout.Models.Global
 
             m_DamageChecker = new Timer(Plugin.Instance.Configuration.Instance.LastDamageAfterHealSeconds * 1000);
             m_DamageChecker.Elapsed += CheckDamage;
+
+            m_TacticalChecker = new Timer(1 * 1000);
+            m_TacticalChecker.Elapsed += EnableTactical;
+
+            m_LethalChecker = new Timer(1 * 1000);
+            m_TacticalChecker.Elapsed += EnableLethal;
         }
 
         // Spawn Protection Seconds
@@ -76,6 +87,70 @@ namespace UnturnedBlackout.Models.Global
         public void SetActiveLoadout(Loadout loadout)
         {
             ActiveLoadout = loadout;
+
+            if (m_LethalChecker.Enabled)
+            {
+                m_LethalChecker.Stop();
+            }
+
+            if (m_TacticalChecker.Enabled)
+            {
+                m_TacticalChecker.Stop();
+            }
+
+            if (loadout.Tactical != null)
+            {
+                HasTactical = false;
+                m_TacticalChecker.Interval = loadout.Tactical.Gadget.GiveSeconds * 1000;
+                m_TacticalChecker.Start();
+            }
+
+            if (loadout.Lethal != null)
+            {
+                HasLethal = false;
+                m_LethalChecker.Interval = loadout.Lethal.Gadget.GiveSeconds * 1000;
+                m_LethalChecker.Start();
+            }
+        }
+
+        // Tactical and Lethal
+
+        public void UsedTactical()
+        {
+            HasTactical = false;
+            if (m_TacticalChecker.Enabled)
+            {
+                m_TacticalChecker.Stop();
+            }
+            m_TacticalChecker.Start();
+            Player.Player.inventory.forceAddItem(new Item(ActiveLoadout.Tactical.Gadget.GadgetID, false), false);
+        }
+
+        public void UsedLethal()
+        {
+            HasLethal = false;
+            if (m_LethalChecker.Enabled)
+            {
+                m_LethalChecker.Stop();
+            }
+            m_LethalChecker.Start();
+            Player.Player.inventory.forceAddItem(new Item(ActiveLoadout.Lethal.Gadget.GadgetID, false), false);
+        }
+
+        private void EnableLethal(object sender, ElapsedEventArgs e)
+        {
+            HasLethal = true;
+            m_LethalChecker.Stop();
+
+            // Code to update the UI
+        }
+
+        private void EnableTactical(object sender, ElapsedEventArgs e)
+        {
+            HasTactical = true;
+            m_TacticalChecker.Stop();
+
+            // Code to update the UI
         }
 
         // Healing
@@ -228,6 +303,16 @@ namespace UnturnedBlackout.Models.Global
 
         public void OnGameLeft()
         {
+            if (m_TacticalChecker.Enabled)
+            {
+                m_TacticalChecker.Stop();
+            }
+
+            if (m_LethalChecker.Enabled)
+            {
+                m_LethalChecker.Stop();
+            }
+
             if (m_RemoveSpawnProtection.Enabled)
             {
                 m_RemoveSpawnProtection.Stop();

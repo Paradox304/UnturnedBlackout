@@ -761,6 +761,18 @@ namespace UnturnedBlackout.Managers
                 }
             }
 
+            // Giving tactical and lethal to player
+            if (activeLoadout.Lethal != null || activeLoadout.Tactical != null)
+            {
+                for (int i = 1; i <= 2; i++)
+                {
+                    if (activeLoadout.Lethal != null)
+                        inv.forceAddItem(new Item(activeLoadout.Lethal.Gadget.GadgetID, false), false);
+                    if (activeLoadout.Tactical != null)
+                        inv.forceAddItem(new Item(activeLoadout.Tactical.Gadget.GadgetID, false), false);
+                }
+            }
+
             player.SetActiveLoadout(activeLoadout);
         }
     }

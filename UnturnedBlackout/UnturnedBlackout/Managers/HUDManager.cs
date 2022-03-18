@@ -79,6 +79,22 @@ namespace UnturnedBlackout.Managers
                 }
             }
 
+            if (player.ActiveLoadout == null)
+            {
+                return;
+            }
+
+            if (jar.item.id == (player.ActiveLoadout.Tactical?.Gadget?.GadgetID ?? 0) && !player.HasTactical)
+            {
+                shouldAllow = false;
+                return;
+            } else if (jar.item.id == (player.ActiveLoadout.Lethal?.Gadget?.GadgetID ?? 0) && !player.HasLethal)
+            {
+                shouldAllow = false;
+                return;
+            }
+
+
             TaskDispatcher.QueueOnMainThread(() =>
             {
                 var connection = player.TransportConnection;
