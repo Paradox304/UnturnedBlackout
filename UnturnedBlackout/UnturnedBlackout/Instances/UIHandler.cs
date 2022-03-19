@@ -2414,6 +2414,7 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item TEXT {i}", gun.Gun.GunName);
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Lock Overlay {i}", !gun.IsBought && gun.Gun.LevelRequirement > PlayerData.Level);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", !gun.IsBought && gun.Gun.LevelRequirement > PlayerData.Level ? $"UNLOCK WITH LEVEL {gun.Gun.LevelRequirement}" : "");
+                SendRarity("SERVER Item", gun.Gun.GunRarity, i);
             }
         }
 
@@ -2443,6 +2444,7 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item TEXT {i}", attachment.Attachment.AttachmentName);
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Lock Overlay {i}", !attachment.IsBought && attachment.LevelRequirement > gun.Level);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", !attachment.IsBought && attachment.LevelRequirement > gun.Level ? $"UNLOCK WITH GUN LEVEL {attachment.LevelRequirement}" : "");
+                SendRarity("SERVER Item", attachment.Attachment.AttachmentRarity, i);
             }
         }
 
@@ -2469,6 +2471,7 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Grid BUTTON {i}", true);
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Grid Equipped {i}", (LoadoutPage.ToString().StartsWith("AttachmentPrimary") && currentLoadout.PrimaryGunCharm == gunCharm) || (LoadoutPage.ToString().StartsWith("AttachmentSecondary") && currentLoadout.SecondaryGunCharm == gunCharm));
                 EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Item Grid IMAGE {i}", gunCharm.GunCharm.IconLink);
+                SendRarity("SERVER Item Grid", gunCharm.GunCharm.CharmRarity, i);
             }
         }
 
@@ -2495,6 +2498,7 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Grid BUTTON {i}", true);
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Grid Equipped {i}", (LoadoutPage == ELoadoutPage.Primary && currentLoadout.PrimarySkin == skin) || (LoadoutPage == ELoadoutPage.Secondary && currentLoadout.SecondarySkin == skin));
                 EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Item Grid IMAGE {i}", skin.IconLink);
+                SendRarity("SERVER Item Grid", skin.SkinRarity, i);
             }
         }
 
@@ -2524,6 +2528,7 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item TEXT {i}", knife.Knife.KnifeName);
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Lock Overlay {i}", !knife.IsBought && knife.Knife.LevelRequirement > PlayerData.Level);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", !knife.IsBought && knife.Knife.LevelRequirement > PlayerData.Level ? $"UNLOCK WITH LEVEL {knife.Knife.LevelRequirement}" : "");
+                SendRarity("SERVER Item", knife.Knife.KnifeRarity, i);
             }
         }
 
@@ -2553,6 +2558,7 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item TEXT {i}", perk.Perk.PerkName);
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Lock Overlay {i}", !perk.IsBought && perk.Perk.LevelRequirement > PlayerData.Level);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", !perk.IsBought && perk.Perk.LevelRequirement > PlayerData.Level ? $"UNLOCK WITH LEVEL {perk.Perk.LevelRequirement}" : "");
+                SendRarity("SERVER Item", perk.Perk.PerkRarity, i);
             }
         }
 
@@ -2582,6 +2588,7 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item TEXT {i}", gadget.Gadget.GadgetName);
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Lock Overlay {i}", !gadget.IsBought && gadget.Gadget.LevelRequirement > PlayerData.Level);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", !gadget.IsBought && gadget.Gadget.LevelRequirement > PlayerData.Level ? $"UNLOCK WITH LEVEL {gadget.Gadget.LevelRequirement}" : "");
+                SendRarity("SERVER Item", gadget.Gadget.GadgetRarity, i);
             }
         }
 
@@ -2611,6 +2618,7 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item TEXT {i}", card.Card.CardName);
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Lock Overlay {i}", !card.IsBought && card.Card.LevelRequirement > PlayerData.Level);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", !card.IsBought && card.Card.LevelRequirement > PlayerData.Level ? $"UNLOCK WITH LEVEL {card.Card.LevelRequirement}" : "");
+                SendRarity("SERVER Item", card.Card.CardRarity, i);
             }
         }
 
@@ -2640,6 +2648,7 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item TEXT {i}", glove.Glove.GloveName);
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Lock Overlay {i}", !glove.IsBought && glove.Glove.LevelRequirement > PlayerData.Level);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", !glove.IsBought && glove.Glove.LevelRequirement > PlayerData.Level ? $"UNLOCK WITH LEVEL {glove.Glove.LevelRequirement}" : "");
+                SendRarity("SERVER Item", glove.Glove.GloveRarity, i);
             }
         }
 
@@ -2669,6 +2678,7 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item TEXT {i}", killstreak.Killstreak.KillstreakName);
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Lock Overlay {i}", !killstreak.IsBought && killstreak.Killstreak.LevelRequirement > PlayerData.Level);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", !killstreak.IsBought && killstreak.Killstreak.LevelRequirement > PlayerData.Level ? $"UNLOCK WITH LEVEL {killstreak.Killstreak.LevelRequirement}" : "");
+                SendRarity("SERVER Item", killstreak.Killstreak.KillstreakRarity, i);
             }
         }
 
@@ -3489,6 +3499,15 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Description TEXT", killstreak.Killstreak.KillstreakDesc);
             EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Item IMAGE", killstreak.Killstreak.IconLink);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item TEXT", killstreak.Killstreak.KillstreakName);
+        }
+
+        public void SendRarity(string objectName, string rarity, int selected)
+        {
+            var rarities = new string[] { "COMMON", "UNCOMMON", "RARE", "EPIC", "LEGENDARY", "MYTHICAL", "YELLOW", "ORANGE", "CYAN", "GREEN" };
+            foreach (var r in rarities)
+            {
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"{objectName} {r} {selected}", rarity == r);
+            }
         }
 
         public void BuySelectedItem()
