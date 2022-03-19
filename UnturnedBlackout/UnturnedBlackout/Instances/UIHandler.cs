@@ -908,7 +908,8 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Loadout Primary {attachmentType} IMAGE", attachment == null ? Utility.GetDefaultAttachmentImage(attachmentType.ToString()) : attachment.Attachment.IconLink);
             }
             EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Loadout Primary Charm IMAGE", loadout.PrimaryGunCharm == null ? Utility.GetDefaultAttachmentImage("charm") : loadout.PrimaryGunCharm.GunCharm.IconLink);
-            
+            EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Loadout Primary Skin IMAGE", loadout.PrimarySkin == null ? Utility.GetDefaultAttachmentImage("skin") : loadout.PrimarySkin.PatternLink);
+
             // Secondary
             Logging.Debug($"Secondary is null {loadout.Secondary == null}, is skin null {loadout.SecondarySkin == null}");
             EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Loadout Secondary IMAGE", loadout.SecondarySkin == null ? (loadout.Secondary == null ? "" : loadout.Secondary.Gun.IconLink) : loadout.SecondarySkin.IconLink);
@@ -922,7 +923,8 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Loadout Secondary {attachmentType} IMAGE", attachment == null ? Utility.GetDefaultAttachmentImage(attachmentType.ToString()) : attachment.Attachment.IconLink);
             }
             EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Loadout Secondary Charm IMAGE", loadout.SecondaryGunCharm == null ? Utility.GetDefaultAttachmentImage("charm") : loadout.SecondaryGunCharm.GunCharm.IconLink);
-            
+            EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Loadout Secondary Skin IMAGE", loadout.SecondarySkin == null ? Utility.GetDefaultAttachmentImage("skin") : loadout.SecondarySkin.PatternLink);
+
              // Knife
             Logging.Debug($"Knife is null {loadout.Knife == null}");
             EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Loadout Knife IMAGE", loadout.Knife == null ? "" : loadout.Knife.Knife.IconLink);
