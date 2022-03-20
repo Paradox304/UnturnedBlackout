@@ -245,6 +245,32 @@ namespace UnturnedBlackout
             return -1;
         }
 
+        public static string ToFriendlyName(this ELoadoutPage page)
+        {
+            switch (page)
+            {
+                case ELoadoutPage.PrimarySkin:
+                    return "Skin";
+                case ELoadoutPage.SecondarySkin:
+                    return "Skin";
+                case ELoadoutPage.Perk1:
+                case ELoadoutPage.Perk2:
+                case ELoadoutPage.Perk3:
+                    return "Perk";
+                case ELoadoutPage.AttachmentPrimaryBarrel:
+                case ELoadoutPage.AttachmentPrimaryCharm:
+                case ELoadoutPage.AttachmentPrimaryGrip:
+                case ELoadoutPage.AttachmentPrimaryMagazine:
+                    return page.ToString().Replace("AttachmentPrimary", "");
+                case ELoadoutPage.AttachmentSecondaryBarrel:
+                case ELoadoutPage.AttachmentSecondaryCharm:
+                case ELoadoutPage.AttachmentSecondaryMagazine:
+                    return page.ToString().Replace("AttachmentSecondary", "");
+                default:
+                    return page.ToString();
+            }
+        }
+
         public static string ToFriendlyName(this EGamePhase gamePhase)
         {
             switch (gamePhase)
@@ -270,6 +296,8 @@ namespace UnturnedBlackout
                     return "https://cdn.discordapp.com/attachments/458038940847439903/953635997990670366/ammo.png";
                 case "charm":
                     return "https://cdn.discordapp.com/attachments/458038940847439903/953635997097279488/charm.png";
+                case "skin":
+                    return "https://cdn.discordapp.com/attachments/458038940847439903/954770457163333672/skins.png";
                 default:
                     return "";
             }

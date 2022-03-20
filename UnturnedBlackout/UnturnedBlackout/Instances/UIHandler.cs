@@ -845,7 +845,7 @@ namespace UnturnedBlackout.Instances
             Logging.Debug($"Showing loadout page for {Player.CharacterName} with id {page.PageID}");
             LoadoutPageID = page.PageID;
 
-            for (int i = 0; i <= 7; i++)
+            for (int i = 0; i <= 9; i++)
             {
                 if (!page.Loadouts.TryGetValue(i, out Loadout loadout))
                 {
@@ -1032,13 +1032,13 @@ namespace UnturnedBlackout.Instances
         public void ShowLoadoutSubPage(ELoadoutPage page)
         {
             Logging.Debug($"Showing loadout sub page {page} for {Player.CharacterName}");
-            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Type TEXT", page.ToString().Replace("AttachmentPrimary", "").Replace("AttachmentSecondary", "").ToUpper());
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Type TEXT", page.ToFriendlyName());
             LoadoutPage = page;
 
             switch (LoadoutPage)
             {
                 case ELoadoutPage.Primary:
-                    ShowLoadoutTab(ELoadoutTab.SUBMACHINE_GUNS);
+                    ShowLoadoutTab(ELoadoutTab.ASSAULT_RIFLES);
                     break;
                 case ELoadoutPage.Secondary:
                     ShowLoadoutTab(ELoadoutTab.PISTOLS);
