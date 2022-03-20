@@ -1859,7 +1859,7 @@ namespace UnturnedBlackout.Managers
                         Logger.Log(ex);
                     }
 
-                    if (!PlayerLoadouts.ContainsKey(player.CSteamID))
+                    if (PlayerLoadouts.ContainsKey(player.CSteamID))
                     {
                         PlayerLoadouts.Remove(player.CSteamID);
                     }
