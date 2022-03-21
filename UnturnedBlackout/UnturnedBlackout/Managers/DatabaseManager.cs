@@ -396,8 +396,8 @@ namespace UnturnedBlackout.Managers
                             var skinDesc = rdr[4].ToString();
                             var rarity = rdr[5].ToString();
                             var patternLink = rdr[6].ToString();
-                            var iconLink = rdr[6].ToString();
-                            if (!int.TryParse(rdr[7].ToString(), out int scrapAmount))
+                            var iconLink = rdr[7].ToString();
+                            if (!int.TryParse(rdr[8].ToString(), out int scrapAmount))
                             {
                                 continue;
                             }

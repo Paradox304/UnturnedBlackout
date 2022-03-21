@@ -261,7 +261,9 @@ namespace UnturnedBlackout
                 case ELoadoutPage.AttachmentPrimaryCharm:
                 case ELoadoutPage.AttachmentPrimaryGrip:
                 case ELoadoutPage.AttachmentPrimaryMagazine:
+                case ELoadoutPage.AttachmentPrimarySights:
                     return page.ToString().Replace("AttachmentPrimary", "");
+                case ELoadoutPage.AttachmentSecondarySights:
                 case ELoadoutPage.AttachmentSecondaryBarrel:
                 case ELoadoutPage.AttachmentSecondaryCharm:
                 case ELoadoutPage.AttachmentSecondaryMagazine:

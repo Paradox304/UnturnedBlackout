@@ -269,7 +269,7 @@ namespace UnturnedBlackout.Managers
             }
         }
 
-        public void SendDeathUI(GamePlayer victim, PlayerData killerData)
+        public void SendDeathUI(GamePlayer victim, GamePlayer killer, PlayerData killerData)
         {
             victim.Player.Player.enablePluginWidgetFlag(EPluginWidgetFlags.Modal);
 
@@ -278,7 +278,7 @@ namespace UnturnedBlackout.Managers
             EffectManager.sendUIEffectImageURL(DeathKey, victim.TransportConnection, true, "EnemyXPIcon", Plugin.Instance.DBManager.Levels.TryGetValue((int)killerData.Level, out XPLevel level) ? level.IconLinkMedium : "");
             EffectManager.sendUIEffectText(DeathKey, victim.TransportConnection, true, "EnemyName", killerData.SteamName.ToUpper());
             EffectManager.sendUIEffectText(DeathKey, victim.TransportConnection, true, "EnemyXPNum", Plugin.Instance.Translate("Level_Show", killerData.Level).ToRich());
-            EffectManager.sendUIEffectImageURL(DeathKey, victim.TransportConnection, true, "DeathBanner", "https://cdn.discordapp.com/attachments/899796442649092119/927985217975758898/Senosan-85382-HG-Dark-grey-600x600.png");
+            EffectManager.sendUIEffectImageURL(DeathKey, victim.TransportConnection, true, "DeathBanner", killer.ActiveLoadout == null ? "https://cdn.discordapp.com/attachments/899796442649092119/927985217975758898/Senosan-85382-HG-Dark-grey-600x600.png" : (killer.ActiveLoadout.Card != null ? killer.ActiveLoadout.Card.Card.CardLink : "https://cdn.discordapp.com/attachments/899796442649092119/927985217975758898/Senosan-85382-HG-Dark-grey-600x600.png"));
         }
 
         public void UpdateRespawnTimer(GamePlayer player, string timer)
@@ -1137,9 +1137,9 @@ namespace UnturnedBlackout.Managers
                     Plugin.Instance.GameManager.AddPlayerToGame(ply, selected);
                 }
             }
-            else if (buttonName.StartsWith("SERVER Item BUTTON"))
+            else if (buttonName.StartsWith("SERVER Item BUTTON") || buttonName.StartsWith("SERVER Item Grid BUTTON"))
             {
-                if (int.TryParse(buttonName.Replace("SERVER Item BUTTON", ""), out int selected))
+                if (int.TryParse(buttonName.Replace("SERVER Item BUTTON", ""), out int selected) || int.TryParse(buttonName.Replace("SERVER Item Grid BUTTON", ""), out selected))
                 {
                     handler.SelectedItem(selected);
                 }

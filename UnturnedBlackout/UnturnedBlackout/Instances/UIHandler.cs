@@ -3314,6 +3314,7 @@ namespace UnturnedBlackout.Instances
             gun.TryGetNeededXP(out int neededXP);
             var spaces = neededXP != 0 ? (gun.XP * 97 / neededXP) : 0;
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item XP Bar Fill", spaces == 0 ? "" : new string(' ', spaces));
+            SendRarityName(gun.Gun.GunRarity);
         }
 
         public void ShowAttachment(LoadoutAttachment attachment, LoadoutGun gun)
@@ -3335,6 +3336,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Description TEXT", attachment.Attachment.AttachmentDesc);
             EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Item IMAGE", attachment.Attachment.IconLink);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item TEXT", attachment.Attachment.AttachmentName);
+            SendRarityName(attachment.Attachment.AttachmentRarity);
         }
 
         public void ShowGunCharm(LoadoutGunCharm gunCharm)
@@ -3356,6 +3358,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Description TEXT", gunCharm.GunCharm.CharmDesc);
             EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Item IMAGE", gunCharm.GunCharm.IconLink);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item TEXT", gunCharm.GunCharm.CharmName);
+            SendRarityName(gunCharm.GunCharm.CharmRarity);
         }
 
         public void ShowGunSkin(GunSkin skin)
@@ -3370,11 +3373,12 @@ namespace UnturnedBlackout.Instances
 
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Buy BUTTON", false);
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Unlock BUTTON", false);
-            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Equip BUTTON", (LoadoutPage == ELoadoutPage.Primary && loadout.PrimarySkin != skin) || (LoadoutPage == ELoadoutPage.Secondary && loadout.SecondarySkin != skin));
-            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Dequip BUTTON", (LoadoutPage == ELoadoutPage.Primary && loadout.PrimarySkin == skin) || (LoadoutPage == ELoadoutPage.Secondary && loadout.SecondarySkin == skin));
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Equip BUTTON", (LoadoutPage == ELoadoutPage.PrimarySkin && loadout.PrimarySkin != skin) || (LoadoutPage == ELoadoutPage.SecondarySkin && loadout.SecondarySkin != skin));
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Dequip BUTTON", (LoadoutPage == ELoadoutPage.PrimarySkin && loadout.PrimarySkin == skin) || (LoadoutPage == ELoadoutPage.SecondarySkin && loadout.SecondarySkin == skin));
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Description TEXT", skin.SkinDesc);
             EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Item IMAGE", skin.IconLink);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item TEXT", skin.SkinName);
+            SendRarityName(skin.SkinRarity);
         }
 
         public void ShowKnife(LoadoutKnife knife)
@@ -3396,6 +3400,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Description TEXT", knife.Knife.KnifeDesc);
             EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Item IMAGE", knife.Knife.IconLink);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item TEXT", knife.Knife.KnifeName);
+            SendRarityName(knife.Knife.KnifeRarity);
         }
 
         public void ShowPerk(LoadoutPerk perk)
@@ -3417,6 +3422,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Description TEXT", perk.Perk.PerkDesc);
             EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Item IMAGE", perk.Perk.IconLink);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item TEXT", perk.Perk.PerkName);
+            SendRarityName(perk.Perk.PerkRarity);
         }
 
         public void ShowGadget(LoadoutGadget gadget)
@@ -3438,6 +3444,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Description TEXT", gadget.Gadget.GadgetDesc);
             EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Item IMAGE", gadget.Gadget.IconLink);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item TEXT", gadget.Gadget.GadgetName);
+            SendRarityName(gadget.Gadget.GadgetRarity);
         }
 
         public void ShowCard(LoadoutCard card)
@@ -3459,6 +3466,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Description TEXT", card.Card.CardDesc);
             EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Item Card IMAGE", card.Card.IconLink);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item TEXT", card.Card.CardName);
+            SendRarityName(card.Card.CardRarity);
         }
 
         public void ShowGlove(LoadoutGlove glove)
@@ -3480,6 +3488,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Description TEXT", glove.Glove.GloveDesc);
             EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Item IMAGE", glove.Glove.IconLink);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item TEXT", glove.Glove.GloveName);
+            SendRarityName(glove.Glove.GloveRarity);
         }
 
         public void ShowKillstreak(LoadoutKillstreak killstreak)
@@ -3501,6 +3510,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Description TEXT", killstreak.Killstreak.KillstreakDesc);
             EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Item IMAGE", killstreak.Killstreak.IconLink);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item TEXT", killstreak.Killstreak.KillstreakName);
+            SendRarityName(killstreak.Killstreak.KillstreakRarity);
         }
 
         public void SendRarity(string objectName, string rarity, int selected)
@@ -3510,6 +3520,14 @@ namespace UnturnedBlackout.Instances
             {
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"{objectName} {r} {selected}", rarity == r);
             }
+        }
+
+        public void SendRarityName(string rarity)
+        {
+            var rarities = new List<string> { "COMMON", "UNCOMMON", "RARE", "EPIC", "LEGENDARY", "MYTHICAL" };
+            var colors = new List<string> { "#FFFFFF", "#1F871F", "#4B64FA", "#964BFA", "#C832FA", "#FA3219" };
+
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Rarity TEXT", rarities.Contains(rarity) ? $"<color={colors[rarities.IndexOf(rarity)]}>{rarity}</color>" : "");
         }
 
         public void BuySelectedItem()

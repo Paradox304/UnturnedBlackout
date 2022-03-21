@@ -449,7 +449,7 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
-            if (GamePhase == EGamePhase.Starting || GamePhase == EGamePhase.Ending)
+            if (GamePhase != EGamePhase.Started)
             {
                 shouldAllow = false;
                 return;

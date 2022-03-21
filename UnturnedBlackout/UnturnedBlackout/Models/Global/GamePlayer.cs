@@ -221,7 +221,13 @@ namespace UnturnedBlackout.Models.Global
                 Plugin.Instance.StopCoroutine(Healer);
             }
 
-            Plugin.Instance.UIManager.SendDeathUI(this, killerData);
+            var killerPlayer = Plugin.Instance.GameManager.GetGamePlayer(killer);
+            if (killer == null)
+            {
+                return;
+            }
+
+            Plugin.Instance.UIManager.SendDeathUI(this, killerPlayer, killerData);
             PreviousStance = EPlayerStance.STAND;
             RespawnTimer = Plugin.Instance.StartCoroutine(RespawnTime(respawnSeconds));
         }
