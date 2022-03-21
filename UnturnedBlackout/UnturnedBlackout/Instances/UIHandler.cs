@@ -2498,7 +2498,7 @@ namespace UnturnedBlackout.Instances
                 }
 
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Grid BUTTON {i}", true);
-                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Grid Equipped {i}", (LoadoutPage == ELoadoutPage.Primary && currentLoadout.PrimarySkin == skin) || (LoadoutPage == ELoadoutPage.Secondary && currentLoadout.SecondarySkin == skin));
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Grid Equipped {i}", (LoadoutPage == ELoadoutPage.PrimarySkin && currentLoadout.PrimarySkin == skin) || (LoadoutPage == ELoadoutPage.SecondarySkin && currentLoadout.SecondarySkin == skin));
                 EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Item Grid IMAGE {i}", skin.IconLink);
                 SendRarity("SERVER Item Grid", skin.SkinRarity, i);
             }
