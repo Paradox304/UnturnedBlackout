@@ -450,25 +450,20 @@ namespace UnturnedBlackout.GameTypes
 
         public override void OnPlayerDamage(ref DamagePlayerParameters parameters, ref bool shouldAllow)
         {
-            Logging.Debug("1");
             var player = GetTDMPlayer(parameters.player);
             if (player == null)
             {
-                Logging.Debug("2");
                 return;
             }
 
-            Logging.Debug("3");
             if (GamePhase != EGamePhase.Started)
             {
-                Logging.Debug($"4: {GamePhase}");
                 shouldAllow = false;
                 return;
             }
 
             if (player.GamePlayer.HasSpawnProtection)
             {
-                Logging.Debug("5");
                 shouldAllow = false;
                 return;
             }
@@ -478,25 +473,19 @@ namespace UnturnedBlackout.GameTypes
                 parameters.damage = 200;
             }
 
-            Logging.Debug("6");
             player.GamePlayer.OnDamaged(parameters.killer);
 
-            Logging.Debug($"7 {parameters.killer}");
             var kPlayer = GetTDMPlayer(parameters.killer);
             if (kPlayer == null)
             {
-                Logging.Debug("8");
                 return;
             }
 
-            Logging.Debug("9");
             if (kPlayer.GamePlayer.HasSpawnProtection)
             {
-                Logging.Debug("10");
                 kPlayer.GamePlayer.m_RemoveSpawnProtection.Stop();
                 kPlayer.GamePlayer.HasSpawnProtection = false;
             }
-            Logging.Debug("11");
         }
 
         public override void OnPlayerRevived(UnturnedPlayer player)
