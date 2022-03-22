@@ -61,7 +61,7 @@ namespace UnturnedBlackout.Models.Global
             m_TacticalChecker.Elapsed += EnableTactical;
 
             m_LethalChecker = new Timer(1 * 1000);
-            m_TacticalChecker.Elapsed += EnableLethal;
+            m_LethalChecker.Elapsed += EnableLethal;
         }
 
         // Spawn Protection Seconds
@@ -123,7 +123,7 @@ namespace UnturnedBlackout.Models.Global
                 m_TacticalChecker.Stop();
             }
             m_TacticalChecker.Start();
-            Player.Player.inventory.forceAddItem(new Item(ActiveLoadout.Tactical.Gadget.GadgetID, false), false);
+            Plugin.Instance.StartCoroutine(GiveGadget(ActiveLoadout.Tactical.Gadget.GadgetID));
         }
 
         public void UsedLethal()
@@ -134,7 +134,7 @@ namespace UnturnedBlackout.Models.Global
                 m_LethalChecker.Stop();
             }
             m_LethalChecker.Start();
-            Player.Player.inventory.forceAddItem(new Item(ActiveLoadout.Lethal.Gadget.GadgetID, false), false);
+            Plugin.Instance.StartCoroutine(GiveGadget(ActiveLoadout.Lethal.Gadget.GadgetID));
         }
 
         private void EnableLethal(object sender, ElapsedEventArgs e)
@@ -151,6 +151,12 @@ namespace UnturnedBlackout.Models.Global
             m_TacticalChecker.Stop();
 
             // Code to update the UI
+        }
+
+        public IEnumerator GiveGadget(ushort id)
+        {
+            yield return new WaitForSeconds(1);
+            Player.Player.inventory.forceAddItem(new Item(id, false), false);
         }
 
         // Healing

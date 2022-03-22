@@ -50,7 +50,7 @@ namespace UnturnedBlackout.Managers
                 var gameMode = (EGameType)gameModes[UnityEngine.Random.Range(0, gameModes.Count)];
                 Logging.Debug($"Found {gameMode}");
                 Logging.Debug($"Found {location.LocationName}");
-                StartGame(location, gameMode);
+                StartGame(location, EGameType.FFA);
             }
         }
 

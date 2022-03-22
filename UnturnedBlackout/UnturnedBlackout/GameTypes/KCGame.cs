@@ -73,6 +73,7 @@ namespace UnturnedBlackout.GameTypes
                 Plugin.Instance.UIManager.ClearWaitingForPlayersUI(player.GamePlayer);
                 player.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(0);
                 Plugin.Instance.UIManager.ShowCountdownUI(player.GamePlayer);
+                SpawnPlayer(player);
             }
 
             for (int seconds = Config.KC.StartSeconds; seconds >= 0; seconds--)

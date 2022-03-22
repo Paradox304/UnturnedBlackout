@@ -50,6 +50,7 @@ namespace UnturnedBlackout.GameTypes
                 Plugin.Instance.UIManager.ClearWaitingForPlayersUI(player.GamePlayer);
                 player.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(0);
                 Plugin.Instance.UIManager.ShowCountdownUI(player.GamePlayer);
+                SpawnPlayer(player, true);
             }
 
             for (int seconds = Config.FFA.StartSeconds; seconds >= 0; seconds--)
@@ -530,10 +531,8 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
-            var isTactical = true;
             if (throwable.equippedThrowableAsset.id == (player.ActiveLoadout.Lethal?.Gadget?.GadgetID ?? 0))
             {
-                isTactical = false;
                 player.UsedLethal();
             } else if (throwable.equippedThrowableAsset.id == (player.ActiveLoadout.Tactical?.Gadget?.GadgetID ?? 0))
             {
@@ -543,13 +542,13 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
-            TaskDispatcher.QueueOnMainThread(() =>
-            {
-                if (player.Player.Player.equipment.itemID == (isTactical ? player.ActiveLoadout.Tactical.Gadget.GadgetID : player.ActiveLoadout.Lethal.Gadget.GadgetID))
-                {
-                    player.Player.Player.equipment.dequip();
-                }
-            });
+            Plugin.Instance.StartCoroutine(Dequip(player.Player.Player));
+        }
+
+        public IEnumerator Dequip(Player player)
+        {
+            yield return new WaitForSeconds(0.5f);
+            player.equipment.dequip();
         }
 
         public override void PlayerChangeFiremode(GamePlayer player)
