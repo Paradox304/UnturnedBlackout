@@ -185,7 +185,7 @@ namespace UnturnedBlackout.GameTypes
 
         public override IEnumerator AddPlayerToGame(GamePlayer player)
         {
-            if (Players.Exists(k => k.GamePlayer.SteamID == player.SteamID))
+            if (PlayersLookup.ContainsKey(player.SteamID))
             {
                 yield break;
             }
@@ -259,7 +259,7 @@ namespace UnturnedBlackout.GameTypes
 
         public override void RemovePlayerFromGame(GamePlayer player)
         {
-            if (!Players.Exists(k => k.GamePlayer.SteamID == player.SteamID))
+            if (!PlayersLookup.ContainsKey(player.SteamID))
             {
                 return;
             }
@@ -277,15 +277,21 @@ namespace UnturnedBlackout.GameTypes
             else if (GamePhase == EGamePhase.WaitingForPlayers)
             {
                 Plugin.Instance.UIManager.ClearWaitingForPlayersUI(player);
+                foreach (var ply in Players)
+                {
+                    if (ply == tPlayer)
+                    {
+                        continue;
+                    }
+
+                    Plugin.Instance.UIManager.UpdateWaitingForPlayersUI(ply.GamePlayer, Players.Count - 1, Location.GetMinPlayers(GameMode));
+                }
             }
 
-            if (tPlayer != null)
-            {
-                tPlayer.Team.RemovePlayer(tPlayer.GamePlayer.SteamID);
-                tPlayer.GamePlayer.OnGameLeft();
-                Players.Remove(tPlayer);
-                PlayersLookup.Remove(tPlayer.GamePlayer.SteamID);
-            }
+            tPlayer.Team.RemovePlayer(tPlayer.GamePlayer.SteamID);
+            tPlayer.GamePlayer.OnGameLeft();
+            Players.Remove(tPlayer);
+            PlayersLookup.Remove(tPlayer.GamePlayer.SteamID);
 
             Plugin.Instance.UIManager.OnGameCountUpdated(this);
         }
@@ -444,20 +450,25 @@ namespace UnturnedBlackout.GameTypes
 
         public override void OnPlayerDamage(ref DamagePlayerParameters parameters, ref bool shouldAllow)
         {
+            Logging.Debug("1");
             var player = GetTDMPlayer(parameters.player);
             if (player == null)
             {
+                Logging.Debug("2");
                 return;
             }
 
+            Logging.Debug("3");
             if (GamePhase != EGamePhase.Started)
             {
+                Logging.Debug($"4: {GamePhase}");
                 shouldAllow = false;
                 return;
             }
 
             if (player.GamePlayer.HasSpawnProtection)
             {
+                Logging.Debug("5");
                 shouldAllow = false;
                 return;
             }
@@ -467,19 +478,25 @@ namespace UnturnedBlackout.GameTypes
                 parameters.damage = 200;
             }
 
+            Logging.Debug("6");
             player.GamePlayer.OnDamaged(parameters.killer);
 
+            Logging.Debug($"7 {parameters.killer}");
             var kPlayer = GetTDMPlayer(parameters.killer);
             if (kPlayer == null)
             {
+                Logging.Debug("8");
                 return;
             }
 
+            Logging.Debug("9");
             if (kPlayer.GamePlayer.HasSpawnProtection)
             {
+                Logging.Debug("10");
                 kPlayer.GamePlayer.m_RemoveSpawnProtection.Stop();
                 kPlayer.GamePlayer.HasSpawnProtection = false;
             }
+            Logging.Debug("11");
         }
 
         public override void OnPlayerRevived(UnturnedPlayer player)

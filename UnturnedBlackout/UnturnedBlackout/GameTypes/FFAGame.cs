@@ -541,14 +541,6 @@ namespace UnturnedBlackout.GameTypes
             {
                 return;
             }
-
-            Plugin.Instance.StartCoroutine(Dequip(player.Player.Player));
-        }
-
-        public IEnumerator Dequip(Player player)
-        {
-            yield return new WaitForSeconds(0.5f);
-            player.equipment.dequip();
         }
 
         public override void PlayerChangeFiremode(GamePlayer player)

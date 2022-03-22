@@ -88,6 +88,11 @@ namespace UnturnedBlackout.Models.Global
         {
             ActiveLoadout = loadout;
 
+            if (loadout == null)
+            {
+                return;
+            }
+
             if (m_LethalChecker.Enabled)
             {
                 m_LethalChecker.Stop();
