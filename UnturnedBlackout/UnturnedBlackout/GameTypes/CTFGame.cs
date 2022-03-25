@@ -464,6 +464,9 @@ namespace UnturnedBlackout.GameTypes
 
                 OnKill(kPlayer.GamePlayer, cPlayer.GamePlayer, kPlayer.GamePlayer.Player.Player.equipment.itemID, kPlayer.Team.Info.KillFeedHexCode, cPlayer.Team.Info.KillFeedHexCode);
 
+                var equipmentID = kPlayer.GamePlayer.Player.Player.equipment.itemID;
+                ushort gunID = ((kPlayer.GamePlayer.ActiveLoadout.Primary?.Gun?.GunID ?? 0) == equipmentID) || ((kPlayer.GamePlayer.ActiveLoadout.Secondary?.Gun?.GunID ?? 0) == equipmentID) ? equipmentID : (ushort)0;
+
                 ThreadPool.QueueUserWorkItem(async (o) =>
                 {
                     if (limb == ELimb.SKULL)
@@ -475,6 +478,10 @@ namespace UnturnedBlackout.GameTypes
                         await Plugin.Instance.DBManager.IncreasePlayerKillsAsync(kPlayer.GamePlayer.SteamID, 1);
                     }
                     await Plugin.Instance.DBManager.IncreasePlayerXPAsync(kPlayer.GamePlayer.SteamID, (uint)xpGained);
+                    if (gunID != 0)
+                    {
+                        await Plugin.Instance.DBManager.IncreasePlayerGunXPAsync(kPlayer.GamePlayer.SteamID, gunID, xpGained);
+                    }
                 });
             });
         }
