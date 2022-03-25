@@ -500,7 +500,7 @@ namespace UnturnedBlackout.Instances
             foreach (var knife in PlayerLoadout.Knives.Values.OrderBy(k => k.Knife.LevelRequirement))
             {
                 knives.Add(index, knife);
-                if (index == MaxItemsPerPage)
+                if (index == MaxSkinsCharmsPerPage)
                 {
                     KnifePages.Add(page, new PageKnife(page, knives));
                     knives = new Dictionary<int, LoadoutKnife>();
@@ -615,7 +615,7 @@ namespace UnturnedBlackout.Instances
             foreach (var card in PlayerLoadout.Cards.Values.OrderBy(k => k.Card.LevelRequirement))
             {
                 cards.Add(index, card);
-                if (index == MaxItemsPerPage)
+                if (index == MaxSkinsCharmsPerPage)
                 {
                     CardPages.Add(page, new PageCard(page, cards));
                     cards = new Dictionary<int, LoadoutCard>();
@@ -642,7 +642,7 @@ namespace UnturnedBlackout.Instances
             foreach (var glove in PlayerLoadout.Gloves.Values.OrderBy(k => k.Glove.LevelRequirement))
             {
                 gloves.Add(index, glove);
-                if (index == MaxItemsPerPage)
+                if (index == MaxSkinsCharmsPerPage)
                 {
                     GlovePages.Add(page, new PageGlove(page, gloves));
                     gloves = new Dictionary<int, LoadoutGlove>();
@@ -2466,7 +2466,7 @@ namespace UnturnedBlackout.Instances
             {
                 if (!page.GunCharms.TryGetValue(i, out LoadoutGunCharm gunCharm))
                 {
-                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item BUTTON {i}", false);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Grid BUTTON {i}", false);
                     continue;
                 }
 
@@ -2493,7 +2493,7 @@ namespace UnturnedBlackout.Instances
             {
                 if (!page.GunSkins.TryGetValue(i, out GunSkin skin))
                 {
-                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item BUTTON {i}", false);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Grid BUTTON {i}", false);
                     continue;
                 }
 
@@ -2516,21 +2516,18 @@ namespace UnturnedBlackout.Instances
             }
 
             EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item Page TEXT", $"Page {page.PageID}");
-            for (int i = 0; i <= MaxItemsPerPage; i++)
+            for (int i = 0; i <= MaxSkinsCharmsPerPage; i++)
             {
                 if (!page.Knives.TryGetValue(i, out LoadoutKnife knife))
                 {
-                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item BUTTON {i}", false);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Grid BUTTON {i}", false);
                     continue;
                 }
 
-                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item BUTTON {i}", true);
-                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Equipped {i}", currentLoadout.Knife == knife);
-                EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Item IMAGE {i}", knife.Knife.IconLink);
-                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item TEXT {i}", knife.Knife.KnifeName);
-                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Lock Overlay {i}", !knife.IsBought && knife.Knife.LevelRequirement > PlayerData.Level);
-                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", !knife.IsBought && knife.Knife.LevelRequirement > PlayerData.Level ? $"UNLOCK WITH LEVEL {knife.Knife.LevelRequirement}" : "");
-                SendRarity("SERVER Item", knife.Knife.KnifeRarity, i);
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Grid BUTTON {i}", true);
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Grid Equipped {i}", currentLoadout.Knife == knife);
+                EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Item Grid IMAGE {i}", knife.Knife.IconLink);
+                SendRarity("SERVER Item Grid", knife.Knife.KnifeRarity, i);
             }
         }
 
@@ -2606,21 +2603,18 @@ namespace UnturnedBlackout.Instances
             }
 
             EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item Page TEXT", $"Page {page.PageID}");
-            for (int i = 0; i <= MaxItemsPerPage; i++)
+            for (int i = 0; i <= MaxSkinsCharmsPerPage; i++)
             {
                 if (!page.Cards.TryGetValue(i, out LoadoutCard card))
                 {
-                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item BUTTON {i}", false);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Grid BUTTON {i}", false);
                     continue;
                 }
 
-                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item BUTTON {i}", true);
-                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Equipped {i}", currentLoadout.Card == card);
-                EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Item IMAGE {i}", card.Card.IconLink);
-                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item TEXT {i}", card.Card.CardName);
-                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Lock Overlay {i}", !card.IsBought && card.Card.LevelRequirement > PlayerData.Level);
-                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", !card.IsBought && card.Card.LevelRequirement > PlayerData.Level ? $"UNLOCK WITH LEVEL {card.Card.LevelRequirement}" : "");
-                SendRarity("SERVER Item", card.Card.CardRarity, i);
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Grid BUTTON {i}", true);
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Grid Equipped {i}", currentLoadout.Card == card);
+                EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Item Grid IMAGE {i}", card.Card.IconLink);
+                SendRarity("SERVER Item Grid", card.Card.CardRarity, i);
             }
         }
 
@@ -2636,21 +2630,18 @@ namespace UnturnedBlackout.Instances
             }
 
             EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item Page TEXT", $"Page {page.PageID}");
-            for (int i = 0; i <= MaxItemsPerPage; i++)
+            for (int i = 0; i <= MaxSkinsCharmsPerPage; i++)
             {
                 if (!page.Gloves.TryGetValue(i, out LoadoutGlove glove))
                 {
-                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item BUTTON {i}", false);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Grid BUTTON {i}", false);
                     continue;
                 }
 
-                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item BUTTON {i}", true);
-                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Equipped {i}", currentLoadout.Glove == glove);
-                EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Item IMAGE {i}", glove.Glove.IconLink);
-                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item TEXT {i}", glove.Glove.GloveName);
-                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Lock Overlay {i}", !glove.IsBought && glove.Glove.LevelRequirement > PlayerData.Level);
-                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", !glove.IsBought && glove.Glove.LevelRequirement > PlayerData.Level ? $"UNLOCK WITH LEVEL {glove.Glove.LevelRequirement}" : "");
-                SendRarity("SERVER Item", glove.Glove.GloveRarity, i);
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Grid BUTTON {i}", true);
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Grid Equipped {i}", currentLoadout.Glove == glove);
+                EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Item Grid IMAGE {i}", glove.Glove.IconLink);
+                SendRarity("SERVER Item Grid", glove.Glove.GloveRarity, i);
             }
         }
 
