@@ -49,8 +49,21 @@ namespace UnturnedBlackout.GameTypes
             ChatManager.onChatted += OnChatted;
             ItemManager.onTakeItemRequested += OnTakeItem;
             UseableThrowable.onThrowableSpawned += OnThrowableSpawned;
+            BarricadeManager.onBarricadeSpawned += OnBarricadeSpawned;
 
             KillFeedChecker = Plugin.Instance.StartCoroutine(UpdateKillfeed());
+        }
+
+        private void OnBarricadeSpawned(BarricadeRegion region, BarricadeDrop drop)
+        {
+            var steamID = new CSteamID(drop.GetServersideData()?.owner ?? 0UL);
+            var gPlayer = Plugin.Instance.GameManager.GetGamePlayer(steamID);
+            if (gPlayer == null)
+            {
+                return;
+            }
+
+            PlayerBarricadeSpawned(gPlayer, drop);
         }
 
         private void OnThrowableSpawned(UseableThrowable useable, GameObject throwable)
@@ -208,7 +221,6 @@ namespace UnturnedBlackout.GameTypes
                 region.items.RemoveAll(k => LevelNavigation.tryGetNavigation(k.point, out byte nav) && nav == Location.NavMesh);
             }
         }
-
         public void Destroy()
         {
             UnturnedPlayerEvents.OnPlayerDeath -= OnPlayerDeath;
@@ -232,6 +244,7 @@ namespace UnturnedBlackout.GameTypes
         public abstract void PlayerChangeFiremode(GamePlayer player);
         public abstract void PlayerStanceChanged(PlayerStance obj);
         public abstract void PlayerThrowableSpawned(GamePlayer player, UseableThrowable throwable);
+        public abstract void PlayerBarricadeSpawned(GamePlayer player, BarricadeDrop drop);
         public abstract void OnChatMessageSent(GamePlayer player, EChatMode chatMode, string text, ref bool isVisible);
         public abstract void OnVoiceChatUpdated(GamePlayer player);
         public abstract void OnTakingItem(GamePlayer player, ItemData itemData, ref bool shouldAllow);

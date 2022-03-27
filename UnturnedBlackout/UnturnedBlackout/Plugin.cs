@@ -141,6 +141,7 @@ namespace UnturnedBlackout
             { "Shutdown_Kill", "Shutdown" },
             { "Assist_Kill", "Kill Assist ({0})" },
             { "Melee_Kill", "Melee Kill" },
+            { "Lethal_Kill", "Lethal Kill" },
             { "Kill_Confirmed", "Kill Confirmed" },
             { "Kill_Denied", "Kill Denied" },
             { "Flag_Captured", "Flag Captured" },

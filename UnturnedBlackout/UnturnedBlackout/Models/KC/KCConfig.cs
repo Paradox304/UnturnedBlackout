@@ -8,6 +8,7 @@
         public int XPPerKill { get; set; }
         public int XPPerMeleeKill { get; set; }
         public int XPPerKillHeadshot { get; set; }
+        public int XPPerLethalKill { get; set; }
         public int XPPerAssist { get; set; }
 
         public int XPPerKillConfirmed { get; set; }
@@ -34,13 +35,14 @@
 
         }
 
-        public KCConfig(int startSeconds, int endSeconds, int xPPerKill, int xPPerMeleeKill, int xPPerKillHeadshot, int xPPerAssist, int xPPerKillConfirmed, int xPPerKillDenied, int baseXPMK, int increaseXPPerMK, int mKSeconds, int shutdownXP, int dominationXP, float winMultipler, int scoreLimit, int spawnProtectionSeconds, int respawnSeconds, ushort redDogTagID, ushort blueDogTagID)
+        public KCConfig(int startSeconds, int endSeconds, int xPPerKill, int xPPerMeleeKill, int xPPerKillHeadshot, int xPPerLethalKill, int xPPerAssist, int xPPerKillConfirmed, int xPPerKillDenied, int baseXPMK, int increaseXPPerMK, int mKSeconds, int shutdownXP, int dominationXP, float winMultipler, int scoreLimit, int spawnProtectionSeconds, int respawnSeconds, ushort redDogTagID, ushort blueDogTagID)
         {
             StartSeconds = startSeconds;
             EndSeconds = endSeconds;
             XPPerKill = xPPerKill;
             XPPerMeleeKill = xPPerMeleeKill;
             XPPerKillHeadshot = xPPerKillHeadshot;
+            XPPerLethalKill = xPPerLethalKill;
             XPPerAssist = xPPerAssist;
             XPPerKillConfirmed = xPPerKillConfirmed;
             XPPerKillDenied = xPPerKillDenied;

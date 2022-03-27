@@ -304,21 +304,38 @@ namespace UnturnedBlackout.GameTypes
 
                 int xpGained = 0;
                 string xpText = "";
-                if (cause == EDeathCause.MELEE)
-                {
-                    xpGained += Config.FFA.XPPerMeleeKill;
-                    xpText += Plugin.Instance.Translate("Melee_Kill").ToRich();
+                ushort equipmentUsed = 0;
 
-                }
-                else if (limb == ELimb.SKULL)
+                switch (cause)
                 {
-                    xpGained += Config.FFA.XPPerKillHeadshot;
-                    xpText += Plugin.Instance.Translate("Headshot_Kill").ToRich();
-                }
-                else
-                {
-                    xpGained += Config.FFA.XPPerKill;
-                    xpText += Plugin.Instance.Translate("Normal_Kill").ToRich();
+                    case EDeathCause.MELEE:
+                        xpGained += Config.FFA.XPPerMeleeKill;
+                        xpText += Plugin.Instance.Translate("Melee_Kill").ToRich();
+                        equipmentUsed = kPlayer.GamePlayer.ActiveLoadout.Knife?.Knife?.KnifeID ?? 0;
+                        break;
+                    case EDeathCause.GUN:
+                        if (limb == ELimb.SKULL)
+                        {
+                            xpGained += Config.FFA.XPPerKillHeadshot;
+                            xpText += Plugin.Instance.Translate("Headshot_Kill").ToRich();
+                        }
+                        else
+                        {
+                            xpGained += Config.FFA.XPPerKill;
+                            xpText += Plugin.Instance.Translate("Normal_Kill").ToRich();
+                        }
+                        equipmentUsed = kPlayer.GamePlayer.Player.Player.equipment.itemID;
+                        break;
+                    case EDeathCause.CHARGE:
+                    case EDeathCause.GRENADE:
+                    case EDeathCause.LANDMINE:
+                    case EDeathCause.BURNING:
+                        xpGained += Config.FFA.XPPerLethalKill;
+                        xpText += Plugin.Instance.Translate("Lethal_Kill").ToRich();
+                        equipmentUsed = kPlayer.GamePlayer.ActiveLoadout.Lethal?.Gadget?.GadgetID ?? 0;
+                        break;
+                    default:
+                        break;
                 }
                 xpText += "\n";
 
@@ -366,7 +383,12 @@ namespace UnturnedBlackout.GameTypes
                 Plugin.Instance.UIManager.ShowXPUI(kPlayer.GamePlayer, xpGained, xpText);
                 Plugin.Instance.UIManager.SendMultiKillSound(kPlayer.GamePlayer, kPlayer.MultipleKills);
                 kPlayer.CheckKills();
-                OnKill(kPlayer.GamePlayer, fPlayer.GamePlayer, kPlayer.GamePlayer.Player.Player.equipment.itemID, Config.FFA.KillFeedHexCode, Config.FFA.KillFeedHexCode);
+
+                if (equipmentUsed != 0)
+                {
+                    OnKill(kPlayer.GamePlayer, fPlayer.GamePlayer, equipmentUsed, Config.FFA.KillFeedHexCode, Config.FFA.KillFeedHexCode);
+                }
+                
                 foreach (var ply in Players)
                 {
                     Plugin.Instance.UIManager.UpdateFFATopUI(ply, Players);
@@ -375,9 +397,10 @@ namespace UnturnedBlackout.GameTypes
                 {
                     Plugin.Instance.StartCoroutine(GameEnd());
                 }
+
                 ThreadPool.QueueUserWorkItem(async (o) =>
                 {
-                    if (limb == ELimb.SKULL)
+                    if (cause == EDeathCause.GUN && limb == ELimb.SKULL)
                     {
                         await Plugin.Instance.DBManager.IncreasePlayerHeadshotKillsAsync(kPlayer.GamePlayer.SteamID, 1);
                     }
@@ -386,6 +409,19 @@ namespace UnturnedBlackout.GameTypes
                         await Plugin.Instance.DBManager.IncreasePlayerKillsAsync(kPlayer.GamePlayer.SteamID, 1);
                     }
                     await Plugin.Instance.DBManager.IncreasePlayerXPAsync(kPlayer.GamePlayer.SteamID, (uint)xpGained);
+                    if ((kPlayer.GamePlayer.ActiveLoadout.Primary != null && kPlayer.GamePlayer.ActiveLoadout.Primary.Gun.GunID == equipmentUsed) || (kPlayer.GamePlayer.ActiveLoadout.Secondary != null && kPlayer.GamePlayer.ActiveLoadout.Secondary.Gun.GunID == equipmentUsed))
+                    {
+                        await Plugin.Instance.DBManager.IncreasePlayerGunXPAsync(kPlayer.GamePlayer.SteamID, equipmentUsed, xpGained);
+                        await Plugin.Instance.DBManager.IncreasePlayerGunKillsAsync(kPlayer.GamePlayer.SteamID, equipmentUsed, 1);
+                    }
+                    else if (kPlayer.GamePlayer.ActiveLoadout.Lethal != null && kPlayer.GamePlayer.ActiveLoadout.Lethal.Gadget.GadgetID == equipmentUsed)
+                    {
+                        await Plugin.Instance.DBManager.IncreasePlayerGadgetKillsAsync(kPlayer.GamePlayer.SteamID, equipmentUsed, 1);
+                    }
+                    else if (kPlayer.GamePlayer.ActiveLoadout.Killstreaks.Select(k => k.Killstreak.KillstreakID).Contains(equipmentUsed))
+                    {
+                        await Plugin.Instance.DBManager.IncreasePlayerKillstreakKillsAsync(kPlayer.GamePlayer.SteamID, equipmentUsed, 1);
+                    }
                 });
             });
         }
@@ -541,6 +577,38 @@ namespace UnturnedBlackout.GameTypes
             {
                 return;
             }
+        }
+
+        public override void PlayerBarricadeSpawned(GamePlayer player, BarricadeDrop drop)
+        {
+            var fPlayer = GetFFAPlayer(player.Player);
+            if (fPlayer == null)
+            {
+                return;
+            }
+
+            var isTactical = true;
+            if (drop.asset.id == (player.ActiveLoadout.Lethal?.Gadget?.GadgetID ?? 0))
+            {
+                isTactical = false;
+                player.UsedLethal();
+            }
+            else if (drop.asset.id == (player.ActiveLoadout.Tactical?.Gadget?.GadgetID ?? 0))
+            {
+                player.UsedTactical();
+            }
+            else
+            {
+                return;
+            }
+
+            TaskDispatcher.QueueOnMainThread(() =>
+            {
+                if (player.Player.Player.equipment.itemID == (isTactical ? player.ActiveLoadout.Tactical.Gadget.GadgetID : player.ActiveLoadout.Lethal.Gadget.GadgetID))
+                {
+                    player.Player.Player.equipment.dequip();
+                }
+            });
         }
 
         public override void PlayerChangeFiremode(GamePlayer player)

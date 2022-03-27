@@ -8,6 +8,7 @@
         public int XPPerKill { get; set; }
         public int XPPerMeleeKill { get; set; }
         public int XPPerKillHeadshot { get; set; }
+        public int XPPerLethalKill { get; set; }
         public int XPPerAssist { get; set; }
 
         public int XPPerFlagCaptured { get; set; }
@@ -36,13 +37,14 @@
 
         }
 
-        public CTFConfig(int startSeconds, int endSeconds, int xPPerKill, int xPPerMeleeKill, int xPPerKillHeadshot, int xPPerAssist, int xPPerFlagCaptured, int xPPerFlagSaved, int baseXPMK, int increaseXPPerMK, int mKSeconds, int shutdownXP, int dominationXP, float winMultipler, int scoreLimit, int spawnProtectionSeconds, int respawnSeconds, ushort redFlagID, ushort blueFlagID, float flagCarryingSpeed)
+        public CTFConfig(int startSeconds, int endSeconds, int xPPerKill, int xPPerMeleeKill, int xPPerKillHeadshot, int xPPerLethalKill, int xPPerAssist, int xPPerFlagCaptured, int xPPerFlagSaved, int baseXPMK, int increaseXPPerMK, int mKSeconds, int shutdownXP, int dominationXP, float winMultipler, int scoreLimit, int spawnProtectionSeconds, int respawnSeconds, ushort redFlagID, ushort blueFlagID, float flagCarryingSpeed)
         {
             StartSeconds = startSeconds;
             EndSeconds = endSeconds;
             XPPerKill = xPPerKill;
             XPPerMeleeKill = xPPerMeleeKill;
             XPPerKillHeadshot = xPPerKillHeadshot;
+            XPPerLethalKill = xPPerLethalKill;
             XPPerAssist = xPPerAssist;
             XPPerFlagCaptured = xPPerFlagCaptured;
             XPPerFlagSaved = xPPerFlagSaved;

@@ -8,6 +8,7 @@
         public int XPPerKill { get; set; }
         public int XPPerMeleeKill { get; set; }
         public int XPPerKillHeadshot { get; set; }
+        public int XPPerLethalKill { get; set; }
         public int XPPerAssist { get; set; }
 
         public int BaseXPMK { get; set; }
@@ -28,13 +29,14 @@
 
         }
 
-        public TDMConfig(int startSeconds, int endSeconds, int xPPerKill, int xPPerMeleeKill, int xPPerKillHeadshot, int xPPerAssist, int baseXPMK, int increaseXPPerMK, int mKSeconds, int shutdownXP, int dominationXP, float winMultipler, int scoreLimit, int spawnProtectionSeconds, int respawnSeconds)
+        public TDMConfig(int startSeconds, int endSeconds, int xPPerKill, int xPPerMeleeKill, int xPPerKillHeadshot, int xPPerLethalKill, int xPPerAssist, int baseXPMK, int increaseXPPerMK, int mKSeconds, int shutdownXP, int dominationXP, float winMultipler, int scoreLimit, int spawnProtectionSeconds, int respawnSeconds)
         {
             StartSeconds = startSeconds;
             EndSeconds = endSeconds;
             XPPerKill = xPPerKill;
             XPPerMeleeKill = xPPerMeleeKill;
             XPPerKillHeadshot = xPPerKillHeadshot;
+            XPPerLethalKill = xPPerLethalKill;
             XPPerAssist = xPPerAssist;
             BaseXPMK = baseXPMK;
             IncreaseXPPerMK = increaseXPPerMK;
