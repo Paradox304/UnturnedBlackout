@@ -304,16 +304,18 @@ namespace UnturnedBlackout.GameTypes
             }
 
             var victimKS = vPlayer.KillStreak;
+            var updatedKiller = cause == EDeathCause.LANDMINE ? (vPlayer.GamePlayer.LastDamager.Count > 0 ? vPlayer.GamePlayer.LastDamager.Pop() : killer) : killer;
+
             Logging.Debug($"Game player died, player name: {vPlayer.GamePlayer.Player.CharacterName}");
-            vPlayer.OnDeath(killer);
-            vPlayer.GamePlayer.OnDeath(killer, Config.KC.RespawnSeconds);
+            vPlayer.OnDeath(updatedKiller);
+            vPlayer.GamePlayer.OnDeath(updatedKiller, Config.KC.RespawnSeconds);
             vPlayer.Team.OnDeath(vPlayer.GamePlayer.SteamID);
             ItemManager.dropItem(new Item(vPlayer.Team.DogTagID, true), vPlayer.GamePlayer.Player.Player.transform.position, true, true, true);
             ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DBManager.IncreasePlayerDeathsAsync(vPlayer.GamePlayer.SteamID, 1));
 
             TaskDispatcher.QueueOnMainThread(() =>
             {
-                var kPlayer = GetKCPlayer(killer);
+                var kPlayer = GetKCPlayer(updatedKiller);
                 if (kPlayer == null)
                 {
                     return;
@@ -326,7 +328,8 @@ namespace UnturnedBlackout.GameTypes
                 }
 
                 Logging.Debug($"Killer found, killer name: {kPlayer.GamePlayer.Player.CharacterName}");
-                if (vPlayer.GamePlayer.LastDamager.Peek() == kPlayer.GamePlayer.SteamID)
+
+                if (vPlayer.GamePlayer.LastDamager.Count > 0 && vPlayer.GamePlayer.LastDamager.Peek() == kPlayer.GamePlayer.SteamID)
                 {
                     vPlayer.GamePlayer.LastDamager.Pop();
                 }

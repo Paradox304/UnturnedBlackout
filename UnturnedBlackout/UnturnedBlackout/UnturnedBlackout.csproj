@@ -164,6 +164,7 @@
     <Compile Include="Enums\EGamePhase.cs" />
     <Compile Include="Enums\EGameType.cs" />
     <Compile Include="Enums\EGun.cs" />
+    <Compile Include="Enums\ELevelUpAnimation.cs" />
     <Compile Include="Enums\ELoadoutPage.cs" />
     <Compile Include="Enums\ELoadoutTab.cs" />
     <Compile Include="Enums\EMainPage.cs" />

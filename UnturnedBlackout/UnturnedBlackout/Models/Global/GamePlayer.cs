@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Timers;
 using UnityEngine;
 using UnturnedBlackout.Database.Data;
+using UnturnedBlackout.Enums;
 using UnturnedBlackout.GameTypes;
 
 namespace UnturnedBlackout.Models.Global
@@ -25,6 +26,8 @@ namespace UnturnedBlackout.Models.Global
         public bool HasSpawnProtection { get; set; }
         public Stack<CSteamID> LastDamager { get; set; }
 
+        public bool HasAnimationGoingOn { get; set; }
+        
         public byte LastEquippedPage { get; set; }
         public byte LastEquippedX { get; set; }
         public byte LastEquippedY { get; set; }
@@ -38,6 +41,8 @@ namespace UnturnedBlackout.Models.Global
         public Coroutine Healer { get; set; }
         public Coroutine RespawnTimer { get; set; }
         public Coroutine VoiceChatChecker { get; set; }
+        public Coroutine AnimationStopper { get; set; }
+        public Coroutine AnimationChecker { get; set; }
         public Timer m_RemoveSpawnProtection { get; set; }
         public Timer m_DamageChecker { get; set; }
         public Timer m_TacticalChecker { get; set; }
@@ -103,6 +108,8 @@ namespace UnturnedBlackout.Models.Global
                 m_TacticalChecker.Stop();
             }
 
+            Plugin.Instance.HUDManager.UpdateGadgetUI(this);
+
             if (loadout.Tactical != null)
             {
                 HasTactical = false;
@@ -116,6 +123,9 @@ namespace UnturnedBlackout.Models.Global
                 m_LethalChecker.Interval = loadout.Lethal.Gadget.GiveSeconds * 1000;
                 m_LethalChecker.Start();
             }
+
+            Plugin.Instance.HUDManager.UpdateGadget(this, false, true);
+            Plugin.Instance.HUDManager.UpdateGadget(this, true, true);
         }
 
         // Tactical and Lethal
@@ -123,6 +133,7 @@ namespace UnturnedBlackout.Models.Global
         public void UsedTactical()
         {
             HasTactical = false;
+            Plugin.Instance.HUDManager.UpdateGadget(this, true, true);
             if (m_TacticalChecker.Enabled)
             {
                 m_TacticalChecker.Stop();
@@ -134,6 +145,7 @@ namespace UnturnedBlackout.Models.Global
         public void UsedLethal()
         {
             HasLethal = false;
+            Plugin.Instance.HUDManager.UpdateGadget(this, false, true);
             if (m_LethalChecker.Enabled)
             {
                 m_LethalChecker.Stop();
@@ -148,6 +160,7 @@ namespace UnturnedBlackout.Models.Global
             m_LethalChecker.Stop();
 
             // Code to update the UI
+            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.HUDManager.UpdateGadget(this, false, false));
         }
 
         private void EnableTactical(object sender, ElapsedEventArgs e)
@@ -156,6 +169,7 @@ namespace UnturnedBlackout.Models.Global
             m_TacticalChecker.Stop();
 
             // Code to update the UI
+            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.HUDManager.UpdateGadget(this, true, false));
         }
 
         public IEnumerator GiveGadget(ushort id)
@@ -175,19 +189,20 @@ namespace UnturnedBlackout.Models.Global
             {
                 Plugin.Instance.StopCoroutine(Healer);
             }
-
-            if (LastDamager.Count > 0)
-            {
-                if (LastDamager.Peek() != damager)
-                {
-                    LastDamager.Push(damager);
-                }
-            }
-            else
-            {
-                LastDamager.Push(damager);
-            }
             m_DamageChecker.Start();
+
+            var damagerPlayer = Plugin.Instance.GameManager.GetGamePlayer(damager);
+            if (damagerPlayer == null)
+            {
+                return;
+            }
+
+            if (LastDamager.Count > 0 && LastDamager.Peek() == damager)
+            {
+                return;
+            }
+
+            LastDamager.Push(damager);
         }
 
         private void CheckDamage(object sender, ElapsedEventArgs e)
@@ -318,6 +333,40 @@ namespace UnturnedBlackout.Models.Global
             VoiceChatChecker = null;
         }
 
+        // Animation
+        public IEnumerator StopAnimation()
+        {
+            HasAnimationGoingOn = true;
+            yield return new WaitForSeconds(5);
+            HasAnimationGoingOn = false;
+        }
+
+        public IEnumerator CheckAnimation(ELevelUpAnimation levelUpAnimationType, LoadoutGun gun)
+        {
+            while (true)
+            {
+                yield return new WaitForSeconds(1);
+                if (!HasAnimationGoingOn)
+                {
+                    if (levelUpAnimationType == ELevelUpAnimation.LevelUp)
+                    {
+                        if (!Plugin.Instance.DBManager.PlayerData.TryGetValue(SteamID, out PlayerData data))
+                        {
+                            yield break;
+                        }
+
+                        Plugin.Instance.UIManager.SendLevelUpAnimation(this, data.Level);
+                    } else
+                    {
+                        if (gun != null)
+                        {
+                            Plugin.Instance.UIManager.SendGunLevelUpAnimation(this, gun);
+                        }
+                    }
+                }
+            }
+        }
+
         public void OnGameLeft()
         {
             if (m_TacticalChecker.Enabled)
@@ -355,7 +404,18 @@ namespace UnturnedBlackout.Models.Global
                 Plugin.Instance.StopCoroutine(VoiceChatChecker);
             }
 
+            if (AnimationStopper != null)
+            {
+                Plugin.Instance.StopCoroutine(AnimationStopper);
+            }
+
+            if (AnimationChecker != null)
+            {
+                Plugin.Instance.StopCoroutine(AnimationChecker);
+            }
+
             HasScoreboard = false;
+            HasAnimationGoingOn = false;
             LastDamager.Clear();
             Plugin.Instance.UIManager.ClearDeathUI(this);
         }

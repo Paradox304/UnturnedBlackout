@@ -53,6 +53,9 @@ namespace UnturnedBlackout.Managers
         public const ushort LevelUpID = 27638;
         public const short LevelUpKey = 27638;
 
+        public const ushort GunLevelUpID = 27642;
+        public const short GunLevelUpKey = 27642;
+
         public const ushort LoadingUIID = 27640;
         public const short LoadingUIKey = 27640;
 
@@ -178,6 +181,12 @@ namespace UnturnedBlackout.Managers
 
         public void SendLevelUpAnimation(GamePlayer player, uint newRank)
         {
+            if (player.HasAnimationGoingOn)
+            {
+                player.AnimationChecker = Plugin.Instance.StartCoroutine(player.CheckAnimation(ELevelUpAnimation.LevelUp, null));
+                return;
+            }
+
             if (!Plugin.Instance.DBManager.Levels.TryGetValue((int)newRank, out XPLevel level))
             {
                 return;
@@ -187,6 +196,32 @@ namespace UnturnedBlackout.Managers
             EffectManager.sendUIEffectImageURL(LevelUpKey, player.TransportConnection, true, "LevelUpIcon", level.IconLinkLarge);
             EffectManager.sendUIEffectText(LevelUpKey, player.TransportConnection, true, "LevelUpDesc", Plugin.Instance.Translate("Level_Up_Desc", newRank).ToRich());
             EffectManager.sendUIEffectText(LevelUpKey, player.TransportConnection, true, "LevelUpText", Plugin.Instance.Translate("Level_Up_Text").ToRich());
+
+            if (player.AnimationStopper != null)
+            {
+                Plugin.Instance.StopCoroutine(player.AnimationStopper);
+            }
+            player.AnimationStopper = Plugin.Instance.StartCoroutine(player.StopAnimation());
+        }
+
+        public void SendGunLevelUpAnimation(GamePlayer player, LoadoutGun gun)
+        {
+            if (player.HasAnimationGoingOn)
+            {
+                player.AnimationChecker = Plugin.Instance.StartCoroutine(player.CheckAnimation(ELevelUpAnimation.GunLevelUp, gun));
+                return;
+            }
+
+            EffectManager.sendUIEffect(GunLevelUpID, GunLevelUpKey, player.TransportConnection, true);
+            EffectManager.sendUIEffectImageURL(GunLevelUpKey, player.TransportConnection, true, "LevelUpIcon", gun.Gun.IconLink);
+            EffectManager.sendUIEffectText(GunLevelUpKey, player.TransportConnection, true, "LevelUpDesc", Plugin.Instance.Translate("Gun_Level_Up_Desc", gun.Gun.GunName, gun.Level).ToRich());
+            EffectManager.sendUIEffectText(GunLevelUpKey, player.TransportConnection, true, "LevelUpText", Plugin.Instance.Translate("Gun_Level_Up_Text").ToRich());
+            
+            if (player.AnimationStopper != null)
+            {
+                Plugin.Instance.StopCoroutine(player.AnimationStopper);
+            }
+            player.AnimationStopper = Plugin.Instance.StartCoroutine(player.StopAnimation());
         }
 
         public void SendHitmarkerSound(GamePlayer player)

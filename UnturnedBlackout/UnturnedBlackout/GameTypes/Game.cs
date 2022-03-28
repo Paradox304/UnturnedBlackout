@@ -77,9 +77,22 @@ namespace UnturnedBlackout.GameTypes
             PlayerThrowableSpawned(gPlayer, useable);
         }
 
-        public void OnTrapTriggered(GamePlayer player, int trapID)
+        public void OnTrapTriggered(GamePlayer player, BarricadeDrop drop)
         {
-            Logging.Debug($"TRAP TRIGGERED BY {player.Player.CharacterName} with id {trapID}");
+            Logging.Debug($"TRAP TRIGGERED BY {player.Player.CharacterName} with id {drop.asset.id}, owner {drop.GetServersideData().owner}");
+            var trapOwner = Plugin.Instance.GameManager.GetGamePlayer(new CSteamID(drop.GetServersideData().owner));
+            Logging.Debug("1");
+            if (trapOwner != null)
+            {
+                Logging.Debug("2");
+                if (player.LastDamager.Count > 0 && player.LastDamager.Peek() == trapOwner.SteamID)
+                {
+                    Logging.Debug("3");
+                    return;
+                }
+                Logging.Debug("4");
+                player.LastDamager.Push(trapOwner.SteamID);
+            }
         }
 
         private void OnPlayerRespawning(PlayerLife sender, bool wantsToSpawnAtHome, ref Vector3 position, ref float yaw)

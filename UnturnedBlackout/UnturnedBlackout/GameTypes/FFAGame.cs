@@ -256,16 +256,17 @@ namespace UnturnedBlackout.GameTypes
             }
 
             var victimKS = fPlayer.KillStreak;
+            var updatedKiller = cause == EDeathCause.LANDMINE ? (fPlayer.GamePlayer.LastDamager.Count > 0 ? fPlayer.GamePlayer.LastDamager.Pop() : killer) : killer;
 
             Logging.Debug($"Game player died, player name: {fPlayer.GamePlayer.Player.CharacterName}");
-            fPlayer.OnDeath(killer);
-            fPlayer.GamePlayer.OnDeath(killer, Config.FFA.RespawnSeconds);
+            fPlayer.OnDeath(updatedKiller);
+            fPlayer.GamePlayer.OnDeath(updatedKiller, Config.FFA.RespawnSeconds);
 
             ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DBManager.IncreasePlayerDeathsAsync(fPlayer.GamePlayer.SteamID, 1));
 
             TaskDispatcher.QueueOnMainThread(() =>
             {
-                var kPlayer = GetFFAPlayer(killer);
+                var kPlayer = GetFFAPlayer(updatedKiller);
                 if (kPlayer == null)
                 {
                     return;
@@ -278,7 +279,8 @@ namespace UnturnedBlackout.GameTypes
                 }
 
                 Logging.Debug($"Killer found, killer name: {kPlayer.GamePlayer.Player.CharacterName}");
-                if (fPlayer.GamePlayer.LastDamager.Peek() == kPlayer.GamePlayer.SteamID)
+
+                if (fPlayer.GamePlayer.LastDamager.Count > 0 && fPlayer.GamePlayer.LastDamager.Peek() == kPlayer.GamePlayer.SteamID)
                 {
                     fPlayer.GamePlayer.LastDamager.Pop();
                 }

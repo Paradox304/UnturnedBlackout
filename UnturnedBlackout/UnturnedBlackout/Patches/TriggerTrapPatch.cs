@@ -43,7 +43,18 @@ namespace UnturnedBlackout.Patches
             {
                 return true;
             }
-            TaskDispatcher.QueueOnMainThread(() => game.OnTrapTriggered(gPlayer, drop.asset.id));
+            var data = drop.GetServersideData();
+            if (data == null)
+            {
+                return true;
+            }
+
+            if (gPlayer.SteamID.m_SteamID == data.owner || (data.group != 0UL && data.group == gPlayer.Player.Player.quests.groupID.m_SteamID))
+            {
+                return false;
+            }
+
+            TaskDispatcher.QueueOnMainThread(() => game.OnTrapTriggered(gPlayer, drop));
             return true;
         }
     }

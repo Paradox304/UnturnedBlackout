@@ -2544,6 +2544,7 @@ namespace UnturnedBlackout.Managers
                         gun.XP = newXP;
                         if (gun.TryGetNeededXP(out int neededXP))
                         {
+                            Logger.Log($"GUN {gun.Gun.GunName} CURRENT XP {gun.XP} CURRENT LEVEL {gun.Level} NEXT XP NEEDED {neededXP}");
                             if (gun.XP >= neededXP)
                             {
                                 var updatedXP = gun.XP - neededXP;
@@ -2552,9 +2553,17 @@ namespace UnturnedBlackout.Managers
                                 if (obj is int newLevel)
                                 {
                                     gun.Level = newLevel;
-                                    // Give reward
                                 }
                                 gun.XP = updatedXP;
+
+                                TaskDispatcher.QueueOnMainThread(() =>
+                                {
+                                    var player = Plugin.Instance.GameManager.GetGamePlayer(steamID);
+                                    if (player != null)
+                                    {
+                                        Plugin.Instance.UIManager.SendGunLevelUpAnimation(player, gun);
+                                    }
+                                });
                             }
                         }
                     }

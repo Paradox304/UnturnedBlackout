@@ -34,7 +34,6 @@ namespace UnturnedBlackout
 
             ObjectManager.onDamageObjectRequested += OnDamageObject;
             ResourceManager.onDamageResourceRequested += OnDamageResource;
-            BarricadeManager.onDamageBarricadeRequested += OnDamageBarricade;
             StructureManager.onDamageStructureRequested += OnDamageStructure;
 
             Logger.Log("Unturned Blackout has been loaded");
@@ -51,7 +50,6 @@ namespace UnturnedBlackout
 
             ObjectManager.onDamageObjectRequested -= OnDamageObject;
             ResourceManager.onDamageResourceRequested -= OnDamageResource;
-            BarricadeManager.onDamageBarricadeRequested -= OnDamageBarricade;
             StructureManager.onDamageStructureRequested -= OnDamageStructure;
 
             StopAllCoroutines();
@@ -71,18 +69,6 @@ namespace UnturnedBlackout
         private void OnDamageStructure(CSteamID instigatorSteamID, Transform structureTransform, ref ushort pendingTotalDamage, ref bool shouldAllow, EDamageOrigin damageOrigin)
         {
             shouldAllow = false;
-        }
-
-        private void OnDamageBarricade(CSteamID instigatorSteamID, Transform barricadeTransform, ref ushort pendingTotalDamage, ref bool shouldAllow, EDamageOrigin damageOrigin)
-        {
-            var drop = BarricadeManager.FindBarricadeByRootTransform(barricadeTransform);
-            if (drop != null)
-            {
-                if (!Configuration.Instance.AllowDamageBarricades.Contains(drop.asset.id))
-                {
-                    shouldAllow = false;
-                }
-            }
         }
 
         private void OnDamageResource(CSteamID instigatorSteamID, Transform objectTransform, ref ushort pendingTotalDamage, ref bool shouldAllow, EDamageOrigin damageOrigin)
@@ -198,7 +184,9 @@ namespace UnturnedBlackout
             { "BURST", "BURST" },
             { "SEMI", "SEMI" },
             { "Level_Up_Desc", "New Level: {0}" },
-            { "Level_Up_Text", "LEVELLED UP!"}
+            { "Level_Up_Text", "LEVELLED UP!"},
+            { "Gun_Level_Up_Desc", "{0} levelled up to level {1}" },
+            { "Gun_Level_Up_Text", "WEAPON LEVEL UP!" }
         };
 
         public static Harmony Harmony { get; set; }

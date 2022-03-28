@@ -78,7 +78,7 @@ namespace UnturnedBlackout
             inv.player.equipment.sendSlot(0);
             inv.player.equipment.sendSlot(1);
 
-            Plugin.Instance.HUDManager.ClearGunUI(inv.player);
+            Plugin.Instance.HUDManager.RemoveGunUI(inv.player.channel.GetOwnerTransportConnection());
         }
 
         public static string GetOrdinal(int index)
@@ -250,7 +250,6 @@ namespace UnturnedBlackout
             switch (page)
             {
                 case ELoadoutPage.PrimarySkin:
-                    return "Skin";
                 case ELoadoutPage.SecondarySkin:
                     return "Skin";
                 case ELoadoutPage.Perk1:
@@ -289,17 +288,17 @@ namespace UnturnedBlackout
             switch (attachmentType.ToLower())
             {
                 case "sights":
-                    return "https://cdn.discordapp.com/attachments/458038940847439903/953635997751578624/sight.png";
+                    return "https://cdn.discordapp.com/attachments/458038940847439903/957681666875347044/sight.png";
                 case "grip":
-                    return "https://cdn.discordapp.com/attachments/458038940847439903/953635997533503579/grip.png";
+                    return "https://cdn.discordapp.com/attachments/458038940847439903/957681668494356580/grip.png";
                 case "barrel":
-                    return "https://cdn.discordapp.com/attachments/458038940847439903/953635997315391518/barrel.png";
+                    return "https://cdn.discordapp.com/attachments/458038940847439903/957681668276232213/barrel.png";
                 case "magazine":
-                    return "https://cdn.discordapp.com/attachments/458038940847439903/953635997990670366/ammo.png";
+                    return "https://cdn.discordapp.com/attachments/458038940847439903/957681667101835305/ammo.png";
                 case "charm":
-                    return "https://cdn.discordapp.com/attachments/458038940847439903/953635997097279488/charm.png";
+                    return "https://cdn.discordapp.com/attachments/458038940847439903/957681668053958656/charm.png";
                 case "skin":
-                    return "https://cdn.discordapp.com/attachments/458038940847439903/954770457163333672/skins.png";
+                    return "https://cdn.discordapp.com/attachments/458038940847439903/957681667781324810/skins.png";
                 default:
                     return "";
             }

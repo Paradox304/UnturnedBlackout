@@ -72,8 +72,6 @@ namespace UnturnedBlackout
         public List<FeedIcon> KillFeedIcons { get; set; }
         public List<TeamInfo> TeamsInfo { get; set; }
 
-        public List<ushort> AllowDamageBarricades { get; set; }
-
         public void LoadDefaults()
         {
             DatabaseHost = "136.243.135.46";
@@ -161,8 +159,6 @@ namespace UnturnedBlackout
                 new TeamInfo(1, "Turned Ops", "#9ac5ff", "#9ac5ff", "#9ac5ff", "#9ac5ff", new List<Kit> { new Kit(new List<ushort> { 173, 2, 1446 }) }),
                 new TeamInfo(2, "Omega", "#ff7e7e", "#ff7e7e", "#ff7e7e", "#ff7e7e", new List<Kit> { new Kit(new List<ushort> { 165, 2, 1446 }) })
             };
-
-            AllowDamageBarricades = new List<ushort> { 3, 4, 5 };
         }
     }
 }

@@ -337,8 +337,10 @@ namespace UnturnedBlackout.GameTypes
             var victimKS = cPlayer.KillStreak;
 
             Logging.Debug($"Game player died, player name: {cPlayer.GamePlayer.Player.CharacterName}");
-            cPlayer.OnDeath(killer);
-            cPlayer.GamePlayer.OnDeath(killer, Config.CTF.RespawnSeconds);
+            var updatedKiller = cause == EDeathCause.LANDMINE ? (cPlayer.GamePlayer.LastDamager.Count > 0 ? cPlayer.GamePlayer.LastDamager.Pop() : killer) : killer;
+
+            cPlayer.OnDeath(updatedKiller);
+            cPlayer.GamePlayer.OnDeath(updatedKiller, Config.CTF.RespawnSeconds);
 
             var otherTeam = cPlayer.Team == BlueTeam ? RedTeam : BlueTeam;
             if (cPlayer.IsCarryingFlag)
@@ -360,7 +362,7 @@ namespace UnturnedBlackout.GameTypes
 
             TaskDispatcher.QueueOnMainThread(() =>
             {
-                var kPlayer = GetCTFPlayer(killer);
+                var kPlayer = GetCTFPlayer(updatedKiller);
                 if (kPlayer == null)
                 {
                     return;
@@ -373,7 +375,8 @@ namespace UnturnedBlackout.GameTypes
                 }
 
                 Logging.Debug($"Killer found, killer name: {kPlayer.GamePlayer.Player.CharacterName}");
-                if (cPlayer.GamePlayer.LastDamager.Peek() == kPlayer.GamePlayer.SteamID)
+
+                if (cPlayer.GamePlayer.LastDamager.Count > 0 && cPlayer.GamePlayer.LastDamager.Peek() == kPlayer.GamePlayer.SteamID)
                 {
                     cPlayer.GamePlayer.LastDamager.Pop();
                 }
