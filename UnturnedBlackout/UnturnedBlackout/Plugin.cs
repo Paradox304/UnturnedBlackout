@@ -186,7 +186,8 @@ namespace UnturnedBlackout
             { "Level_Up_Desc", "New Level: {0}" },
             { "Level_Up_Text", "LEVELLED UP!"},
             { "Gun_Level_Up_Desc", "{0} levelled up to level {1}" },
-            { "Gun_Level_Up_Text", "WEAPON LEVEL UP!" }
+            { "Gun_Level_Up_Text", "WEAPON LEVEL UP!" },
+            { "Version", "VERSION: 1.0.1" }
         };
 
         public static Harmony Harmony { get; set; }

@@ -24,20 +24,12 @@ namespace UnturnedBlackout.Database.Data
 
         public bool TryGetNeededXP(out int neededXP)
         {
-            Logging.Debug($"TRYING GETTING NEEDED XP FOR GUN {Gun.GunName}");
-            foreach (var id in Gun.LevelXPNeeded)
-            {
-                Logging.Debug(id.ToString());
-            }
             neededXP = 0;
-            Logging.Debug($"{Gun.LevelXPNeeded.Count}, {Level - 1}");
-            if (Gun.LevelXPNeeded.Count < (Level - 1))
+            if (Gun.LevelXPNeeded.Count > (Level - 1))
             {
-                Logging.Debug("1");
                 neededXP = Gun.LevelXPNeeded[Level - 1];
                 return true;
             }
-            Logging.Debug("2");
             return false;
         }
     }

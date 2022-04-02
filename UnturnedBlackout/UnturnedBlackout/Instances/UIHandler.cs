@@ -122,7 +122,10 @@ namespace UnturnedBlackout.Instances
 
             EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Player Icon", data.AvatarLink);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Player Name", data.SteamName);
-
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Unbox BUTTON", false);
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Store BUTTON", false);
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Leaderboards BUTTON", false);
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Version TEXT", Plugin.Instance.Translate("Version").ToRich());
             ClearChat();
             ShowXP();
             OnMusicChanged(data.Music);
