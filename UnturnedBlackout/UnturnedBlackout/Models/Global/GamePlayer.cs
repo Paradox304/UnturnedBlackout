@@ -363,6 +363,7 @@ namespace UnturnedBlackout.Models.Global
                             Plugin.Instance.UIManager.SendGunLevelUpAnimation(this, gun);
                         }
                     }
+                    break;
                 }
             }
         }
