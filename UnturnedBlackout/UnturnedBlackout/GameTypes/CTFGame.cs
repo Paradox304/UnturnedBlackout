@@ -483,6 +483,7 @@ namespace UnturnedBlackout.GameTypes
                 Plugin.Instance.UIManager.ShowXPUI(kPlayer.GamePlayer, xpGained, xpText);
                 Plugin.Instance.UIManager.SendMultiKillSound(kPlayer.GamePlayer, kPlayer.MultipleKills);
                 kPlayer.CheckKills();
+                kPlayer.GamePlayer.OnKilled(cPlayer.GamePlayer);
 
                 if (equipmentUsed != 0)
                 {

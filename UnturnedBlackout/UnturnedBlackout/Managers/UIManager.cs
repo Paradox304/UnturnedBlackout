@@ -313,7 +313,7 @@ namespace UnturnedBlackout.Managers
             EffectManager.sendUIEffectImageURL(DeathKey, victim.TransportConnection, true, "EnemyXPIcon", Plugin.Instance.DBManager.Levels.TryGetValue((int)killerData.Level, out XPLevel level) ? level.IconLinkMedium : "");
             EffectManager.sendUIEffectText(DeathKey, victim.TransportConnection, true, "EnemyName", killerData.SteamName.ToUpper());
             EffectManager.sendUIEffectText(DeathKey, victim.TransportConnection, true, "EnemyXPNum", Plugin.Instance.Translate("Level_Show", killerData.Level).ToRich());
-            EffectManager.sendUIEffectImageURL(DeathKey, victim.TransportConnection, true, "DeathBanner", killer.ActiveLoadout == null ? "https://cdn.discordapp.com/attachments/899796442649092119/927985217975758898/Senosan-85382-HG-Dark-grey-600x600.png" : (killer.ActiveLoadout.Card != null ? killer.ActiveLoadout.Card.Card.CardLink : "https://cdn.discordapp.com/attachments/899796442649092119/927985217975758898/Senosan-85382-HG-Dark-grey-600x600.png"));
+            EffectManager.sendUIEffectImageURL(DeathKey, victim.TransportConnection, true, "DeathBanner", killer.ActiveLoadout?.Card?.Card?.CardLink ?? "https://cdn.discordapp.com/attachments/899796442649092119/927985217975758898/Senosan-85382-HG-Dark-grey-600x600.png");
         }
 
         public void UpdateRespawnTimer(GamePlayer player, string timer)
@@ -324,6 +324,23 @@ namespace UnturnedBlackout.Managers
         public void ClearDeathUI(GamePlayer player)
         {
             player.Player.Player.disablePluginWidgetFlag(EPluginWidgetFlags.Modal);
+            EffectManager.askEffectClearByID(DeathID, player.TransportConnection);
+        }
+
+        public void SendKillCard(GamePlayer killer, GamePlayer victim, PlayerData victimData)
+        {
+            EffectManager.sendUIEffect(DeathID, DeathKey, killer.TransportConnection, true);
+            EffectManager.sendUIEffectImageURL(DeathKey, killer.TransportConnection, true, "EnemyIcon", victimData.AvatarLink);
+            EffectManager.sendUIEffectImageURL(DeathKey, killer.TransportConnection, true, "EnemyXPIcon", Plugin.Instance.DBManager.Levels.TryGetValue((int)victimData.Level, out XPLevel level) ? level.IconLinkMedium : "");
+            EffectManager.sendUIEffectText(DeathKey, killer.TransportConnection, true, "EnemyName", victimData.SteamName.ToUpper());
+            EffectManager.sendUIEffectText(DeathKey, killer.TransportConnection, true, "EnemyXPNum", Plugin.Instance.Translate("Level_Show", victimData.Level).ToRich());
+            EffectManager.sendUIEffectImageURL(DeathKey, killer.TransportConnection, true, "DeathBanner", victim.ActiveLoadout?.Card?.Card?.CardLink ?? "https://cdn.discordapp.com/attachments/899796442649092119/927985217975758898/Senosan-85382-HG-Dark-grey-600x600.png");
+            EffectManager.sendUIEffectText(DeathKey, killer.TransportConnection, true, "KilledTxt", "KILLED");
+            EffectManager.sendUIEffectText(DeathKey, killer.TransportConnection, true, "RespawnTime", " ");
+        }
+
+        public void RemoveKillCard(GamePlayer player)
+        {
             EffectManager.askEffectClearByID(DeathID, player.TransportConnection);
         }
 
