@@ -337,6 +337,7 @@ namespace UnturnedBlackout.Managers
             EffectManager.sendUIEffectImageURL(DeathKey, killer.TransportConnection, true, "DeathBanner", victim.ActiveLoadout?.Card?.Card?.CardLink ?? "https://cdn.discordapp.com/attachments/899796442649092119/927985217975758898/Senosan-85382-HG-Dark-grey-600x600.png");
             EffectManager.sendUIEffectText(DeathKey, killer.TransportConnection, true, "KilledTxt", "KILLED");
             EffectManager.sendUIEffectText(DeathKey, killer.TransportConnection, true, "RespawnTime", " ");
+            EffectManager.sendUIEffectText(DeathKey, killer.TransportConnection, true, "RespawnTxt", " ");
         }
 
         public void RemoveKillCard(GamePlayer player)
