@@ -47,6 +47,9 @@ namespace UnturnedBlackout.Managers
         public const ushort DeathID = 27635;
         public const short DeathKey = 27635;
 
+        public const ushort KillCardID = 27644;
+        public const short KillCardKey = 27644;
+
         public const ushort PreEndingUIID = 27636;
         public const short PreEndingUIKey = 27636;
 
@@ -58,6 +61,9 @@ namespace UnturnedBlackout.Managers
 
         public const ushort LoadingUIID = 27640;
         public const short LoadingUIKey = 27640;
+
+        public const ushort LoadoutSelectionID = 27643;
+        public const short LoadoutSelectionKey = 27643;
 
         public UIManager()
         {
@@ -224,11 +230,6 @@ namespace UnturnedBlackout.Managers
             player.AnimationStopper = Plugin.Instance.StartCoroutine(player.StopAnimation());
         }
 
-        public void SendHitmarkerSound(GamePlayer player)
-        {
-            EffectManager.sendUIEffect(27637, 27637, player.TransportConnection, true);
-        }
-
         public void SendKillfeed(List<GamePlayer> players, EGameType type, List<Feed> killfeed)
         {
             short key;
@@ -329,15 +330,12 @@ namespace UnturnedBlackout.Managers
 
         public void SendKillCard(GamePlayer killer, GamePlayer victim, PlayerData victimData)
         {
-            EffectManager.sendUIEffect(DeathID, DeathKey, killer.TransportConnection, true);
-            EffectManager.sendUIEffectImageURL(DeathKey, killer.TransportConnection, true, "EnemyIcon", victimData.AvatarLink);
-            EffectManager.sendUIEffectImageURL(DeathKey, killer.TransportConnection, true, "EnemyXPIcon", Plugin.Instance.DBManager.Levels.TryGetValue((int)victimData.Level, out XPLevel level) ? level.IconLinkMedium : "");
-            EffectManager.sendUIEffectText(DeathKey, killer.TransportConnection, true, "EnemyName", victimData.SteamName.ToUpper());
-            EffectManager.sendUIEffectText(DeathKey, killer.TransportConnection, true, "EnemyXPNum", Plugin.Instance.Translate("Level_Show", victimData.Level).ToRich());
-            EffectManager.sendUIEffectImageURL(DeathKey, killer.TransportConnection, true, "DeathBanner", victim.ActiveLoadout?.Card?.Card?.CardLink ?? "https://cdn.discordapp.com/attachments/899796442649092119/927985217975758898/Senosan-85382-HG-Dark-grey-600x600.png");
-            EffectManager.sendUIEffectText(DeathKey, killer.TransportConnection, true, "KilledTxt", "KILLED");
-            EffectManager.sendUIEffectText(DeathKey, killer.TransportConnection, true, "RespawnTime", " ");
-            EffectManager.sendUIEffectText(DeathKey, killer.TransportConnection, true, "RespawnTxt", " ");
+            EffectManager.sendUIEffect(KillCardID, KillCardKey, killer.TransportConnection, true);
+            EffectManager.sendUIEffectImageURL(KillCardKey, killer.TransportConnection, true, "EnemyIcon", victimData.AvatarLink);
+            EffectManager.sendUIEffectImageURL(KillCardKey, killer.TransportConnection, true, "EnemyXPIcon", Plugin.Instance.DBManager.Levels.TryGetValue((int)victimData.Level, out XPLevel level) ? level.IconLinkMedium : "");
+            EffectManager.sendUIEffectText(KillCardKey, killer.TransportConnection, true, "EnemyName", victimData.SteamName.ToUpper());
+            EffectManager.sendUIEffectText(KillCardKey, killer.TransportConnection, true, "EnemyXPNum", Plugin.Instance.Translate("Level_Show", victimData.Level).ToRich());
+            EffectManager.sendUIEffectImageURL(KillCardKey, killer.TransportConnection, true, "DeathBanner", victim.ActiveLoadout?.Card?.Card?.CardLink ?? "https://cdn.discordapp.com/attachments/899796442649092119/927985217975758898/Senosan-85382-HG-Dark-grey-600x600.png");
         }
 
         public void RemoveKillCard(GamePlayer player)

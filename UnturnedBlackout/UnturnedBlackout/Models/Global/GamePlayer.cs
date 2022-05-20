@@ -47,7 +47,6 @@ namespace UnturnedBlackout.Models.Global
         public Timer m_DamageChecker { get; set; }
         public Timer m_TacticalChecker { get; set; }
         public Timer m_LethalChecker { get; set; }
-        public Timer m_KillCardRemover { get; set; }
 
         public GamePlayer(UnturnedPlayer player, ITransportConnection transportConnection)
         {
@@ -68,9 +67,6 @@ namespace UnturnedBlackout.Models.Global
 
             m_LethalChecker = new Timer(1 * 1000);
             m_LethalChecker.Elapsed += EnableLethal;
-
-            m_KillCardRemover = new Timer(2 * 1000);
-            m_KillCardRemover.Elapsed += RemoveKillCard;
         }
 
         // Spawn Protection Seconds
@@ -241,17 +237,6 @@ namespace UnturnedBlackout.Models.Global
             }
 
             Plugin.Instance.UIManager.SendKillCard(this, victim, victimData);
-            if (m_KillCardRemover.Enabled)
-            {
-                m_KillCardRemover.Stop();
-            }
-            m_KillCardRemover.Start();
-        }
-
-        private void RemoveKillCard(object sender, ElapsedEventArgs e)
-        {
-            m_KillCardRemover.Stop();
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.RemoveKillCard(this));
         }
 
         // Death screen
@@ -270,10 +255,7 @@ namespace UnturnedBlackout.Models.Global
             {
                 Plugin.Instance.StopCoroutine(Healer);
             }
-            if (m_KillCardRemover.Enabled)
-            {
-                m_KillCardRemover.Stop();
-            }
+            Plugin.Instance.UIManager.RemoveKillCard(this);
 
             var killerPlayer = Plugin.Instance.GameManager.GetGamePlayer(killer);
             if (killer == null)
