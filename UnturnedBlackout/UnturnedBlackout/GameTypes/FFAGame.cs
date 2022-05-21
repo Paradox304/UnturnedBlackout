@@ -478,7 +478,6 @@ namespace UnturnedBlackout.GameTypes
             }
 
             fPlayer.GamePlayer.OnRevived();
-            SpawnPlayer(fPlayer, false);
         }
 
         public override void OnPlayerRespawn(GamePlayer player, ref Vector3 respawnPosition)
