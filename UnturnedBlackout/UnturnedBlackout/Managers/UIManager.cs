@@ -340,7 +340,7 @@ namespace UnturnedBlackout.Managers
 
         public void RemoveKillCard(GamePlayer player)
         {
-            EffectManager.askEffectClearByID(DeathID, player.TransportConnection);
+            EffectManager.askEffectClearByID(KillCardID, player.TransportConnection);
         }
 
         public void SendLoadingUI(GamePlayer player, EGameType gameMode, ArenaLocation location)
