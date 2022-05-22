@@ -21,6 +21,8 @@ namespace UnturnedBlackout.Instances
     {
         public const ushort ID = 27632;
         public const short Key = 27632;
+        public const ushort MidgameLoadoutSelectionID = 27643;
+        public const short MidgameLoadoutSelectionKey = 27643;
         public const int MaxItemsPerPage = 9;
         public const int MaxSkinsCharmsPerPage = 15;
 
@@ -1032,6 +1034,213 @@ namespace UnturnedBlackout.Instances
         public void ExitRenameLoadout()
         {
             LoadoutNameText = "";
+        }
+
+        // Midgame Loadout Selection
+
+        public void ShowMidgameLoadouts()
+        {
+            Logging.Debug($"Showing midgame loadouts to {Player.CharacterName}");
+            MainPage = EMainPage.Loadout;
+
+            EffectManager.sendUIEffect(MidgameLoadoutSelectionID, MidgameLoadoutSelectionKey, TransportConnection, true);
+            if (!LoadoutPages.TryGetValue(1, out PageLoadout firstPage))
+            {
+                Logging.Debug($"Error finding first page of loadouts midgame for {Player.CharacterName}");
+                LoadoutPageID = 0;
+                EffectManager.sendUIEffectVisibility(MidgameLoadoutSelectionKey, TransportConnection, true, "SERVER Loadout Next BUTTON", false);
+                EffectManager.sendUIEffectVisibility(MidgameLoadoutSelectionKey, TransportConnection, true, "SERVER Loadout Previous Button", false);
+                EffectManager.sendUIEffectText(MidgameLoadoutSelectionKey, TransportConnection, true, "SERVER Loadout Page TEXT", "");
+                return;
+            }
+
+            EffectManager.sendUIEffectVisibility(MidgameLoadoutSelectionKey, TransportConnection, true, "SERVER Loadout Next BUTTON", true);
+            EffectManager.sendUIEffectVisibility(MidgameLoadoutSelectionKey, TransportConnection, true, "SERVER Loadout Previous Button", true);
+            ShowMidgameLoadoutPage(firstPage);
+            SelectedMidgameLoadout(0);
+        }
+
+        public void ForwardMidgameLoadoutPage()
+        {
+            if (LoadoutPageID == 0)
+            {
+                return;
+            }
+            Logging.Debug($"Forwarding midgame loadout page for {Player.CharacterName}, Current Page {LoadoutPageID}");
+
+            if (!LoadoutPages.TryGetValue(LoadoutPageID + 1, out PageLoadout nextPage) && !LoadoutPages.TryGetValue(1, out nextPage))
+            {
+                ShowLoadouts();
+                return;
+            }
+
+            ShowMidgameLoadoutPage(nextPage);
+        }
+
+        public void BackwardMidgameLoadoutPage()
+        {
+            if (LoadoutPageID == 0)
+            {
+                return;
+            }
+            Logging.Debug($"Backwarding midgame loadout page for {Player.CharacterName}, Current Page {LoadoutPageID}");
+
+            if (!LoadoutPages.TryGetValue(LoadoutPageID - 1, out PageLoadout prevPage) && !LoadoutPages.TryGetValue(LoadoutPages.Keys.Max(), out prevPage))
+            {
+                ShowLoadouts();
+                return;
+            }
+
+            ShowMidgameLoadoutPage(prevPage);
+        }
+
+        public void ShowMidgameLoadoutPage(PageLoadout page)
+        {
+            Logging.Debug($"Showing midgame loadout page for {Player.CharacterName} with id {page.PageID}");
+            LoadoutPageID = page.PageID;
+
+            for (int i = 0; i <= 9; i++)
+            {
+                if (!page.Loadouts.TryGetValue(i, out Loadout loadout))
+                {
+                    EffectManager.sendUIEffectVisibility(MidgameLoadoutSelectionKey, TransportConnection, true, $"SERVER Loadout BUTTON {i}", false);
+                    continue;
+                }
+
+                EffectManager.sendUIEffectVisibility(MidgameLoadoutSelectionKey, TransportConnection, true, $"SERVER Loadout BUTTON {i}", true);
+                EffectManager.sendUIEffectText(MidgameLoadoutSelectionKey, TransportConnection, true, $"SERVER Loadout TEXT {i}", loadout.LoadoutName);
+                EffectManager.sendUIEffectVisibility(MidgameLoadoutSelectionKey, TransportConnection, true, $"SERVER Loadout Equipped {i}", loadout.IsActive);
+            }
+        }
+
+        public void SelectedMidgameLoadout(int selected)
+        {
+            Logging.Debug($"{Player.CharacterName} selected midgame loadout at {selected}");
+            if (!LoadoutPages.TryGetValue(LoadoutPageID, out PageLoadout currentPage))
+            {
+                Logging.Debug($"Couldnt find the current selected page at {LoadoutPageID}");
+                return;
+            }
+
+            if (!currentPage.Loadouts.TryGetValue(selected, out Loadout currentLoadout))
+            {
+                Logging.Debug($"Couldnt find the selected loadout at {selected}");
+                return;
+            }
+
+            ShowMidgameLoadout(currentLoadout);
+        }
+
+        public void ShowMidgameLoadout(Loadout loadout)
+        {
+            Logging.Debug($"Showing midgame loadout with id {loadout.LoadoutID} for {Player.CharacterName}");
+            LoadoutID = loadout.LoadoutID;
+
+            EffectManager.sendUIEffectVisibility(MidgameLoadoutSelectionKey, TransportConnection, true, "SERVER Loadout Equip BUTTON", !loadout.IsActive);
+            // Primary
+            Logging.Debug($"Primary is null {loadout.Primary == null}, is skin null {loadout.SecondarySkin == null}");
+            EffectManager.sendUIEffectImageURL(MidgameLoadoutSelectionKey, TransportConnection, true, "SERVER Loadout Primary IMAGE", loadout.PrimarySkin == null ? (loadout.Primary == null ? "" : loadout.Primary.Gun.IconLink) : loadout.PrimarySkin.IconLink);
+            EffectManager.sendUIEffectText(MidgameLoadoutSelectionKey, TransportConnection, true, "SERVER Loadout Primary TEXT", loadout.Primary == null ? "" : loadout.Primary.Gun.GunName);
+            EffectManager.sendUIEffectText(MidgameLoadoutSelectionKey, TransportConnection, true, "SERVER Loadout Primary Level TEXT", loadout.Primary == null ? "" : loadout.Primary.Level.ToString());
+            for (int i = 0; i <= 3; i++)
+            {
+                var attachmentType = (EAttachment)i;
+                loadout.PrimaryAttachments.TryGetValue(attachmentType, out LoadoutAttachment attachment);
+                Logging.Debug($"Primary attachment {attachmentType} is null {attachment == null}");
+                EffectManager.sendUIEffectImageURL(MidgameLoadoutSelectionKey, TransportConnection, true, $"SERVER Loadout Primary {attachmentType} IMAGE", attachment == null ? Utility.GetDefaultAttachmentImage(attachmentType.ToString()) : attachment.Attachment.IconLink);
+            }
+            EffectManager.sendUIEffectImageURL(MidgameLoadoutSelectionKey, TransportConnection, true, "SERVER Loadout Primary Charm IMAGE", loadout.PrimaryGunCharm == null ? Utility.GetDefaultAttachmentImage("charm") : loadout.PrimaryGunCharm.GunCharm.IconLink);
+            EffectManager.sendUIEffectImageURL(MidgameLoadoutSelectionKey, TransportConnection, true, "SERVER Loadout Primary Skin IMAGE", loadout.PrimarySkin == null ? Utility.GetDefaultAttachmentImage("skin") : loadout.PrimarySkin.PatternLink);
+
+            // Secondary
+            Logging.Debug($"Secondary is null {loadout.Secondary == null}, is skin null {loadout.SecondarySkin == null}");
+            EffectManager.sendUIEffectImageURL(MidgameLoadoutSelectionKey, TransportConnection, true, "SERVER Loadout Secondary IMAGE", loadout.SecondarySkin == null ? (loadout.Secondary == null ? "" : loadout.Secondary.Gun.IconLink) : loadout.SecondarySkin.IconLink);
+            EffectManager.sendUIEffectText(MidgameLoadoutSelectionKey, TransportConnection, true, "SERVER Loadout Secondary TEXT", loadout.Secondary == null ? "" : loadout.Secondary.Gun.GunName);
+            EffectManager.sendUIEffectText(MidgameLoadoutSelectionKey, TransportConnection, true, "SERVER Loadout Secondary Level TEXT", loadout.Secondary == null ? "" : loadout.Secondary.Level.ToString());
+            for (int i = 0; i <= 3; i++)
+            {
+                var attachmentType = (EAttachment)i;
+                loadout.SecondaryAttachments.TryGetValue(attachmentType, out LoadoutAttachment attachment);
+                Logging.Debug($"Secondary attachment {attachmentType} is null {attachment == null}");
+                EffectManager.sendUIEffectImageURL(MidgameLoadoutSelectionKey, TransportConnection, true, $"SERVER Loadout Secondary {attachmentType} IMAGE", attachment == null ? Utility.GetDefaultAttachmentImage(attachmentType.ToString()) : attachment.Attachment.IconLink);
+            }
+            EffectManager.sendUIEffectImageURL(MidgameLoadoutSelectionKey, TransportConnection, true, "SERVER Loadout Secondary Charm IMAGE", loadout.SecondaryGunCharm == null ? Utility.GetDefaultAttachmentImage("charm") : loadout.SecondaryGunCharm.GunCharm.IconLink);
+            EffectManager.sendUIEffectImageURL(MidgameLoadoutSelectionKey, TransportConnection, true, "SERVER Loadout Secondary Skin IMAGE", loadout.SecondarySkin == null ? Utility.GetDefaultAttachmentImage("skin") : loadout.SecondarySkin.PatternLink);
+
+            // Knife
+            Logging.Debug($"Knife is null {loadout.Knife == null}");
+            EffectManager.sendUIEffectImageURL(MidgameLoadoutSelectionKey, TransportConnection, true, "SERVER Loadout Knife IMAGE", loadout.Knife == null ? "" : loadout.Knife.Knife.IconLink);
+            EffectManager.sendUIEffectText(MidgameLoadoutSelectionKey, TransportConnection, true, "SERVER Loadout Knife TEXT", loadout.Knife == null ? "" : loadout.Knife.Knife.KnifeName);
+
+            // Tactical
+            Logging.Debug($"Tactical is null {loadout.Tactical == null}");
+            EffectManager.sendUIEffectImageURL(MidgameLoadoutSelectionKey, TransportConnection, true, "SERVER Loadout Tactical IMAGE", loadout.Tactical == null ? "" : loadout.Tactical.Gadget.IconLink);
+            EffectManager.sendUIEffectText(MidgameLoadoutSelectionKey, TransportConnection, true, "SERVER Loadout Tactical TEXT", loadout.Tactical == null ? "" : loadout.Tactical.Gadget.GadgetName);
+
+            // Lethal
+            Logging.Debug($"Lethal is null {loadout.Lethal == null}");
+            EffectManager.sendUIEffectImageURL(MidgameLoadoutSelectionKey, TransportConnection, true, "SERVER Loadout Lethal IMAGE", loadout.Lethal == null ? "" : loadout.Lethal.Gadget.IconLink);
+            EffectManager.sendUIEffectText(MidgameLoadoutSelectionKey, TransportConnection, true, "SERVER Loadout Lethal TEXT", loadout.Lethal == null ? "" : loadout.Lethal.Gadget.GadgetName);
+
+            // Perk
+            for (int i = 1; i <= 3; i++)
+            {
+                loadout.Perks.TryGetValue(i, out LoadoutPerk perk);
+                EffectManager.sendUIEffectImageURL(MidgameLoadoutSelectionKey, TransportConnection, true, $"SERVER Loadout Perk IMAGE {i}", perk == null ? "" : loadout.Perks[i].Perk.IconLink);
+                EffectManager.sendUIEffectText(MidgameLoadoutSelectionKey, TransportConnection, true, $"SERVER Loadout Perk TEXT {i}", perk == null ? "" : loadout.Perks[i].Perk.PerkName);
+            }
+
+            // Killstreak
+            for (int i = 0; i <= 2; i++)
+            {
+                Logging.Debug($"Killstreak at {i} is null {loadout.Killstreaks.Count < (i + 1)}");
+                EffectManager.sendUIEffectImageURL(MidgameLoadoutSelectionKey, TransportConnection, true, $"SERVER Loadout Killstreak IMAGE {i}", loadout.Killstreaks.Count < (i + 1) ? "" : loadout.Killstreaks[i].Killstreak.IconLink);
+                EffectManager.sendUIEffectText(MidgameLoadoutSelectionKey, TransportConnection, true, $"SERVER Loadout Killstreak TEXT {i}", loadout.Killstreaks.Count < (i + 1) ? "" : loadout.Killstreaks[i].Killstreak.KillstreakName);
+            }
+
+            // Card
+            Logging.Debug($"Card is null {loadout.Card == null}");
+            EffectManager.sendUIEffectImageURL(MidgameLoadoutSelectionKey, TransportConnection, true, $"SERVER Loadout Card IMAGE", loadout.Card == null ? "" : loadout.Card.Card.IconLink);
+            EffectManager.sendUIEffectText(MidgameLoadoutSelectionKey, TransportConnection, true, $"SERVER Loadout Card TEXT", loadout.Card == null ? "" : loadout.Card.Card.CardName);
+
+            // Glove
+            Logging.Debug($"Glove is null {loadout.Glove == null}");
+            EffectManager.sendUIEffectImageURL(MidgameLoadoutSelectionKey, TransportConnection, true, $"SERVER Loadout Glove IMAGE", loadout.Glove == null ? "" : loadout.Glove.Glove.IconLink);
+            EffectManager.sendUIEffectText(MidgameLoadoutSelectionKey, TransportConnection, true, $"SERVER Loadout Glove TEXT", loadout.Glove == null ? "" : loadout.Glove.Glove.GloveName);
+        }
+
+        public void EquipMidgameLoadout()
+        {
+            Logging.Debug($"{Player.CharacterName} activated loadout midgame with id {LoadoutID}");
+            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
+            {
+                Logging.Debug($"Error finding loadout with id {LoadoutID} for {Player.CharacterName}");
+                return;
+            }
+
+            ThreadPool.QueueUserWorkItem(async (o) =>
+            {
+                foreach (var activeLoadout in PlayerLoadout.Loadouts.Values.Where(k => k.IsActive))
+                {
+                    await DB.UpdatePlayerLoadoutActiveAsync(Player.CSteamID, activeLoadout.LoadoutID, false);
+                }
+
+                await DB.UpdatePlayerLoadoutActiveAsync(Player.CSteamID, LoadoutID, true);
+                TaskDispatcher.QueueOnMainThread(() =>
+                {
+                    ClearMidgameLoadouts();
+                    var gPlayer = Plugin.Instance.GameManager.GetGamePlayer(Player);
+                    if (gPlayer != null)
+                    {
+                        gPlayer.IsPendingLoadoutChange = true;
+                    }
+                });
+            });
+        }
+
+        public void ClearMidgameLoadouts()
+        {
+            EffectManager.askEffectClearByID(MidgameLoadoutSelectionID, TransportConnection);
         }
 
         // Loadout Sub Page

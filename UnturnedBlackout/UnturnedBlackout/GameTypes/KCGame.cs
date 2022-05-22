@@ -138,6 +138,8 @@ namespace UnturnedBlackout.GameTypes
             foreach (var player in Players)
             {
                 Plugin.Instance.UIManager.ClearKCHUD(player.GamePlayer);
+                Plugin.Instance.UIManager.ClearMidgameLoadoutUI(player.GamePlayer);
+
                 if (player.GamePlayer.HasScoreboard)
                 {
                     player.GamePlayer.HasScoreboard = false;
@@ -517,7 +519,7 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
-            kPlayer.GamePlayer.OnRevived();
+            kPlayer.GamePlayer.OnRevived(kPlayer.Team.Info.TeamKits[UnityEngine.Random.Range(0, kPlayer.Team.Info.TeamKits.Count)]);
         }
 
         public override void OnPlayerRespawn(GamePlayer player, ref Vector3 respawnPosition)

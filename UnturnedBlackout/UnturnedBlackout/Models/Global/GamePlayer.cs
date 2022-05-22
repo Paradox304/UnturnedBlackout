@@ -20,6 +20,7 @@ namespace UnturnedBlackout.Models.Global
         public UnturnedPlayer Player { get; set; }
         public ITransportConnection TransportConnection { get; set; }
 
+        public bool IsPendingLoadoutChange { get; set; }
         public Loadout ActiveLoadout { get; set; }
 
         public bool HasScoreboard { get; set; }
@@ -256,6 +257,7 @@ namespace UnturnedBlackout.Models.Global
                 Plugin.Instance.StopCoroutine(Healer);
             }
             Plugin.Instance.UIManager.RemoveKillCard(this);
+            Plugin.Instance.UIManager.ClearMidgameLoadoutUI(this);
 
             var killerPlayer = Plugin.Instance.GameManager.GetGamePlayer(killer);
             if (killer == null)
@@ -279,8 +281,16 @@ namespace UnturnedBlackout.Models.Global
         }
 
         // Equipping and refilling on guns on respawn
-        public void OnRevived()
+        public void OnRevived(Kit kit)
         {
+            if (IsPendingLoadoutChange)
+            {
+                Plugin.Instance.LoadoutManager.GiveLoadout(this, kit);
+                IsPendingLoadoutChange = false;
+                Plugin.Instance.UIManager.ClearDeathUI(this);
+                return;
+            }
+
             for (byte i = 0; i <= 1; i++)
             {
                 var item = Player.Player.inventory.getItem(i, 0);
@@ -295,7 +305,6 @@ namespace UnturnedBlackout.Models.Global
             }
 
             Player.Player.equipment.tryEquip(LastEquippedPage, LastEquippedX, LastEquippedY);
-            Plugin.Instance.UIManager.ClearDeathUI(this);
         }
 
 
@@ -427,6 +436,7 @@ namespace UnturnedBlackout.Models.Global
 
             HasScoreboard = false;
             HasAnimationGoingOn = false;
+            IsPendingLoadoutChange = false;
             LastDamager.Clear();
             Plugin.Instance.UIManager.ClearDeathUI(this);
         }

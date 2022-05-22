@@ -103,6 +103,7 @@ namespace UnturnedBlackout.GameTypes
             {
                 var player = Players[index];
                 Plugin.Instance.UIManager.ClearFFAHUD(player.GamePlayer);
+                Plugin.Instance.UIManager.ClearMidgameLoadoutUI(player.GamePlayer);
                 if (player.GamePlayer.HasScoreboard)
                 {
                     player.GamePlayer.HasScoreboard = false;
@@ -477,7 +478,7 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
-            fPlayer.GamePlayer.OnRevived();
+            fPlayer.GamePlayer.OnRevived(Config.FFA.Kit);
         }
 
         public override void OnPlayerRespawn(GamePlayer player, ref Vector3 respawnPosition)

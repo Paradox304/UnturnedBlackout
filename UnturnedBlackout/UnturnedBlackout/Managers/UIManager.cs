@@ -62,9 +62,6 @@ namespace UnturnedBlackout.Managers
         public const ushort LoadingUIID = 27640;
         public const short LoadingUIKey = 27640;
 
-        public const ushort LoadoutSelectionID = 27643;
-        public const short LoadoutSelectionKey = 27643;
-
         public UIManager()
         {
             Config = Plugin.Instance.Configuration.Instance;
@@ -384,6 +381,10 @@ namespace UnturnedBlackout.Managers
             EffectManager.askEffectClearByID(PreEndingUIID, player.TransportConnection);
         }
 
+        public void ClearMidgameLoadoutUI(GamePlayer player)
+        {
+            EffectManager.askEffectClearByID(27643, player.TransportConnection);
+        }
         // FFA RELATED UI
 
         public void SendFFAHUD(GamePlayer player)
@@ -1012,8 +1013,9 @@ namespace UnturnedBlackout.Managers
         {
             Logging.Debug($"{player.channel.owner.playerID.characterName} clicked {buttonName}");
             var ply = UnturnedPlayer.FromPlayer(player);
+            bool isGame = Plugin.Instance.GameManager.TryGetCurrentGame(ply.CSteamID, out _);
 
-            if (!UIHandlersLookup.TryGetValue(player.channel.owner.playerID.steamID, out UIHandler handler))
+            if (!UIHandlersLookup.TryGetValue(ply.CSteamID, out UIHandler handler))
             {
                 Logging.Debug($"Error finding handler for {player.channel.owner.playerID.characterName}");
                 return;
@@ -1046,16 +1048,25 @@ namespace UnturnedBlackout.Managers
                     handler.SetupMainMenu();
                     return;
                 case "SERVER Loadout Next BUTTON":
-                    handler.ForwardLoadoutPage();
+                    if (!isGame)
+                        handler.ForwardLoadoutPage();
+                    else
+                        handler.ForwardMidgameLoadoutPage();
                     return;
                 case "SERVER Loadout Previous BUTTON":
-                    handler.BackwardLoadoutPage();
+                    if (!isGame)
+                        handler.BackwardLoadoutPage();
+                    else
+                        handler.BackwardMidgameLoadoutPage();
                     return;
                 case "SERVER Loadout Back BUTTON":
                     handler.SetupMainMenu();
                     return;
                 case "SERVER Loadout Equip BUTTON":
-                    handler.EquipLoadout();
+                    if (!isGame)
+                        handler.EquipLoadout();
+                    else
+                        handler.EquipMidgameLoadout();
                     return;
                 case "SERVER Loadout Rename Confirm BUTTON":
                     handler.RenameLoadout();
@@ -1199,7 +1210,10 @@ namespace UnturnedBlackout.Managers
             {
                 if (int.TryParse(buttonName.Replace("SERVER Loadout BUTTON", ""), out int selected))
                 {
-                    handler.SelectedLoadout(selected);
+                    if (!isGame)
+                        handler.SelectedLoadout(selected);
+                    else
+                        handler.SelectedMidgameLoadout(selected);
                 }
             } else if (buttonName.StartsWith("SERVER Play BUTTON"))
             {
