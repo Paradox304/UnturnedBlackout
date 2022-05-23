@@ -381,10 +381,19 @@ namespace UnturnedBlackout.Managers
             EffectManager.askEffectClearByID(PreEndingUIID, player.TransportConnection);
         }
 
+        public void ShowMidgameLoadoutUI(GamePlayer player)
+        {
+            if (UIHandlersLookup.TryGetValue(player.SteamID, out UIHandler handler))
+            {
+                handler.ShowMidgameLoadouts();
+            }
+        }
+
         public void ClearMidgameLoadoutUI(GamePlayer player)
         {
             EffectManager.askEffectClearByID(27643, player.TransportConnection);
         }
+
         // FFA RELATED UI
 
         public void SendFFAHUD(GamePlayer player)
