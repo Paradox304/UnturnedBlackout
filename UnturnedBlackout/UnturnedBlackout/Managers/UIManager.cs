@@ -391,6 +391,7 @@ namespace UnturnedBlackout.Managers
 
         public void ClearMidgameLoadoutUI(GamePlayer player)
         {
+            player.Player.Player.disablePluginWidgetFlag(EPluginWidgetFlags.Modal);
             EffectManager.askEffectClearByID(27643, player.TransportConnection);
         }
 

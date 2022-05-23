@@ -19,7 +19,7 @@ namespace UnturnedBlackout.Commands
 
         public string Syntax => "/loadouts";
 
-        public List<string> Aliases => new List<string>();
+        public List<string> Aliases => new List<string> { "loadout" };
 
         public List<string> Permissions => new List<string>();
 
@@ -33,9 +33,9 @@ namespace UnturnedBlackout.Commands
             }
             if (Plugin.Instance.GameManager.TryGetCurrentGame(gPlayer.SteamID, out Game game))
             {
-                if (game.GamePhase == Enums.EGamePhase.Started)
+                if (game.GamePhase == Enums.EGamePhase.Started || game.GamePhase == Enums.EGamePhase.WaitingForPlayers)
                 {
-
+                    Plugin.Instance.UIManager.ShowMidgameLoadoutUI(gPlayer);
                 }
             }
         }

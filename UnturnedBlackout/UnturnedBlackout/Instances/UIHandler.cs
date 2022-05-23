@@ -1043,6 +1043,7 @@ namespace UnturnedBlackout.Instances
             Logging.Debug($"Showing midgame loadouts to {Player.CharacterName}");
             MainPage = EMainPage.Loadout;
 
+            Player.Player.enablePluginWidgetFlag(EPluginWidgetFlags.Modal);
             EffectManager.sendUIEffect(MidgameLoadoutSelectionID, MidgameLoadoutSelectionKey, TransportConnection, true);
             if (!LoadoutPages.TryGetValue(1, out PageLoadout firstPage))
             {
@@ -1241,6 +1242,7 @@ namespace UnturnedBlackout.Instances
         public void ClearMidgameLoadouts()
         {
             EffectManager.askEffectClearByID(MidgameLoadoutSelectionID, TransportConnection);
+            Player.Player.disablePluginWidgetFlag(EPluginWidgetFlags.Modal);
         }
 
         // Loadout Sub Page

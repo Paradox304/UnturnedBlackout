@@ -305,6 +305,7 @@ namespace UnturnedBlackout.Models.Global
             }
 
             Player.Player.equipment.tryEquip(LastEquippedPage, LastEquippedX, LastEquippedY);
+            Plugin.Instance.UIManager.ClearDeathUI(this);
         }
 
 

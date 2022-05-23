@@ -205,7 +205,8 @@ namespace UnturnedBlackout.GameTypes
             Plugin.Instance.UIManager.OnGameCountUpdated(this);
             Plugin.Instance.UIManager.SendLoadingUI(player, GameMode, Location);
             yield return new WaitForSeconds(5);
-
+            var currentPos = player.Player.Position;
+            player.Player.Player.teleportToLocationUnsafe(new Vector3(currentPos.x, currentPos.y + 100, currentPos.z), 0);
             GiveLoadout(kPlayer);
             Plugin.Instance.UIManager.SendPreEndingUI(kPlayer.GamePlayer);
             SpawnPlayer(kPlayer);
@@ -501,6 +502,12 @@ namespace UnturnedBlackout.GameTypes
             var kPlayer = GetKCPlayer(parameters.killer);
             if (kPlayer == null)
             {
+                return;
+            }
+
+            if (kPlayer.Team == player.Team)
+            {
+                shouldAllow = false;
                 return;
             }
 

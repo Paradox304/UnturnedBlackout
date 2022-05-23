@@ -3,10 +3,12 @@ using Rocket.API.Collections;
 using Rocket.Core.Plugins;
 using SDG.Unturned;
 using Steamworks;
+using System;
 using System.Collections;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
+using UnturnedBlackout.GameTypes;
 using UnturnedBlackout.Managers;
 using Logger = Rocket.Core.Logging.Logger;
 
@@ -36,6 +38,8 @@ namespace UnturnedBlackout
             ResourceManager.onDamageResourceRequested += OnDamageResource;
             StructureManager.onDamageStructureRequested += OnDamageStructure;
 
+            PlayerInput.onPluginKeyTick += OnHotkeyPressed;
+
             Logger.Log("Unturned Blackout has been loaded");
         }
 
@@ -52,9 +56,29 @@ namespace UnturnedBlackout
             ResourceManager.onDamageResourceRequested -= OnDamageResource;
             StructureManager.onDamageStructureRequested -= OnDamageStructure;
 
+            PlayerInput.onPluginKeyTick -= OnHotkeyPressed;
             StopAllCoroutines();
 
             Logger.Log("Unturned Blackout has been unloaded");
+        }
+
+        private void OnHotkeyPressed(Player player, uint simulation, byte key, bool state)
+        {
+            if (key != 1) return;
+            if (state == false) return;
+
+            var gPlayer = GameManager.GetGamePlayer(player);
+            if (gPlayer == null)
+            {
+                return;
+            }
+            if (GameManager.TryGetCurrentGame(gPlayer.SteamID, out Game game))
+            {
+                if (game.GamePhase == Enums.EGamePhase.Started || game.GamePhase == Enums.EGamePhase.WaitingForPlayers)
+                {
+                    UIManager.ShowMidgameLoadoutUI(gPlayer);
+                }
+            }
         }
 
         public IEnumerator Day()
