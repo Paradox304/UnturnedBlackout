@@ -1039,6 +1039,9 @@ namespace UnturnedBlackout.Managers
                 case "SERVER Loadout BUTTON":
                     handler.ShowLoadouts();
                     return;
+                case "SERVER Loadout Close BUTTON":
+                    handler.ClearMidgameLoadouts();
+                    return;
                 case "SERVER Exit BUTTON":
                     Provider.kick(player.channel.owner.playerID.steamID, "You exited");
                     return;
