@@ -675,6 +675,25 @@ namespace UnturnedBlackout.GameTypes
             });
         }
 
+        public override void PlayerConsumeableUsed(GamePlayer player)
+        {
+            var tPlayer = GetTDMPlayer(player.Player);
+            if (tPlayer == null)
+            {
+                return;
+            }
+
+            player.UsedTactical();
+
+            TaskDispatcher.QueueOnMainThread(() =>
+            {
+                if (player.Player.Player.equipment.itemID == (player.ActiveLoadout.Tactical?.Gadget?.GadgetID ?? 0))
+                {
+                    player.Player.Player.equipment.dequip();
+                }
+            });
+        }
+
         public override void PlayerBarricadeSpawned(GamePlayer player, BarricadeDrop drop)
         {
             var tPlayer = GetTDMPlayer(player.Player);
