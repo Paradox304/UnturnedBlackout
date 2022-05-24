@@ -33,6 +33,7 @@ namespace UnturnedBlackout.Managers
             U.Events.OnPlayerConnected += OnPlayerJoined;
             U.Events.OnPlayerDisconnected += OnPlayerLeft;
             PlayerLife.onPlayerDied += OnPlayerDeath;
+            ChatManager.onChatted += OnMessageSent;
 
             StartGames();
         }
@@ -199,6 +200,14 @@ namespace UnturnedBlackout.Managers
             }
         }
 
+        private void OnMessageSent(SteamPlayer player, EChatMode mode, ref UnityEngine.Color chatted, ref bool isRich, string text, ref bool isVisible)
+        {
+            if (!Plugin.Instance.GameManager.TryGetCurrentGame(player.playerID.steamID, out _))
+            {
+                isVisible = false;
+            }
+        }
+
         public void SendPlayerToLobby(UnturnedPlayer player)
         {
             player.Player.inventory.ClearInventory();
@@ -217,6 +226,8 @@ namespace UnturnedBlackout.Managers
             U.Events.OnPlayerDisconnected -= OnPlayerLeft;
 
             PlayerLife.onPlayerDied -= OnPlayerDeath;
+
+            ChatManager.onChatted -= OnMessageSent;
         }
 
         public GamePlayer GetGamePlayer(UnturnedPlayer player)

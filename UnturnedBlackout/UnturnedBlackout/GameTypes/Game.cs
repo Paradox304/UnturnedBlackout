@@ -50,7 +50,7 @@ namespace UnturnedBlackout.GameTypes
             ItemManager.onTakeItemRequested += OnTakeItem;
             UseableThrowable.onThrowableSpawned += OnThrowableSpawned;
             BarricadeManager.onBarricadeSpawned += OnBarricadeSpawned;
-
+            
             KillFeedChecker = Plugin.Instance.StartCoroutine(UpdateKillfeed());
         }
 

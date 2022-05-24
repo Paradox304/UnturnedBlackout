@@ -552,7 +552,7 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
-            if (kPlayer.Team == player.Team)
+            if (kPlayer.Team == player.Team || kPlayer == player)
             {
                 shouldAllow = false;
                 return;
@@ -616,6 +616,12 @@ namespace UnturnedBlackout.GameTypes
 
             Logging.Debug($"{player.Player.CharacterName} is trying to pick up item {itemData.item.id}");
             var otherTeam = cPlayer.Team == BlueTeam ? RedTeam : BlueTeam;
+
+            if (player.Player.Player.equipment.isBusy)
+            {
+                shouldAllow = false;
+                return;
+            }
 
             if (cPlayer.Team.FlagID == itemData.item.id)
             {

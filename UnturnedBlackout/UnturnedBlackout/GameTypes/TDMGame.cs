@@ -520,7 +520,7 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
-            if (kPlayer.Team == player.Team)
+            if (kPlayer.Team == player.Team || kPlayer == player)
             {
                 shouldAllow = false;
                 return;

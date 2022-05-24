@@ -465,6 +465,12 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
+            if (kPlayer == player)
+            {
+                shouldAllow = false;
+                return;
+            }
+
             if (kPlayer.GamePlayer.HasSpawnProtection)
             {
                 kPlayer.GamePlayer.m_RemoveSpawnProtection.Stop();
