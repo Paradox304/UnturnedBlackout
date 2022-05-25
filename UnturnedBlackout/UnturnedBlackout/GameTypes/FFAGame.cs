@@ -528,6 +528,7 @@ namespace UnturnedBlackout.GameTypes
             {
                 if (!Plugin.Instance.DBManager.PlayerData.TryGetValue(player.SteamID, out PlayerData data) || data.IsMuted)
                 {
+                    Utility.Say(player.Player, $"<color=red>You are muted for " + (data.MuteExpiry.UtcDateTime - DateTime.UtcNow).ToString("d 'Days,' h 'Hours,' m 'Minutes,' s 'Seconds'") + "</color>");
                     return;
                 }
 

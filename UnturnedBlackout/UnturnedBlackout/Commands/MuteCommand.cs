@@ -80,7 +80,7 @@ namespace UnturnedBlackout.Commands
                     TaskDispatcher.QueueOnMainThread(() => Utility.Say(UnturnedPlayer.FromCSteamID(steamID), Plugin.Instance.Translate("Muted", seconds, command[2]).ToRich()));
                 }
 
-                TaskDispatcher.QueueOnMainThread(() => Utility.Say(caller, $"<color=green>Player has been muted for {seconds} for {command[2]}"));
+                TaskDispatcher.QueueOnMainThread(() => Utility.Say(caller, $"<color=green>Player has been muted for {seconds} for {command[2]}</color>"));
 
                 Embed embed = new Embed(null, $"**{profile.SteamID}** was muted for **{seconds}** second(s)", null, "15105570", DateTime.UtcNow.ToString("s"),
                                         new Footer(Provider.serverName, Provider.configData.Browser.Icon),

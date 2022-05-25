@@ -158,6 +158,8 @@ namespace UnturnedBlackout.Managers
                                                     null, null);
                             if (!string.IsNullOrEmpty(Plugin.Instance.Configuration.Instance.WebhookURL))
                                 DiscordManager.SendEmbed(embed, "Player Unmuted", Plugin.Instance.Configuration.Instance.WebhookURL);
+
+                            TaskDispatcher.QueueOnMainThread(() => Utility.Say(UnturnedPlayer.FromCSteamID(data.SteamID), Plugin.Instance.Translate("Unmuted").ToRich()));
                         }
                         catch (Exception)
                         {
