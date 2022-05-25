@@ -129,6 +129,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Commands\AddCardCommand.cs" />
     <Compile Include="Commands\CTFSPCommand.cs" />
     <Compile Include="Commands\FFASPCommand.cs" />
     <Compile Include="Commands\GetNavMeshCommand.cs" />
