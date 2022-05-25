@@ -94,6 +94,9 @@ namespace UnturnedBlackout.Models.Global
         {
             ActiveLoadout = loadout;
 
+            HasTactical = false;
+            HasLethal = false;
+
             if (loadout == null)
             {
                 return;
@@ -113,20 +116,18 @@ namespace UnturnedBlackout.Models.Global
 
             if (loadout.Tactical != null)
             {
-                HasTactical = false;
+                HasTactical = true;
                 m_TacticalChecker.Interval = loadout.Tactical.Gadget.GiveSeconds * 1000;
-                m_TacticalChecker.Start();
             }
 
             if (loadout.Lethal != null)
             {
-                HasLethal = false;
+                HasLethal = true;
                 m_LethalChecker.Interval = loadout.Lethal.Gadget.GiveSeconds * 1000;
-                m_LethalChecker.Start();
             }
 
-            Plugin.Instance.HUDManager.UpdateGadget(this, false, true);
-            Plugin.Instance.HUDManager.UpdateGadget(this, true, true);
+            Plugin.Instance.HUDManager.UpdateGadget(this, false, !HasLethal);
+            Plugin.Instance.HUDManager.UpdateGadget(this, true, !HasTactical);
         }
 
         // Tactical and Lethal

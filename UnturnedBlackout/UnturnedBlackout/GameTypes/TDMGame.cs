@@ -524,7 +524,7 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
-            if (kPlayer.Team == player.Team)
+            if (kPlayer.Team == player.Team || kPlayer == player)
             {
                 shouldAllow = false;
                 return;
@@ -673,6 +673,25 @@ namespace UnturnedBlackout.GameTypes
             TaskDispatcher.QueueOnMainThread(() =>
             {
                 if (player.Player.Player.equipment.itemID == (isTactical ? player.ActiveLoadout.Tactical.Gadget.GadgetID : player.ActiveLoadout.Lethal.Gadget.GadgetID))
+                {
+                    player.Player.Player.equipment.dequip();
+                }
+            });
+        }
+
+        public override void PlayerConsumeableUsed(GamePlayer player)
+        {
+            var tPlayer = GetTDMPlayer(player.Player);
+            if (tPlayer == null)
+            {
+                return;
+            }
+
+            player.UsedTactical();
+
+            TaskDispatcher.QueueOnMainThread(() =>
+            {
+                if (player.Player.Player.equipment.itemID == (player.ActiveLoadout.Tactical?.Gadget?.GadgetID ?? 0))
                 {
                     player.Player.Player.equipment.dequip();
                 }

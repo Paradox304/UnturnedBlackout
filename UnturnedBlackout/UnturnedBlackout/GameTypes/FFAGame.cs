@@ -468,6 +468,12 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
+            if (kPlayer == player)
+            {
+                shouldAllow = false;
+                return;
+            }
+
             if (kPlayer.GamePlayer.HasSpawnProtection)
             {
                 kPlayer.GamePlayer.m_RemoveSpawnProtection.Stop();
@@ -575,6 +581,25 @@ namespace UnturnedBlackout.GameTypes
             {
                 return;
             }
+        }
+
+        public override void PlayerConsumeableUsed(GamePlayer player)
+        {
+            var fPlayer = GetFFAPlayer(player.Player);
+            if (fPlayer == null)
+            {
+                return;
+            }
+
+            player.UsedTactical();
+
+            TaskDispatcher.QueueOnMainThread(() =>
+            {
+                if (player.Player.Player.equipment.itemID == (player.ActiveLoadout.Tactical?.Gadget?.GadgetID ?? 0))
+                {
+                    player.Player.Player.equipment.dequip();
+                }
+            });
         }
 
         public override void PlayerBarricadeSpawned(GamePlayer player, BarricadeDrop drop)
