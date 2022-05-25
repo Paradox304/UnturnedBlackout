@@ -468,6 +468,10 @@ namespace UnturnedBlackout.GameTypes
                     {
                         await Plugin.Instance.DBManager.IncreasePlayerKillstreakKillsAsync(kPlayer.GamePlayer.SteamID, equipmentUsed, 1);
                     }
+                    else if (kPlayer.GamePlayer.ActiveLoadout.Knife != null && kPlayer.GamePlayer.ActiveLoadout.Knife.Knife.KnifeID == equipmentUsed)
+                    {
+                        await Plugin.Instance.DBManager.IncreasePlayerKnifeKillsAsync(kPlayer.GamePlayer.SteamID, equipmentUsed, 1);
+                    }
                 });
             });
         }
@@ -568,7 +572,7 @@ namespace UnturnedBlackout.GameTypes
             isVisible = false;
             TaskDispatcher.QueueOnMainThread(() =>
             {
-                if (!Plugin.Instance.DBManager.PlayerData.TryGetValue(player.SteamID, out PlayerData data))
+                if (!Plugin.Instance.DBManager.PlayerData.TryGetValue(player.SteamID, out PlayerData data) || data.IsMuted)
                 {
                     return;
                 }

@@ -145,7 +145,7 @@ namespace UnturnedBlackout.Managers
                     await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{LevelsTableName}` ( `Level` INT UNSIGNED NOT NULL , `XPNeeded` INT UNSIGNED NOT NULL , `IconLinkLarge` TEXT NOT NULL , `IconLinkMedium` TEXT NOT NULL , `IconLinkSmall` TEXT NOT NULL , PRIMARY KEY (`Level`));", Conn).ExecuteScalarAsync();
 
                     // PLAYERS DATA
-                    await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PlayersTableName}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `SteamName` TEXT NOT NULL , `AvatarLink` VARCHAR(200) NOT NULL , `XP` INT UNSIGNED NOT NULL DEFAULT '0' , `Level` INT UNSIGNED NOT NULL DEFAULT '1' , `Credits` INT UNSIGNED NOT NULL DEFAULT '0' , `Scrap` INT UNSIGNED NOT NULL DEFAULT '0' , `Coins` INT UNSIGNED NOT NULL DEFAULT '0' , `Kills` INT UNSIGNED NOT NULL DEFAULT '0' , `HeadshotKills` INT UNSIGNED NOT NULL DEFAULT '0' , `HighestKillstreak` INT UNSIGNED NOT NULL DEFAULT '0' , `HighestMultiKills` INT UNSIGNED NOT NULL DEFAULT '0' , `KillsConfirmed` INT UNSIGNED NOT NULL DEFAULT '0' , `KillsDenied` INT UNSIGNED NOT NULL DEFAULT '0' , `FlagsCaptured` INT UNSIGNED NOT NULL DEFAULT '0' , `FlagsSaved` INT UNSIGNED NOT NULL DEFAULT '0' , `AreasTaken` INT UNSIGNED NOT NULL DEFAULT '0' , `Deaths` INT UNSIGNED NOT NULL DEFAULT '0' , `Music` BOOLEAN NOT NULL DEFAULT TRUE , PRIMARY KEY (`SteamID`));", Conn).ExecuteScalarAsync();
+                    await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PlayersTableName}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `SteamName` TEXT NOT NULL , `AvatarLink` VARCHAR(200) NOT NULL , `XP` INT UNSIGNED NOT NULL DEFAULT '0' , `Level` INT UNSIGNED NOT NULL DEFAULT '1' , `Credits` INT UNSIGNED NOT NULL DEFAULT '0' , `Scrap` INT UNSIGNED NOT NULL DEFAULT '0' , `Coins` INT UNSIGNED NOT NULL DEFAULT '0' , `Kills` INT UNSIGNED NOT NULL DEFAULT '0' , `HeadshotKills` INT UNSIGNED NOT NULL DEFAULT '0' , `HighestKillstreak` INT UNSIGNED NOT NULL DEFAULT '0' , `HighestMultiKills` INT UNSIGNED NOT NULL DEFAULT '0' , `KillsConfirmed` INT UNSIGNED NOT NULL DEFAULT '0' , `KillsDenied` INT UNSIGNED NOT NULL DEFAULT '0' , `FlagsCaptured` INT UNSIGNED NOT NULL DEFAULT '0' , `FlagsSaved` INT UNSIGNED NOT NULL DEFAULT '0' , `AreasTaken` INT UNSIGNED NOT NULL DEFAULT '0' , `Deaths` INT UNSIGNED NOT NULL DEFAULT '0' , `Music` BOOLEAN NOT NULL DEFAULT TRUE , `IsMuted` BOOLEAN NOT NULL DEFAULT FALSE , `MuteExpiry` BIGINT NOT NULL , PRIMARY KEY (`SteamID`));", Conn).ExecuteScalarAsync();
                     await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PlayersGunsTableName}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `GunID` SMALLINT UNSIGNED NOT NULL , `Level` INT UNSIGNED NOT NULL , `XP` INT UNSIGNED NOT NULL , `GunKills` INT UNSIGNED NOT NULL , `IsBought` BOOLEAN NOT NULL , `Attachments` TEXT NOT NULL , CONSTRAINT `ub_steam_id` FOREIGN KEY (`SteamID`) REFERENCES `{PlayersTableName}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_gun_id_1` FOREIGN KEY (`GunID`) REFERENCES `{GunsTableName}` (`GunID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `GunID`));", Conn).ExecuteScalarAsync();
                     await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PlayersGunsSkinsTableName}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `SkinIDs` TEXT NOT NULL , CONSTRAINT `ub_steam_id_1` FOREIGN KEY (`SteamID`) REFERENCES `{PlayersTableName}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID`));", Conn).ExecuteScalarAsync();
                     await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PlayersGunsCharmsTableName}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `CharmID` SMALLINT UNSIGNED NOT NULL , `IsBought` BOOLEAN NOT NULL , CONSTRAINT `ub_steam_id_10` FOREIGN KEY (`SteamID`) REFERENCES `{PlayersTableName}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_charm_id` FOREIGN KEY (`CharmID`) REFERENCES `{GunsCharmsTableName}` (`CharmID`) ON DELETE CASCADE ON UPDATE CASCADE , Primary Key (`SteamID`, `CharmID`));", Conn).ExecuteScalarAsync();
@@ -1044,7 +1044,7 @@ namespace UnturnedBlackout.Managers
                 {
                     Logging.Debug($"Adding {steamName} to the DB");
                     await Conn.OpenAsync();
-                    var cmd = new MySqlCommand($"INSERT INTO `{PlayersTableName}` ( `SteamID` , `SteamName` , `AvatarLink` ) VALUES ({player.CSteamID}, @name, '{avatarLink}') ON DUPLICATE KEY UPDATE `AvatarLink` = '{avatarLink}', `SteamName` = @name;", Conn);
+                    var cmd = new MySqlCommand($"INSERT INTO `{PlayersTableName}` ( `SteamID` , `SteamName` , `AvatarLink` , `MuteExpiry` ) VALUES ({player.CSteamID}, @name, '{avatarLink}' , {DateTimeOffset.UtcNow.ToUnixTimeSeconds()}) ON DUPLICATE KEY UPDATE `AvatarLink` = '{avatarLink}', `SteamName` = @name;", Conn);
                     cmd.Parameters.AddWithValue("@name", steamName);
                     await cmd.ExecuteScalarAsync();
 
@@ -1229,12 +1229,24 @@ namespace UnturnedBlackout.Managers
                                 continue;
                             }
 
+                            if (!bool.TryParse(rdr[19].ToString(), out bool isMuted))
+                            {
+                                continue;
+                            }
+
+                            if (!long.TryParse(rdr[20].ToString(), out long muteUnixSeconds))
+                            {
+                                continue;
+                            }
+
+                            var muteExpiry = DateTimeOffset.FromUnixTimeSeconds(muteUnixSeconds);
+
                             if (PlayerData.ContainsKey(player.CSteamID))
                             {
                                 PlayerData.Remove(player.CSteamID);
                             }
 
-                            PlayerData.Add(player.CSteamID, new PlayerData(player.CSteamID, steamName, avatarLink, xp, level, credits, scrap, coins, kills, headshotKills, highestKillstreak, highestMultiKills, killsConfirmed, killsDenied, flagsCaptured, flagsSaved, areasTaken, deaths, music));
+                            PlayerData.Add(player.CSteamID, new PlayerData(player.CSteamID, steamName, avatarLink, xp, level, credits, scrap, coins, kills, headshotKills, highestKillstreak, highestMultiKills, killsConfirmed, killsDenied, flagsCaptured, flagsSaved, areasTaken, deaths, music, isMuted, muteExpiry));
                         }
                     }
                     catch (Exception ex)
@@ -2445,6 +2457,57 @@ namespace UnturnedBlackout.Managers
                 catch (Exception ex)
                 {
                     Logger.Log($"Error changing music to {isMusic} for player with steam id {steamID}");
+                    Logger.Log(ex);
+                }
+                finally
+                {
+                    await Conn.CloseAsync();
+                }
+            }
+        }
+
+        public async Task ChangePlayerMutedAsync(CSteamID steamID, bool isMuted)
+        {
+            using (MySqlConnection Conn = new MySqlConnection(ConnectionString))
+            {
+                try
+                {
+                    await Conn.OpenAsync();
+
+                    await new MySqlCommand($"UPDATE `{PlayersTableName}` SET `IsMuted` = {isMuted} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                    if (PlayerData.TryGetValue(steamID, out PlayerData data))
+                    {
+                        data.IsMuted = isMuted;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log($"Error changing is muted to {isMuted} for player with steam id {steamID}");
+                    Logger.Log(ex);
+                }
+                finally
+                {
+                    await Conn.CloseAsync();
+                }
+            }
+        }
+
+        public async Task ChangePlayerMuteExpiryAsync(CSteamID steamID, DateTimeOffset muteExpiry)
+        {
+            using (MySqlConnection Conn = new MySqlConnection(ConnectionString))
+            {
+                try
+                {
+                    await Conn.OpenAsync();
+                    await new MySqlCommand($"UPDATE `{PlayersTableName}` SET `MuteExpiry` = {muteExpiry.ToUnixTimeSeconds()} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                    if (PlayerData.TryGetValue(steamID, out PlayerData data))
+                    {
+                        data.MuteExpiry = muteExpiry;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log($"Error changing mute expiry to {muteExpiry.ToUnixTimeSeconds()} for player with steam id {steamID}");
                     Logger.Log(ex);
                 }
                 finally

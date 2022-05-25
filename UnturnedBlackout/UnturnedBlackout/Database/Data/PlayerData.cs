@@ -1,4 +1,5 @@
 ﻿using Steamworks;
+using System;
 using System.Threading;
 using UnturnedBlackout.Database.Base;
 
@@ -25,8 +26,10 @@ namespace UnturnedBlackout.Database.Data
         public uint AreasTaken { get; set; }
         public uint Deaths { get; set; }
         public bool Music { get; set; }
+        public bool IsMuted { get; set; }
+        public DateTimeOffset MuteExpiry { get; set; }
 
-        public PlayerData(CSteamID steamID, string steamName, string avatarLink, uint xP, uint level, uint credits, uint scrap, uint coins, uint kills, uint headshotKills, uint highestKillstreak, uint highestMultiKills, uint killsConfirmed, uint killsDenied, uint flagsCaptured, uint flagsSaved, uint areasTaken, uint deaths, bool music)
+        public PlayerData(CSteamID steamID, string steamName, string avatarLink, uint xP, uint level, uint credits, uint scrap, uint coins, uint kills, uint headshotKills, uint highestKillstreak, uint highestMultiKills, uint killsConfirmed, uint killsDenied, uint flagsCaptured, uint flagsSaved, uint areasTaken, uint deaths, bool music, bool isMuted, DateTimeOffset muteExpiry)
         {
             SteamID = steamID;
             SteamName = steamName;
@@ -47,6 +50,8 @@ namespace UnturnedBlackout.Database.Data
             AreasTaken = areasTaken;
             Deaths = deaths;
             Music = music;
+            IsMuted = isMuted;
+            MuteExpiry = muteExpiry;
         }
 
         public bool TryGetNeededXP(out int xp)

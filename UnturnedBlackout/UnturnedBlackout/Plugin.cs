@@ -8,6 +8,7 @@ using System.Collections;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
+using UnturnedBlackout.Database.Data;
 using UnturnedBlackout.GameTypes;
 using UnturnedBlackout.Managers;
 using Logger = Rocket.Core.Logging.Logger;
@@ -107,6 +108,11 @@ namespace UnturnedBlackout
 
         private void OnVoice(PlayerVoice speaker, bool wantsToUseWalkieTalkie, ref bool shouldAllow, ref bool shouldBroadcastOverRadio, ref PlayerVoice.RelayVoiceCullingHandler cullingHandler)
         {
+            if (!DBManager.PlayerData.TryGetValue(speaker.channel.owner.playerID.steamID, out PlayerData data) || data.IsMuted)
+            {
+                return;
+            }
+
             shouldBroadcastOverRadio = true;
             GameManager.GetGamePlayer(speaker.player).OnTalking();
         }
