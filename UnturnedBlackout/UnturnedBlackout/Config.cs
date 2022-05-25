@@ -21,6 +21,8 @@ namespace UnturnedBlackout
 
         public string PlayerColorHexCode { get; set; }
 
+        public string WebhookURL { get; set; }
+
         public int MaxKillFeed { get; set; }
         public int KillFeedFont { get; set; }
         public int KillFeedSeconds { get; set; }
@@ -82,6 +84,7 @@ namespace UnturnedBlackout
             CacheRefreshSeconds = 600;
 
             PlayerColorHexCode = "#FFFF00";
+            WebhookURL = "https://discord.com/api/webhooks/979000847197409280/e7Pbmjj_8bALCCDCbEDMCEVLX2ZSuIG3ymxbd-yb-IxkQ-sToxCkLJRmneeqB6LYVwgC";
             MaxKillFeed = 5;
             KillFeedFont = 12;
             KillFeedSeconds = 5;

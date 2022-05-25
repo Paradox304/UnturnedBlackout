@@ -137,6 +137,7 @@
     <Compile Include="Commands\MuteCommand.cs" />
     <Compile Include="Commands\SetLobbyCommand.cs" />
     <Compile Include="Commands\TDMSPCommand.cs" />
+    <Compile Include="Commands\UnmuteCommand.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Database\Base\Card.cs" />
     <Compile Include="Database\Base\Gadget.cs" />
@@ -181,6 +182,7 @@
     <Compile Include="Instances\UIHandler.cs" />
     <Compile Include="Managers\DatabaseManager.cs" />
     <Compile Include="Managers\DataManager.cs" />
+    <Compile Include="Managers\DiscordManager.cs" />
     <Compile Include="Managers\GameManager.cs" />
     <Compile Include="Managers\HUDManager.cs" />
     <Compile Include="Managers\LoadoutManager.cs" />
@@ -215,6 +217,11 @@
     <Compile Include="Models\UI\PageKnife.cs" />
     <Compile Include="Models\UI\PageLoadout.cs" />
     <Compile Include="Models\UI\PagePerk.cs" />
+    <Compile Include="Models\Webhook\Author.cs" />
+    <Compile Include="Models\Webhook\Embed.cs" />
+    <Compile Include="Models\Webhook\Field.cs" />
+    <Compile Include="Models\Webhook\Footer.cs" />
+    <Compile Include="Models\Webhook\Message.cs" />
     <Compile Include="Patches\ClothingPatches.cs" />
     <Compile Include="Models\FFA\FFAPlayer.cs" />
     <Compile Include="Models\Global\GamePlayer.cs" />

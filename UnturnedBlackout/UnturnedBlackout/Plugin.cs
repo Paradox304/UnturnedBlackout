@@ -146,6 +146,8 @@ namespace UnturnedBlackout
             { "TDM_SpawnPoint_Set", "[color=green]TDM spawnpoint set for arena {0} for group {1}[/color]" },
             { "CTF_SpawnPoint_Set", "[color=green]CTF spawnpoint set for arena {0} for group {1}[/color]" },
             { "CTF_Flag_SpawnPoint_Set", "[color=green]CTF Flag spawnpoint set for arena {0} for group {1}[/color]" },
+            { "Muted", "[color=red]You have been muted for {0} seconds for {1}[/color]" },
+            { "Unmuted", "[color=green]You have been unmuted[/color]" },
             { "Game_Not_Found_With_ID", "[color=red]No game found with that ID[/color]" },
             { "Game_Full", "[color=red]Game is full, can't join[/color]" },
             { "Game_Voting", "[color=red]There is voting going on in that game, can't join[/color]" },

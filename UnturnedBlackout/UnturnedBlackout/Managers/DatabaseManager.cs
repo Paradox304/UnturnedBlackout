@@ -1,7 +1,9 @@
 ﻿using MySql.Data.MySqlClient;
 using Rocket.Core.Logging;
+using Rocket.Core.Steam;
 using Rocket.Core.Utils;
 using Rocket.Unturned.Player;
+using SDG.Unturned;
 using Steamworks;
 using System;
 using System.Collections.Generic;
@@ -12,6 +14,8 @@ using UnturnedBlackout.Database.Base;
 using UnturnedBlackout.Database.Data;
 using UnturnedBlackout.Enums;
 using UnturnedBlackout.Models.Data;
+using UnturnedBlackout.Models.Webhook;
+using Timer = System.Timers.Timer;
 
 namespace UnturnedBlackout.Managers
 {
@@ -19,6 +23,9 @@ namespace UnturnedBlackout.Managers
     {
         public string ConnectionString { get; set; }
         public Config Config { get; set; }
+
+        public Timer m_MuteChecker { get; set; }
+
 
         // Players Data
         public Dictionary<CSteamID, PlayerData> PlayerData { get; set; }
@@ -111,6 +118,8 @@ namespace UnturnedBlackout.Managers
         {
             Config = Plugin.Instance.Configuration.Instance;
             ConnectionString = $"server={Config.DatabaseHost};user={Config.DatabaseUsername};database={Config.DatabaseName};port={Config.DatabasePort};password={Config.DatabasePassword}";
+            m_MuteChecker = new Timer(10 * 1000);
+            m_MuteChecker.Elapsed += CheckMutedPlayers;
 
             PlayerData = new Dictionary<CSteamID, PlayerData>();
             PlayerLoadouts = new Dictionary<CSteamID, PlayerLoadout>();
@@ -121,7 +130,47 @@ namespace UnturnedBlackout.Managers
                 await GetBaseDataAsync();
 
                 Plugin.Instance.LoadoutManager = new LoadoutManager();
+                m_MuteChecker.Start();
             });
+        }
+
+        private void CheckMutedPlayers(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            try
+            {
+                foreach (var data in PlayerData.Values.Where(k => k.IsMuted).ToList())
+                {
+                    if (DateTime.UtcNow > data.MuteExpiry.UtcDateTime)
+                    {
+                        ChangePlayerMutedAsync(data.SteamID, false);
+                        try
+                        {
+                            var profile = new Profile(data.SteamID.m_SteamID);
+
+                            Embed embed = new Embed(null, $"**{profile.SteamID}** was unmuted", null, "15105570", DateTime.UtcNow.ToString("s"),
+                                                    new Footer(Provider.serverName, Provider.configData.Browser.Icon),
+                                                    new Author(profile.SteamID, $"https://steamcommunity.com/profiles/{profile.SteamID64}/", profile.AvatarIcon.ToString()),
+                                                    new Field[]
+                                                    {
+                                                            new Field("**Unmuter:**", $"**Mute Expired**", true),
+                                                            new Field("**Time:**", DateTime.UtcNow.ToString(), true)
+                                                    },
+                                                    null, null);
+                            if (!string.IsNullOrEmpty(Plugin.Instance.Configuration.Instance.WebhookURL))
+                                DiscordManager.SendEmbed(embed, "Player Unmuted", Plugin.Instance.Configuration.Instance.WebhookURL);
+                        }
+                        catch (Exception)
+                        {
+                            Logger.Log($"Error sending discord webhook for {data.SteamID}");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Log("Error checking the muted players");
+                Logger.Log(ex);
+            }
         }
 
         public async Task LoadDatabaseAsync()
