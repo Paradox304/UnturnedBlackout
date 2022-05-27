@@ -258,19 +258,20 @@ namespace UnturnedBlackout.Managers
 
                             var attachmentType = (EAttachment)attachmentTypeInt;
                             var rarity = rdr[4].ToString();
-                            var iconLink = rdr[5].ToString();
-                            if (!int.TryParse(rdr[6].ToString(), out int buyPrice))
+                            if (!float.TryParse(rdr[5].ToString(), out float movementChange)) continue;
+                            var iconLink = rdr[6].ToString();
+                            if (!int.TryParse(rdr[7].ToString(), out int buyPrice))
                             {
                                 continue;
                             }
-                            if (!int.TryParse(rdr[7].ToString(), out int coins))
+                            if (!int.TryParse(rdr[8].ToString(), out int coins))
                             {
                                 continue;
                             }
 
                             if (!gunAttachments.ContainsKey(attachmentID))
                             {
-                                gunAttachments.Add(attachmentID, new GunAttachment(attachmentID, attachmentName, attachmentDesc, attachmentType, rarity, iconLink, buyPrice, coins));
+                                gunAttachments.Add(attachmentID, new GunAttachment(attachmentID, attachmentName, attachmentDesc, attachmentType, rarity, movementChange, iconLink, buyPrice, coins));
                             }
                             else
                             {
@@ -312,39 +313,40 @@ namespace UnturnedBlackout.Managers
 
                             var gunType = (EGun)gunTypeInt;
                             var rarity = rdr[4].ToString();
-                            var iconLink = rdr[5].ToString();
-                            if (!int.TryParse(rdr[6].ToString(), out int magAmount))
+                            if (!float.TryParse(rdr[5].ToString(), out float movementChange)) continue;
+                            var iconLink = rdr[6].ToString();
+                            if (!int.TryParse(rdr[7].ToString(), out int magAmount))
                             {
                                 continue;
                             }
 
-                            if (!int.TryParse(rdr[7].ToString(), out int coins))
+                            if (!int.TryParse(rdr[8].ToString(), out int coins))
                             {
                                 continue;
                             }
 
-                            if (!int.TryParse(rdr[8].ToString(), out int buyPrice))
+                            if (!int.TryParse(rdr[9].ToString(), out int buyPrice))
                             {
                                 continue;
                             }
 
-                            if (!int.TryParse(rdr[9].ToString(), out int scrapAmount))
+                            if (!int.TryParse(rdr[10].ToString(), out int scrapAmount))
                             {
                                 continue;
                             }
 
-                            if (!int.TryParse(rdr[10].ToString(), out int levelRequirement))
+                            if (!int.TryParse(rdr[11].ToString(), out int levelRequirement))
                             {
                                 continue;
                             }
 
-                            if (!bool.TryParse(rdr[11].ToString(), out bool isPrimary))
+                            if (!bool.TryParse(rdr[12].ToString(), out bool isPrimary))
                             {
                                 continue;
                             }
 
                             var defaultAttachments = new List<GunAttachment>();
-                            foreach (var id in rdr[12].GetIntListFromReaderResult())
+                            foreach (var id in rdr[13].GetIntListFromReaderResult())
                             {
                                 if (GunAttachments.TryGetValue((ushort)id, out GunAttachment gunAttachment))
                                 {
@@ -356,8 +358,8 @@ namespace UnturnedBlackout.Managers
                                 }
                             }
 
-                            var levelXPNeeded = rdr[13].GetIntListFromReaderResult();
-                            var levelRewards = rdr[14].GetIntListFromReaderResult();
+                            var levelXPNeeded = rdr[14].GetIntListFromReaderResult();
+                            var levelRewards = rdr[15].GetIntListFromReaderResult();
                             var rewardAttachments = new Dictionary<int, GunAttachment>();
                             var rewardAttachmentsInverse = new Dictionary<GunAttachment, int>();
                             foreach (var id in levelRewards)
@@ -384,7 +386,7 @@ namespace UnturnedBlackout.Managers
                                     Logging.Debug($"Could'nt find reward attachment with id {id} for gun {gunID} with name {gunName}");
                                 }
                             }
-                            var gun = new Gun(gunID, gunName, gunDesc, gunType, rarity, iconLink, magAmount, coins, buyPrice, scrapAmount, levelRequirement, isPrimary, defaultAttachments, rewardAttachments, rewardAttachmentsInverse, levelXPNeeded);
+                            var gun = new Gun(gunID, gunName, gunDesc, gunType, rarity, movementChange, iconLink, magAmount, coins, buyPrice, scrapAmount, levelRequirement, isPrimary, defaultAttachments, rewardAttachments, rewardAttachmentsInverse, levelXPNeeded);
                             if (!guns.ContainsKey(gunID))
                             {
                                 guns.Add(gunID, gun);
@@ -558,28 +560,29 @@ namespace UnturnedBlackout.Managers
                             var knifeName = rdr[1].ToString();
                             var knifeDesc = rdr[2].ToString();
                             var rarity = rdr[3].ToString();
-                            var iconLink = rdr[4].ToString();
-                            if (!int.TryParse(rdr[5].ToString(), out int scrapAmount))
+                            if (!float.TryParse(rdr[4].ToString(), out float movementChange)) continue;
+                            var iconLink = rdr[5].ToString();
+                            if (!int.TryParse(rdr[6].ToString(), out int scrapAmount))
                             {
                                 continue;
                             }
 
-                            if (!int.TryParse(rdr[6].ToString(), out int coins))
+                            if (!int.TryParse(rdr[7].ToString(), out int coins))
                             {
                                 continue;
                             }
 
-                            if (!int.TryParse(rdr[7].ToString(), out int buyPrice))
+                            if (!int.TryParse(rdr[8].ToString(), out int buyPrice))
                             {
                                 continue;
                             }
 
-                            if (!int.TryParse(rdr[8].ToString(), out int levelRequirement))
+                            if (!int.TryParse(rdr[9].ToString(), out int levelRequirement))
                             {
                                 continue;
                             }
 
-                            var knife = new Knife(knifeID, knifeName, knifeDesc, rarity, iconLink, scrapAmount, coins, buyPrice, levelRequirement);
+                            var knife = new Knife(knifeID, knifeName, knifeDesc, rarity, movementChange, iconLink, scrapAmount, coins, buyPrice, levelRequirement);
                             if (!knives.ContainsKey(knifeID))
                             {
                                 knives.Add(knifeID, knife);
