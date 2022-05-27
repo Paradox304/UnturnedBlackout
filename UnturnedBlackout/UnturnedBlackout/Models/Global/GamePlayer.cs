@@ -175,7 +175,16 @@ namespace UnturnedBlackout.Models.Global
         public IEnumerator GiveGadget(ushort id)
         {
             yield return new WaitForSeconds(1);
-            Player.Player.inventory.forceAddItem(new Item(id, false), false);
+            while (true)
+            {
+                if (Player.Player.life.isDead)
+                {
+                    yield return new WaitForSeconds(1);
+                    continue;
+                }
+                Player.Player.inventory.forceAddItem(new Item(id, false), false);
+                break;
+            }
         }
 
         // Healing
