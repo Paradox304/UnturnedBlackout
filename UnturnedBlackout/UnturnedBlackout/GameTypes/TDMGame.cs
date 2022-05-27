@@ -670,14 +670,6 @@ namespace UnturnedBlackout.GameTypes
             {
                 return;
             }
-
-            TaskDispatcher.QueueOnMainThread(() =>
-            {
-                if (player.Player.Player.equipment.itemID == (isTactical ? player.ActiveLoadout.Tactical.Gadget.GadgetID : player.ActiveLoadout.Lethal.Gadget.GadgetID))
-                {
-                    player.Player.Player.equipment.dequip();
-                }
-            });
         }
 
         public override void PlayerConsumeableUsed(GamePlayer player)
@@ -689,14 +681,6 @@ namespace UnturnedBlackout.GameTypes
             }
 
             player.UsedTactical();
-
-            TaskDispatcher.QueueOnMainThread(() =>
-            {
-                if (player.Player.Player.equipment.itemID == (player.ActiveLoadout.Tactical?.Gadget?.GadgetID ?? 0))
-                {
-                    player.Player.Player.equipment.dequip();
-                }
-            });
         }
 
         public override void PlayerBarricadeSpawned(GamePlayer player, BarricadeDrop drop)
@@ -721,14 +705,6 @@ namespace UnturnedBlackout.GameTypes
             {
                 return;
             }
-
-            TaskDispatcher.QueueOnMainThread(() =>
-            {
-                if (player.Player.Player.equipment.itemID == (isTactical ? player.ActiveLoadout.Tactical.Gadget.GadgetID : player.ActiveLoadout.Lethal.Gadget.GadgetID))
-                {
-                    player.Player.Player.equipment.dequip();
-                }
-            });
         }
 
         public override void PlayerChangeFiremode(GamePlayer player)
