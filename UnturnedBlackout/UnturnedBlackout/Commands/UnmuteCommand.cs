@@ -6,11 +6,7 @@ using SDG.Unturned;
 using Steamworks;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
-using UnturnedBlackout.Database.Data;
 using UnturnedBlackout.Managers;
 using UnturnedBlackout.Models.Webhook;
 
@@ -86,7 +82,9 @@ namespace UnturnedBlackout.Commands
                                         },
                                         null, null);
                 if (!string.IsNullOrEmpty(Plugin.Instance.Configuration.Instance.WebhookURL))
+                {
                     DiscordManager.SendEmbed(embed, "Player Unmuted", Plugin.Instance.Configuration.Instance.WebhookURL);
+                }
             });
         }
     }

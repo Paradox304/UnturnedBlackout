@@ -157,7 +157,9 @@ namespace UnturnedBlackout.Managers
                                                     },
                                                     null, null);
                             if (!string.IsNullOrEmpty(Plugin.Instance.Configuration.Instance.WebhookURL))
+                            {
                                 DiscordManager.SendEmbed(embed, "Player Unmuted", Plugin.Instance.Configuration.Instance.WebhookURL);
+                            }
 
                             TaskDispatcher.QueueOnMainThread(() => Utility.Say(UnturnedPlayer.FromCSteamID(data.SteamID), Plugin.Instance.Translate("Unmuted").ToRich()));
                         }
@@ -258,7 +260,11 @@ namespace UnturnedBlackout.Managers
 
                             var attachmentType = (EAttachment)attachmentTypeInt;
                             var rarity = rdr[4].ToString();
-                            if (!float.TryParse(rdr[5].ToString(), out float movementChange)) continue;
+                            if (!float.TryParse(rdr[5].ToString(), out float movementChange))
+                            {
+                                continue;
+                            }
+
                             var iconLink = rdr[6].ToString();
                             if (!int.TryParse(rdr[7].ToString(), out int buyPrice))
                             {
@@ -313,7 +319,11 @@ namespace UnturnedBlackout.Managers
 
                             var gunType = (EGun)gunTypeInt;
                             var rarity = rdr[4].ToString();
-                            if (!float.TryParse(rdr[5].ToString(), out float movementChange)) continue;
+                            if (!float.TryParse(rdr[5].ToString(), out float movementChange))
+                            {
+                                continue;
+                            }
+
                             var iconLink = rdr[6].ToString();
                             if (!int.TryParse(rdr[7].ToString(), out int magAmount))
                             {
@@ -369,19 +379,22 @@ namespace UnturnedBlackout.Managers
                                     if (!rewardAttachments.ContainsKey(levelRewards.IndexOf(id) + 2))
                                     {
                                         rewardAttachments.Add(levelRewards.IndexOf(id) + 2, gunAttachment);
-                                    } else
+                                    }
+                                    else
                                     {
                                         Logging.Debug($"Duplicate reward attachment with id {id} found for gun {gunID} with name {gunName}");
                                     }
-                                    
+
                                     if (!rewardAttachmentsInverse.ContainsKey(gunAttachment))
                                     {
                                         rewardAttachmentsInverse.Add(gunAttachment, levelRewards.IndexOf(id) + 2);
-                                    } else
+                                    }
+                                    else
                                     {
                                         Logging.Debug($"Duplicate reward attachment inverse with id {id} found for gun {gunID} with name {gunName}");
                                     }
-                                } else
+                                }
+                                else
                                 {
                                     Logging.Debug($"Could'nt find reward attachment with id {id} for gun {gunID} with name {gunName}");
                                 }
@@ -516,15 +529,34 @@ namespace UnturnedBlackout.Managers
                         var gunCharms = new Dictionary<ushort, GunCharm>();
                         while (await rdr.ReadAsync())
                         {
-                            if (!ushort.TryParse(rdr[0].ToString(), out ushort charmID)) continue;
+                            if (!ushort.TryParse(rdr[0].ToString(), out ushort charmID))
+                            {
+                                continue;
+                            }
+
                             var charmName = rdr[1].ToString();
                             var charmDesc = rdr[2].ToString();
                             var rarity = rdr[3].ToString();
                             var iconLink = rdr[4].ToString();
-                            if (!int.TryParse(rdr[5].ToString(), out int buyPrice)) continue;
-                            if (!int.TryParse(rdr[6].ToString(), out int coins)) continue;
-                            if (!int.TryParse(rdr[7].ToString(), out int scrapAmount)) continue;
-                            if (!int.TryParse(rdr[8].ToString(), out int levelRequirement)) continue;
+                            if (!int.TryParse(rdr[5].ToString(), out int buyPrice))
+                            {
+                                continue;
+                            }
+
+                            if (!int.TryParse(rdr[6].ToString(), out int coins))
+                            {
+                                continue;
+                            }
+
+                            if (!int.TryParse(rdr[7].ToString(), out int scrapAmount))
+                            {
+                                continue;
+                            }
+
+                            if (!int.TryParse(rdr[8].ToString(), out int levelRequirement))
+                            {
+                                continue;
+                            }
 
                             if (gunCharms.ContainsKey(charmID))
                             {
@@ -536,11 +568,13 @@ namespace UnturnedBlackout.Managers
 
                         Logging.Debug($"Successfully read {gunCharms.Count} gun charms");
                         GunCharms = gunCharms;
-                    } catch (Exception ex)
+                    }
+                    catch (Exception ex)
                     {
                         Logger.Log($"Error finding data from guns charms table");
                         Logger.Log(ex);
-                    } finally
+                    }
+                    finally
                     {
                         rdr.Close();
                     }
@@ -560,7 +594,11 @@ namespace UnturnedBlackout.Managers
                             var knifeName = rdr[1].ToString();
                             var knifeDesc = rdr[2].ToString();
                             var rarity = rdr[3].ToString();
-                            if (!float.TryParse(rdr[4].ToString(), out float movementChange)) continue;
+                            if (!float.TryParse(rdr[4].ToString(), out float movementChange))
+                            {
+                                continue;
+                            }
+
                             var iconLink = rdr[5].ToString();
                             if (!int.TryParse(rdr[6].ToString(), out int scrapAmount))
                             {
@@ -1105,7 +1143,11 @@ namespace UnturnedBlackout.Managers
                     Logging.Debug($"Giving {steamName} the guns");
                     foreach (var gun in Guns.Values)
                     {
-                        if (gun.LevelRequirement < 0) continue;
+                        if (gun.LevelRequirement < 0)
+                        {
+                            continue;
+                        }
+
                         Logging.Debug($"Adding gun with id {gun.GunID}");
                         await new MySqlCommand($"INSERT IGNORE INTO `{PlayersGunsTableName}` (`SteamID` , `GunID` , `Level` , `XP` , `GunKills` , `IsBought` , `Attachments`) VALUES ({player.CSteamID} , {gun.GunID} , 1 , 0 , 0 , {gun.LevelRequirement == 0} , '{Utility.CreateStringFromDefaultAttachments(gun.DefaultAttachments) + Utility.CreateStringFromRewardAttachments(gun.RewardAttachments.Values.ToList())}');", Conn).ExecuteScalarAsync();
                     }
@@ -1114,7 +1156,11 @@ namespace UnturnedBlackout.Managers
                     Logging.Debug($"Giving {steamName} the gun charms");
                     foreach (var gunCharm in GunCharms.Values)
                     {
-                        if (gunCharm.LevelRequirement < 0) continue;
+                        if (gunCharm.LevelRequirement < 0)
+                        {
+                            continue;
+                        }
+
                         Logging.Debug($"Adding gun charm with id {gunCharm.CharmID}");
                         await new MySqlCommand($"INSERT IGNORE INTO `{PlayersGunsCharmsTableName}` (`SteamID` , `CharmID` , `IsBought`) VALUES ({player.CSteamID} , {gunCharm.CharmID} , {gunCharm.LevelRequirement == 0});", Conn).ExecuteScalarAsync();
                     }
@@ -1122,7 +1168,11 @@ namespace UnturnedBlackout.Managers
                     Logging.Debug($"Giving {steamName} the knives");
                     foreach (var knife in Knives.Values)
                     {
-                        if (knife.LevelRequirement < 0) continue;
+                        if (knife.LevelRequirement < 0)
+                        {
+                            continue;
+                        }
+
                         Logging.Debug($"Adding knife with id {knife.KnifeID}");
                         await new MySqlCommand($"INSERT IGNORE INTO `{PlayersKnivesTableName}` (`SteamID` , `KnifeID` , `KnifeKills` , `IsBought`) VALUES ({player.CSteamID} , {knife.KnifeID} , 0 , {knife.LevelRequirement == 0});", Conn).ExecuteScalarAsync();
                     }
@@ -1130,7 +1180,11 @@ namespace UnturnedBlackout.Managers
                     Logging.Debug($"Giving {steamName} the gadgets");
                     foreach (var gadget in Gadgets.Values)
                     {
-                        if (gadget.LevelRequirement < 0) continue;
+                        if (gadget.LevelRequirement < 0)
+                        {
+                            continue;
+                        }
+
                         Logging.Debug($"Adding gadget with id {gadget.GadgetID}");
                         await new MySqlCommand($"INSERT IGNORE INTO  `{PlayersGadgetsTableName}` (`SteamID` , `GadgetID` , `GadgetKills` , `IsBought`) VALUES ({player.CSteamID} , {gadget.GadgetID} , 0 , {gadget.LevelRequirement == 0});", Conn).ExecuteScalarAsync();
                     }
@@ -1138,7 +1192,11 @@ namespace UnturnedBlackout.Managers
                     Logging.Debug($"Giving {steamName} the killstreaks");
                     foreach (var killstreak in Killstreaks.Values)
                     {
-                        if (killstreak.LevelRequirement < 0) continue;
+                        if (killstreak.LevelRequirement < 0)
+                        {
+                            continue;
+                        }
+
                         Logging.Debug($"Adding killstreak with id {killstreak.KillstreakID}");
                         await new MySqlCommand($"INSERT IGNORE INTO `{PlayersKillstreaksTableName}` (`SteamID` , `KillstreakID` , `KillstreakKills` , `IsBought`) VALUES ({player.CSteamID} , {killstreak.KillstreakID} , 0 ,  {killstreak.LevelRequirement == 0});", Conn).ExecuteScalarAsync();
                     }
@@ -1146,7 +1204,11 @@ namespace UnturnedBlackout.Managers
                     Logging.Debug($"Giving {steamName} the perks");
                     foreach (var perk in Perks.Values)
                     {
-                        if (perk.LevelRequirement < 0) continue;
+                        if (perk.LevelRequirement < 0)
+                        {
+                            continue;
+                        }
+
                         Logging.Debug($"Adding perk with id {perk.PerkID}");
                         await new MySqlCommand($"INSERT IGNORE INTO `{PlayersPerksTableName}` (`SteamID` , `PerkID` , `IsBought`) VALUES ({player.CSteamID} , {perk.PerkID} , {perk.LevelRequirement == 0});", Conn).ExecuteScalarAsync();
                     }
@@ -1154,7 +1216,11 @@ namespace UnturnedBlackout.Managers
                     Logging.Debug($"Giving {steamName} the gloves");
                     foreach (var glove in Gloves.Values)
                     {
-                        if (glove.LevelRequirement < 0) continue;
+                        if (glove.LevelRequirement < 0)
+                        {
+                            continue;
+                        }
+
                         Logging.Debug($"Adding glove with id {glove.GloveID}");
                         await new MySqlCommand($"INSERT IGNORE INTO `{PlayersGlovesTableName}` (`SteamID` , `GloveID` , `IsBought`) VALUES ({player.CSteamID} , {glove.GloveID} , {glove.LevelRequirement == 0});", Conn).ExecuteScalarAsync();
                     }
@@ -1162,7 +1228,11 @@ namespace UnturnedBlackout.Managers
                     Logging.Debug($"Giving {steamName} the cards");
                     foreach (var card in Cards.Values)
                     {
-                        if (card.LevelRequirement < 0) continue;
+                        if (card.LevelRequirement < 0)
+                        {
+                            continue;
+                        }
+
                         Logging.Debug($"Adding card with id {card.CardID}");
                         await new MySqlCommand($"INSERT IGNORE INTO `{PlayersCardsTableName}` (`SteamID` , `CardID` , `IsBought`) VALUES ({player.CSteamID} , {card.CardID} ,  {card.LevelRequirement == 0});", Conn).ExecuteScalarAsync();
                     }
@@ -1406,7 +1476,8 @@ namespace UnturnedBlackout.Managers
                             }
                             await new MySqlCommand($"UPDATE `{PlayersGunsTableName}` SET `Attachments` = '{Utility.GetStringFromAttachments(gun.Attachments.Values.ToList())}' WHERE `SteamID` = {player.CSteamID} AND `GunID` = {gun.Gun.GunID};", Conn).ExecuteScalarAsync();
                         }
-                    } catch (Exception ex)
+                    }
+                    catch (Exception ex)
                     {
                         Logger.Log("Error while checking gun attachments");
                         Logger.Log(ex);
@@ -1476,11 +1547,13 @@ namespace UnturnedBlackout.Managers
                             }
                         }
                         Logging.Debug($"Successfully got {gunCharms.Count} for {player.CharacterName}");
-                    } catch (Exception ex)
+                    }
+                    catch (Exception ex)
                     {
                         Logger.Log($"Error reading gun charms data for {player.CharacterName}");
                         Logger.Log(ex);
-                    } finally
+                    }
+                    finally
                     {
                         rdr.Close();
                     }

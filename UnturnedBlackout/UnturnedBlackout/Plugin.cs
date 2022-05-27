@@ -3,7 +3,6 @@ using Rocket.API.Collections;
 using Rocket.Core.Plugins;
 using SDG.Unturned;
 using Steamworks;
-using System;
 using System.Collections;
 using System.Linq;
 using System.Reflection;
@@ -65,8 +64,15 @@ namespace UnturnedBlackout
 
         private void OnHotkeyPressed(Player player, uint simulation, byte key, bool state)
         {
-            if (key != 1) return;
-            if (state == false) return;
+            if (key != 1)
+            {
+                return;
+            }
+
+            if (state == false)
+            {
+                return;
+            }
 
             var gPlayer = GameManager.GetGamePlayer(player);
             if (gPlayer == null)

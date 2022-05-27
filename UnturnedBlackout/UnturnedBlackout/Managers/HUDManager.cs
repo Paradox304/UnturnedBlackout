@@ -102,7 +102,8 @@ namespace UnturnedBlackout.Managers
             {
                 shouldAllow = false;
                 return;
-            } else if (jar.item.id == (player.ActiveLoadout.Lethal?.Gadget?.GadgetID ?? 0) && !player.HasLethal)
+            }
+            else if (jar.item.id == (player.ActiveLoadout.Lethal?.Gadget?.GadgetID ?? 0) && !player.HasLethal)
             {
                 shouldAllow = false;
                 return;
@@ -137,7 +138,8 @@ namespace UnturnedBlackout.Managers
                     EffectManager.sendUIEffectText(Key, connection, true, "AmmoNum", " ");
                     EffectManager.sendUIEffectText(Key, connection, true, "ReserveNum", " ");
                     player.ForceEquip = false;
-                } else
+                }
+                else
                 {
                     EffectManager.sendUIEffectText(Key, connection, true, "WeaponName", asset.itemName);
                     EffectManager.sendUIEffectText(Key, connection, true, "AmmoNum", " ");
@@ -175,7 +177,8 @@ namespace UnturnedBlackout.Managers
                 if (obj.useable == null && player.ForceEquip)
                 {
                     Plugin.Instance.StartCoroutine(Equip(player.Player.Player.equipment, player.LastEquippedPage, player.LastEquippedX, player.LastEquippedY));
-                } else if (obj.useable == null && !player.ForceEquip)
+                }
+                else if (obj.useable == null && !player.ForceEquip)
                 {
                     var inv = player.Player.Player.inventory;
                     for (byte page = 0; page < PlayerInventory.PAGES - 2; page++)
