@@ -36,6 +36,12 @@ namespace UnturnedBlackout.Models.Global
 
         public bool HasTactical { get; set; }
         public bool HasLethal { get; set; }
+        
+        public float PrimaryMovementChange { get; set; }
+        public float PrimaryMovementChangeADS { get; set; }
+        public float SecondaryMovementChange { get; set; }
+        public float SecondaryMovementChangeADS { get; set; }
+        public float KnifeMovementChange { get; set; }
 
         public EPlayerStance PreviousStance { get; set; }
 
@@ -101,6 +107,16 @@ namespace UnturnedBlackout.Models.Global
             {
                 return;
             }
+
+            loadout.GetPrimaryMovement(out float primaryMovementChange, out float primaryMovementChangeADS);
+            PrimaryMovementChange = primaryMovementChange;
+            PrimaryMovementChangeADS = primaryMovementChangeADS;
+
+            loadout.GetSecondaryMovement(out float secondaryMovementChange, out float secondaryMovementChangeADS);
+            SecondaryMovementChange = secondaryMovementChange;
+            SecondaryMovementChangeADS = secondaryMovementChangeADS;
+
+            KnifeMovementChange = loadout.GetKnifeMovement();
 
             if (m_LethalChecker.Enabled)
             {
@@ -397,6 +413,18 @@ namespace UnturnedBlackout.Models.Global
                     break;
                 }
             }
+        }
+
+        // Movement
+
+        public void GiveMovement(bool isADS, bool isCarryingFlag)
+        {
+            if (ActiveLoadout == null)
+            {
+                return;
+            }
+
+            if (Player.Player)
         }
 
         public void OnGameLeft()

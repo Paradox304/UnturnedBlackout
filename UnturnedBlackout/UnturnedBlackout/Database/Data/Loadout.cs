@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnturnedBlackout.Database.Base;
 using UnturnedBlackout.Enums;
 
@@ -45,6 +46,39 @@ namespace UnturnedBlackout.Database.Data
             Perks = perks;
             Glove = glove;
             Card = card;
+        }
+
+        public void GetPrimaryMovement(out float movementChange, out float movementChangeADS)
+        {
+            movementChange = 1f;
+            movementChangeADS = 1f;
+            if (Primary == null)
+            {
+                return;
+            }
+
+            movementChange = Primary.Gun.MovementChange + PrimaryAttachments.Values.Sum(k => k.Attachment.MovementChange);
+            movementChangeADS = movementChange + Primary.Gun.MovementChangeADS + PrimaryAttachments.Values.Sum(k => k.Attachment.MovementChangeADS);
+            return;
+        }
+
+        public void GetSecondaryMovement(out float movementChange, out float movementChangeADS)
+        {
+            movementChange = 1f;
+            movementChangeADS = 1f;
+            if (Secondary == null)
+            {
+                return;
+            }
+
+            movementChange = Secondary.Gun.MovementChange + SecondaryAttachments.Values.Sum(k => k.Attachment.MovementChange);
+            movementChangeADS = movementChange + Secondary.Gun.MovementChangeADS + SecondaryAttachments.Values.Sum(k => k.Attachment.MovementChangeADS);
+            return;
+        }
+
+        public float GetKnifeMovement()
+        {
+            return Knife.Knife.MovementChange;
         }
     }
 }

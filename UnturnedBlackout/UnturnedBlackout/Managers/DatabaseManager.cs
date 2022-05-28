@@ -185,8 +185,8 @@ namespace UnturnedBlackout.Managers
                 {
                     await Conn.OpenAsync();
                     // BASE DATA
-                    await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{GunsTableName}` ( `GunID` SMALLINT UNSIGNED NOT NULL , `GunName` VARCHAR(255) NOT NULL , `GunDesc` TEXT NOT NULL , `GunType` ENUM('Pistol','SMG','Shotgun','LMG','AR','SNIPER') NOT NULL , `GunRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `MovementChange` DECIMAL(4,3) NOT NULL , `IconLink` TEXT NOT NULL , `MagAmount` TINYINT UNSIGNED NOT NULL , `Coins` INT UNSIGNED NOT NULL , `BuyPrice` INT UNSIGNED NOT NULL ,  `ScrapAmount` INT UNSIGNED NOT NULL , `LevelRequirement` INT NOT NULL , `IsPrimary` BOOLEAN NOT NULL , `DefaultAttachments` TEXT NOT NULL , `LevelXPNeeded` TEXT NOT NULL , `LevelRewards` TEXT NOT NULL , PRIMARY KEY (`GunID`));", Conn).ExecuteScalarAsync();
-                    await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{AttachmentsTableName}` ( `AttachmentID` SMALLINT UNSIGNED NOT NULL , `AttachmentName` VARCHAR(255) NOT NULL , `AttachmentDesc` TEXT NOT NULL , `AttachmentType` ENUM('Sights','Grip','Barrel','Magazine') NOT NULL , `AttachmentRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `MovementChange` DECIMAL(4,3) NOT NULL , `IconLink` TEXT NOT NULL , `BuyPrice` INT UNSIGNED NOT NULL , `Coins` INT UNSIGNED NOT NULL , PRIMARY KEY (`AttachmentID`));", Conn).ExecuteScalarAsync();
+                    await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{GunsTableName}` ( `GunID` SMALLINT UNSIGNED NOT NULL , `GunName` VARCHAR(255) NOT NULL , `GunDesc` TEXT NOT NULL , `GunType` ENUM('Pistol','SMG','Shotgun','LMG','AR','SNIPER') NOT NULL , `GunRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `MovementChange` DECIMAL(4,3) NOT NULL , `MovementChangeADS` DECIMAL(4,3) NOT NULL , `IconLink` TEXT NOT NULL , `MagAmount` TINYINT UNSIGNED NOT NULL , `Coins` INT UNSIGNED NOT NULL , `BuyPrice` INT UNSIGNED NOT NULL ,  `ScrapAmount` INT UNSIGNED NOT NULL , `LevelRequirement` INT NOT NULL , `IsPrimary` BOOLEAN NOT NULL , `DefaultAttachments` TEXT NOT NULL , `LevelXPNeeded` TEXT NOT NULL , `LevelRewards` TEXT NOT NULL , PRIMARY KEY (`GunID`));", Conn).ExecuteScalarAsync();
+                    await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{AttachmentsTableName}` ( `AttachmentID` SMALLINT UNSIGNED NOT NULL , `AttachmentName` VARCHAR(255) NOT NULL , `AttachmentDesc` TEXT NOT NULL , `AttachmentType` ENUM('Sights','Grip','Barrel','Magazine') NOT NULL , `AttachmentRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `MovementChange` DECIMAL(4,3) NOT NULL , `MovementChangeADS` DECIMAL (4,3) NOT NULL , `IconLink` TEXT NOT NULL , `BuyPrice` INT UNSIGNED NOT NULL , `Coins` INT UNSIGNED NOT NULL , PRIMARY KEY (`AttachmentID`));", Conn).ExecuteScalarAsync();
                     await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{GunsSkinsTableName}` ( `ID` INT UNSIGNED NOT NULL AUTO_INCREMENT , `GunID` SMALLINT UNSIGNED NOT NULL , `SkinID` SMALLINT UNSIGNED NOT NULL , `SkinName` VARCHAR(255) NOT NULL , `SkinDesc` TEXT NOT NULL , `SkinRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `PatternLink` TEXT NOT NULL , `IconLink` TEXT NOT NULL , `ScrapAmount` INT UNSIGNED NOT NULL , CONSTRAINT `ub_gun_id` FOREIGN KEY (`GunID`) REFERENCES `{GunsTableName}` (`GunID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`ID`));", Conn).ExecuteScalarAsync();
                     await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{GunsCharmsTableName}` ( `CharmID` SMALLINT UNSIGNED NOT NULL , `CharmName` VARCHAR(255) NOT NULL , `CharmDesc` TEXT NOT NULL , `CharmRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `IconLink` TEXT NOT NULL , `BuyPrice` INT UNSIGNED NOT NULL , `Coins` INT UNSIGNED NOT NULL , `ScrapAmount` INT UNSIGNED NOT NULL , `LevelRequirement` INT NOT NULL , PRIMARY KEY (`CharmID`));", Conn).ExecuteScalarAsync();
                     await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{KnivesTableName}` ( `KnifeID` SMALLINT UNSIGNED NOT NULL , `KnifeName` VARCHAR(255) NOT NULL , `KnifeDesc` TEXT NOT NULL , `KnifeRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `MovementChange` DECIMAL(4,3) NOT NULL , `IconLink` TEXT NOT NULL , `ScrapAmount` INT UNSIGNED NOT NULL , `Coins` INT UNSIGNED NOT NULL , `BuyPrice` INT UNSIGNED NOT NULL , `LevelRequirement` INT NOT NULL , PRIMARY KEY (`KnifeID`));", Conn).ExecuteScalarAsync();
@@ -240,7 +240,7 @@ namespace UnturnedBlackout.Managers
                     var defaultGloves = new List<Glove>();
                     var defaultCards = new List<Card>();
 
-                    var rdr = (MySqlDataReader)await new MySqlCommand($"SELECT `AttachmentID`, `AttachmentName`, `AttachmentDesc`, `AttachmentType`-1, `AttachmentRarity`, `MovementChange`, `IconLink`, `BuyPrice`, `Coins` FROM `{AttachmentsTableName}`;", Conn).ExecuteReaderAsync();
+                    var rdr = (MySqlDataReader)await new MySqlCommand($"SELECT `AttachmentID`, `AttachmentName`, `AttachmentDesc`, `AttachmentType`-1, `AttachmentRarity`, `MovementChange`, `MovementChangeADS`, `IconLink`, `BuyPrice`, `Coins` FROM `{AttachmentsTableName}`;", Conn).ExecuteReaderAsync();
                     try
                     {
                         var gunAttachments = new Dictionary<ushort, GunAttachment>();
@@ -265,19 +265,24 @@ namespace UnturnedBlackout.Managers
                                 continue;
                             }
 
-                            var iconLink = rdr[6].ToString();
-                            if (!int.TryParse(rdr[7].ToString(), out int buyPrice))
+                            if (!float.TryParse(rdr[6].ToString(), out float movementChangeADS))
                             {
                                 continue;
                             }
-                            if (!int.TryParse(rdr[8].ToString(), out int coins))
+
+                            var iconLink = rdr[7].ToString();
+                            if (!int.TryParse(rdr[8].ToString(), out int buyPrice))
+                            {
+                                continue;
+                            }
+                            if (!int.TryParse(rdr[9].ToString(), out int coins))
                             {
                                 continue;
                             }
 
                             if (!gunAttachments.ContainsKey(attachmentID))
                             {
-                                gunAttachments.Add(attachmentID, new GunAttachment(attachmentID, attachmentName, attachmentDesc, attachmentType, rarity, movementChange, iconLink, buyPrice, coins));
+                                gunAttachments.Add(attachmentID, new GunAttachment(attachmentID, attachmentName, attachmentDesc, attachmentType, rarity, movementChange, movementChangeADS, iconLink, buyPrice, coins));
                             }
                             else
                             {
@@ -299,7 +304,7 @@ namespace UnturnedBlackout.Managers
                     }
 
                     Logging.Debug("Reading guns from the base data");
-                    rdr = (MySqlDataReader)await new MySqlCommand($"SELECT `GunID`, `GunName`, `GunDesc`, `GunType`-1, `GunRarity`, `MovementChange`, `IconLink`, `MagAmount`, `Coins`, `BuyPrice`, `ScrapAmount`, `LevelRequirement`, `IsPrimary`, `DefaultAttachments`, `LevelXPNeeded`, `LevelRewards` FROM `{GunsTableName}`;", Conn).ExecuteReaderAsync();
+                    rdr = (MySqlDataReader)await new MySqlCommand($"SELECT `GunID`, `GunName`, `GunDesc`, `GunType`-1, `GunRarity`, `MovementChange`, `MovementChangeADS`, `IconLink`, `MagAmount`, `Coins`, `BuyPrice`, `ScrapAmount`, `LevelRequirement`, `IsPrimary`, `DefaultAttachments`, `LevelXPNeeded`, `LevelRewards` FROM `{GunsTableName}`;", Conn).ExecuteReaderAsync();
                     try
                     {
                         var guns = new Dictionary<ushort, Gun>();
@@ -322,41 +327,46 @@ namespace UnturnedBlackout.Managers
                             if (!float.TryParse(rdr[5].ToString(), out float movementChange))
                             {
                                 continue;
-                            }
+                            } 
 
-                            var iconLink = rdr[6].ToString();
-                            if (!int.TryParse(rdr[7].ToString(), out int magAmount))
+                            if (!float.TryParse(rdr[6].ToString(), out float movementChangeADS))
                             {
                                 continue;
                             }
 
-                            if (!int.TryParse(rdr[8].ToString(), out int coins))
+                            var iconLink = rdr[7].ToString();
+                            if (!int.TryParse(rdr[8].ToString(), out int magAmount))
                             {
                                 continue;
                             }
 
-                            if (!int.TryParse(rdr[9].ToString(), out int buyPrice))
+                            if (!int.TryParse(rdr[9].ToString(), out int coins))
                             {
                                 continue;
                             }
 
-                            if (!int.TryParse(rdr[10].ToString(), out int scrapAmount))
+                            if (!int.TryParse(rdr[10].ToString(), out int buyPrice))
                             {
                                 continue;
                             }
 
-                            if (!int.TryParse(rdr[11].ToString(), out int levelRequirement))
+                            if (!int.TryParse(rdr[11].ToString(), out int scrapAmount))
                             {
                                 continue;
                             }
 
-                            if (!bool.TryParse(rdr[12].ToString(), out bool isPrimary))
+                            if (!int.TryParse(rdr[12].ToString(), out int levelRequirement))
+                            {
+                                continue;
+                            }
+
+                            if (!bool.TryParse(rdr[13].ToString(), out bool isPrimary))
                             {
                                 continue;
                             }
 
                             var defaultAttachments = new List<GunAttachment>();
-                            foreach (var id in rdr[13].GetIntListFromReaderResult())
+                            foreach (var id in rdr[14].GetIntListFromReaderResult())
                             {
                                 if (GunAttachments.TryGetValue((ushort)id, out GunAttachment gunAttachment))
                                 {
@@ -368,8 +378,8 @@ namespace UnturnedBlackout.Managers
                                 }
                             }
 
-                            var levelXPNeeded = rdr[14].GetIntListFromReaderResult();
-                            var levelRewards = rdr[15].GetIntListFromReaderResult();
+                            var levelXPNeeded = rdr[15].GetIntListFromReaderResult();
+                            var levelRewards = rdr[16].GetIntListFromReaderResult();
                             var rewardAttachments = new Dictionary<int, GunAttachment>();
                             var rewardAttachmentsInverse = new Dictionary<GunAttachment, int>();
                             foreach (var id in levelRewards)
@@ -399,7 +409,7 @@ namespace UnturnedBlackout.Managers
                                     Logging.Debug($"Could'nt find reward attachment with id {id} for gun {gunID} with name {gunName}");
                                 }
                             }
-                            var gun = new Gun(gunID, gunName, gunDesc, gunType, rarity, movementChange, iconLink, magAmount, coins, buyPrice, scrapAmount, levelRequirement, isPrimary, defaultAttachments, rewardAttachments, rewardAttachmentsInverse, levelXPNeeded);
+                            var gun = new Gun(gunID, gunName, gunDesc, gunType, rarity, movementChange, movementChangeADS, iconLink, magAmount, coins, buyPrice, scrapAmount, levelRequirement, isPrimary, defaultAttachments, rewardAttachments, rewardAttachmentsInverse, levelXPNeeded);
                             if (!guns.ContainsKey(gunID))
                             {
                                 guns.Add(gunID, gun);
