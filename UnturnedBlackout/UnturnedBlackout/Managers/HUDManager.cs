@@ -148,6 +148,8 @@ namespace UnturnedBlackout.Managers
                     return;
                 }
 
+                game.PlayerEquipmentChanged(player);
+
                 player.LastEquippedPage = equipment.equippedPage;
                 player.LastEquippedX = equipment.equipped_x;
                 player.LastEquippedY = equipment.equipped_y;

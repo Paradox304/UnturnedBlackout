@@ -424,7 +424,26 @@ namespace UnturnedBlackout.Models.Global
                 return;
             }
 
-            if (Player.Player)
+            if (Player.Player.equipment.itemID == 0)
+            {
+                Player.Player.movement.sendPluginSpeedMultiplier(1f);
+                return;
+            }
+
+            var flagCarryingSpeed = isCarryingFlag ? Plugin.Instance.Configuration.Instance.CTF.FlagCarryingSpeed : 0f;
+            var updatedMovement = 1f;
+            if (Player.Player.equipment.itemID == (ActiveLoadout.Primary?.Gun?.GunID ?? 0))
+            {
+                updatedMovement = (isADS ? PrimaryMovementChangeADS : PrimaryMovementChange) + flagCarryingSpeed;
+            } else if (Player.Player.equipment.itemID == (ActiveLoadout.Secondary?.Gun?.GunID ?? 0))
+            {
+                updatedMovement = (isADS ? SecondaryMovementChangeADS : SecondaryMovementChange) + flagCarryingSpeed;
+            } else if (Player.Player.equipment.itemID == (ActiveLoadout.Knife.Knife.KnifeID))
+            {
+                updatedMovement = KnifeMovementChange + flagCarryingSpeed;
+            }
+
+            Player.Player.movement.sendPluginSpeedMultiplier(updatedMovement);
         }
 
         public void OnGameLeft()

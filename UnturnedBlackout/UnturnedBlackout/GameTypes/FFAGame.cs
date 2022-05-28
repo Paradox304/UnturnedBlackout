@@ -64,7 +64,7 @@ namespace UnturnedBlackout.GameTypes
             Plugin.Instance.UIManager.OnGameUpdated(this);
             foreach (var player in Players)
             {
-                player.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1);
+                player.GamePlayer.GiveMovement(player.GamePlayer.Player.Player.equipment.useable is UseableGun gun && gun.isAiming, false);
 
                 Plugin.Instance.UIManager.SendFFAHUD(player.GamePlayer);
                 Plugin.Instance.UIManager.ClearCountdownUI(player.GamePlayer);
@@ -648,7 +648,6 @@ namespace UnturnedBlackout.GameTypes
             }
         }
 
-
         public override void PlayerStanceChanged(PlayerStance obj)
         {
             var fPlayer = GetFFAPlayer(obj.player);
@@ -658,6 +657,22 @@ namespace UnturnedBlackout.GameTypes
             }
 
             fPlayer.GamePlayer.OnStanceChanged(obj.stance);
+        }
+
+        public override void PlayerEquipmentChanged(GamePlayer player)
+        {
+            if (IsPlayerIngame(player.SteamID) && GamePhase == EGamePhase.Started)
+            {
+                player.GiveMovement(player.Player.Player.equipment.useable is UseableGun gun && gun.isAiming, false);
+            }
+        }
+
+        public override void PlayerAimingChanged(GamePlayer player, bool isAiming)
+        {
+            if (IsPlayerIngame(player.SteamID) && GamePhase == EGamePhase.Started)
+            {
+                player.GiveMovement(isAiming, false);
+            }
         }
 
         public IEnumerator SpawnUsedUp(FFASpawnPoint spawnPoint)

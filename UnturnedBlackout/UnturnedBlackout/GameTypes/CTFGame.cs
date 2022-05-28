@@ -96,7 +96,7 @@ namespace UnturnedBlackout.GameTypes
             GamePhase = EGamePhase.Started;
             foreach (var player in Players)
             {
-                player.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1);
+                player.GamePlayer.GiveMovement(player.GamePlayer.Player.Player.equipment.useable is UseableGun gun && gun.isAiming, false);
 
                 Plugin.Instance.UIManager.ClearCountdownUI(player.GamePlayer);
             }
@@ -679,7 +679,7 @@ namespace UnturnedBlackout.GameTypes
                     cPlayer.Score += Config.FlagCapturedPoints;
                     cPlayer.XP += Config.CTF.XPPerFlagCaptured;
                     cPlayer.FlagsCaptured++;
-                    cPlayer.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1f);
+                    player.GiveMovement(player.Player.Player.equipment.useable is UseableGun gun && gun.isAiming, false);
 
                     Plugin.Instance.UIManager.ShowXPUI(cPlayer.GamePlayer, Config.CTF.XPPerFlagCaptured, Plugin.Instance.Translate("Flag_Captured").ToRich());
                     Plugin.Instance.UIManager.SendFlagCapturedSound(cPlayer.GamePlayer);
@@ -752,7 +752,7 @@ namespace UnturnedBlackout.GameTypes
                     }
                 });
 
-                cPlayer.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(Config.CTF.FlagCarryingSpeed);
+                player.GiveMovement(player.Player.Player.equipment.useable is UseableGun gun && gun.isAiming, true);
                 cPlayer.IsCarryingFlag = true;
                 Plugin.Instance.UIManager.UpdateCTFHUD(Players, otherTeam);
             }
@@ -942,6 +942,38 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
             cPlayer.GamePlayer.OnStanceChanged(obj.stance);
+        }
+
+        public override void PlayerEquipmentChanged(GamePlayer player)
+        {
+            var cPlayer = GetCTFPlayer(player.Player);
+            if (cPlayer == null)
+            {
+                return;
+            }
+
+            if (GamePhase != EGamePhase.Started)
+            {
+                return;
+            }
+
+            player.GiveMovement(player.Player.Player.equipment.useable is UseableGun gun && gun.isAiming, cPlayer.IsCarryingFlag);
+        }
+
+        public override void PlayerAimingChanged(GamePlayer player, bool isAiming)
+        {
+            var cPlayer = GetCTFPlayer(player.Player);
+            if (cPlayer == null)
+            {
+                return;
+            }
+
+            if (GamePhase != EGamePhase.Started)
+            {
+                return;
+            }
+
+            player.GiveMovement(isAiming, cPlayer.IsCarryingFlag);
         }
 
         public CTFPlayer GetCTFPlayer(CSteamID steamID)

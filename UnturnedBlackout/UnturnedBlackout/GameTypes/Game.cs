@@ -52,8 +52,20 @@ namespace UnturnedBlackout.GameTypes
             BarricadeManager.onBarricadeSpawned += OnBarricadeSpawned;
             UseableConsumeable.onConsumePerformed += OnConsumed;
             UseableConsumeable.onPerformedAid += OnPerfomedAid;
+            UseableGun.OnAimingChanged_Global += OnAimingChanged;
 
             KillFeedChecker = Plugin.Instance.StartCoroutine(UpdateKillfeed());
+        }
+
+        private void OnAimingChanged(UseableGun obj)
+        {
+            var gPlayer = Plugin.Instance.GameManager.GetGamePlayer(obj.player);
+            if (gPlayer == null)
+            {
+                return;
+            }
+
+            PlayerAimingChanged(gPlayer, obj.isAiming);
         }
 
         private void OnPerfomedAid(Player instigator, Player target)
@@ -268,6 +280,10 @@ namespace UnturnedBlackout.GameTypes
             ChatManager.onChatted -= OnChatted;
             ItemManager.onTakeItemRequested -= OnTakeItem;
             UseableThrowable.onThrowableSpawned -= OnThrowableSpawned;
+            BarricadeManager.onBarricadeSpawned -= OnBarricadeSpawned;
+            UseableConsumeable.onConsumePerformed -= OnConsumed;
+            UseableConsumeable.onPerformedAid -= OnPerfomedAid;
+            UseableGun.OnAimingChanged_Global -= OnAimingChanged;
         }
 
         public abstract bool IsPlayerIngame(CSteamID steamID);
@@ -286,6 +302,8 @@ namespace UnturnedBlackout.GameTypes
         public abstract void OnChatMessageSent(GamePlayer player, EChatMode chatMode, string text, ref bool isVisible);
         public abstract void OnVoiceChatUpdated(GamePlayer player);
         public abstract void OnTakingItem(GamePlayer player, ItemData itemData, ref bool shouldAllow);
+        public abstract void PlayerEquipmentChanged(GamePlayer player);
+        public abstract void PlayerAimingChanged(GamePlayer player, bool isAiming);
         public abstract int GetPlayerCount();
         public abstract bool IsPlayerCarryingFlag(GamePlayer player);
         public abstract List<GamePlayer> GetPlayers();
