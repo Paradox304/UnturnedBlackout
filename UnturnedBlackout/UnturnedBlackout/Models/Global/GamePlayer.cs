@@ -28,15 +28,15 @@ namespace UnturnedBlackout.Models.Global
         public Stack<CSteamID> LastDamager { get; set; }
 
         public bool HasAnimationGoingOn { get; set; }
-        
+
         public byte LastEquippedPage { get; set; }
         public byte LastEquippedX { get; set; }
         public byte LastEquippedY { get; set; }
         public bool ForceEquip { get; set; }
-        
+
         public bool HasTactical { get; set; }
         public bool HasLethal { get; set; }
-        
+
         public EPlayerStance PreviousStance { get; set; }
 
         public Coroutine Healer { get; set; }
@@ -175,7 +175,16 @@ namespace UnturnedBlackout.Models.Global
         public IEnumerator GiveGadget(ushort id)
         {
             yield return new WaitForSeconds(1);
-            Player.Player.inventory.forceAddItem(new Item(id, false), false);
+            while (true)
+            {
+                if (Player.Player.life.isDead)
+                {
+                    yield return new WaitForSeconds(1);
+                    continue;
+                }
+                Player.Player.inventory.forceAddItem(new Item(id, false), false);
+                break;
+            }
         }
 
         // Healing
@@ -377,7 +386,8 @@ namespace UnturnedBlackout.Models.Global
                         }
 
                         Plugin.Instance.UIManager.SendLevelUpAnimation(this, data.Level);
-                    } else
+                    }
+                    else
                     {
                         if (gun != null)
                         {

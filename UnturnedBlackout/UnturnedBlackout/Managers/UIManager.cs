@@ -219,7 +219,7 @@ namespace UnturnedBlackout.Managers
             EffectManager.sendUIEffectImageURL(GunLevelUpKey, player.TransportConnection, true, "LevelUpIcon", gun.Gun.IconLink);
             EffectManager.sendUIEffectText(GunLevelUpKey, player.TransportConnection, true, "LevelUpDesc", Plugin.Instance.Translate("Gun_Level_Up_Desc", gun.Gun.GunName, gun.Level).ToRich());
             EffectManager.sendUIEffectText(GunLevelUpKey, player.TransportConnection, true, "LevelUpText", Plugin.Instance.Translate("Gun_Level_Up_Text").ToRich());
-            
+
             if (player.AnimationStopper != null)
             {
                 Plugin.Instance.StopCoroutine(player.AnimationStopper);
@@ -1062,24 +1062,39 @@ namespace UnturnedBlackout.Managers
                     return;
                 case "SERVER Loadout Next BUTTON":
                     if (!isGame)
+                    {
                         handler.ForwardLoadoutPage();
+                    }
                     else
+                    {
                         handler.ForwardMidgameLoadoutPage();
+                    }
+
                     return;
                 case "SERVER Loadout Previous BUTTON":
                     if (!isGame)
+                    {
                         handler.BackwardLoadoutPage();
+                    }
                     else
+                    {
                         handler.BackwardMidgameLoadoutPage();
+                    }
+
                     return;
                 case "SERVER Loadout Back BUTTON":
                     handler.SetupMainMenu();
                     return;
                 case "SERVER Loadout Equip BUTTON":
                     if (!isGame)
+                    {
                         handler.EquipLoadout();
+                    }
                     else
+                    {
                         handler.EquipMidgameLoadout();
+                    }
+
                     return;
                 case "SERVER Loadout Rename Confirm BUTTON":
                     handler.RenameLoadout();
@@ -1224,11 +1239,16 @@ namespace UnturnedBlackout.Managers
                 if (int.TryParse(buttonName.Replace("SERVER Loadout BUTTON", ""), out int selected))
                 {
                     if (!isGame)
+                    {
                         handler.SelectedLoadout(selected);
+                    }
                     else
+                    {
                         handler.SelectedMidgameLoadout(selected);
+                    }
                 }
-            } else if (buttonName.StartsWith("SERVER Play BUTTON"))
+            }
+            else if (buttonName.StartsWith("SERVER Play BUTTON"))
             {
                 if (int.TryParse(buttonName.Replace("SERVER Play BUTTON", ""), out int selected))
                 {

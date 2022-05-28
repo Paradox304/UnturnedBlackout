@@ -384,7 +384,8 @@ namespace UnturnedBlackout.Managers
             if (playerLoadout.Perks.ContainsKey(perk.Perk.PerkType))
             {
                 playerLoadout.Perks[perk.Perk.PerkType] = perk;
-            } else
+            }
+            else
             {
                 playerLoadout.Perks.Add(perk.Perk.PerkType, perk);
             }
@@ -633,7 +634,8 @@ namespace UnturnedBlackout.Managers
                                 inv.forceAddItem(new Item(attachment.Attachment.AttachmentID, true), false);
                             }
                         }
-                    } else
+                    }
+                    else
                     {
                         item.state[startingPos] = 0;
                         item.state[startingPos + 1] = 0;
@@ -645,7 +647,8 @@ namespace UnturnedBlackout.Managers
                     var bytes = BitConverter.GetBytes(activeLoadout.PrimaryGunCharm.GunCharm.CharmID);
                     item.state[2] = bytes[0];
                     item.state[3] = bytes[1];
-                } else
+                }
+                else
                 {
                     item.state[2] = 0;
                     item.state[3] = 0;
@@ -725,7 +728,8 @@ namespace UnturnedBlackout.Managers
                     if (skills.ContainsKey((specialtyIndex, skillIndex)))
                     {
                         skills[(specialtyIndex, skillIndex)] = defaultSkill.SkillLevel < max ? defaultSkill.SkillLevel : max;
-                    } else
+                    }
+                    else
                     {
                         skills.Add((specialtyIndex, skillIndex), defaultSkill.SkillLevel < max ? defaultSkill.SkillLevel : max);
                     }
@@ -741,7 +745,8 @@ namespace UnturnedBlackout.Managers
                         if (skills[(specialtyIndex, skillIndex)] + perk.Value.Perk.SkillLevel > max)
                         {
                             skills[(specialtyIndex, skillIndex)] = max;
-                        } else
+                        }
+                        else
                         {
                             skills[(specialtyIndex, skillIndex)] += perk.Value.Perk.SkillLevel;
                         }
@@ -765,9 +770,14 @@ namespace UnturnedBlackout.Managers
             if (activeLoadout.Lethal != null || activeLoadout.Tactical != null)
             {
                 if (activeLoadout.Lethal != null)
+                {
                     inv.forceAddItem(new Item(activeLoadout.Lethal.Gadget.GadgetID, false), false);
+                }
+
                 if (activeLoadout.Tactical != null)
+                {
                     inv.forceAddItem(new Item(activeLoadout.Tactical.Gadget.GadgetID, false), false);
+                }
             }
 
             player.SetActiveLoadout(activeLoadout);

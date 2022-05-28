@@ -934,7 +934,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Loadout Secondary Charm IMAGE", loadout.SecondaryGunCharm == null ? Utility.GetDefaultAttachmentImage("charm") : loadout.SecondaryGunCharm.GunCharm.IconLink);
             EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Loadout Secondary Skin IMAGE", loadout.SecondarySkin == null ? Utility.GetDefaultAttachmentImage("skin") : loadout.SecondarySkin.PatternLink);
 
-             // Knife
+            // Knife
             Logging.Debug($"Knife is null {loadout.Knife == null}");
             EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Loadout Knife IMAGE", loadout.Knife == null ? "" : loadout.Knife.Knife.IconLink);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Loadout Knife TEXT", loadout.Knife == null ? "" : loadout.Knife.Knife.KnifeName);
@@ -3544,11 +3544,12 @@ namespace UnturnedBlackout.Instances
             if (attachment.Attachment.AttachmentType != EAttachment.Sights && attachment.Attachment.AttachmentType != EAttachment.Magazine)
             {
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Dequip BUTTON", attachment.IsBought && ((LoadoutPage.ToString().StartsWith("AttachmentPrimary") && loadout.PrimaryAttachments.ContainsValue(attachment)) || (LoadoutPage.ToString().StartsWith("AttachmentSecondary") && loadout.SecondaryAttachments.ContainsValue(attachment))));
-            } else
+            }
+            else
             {
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Dequip BUTTON", false);
             }
-            
+
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Description TEXT", attachment.Attachment.AttachmentDesc);
             EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Item IMAGE", attachment.Attachment.IconLink);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item TEXT", attachment.Attachment.AttachmentName);
@@ -3777,7 +3778,12 @@ namespace UnturnedBlackout.Instances
                             {
                                 await DB.DecreasePlayerCreditsAsync(Player.CSteamID, (uint)gun.Gun.BuyPrice);
                                 await DB.UpdatePlayerGunBoughtAsync(Player.CSteamID, gun.Gun.GunID, true);
-                                TaskDispatcher.QueueOnMainThread(() => ReloadSelectedItem());
+                                TaskDispatcher.QueueOnMainThread(() =>
+                                {
+                                    EquipSelectedItem();
+                                    ReloadLoadoutTab();
+                                    ReloadSelectedItem();
+                                });
                             }
                         });
                         break;
@@ -3806,7 +3812,12 @@ namespace UnturnedBlackout.Instances
                             {
                                 await DB.DecreasePlayerCreditsAsync(Player.CSteamID, (uint)attachment.Attachment.BuyPrice);
                                 await DB.UpdatePlayerGunAttachmentBoughtAsync(Player.CSteamID, gun.Gun.GunID, attachment.Attachment.AttachmentID, true);
-                                TaskDispatcher.QueueOnMainThread(() => ReloadSelectedItem());
+                                TaskDispatcher.QueueOnMainThread(() =>
+                                {
+                                    EquipSelectedItem();
+                                    ReloadLoadoutTab();
+                                    ReloadSelectedItem();
+                                });
                             }
                         });
                         break;
@@ -3826,7 +3837,12 @@ namespace UnturnedBlackout.Instances
                             {
                                 await DB.DecreasePlayerCreditsAsync(Player.CSteamID, (uint)gun.Gun.BuyPrice);
                                 await DB.UpdatePlayerGunBoughtAsync(Player.CSteamID, gun.Gun.GunID, true);
-                                TaskDispatcher.QueueOnMainThread(() => ReloadSelectedItem());
+                                TaskDispatcher.QueueOnMainThread(() =>
+                                {
+                                    EquipSelectedItem();
+                                    ReloadLoadoutTab();
+                                    ReloadSelectedItem();
+                                });
                             }
                         });
                         break;
@@ -3854,7 +3870,12 @@ namespace UnturnedBlackout.Instances
                             {
                                 await DB.DecreasePlayerCreditsAsync(Player.CSteamID, (uint)attachment.Attachment.BuyPrice);
                                 await DB.UpdatePlayerGunAttachmentBoughtAsync(Player.CSteamID, gun.Gun.GunID, attachment.Attachment.AttachmentID, true);
-                                TaskDispatcher.QueueOnMainThread(() => ReloadSelectedItem());
+                                TaskDispatcher.QueueOnMainThread(() =>
+                                {
+                                    EquipSelectedItem();
+                                    ReloadLoadoutTab();
+                                    ReloadSelectedItem();
+                                });
                             }
                         });
                         break;
@@ -3875,7 +3896,12 @@ namespace UnturnedBlackout.Instances
                             {
                                 await DB.DecreasePlayerCreditsAsync(Player.CSteamID, (uint)gunCharm.GunCharm.BuyPrice);
                                 await DB.UpdatePlayerGunCharmBoughtAsync(Player.CSteamID, gunCharm.GunCharm.CharmID, true);
-                                TaskDispatcher.QueueOnMainThread(() => ReloadSelectedItem());
+                                TaskDispatcher.QueueOnMainThread(() =>
+                                {
+                                    EquipSelectedItem();
+                                    ReloadLoadoutTab();
+                                    ReloadSelectedItem();
+                                });
                             }
                         });
                         break;
@@ -3895,7 +3921,12 @@ namespace UnturnedBlackout.Instances
                             {
                                 await DB.DecreasePlayerCreditsAsync(Player.CSteamID, (uint)knife.Knife.BuyPrice);
                                 await DB.UpdatePlayerKnifeBoughtAsync(Player.CSteamID, knife.Knife.KnifeID, true);
-                                TaskDispatcher.QueueOnMainThread(() => ReloadSelectedItem());
+                                TaskDispatcher.QueueOnMainThread(() =>
+                                {
+                                    EquipSelectedItem();
+                                    ReloadLoadoutTab();
+                                    ReloadSelectedItem();
+                                });
                             }
                         });
                         break;
@@ -3915,7 +3946,12 @@ namespace UnturnedBlackout.Instances
                             {
                                 await DB.DecreasePlayerCreditsAsync(Player.CSteamID, (uint)gadget.Gadget.BuyPrice);
                                 await DB.UpdatePlayerGadgetBoughtAsync(Player.CSteamID, gadget.Gadget.GadgetID, true);
-                                TaskDispatcher.QueueOnMainThread(() => ReloadSelectedItem());
+                                TaskDispatcher.QueueOnMainThread(() =>
+                                {
+                                    EquipSelectedItem();
+                                    ReloadLoadoutTab();
+                                    ReloadSelectedItem();
+                                });
                             }
                         });
                         break;
@@ -3935,7 +3971,12 @@ namespace UnturnedBlackout.Instances
                             {
                                 await DB.DecreasePlayerCreditsAsync(Player.CSteamID, (uint)gadget.Gadget.BuyPrice);
                                 await DB.UpdatePlayerGadgetBoughtAsync(Player.CSteamID, gadget.Gadget.GadgetID, true);
-                                TaskDispatcher.QueueOnMainThread(() => ReloadSelectedItem());
+                                TaskDispatcher.QueueOnMainThread(() =>
+                                {
+                                    EquipSelectedItem();
+                                    ReloadLoadoutTab();
+                                    ReloadSelectedItem();
+                                });
                             }
                         });
                         break;
@@ -3957,7 +3998,12 @@ namespace UnturnedBlackout.Instances
                             {
                                 await DB.DecreasePlayerCreditsAsync(Player.CSteamID, (uint)perk.Perk.BuyPrice);
                                 await DB.UpdatePlayerPerkBoughtAsync(Player.CSteamID, perk.Perk.PerkID, true);
-                                TaskDispatcher.QueueOnMainThread(() => ReloadSelectedItem());
+                                TaskDispatcher.QueueOnMainThread(() =>
+                                {
+                                    EquipSelectedItem();
+                                    ReloadLoadoutTab();
+                                    ReloadSelectedItem();
+                                });
                             }
                         });
                         break;
@@ -3977,7 +4023,12 @@ namespace UnturnedBlackout.Instances
                             {
                                 await DB.DecreasePlayerCreditsAsync(Player.CSteamID, (uint)killstreak.Killstreak.BuyPrice);
                                 await DB.UpdatePlayerKillstreakBoughtAsync(Player.CSteamID, killstreak.Killstreak.KillstreakID, true);
-                                TaskDispatcher.QueueOnMainThread(() => ReloadSelectedItem());
+                                TaskDispatcher.QueueOnMainThread(() =>
+                                {
+                                    EquipSelectedItem();
+                                    ReloadLoadoutTab();
+                                    ReloadSelectedItem();
+                                });
                             }
                         });
                         break;
@@ -3997,7 +4048,12 @@ namespace UnturnedBlackout.Instances
                             {
                                 await DB.DecreasePlayerCreditsAsync(Player.CSteamID, (uint)card.Card.BuyPrice);
                                 await DB.UpdatePlayerCardBoughtAsync(Player.CSteamID, card.Card.CardID, true);
-                                TaskDispatcher.QueueOnMainThread(() => ReloadSelectedItem());
+                                TaskDispatcher.QueueOnMainThread(() =>
+                                {
+                                    EquipSelectedItem();
+                                    ReloadLoadoutTab();
+                                    ReloadSelectedItem();
+                                });
                             }
                         });
                         break;
@@ -4017,7 +4073,12 @@ namespace UnturnedBlackout.Instances
                             {
                                 await DB.DecreasePlayerCreditsAsync(Player.CSteamID, (uint)glove.Glove.BuyPrice);
                                 await DB.UpdatePlayerGloveBoughtAsync(Player.CSteamID, glove.Glove.GloveID, true);
-                                TaskDispatcher.QueueOnMainThread(() => ReloadSelectedItem());
+                                TaskDispatcher.QueueOnMainThread(() =>
+                                {
+                                    EquipSelectedItem();
+                                    ReloadLoadoutTab();
+                                    ReloadSelectedItem();
+                                });
                             }
                         });
                         break;
@@ -4058,6 +4119,7 @@ namespace UnturnedBlackout.Instances
                                 await DB.UpdatePlayerGunBoughtAsync(Player.CSteamID, gun.Gun.GunID, true);
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
+                                    EquipSelectedItem();
                                     ReloadSelectedItem();
                                     ReloadLoadoutTab();
                                 });
@@ -4091,6 +4153,7 @@ namespace UnturnedBlackout.Instances
                                 await DB.UpdatePlayerGunAttachmentBoughtAsync(Player.CSteamID, gun.Gun.GunID, attachment.Attachment.AttachmentID, true);
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
+                                    EquipSelectedItem();
                                     ReloadSelectedItem();
                                     ReloadLoadoutTab();
                                 });
@@ -4115,6 +4178,7 @@ namespace UnturnedBlackout.Instances
                                 await DB.UpdatePlayerGunBoughtAsync(Player.CSteamID, gun.Gun.GunID, true);
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
+                                    EquipSelectedItem();
                                     ReloadSelectedItem();
                                     ReloadLoadoutTab();
                                 });
@@ -4147,6 +4211,7 @@ namespace UnturnedBlackout.Instances
                                 await DB.UpdatePlayerGunAttachmentBoughtAsync(Player.CSteamID, gun.Gun.GunID, attachment.Attachment.AttachmentID, true);
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
+                                    EquipSelectedItem();
                                     ReloadSelectedItem();
                                     ReloadLoadoutTab();
                                 });
@@ -4172,6 +4237,7 @@ namespace UnturnedBlackout.Instances
                                 await DB.UpdatePlayerGunCharmBoughtAsync(Player.CSteamID, gunCharm.GunCharm.CharmID, true);
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
+                                    EquipSelectedItem();
                                     ReloadSelectedItem();
                                     ReloadLoadoutTab();
                                 });
@@ -4196,6 +4262,7 @@ namespace UnturnedBlackout.Instances
                                 await DB.UpdatePlayerKnifeBoughtAsync(Player.CSteamID, knife.Knife.KnifeID, true);
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
+                                    EquipSelectedItem();
                                     ReloadSelectedItem();
                                     ReloadLoadoutTab();
                                 });
@@ -4220,6 +4287,7 @@ namespace UnturnedBlackout.Instances
                                 await DB.UpdatePlayerGadgetBoughtAsync(Player.CSteamID, gadget.Gadget.GadgetID, true);
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
+                                    EquipSelectedItem();
                                     ReloadSelectedItem();
                                     ReloadLoadoutTab();
                                 });
@@ -4244,6 +4312,7 @@ namespace UnturnedBlackout.Instances
                                 await DB.UpdatePlayerGadgetBoughtAsync(Player.CSteamID, gadget.Gadget.GadgetID, true);
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
+                                    EquipSelectedItem();
                                     ReloadSelectedItem();
                                     ReloadLoadoutTab();
                                 });
@@ -4270,6 +4339,7 @@ namespace UnturnedBlackout.Instances
                                 await DB.UpdatePlayerPerkBoughtAsync(Player.CSteamID, perk.Perk.PerkID, true);
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
+                                    EquipSelectedItem();
                                     ReloadSelectedItem();
                                     ReloadLoadoutTab();
                                 });
@@ -4294,6 +4364,7 @@ namespace UnturnedBlackout.Instances
                                 await DB.UpdatePlayerKillstreakBoughtAsync(Player.CSteamID, killstreak.Killstreak.KillstreakID, true);
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
+                                    EquipSelectedItem();
                                     ReloadSelectedItem();
                                     ReloadLoadoutTab();
                                 });
@@ -4318,6 +4389,7 @@ namespace UnturnedBlackout.Instances
                                 await DB.UpdatePlayerCardBoughtAsync(Player.CSteamID, card.Card.CardID, true);
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
+                                    EquipSelectedItem();
                                     ReloadSelectedItem();
                                     ReloadLoadoutTab();
                                 });
@@ -4342,6 +4414,7 @@ namespace UnturnedBlackout.Instances
                                 await DB.UpdatePlayerGloveBoughtAsync(Player.CSteamID, glove.Glove.GloveID, true);
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
+                                    EquipSelectedItem();
                                     ReloadSelectedItem();
                                     ReloadLoadoutTab();
                                 });

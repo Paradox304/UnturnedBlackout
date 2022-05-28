@@ -1,5 +1,4 @@
-﻿using Rocket.Core;
-using Rocket.Core.Utils;
+﻿using Rocket.Core.Utils;
 using Rocket.Unturned.Enumerations;
 using Rocket.Unturned.Player;
 using SDG.Unturned;
@@ -589,7 +588,8 @@ namespace UnturnedBlackout.GameTypes
             {
                 if (!Plugin.Instance.DBManager.PlayerData.TryGetValue(player.SteamID, out PlayerData data) || data.IsMuted)
                 {
-                    Utility.Say(player.Player, $"<color=red>You are muted for " + (data.MuteExpiry.UtcDateTime - DateTime.UtcNow).ToString(@"d \d h \h m \m") + "</color>");
+                    var expiryTime = data.MuteExpiry.UtcDateTime - DateTime.UtcNow;
+                    Utility.Say(player.Player, $"<color=red>You are muted for{(expiryTime.Days == 0 ? "" : $" {expiryTime.Days} Days ")}{(expiryTime.Hours == 0 ? "" : $" {expiryTime.Hours} Hours")}{(expiryTime.Minutes == 0 ? "" : $" {expiryTime.Minutes} Minutes")}");
                     return;
                 }
 
@@ -670,14 +670,6 @@ namespace UnturnedBlackout.GameTypes
             {
                 return;
             }
-
-            TaskDispatcher.QueueOnMainThread(() =>
-            {
-                if (player.Player.Player.equipment.itemID == (isTactical ? player.ActiveLoadout.Tactical.Gadget.GadgetID : player.ActiveLoadout.Lethal.Gadget.GadgetID))
-                {
-                    player.Player.Player.equipment.dequip();
-                }
-            });
         }
 
         public override void PlayerConsumeableUsed(GamePlayer player)
@@ -689,14 +681,6 @@ namespace UnturnedBlackout.GameTypes
             }
 
             player.UsedTactical();
-
-            TaskDispatcher.QueueOnMainThread(() =>
-            {
-                if (player.Player.Player.equipment.itemID == (player.ActiveLoadout.Tactical?.Gadget?.GadgetID ?? 0))
-                {
-                    player.Player.Player.equipment.dequip();
-                }
-            });
         }
 
         public override void PlayerBarricadeSpawned(GamePlayer player, BarricadeDrop drop)
@@ -721,14 +705,6 @@ namespace UnturnedBlackout.GameTypes
             {
                 return;
             }
-
-            TaskDispatcher.QueueOnMainThread(() =>
-            {
-                if (player.Player.Player.equipment.itemID == (isTactical ? player.ActiveLoadout.Tactical.Gadget.GadgetID : player.ActiveLoadout.Lethal.Gadget.GadgetID))
-                {
-                    player.Player.Player.equipment.dequip();
-                }
-            });
         }
 
         public override void PlayerChangeFiremode(GamePlayer player)

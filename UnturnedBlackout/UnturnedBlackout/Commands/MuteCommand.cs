@@ -6,11 +6,7 @@ using SDG.Unturned;
 using Steamworks;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
-using UnturnedBlackout.Database.Data;
 using UnturnedBlackout.Managers;
 using UnturnedBlackout.Models.Webhook;
 
@@ -42,7 +38,8 @@ namespace UnturnedBlackout.Commands
             if (!ulong.TryParse(command[0], out ulong steamid))
             {
                 steamID = PlayerTool.getPlayer(command[0])?.channel?.owner?.playerID?.steamID ?? CSteamID.Nil;
-            } else
+            }
+            else
             {
                 steamID = new CSteamID(steamid);
             }
@@ -65,7 +62,8 @@ namespace UnturnedBlackout.Commands
                 try
                 {
                     profile = new Profile(steamID.m_SteamID);
-                } catch (Exception)
+                }
+                catch (Exception)
                 {
                     TaskDispatcher.QueueOnMainThread(() => Utility.Say(caller, "<color=red>Player not found</color>"));
                     return;
@@ -94,7 +92,9 @@ namespace UnturnedBlackout.Commands
                                         },
                                         null, null);
                 if (!string.IsNullOrEmpty(Plugin.Instance.Configuration.Instance.WebhookURL))
+                {
                     DiscordManager.SendEmbed(embed, "Player Muted", Plugin.Instance.Configuration.Instance.WebhookURL);
+                }
             });
         }
     }

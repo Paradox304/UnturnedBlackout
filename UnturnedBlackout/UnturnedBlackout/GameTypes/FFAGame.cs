@@ -1,5 +1,4 @@
-﻿using Rocket.Core;
-using Rocket.Core.Utils;
+﻿using Rocket.Core.Utils;
 using Rocket.Unturned.Enumerations;
 using Rocket.Unturned.Player;
 using SDG.Unturned;
@@ -394,7 +393,7 @@ namespace UnturnedBlackout.GameTypes
                 {
                     OnKill(kPlayer.GamePlayer, fPlayer.GamePlayer, equipmentUsed, Config.FFA.KillFeedHexCode, Config.FFA.KillFeedHexCode);
                 }
-                
+
                 foreach (var ply in Players)
                 {
                     Plugin.Instance.UIManager.UpdateFFATopUI(ply, Players);
@@ -427,7 +426,8 @@ namespace UnturnedBlackout.GameTypes
                     else if (kPlayer.GamePlayer.ActiveLoadout.Killstreaks.Select(k => k.Killstreak.KillstreakID).Contains(equipmentUsed))
                     {
                         await Plugin.Instance.DBManager.IncreasePlayerKillstreakKillsAsync(kPlayer.GamePlayer.SteamID, equipmentUsed, 1);
-                    } else if (kPlayer.GamePlayer.ActiveLoadout.Knife != null &&  kPlayer.GamePlayer.ActiveLoadout.Knife.Knife.KnifeID == equipmentUsed)
+                    }
+                    else if (kPlayer.GamePlayer.ActiveLoadout.Knife != null && kPlayer.GamePlayer.ActiveLoadout.Knife.Knife.KnifeID == equipmentUsed)
                     {
                         await Plugin.Instance.DBManager.IncreasePlayerKnifeKillsAsync(kPlayer.GamePlayer.SteamID, equipmentUsed, 1);
                     }
@@ -528,7 +528,8 @@ namespace UnturnedBlackout.GameTypes
             {
                 if (!Plugin.Instance.DBManager.PlayerData.TryGetValue(player.SteamID, out PlayerData data) || data.IsMuted)
                 {
-                    Utility.Say(player.Player, $"<color=red>You are muted for " + (data.MuteExpiry.UtcDateTime - DateTime.UtcNow).ToString(@"d \d h \h m \m") + "</color>");
+                    var expiryTime = data.MuteExpiry.UtcDateTime - DateTime.UtcNow;
+                    Utility.Say(player.Player, $"<color=red>You are muted for{(expiryTime.Days == 0 ? "" : $" {expiryTime.Days} Days ")}{(expiryTime.Hours == 0 ? "" : $" {expiryTime.Hours} Hours")}{(expiryTime.Minutes == 0 ? "" : $" {expiryTime.Minutes} Minutes")}");
                     return;
                 }
 
@@ -575,10 +576,12 @@ namespace UnturnedBlackout.GameTypes
             if (throwable.equippedThrowableAsset.id == (player.ActiveLoadout.Lethal?.Gadget?.GadgetID ?? 0))
             {
                 player.UsedLethal();
-            } else if (throwable.equippedThrowableAsset.id == (player.ActiveLoadout.Tactical?.Gadget?.GadgetID ?? 0))
+            }
+            else if (throwable.equippedThrowableAsset.id == (player.ActiveLoadout.Tactical?.Gadget?.GadgetID ?? 0))
             {
                 player.UsedTactical();
-            } else
+            }
+            else
             {
                 return;
             }
@@ -593,14 +596,6 @@ namespace UnturnedBlackout.GameTypes
             }
 
             player.UsedTactical();
-
-            TaskDispatcher.QueueOnMainThread(() =>
-            {
-                if (player.Player.Player.equipment.itemID == (player.ActiveLoadout.Tactical?.Gadget?.GadgetID ?? 0))
-                {
-                    player.Player.Player.equipment.dequip();
-                }
-            });
         }
 
         public override void PlayerBarricadeSpawned(GamePlayer player, BarricadeDrop drop)
@@ -625,14 +620,6 @@ namespace UnturnedBlackout.GameTypes
             {
                 return;
             }
-
-            TaskDispatcher.QueueOnMainThread(() =>
-            {
-                if (player.Player.Player.equipment.itemID == (isTactical ? player.ActiveLoadout.Tactical.Gadget.GadgetID : player.ActiveLoadout.Lethal.Gadget.GadgetID))
-                {
-                    player.Player.Player.equipment.dequip();
-                }
-            });
         }
 
         public override void PlayerChangeFiremode(GamePlayer player)
