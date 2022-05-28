@@ -805,6 +805,18 @@ namespace UnturnedBlackout.GameTypes
             keys.Remove(RedTeam.SpawnPoint);
             RedTeam.SpawnPoint = keys[UnityEngine.Random.Range(0, keys.Count)];
             m_SpawnSwitcher.Start();
+
+            if (RedTeam.m_CheckSpawnSwitch.Enabled)
+            {
+                RedTeam.m_CheckSpawnSwitch.Stop();
+                RedTeam.SpawnThreshold = 0;
+            }
+
+            if (BlueTeam.m_CheckSpawnSwitch.Enabled)
+            {
+                BlueTeam.m_CheckSpawnSwitch.Stop();
+                BlueTeam.SpawnThreshold = 0;
+            }
         }
 
         public TDMPlayer GetTDMPlayer(CSteamID steamID)
