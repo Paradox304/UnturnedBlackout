@@ -432,10 +432,10 @@ namespace UnturnedBlackout.Models.Global
 
             var flagCarryingSpeed = isCarryingFlag ? Plugin.Instance.Configuration.Instance.CTF.FlagCarryingSpeed : 0f;
             var updatedMovement = 1f;
-            if (Player.Player.equipment.itemID == (ActiveLoadout.Primary?.Gun?.GunID ?? 0))
+            if (Player.Player.equipment.itemID == (ActiveLoadout.Primary?.Gun?.GunID ?? 0) || Player.Player.equipment.itemID == (ActiveLoadout.PrimarySkin?.SkinID ?? 0))
             {
                 updatedMovement = (isADS ? PrimaryMovementChangeADS : PrimaryMovementChange) + flagCarryingSpeed;
-            } else if (Player.Player.equipment.itemID == (ActiveLoadout.Secondary?.Gun?.GunID ?? 0))
+            } else if (Player.Player.equipment.itemID == (ActiveLoadout.Secondary?.Gun?.GunID ?? 0) || Player.Player.equipment.itemID == (ActiveLoadout.PrimarySkin?.SkinID ?? 0))
             {
                 updatedMovement = (isADS ? SecondaryMovementChangeADS : SecondaryMovementChange) + flagCarryingSpeed;
             } else if (Player.Player.equipment.itemID == (ActiveLoadout.Knife.Knife.KnifeID))
@@ -445,7 +445,7 @@ namespace UnturnedBlackout.Models.Global
 
             Player.Player.movement.sendPluginSpeedMultiplier(updatedMovement);
         }
-
+         
         public void OnGameLeft()
         {
             if (m_TacticalChecker.Enabled)
