@@ -128,6 +128,7 @@ namespace UnturnedBlackout
             GameManager = new GameManager();
             HUDManager = new HUDManager();
 
+            PlayerMovement.forceTrustClient = true;
             var shouldFillAfterDetach = typeof(ItemMagazineAsset).GetProperty("shouldFillAfterDetach", BindingFlags.Public | BindingFlags.Instance);
             var magazines = Assets.find(EAssetType.ITEM).OfType<ItemMagazineAsset>();
             foreach (var mag in magazines)

@@ -442,7 +442,7 @@ namespace UnturnedBlackout.Models.Global
             {
                 updatedMovement = KnifeMovementChange + flagCarryingSpeed;
             }
-
+            
             Player.Player.movement.sendPluginSpeedMultiplier(updatedMovement);
         }
          
