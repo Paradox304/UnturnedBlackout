@@ -1,8 +1,10 @@
 ﻿using HarmonyLib;
 using Rocket.API.Collections;
 using Rocket.Core.Plugins;
+using Rocket.Unturned.Permissions;
 using SDG.Unturned;
 using Steamworks;
+using System;
 using System.Collections;
 using System.Linq;
 using System.Reflection;
@@ -38,6 +40,8 @@ namespace UnturnedBlackout
             ResourceManager.onDamageResourceRequested += OnDamageResource;
             StructureManager.onDamageStructureRequested += OnDamageStructure;
 
+            UnturnedPermissions.OnJoinRequested += OnJoining;
+
             PlayerInput.onPluginKeyTick += OnHotkeyPressed;
 
             Logger.Log("Unturned Blackout has been loaded");
@@ -56,10 +60,28 @@ namespace UnturnedBlackout
             ResourceManager.onDamageResourceRequested -= OnDamageResource;
             StructureManager.onDamageStructureRequested -= OnDamageStructure;
 
+            UnturnedPermissions.OnJoinRequested -= OnJoining;
             PlayerInput.onPluginKeyTick -= OnHotkeyPressed;
             StopAllCoroutines();
 
             Logger.Log("Unturned Blackout has been unloaded");
+        }
+
+        private void OnJoining(CSteamID player, ref ESteamRejection? rejectionReason)
+        {
+            var ply = Provider.pending.FirstOrDefault(k => k.playerID.steamID == player);
+            if (ply != null)
+                ply.playerID.characterName = ply.playerID.nickName;
+
+            ply.hatItem = 0;
+            ply.maskItem = 0;
+            ply.glassesItem = 0;
+            ply.backpackItem = 0;
+            ply.shirtItem = 0;
+            ply.pantsItem = 0;
+            ply.vestItem = 0;
+
+            ply.skinItems = new int[0];
         }
 
         private void OnHotkeyPressed(Player player, uint simulation, byte key, bool state)
