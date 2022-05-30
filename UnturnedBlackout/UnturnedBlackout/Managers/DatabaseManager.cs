@@ -8,6 +8,7 @@ using Steamworks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using UnturnedBlackout.Database.Base;
@@ -374,7 +375,8 @@ namespace UnturnedBlackout.Managers
                                 }
                                 else
                                 {
-                                    Logging.Debug($"Could'nt find default attachment with id {id} for gun {gunID} with name {gunName}");
+                                    if (id != 0)
+                                        Logging.Debug($"Could'nt find default attachment with id {id} for gun {gunID} with name {gunName}");
                                 }
                             }
 
@@ -406,7 +408,8 @@ namespace UnturnedBlackout.Managers
                                 }
                                 else
                                 {
-                                    Logging.Debug($"Could'nt find reward attachment with id {id} for gun {gunID} with name {gunName}");
+                                    if (id != 0)
+                                        Logging.Debug($"Could'nt find reward attachment with id {id} for gun {gunID} with name {gunName}");
                                 }
                             }
                             var gun = new Gun(gunID, gunName, gunDesc, gunType, rarity, movementChange, movementChangeADS, iconLink, magAmount, coins, buyPrice, scrapAmount, levelRequirement, isPrimary, defaultAttachments, rewardAttachments, rewardAttachmentsInverse, levelXPNeeded);
@@ -1144,10 +1147,11 @@ namespace UnturnedBlackout.Managers
             {
                 try
                 {
+                    var regex = new Regex("<[^>]*>");
                     Logging.Debug($"Adding {steamName} to the DB");
                     await Conn.OpenAsync();
                     var cmd = new MySqlCommand($"INSERT INTO `{PlayersTableName}` ( `SteamID` , `SteamName` , `AvatarLink` , `MuteExpiry` ) VALUES ({player.CSteamID}, @name, '{avatarLink}' , {DateTimeOffset.UtcNow.ToUnixTimeSeconds()}) ON DUPLICATE KEY UPDATE `AvatarLink` = '{avatarLink}', `SteamName` = @name;", Conn);
-                    cmd.Parameters.AddWithValue("@name", steamName);
+                    cmd.Parameters.AddWithValue("@name", steamName.ToUnrich());
                     await cmd.ExecuteScalarAsync();
 
                     Logging.Debug($"Giving {steamName} the guns");

@@ -45,6 +45,7 @@ namespace UnturnedBlackout.Models.Global
 
         public EPlayerStance PreviousStance { get; set; }
 
+        public Coroutine MovementChanger { get; set; }
         public Coroutine Healer { get; set; }
         public Coroutine RespawnTimer { get; set; }
         public Coroutine VoiceChatChecker { get; set; }
@@ -442,10 +443,39 @@ namespace UnturnedBlackout.Models.Global
             {
                 updatedMovement = KnifeMovementChange + flagCarryingSpeed;
             }
-            
-            Player.Player.movement.sendPluginSpeedMultiplier(updatedMovement);
+
+            Logging.Debug($"UPDATED MOVEMENT FOR {Player.CharacterName} IS {updatedMovement}");
+            if (isADS)
+            {
+                Logging.Debug("Sending speed for ADS, not doing steps");
+                Player.Player.movement.sendPluginSpeedMultiplier(updatedMovement);
+            } else
+            {
+                Logging.Debug("Sending speed for non ads, doing steps");
+                if (MovementChanger != null)
+                {
+                    Logging.Debug("Steps already on, disabling it");
+                    Plugin.Instance.StopCoroutine(MovementChanger);
+                }
+
+                Logging.Debug($"Current speed multiplier of player {Player.Player.movement.pluginSpeedMultiplier}");
+                var changeMovement = (updatedMovement - Player.Player.movement.pluginSpeedMultiplier) / 2;
+                Logging.Debug($"Changing {changeMovement} speed for steps");
+                MovementChanger = Plugin.Instance.StartCoroutine(ChangeMovementSteps(changeMovement));
+            }
         }
          
+        public IEnumerator ChangeMovementSteps(float changeMovement)
+        {
+            Logging.Debug($"Doing steps speed changing for {Player.CharacterName}");
+            for (int i = 1; i <= 2; i++)
+            {
+                yield return new WaitForSeconds(Plugin.Instance.Configuration.Instance.MovementStepsDelay);
+                Logging.Debug($"i: {i}, steps: {changeMovement}, player's speed: {Player.Player.movement.pluginSpeedMultiplier}");
+                Player.Player.movement.sendPluginSpeedMultiplier(Player.Player.movement.pluginSpeedMultiplier + changeMovement);
+            }
+        }
+
         public void OnGameLeft()
         {
             if (m_TacticalChecker.Enabled)
@@ -491,6 +521,11 @@ namespace UnturnedBlackout.Models.Global
             if (AnimationChecker != null)
             {
                 Plugin.Instance.StopCoroutine(AnimationChecker);
+            }
+
+            if (MovementChanger != null)
+            {
+                Plugin.Instance.StopCoroutine(MovementChanger);
             }
 
             HasScoreboard = false;

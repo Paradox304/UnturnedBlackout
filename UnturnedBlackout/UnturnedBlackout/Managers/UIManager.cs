@@ -4,6 +4,7 @@ using Steamworks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using UnturnedBlackout.Database.Base;
 using UnturnedBlackout.Database.Data;
 using UnturnedBlackout.Enums;
@@ -259,7 +260,8 @@ namespace UnturnedBlackout.Managers
             }
             foreach (var player in players)
             {
-                EffectManager.sendUIEffectText(key, player.TransportConnection, true, "Killfeed", feedText);
+                var updatedText = new Regex($@"<color=([^>]*)>{player.Player.CharacterName.ToUnrich()}<\/color>", RegexOptions.IgnoreCase).Replace(feedText, $"{(type == EGameType.FFA ? Config.FFA.ChatPlayerHexCode : Config.PlayerColorHexCode)}");
+                EffectManager.sendUIEffectText(key, player.TransportConnection, true, "Killfeed", updatedText);
             }
         }
 

@@ -270,6 +270,7 @@ namespace UnturnedBlackout.GameTypes
                 region.items.RemoveAll(k => LevelNavigation.tryGetNavigation(k.point, out byte nav) && nav == Location.NavMesh);
             }
         }
+
         public void Destroy()
         {
             UnturnedPlayerEvents.OnPlayerDeath -= OnPlayerDeath;
@@ -284,6 +285,11 @@ namespace UnturnedBlackout.GameTypes
             UseableConsumeable.onConsumePerformed -= OnConsumed;
             UseableConsumeable.onPerformedAid -= OnPerfomedAid;
             UseableGun.OnAimingChanged_Global -= OnAimingChanged;
+
+            if (KillFeedChecker != null)
+            {
+                Plugin.Instance.StopCoroutine(KillFeedChecker);
+            }
         }
 
         public abstract bool IsPlayerIngame(CSteamID steamID);

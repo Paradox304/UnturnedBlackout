@@ -3,6 +3,7 @@ using Rocket.Unturned.Player;
 using SDG.Unturned;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using UnityEngine;
 using UnturnedBlackout.Database.Base;
 using UnturnedBlackout.Database.Data;
@@ -19,31 +20,7 @@ namespace UnturnedBlackout
 
         public static string ToUnrich(this string value)
         {
-            string newString = "";
-            bool omit = false;
-
-            foreach (var c in value)
-            {
-                if (c == '<')
-                {
-                    omit = true;
-                    continue;
-                }
-                else if (c == '>')
-                {
-                    omit = false;
-                    continue;
-                }
-
-                if (omit)
-                {
-                    continue;
-                }
-
-                newString += c;
-            }
-
-            return newString.Trim();
+            return new Regex("<[^>]*>", RegexOptions.IgnoreCase).Replace(value, "").Trim();
         }
 
         public static void Say(IRocketPlayer target, string message)

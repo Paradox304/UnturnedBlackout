@@ -685,11 +685,6 @@ namespace UnturnedBlackout.Managers
                             }
                         }
                     }
-                    else
-                    {
-                        item.state[startingPos] = 0;
-                        item.state[startingPos + 1] = 0;
-                    }
                 }
 
                 if (activeLoadout.SecondaryGunCharm != null)
@@ -697,11 +692,6 @@ namespace UnturnedBlackout.Managers
                     var bytes = BitConverter.GetBytes(activeLoadout.SecondaryGunCharm.GunCharm.CharmID);
                     item.state[2] = bytes[0];
                     item.state[3] = bytes[1];
-                }
-                else
-                {
-                    item.state[2] = 0;
-                    item.state[3] = 0;
                 }
 
                 inv.items[1].tryAddItem(item);

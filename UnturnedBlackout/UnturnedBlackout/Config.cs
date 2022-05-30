@@ -40,6 +40,8 @@ namespace UnturnedBlackout
         public int VoteSeconds { get; set; }
         public int GamesCount { get; set; }
 
+        public float MovementStepsDelay { get; set; }
+
         public int SpawnUnavailableSeconds { get; set; }
 
         public int EndingLeaderboardSeconds { get; set; }
@@ -101,6 +103,8 @@ namespace UnturnedBlackout
 
             VoteSeconds = 60;
             GamesCount = 3;
+
+            MovementStepsDelay = 0.2f;
 
             SpawnUnavailableSeconds = 5;
 

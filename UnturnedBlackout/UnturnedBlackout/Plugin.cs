@@ -64,11 +64,6 @@ namespace UnturnedBlackout
 
         private void OnHotkeyPressed(Player player, uint simulation, byte key, bool state)
         {
-            if (key != 1)
-            {
-                return;
-            }
-
             if (state == false)
             {
                 return;
@@ -79,12 +74,25 @@ namespace UnturnedBlackout
             {
                 return;
             }
-            if (GameManager.TryGetCurrentGame(gPlayer.SteamID, out Game game))
+
+            if (!GameManager.TryGetCurrentGame(gPlayer.SteamID, out Game game))
             {
-                if (game.GamePhase == Enums.EGamePhase.Started || game.GamePhase == Enums.EGamePhase.WaitingForPlayers)
-                {
-                    UIManager.ShowMidgameLoadoutUI(gPlayer);
-                }
+                return;
+            }
+
+            switch (key)
+            {
+                case 0:
+                    game.OnChangeFiremode(gPlayer);
+                    break;
+                case 1:
+                    if (game.GamePhase == Enums.EGamePhase.Started || game.GamePhase == Enums.EGamePhase.WaitingForPlayers)
+                    {
+                        UIManager.ShowMidgameLoadoutUI(gPlayer);
+                    }
+                    break;
+                default:
+                    return;
             }
         }
 
@@ -128,7 +136,6 @@ namespace UnturnedBlackout
             GameManager = new GameManager();
             HUDManager = new HUDManager();
 
-            PlayerMovement.forceTrustClient = true;
             var shouldFillAfterDetach = typeof(ItemMagazineAsset).GetProperty("shouldFillAfterDetach", BindingFlags.Public | BindingFlags.Instance);
             var magazines = Assets.find(EAssetType.ITEM).OfType<ItemMagazineAsset>();
             foreach (var mag in magazines)
