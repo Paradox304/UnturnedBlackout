@@ -155,7 +155,7 @@ namespace UnturnedBlackout.Instances
             int spaces = 0;
             if (data.TryGetNeededXP(out int neededXP))
             {
-                spaces = Math.Min(96, neededXP == 0 ? 0 : (int)(data.XP * 96 / neededXP));
+                spaces = Math.Min(96, neededXP == 0 ? 0 : (int)(data.XP * 176 / neededXP));
             }
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER XP Bar Fill", spaces == 0 ? " " : new string(' ', spaces));
         }
@@ -3521,7 +3521,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item TEXT", gun.Gun.GunName);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Level TEXT", gun.Level.ToString());
             gun.TryGetNeededXP(out int neededXP);
-            var spaces = neededXP != 0 ? (gun.XP * 97 / neededXP) : 0;
+            var spaces = neededXP != 0 ? (gun.XP * 188 / neededXP) : 0;
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item XP Bar Fill", spaces == 0 ? "" : new string(' ', spaces));
             SendRarityName(gun.Gun.GunRarity);
         }
