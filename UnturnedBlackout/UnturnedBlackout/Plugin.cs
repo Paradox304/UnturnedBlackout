@@ -91,23 +91,28 @@ namespace UnturnedBlackout
                 return;
             }
 
+            Logging.Debug($"HOTKEY PRESSED: {player.channel.owner.playerID.characterName}, KEY: {key}, STATE: {state}");
             var gPlayer = GameManager.GetGamePlayer(player);
             if (gPlayer == null)
             {
                 return;
             }
 
+            Logging.Debug("Found player");
             if (!GameManager.TryGetCurrentGame(gPlayer.SteamID, out Game game))
             {
                 return;
             }
 
+            Logging.Debug("Game found");
             switch (key)
             {
                 case 0:
+                    Logging.Debug("Sending scoreboard");
                     game.OnChangeFiremode(gPlayer);
                     break;
                 case 1:
+                    Logging.Debug("Sending loadout change");
                     if (game.GamePhase == Enums.EGamePhase.Started || game.GamePhase == Enums.EGamePhase.WaitingForPlayers)
                     {
                         UIManager.ShowMidgameLoadoutUI(gPlayer);

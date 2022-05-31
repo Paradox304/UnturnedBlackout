@@ -495,11 +495,6 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
-            if (parameters.cause == EDeathCause.MELEE)
-            {
-                parameters.damage = 200;
-            }
-
             player.GamePlayer.OnDamaged(parameters.killer);
 
             var kPlayer = GetKCPlayer(parameters.killer);
