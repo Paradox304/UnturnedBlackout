@@ -542,7 +542,7 @@ namespace UnturnedBlackout.GameTypes
             {
                 shouldAllow = false;
                 return;
-            }.
+            }
 
             player.GamePlayer.OnDamaged(parameters.killer);
 
