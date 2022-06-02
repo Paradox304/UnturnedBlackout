@@ -96,7 +96,7 @@ namespace UnturnedBlackout.GameTypes
             GamePhase = EGamePhase.Started;
             foreach (var player in Players)
             {
-                player.GamePlayer.GiveMovement(player.GamePlayer.Player.Player.equipment.useable is UseableGun gun && gun.isAiming, false);
+                player.GamePlayer.GiveMovement(player.GamePlayer.Player.Player.equipment.useable is UseableGun gun && gun.isAiming, false, false);
 
                 Plugin.Instance.UIManager.ClearCountdownUI(player.GamePlayer);
             }
@@ -674,7 +674,7 @@ namespace UnturnedBlackout.GameTypes
                     cPlayer.Score += Config.FlagCapturedPoints;
                     cPlayer.XP += Config.CTF.XPPerFlagCaptured;
                     cPlayer.FlagsCaptured++;
-                    player.GiveMovement(player.Player.Player.equipment.useable is UseableGun gun && gun.isAiming, false);
+                    player.GiveMovement(player.Player.Player.equipment.useable is UseableGun gun && gun.isAiming, false, false);
 
                     Plugin.Instance.UIManager.ShowXPUI(cPlayer.GamePlayer, Config.CTF.XPPerFlagCaptured, Plugin.Instance.Translate("Flag_Captured").ToRich());
                     Plugin.Instance.UIManager.SendFlagCapturedSound(cPlayer.GamePlayer);
@@ -747,7 +747,7 @@ namespace UnturnedBlackout.GameTypes
                     }
                 });
 
-                player.GiveMovement(player.Player.Player.equipment.useable is UseableGun gun && gun.isAiming, true);
+                player.GiveMovement(player.Player.Player.equipment.useable is UseableGun gun && gun.isAiming, true, false);
                 cPlayer.IsCarryingFlag = true;
                 Plugin.Instance.UIManager.UpdateCTFHUD(Players, otherTeam);
             }
@@ -839,31 +839,22 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
-            var isTactical = true;
             if (throwable.equippedThrowableAsset.id == (player.ActiveLoadout.Lethal?.Gadget?.GadgetID ?? 0))
             {
-                isTactical = false;
                 player.UsedLethal();
             }
             else if (throwable.equippedThrowableAsset.id == (player.ActiveLoadout.Tactical?.Gadget?.GadgetID ?? 0))
             {
                 player.UsedTactical();
             }
-            else
-            {
-                return;
-            }
         }
 
-        public override void PlayerConsumeableUsed(GamePlayer player)
+        public override void PlayerConsumeableUsed(GamePlayer player, ItemConsumeableAsset consumeableAsset)
         {
-            var cPlayer = GetCTFPlayer(player.Player);
-            if (cPlayer == null)
+            if (IsPlayerIngame(player.SteamID) && consumeableAsset.id == (player.ActiveLoadout.Tactical?.Gadget?.GadgetID ?? 0))
             {
-                return;
+                player.UsedTactical();
             }
-
-            player.UsedTactical();
         }
 
         public override void PlayerBarricadeSpawned(GamePlayer player, BarricadeDrop drop)
@@ -874,19 +865,13 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
-            var isTactical = true;
             if (drop.asset.id == (player.ActiveLoadout.Lethal?.Gadget?.GadgetID ?? 0))
             {
-                isTactical = false;
                 player.UsedLethal();
             }
             else if (drop.asset.id == (player.ActiveLoadout.Tactical?.Gadget?.GadgetID ?? 0))
             {
                 player.UsedTactical();
-            }
-            else
-            {
-                return;
             }
         }
 
@@ -952,7 +937,7 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
-            player.GiveMovement(player.Player.Player.equipment.useable is UseableGun gun && gun.isAiming, cPlayer.IsCarryingFlag);
+            player.GiveMovement(player.Player.Player.equipment.useable is UseableGun gun && gun.isAiming, cPlayer.IsCarryingFlag, true);
         }
 
         public override void PlayerAimingChanged(GamePlayer player, bool isAiming)
@@ -968,7 +953,7 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
-            player.GiveMovement(isAiming, cPlayer.IsCarryingFlag);
+            player.GiveMovement(isAiming, cPlayer.IsCarryingFlag, false);
         }
 
         public CTFPlayer GetCTFPlayer(CSteamID steamID)

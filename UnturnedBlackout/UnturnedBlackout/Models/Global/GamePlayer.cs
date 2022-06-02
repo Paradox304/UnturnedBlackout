@@ -6,6 +6,7 @@ using Steamworks;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Timers;
 using UnityEngine;
 using UnturnedBlackout.Database.Data;
@@ -117,7 +118,7 @@ namespace UnturnedBlackout.Models.Global
             SecondaryMovementChange = secondaryMovementChange;
             SecondaryMovementChangeADS = secondaryMovementChangeADS;
 
-            KnifeMovementChange = loadout.GetKnifeMovement();
+            KnifeMovementChange = primaryMovementChange + secondaryMovementChange + loadout.GetKnifeMovement();
 
             if (m_LethalChecker.Enabled)
             {
@@ -418,7 +419,7 @@ namespace UnturnedBlackout.Models.Global
 
         // Movement
 
-        public void GiveMovement(bool isADS, bool isCarryingFlag)
+        public void GiveMovement(bool isADS, bool isCarryingFlag, bool doSteps)
         {
             if (ActiveLoadout == null)
             {
@@ -435,44 +436,65 @@ namespace UnturnedBlackout.Models.Global
             var updatedMovement = 1f;
             if (Player.Player.equipment.itemID == (ActiveLoadout.Primary?.Gun?.GunID ?? 0) || Player.Player.equipment.itemID == (ActiveLoadout.PrimarySkin?.SkinID ?? 0))
             {
-                updatedMovement = (isADS ? PrimaryMovementChangeADS : PrimaryMovementChange) + flagCarryingSpeed;
+                updatedMovement = (PrimaryMovementChange + SecondaryMovementChange) + (isADS ? PrimaryMovementChangeADS : 0) + flagCarryingSpeed;
             } else if (Player.Player.equipment.itemID == (ActiveLoadout.Secondary?.Gun?.GunID ?? 0) || Player.Player.equipment.itemID == (ActiveLoadout.PrimarySkin?.SkinID ?? 0))
             {
-                updatedMovement = (isADS ? SecondaryMovementChangeADS : SecondaryMovementChange) + flagCarryingSpeed;
+                updatedMovement = (PrimaryMovementChange + SecondaryMovementChange) + (isADS ? SecondaryMovementChangeADS : 0) + flagCarryingSpeed;
             } else if (Player.Player.equipment.itemID == (ActiveLoadout.Knife.Knife.KnifeID))
             {
                 updatedMovement = KnifeMovementChange + flagCarryingSpeed;
             }
 
-            Logging.Debug($"UPDATED MOVEMENT FOR {Player.CharacterName} IS {updatedMovement}");
-            if (isADS)
+            if (updatedMovement == Player.Player.movement.pluginSpeedMultiplier)
             {
-                Logging.Debug("Sending speed for ADS, not doing steps");
-                Player.Player.movement.sendPluginSpeedMultiplier(updatedMovement);
-            } else
+                return;
+            }
+
+            if (doSteps)
             {
-                Logging.Debug("Sending speed for non ads, doing steps");
                 if (MovementChanger != null)
                 {
-                    Logging.Debug("Steps already on, disabling it");
                     Plugin.Instance.StopCoroutine(MovementChanger);
                 }
 
-                Logging.Debug($"Current speed multiplier of player {Player.Player.movement.pluginSpeedMultiplier}");
                 var changeMovement = (updatedMovement - Player.Player.movement.pluginSpeedMultiplier) / 2;
-                Logging.Debug($"Changing {changeMovement} speed for steps");
                 MovementChanger = Plugin.Instance.StartCoroutine(ChangeMovementSteps(changeMovement));
+            }
+            else
+            {
+                if (MovementChanger != null)
+                {
+                    Plugin.Instance.StopCoroutine(MovementChanger);
+                }
+
+                MovementChanger = Plugin.Instance.StartCoroutine(ChangeMovement(updatedMovement));
             }
         }
          
+        public IEnumerator ChangeMovement(float newMovement)
+        {
+            Logging.Debug($"Directly changing movement speed for {Player.CharacterName} to {newMovement}");
+            var type = typeof(PlayerMovement);
+            var info = type.GetField("SendPluginSpeedMultiplier", BindingFlags.NonPublic | BindingFlags.Static);
+            var value = info.GetValue(null);
+            ((ClientInstanceMethod<float>)value).Invoke(Player.Player.movement.GetNetId(), ENetReliability.Reliable, Player.Player.channel.GetOwnerTransportConnection(), newMovement);
+            yield return new WaitForSeconds(Player.Ping - 0.01f);
+            Player.Player.movement.pluginSpeedMultiplier = newMovement;
+        }
+
         public IEnumerator ChangeMovementSteps(float changeMovement)
         {
             Logging.Debug($"Doing steps speed changing for {Player.CharacterName}");
             for (int i = 1; i <= 2; i++)
             {
-                yield return new WaitForSeconds(Plugin.Instance.Configuration.Instance.MovementStepsDelay);
+                var type = typeof(PlayerMovement);
+                var info = type.GetField("SendPluginSpeedMultiplier", BindingFlags.NonPublic | BindingFlags.Static);
+                var value = info.GetValue(null);
+                ((ClientInstanceMethod<float>)value).Invoke(Player.Player.movement.GetNetId(), ENetReliability.Reliable, Player.Player.channel.GetOwnerTransportConnection(), Player.Player.movement.pluginSpeedMultiplier + changeMovement);
+                yield return new WaitForSeconds(Player.Ping - 0.01f);
+                Player.Player.movement.pluginSpeedMultiplier += changeMovement;
                 Logging.Debug($"i: {i}, steps: {changeMovement}, player's speed: {Player.Player.movement.pluginSpeedMultiplier}");
-                Player.Player.movement.sendPluginSpeedMultiplier(Player.Player.movement.pluginSpeedMultiplier + changeMovement);
+                yield return new WaitForSeconds(Plugin.Instance.Configuration.Instance.MovementStepsDelay);
             }
         }
 

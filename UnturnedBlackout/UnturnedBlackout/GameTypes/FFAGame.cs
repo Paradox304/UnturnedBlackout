@@ -64,7 +64,7 @@ namespace UnturnedBlackout.GameTypes
             Plugin.Instance.UIManager.OnGameUpdated(this);
             foreach (var player in Players)
             {
-                player.GamePlayer.GiveMovement(player.GamePlayer.Player.Player.equipment.useable is UseableGun gun && gun.isAiming, false);
+                player.GamePlayer.GiveMovement(player.GamePlayer.Player.Player.equipment.useable is UseableGun gun && gun.isAiming, false, false);
 
                 Plugin.Instance.UIManager.SendFFAHUD(player.GamePlayer);
                 Plugin.Instance.UIManager.ClearCountdownUI(player.GamePlayer);
@@ -576,21 +576,14 @@ namespace UnturnedBlackout.GameTypes
             {
                 player.UsedTactical();
             }
-            else
-            {
-                return;
-            }
         }
 
-        public override void PlayerConsumeableUsed(GamePlayer player)
+        public override void PlayerConsumeableUsed(GamePlayer player, ItemConsumeableAsset consumeableAsset)
         {
-            var fPlayer = GetFFAPlayer(player.Player);
-            if (fPlayer == null)
+            if (IsPlayerIngame(player.SteamID) && consumeableAsset.id == (player.ActiveLoadout.Tactical?.Gadget?.GadgetID ?? 0))
             {
-                return;
+                player.UsedTactical();
             }
-
-            player.UsedTactical();
         }
 
         public override void PlayerBarricadeSpawned(GamePlayer player, BarricadeDrop drop)
@@ -601,19 +594,13 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
-            var isTactical = true;
             if (drop.asset.id == (player.ActiveLoadout.Lethal?.Gadget?.GadgetID ?? 0))
             {
-                isTactical = false;
                 player.UsedLethal();
             }
             else if (drop.asset.id == (player.ActiveLoadout.Tactical?.Gadget?.GadgetID ?? 0))
             {
                 player.UsedTactical();
-            }
-            else
-            {
-                return;
             }
         }
 
@@ -658,7 +645,7 @@ namespace UnturnedBlackout.GameTypes
         {
             if (IsPlayerIngame(player.SteamID) && GamePhase == EGamePhase.Started)
             {
-                player.GiveMovement(player.Player.Player.equipment.useable is UseableGun gun && gun.isAiming, false);
+                player.GiveMovement(player.Player.Player.equipment.useable is UseableGun gun && gun.isAiming, false, true);
             }
         }
 
@@ -666,7 +653,7 @@ namespace UnturnedBlackout.GameTypes
         {
             if (IsPlayerIngame(player.SteamID) && GamePhase == EGamePhase.Started)
             {
-                player.GiveMovement(isAiming, false);
+                player.GiveMovement(isAiming, false, false);
             }
         }
 

@@ -50,29 +50,29 @@ namespace UnturnedBlackout.Database.Data
 
         public void GetPrimaryMovement(out float movementChange, out float movementChangeADS)
         {
-            movementChange = 1f;
-            movementChangeADS = 1f;
+            movementChange = 0f;
+            movementChangeADS = 0f;
             if (Primary == null)
             {
                 return;
             }
 
             movementChange = Primary.Gun.MovementChange + PrimaryAttachments.Values.Sum(k => k.Attachment.MovementChange);
-            movementChangeADS = movementChange + Primary.Gun.MovementChangeADS + PrimaryAttachments.Values.Sum(k => k.Attachment.MovementChangeADS);
+            movementChangeADS = Primary.Gun.MovementChangeADS + PrimaryAttachments.Values.Sum(k => k.Attachment.MovementChangeADS);
             return;
         }
 
         public void GetSecondaryMovement(out float movementChange, out float movementChangeADS)
         {
-            movementChange = 1f;
-            movementChangeADS = 1f;
+            movementChange = 0f;
+            movementChangeADS = 0f;
             if (Secondary == null)
             {
                 return;
             }
 
             movementChange = Secondary.Gun.MovementChange + SecondaryAttachments.Values.Sum(k => k.Attachment.MovementChange);
-            movementChangeADS = movementChange + Secondary.Gun.MovementChangeADS + SecondaryAttachments.Values.Sum(k => k.Attachment.MovementChangeADS);
+            movementChangeADS = Secondary.Gun.MovementChangeADS + SecondaryAttachments.Values.Sum(k => k.Attachment.MovementChangeADS);
             return;
         }
 

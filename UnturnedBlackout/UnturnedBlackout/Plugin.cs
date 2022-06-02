@@ -39,6 +39,7 @@ namespace UnturnedBlackout
             ObjectManager.onDamageObjectRequested += OnDamageObject;
             ResourceManager.onDamageResourceRequested += OnDamageResource;
             StructureManager.onDamageStructureRequested += OnDamageStructure;
+            UseableConsumeable.onPerformingAid += OnPerformingAid;
 
             UnturnedPermissions.OnJoinRequested += OnJoining;
 
@@ -59,12 +60,18 @@ namespace UnturnedBlackout
             ObjectManager.onDamageObjectRequested -= OnDamageObject;
             ResourceManager.onDamageResourceRequested -= OnDamageResource;
             StructureManager.onDamageStructureRequested -= OnDamageStructure;
+            UseableConsumeable.onPerformingAid -= OnPerformingAid;
 
             UnturnedPermissions.OnJoinRequested -= OnJoining;
             PlayerInput.onPluginKeyTick -= OnHotkeyPressed;
             StopAllCoroutines();
 
             Logger.Log("Unturned Blackout has been unloaded");
+        }
+
+        private void OnPerformingAid(Player instigator, Player target, ItemConsumeableAsset asset, ref bool shouldAllow)
+        {
+            shouldAllow = false;
         }
 
         private void OnJoining(CSteamID player, ref ESteamRejection? rejectionReason)

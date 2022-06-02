@@ -725,6 +725,7 @@ namespace UnturnedBlackout.Managers
                     }
                 }
             }
+
             foreach (var perk in activeLoadout.Perks)
             {
                 if (PlayerSkills.TryParseIndices(perk.Value.Perk.SkillType, out int specialtyIndex, out int skillIndex))

@@ -51,7 +51,6 @@ namespace UnturnedBlackout.GameTypes
             UseableThrowable.onThrowableSpawned += OnThrowableSpawned;
             BarricadeManager.onBarricadeSpawned += OnBarricadeSpawned;
             UseableConsumeable.onConsumePerformed += OnConsumed;
-            UseableConsumeable.onPerformedAid += OnPerfomedAid;
             UseableGun.OnAimingChanged_Global += OnAimingChanged;
 
             KillFeedChecker = Plugin.Instance.StartCoroutine(UpdateKillfeed());
@@ -68,17 +67,6 @@ namespace UnturnedBlackout.GameTypes
             PlayerAimingChanged(gPlayer, obj.isAiming);
         }
 
-        private void OnPerfomedAid(Player instigator, Player target)
-        {
-            var gPlayer = Plugin.Instance.GameManager.GetGamePlayer(instigator);
-            if (gPlayer == null)
-            {
-                return;
-            }
-
-            PlayerConsumeableUsed(gPlayer);
-        }
-
         private void OnConsumed(Player instigatingPlayer, ItemConsumeableAsset consumeableAsset)
         {
             var gPlayer = Plugin.Instance.GameManager.GetGamePlayer(instigatingPlayer);
@@ -87,7 +75,7 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
-            PlayerConsumeableUsed(gPlayer);
+            PlayerConsumeableUsed(gPlayer, consumeableAsset);
         }
 
         private void OnBarricadeSpawned(BarricadeRegion region, BarricadeDrop drop)
@@ -283,7 +271,6 @@ namespace UnturnedBlackout.GameTypes
             UseableThrowable.onThrowableSpawned -= OnThrowableSpawned;
             BarricadeManager.onBarricadeSpawned -= OnBarricadeSpawned;
             UseableConsumeable.onConsumePerformed -= OnConsumed;
-            UseableConsumeable.onPerformedAid -= OnPerfomedAid;
             UseableGun.OnAimingChanged_Global -= OnAimingChanged;
 
             if (KillFeedChecker != null)
@@ -304,7 +291,7 @@ namespace UnturnedBlackout.GameTypes
         public abstract void PlayerStanceChanged(PlayerStance obj);
         public abstract void PlayerThrowableSpawned(GamePlayer player, UseableThrowable throwable);
         public abstract void PlayerBarricadeSpawned(GamePlayer player, BarricadeDrop drop);
-        public abstract void PlayerConsumeableUsed(GamePlayer player);
+        public abstract void PlayerConsumeableUsed(GamePlayer player, ItemConsumeableAsset consumeableAsset);
         public abstract void OnChatMessageSent(GamePlayer player, EChatMode chatMode, string text, ref bool isVisible);
         public abstract void OnVoiceChatUpdated(GamePlayer player);
         public abstract void OnTakingItem(GamePlayer player, ItemData itemData, ref bool shouldAllow);
