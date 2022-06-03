@@ -63,6 +63,7 @@ namespace UnturnedBlackout
             UseableConsumeable.onPerformingAid -= OnPerformingAid;
 
             UnturnedPermissions.OnJoinRequested -= OnJoining;
+
             PlayerInput.onPluginKeyTick -= OnHotkeyPressed;
             StopAllCoroutines();
 
