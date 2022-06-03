@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>UnturnedBlackout</RootNamespace>
-	<LangVersion>9.0</LangVersion>
+    <LangVersion>9.0</LangVersion>
     <AssemblyName>UnturnedBlackout</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -150,7 +150,11 @@
     <Compile Include="Database\Base\GunSkin.cs" />
     <Compile Include="Database\Base\Killstreak.cs" />
     <Compile Include="Database\Base\Knife.cs" />
+    <Compile Include="Database\Base\LeaderboardData.cs" />
+    <Compile Include="Database\Base\Options.cs" />
+    <Compile Include="Database\Base\PercentileReward.cs" />
     <Compile Include="Database\Base\Perk.cs" />
+    <Compile Include="Database\Base\Reward.cs" />
     <Compile Include="Database\Base\XPLevel.cs" />
     <Compile Include="Database\Data\Loadout.cs" />
     <Compile Include="Database\Data\LoadoutAttachment.cs" />
@@ -174,6 +178,7 @@
     <Compile Include="Enums\ELoadoutTab.cs" />
     <Compile Include="Enums\EMainPage.cs" />
     <Compile Include="Enums\EPlayPage.cs" />
+    <Compile Include="Enums\ERewardType.cs" />
     <Compile Include="Enums\ETeam.cs" />
     <Compile Include="GameTypes\CTFGame.cs" />
     <Compile Include="GameTypes\FFAGame.cs" />

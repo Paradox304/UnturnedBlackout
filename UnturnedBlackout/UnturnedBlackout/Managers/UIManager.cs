@@ -260,7 +260,7 @@ namespace UnturnedBlackout.Managers
             }
             foreach (var player in players)
             {
-                var playerName = player.Player.CharacterName.ToUnrich();
+                var playerName = player.Player.CharacterName;
                 var updatedText = new Regex($@"<color=[^>]*>{playerName}<\/color>", RegexOptions.IgnoreCase).Replace(feedText, $"<color={Config.PlayerColorHexCode}>{playerName}</color>");
                 EffectManager.sendUIEffectText(key, player.TransportConnection, true, "Killfeed", updatedText);
             }

@@ -78,8 +78,17 @@ namespace UnturnedBlackout
         private void OnJoining(CSteamID player, ref ESteamRejection? rejectionReason)
         {
             var ply = Provider.pending.FirstOrDefault(k => k.playerID.steamID == player);
-            if (ply != null)
-                ply.playerID.characterName = ply.playerID.nickName;
+            if (ply == null) return;
+
+            ply.playerID.characterName = ply.playerID.nickName.ToUnrich().Replace("[", "").Replace("]", "");
+            var chars = ply.playerID.characterName.Count();
+
+            if (chars > Configuration.Instance.MaxPlayerNameCharacters)
+            {
+                var newName = ply.playerID.characterName.Remove(Configuration.Instance.MaxPlayerNameCharacters - 1, chars - 30);
+                newName += "...";
+                ply.playerID.characterName = newName;
+            }
 
             ply.hatItem = 0;
             ply.maskItem = 0;

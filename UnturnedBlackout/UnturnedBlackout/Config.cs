@@ -19,6 +19,8 @@ namespace UnturnedBlackout
         public string DatabasePort { get; set; }
         public int CacheRefreshSeconds { get; set; }
 
+        public int MaxPlayerNameCharacters { get; set; }
+
         public string PlayerColorHexCode { get; set; }
 
         public string WebhookURL { get; set; }
@@ -37,7 +39,6 @@ namespace UnturnedBlackout
         public float HealSeconds { get; set; }
         public int HealAmount { get; set; }
 
-        public int VoteSeconds { get; set; }
         public int GamesCount { get; set; }
 
         public float MovementStepsDelay { get; set; }
@@ -85,6 +86,8 @@ namespace UnturnedBlackout
             DatabasePort = "3306";
             CacheRefreshSeconds = 600;
 
+            MaxPlayerNameCharacters = 30;
+
             PlayerColorHexCode = "#FFFF00";
             WebhookURL = "https://discord.com/api/webhooks/979000847197409280/e7Pbmjj_8bALCCDCbEDMCEVLX2ZSuIG3ymxbd-yb-IxkQ-sToxCkLJRmneeqB6LYVwgC";
             MaxKillFeed = 5;
@@ -101,7 +104,6 @@ namespace UnturnedBlackout
             HealSeconds = 0.065f;
             HealAmount = 10;
 
-            VoteSeconds = 60;
             GamesCount = 3;
 
             MovementStepsDelay = 0.2f;

@@ -26,11 +26,24 @@ namespace UnturnedBlackout.Managers
         public Config Config { get; set; }
 
         public Timer m_MuteChecker { get; set; }
+        public Timer m_LeaderboardChecker { get; set; }
 
+        // Server Data
+        public Options ServerOptions { get; set; }
 
         // Players Data
         public Dictionary<CSteamID, PlayerData> PlayerData { get; set; }
         public Dictionary<CSteamID, PlayerLoadout> PlayerLoadouts { get; set; }
+
+        // Leaderboard Data
+        public Dictionary<CSteamID, LeaderboardData> PlayerDailyLeaderboardLookup { get; set; }
+        public List<LeaderboardData> PlayerDailyLeaderboard { get; set; }
+
+        public Dictionary<CSteamID, LeaderboardData> PlayerWeeklyLeaderboardLookup { get; set; }
+        public List<LeaderboardData> PlayerWeeklyLeaderboard { get; set; }
+
+        public Dictionary<CSteamID, LeaderboardData> PlayerSeasonalLeaderboardLookup { get; set; }
+        public List<LeaderboardData> PlayerSeasonalLeaderboard { get; set; }
 
         // Base Data
         public Dictionary<ushort, Gun> Guns { get; set; }
@@ -128,6 +141,9 @@ namespace UnturnedBlackout.Managers
             m_MuteChecker = new Timer(10 * 1000);
             m_MuteChecker.Elapsed += CheckMutedPlayers;
 
+            m_LeaderboardChecker = new Timer(60 * 1000);
+            m_LeaderboardChecker.Elapsed += RefreshLeaderboardData;
+
             PlayerData = new Dictionary<CSteamID, PlayerData>();
             PlayerLoadouts = new Dictionary<CSteamID, PlayerLoadout>();
 
@@ -138,50 +154,9 @@ namespace UnturnedBlackout.Managers
 
                 Plugin.Instance.LoadoutManager = new LoadoutManager();
                 m_MuteChecker.Start();
+                RefreshLeaderboardData(null, null);
+                m_LeaderboardChecker.Start();
             });
-        }
-
-        private void CheckMutedPlayers(object sender, System.Timers.ElapsedEventArgs e)
-        {
-            try
-            {
-                foreach (var data in PlayerData.Values.Where(k => k.IsMuted).ToList())
-                {
-                    if (DateTime.UtcNow > data.MuteExpiry.UtcDateTime)
-                    {
-                        ChangePlayerMutedAsync(data.SteamID, false);
-                        try
-                        {
-                            var profile = new Profile(data.SteamID.m_SteamID);
-
-                            Embed embed = new Embed(null, $"**{profile.SteamID}** was unmuted", null, "15105570", DateTime.UtcNow.ToString("s"),
-                                                    new Footer(Provider.serverName, Provider.configData.Browser.Icon),
-                                                    new Author(profile.SteamID, $"https://steamcommunity.com/profiles/{profile.SteamID64}/", profile.AvatarIcon.ToString()),
-                                                    new Field[]
-                                                    {
-                                                            new Field("**Unmuter:**", $"**Mute Expired**", true),
-                                                            new Field("**Time:**", DateTime.UtcNow.ToString(), true)
-                                                    },
-                                                    null, null);
-                            if (!string.IsNullOrEmpty(Plugin.Instance.Configuration.Instance.WebhookURL))
-                            {
-                                DiscordManager.SendEmbed(embed, "Player Unmuted", Plugin.Instance.Configuration.Instance.WebhookURL);
-                            }
-
-                            TaskDispatcher.QueueOnMainThread(() => Utility.Say(UnturnedPlayer.FromCSteamID(data.SteamID), Plugin.Instance.Translate("Unmuted").ToRich()));
-                        }
-                        catch (Exception)
-                        {
-                            Logger.Log($"Error sending discord webhook for {data.SteamID}");
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.Log("Error checking the muted players");
-                Logger.Log(ex);
-            }
         }
 
         public async Task LoadDatabaseAsync()
@@ -204,8 +179,6 @@ namespace UnturnedBlackout.Managers
                     await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{GlovesTableName}` ( `GloveID` SMALLINT UNSIGNED NOT NULL , `GloveName` VARCHAR(255) NOT NULL , `GloveDesc` TEXT NOT NULL , `GloveRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `IconLink` TEXT NOT NULL , `ScrapAmount` INT UNSIGNED NOT NULL , `BuyPrice` INT UNSIGNED NOT NULL , `Coins` INT UNSIGNED NOT NULL , `LevelRequirement` INT NOT NULL , PRIMARY KEY (`GloveID`));", Conn).ExecuteScalarAsync();
                     await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{LevelsTableName}` ( `Level` INT UNSIGNED NOT NULL , `XPNeeded` INT UNSIGNED NOT NULL , `IconLinkLarge` TEXT NOT NULL , `IconLinkMedium` TEXT NOT NULL , `IconLinkSmall` TEXT NOT NULL , PRIMARY KEY (`Level`));", Conn).ExecuteScalarAsync();
                     await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{OptionsTableName}` ( `DailyLeaderboardWipe` BIGINT NOT NULL , `WeeklyLeaderboardWipe` BIGINT NOT NULL , `DailyLeaderboardRankedRewards` TEXT NOT NULL , `DailyLeaderboardPercentileRewards` TEXT NOT NULL , `WeeklyLeaderboardRankedRewards` TEXT NOT NULL , `WeeklyLeaderboardPercentileRewards` TEXT NOT NULL, `SeasonalLeaderboardRankedRewards` TEXT NOT NULL , `SeasonalLeaderboardPercentileRewards` TEXT NOT NULL);", Conn).ExecuteScalarAsync();
-                    await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{OptionsTableName}` ( `DailyLeaderboardWipe` BIGINT NOT NULL , `WeeklyLeaderboardWipe` BIGINT NOT NULL , `DailyLeaderboardRankedRewards` TEXT NOT NULL , `DailyLeaderboardPercentileRewards` TEXT NOT NULL , `WeeklyLeaderboardRankedRewards` TEXT NOT NULL , `WeeklyLeaderboardPercentileRewards` TEXT NOT NULL, `SeasonalLeaderboardRankedRewards` TEXT NOT NULL , `SeasonalLeaderboardPercentileRewards` TEXT NOT NULL);", Conn).ExecuteScalarAsync();
-
 
                     // PLAYERS DATA
                     await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PlayersTableName}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `SteamName` TEXT NOT NULL , `AvatarLink` VARCHAR(200) NOT NULL , `XP` INT UNSIGNED NOT NULL DEFAULT '0' , `Level` INT UNSIGNED NOT NULL DEFAULT '1' , `Credits` INT UNSIGNED NOT NULL DEFAULT '0' , `Scrap` INT UNSIGNED NOT NULL DEFAULT '0' , `Coins` INT UNSIGNED NOT NULL DEFAULT '0' , `Kills` INT UNSIGNED NOT NULL DEFAULT '0' , `HeadshotKills` INT UNSIGNED NOT NULL DEFAULT '0' , `HighestKillstreak` INT UNSIGNED NOT NULL DEFAULT '0' , `HighestMultiKills` INT UNSIGNED NOT NULL DEFAULT '0' , `KillsConfirmed` INT UNSIGNED NOT NULL DEFAULT '0' , `KillsDenied` INT UNSIGNED NOT NULL DEFAULT '0' , `FlagsCaptured` INT UNSIGNED NOT NULL DEFAULT '0' , `FlagsSaved` INT UNSIGNED NOT NULL DEFAULT '0' , `AreasTaken` INT UNSIGNED NOT NULL DEFAULT '0' , `Deaths` INT UNSIGNED NOT NULL DEFAULT '0' , `Music` BOOLEAN NOT NULL DEFAULT TRUE , `IsMuted` BOOLEAN NOT NULL DEFAULT FALSE , `MuteExpiry` BIGINT NOT NULL , PRIMARY KEY (`SteamID`));", Conn).ExecuteScalarAsync();
@@ -1167,6 +1140,10 @@ namespace UnturnedBlackout.Managers
                     cmd.Parameters.AddWithValue("@name", steamName.ToUnrich());
                     await cmd.ExecuteScalarAsync();
 
+                    await new MySqlCommand($"INSERT IGNORE INTO `{PlayersLeaderboardDailyTableName}` ( `SteamID` ) VALUES ({player.CSteamID});", Conn).ExecuteScalarAsync();
+                    await new MySqlCommand($"INSERT IGNORE INTO `{PlayersLeaderboardWeeklyTableName}` ( `SteamID` ) VALUES ({player.CSteamID});", Conn).ExecuteScalarAsync();
+                    await new MySqlCommand($"INSERT IGNORE INTO `{PlayersLeaderboardSeasonalTableName}` ( `SteamID` ) VALUES ({player.CSteamID});", Conn).ExecuteScalarAsync();
+                    
                     Logging.Debug($"Giving {steamName} the guns");
                     foreach (var gun in Guns.Values)
                     {
@@ -1284,6 +1261,8 @@ namespace UnturnedBlackout.Managers
                 }
             }
         }
+
+        // Player Data
 
         public async Task GetPlayerDataAsync(UnturnedPlayer player)
         {
@@ -3681,6 +3660,86 @@ namespace UnturnedBlackout.Managers
                 finally
                 {
                     await Conn.CloseAsync();
+                }
+            }
+        }
+
+        // Mute
+        private void CheckMutedPlayers(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            try
+            {
+                foreach (var data in PlayerData.Values.Where(k => k.IsMuted).ToList())
+                {
+                    if (DateTime.UtcNow > data.MuteExpiry.UtcDateTime)
+                    {
+                        ChangePlayerMutedAsync(data.SteamID, false);
+                        try
+                        {
+                            var profile = new Profile(data.SteamID.m_SteamID);
+
+                            Embed embed = new Embed(null, $"**{profile.SteamID}** was unmuted", null, "15105570", DateTime.UtcNow.ToString("s"),
+                                                    new Footer(Provider.serverName, Provider.configData.Browser.Icon),
+                                                    new Author(profile.SteamID, $"https://steamcommunity.com/profiles/{profile.SteamID64}/", profile.AvatarIcon.ToString()),
+                                                    new Field[]
+                                                    {
+                                                            new Field("**Unmuter:**", $"**Mute Expired**", true),
+                                                            new Field("**Time:**", DateTime.UtcNow.ToString(), true)
+                                                    },
+                                                    null, null);
+                            if (!string.IsNullOrEmpty(Plugin.Instance.Configuration.Instance.WebhookURL))
+                            {
+                                DiscordManager.SendEmbed(embed, "Player Unmuted", Plugin.Instance.Configuration.Instance.WebhookURL);
+                            }
+
+                            TaskDispatcher.QueueOnMainThread(() => Utility.Say(UnturnedPlayer.FromCSteamID(data.SteamID), Plugin.Instance.Translate("Unmuted").ToRich()));
+                        }
+                        catch (Exception)
+                        {
+                            Logger.Log($"Error sending discord webhook for {data.SteamID}");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Log("Error checking the muted players");
+                Logger.Log(ex);
+            }
+        }
+
+        // Leaderboard
+        private void RefreshLeaderboardData(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            using (MySqlConnection Conn = new MySqlConnection(ConnectionString))
+            {
+                Conn.Open();
+                Logging.Debug("Refreshing leaderboard data");
+                Logging.Debug("Getting server options");
+                var rdr = new MySqlCommand($"SELECT * FROM `{OptionsTableName}`;", Conn).ExecuteReader();
+                try
+                {
+                    while (rdr.Read())
+                    {
+                        if (!long.TryParse(rdr[0].ToString(), out long dailyLeaderboardWipeUnix))
+                        {
+                            continue;
+                        }
+
+                        if (!long.TryParse(rdr[0].ToString(), out long weeklyLeaderboardWipeUnix))
+                        {
+                            continue;
+                        }
+
+
+                    }
+                } catch (Exception ex)
+                {
+                    Logger.Log($"Error getting data from options table");
+                    Logger.Log(ex);
+                } finally
+                {
+                    rdr.Close();
                 }
             }
         }

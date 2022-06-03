@@ -20,7 +20,7 @@ namespace UnturnedBlackout
 
         public static string ToUnrich(this string value)
         {
-            return new Regex(@"<[^>]*>|(\[.*?\])", RegexOptions.IgnoreCase).Replace(value, "").Trim();
+            return new Regex(@"<[^>]*>", RegexOptions.IgnoreCase).Replace(value, "").Trim();
         }
 
         public static void Say(IRocketPlayer target, string message)
@@ -190,6 +190,11 @@ namespace UnturnedBlackout
                 text += $"UB.{attachment.AttachmentID},";
             }
             return text;
+        }
+
+        public static List<Reward> GetRewardsFromString(string text)
+        {
+
         }
 
         public static int GetLoadoutAmount(UnturnedPlayer player)
