@@ -20,7 +20,7 @@ namespace UnturnedBlackout
 
         public static string ToUnrich(this string value)
         {
-            return new Regex("<[^>]*>", RegexOptions.IgnoreCase).Replace(value, "").Trim();
+            return new Regex(@"<[^>]*>|(\[.*?\])", RegexOptions.IgnoreCase).Replace(value, "").Trim();
         }
 
         public static void Say(IRocketPlayer target, string message)
