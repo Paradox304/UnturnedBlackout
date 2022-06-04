@@ -1,6 +1,7 @@
 ﻿using Rocket.API;
 using Rocket.Unturned.Player;
 using SDG.Unturned;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -192,9 +193,42 @@ namespace UnturnedBlackout
             return text;
         }
 
-        public static List<Reward> GetRewardsFromString(string text)
+        public static void GetRankedRewaredsFromString(string text, out Dictionary<int, List<Reward>> rewardsRanked)
         {
+            Logging.Debug("Getting ranked rewards from string");
+            rewardsRanked = new Dictionary<int, List<Reward>>();
 
+            int rank = 1;
+            var letterRegex = new Regex("([a-zA-Z]*)");
+            var numberRegex = new Regex("[0-9]*");
+
+            foreach (var rewardsTxt in text.Split(','))
+            {
+                Logging.Debug($"Getting rewards for rank {rank}");
+                var rewards = new List<Reward>();
+                foreach (var rewardTxt in rewardsTxt.Split(' '))
+                {
+                    Logging.Debug($"Found reward with text {rewardTxt}");
+                    if (!letterRegex.IsMatch(rewardTxt) || !numberRegex.IsMatch(rewardTxt))
+                    {
+                        Logging.Debug($"There isn't a text or number in the reward text");
+                        continue;
+                    }
+
+                    var letterRegexMatch = letterRegex.Match(rewardTxt).Value;
+                    if (!Enum.TryParse(letterRegexMatch, out ERewardType rewardType))
+                    {
+                        Logging.Debug($"Cant find reward type with the match {letterRegexMatch}");
+                        return;
+                    }
+
+                    var numberRegexMatch = numberRegex.Match(rewardTxt).Value;
+                    if (!int.TryParse(numberRegexMatch, out int reward))
+                    {
+
+                    }
+                }
+            }
         }
 
         public static int GetLoadoutAmount(UnturnedPlayer player)
