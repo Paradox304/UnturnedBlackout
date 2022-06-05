@@ -238,9 +238,69 @@ namespace UnturnedBlackout
             }
         }
 
-        public static void GetPercentileRewards()
-        {
 
+        public static void GetPercentileRewards(string text, out List<PercentileReward> percentileRewards)
+        {
+            Logging.Debug("Getting ranked rewards from string");
+            percentileRewards = new List<PercentileReward>();
+                
+            var letterRegex = new Regex("([a-zA-Z]*)");
+            var numberRegex = new Regex("([0-9]*)");
+
+            var percentRegex = new Regex("([0-9]*)%");
+
+            int lowerPercentile = 0;
+
+            foreach (var percRewards in text.Split(','))
+            {
+                Logging.Debug($"Getting percentage in {percRewards}");
+                if (!percentRegex.IsMatch(percRewards))
+                {
+                    Logging.Debug("Could'nt find percentage");
+                    continue;
+                }
+
+                var percentRegexMatch = percentRegex.Match(percRewards).Value;
+                if (!int.TryParse(percentRegexMatch, out int percentage))
+                {
+                    Logging.Debug($"Couldnt find percentage with the match {percentRegexMatch}");
+                    continue;
+                }
+
+                var upperPercentile = lowerPercentile + percentage;
+                var rewardsTxt = percRewards.Remove(0, percRewards.IndexOf('-') + 1);
+                Logging.Debug($"Getting rewards from reward text {rewardsTxt}");
+                var rewards = new List<Reward>();
+                foreach (var rewardTxt in rewardsTxt.Split(' '))
+                {
+                    Logging.Debug($"Found reward with text {rewardTxt}");
+                    if (!letterRegex.IsMatch(rewardTxt) || !numberRegex.IsMatch(rewardTxt))
+                    {
+                        Logging.Debug($"There isn't a text or number in the reward text");
+                        continue;
+                    }
+
+                    var letterRegexMatch = letterRegex.Match(rewardTxt).Value;
+                    if (!Enum.TryParse(letterRegexMatch, out ERewardType rewardType))
+                    {
+                        Logging.Debug($"Cant find reward type with the match {letterRegexMatch}");
+                        return;
+                    }
+
+                    var numberRegexMatch = numberRegex.Match(rewardTxt).Value;
+                    if (!int.TryParse(numberRegexMatch, out int rewardValue))
+                    {
+                        Logging.Debug($"Cant find reward value with the match {numberRegexMatch}");
+                        return;
+                    }
+
+                    Logging.Debug($"Found reward with type {rewardType} and value {rewardValue}");
+                    rewards.Add(new Reward(rewardType, rewardValue));
+                }
+                Logging.Debug($"Found total {rewards.Count} rewards for lower percentile {lowerPercentile} and upper percentile {upperPercentile}");
+                percentileRewards.Add(new PercentileReward(lowerPercentile, upperPercentile, rewards));
+                lowerPercentile = upperPercentile;
+            }
         }
 
         public static int GetLoadoutAmount(UnturnedPlayer player)
