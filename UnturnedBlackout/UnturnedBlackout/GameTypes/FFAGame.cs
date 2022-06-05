@@ -137,9 +137,13 @@ namespace UnturnedBlackout.GameTypes
             var gameModes = new List<byte> { (byte)EGameType.CTF, (byte)EGameType.FFA, (byte)EGameType.TDM, (byte)EGameType.KC };
             gameModes.Remove((byte)GameMode);
             var gameMode = (EGameType)gameModes[UnityEngine.Random.Range(0, gameModes.Count)];
+            var locations = Plugin.Instance.GameManager.AvailableLocations.ToList();
+            locations.Add(Location.LocationID);
+            var randomLocation = locations[UnityEngine.Random.Range(0, locations.Count)];
+            var location = Config.ArenaLocations.FirstOrDefault(k => k.LocationID == randomLocation);
             GamePhase = EGamePhase.Ended;
             Plugin.Instance.GameManager.EndGame(this);
-            Plugin.Instance.GameManager.StartGame(Location, gameMode);
+            Plugin.Instance.GameManager.StartGame(location ?? Location, gameMode);
         }
 
         public override IEnumerator AddPlayerToGame(GamePlayer player)

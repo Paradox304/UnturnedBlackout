@@ -168,6 +168,7 @@ namespace UnturnedBlackout
         {
             if (!DBManager.PlayerData.TryGetValue(speaker.channel.owner.playerID.steamID, out PlayerData data) || data.IsMuted)
             {
+                shouldAllow = false;
                 return;
             }
 
