@@ -167,7 +167,7 @@ namespace UnturnedBlackout.Managers
                     Plugin.Instance.UIManager.RegisterUIHandler(player);
 
                     player.Player.quests.leaveGroup(true);
-                    if (!Players.ContainsKey(player.CSteamID))
+                    if (Players.ContainsKey(player.CSteamID))
                     {
                         Players.Remove(player.CSteamID);
                     }

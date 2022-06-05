@@ -215,12 +215,12 @@ namespace UnturnedBlackout.GameTypes
 
         public override void RemovePlayerFromGame(GamePlayer player)
         {
-            if (!Players.Exists(k => k.GamePlayer.SteamID == player.SteamID))
+            var fPlayer = GetFFAPlayer(player.Player);
+
+            if (fPlayer == null)
             {
                 return;
             }
-
-            var fPlayer = GetFFAPlayer(player.Player);
 
             Plugin.Instance.UIManager.ClearPreEndingUI(player);
             Plugin.Instance.UIManager.ClearFFAHUD(player);

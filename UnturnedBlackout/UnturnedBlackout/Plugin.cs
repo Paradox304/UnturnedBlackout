@@ -81,7 +81,7 @@ namespace UnturnedBlackout
             if (ply == null) return;
 
             Logging.Debug($"Player joining");
-            var newName = ply.playerID.characterName.ToUnrich().Replace("[", "").Replace("]", "");
+            var newName = ply.playerID.characterName.ToUnrich();
             var chars = newName.Count();
             Logging.Debug($"Found {chars} characters in player name {newName}");
             if (chars > Configuration.Instance.MaxPlayerNameCharacters)
@@ -93,7 +93,7 @@ namespace UnturnedBlackout
 
             ply.playerID.characterName = newName;
             ply.playerID.nickName = newName;
-            
+           
             ply.hatItem = 0;
             ply.maskItem = 0;
             ply.glassesItem = 0;
