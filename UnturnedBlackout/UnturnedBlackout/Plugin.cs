@@ -80,16 +80,20 @@ namespace UnturnedBlackout
             var ply = Provider.pending.FirstOrDefault(k => k.playerID.steamID == player);
             if (ply == null) return;
 
-            ply.playerID.characterName = ply.playerID.nickName.ToUnrich().Replace("[", "").Replace("]", "");
-            var chars = ply.playerID.characterName.Count();
-
+            Logging.Debug($"Player joining");
+            var newName = ply.playerID.characterName.ToUnrich().Replace("[", "").Replace("]", "");
+            var chars = newName.Count();
+            Logging.Debug($"Found {chars} characters in player name {newName}");
             if (chars > Configuration.Instance.MaxPlayerNameCharacters)
             {
-                var newName = ply.playerID.characterName.Remove(Configuration.Instance.MaxPlayerNameCharacters - 1, chars - 30);
+                Logging.Debug($"Name is over the limit, removing {chars - Configuration.Instance.MaxPlayerNameCharacters} characters from the position {Configuration.Instance.MaxPlayerNameCharacters - 1}");
+                newName = newName.Remove(Configuration.Instance.MaxPlayerNameCharacters, chars - Configuration.Instance.MaxPlayerNameCharacters);
                 newName += "...";
-                ply.playerID.characterName = newName;
             }
 
+            ply.playerID.characterName = newName;
+            ply.playerID.nickName = newName;
+            
             ply.hatItem = 0;
             ply.maskItem = 0;
             ply.glassesItem = 0;

@@ -193,14 +193,14 @@ namespace UnturnedBlackout
             return text;
         }
 
-        public static void GetRankedRewaredsFromString(string text, out Dictionary<int, List<Reward>> rewardsRanked)
+        public static void GetRankedRewardsFromString(string text, out Dictionary<int, List<Reward>> rewardsRanked)
         {
             Logging.Debug("Getting ranked rewards from string");
             rewardsRanked = new Dictionary<int, List<Reward>>();
 
             int rank = 1;
             var letterRegex = new Regex("([a-zA-Z]*)");
-            var numberRegex = new Regex("[0-9]*");
+            var numberRegex = new Regex("([0-9]*)");
 
             foreach (var rewardsTxt in text.Split(','))
             {
@@ -223,12 +223,24 @@ namespace UnturnedBlackout
                     }
 
                     var numberRegexMatch = numberRegex.Match(rewardTxt).Value;
-                    if (!int.TryParse(numberRegexMatch, out int reward))
+                    if (!int.TryParse(numberRegexMatch, out int rewardValue))
                     {
-
+                        Logging.Debug($"Cant find reward value with the match {numberRegexMatch}");
+                        return;
                     }
+
+                    Logging.Debug($"Found reward with type {rewardType} and value {rewardValue}");
+                    rewards.Add(new Reward(rewardType, rewardValue));
                 }
+                Logging.Debug($"Found total {rewards.Count} rewards for rank {rank}");
+                rewardsRanked.Add(rank, rewards);
+                rank++;
             }
+        }
+
+        public static void GetPercentileRewards()
+        {
+
         }
 
         public static int GetLoadoutAmount(UnturnedPlayer player)
