@@ -4040,7 +4040,7 @@ namespace UnturnedBlackout.Managers
                         Logging.Debug("Daily leaderboard has to be wiped, giving ranked rewards");
 
                         // Give all ranked rewards
-                        var rankedEmbed = new Embed(null, $"**Daily Leaderboard Rankings:", null, "15105570", DateTime.UtcNow.ToString("s"),
+                        var rankedEmbed = new Embed(null, $"**Daily Leaderboard Rankings:**", null, "15105570", DateTime.UtcNow.ToString("s"),
                         new Footer(Provider.serverName, Provider.configData.Browser.Icon),
                         new Author(Provider.serverName, "", Provider.configData.Browser.Icon),
                         new Field[] { },
@@ -4065,10 +4065,9 @@ namespace UnturnedBlackout.Managers
                         }
                         ThreadPool.QueueUserWorkItem((o) => DiscordManager.SendEmbed(rankedEmbed, "Daily Leaderboard", "https://discord.com/api/webhooks/983367340525760542/RfPxBseRKp3kffBEaHovRBRsLpIR4A-pvAXbQWzknDMohxCiawGlsZw6U_ehXukPreb_"));
 
-
                         Logging.Debug("Giving percentile rewards");
                         // Give all percentile rewards
-                        var percentileEmbed = new Embed(null, $"**Daily Leaderboard Percentile Rankings:", null, "15105570", DateTime.UtcNow.ToString("s"),
+                        var percentileEmbed = new Embed(null, $"**Daily Leaderboard Percentile Rankings: ({PlayerDailyLeaderboard.Count} Players)**", null, "15105570", DateTime.UtcNow.ToString("s"),
                         new Footer(Provider.serverName, Provider.configData.Browser.Icon),
                         new Author(Provider.serverName, "", Provider.configData.Browser.Icon),
                         new Field[] { },
@@ -4153,7 +4152,7 @@ namespace UnturnedBlackout.Managers
 
                         Logging.Debug("Giving percentile rewards");
                         // Give all percentile rewards
-                        var percentileEmbed = new Embed(null, $"**Weekly Leaderboard Percentile Rankings:", null, "15105570", DateTime.UtcNow.ToString("s"),
+                        var percentileEmbed = new Embed(null, $"**Weekly Leaderboard Percentile Rankings:**", null, "15105570", DateTime.UtcNow.ToString("s"),
                         new Footer(Provider.serverName, Provider.configData.Browser.Icon),
                         new Author(Provider.serverName, "", Provider.configData.Browser.Icon),
                         new Field[] { },
@@ -4199,7 +4198,7 @@ namespace UnturnedBlackout.Managers
                         }
 
                         // Change the wipe date
-                        var newWipeDate = DateTimeOffset.UtcNow.AddDays(1);
+                        var newWipeDate = DateTimeOffset.UtcNow.AddDays(7);
                         new MySqlCommand($"UPDATE `{OptionsTableName}` SET `WeeklyLeaderboardWipe` = {newWipeDate.ToUnixTimeSeconds()};", Conn).ExecuteScalar();
                         ServerOptions.WeeklyLeaderboardWipe = newWipeDate;
                     }
