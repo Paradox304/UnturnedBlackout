@@ -63,6 +63,8 @@ namespace UnturnedBlackout
         {
             switch (index)
             {
+                case 1:
+                    return "1st";
                 case 2:
                     return "2nd";
                 case 3:
@@ -193,14 +195,14 @@ namespace UnturnedBlackout
             return text;
         }
 
-        public static void GetRankedRewardsFromString(string text, out Dictionary<int, List<Reward>> rewardsRanked)
+        public static Dictionary<int, List<Reward>> GetRankedRewardsFromString(string text)
         {
             Logging.Debug("Getting ranked rewards from string");
-            rewardsRanked = new Dictionary<int, List<Reward>>();
+            var rewardsRanked = new Dictionary<int, List<Reward>>();
 
-            int rank = 1;
+            int rank = 0;
             var letterRegex = new Regex("([a-zA-Z]*)");
-            var numberRegex = new Regex("([0-9]*)");
+            var numberRegex = new Regex(@"(\d+)");
 
             foreach (var rewardsTxt in text.Split(','))
             {
@@ -216,17 +218,17 @@ namespace UnturnedBlackout
                     }
 
                     var letterRegexMatch = letterRegex.Match(rewardTxt).Value;
-                    if (!Enum.TryParse(letterRegexMatch, out ERewardType rewardType))
+                    if (!Enum.TryParse(letterRegexMatch, true, out ERewardType rewardType))
                     {
                         Logging.Debug($"Cant find reward type with the match {letterRegexMatch}");
-                        return;
+                        continue;
                     }
 
                     var numberRegexMatch = numberRegex.Match(rewardTxt).Value;
                     if (!int.TryParse(numberRegexMatch, out int rewardValue))
                     {
                         Logging.Debug($"Cant find reward value with the match {numberRegexMatch}");
-                        return;
+                        continue;
                     }
 
                     Logging.Debug($"Found reward with type {rewardType} and value {rewardValue}");
@@ -236,16 +238,18 @@ namespace UnturnedBlackout
                 rewardsRanked.Add(rank, rewards);
                 rank++;
             }
+
+            return rewardsRanked;
         }
 
 
-        public static void GetPercentileRewards(string text, out List<PercentileReward> percentileRewards)
+        public static List<PercentileReward> GetPercentileRewardsFromString(string text)
         {
-            Logging.Debug("Getting ranked rewards from string");
-            percentileRewards = new List<PercentileReward>();
+            Logging.Debug("Getting percentile rewards from string");
+            var percentileRewards = new List<PercentileReward>();
                 
             var letterRegex = new Regex("([a-zA-Z]*)");
-            var numberRegex = new Regex("([0-9]*)");
+            var numberRegex = new Regex(@"(\d+)");
 
             var percentRegex = new Regex("([0-9]*)%");
 
@@ -261,7 +265,7 @@ namespace UnturnedBlackout
                 }
 
                 var percentRegexMatch = percentRegex.Match(percRewards).Value;
-                if (!int.TryParse(percentRegexMatch, out int percentage))
+                if (!int.TryParse(percentRegexMatch.Replace("%", ""), out int percentage))
                 {
                     Logging.Debug($"Couldnt find percentage with the match {percentRegexMatch}");
                     continue;
@@ -281,17 +285,17 @@ namespace UnturnedBlackout
                     }
 
                     var letterRegexMatch = letterRegex.Match(rewardTxt).Value;
-                    if (!Enum.TryParse(letterRegexMatch, out ERewardType rewardType))
+                    if (!Enum.TryParse(letterRegexMatch, true, out ERewardType rewardType))
                     {
                         Logging.Debug($"Cant find reward type with the match {letterRegexMatch}");
-                        return;
+                        continue;
                     }
 
                     var numberRegexMatch = numberRegex.Match(rewardTxt).Value;
                     if (!int.TryParse(numberRegexMatch, out int rewardValue))
                     {
                         Logging.Debug($"Cant find reward value with the match {numberRegexMatch}");
-                        return;
+                        continue;
                     }
 
                     Logging.Debug($"Found reward with type {rewardType} and value {rewardValue}");
@@ -301,6 +305,8 @@ namespace UnturnedBlackout
                 percentileRewards.Add(new PercentileReward(lowerPercentile, upperPercentile, rewards));
                 lowerPercentile = upperPercentile;
             }
+
+            return percentileRewards;
         }
 
         public static int GetLoadoutAmount(UnturnedPlayer player)

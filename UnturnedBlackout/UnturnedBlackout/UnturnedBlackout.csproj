@@ -194,6 +194,7 @@
     <Compile Include="Managers\GameManager.cs" />
     <Compile Include="Managers\HUDManager.cs" />
     <Compile Include="Managers\LoadoutManager.cs" />
+    <Compile Include="Managers\RewardManager.cs" />
     <Compile Include="Managers\UIManager.cs" />
     <Compile Include="Models\Data\LoadoutData.cs" />
     <Compile Include="Models\Global\ArenaLocation.cs" />

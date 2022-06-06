@@ -30,6 +30,7 @@ namespace UnturnedBlackout
             UIManager = new UIManager();
             DBManager = new DatabaseManager();
             DataManager = new DataManager();
+            RewardManager = new RewardManager();
 
             StartCoroutine(Day());
 
@@ -292,6 +293,7 @@ namespace UnturnedBlackout
         public DataManager DataManager { get; set; }
         public DatabaseManager DBManager { get; set; }
         public LoadoutManager LoadoutManager { get; set; }
+        public RewardManager RewardManager { get; set; }
         public static Plugin Instance { get; set; }
     }
 }

@@ -10,11 +10,11 @@ namespace UnturnedBlackout.Database.Base
     public class LeaderboardData
     {
         public CSteamID SteamID { get; set; }
-        public int Kills { get; set; }
-        public int HeadshotKills { get; set; }
-        public int Deaths { get; set; }
+        public uint Kills { get; set; }
+        public uint HeadshotKills { get; set; }
+        public uint Deaths { get; set; }
 
-        public LeaderboardData(CSteamID steamID, int kills, int headshotKills, int deaths)
+        public LeaderboardData(CSteamID steamID, uint kills, uint headshotKills, uint deaths)
         {
             SteamID = steamID;
             Kills = kills;
