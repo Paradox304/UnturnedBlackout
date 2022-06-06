@@ -4084,6 +4084,11 @@ namespace UnturnedBlackout.Managers
                             for (int i = lowerIndex; i < upperIndex; i++)
                             {
                                 Logging.Debug($"i: {i}");
+                                if (!ServerOptions.DailyRankedRewards.ContainsKey(i))
+                                {
+                                    Logging.Debug("Player at this position already got ranked reward, continue");
+                                    continue;
+                                }
                                 if (PlayerDailyLeaderboard.Count < (i + 1))
                                 {
                                     Logging.Debug("Could'nt find any player at the position i, breaking");
@@ -4169,6 +4174,11 @@ namespace UnturnedBlackout.Managers
                             for (int i = lowerIndex; i < upperIndex; i++)
                             {
                                 Logging.Debug($"i: {i}");
+                                if (!ServerOptions.WeeklyRankedRewards.ContainsKey(i))
+                                {
+                                    Logging.Debug("Player at this position already got ranked reward, continue");
+                                    continue;
+                                }
                                 if (PlayerWeeklyLeaderboard.Count < (i + 1))
                                 {
                                     Logging.Debug("Could'nt find any player at the position i, breaking");
