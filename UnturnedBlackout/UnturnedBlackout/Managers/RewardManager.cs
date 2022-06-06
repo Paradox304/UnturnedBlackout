@@ -71,5 +71,62 @@ namespace UnturnedBlackout.Managers
                 }
             });
         }
+
+        public void GiveBulkRewards(List<(CSteamID, List<Reward>)> bulkRewards)
+        {
+            var db = Plugin.Instance.DBManager;
+            ThreadPool.QueueUserWorkItem(async (o) =>
+            {
+                foreach (var bulkReward in bulkRewards)
+                {
+                    foreach (var reward in bulkReward.Item2)
+                    {
+                        switch (reward.RewardType)
+                        {
+                            case ERewardType.Gun:
+                                await db.AddPlayerGunAsync(bulkReward.Item1, Convert.ToUInt16(reward.RewardValue), true);
+                                break;
+                            case ERewardType.GunCharm:
+                                await db.AddPlayerGunCharmAsync(bulkReward.Item1, Convert.ToUInt16(reward.RewardValue), true);
+                                break;
+                            case ERewardType.GunSkin:
+                                await db.AddPlayerGunSkinAsync(bulkReward.Item1, (int)reward.RewardValue);
+                                break;
+                            case ERewardType.Knife:
+                                await db.AddPlayerKnifeAsync(bulkReward.Item1, Convert.ToUInt16(reward.RewardValue), true);
+                                break;
+                            case ERewardType.Gadget:
+                                await db.AddPlayerGadgetAsync(bulkReward.Item1, Convert.ToUInt16(reward.RewardValue), true);
+                                break;
+                            case ERewardType.Killstreak:
+                                await db.AddPlayerKillstreakAsync(bulkReward.Item1, (int)reward.RewardValue, true);
+                                break;
+                            case ERewardType.Perk:
+                                await db.AddPlayerPerkAsync(bulkReward.Item1, (int)reward.RewardValue, true);
+                                break;
+                            case ERewardType.Glove:
+                                await db.AddPlayerGloveAsync(bulkReward.Item1, Convert.ToUInt16(reward.RewardValue), true);
+                                break;
+                            case ERewardType.Card:
+                                await db.AddPlayerCardAsync(bulkReward.Item1, (int)reward.RewardValue, true);
+                                break;
+                            case ERewardType.Credit:
+                                await db.IncreasePlayerCreditsAsync(bulkReward.Item1, Convert.ToUInt32(reward.RewardValue));
+                                break;
+                            case ERewardType.Coin:
+                                await db.IncreasePlayerCoinsAsync(bulkReward.Item1, Convert.ToUInt32(reward.RewardValue));
+                                break;
+                            case ERewardType.LevelXP:
+                                await db.IncreasePlayerXPAsync(bulkReward.Item1, Convert.ToUInt32(reward.RewardValue));
+                                break;
+                            case ERewardType.BattlepassXP:
+                                break;
+                            case ERewardType.Crate:
+                                break;
+                        }
+                    }
+                }
+            });
+        }
     }
 }

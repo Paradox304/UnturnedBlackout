@@ -74,6 +74,21 @@ namespace UnturnedBlackout
             }
         }
 
+        public static string GetDiscordEmoji(int index)
+        {
+            switch (index)
+            {
+                case 1:
+                    return ":first_place:";
+                case 2:
+                    return ":second_place:";
+                case 3:
+                    return ":third_place:";
+                default:
+                    return ":military_medal:";
+            }
+        }
+
         public static uint GetFreeFrequency()
         {
             while (true)
@@ -210,6 +225,11 @@ namespace UnturnedBlackout
                 var rewards = new List<Reward>();
                 foreach (var rewardTxt in rewardsTxt.Split(' '))
                 {
+                    if (string.IsNullOrEmpty(rewardTxt))
+                    {
+                        continue;
+                    }
+
                     Logging.Debug($"Found reward with text {rewardTxt}");
                     if (!letterRegex.IsMatch(rewardTxt) || !numberRegex.IsMatch(rewardTxt))
                     {
@@ -277,6 +297,11 @@ namespace UnturnedBlackout
                 var rewards = new List<Reward>();
                 foreach (var rewardTxt in rewardsTxt.Split(' '))
                 {
+                    if (string.IsNullOrEmpty(rewardTxt))
+                    {
+                        continue;
+                    }
+
                     Logging.Debug($"Found reward with text {rewardTxt}");
                     if (!letterRegex.IsMatch(rewardTxt) || !numberRegex.IsMatch(rewardTxt))
                     {

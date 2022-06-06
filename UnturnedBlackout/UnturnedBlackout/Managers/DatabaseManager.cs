@@ -4035,12 +4035,13 @@ namespace UnturnedBlackout.Managers
                     PlayerSeasonalLeaderboard.Sort((x, y) => (y.Kills + y.HeadshotKills).CompareTo(x.Kills + x.HeadshotKills));
 
                     Logging.Debug("Checking if daily leaderboard is to be wiped");
+                    var bulkRewards = new List<(CSteamID, List<Reward>)>();
                     if (ServerOptions.DailyLeaderboardWipe.UtcDateTime < DateTime.UtcNow)
                     {
                         Logging.Debug("Daily leaderboard has to be wiped, giving ranked rewards");
 
                         // Give all ranked rewards
-                        var rankedEmbed = new Embed(null, $"**Daily Leaderboard Rankings:**", null, "15105570", DateTime.UtcNow.ToString("s"),
+                        var embed = new Embed(null, $"**Last Playtest Rankings:**", null, "15105570", DateTime.UtcNow.ToString("s"),
                         new Footer(Provider.serverName, Provider.configData.Browser.Icon),
                         new Author(Provider.serverName, "", Provider.configData.Browser.Icon),
                         new Field[] { },
@@ -4057,22 +4058,17 @@ namespace UnturnedBlackout.Managers
 
                             var leaderboardData = PlayerDailyLeaderboard[rankedReward.Key];
                             Logging.Debug($"Giving player with steam id {leaderboardData.SteamID} the reward");
-                            Plugin.Instance.RewardManager.GiveReward(leaderboardData.SteamID, rankedReward.Value);
-
-                            var fields = rankedEmbed.fields.ToList();
-                            fields.Add(new Field($"**{Utility.GetOrdinal(rankedReward.Key + 1)}:**", $"[**{leaderboardData.SteamID}**](https://steamcommunity.com/profiles/{leaderboardData.SteamID}/)", false));
-                            rankedEmbed.fields = fields.ToArray();
+                            bulkRewards.Add(new(leaderboardData.SteamID, rankedReward.Value));
+                            Logging.Debug("Getting player name and adding to field");
+                            var fields = embed.fields.ToList();
+                            var name = new MySqlCommand($"SELECT `SteamName` FROM `{PlayersTableName}` WHERE `SteamID` = {leaderboardData.SteamID}", Conn).ExecuteScalar();
+                            Logging.Debug($"Found player name {name}");
+                            fields.Add(new Field($"{Utility.GetDiscordEmoji(rankedReward.Key + 1)}", $"[{name}](https://steamcommunity.com/profiles/{leaderboardData.SteamID}/)", false));
+                            embed.fields = fields.ToArray();
                         }
-                        ThreadPool.QueueUserWorkItem((o) => DiscordManager.SendEmbed(rankedEmbed, "Daily Leaderboard", "https://discord.com/api/webhooks/983367340525760542/RfPxBseRKp3kffBEaHovRBRsLpIR4A-pvAXbQWzknDMohxCiawGlsZw6U_ehXukPreb_"));
 
                         Logging.Debug("Giving percentile rewards");
                         // Give all percentile rewards
-                        var percentileEmbed = new Embed(null, $"**Daily Leaderboard Percentile Rankings: ({PlayerDailyLeaderboard.Count} Players)**", null, "15105570", DateTime.UtcNow.ToString("s"),
-                        new Footer(Provider.serverName, Provider.configData.Browser.Icon),
-                        new Author(Provider.serverName, "", Provider.configData.Browser.Icon),
-                        new Field[] { },
-                        null, null);
-
                         foreach (var percentileReward in ServerOptions.DailyPercentileRewards)
                         {
                             Logging.Debug($"Giving percentile reward with lower percentile {percentileReward.LowerPercentile} and upper percentile {percentileReward.UpperPercentile}");
@@ -4084,7 +4080,7 @@ namespace UnturnedBlackout.Managers
                             for (int i = lowerIndex; i < upperIndex; i++)
                             {
                                 Logging.Debug($"i: {i}");
-                                if (!ServerOptions.DailyRankedRewards.ContainsKey(i))
+                                if (ServerOptions.DailyRankedRewards.ContainsKey(i))
                                 {
                                     Logging.Debug("Player at this position already got ranked reward, continue");
                                     continue;
@@ -4098,14 +4094,26 @@ namespace UnturnedBlackout.Managers
                                 players++;
                                 var leaderboardData = PlayerDailyLeaderboard[i];
                                 Logging.Debug($"Giving player with steam id {leaderboardData.SteamID} the percentile reward");
-                                Plugin.Instance.RewardManager.GiveReward(leaderboardData.SteamID, percentileReward.Rewards);
+                                bulkRewards.Add(new(leaderboardData.SteamID, percentileReward.Rewards));
                             }
 
-                            var fields = percentileEmbed.fields.ToList();
-                            fields.Add(new Field($"**{percentileReward.LowerPercentile}% - {percentileReward.UpperPercentile}%:**", $"**{players} players**", false));
-                            percentileEmbed.fields = fields.ToArray();
+                            var fields = embed.fields.ToList();
+                            fields.Add(new Field($"**Top {percentileReward.UpperPercentile}%:**", $"{players} players", false));
+                            embed.fields = fields.ToArray();
                         }
-                        ThreadPool.QueueUserWorkItem((o) => DiscordManager.SendEmbed(percentileEmbed, "Daily Leaderboard", "https://discord.com/api/webhooks/983367340525760542/RfPxBseRKp3kffBEaHovRBRsLpIR4A-pvAXbQWzknDMohxCiawGlsZw6U_ehXukPreb_"));
+                        ThreadPool.QueueUserWorkItem((o) =>
+                        {
+                            Logging.Debug($"Sending embed with {embed.fields.Count()} fields");
+                            try
+                            {
+                                DiscordManager.SendEmbed(embed, "Leaderboard", "https://discord.com/api/webhooks/983367340525760542/RfPxBseRKp3kffBEaHovRBRsLpIR4A-pvAXbQWzknDMohxCiawGlsZw6U_ehXukPreb_");
+                            } catch (Exception ex)
+                            {
+                                Logger.Log("Error sending embed");
+                                Logger.Log(ex);
+                            }
+                            Logging.Debug("Sent embed");
+                        });
 
                         // Wipe the daily leaderboard data
                         new MySqlCommand($"UPDATE `{PlayersLeaderboardDailyTableName}` SET `Kills` = 0, `HeadshotKills` = 0, `Deaths` = 0;", Conn).ExecuteScalar();
@@ -4129,7 +4137,7 @@ namespace UnturnedBlackout.Managers
                         Logging.Debug("Weekly leaderboard has to be wiped, giving ranked rewards");
 
                         // Give all ranked rewards
-                        var rankedEmbed = new Embed(null, $"**Weekly Leaderboard Rankings:", null, "15105570", DateTime.UtcNow.ToString("s"),
+                        var embed = new Embed(null, $"**Last Playtest Rankings:**", null, "15105570", DateTime.UtcNow.ToString("s"),
                         new Footer(Provider.serverName, Provider.configData.Browser.Icon),
                         new Author(Provider.serverName, "", Provider.configData.Browser.Icon),
                         new Field[] { },
@@ -4146,23 +4154,17 @@ namespace UnturnedBlackout.Managers
 
                             var leaderboardData = PlayerWeeklyLeaderboard[rankedReward.Key];
                             Logging.Debug($"Giving player with steam id {leaderboardData.SteamID} the reward");
-                            Plugin.Instance.RewardManager.GiveReward(leaderboardData.SteamID, rankedReward.Value);
-
-                            var fields = rankedEmbed.fields.ToList();
-                            fields.Add(new Field($"**{Utility.GetOrdinal(rankedReward.Key + 1)}:**", $"[**{leaderboardData.SteamID}**](https://steamcommunity.com/profiles/{leaderboardData.SteamID}/)", false));
-                            rankedEmbed.fields = fields.ToArray();
+                            bulkRewards.Add(new(leaderboardData.SteamID, rankedReward.Value));
+                            Logging.Debug("Getting player name and adding to field");
+                            var fields = embed.fields.ToList();
+                            var name = new MySqlCommand($"SELECT `SteamName` FROM `{PlayersTableName}` WHERE `SteamID` = {leaderboardData.SteamID}", Conn).ExecuteScalar();
+                            Logging.Debug($"Found player name {name}");
+                            fields.Add(new Field($"{Utility.GetDiscordEmoji(rankedReward.Key + 1)}", $"[{name}](https://steamcommunity.com/profiles/{leaderboardData.SteamID}/)", false));
+                            embed.fields = fields.ToArray();
                         }
-                        ThreadPool.QueueUserWorkItem((o) => DiscordManager.SendEmbed(rankedEmbed, "Weekly Leaderboard", "https://discord.com/api/webhooks/983367340525760542/RfPxBseRKp3kffBEaHovRBRsLpIR4A-pvAXbQWzknDMohxCiawGlsZw6U_ehXukPreb_"));
-
 
                         Logging.Debug("Giving percentile rewards");
                         // Give all percentile rewards
-                        var percentileEmbed = new Embed(null, $"**Weekly Leaderboard Percentile Rankings:**", null, "15105570", DateTime.UtcNow.ToString("s"),
-                        new Footer(Provider.serverName, Provider.configData.Browser.Icon),
-                        new Author(Provider.serverName, "", Provider.configData.Browser.Icon),
-                        new Field[] { },
-                        null, null);
-
                         foreach (var percentileReward in ServerOptions.WeeklyPercentileRewards)
                         {
                             Logging.Debug($"Giving percentile reward with lower percentile {percentileReward.LowerPercentile} and upper percentile {percentileReward.UpperPercentile}");
@@ -4174,7 +4176,7 @@ namespace UnturnedBlackout.Managers
                             for (int i = lowerIndex; i < upperIndex; i++)
                             {
                                 Logging.Debug($"i: {i}");
-                                if (!ServerOptions.WeeklyRankedRewards.ContainsKey(i))
+                                if (ServerOptions.WeeklyRankedRewards.ContainsKey(i))
                                 {
                                     Logging.Debug("Player at this position already got ranked reward, continue");
                                     continue;
@@ -4188,14 +4190,27 @@ namespace UnturnedBlackout.Managers
                                 players++;
                                 var leaderboardData = PlayerWeeklyLeaderboard[i];
                                 Logging.Debug($"Giving player with steam id {leaderboardData.SteamID} the percentile reward");
-                                Plugin.Instance.RewardManager.GiveReward(leaderboardData.SteamID, percentileReward.Rewards);
+                                bulkRewards.Add(new(leaderboardData.SteamID, percentileReward.Rewards));
                             }
 
-                            var fields = percentileEmbed.fields.ToList();
-                            fields.Add(new Field($"**{percentileReward.LowerPercentile}% - {percentileReward.UpperPercentile}%:**", $"**{players} players**", false));
-                            percentileEmbed.fields = fields.ToArray();
+                            var fields = embed.fields.ToList();
+                            fields.Add(new Field($"**Top {percentileReward.UpperPercentile}%:**", $"{players} players", false));
+                            embed.fields = fields.ToArray();
                         }
-                        ThreadPool.QueueUserWorkItem((o) => DiscordManager.SendEmbed(percentileEmbed, "Weekly Leaderboard", "https://discord.com/api/webhooks/983367340525760542/RfPxBseRKp3kffBEaHovRBRsLpIR4A-pvAXbQWzknDMohxCiawGlsZw6U_ehXukPreb_"));
+                        ThreadPool.QueueUserWorkItem((o) =>
+                        {
+                            Logging.Debug($"Sending embed with {embed.fields.Count()} fields");
+                            try
+                            {
+                                DiscordManager.SendEmbed(embed, "Leaderboard", "https://discord.com/api/webhooks/983367340525760542/RfPxBseRKp3kffBEaHovRBRsLpIR4A-pvAXbQWzknDMohxCiawGlsZw6U_ehXukPreb_");
+                            }
+                            catch (Exception ex)
+                            {
+                                Logger.Log("Error sending embed");
+                                Logger.Log(ex);
+                            }
+                            Logging.Debug("Sent embed");
+                        });
 
                         // Wipe the Weekly leaderboard data
                         new MySqlCommand($"UPDATE `{PlayersLeaderboardWeeklyTableName}` SET `Kills` = 0, `HeadshotKills` = 0, `Deaths` = 0;", Conn).ExecuteScalar();
@@ -4208,10 +4223,13 @@ namespace UnturnedBlackout.Managers
                         }
 
                         // Change the wipe date
-                        var newWipeDate = DateTimeOffset.UtcNow.AddDays(7);
+                        var newWipeDate = DateTimeOffset.UtcNow.AddDays(1);
                         new MySqlCommand($"UPDATE `{OptionsTableName}` SET `WeeklyLeaderboardWipe` = {newWipeDate.ToUnixTimeSeconds()};", Conn).ExecuteScalar();
                         ServerOptions.WeeklyLeaderboardWipe = newWipeDate;
                     }
+
+                    Logging.Debug($"Sending {bulkRewards.Count} bulk rewards");
+                    Plugin.Instance.RewardManager.GiveBulkRewards(bulkRewards);
                 } catch (Exception ex)
                 {
                     Logger.Log("Error refreshing leaderboard data");
