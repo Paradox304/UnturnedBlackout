@@ -37,7 +37,7 @@ namespace UnturnedBlackout.Models.Global
 
         public bool HasTactical { get; set; }
         public bool HasLethal { get; set; }
-        
+
         public float PrimaryMovementChange { get; set; }
         public float PrimaryMovementChangeADS { get; set; }
         public float SecondaryMovementChange { get; set; }
@@ -437,10 +437,12 @@ namespace UnturnedBlackout.Models.Global
             if (Player.Player.equipment.itemID == (ActiveLoadout.Primary?.Gun?.GunID ?? 0) || Player.Player.equipment.itemID == (ActiveLoadout.PrimarySkin?.SkinID ?? 0))
             {
                 updatedMovement = (PrimaryMovementChange + SecondaryMovementChange) + (isADS ? PrimaryMovementChangeADS : 0) + flagCarryingSpeed;
-            } else if (Player.Player.equipment.itemID == (ActiveLoadout.Secondary?.Gun?.GunID ?? 0) || Player.Player.equipment.itemID == (ActiveLoadout.PrimarySkin?.SkinID ?? 0))
+            }
+            else if (Player.Player.equipment.itemID == (ActiveLoadout.Secondary?.Gun?.GunID ?? 0) || Player.Player.equipment.itemID == (ActiveLoadout.PrimarySkin?.SkinID ?? 0))
             {
                 updatedMovement = (PrimaryMovementChange + SecondaryMovementChange) + (isADS ? SecondaryMovementChangeADS : 0) + flagCarryingSpeed;
-            } else if (Player.Player.equipment.itemID == (ActiveLoadout.Knife.Knife.KnifeID))
+            }
+            else if (Player.Player.equipment.itemID == (ActiveLoadout.Knife.Knife.KnifeID))
             {
                 updatedMovement = KnifeMovementChange + flagCarryingSpeed;
             }
@@ -470,7 +472,7 @@ namespace UnturnedBlackout.Models.Global
                 MovementChanger = Plugin.Instance.StartCoroutine(ChangeMovement(updatedMovement));
             }
         }
-         
+
         public IEnumerator ChangeMovement(float newMovement)
         {
             Logging.Debug($"Directly changing movement speed for {Player.CharacterName} to {newMovement}");

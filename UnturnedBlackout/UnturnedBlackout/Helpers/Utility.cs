@@ -267,7 +267,7 @@ namespace UnturnedBlackout
         {
             Logging.Debug("Getting percentile rewards from string");
             var percentileRewards = new List<PercentileReward>();
-                
+
             var letterRegex = new Regex("([a-zA-Z]*)");
             var numberRegex = new Regex(@"(\d+)");
 
@@ -428,6 +428,6 @@ namespace UnturnedBlackout
             return isPlayer ? $"<color={Plugin.Instance.Configuration.Instance.PlayerColorHexCode}>{value}</color>" : value.ToString();
         }
 
-        public static List<uint> UsedFrequencies = new List<uint>();
+        public static List<uint> UsedFrequencies = new();
     }
 }

@@ -211,7 +211,7 @@ namespace UnturnedBlackout.GameTypes
             }
 
             var team = BlueTeam.Players.Count > RedTeam.Players.Count ? RedTeam : BlueTeam;
-            CTFPlayer cPlayer = new CTFPlayer(player, team);
+            CTFPlayer cPlayer = new(player, team);
             team.AddPlayer(player.SteamID);
             Players.Add(cPlayer);
             if (PlayersLookup.ContainsKey(player.SteamID))

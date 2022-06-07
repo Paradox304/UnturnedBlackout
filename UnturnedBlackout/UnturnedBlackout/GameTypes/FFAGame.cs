@@ -153,7 +153,7 @@ namespace UnturnedBlackout.GameTypes
                 yield break;
             }
 
-            FFAPlayer fPlayer = new FFAPlayer(player);
+            FFAPlayer fPlayer = new(player);
 
             player.Player.Player.quests.askSetRadioFrequency(CSteamID.Nil, Frequency);
             Players.Add(fPlayer);

@@ -196,7 +196,7 @@ namespace UnturnedBlackout.GameTypes
                 yield break;
             }
             var team = BlueTeam.Players.Count > RedTeam.Players.Count ? RedTeam : BlueTeam;
-            KCPlayer kPlayer = new KCPlayer(player, team);
+            KCPlayer kPlayer = new(player, team);
             team.AddPlayer(player.SteamID);
             Players.Add(kPlayer);
             if (PlayersLookup.ContainsKey(player.SteamID))

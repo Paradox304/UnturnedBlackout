@@ -4,7 +4,6 @@ using Rocket.Core.Plugins;
 using Rocket.Unturned.Permissions;
 using SDG.Unturned;
 using Steamworks;
-using System;
 using System.Collections;
 using System.Linq;
 using System.Reflection;
@@ -94,7 +93,7 @@ namespace UnturnedBlackout
 
             ply.playerID.characterName = newName;
             ply.playerID.nickName = newName;
-           
+
             ply.hatItem = 0;
             ply.maskItem = 0;
             ply.glassesItem = 0;
@@ -201,7 +200,7 @@ namespace UnturnedBlackout
             }
         }
 
-        public override TranslationList DefaultTranslations => new TranslationList()
+        public override TranslationList DefaultTranslations => new()
         {
             { "Correct_Usage", "[color=red]Correct Usage: {0}[/color]" },
             { "Location_Not_Found", "[color=red]Location with that ID not found[/color]" },

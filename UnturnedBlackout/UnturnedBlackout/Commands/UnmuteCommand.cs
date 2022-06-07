@@ -22,9 +22,9 @@ namespace UnturnedBlackout.Commands
 
         public string Syntax => "/unmute (PlayerName/SteamID)";
 
-        public List<string> Aliases => new List<string>();
+        public List<string> Aliases => new();
 
-        public List<string> Permissions => new List<string>();
+        public List<string> Permissions => new();
 
         public void Execute(IRocketPlayer caller, string[] command)
         {
@@ -72,7 +72,7 @@ namespace UnturnedBlackout.Commands
 
                 TaskDispatcher.QueueOnMainThread(() => Utility.Say(caller, $"<color=green>Player has been unmuted</color>"));
 
-                Embed embed = new Embed(null, $"**{profile.SteamID}** was unmuted", null, "15105570", DateTime.UtcNow.ToString("s"),
+                Embed embed = new(null, $"**{profile.SteamID}** was unmuted", null, "15105570", DateTime.UtcNow.ToString("s"),
                                         new Footer(Provider.serverName, Provider.configData.Browser.Icon),
                                         new Author(profile.SteamID, $"https://steamcommunity.com/profiles/{profile.SteamID64}/", profile.AvatarIcon.ToString()),
                                         new Field[]

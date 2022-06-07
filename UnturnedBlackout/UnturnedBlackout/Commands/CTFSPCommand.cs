@@ -16,9 +16,9 @@ namespace UnturnedBlackout.Commands
 
         public string Syntax => "/ctfsp (LocationID) (GroupID) [IsFlag]";
 
-        public List<string> Aliases => new List<string>();
+        public List<string> Aliases => new();
 
-        public List<string> Permissions => new List<string>();
+        public List<string> Permissions => new();
 
         public void Execute(IRocketPlayer caller, string[] command)
         {

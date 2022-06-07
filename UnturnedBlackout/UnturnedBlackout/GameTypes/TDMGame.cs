@@ -196,7 +196,7 @@ namespace UnturnedBlackout.GameTypes
             }
 
             var team = BlueTeam.Players.Count > RedTeam.Players.Count ? RedTeam : BlueTeam;
-            TDMPlayer tPlayer = new TDMPlayer(player, team);
+            TDMPlayer tPlayer = new(player, team);
             team.AddPlayer(player.SteamID);
             Players.Add(tPlayer);
             if (PlayersLookup.ContainsKey(player.SteamID))

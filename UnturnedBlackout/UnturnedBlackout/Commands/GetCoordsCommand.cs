@@ -1,10 +1,6 @@
 ﻿using Rocket.API;
 using Rocket.Unturned.Player;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace UnturnedBlackout.Commands
 {
@@ -18,9 +14,9 @@ namespace UnturnedBlackout.Commands
 
         public string Syntax => "/getcoords";
 
-        public List<string> Aliases => new List<string>();
+        public List<string> Aliases => new();
 
-        public List<string> Permissions => new List<string>();
+        public List<string> Permissions => new();
 
         public void Execute(IRocketPlayer caller, string[] command)
         {
