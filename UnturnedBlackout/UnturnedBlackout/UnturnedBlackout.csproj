@@ -136,6 +136,7 @@
     <Compile Include="Commands\FFASPCommand.cs" />
     <Compile Include="Commands\GetCoordsCommand.cs" />
     <Compile Include="Commands\GetNavMeshCommand.cs" />
+    <Compile Include="Commands\GiveSeasonalRewardCommand.cs" />
     <Compile Include="Commands\LeaveCommand.cs" />
     <Compile Include="Commands\LoadoutsCommand.cs" />
     <Compile Include="Commands\MuteCommand.cs" />

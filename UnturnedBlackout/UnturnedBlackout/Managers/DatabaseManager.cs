@@ -30,6 +30,7 @@ namespace UnturnedBlackout.Managers
 
         // Server Data
         public Options ServerOptions { get; set; }
+        public bool IsPendingSeasonalWipe { get; set; }
 
         // Players Data
         public Dictionary<CSteamID, PlayerData> PlayerData { get; set; }
@@ -147,6 +148,7 @@ namespace UnturnedBlackout.Managers
             PlayerData = new Dictionary<CSteamID, PlayerData>();
             PlayerLoadouts = new Dictionary<CSteamID, PlayerLoadout>();
 
+            IsPendingSeasonalWipe = false;
             ThreadPool.QueueUserWorkItem(async (o) =>
             {
                 await LoadDatabaseAsync();
@@ -4041,10 +4043,10 @@ namespace UnturnedBlackout.Managers
                         Logging.Debug("Daily leaderboard has to be wiped, giving ranked rewards");
 
                         // Give all ranked rewards
-                        var embed = new Embed(null, $"**Last Playtest Rankings:**", null, "15105570", DateTime.UtcNow.ToString("s"),
+                        var embed = new Embed(null, $"Last Playtest Rankings ({PlayerDailyLeaderboard.Count} Players)", null, "15105570", DateTime.UtcNow.ToString("s"),
                         new Footer(Provider.serverName, Provider.configData.Browser.Icon),
                         new Author(Provider.serverName, "", Provider.configData.Browser.Icon),
-                        new Field[] { },
+                        new Field[] { new Field($"Ranked:", "", false), new Field("Percentile:", "", false) },
                         null, null);
 
                         foreach (var rankedReward in ServerOptions.DailyRankedRewards)
@@ -4060,11 +4062,13 @@ namespace UnturnedBlackout.Managers
                             Logging.Debug($"Giving player with steam id {leaderboardData.SteamID} the reward");
                             bulkRewards.Add(new(leaderboardData.SteamID, rankedReward.Value));
                             Logging.Debug("Getting player name and adding to field");
-                            var fields = embed.fields.ToList();
                             var name = new MySqlCommand($"SELECT `SteamName` FROM `{PlayersTableName}` WHERE `SteamID` = {leaderboardData.SteamID}", Conn).ExecuteScalar();
                             Logging.Debug($"Found player name {name}");
-                            fields.Add(new Field($"{Utility.GetDiscordEmoji(rankedReward.Key + 1)}", $"[{name}](https://steamcommunity.com/profiles/{leaderboardData.SteamID}/)", false));
-                            embed.fields = fields.ToArray();
+                            embed.fields[0].value += $"{Utility.GetDiscordEmoji(rankedReward.Key + 1)} [{name}](https://steamcommunity.com/profiles/{leaderboardData.SteamID}/) | {leaderboardData.Kills + leaderboardData.HeadshotKills} Kills \n";
+                            if (rankedReward.Key == 2)
+                            {
+                                embed.fields[0].value += $"\n";
+                            } 
                         }
 
                         Logging.Debug("Giving percentile rewards");
@@ -4076,7 +4080,6 @@ namespace UnturnedBlackout.Managers
                             var upperIndex = percentileReward.UpperPercentile * PlayerDailyLeaderboard.Count / 100;
 
                             Logging.Debug($"Lower index {lowerIndex}, Upper Index {upperIndex}");
-                            var players = 0;
                             for (int i = lowerIndex; i < upperIndex; i++)
                             {
                                 Logging.Debug($"i: {i}");
@@ -4091,23 +4094,22 @@ namespace UnturnedBlackout.Managers
                                     break;
                                 }
 
-                                players++;
                                 var leaderboardData = PlayerDailyLeaderboard[i];
                                 Logging.Debug($"Giving player with steam id {leaderboardData.SteamID} the percentile reward");
                                 bulkRewards.Add(new(leaderboardData.SteamID, percentileReward.Rewards));
                             }
 
-                            var fields = embed.fields.ToList();
-                            fields.Add(new Field($"**Top {percentileReward.UpperPercentile}%:**", $"{players} players", false));
-                            embed.fields = fields.ToArray();
+                            embed.fields[1].value += $"**Top {percentileReward.UpperPercentile}%:** {upperIndex - lowerIndex} players \n";
                         }
+
                         ThreadPool.QueueUserWorkItem((o) =>
                         {
                             Logging.Debug($"Sending embed with {embed.fields.Count()} fields");
                             try
                             {
                                 DiscordManager.SendEmbed(embed, "Leaderboard", "https://discord.com/api/webhooks/983367340525760542/RfPxBseRKp3kffBEaHovRBRsLpIR4A-pvAXbQWzknDMohxCiawGlsZw6U_ehXukPreb_");
-                            } catch (Exception ex)
+                            }
+                            catch (Exception ex)
                             {
                                 Logger.Log("Error sending embed");
                                 Logger.Log(ex);
@@ -4115,7 +4117,7 @@ namespace UnturnedBlackout.Managers
                             Logging.Debug("Sent embed");
                         });
 
-                        // Wipe the daily leaderboard data
+                        // Wipe the Daily leaderboard data
                         new MySqlCommand($"UPDATE `{PlayersLeaderboardDailyTableName}` SET `Kills` = 0, `HeadshotKills` = 0, `Deaths` = 0;", Conn).ExecuteScalar();
 
                         foreach (var data in PlayerDailyLeaderboard)
@@ -4137,10 +4139,10 @@ namespace UnturnedBlackout.Managers
                         Logging.Debug("Weekly leaderboard has to be wiped, giving ranked rewards");
 
                         // Give all ranked rewards
-                        var embed = new Embed(null, $"**Last Playtest Rankings:**", null, "15105570", DateTime.UtcNow.ToString("s"),
+                        var embed = new Embed(null, $"Last Playtest Rankings ({PlayerWeeklyLeaderboard.Count} Players)", null, "15105570", DateTime.UtcNow.ToString("s"),
                         new Footer(Provider.serverName, Provider.configData.Browser.Icon),
                         new Author(Provider.serverName, "", Provider.configData.Browser.Icon),
-                        new Field[] { },
+                        new Field[] { new Field($"Ranked:", "", false), new Field("Percentile:", "", false) },
                         null, null);
 
                         foreach (var rankedReward in ServerOptions.WeeklyRankedRewards)
@@ -4156,11 +4158,13 @@ namespace UnturnedBlackout.Managers
                             Logging.Debug($"Giving player with steam id {leaderboardData.SteamID} the reward");
                             bulkRewards.Add(new(leaderboardData.SteamID, rankedReward.Value));
                             Logging.Debug("Getting player name and adding to field");
-                            var fields = embed.fields.ToList();
                             var name = new MySqlCommand($"SELECT `SteamName` FROM `{PlayersTableName}` WHERE `SteamID` = {leaderboardData.SteamID}", Conn).ExecuteScalar();
                             Logging.Debug($"Found player name {name}");
-                            fields.Add(new Field($"{Utility.GetDiscordEmoji(rankedReward.Key + 1)}", $"[{name}](https://steamcommunity.com/profiles/{leaderboardData.SteamID}/)", false));
-                            embed.fields = fields.ToArray();
+                            embed.fields[0].value += $"{Utility.GetDiscordEmoji(rankedReward.Key + 1)} [{name}](https://steamcommunity.com/profiles/{leaderboardData.SteamID}/) | {leaderboardData.Kills + leaderboardData.HeadshotKills} Kills \n";
+                            if (rankedReward.Key == 2)
+                            {
+                                embed.fields[0].value += $"\n";
+                            }
                         }
 
                         Logging.Debug("Giving percentile rewards");
@@ -4172,7 +4176,6 @@ namespace UnturnedBlackout.Managers
                             var upperIndex = percentileReward.UpperPercentile * PlayerWeeklyLeaderboard.Count / 100;
 
                             Logging.Debug($"Lower index {lowerIndex}, Upper Index {upperIndex}");
-                            var players = 0;
                             for (int i = lowerIndex; i < upperIndex; i++)
                             {
                                 Logging.Debug($"i: {i}");
@@ -4187,16 +4190,14 @@ namespace UnturnedBlackout.Managers
                                     break;
                                 }
 
-                                players++;
                                 var leaderboardData = PlayerWeeklyLeaderboard[i];
                                 Logging.Debug($"Giving player with steam id {leaderboardData.SteamID} the percentile reward");
                                 bulkRewards.Add(new(leaderboardData.SteamID, percentileReward.Rewards));
                             }
 
-                            var fields = embed.fields.ToList();
-                            fields.Add(new Field($"**Top {percentileReward.UpperPercentile}%:**", $"{players} players", false));
-                            embed.fields = fields.ToArray();
+                            embed.fields[1].value += $"**Top {percentileReward.UpperPercentile}%:** {upperIndex - lowerIndex} players \n";
                         }
+
                         ThreadPool.QueueUserWorkItem((o) =>
                         {
                             Logging.Debug($"Sending embed with {embed.fields.Count()} fields");
@@ -4226,6 +4227,88 @@ namespace UnturnedBlackout.Managers
                         var newWipeDate = DateTimeOffset.UtcNow.AddDays(1);
                         new MySqlCommand($"UPDATE `{OptionsTableName}` SET `WeeklyLeaderboardWipe` = {newWipeDate.ToUnixTimeSeconds()};", Conn).ExecuteScalar();
                         ServerOptions.WeeklyLeaderboardWipe = newWipeDate;
+                    }
+
+                    Logging.Debug("Checking if seasonal leaderboard is to be wiped");
+                    if (IsPendingSeasonalWipe)
+                    {
+                        IsPendingSeasonalWipe = false;
+                        Logging.Debug("Seasonal leaderboard has to be wiped, giving ranked rewards");
+
+                        // Give all ranked rewards
+                        var embed = new Embed(null, $"Last Playtest Rankings ({PlayerSeasonalLeaderboard.Count} Players)", null, "15105570", DateTime.UtcNow.ToString("s"),
+                        new Footer(Provider.serverName, Provider.configData.Browser.Icon),
+                        new Author(Provider.serverName, "", Provider.configData.Browser.Icon),
+                        new Field[] { new Field($"Ranked:", "", false), new Field("Percentile:", "", false) },
+                        null, null);
+
+                        foreach (var rankedReward in ServerOptions.SeasonalRankedRewards)
+                        {
+                            Logging.Debug($"Giving ranked reward for position {rankedReward.Key}");
+                            if (PlayerSeasonalLeaderboard.Count < (rankedReward.Key + 1))
+                            {
+                                Logging.Debug($"Seasonal leaderboard doesn't have any player at that position, breaking");
+                                break;
+                            }
+
+                            var leaderboardData = PlayerSeasonalLeaderboard[rankedReward.Key];
+                            Logging.Debug($"Giving player with steam id {leaderboardData.SteamID} the reward");
+                            bulkRewards.Add(new(leaderboardData.SteamID, rankedReward.Value));
+                            Logging.Debug("Getting player name and adding to field");
+                            var name = new MySqlCommand($"SELECT `SteamName` FROM `{PlayersTableName}` WHERE `SteamID` = {leaderboardData.SteamID}", Conn).ExecuteScalar();
+                            Logging.Debug($"Found player name {name}");
+                            embed.fields[0].value += $"{Utility.GetDiscordEmoji(rankedReward.Key + 1)} [{name}](https://steamcommunity.com/profiles/{leaderboardData.SteamID}/) | {leaderboardData.Kills + leaderboardData.HeadshotKills} Kills \n";
+                            if (rankedReward.Key == 2)
+                            {
+                                embed.fields[0].value += $"\n";
+                            }
+                        }
+
+                        Logging.Debug("Giving percentile rewards");
+                        // Give all percentile rewards
+                        foreach (var percentileReward in ServerOptions.SeasonalPercentileRewards)
+                        {
+                            Logging.Debug($"Giving percentile reward with lower percentile {percentileReward.LowerPercentile} and upper percentile {percentileReward.UpperPercentile}");
+                            var lowerIndex = percentileReward.LowerPercentile == 0 ? 0 : (percentileReward.LowerPercentile * PlayerSeasonalLeaderboard.Count / 100);
+                            var upperIndex = percentileReward.UpperPercentile * PlayerSeasonalLeaderboard.Count / 100;
+
+                            Logging.Debug($"Lower index {lowerIndex}, Upper Index {upperIndex}");
+                            for (int i = lowerIndex; i < upperIndex; i++)
+                            {
+                                Logging.Debug($"i: {i}");
+                                if (ServerOptions.SeasonalRankedRewards.ContainsKey(i))
+                                {
+                                    Logging.Debug("Player at this position already got ranked reward, continue");
+                                    continue;
+                                }
+                                if (PlayerSeasonalLeaderboard.Count < (i + 1))
+                                {
+                                    Logging.Debug("Could'nt find any player at the position i, breaking");
+                                    break;
+                                }
+
+                                var leaderboardData = PlayerSeasonalLeaderboard[i];
+                                Logging.Debug($"Giving player with steam id {leaderboardData.SteamID} the percentile reward");
+                                bulkRewards.Add(new(leaderboardData.SteamID, percentileReward.Rewards));
+                            }
+
+                            embed.fields[1].value += $"**Top {percentileReward.UpperPercentile}%:** {upperIndex - lowerIndex} players \n";
+                        }
+
+                        ThreadPool.QueueUserWorkItem((o) =>
+                        {
+                            Logging.Debug($"Sending embed with {embed.fields.Count()} fields");
+                            try
+                            {
+                                DiscordManager.SendEmbed(embed, "Leaderboard", "https://discord.com/api/webhooks/983367340525760542/RfPxBseRKp3kffBEaHovRBRsLpIR4A-pvAXbQWzknDMohxCiawGlsZw6U_ehXukPreb_");
+                            }
+                            catch (Exception ex)
+                            {
+                                Logger.Log("Error sending embed");
+                                Logger.Log(ex);
+                            }
+                            Logging.Debug("Sent embed");
+                        });
                     }
 
                     Logging.Debug($"Sending {bulkRewards.Count} bulk rewards");
