@@ -132,7 +132,6 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Player Name", data.SteamName);
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Unbox BUTTON", false);
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Store BUTTON", false);
-            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Leaderboards BUTTON", false);
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Achievements BUTTON", false);
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Quest BUTTON", false);
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Battlepass BUTTON", false);
@@ -161,7 +160,7 @@ namespace UnturnedBlackout.Instances
             int spaces = 0;
             if (data.TryGetNeededXP(out int neededXP))
             {
-                spaces = Math.Min(96, neededXP == 0 ? 0 : (int)(data.XP * 176 / neededXP));
+                spaces = Math.Min(176, neededXP == 0 ? 0 : (int)(data.XP * 176 / neededXP));
             }
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER XP Bar Fill", spaces == 0 ? " " : new string(' ', spaces));
         }
@@ -4848,23 +4847,77 @@ namespace UnturnedBlackout.Instances
         {
             var data = GetLeaderboardData();
             var dataLookup = GetLeaderboardDataLookup();
+            
+            for (int i = 0; i <= 8; i++)
+            {
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Leaderboards BUTTON {i}", false);
+            }
+            
+            if (data.Count == 0)
+            {
+                return;
+            }
 
-
+            if (dataLookup.TryGetValue(SteamID, out LeaderboardData playerData))
+            {
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Leaderboards BUTTON 8", true);
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Leaderboards No TEXT 8", (data.IndexOf(playerData) + 1).ToString());
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Leaderboards Player TEXT 8", playerData.SteamName);
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Leaderboards Value TEXT 8", (playerData.Kills + playerData.HeadshotKills).ToString());
+            }
+            
+            ShowLeaderboardPage(1);
         }
 
         public void ShowLeaderboardPage(int pageNum)
         {
+            LeaderboardPageID = pageNum;
+            var data = GetLeaderboardData();
+            
+            for (int i = 0; i <= 7; i++)
+            {
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Leaderboards BUTTON {i}", false);
+            }
 
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Leaderboards Page TEXT", $"Page {pageNum}");
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Leaderboards Refresh TEXT", GetRefreshTime());
+            
+            var lowerIndex = 8 * (pageNum - 1);
+            var upperIndex = Math.Min(lowerIndex + 7, data.Count - 1);
+
+            var index = 0;
+            for (int i = lowerIndex; i <= upperIndex; i++)
+            {
+                var playerData = data[i];
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Leaderboards BUTTON {index}", true);
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Leaderboards Button TEXT {index}", (i + 1).ToString());
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Leaderboards Player TEXT {index}", playerData.SteamName);
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Leaderboards Value TEXT {index}", (playerData.Kills + playerData.HeadshotKills).ToString());
+                index++;
+            }
         }
 
         public void ForwardLeaderboardPage()
         {
+            var data = GetLeaderboardData();
+            
+            if ((data.Count - 1) < LeaderboardPageID * 8)
+            {
+                ShowLeaderboard();
+                return;
+            }
 
+            ShowLeaderboardPage(LeaderboardPageID + 1);
         }
 
         public void BackwardLeaderboardPage()
         {
+            if (LeaderboardPageID == 1)
+            {
+                return;
+            }
 
+            ShowLeaderboardPage(LeaderboardPageID - 1);
         }
         
         public List<LeaderboardData> GetLeaderboardData() =>
@@ -4887,6 +4940,14 @@ namespace UnturnedBlackout.Instances
                 _ => throw new ArgumentOutOfRangeException("LeaderboardPage is not as expected")
             };
 
+        public string GetRefreshTime() =>
+            LeaderboardPage switch
+            {
+                ELeaderboardPage.Daily => (DB.ServerOptions.DailyLeaderboardWipe.UtcDateTime - DateTime.UtcNow).ToString(@"dd\:hh\:mm"),
+                ELeaderboardPage.Weekly => (DB.ServerOptions.WeeklyLeaderboardWipe.UtcDateTime - DateTime.UtcNow).ToString(@"dd\:hh\:mm"),
+                _ => "00:00:00"
+            };
+        
         // Events
 
         public void OnMusicChanged(bool isMusic)

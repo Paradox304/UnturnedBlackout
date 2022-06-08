@@ -1045,6 +1045,9 @@ namespace UnturnedBlackout.Managers
                 case "SERVER Loadout Close BUTTON":
                     handler.ClearMidgameLoadouts();
                     return;
+                case "SERVER Leaderboards BUTTON":
+                    handler.ShowLeaderboards();
+                    return;
                 case "SERVER Exit BUTTON":
                     Provider.kick(player.channel.owner.playerID.steamID, "You exited");
                     return;
@@ -1212,6 +1215,33 @@ namespace UnturnedBlackout.Managers
                     return;
                 case "SERVER Item Previous BUTTON":
                     handler.BackwardLoadoutTab();
+                    return;
+                case "SERVER Leaderboards Weekly BUTTON":
+                    handler.SelectLeaderboardPage(ELeaderboardPage.Weekly);
+                    return;
+                case "SERVER Leaderboards All BUTTON":
+                    handler.SelectLeaderboardPage(ELeaderboardPage.All);
+                    return;
+                case "SERVER Leaderboards Monthly BUTTON":
+                    handler.SelectLeaderboardPage(ELeaderboardPage.Daily);
+                    return;
+                case "SERVER Leaderboards Season BUTTON":
+                    handler.SelectLeaderboardPage(ELeaderboardPage.Seasonal);
+                    return;
+                case "SERVER Leaderboards Kill BUTTON":
+                    handler.SelectLeaderboardTab(ELeaderboardTab.Kill);
+                    return;
+                case "SERVER Leaderboards Level BUTTON":
+                    handler.SelectLeaderboardTab(ELeaderboardTab.Level);
+                    return;
+                case "SERVER Leaderboards Next BUTTON":
+                    handler.ForwardLeaderboardPage();
+                    return;
+                case "SERVER Leaderboards Previous BUTTON":
+                    handler.BackwardLeaderboardPage();
+                    return;
+                case "SERVER Leaderboards Back BUTTON":
+                    handler.SetupMainMenu();
                     return;
                 case "KnobOff":
                     handler.OnMusicChanged(true);

@@ -3786,7 +3786,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 Logging.Debug("Getting daily leaderboard data");
-                rdr = new MySqlCommand($"SELECT `{PlayersLeaderboardDailyTableName}`.`SteamID`, `{PlayersTableName}`.`SteamName`, `{PlayersTableName}`.`Level`, `{PlayersLeaderboardDailyTableName}`.`Kills`, `{PlayersLeaderboardDailyTableName}`.`HeadshotKills`, `{PlayersLeaderboardDailyTableName}`.`Deaths` FROM `{PlayersLeaderboardDailyTableName}` INNER JOIN `{PlayersTableName}` ON `{PlayersLeaderboardDailyTableName}`.SteamID = `{PlayersTableName}`.SteamID` ORDER BY (`{PlayersLeaderboardDailyTableName}`.`Kills` + `{PlayersLeaderboardDailyTableName}`.`HeadshotKills`) DESC;", Conn).ExecuteReader();
+                rdr = new MySqlCommand($"SELECT `{PlayersLeaderboardDailyTableName}`.`SteamID`, `{PlayersTableName}`.`SteamName`, `{PlayersTableName}`.`Level`, `{PlayersLeaderboardDailyTableName}`.`Kills`, `{PlayersLeaderboardDailyTableName}`.`HeadshotKills`, `{PlayersLeaderboardDailyTableName}`.`Deaths` FROM `{PlayersLeaderboardDailyTableName}` INNER JOIN `{PlayersTableName}` ON `{PlayersLeaderboardDailyTableName}`.`SteamID` = `{PlayersTableName}`.`SteamID` ORDER BY (`{PlayersLeaderboardDailyTableName}`.`Kills` + `{PlayersLeaderboardDailyTableName}`.`HeadshotKills`) DESC;", Conn).ExecuteReader();
                 try
                 {
                     var playerDailyLeaderboard = new List<LeaderboardData>();
@@ -3843,7 +3843,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 Logging.Debug("Getting weekly leaderboard data");
-                rdr = new MySqlCommand($"SELECT `{PlayersLeaderboardWeeklyTableName}`.`SteamID`, `{PlayersTableName}`.`SteamName`, `{PlayersTableName}`.`Level`, `{PlayersLeaderboardWeeklyTableName}`.`Kills`, `{PlayersLeaderboardWeeklyTableName}`.`HeadshotKills`, `{PlayersLeaderboardWeeklyTableName}`.`Deaths` FROM `{PlayersLeaderboardWeeklyTableName}` INNER JOIN `{PlayersTableName}` ON `{PlayersLeaderboardWeeklyTableName}`.SteamID = `{PlayersTableName}`.SteamID` ORDER BY (`{PlayersLeaderboardWeeklyTableName}`.`Kills` + `{PlayersLeaderboardWeeklyTableName}`.`HeadshotKills`) DESC;", Conn).ExecuteReader();
+                rdr = new MySqlCommand($"SELECT `{PlayersLeaderboardWeeklyTableName}`.`SteamID`, `{PlayersTableName}`.`SteamName`, `{PlayersTableName}`.`Level`, `{PlayersLeaderboardWeeklyTableName}`.`Kills`, `{PlayersLeaderboardWeeklyTableName}`.`HeadshotKills`, `{PlayersLeaderboardWeeklyTableName}`.`Deaths` FROM `{PlayersLeaderboardWeeklyTableName}` INNER JOIN `{PlayersTableName}` ON `{PlayersLeaderboardWeeklyTableName}`.`SteamID` = `{PlayersTableName}`.`SteamID` ORDER BY (`{PlayersLeaderboardWeeklyTableName}`.`Kills` + `{PlayersLeaderboardWeeklyTableName}`.`HeadshotKills`) DESC;", Conn).ExecuteReader();
                 try
                 {
                     var playerWeeklyLeaderboard = new List<LeaderboardData>();
@@ -3900,7 +3900,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 Logging.Debug("Getting seasonal leaderboard data");
-                rdr = new MySqlCommand($"SELECT `{PlayersLeaderboardSeasonalTableName}`.`SteamID`, `{PlayersTableName}`.`SteamName`, `{PlayersTableName}`.`Level`, `{PlayersLeaderboardSeasonalTableName}`.`Kills`, `{PlayersLeaderboardSeasonalTableName}`.`HeadshotKills`, `{PlayersLeaderboardSeasonalTableName}`.`Deaths` FROM `{PlayersLeaderboardSeasonalTableName}` INNER JOIN `{PlayersTableName}` ON `{PlayersLeaderboardSeasonalTableName}`.SteamID = `{PlayersTableName}`.SteamID` ORDER BY (`{PlayersLeaderboardSeasonalTableName}`.`Kills` + `{PlayersLeaderboardSeasonalTableName}`.`HeadshotKills`) DESC;", Conn).ExecuteReader();
+                rdr = new MySqlCommand($"SELECT `{PlayersLeaderboardSeasonalTableName}`.`SteamID`, `{PlayersTableName}`.`SteamName`, `{PlayersTableName}`.`Level`, `{PlayersLeaderboardSeasonalTableName}`.`Kills`, `{PlayersLeaderboardSeasonalTableName}`.`HeadshotKills`, `{PlayersLeaderboardSeasonalTableName}`.`Deaths` FROM `{PlayersLeaderboardSeasonalTableName}` INNER JOIN `{PlayersTableName}` ON `{PlayersLeaderboardSeasonalTableName}`.`SteamID` = `{PlayersTableName}`.`SteamID` ORDER BY (`{PlayersLeaderboardSeasonalTableName}`.`Kills` + `{PlayersLeaderboardSeasonalTableName}`.`HeadshotKills`) DESC;", Conn).ExecuteReader();
                 try
                 {
                     var playerSeasonalLeaderboard = new List<LeaderboardData>();
@@ -3957,7 +3957,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 Logging.Debug("Getting all time leaderboard data");
-                rdr = new MySqlCommand($"SELECT `SteamID`, `SteamName` `Level`, `Kills`, `HeadshotKills` FROM `{PlayersTableName}` ORDER BY (`Kills` + `HeadshotKills`) DESC;", Conn).ExecuteReader();
+                rdr = new MySqlCommand($"SELECT `SteamID`, `SteamName`, `Level`, `Kills`, `HeadshotKills`, `Deaths` FROM `{PlayersTableName}` ORDER BY (`Kills` + `HeadshotKills`) DESC;", Conn).ExecuteReader();
                 try
                 {
                     var playerAllTimeLeaderboardLookup = new Dictionary<CSteamID, LeaderboardData>();
