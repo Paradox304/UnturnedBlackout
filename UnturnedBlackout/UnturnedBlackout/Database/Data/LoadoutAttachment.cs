@@ -14,5 +14,11 @@ namespace UnturnedBlackout.Database.Data
             LevelRequirement = levelRequirement;
             IsBought = isBought;
         }
+
+        public int GetCoins(int currentLevel)
+        {
+            var levelsRequired = LevelRequirement - currentLevel;
+            return Attachment.Coins * levelsRequired;
+        }
     }
 }

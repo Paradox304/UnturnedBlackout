@@ -59,35 +59,23 @@ namespace UnturnedBlackout
             Plugin.Instance.HUDManager.RemoveGunUI(inv.player.channel.GetOwnerTransportConnection());
         }
 
-        public static string GetOrdinal(int index)
-        {
-            switch (index)
-            {
-                case 1:
-                    return "1st";
-                case 2:
-                    return "2nd";
-                case 3:
-                    return "3rd";
-                default:
-                    return index + "th";
-            }
-        }
+        public static string GetOrdinal(int index) =>
+             index switch
+             {
+                 1 => "1st",
+                 2 => "2nd",
+                 3 => "3rd",
+                 _ => index + "th",
+             };
 
-        public static string GetDiscordEmoji(int index)
-        {
-            switch (index)
-            {
-                case 1:
-                    return ":first_place:";
-                case 2:
-                    return ":second_place:";
-                case 3:
-                    return ":third_place:";
-                default:
-                    return ":military_medal:";
-            }
-        }
+        public static string GetDiscordEmoji(int index) =>
+             index switch
+             {
+                 1 => ":first_place:",
+                 2 => ":second_place:",
+                 3 => ":third_place:",
+                 _ => ":military_medal:",
+             };
 
         public static uint GetFreeFrequency()
         {
@@ -348,80 +336,44 @@ namespace UnturnedBlackout
             return amount;
         }
 
-        public static int GetStartingPos(EAttachment attachment)
-        {
-            switch (attachment)
-            {
-                case EAttachment.Sights:
-                    return 0;
-                case EAttachment.Grip:
-                    return 4;
-                case EAttachment.Barrel:
-                    return 6;
-                case EAttachment.Magazine:
-                    return 8;
-            }
-            return -1;
-        }
+        public static int GetStartingPos(EAttachment attachment) =>
+             attachment switch
+             {
+                 EAttachment.Sights => 0,
+                 EAttachment.Grip => 4,
+                 EAttachment.Barrel => 6,
+                 EAttachment.Magazine => 8,
+                 _ => -1,
+             };
 
-        public static string ToFriendlyName(this ELoadoutPage page)
-        {
-            switch (page)
-            {
-                case ELoadoutPage.PrimarySkin:
-                case ELoadoutPage.SecondarySkin:
-                    return "Skin";
-                case ELoadoutPage.Perk1:
-                case ELoadoutPage.Perk2:
-                case ELoadoutPage.Perk3:
-                    return "Perk";
-                case ELoadoutPage.AttachmentPrimaryBarrel:
-                case ELoadoutPage.AttachmentPrimaryCharm:
-                case ELoadoutPage.AttachmentPrimaryGrip:
-                case ELoadoutPage.AttachmentPrimaryMagazine:
-                case ELoadoutPage.AttachmentPrimarySights:
-                    return page.ToString().Replace("AttachmentPrimary", "");
-                case ELoadoutPage.AttachmentSecondarySights:
-                case ELoadoutPage.AttachmentSecondaryBarrel:
-                case ELoadoutPage.AttachmentSecondaryCharm:
-                case ELoadoutPage.AttachmentSecondaryMagazine:
-                    return page.ToString().Replace("AttachmentSecondary", "");
-                default:
-                    return page.ToString();
-            }
-        }
+        public static string ToFriendlyName(this ELoadoutPage page) =>
+             page switch
+             {
+                 ELoadoutPage.PrimarySkin or ELoadoutPage.SecondarySkin => "Skin",
+                 ELoadoutPage.Perk1 or ELoadoutPage.Perk2 or ELoadoutPage.Perk3 => "Perk",
+                 ELoadoutPage.AttachmentPrimaryBarrel or ELoadoutPage.AttachmentPrimaryCharm or ELoadoutPage.AttachmentPrimaryGrip or ELoadoutPage.AttachmentPrimaryMagazine or ELoadoutPage.AttachmentPrimarySights => page.ToString().Replace("AttachmentPrimary", ""),
+                 ELoadoutPage.AttachmentSecondarySights or ELoadoutPage.AttachmentSecondaryBarrel or ELoadoutPage.AttachmentSecondaryCharm or ELoadoutPage.AttachmentSecondaryMagazine => page.ToString().Replace("AttachmentSecondary", ""),
+                 _ => page.ToString(),
+             };
 
-        public static string ToFriendlyName(this EGamePhase gamePhase)
-        {
-            switch (gamePhase)
-            {
-                case EGamePhase.WaitingForPlayers:
-                    return "Waiting For Players";
-                default:
-                    return gamePhase.ToString();
-            }
-        }
+        public static string ToFriendlyName(this EGamePhase gamePhase) =>
+             gamePhase switch
+             {
+                 EGamePhase.WaitingForPlayers => "Waiting For Players",
+                 _ => gamePhase.ToString(),
+             };
 
-        public static string GetDefaultAttachmentImage(string attachmentType)
-        {
-            switch (attachmentType.ToLower())
-            {
-                case "sights":
-                    return "https://cdn.discordapp.com/attachments/458038940847439903/957681666875347044/sight.png";
-                case "grip":
-                    return "https://cdn.discordapp.com/attachments/458038940847439903/957681668494356580/grip.png";
-                case "barrel":
-                    return "https://cdn.discordapp.com/attachments/458038940847439903/957681668276232213/barrel.png";
-                case "magazine":
-                    return "https://cdn.discordapp.com/attachments/458038940847439903/957681667101835305/ammo.png";
-                case "charm":
-                    return "https://cdn.discordapp.com/attachments/458038940847439903/957681668053958656/charm.png";
-                case "skin":
-                    return "https://cdn.discordapp.com/attachments/458038940847439903/957681667781324810/skins.png";
-                default:
-                    return "";
-            }
-        }
+        public static string GetDefaultAttachmentImage(string attachmentType) =>
+             attachmentType.ToLower() switch
+             {
+                 "sights" => "https://cdn.discordapp.com/attachments/458038940847439903/957681666875347044/sight.png",
+                 "grip" => "https://cdn.discordapp.com/attachments/458038940847439903/957681668494356580/grip.png",
+                 "barrel" => "https://cdn.discordapp.com/attachments/458038940847439903/957681668276232213/barrel.png",
+                 "magazine" => "https://cdn.discordapp.com/attachments/458038940847439903/957681667101835305/ammo.png",
+                 "charm" => "https://cdn.discordapp.com/attachments/458038940847439903/957681668053958656/charm.png",
+                 "skin" => "https://cdn.discordapp.com/attachments/458038940847439903/957681667781324810/skins.png",
+                 _ => "",
+             };
 
         public static string ToColor(this object value, bool isPlayer)
         {

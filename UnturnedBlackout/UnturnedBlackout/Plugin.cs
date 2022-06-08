@@ -274,6 +274,8 @@ namespace UnturnedBlackout
             { "CTF_Enemy_Dropped_Flag", "The enemy has the dropped the flag" },
             { "CTF_Team_Picked_Flag", "Your team has picked up the flag" },
             { "CTF_Enemy_Picked_Flag", "The enemy has picked up the flag" },
+            { "Unlock_Gun_Level", "UNLOCK WITH GUN LEVEL {0}" },
+            { "Unlock_Level", "UNLOCK WITH LEVEL {0}" },
             { "SAFETY", "SAFETY" },
             { "AUTO", "AUTO" },
             { "BURST", "BURST" },

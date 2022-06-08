@@ -45,5 +45,11 @@ namespace UnturnedBlackout.Database.Base
             RewardAttachmentsInverse = rewardAttachmentsInverse;
             LevelXPNeeded = levelXPNeeded;
         }
+
+        public int GetCoins(uint currentLevel)
+        {
+            var levelsNeeded = LevelRequirement - currentLevel;
+            return Coins * (int)levelsNeeded;
+        }
     }
 }

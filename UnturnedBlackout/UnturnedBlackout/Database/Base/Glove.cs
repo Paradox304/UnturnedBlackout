@@ -24,5 +24,11 @@
             Coins = coins;
             LevelRequirement = levelRequirement;
         }
+
+        public int GetCoins(uint currentLevel)
+        {
+            var levelsNeeded = LevelRequirement - currentLevel;
+            return Coins * (int)levelsNeeded;
+        }
     }
 }

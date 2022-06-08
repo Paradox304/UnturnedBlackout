@@ -176,6 +176,8 @@
     <Compile Include="Enums\EGamePhase.cs" />
     <Compile Include="Enums\EGameType.cs" />
     <Compile Include="Enums\EGun.cs" />
+    <Compile Include="Enums\ELeaderboardPage.cs" />
+    <Compile Include="Enums\ELeaderboardTab.cs" />
     <Compile Include="Enums\ELevelUpAnimation.cs" />
     <Compile Include="Enums\ELoadoutPage.cs" />
     <Compile Include="Enums\ELoadoutTab.cs" />
