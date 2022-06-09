@@ -2668,7 +2668,7 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Item IMAGE {i}", attachment.Attachment.IconLink);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item TEXT {i}", attachment.Attachment.AttachmentName);
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Item Lock Overlay {i}", !attachment.IsBought && attachment.LevelRequirement > gun.Level);
-                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", !attachment.IsBought && attachment.LevelRequirement > gun.Level ? Plugin.Instance.Translate("Unlock_Gun_Level", gun.Gun.LevelRequirement) : "");
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", !attachment.IsBought && attachment.LevelRequirement > gun.Level ? Plugin.Instance.Translate("Unlock_Gun_Level", attachment.LevelRequirement) : "");
                 SendRarity("SERVER Item", attachment.Attachment.AttachmentRarity, i);
             }
         }

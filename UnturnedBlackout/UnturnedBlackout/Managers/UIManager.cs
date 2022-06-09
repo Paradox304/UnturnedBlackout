@@ -1222,7 +1222,7 @@ namespace UnturnedBlackout.Managers
                 case "SERVER Leaderboards All BUTTON":
                     handler.SelectLeaderboardPage(ELeaderboardPage.All);
                     return;
-                case "SERVER Leaderboards Monthly BUTTON":
+                case "SERVER Leaderboards Daily BUTTON":
                     handler.SelectLeaderboardPage(ELeaderboardPage.Daily);
                     return;
                 case "SERVER Leaderboards Season BUTTON":
