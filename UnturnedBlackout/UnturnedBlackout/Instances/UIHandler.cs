@@ -4889,7 +4889,7 @@ namespace UnturnedBlackout.Instances
             }
 
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Leaderboards Page TEXT", $"Page {pageNum}");
-            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Leaderboards Refresh TEXT", GetRefreshTime());
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Leaderboards Reset TEXT", GetRefreshTime());
             
             var lowerIndex = 10 * (pageNum - 1);
             var upperIndex = Math.Min(lowerIndex + 9, data.Count - 1);
