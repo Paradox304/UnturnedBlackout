@@ -4848,7 +4848,7 @@ namespace UnturnedBlackout.Instances
             var data = GetLeaderboardData();
             var dataLookup = GetLeaderboardDataLookup();
             
-            for (int i = 0; i <= 8; i++)
+            for (int i = 0; i <= 10; i++)
             {
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Leaderboards BUTTON {i}", false);
             }
@@ -4860,10 +4860,19 @@ namespace UnturnedBlackout.Instances
 
             if (dataLookup.TryGetValue(SteamID, out LeaderboardData playerData))
             {
-                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Leaderboards BUTTON 8", true);
-                EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Leaderboards No TEXT 8", (data.IndexOf(playerData) + 1).ToString());
-                EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Leaderboards Player TEXT 8", playerData.SteamName);
-                EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Leaderboards Value TEXT 8", (playerData.Kills + playerData.HeadshotKills).ToString());
+                var kills = (decimal)(playerData.Kills + playerData.HeadshotKills);
+                var deaths = (decimal)playerData.Deaths;
+
+                var ratio = playerData.Deaths == 0 ? String.Format("{0:n}", kills) : String.Format("{0:n}", Math.Round(kills / deaths, 2));
+
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Leaderboards BUTTON 10", true);
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Leaderboards Rank TEXT 10", (data.IndexOf(playerData) + 1).ToString());
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Leaderboards Level TEXT 10", playerData.Level.ToString());
+                EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Leaderboards Level IMAGE 10", Plugin.Instance.DBManager.Levels.TryGetValue((int)playerData.Level, out XPLevel level) ? level.IconLinkLarge : "");
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Leaderboards Name TEXT 10", playerData.SteamName);
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Leaderboards Kills TEXT 10", (playerData.Kills + playerData.HeadshotKills).ToString());
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Leaderboards Deaths TEXT 10", playerData.Deaths.ToString());
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Leaderboards KDR TEXT 10", ratio.ToString());
             }
             
             ShowLeaderboardPage(1);
@@ -4882,18 +4891,26 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Leaderboards Page TEXT", $"Page {pageNum}");
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Leaderboards Refresh TEXT", GetRefreshTime());
             
-            var lowerIndex = 8 * (pageNum - 1);
-            var upperIndex = Math.Min(lowerIndex + 7, data.Count - 1);
+            var lowerIndex = 10 * (pageNum - 1);
+            var upperIndex = Math.Min(lowerIndex + 9, data.Count - 1);
 
             var index = 0;
             for (int i = lowerIndex; i <= upperIndex; i++)
             {
                 var playerData = data[i];
+                var kills = (decimal)(playerData.Kills + playerData.HeadshotKills);
+                var deaths = (decimal)playerData.Deaths;
+
+                var ratio = playerData.Deaths == 0 ? String.Format("{0:n}", kills) : String.Format("{0:n}", Math.Round(kills / deaths, 2));
+
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Leaderboards BUTTON {index}", true);
-                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Leaderboards Button TEXT {index}", (i + 1).ToString());
-                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Leaderboards Player TEXT {index}", playerData.SteamName);
-                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Leaderboards Value TEXT {index}", (playerData.Kills + playerData.HeadshotKills).ToString());
-                index++;
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Leaderboards Rank TEXT {index}", (i + 1).ToString());
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Leaderboards Level TEXT {index}", playerData.Level.ToString());
+                EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Leaderboards Level IMAGE {index}", Plugin.Instance.DBManager.Levels.TryGetValue((int)playerData.Level, out XPLevel level) ? level.IconLinkLarge : "");
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Leaderboards Name TEXT {index}", playerData.SteamName);
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Leaderboards Kills TEXT {index}", (playerData.Kills + playerData.HeadshotKills).ToString());
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Leaderboards Deaths TEXT {index}", playerData.Deaths.ToString());
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Leaderboards KDR TEXT {index}", ratio.ToString());
             }
         }
 
