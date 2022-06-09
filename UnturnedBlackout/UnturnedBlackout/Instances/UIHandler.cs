@@ -4868,7 +4868,7 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Leaderboards BUTTON 10", true);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Leaderboards Rank TEXT 10", (data.IndexOf(playerData) + 1).ToString());
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Leaderboards Level TEXT 10", playerData.Level.ToString());
-                EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Leaderboards Level IMAGE 10", Plugin.Instance.DBManager.Levels.TryGetValue((int)playerData.Level, out XPLevel level) ? level.IconLinkLarge : "");
+                EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Leaderboards Level IMAGE 10", Plugin.Instance.DBManager.Levels.TryGetValue((int)playerData.Level, out XPLevel level) ? level.IconLinkMedium : "");
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Leaderboards Name TEXT 10", playerData.SteamName);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Leaderboards Kills TEXT 10", (playerData.Kills + playerData.HeadshotKills).ToString());
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Leaderboards Deaths TEXT 10", playerData.Deaths.ToString());
@@ -4883,7 +4883,7 @@ namespace UnturnedBlackout.Instances
             LeaderboardPageID = pageNum;
             var data = GetLeaderboardData();
             
-            for (int i = 0; i <= 7; i++)
+            for (int i = 0; i <= 9; i++)
             {
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Leaderboards BUTTON {i}", false);
             }
@@ -4894,9 +4894,11 @@ namespace UnturnedBlackout.Instances
             var lowerIndex = 10 * (pageNum - 1);
             var upperIndex = Math.Min(lowerIndex + 9, data.Count - 1);
 
+            Logging.Debug($"PAGE: {pageNum}, Lower Index: {lowerIndex}, Upper Index: {upperIndex}");
             var index = 0;
             for (int i = lowerIndex; i <= upperIndex; i++)
             {
+                Logging.Debug($"INDEX {index}, i: {i}");
                 var playerData = data[i];
                 var kills = (decimal)(playerData.Kills + playerData.HeadshotKills);
                 var deaths = (decimal)playerData.Deaths;
@@ -4906,11 +4908,12 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Leaderboards BUTTON {index}", true);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Leaderboards Rank TEXT {index}", (i + 1).ToString());
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Leaderboards Level TEXT {index}", playerData.Level.ToString());
-                EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Leaderboards Level IMAGE {index}", Plugin.Instance.DBManager.Levels.TryGetValue((int)playerData.Level, out XPLevel level) ? level.IconLinkLarge : "");
+                EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Leaderboards Level IMAGE {index}", Plugin.Instance.DBManager.Levels.TryGetValue((int)playerData.Level, out XPLevel level) ? level.IconLinkMedium : "");
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Leaderboards Name TEXT {index}", playerData.SteamName);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Leaderboards Kills TEXT {index}", (playerData.Kills + playerData.HeadshotKills).ToString());
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Leaderboards Deaths TEXT {index}", playerData.Deaths.ToString());
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Leaderboards KDR TEXT {index}", ratio.ToString());
+                index++;
             }
         }
 
