@@ -2083,6 +2083,37 @@ namespace UnturnedBlackout.Managers
                         }
                         playerQuestsSearchByType[quest.QuestType].Add(playerQuest);
                     }
+                    Logging.Debug($"Got {playerQuestsSearchByType.Count} quests registered to player");
+                    if (playerQuests.Count == 0 || playerQuests[0].QuestEnd.UtcDateTime < DateTime.UtcNow)
+                    {
+                        Logging.Debug("Quests have expired, generate different quests");
+                        
+                        playerQuests.Clear();
+                        playerQuestsSearchByType.Clear();
+
+                        await new MySqlCommand($"DELETE FROM `{PlayersQuestsTableName}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteScalarAsync();
+                        var randomQuests = Quests.ToList();
+
+                        var expiryDate = DateTimeOffset.UtcNow.AddDays(1);
+                        for (var i = 0; i < 5; i++)
+                        {
+                            var quest = randomQuests[UnityEngine.Random.Range(0, randomQuests.Count)];
+                            var playerQuest = new PlayerQuest(player.CSteamID, quest, 0, expiryDate);
+                            playerQuests.Add(playerQuest);
+                            if (!playerQuestsSearchByType.ContainsKey(quest.QuestType))
+                            {
+                                playerQuestsSearchByType.Add(quest.QuestType, new List<PlayerQuest>());
+                            }
+                            playerQuestsSearchByType[quest.QuestType].Add(playerQuest);
+                            //randomQuests.Remove(quest);
+
+                            await new MySqlCommand($"INSERT INTO `{PlayersQuestsTableName}` (`SteamID` , `QuestID`, `Amount`, `QuestEnd`) VALUES ({player.CSteamID}, {quest.QuestID}, 0, {expiryDate.ToUnixTimeSeconds()}", Conn).ExecuteScalarAsync();
+                        }
+                    }
+
+                    playerData.Quests = playerQuests;
+                    playerData.QuestsSearchByType = playerQuestsSearchByType;
+                    
                 }
                 catch (Exception ex)
                 {

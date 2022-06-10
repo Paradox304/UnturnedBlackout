@@ -4890,7 +4890,7 @@ namespace UnturnedBlackout.Instances
             }
 
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Leaderboards Page TEXT", $"Page {pageNum}");
-            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Leaderboards Reset TEXT", GetRefreshTime());
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Leaderboards Reset TEXT", GetLeaderboardRefreshTime());
             
             var lowerIndex = 10 * (pageNum - 1);
             var upperIndex = Math.Min(lowerIndex + 9, data.Count - 1);
@@ -5001,13 +5001,15 @@ namespace UnturnedBlackout.Instances
                 _ => throw new ArgumentOutOfRangeException("LeaderboardPage is not as expected")
             };
 
-        public string GetRefreshTime() =>
+        public string GetLeaderboardRefreshTime() =>
             LeaderboardPage switch
             {
                 ELeaderboardPage.Daily => (DB.ServerOptions.DailyLeaderboardWipe.UtcDateTime - DateTime.UtcNow).ToString(@"dd\:hh\:mm"),
                 ELeaderboardPage.Weekly => (DB.ServerOptions.WeeklyLeaderboardWipe.UtcDateTime - DateTime.UtcNow).ToString(@"dd\:hh\:mm"),
                 _ => "00:00:00"
             };
+
+        
         
         // Events
 
