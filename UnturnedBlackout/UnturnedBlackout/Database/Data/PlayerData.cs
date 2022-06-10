@@ -1,7 +1,9 @@
 ﻿using Steamworks;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using UnturnedBlackout.Database.Base;
+using UnturnedBlackout.Enums;
 
 namespace UnturnedBlackout.Database.Data
 {
@@ -28,8 +30,10 @@ namespace UnturnedBlackout.Database.Data
         public bool Music { get; set; }
         public bool IsMuted { get; set; }
         public DateTimeOffset MuteExpiry { get; set; }
+        public List<PlayerQuest> Quests { get; set; }
+        public Dictionary<EQuestType, List<PlayerQuest>> QuestsSearchByType { get; set; }
 
-        public PlayerData(CSteamID steamID, string steamName, string avatarLink, uint xP, uint level, uint credits, uint scrap, uint coins, uint kills, uint headshotKills, uint highestKillstreak, uint highestMultiKills, uint killsConfirmed, uint killsDenied, uint flagsCaptured, uint flagsSaved, uint areasTaken, uint deaths, bool music, bool isMuted, DateTimeOffset muteExpiry)
+        public PlayerData(CSteamID steamID, string steamName, string avatarLink, uint xP, uint level, uint credits, uint scrap, uint coins, uint kills, uint headshotKills, uint highestKillstreak, uint highestMultiKills, uint killsConfirmed, uint killsDenied, uint flagsCaptured, uint flagsSaved, uint areasTaken, uint deaths, bool music, bool isMuted, DateTimeOffset muteExpiry, List<PlayerQuest> quests, Dictionary<EQuestType, List<PlayerQuest>> questsSearchByType)
         {
             SteamID = steamID;
             SteamName = steamName;
@@ -52,6 +56,8 @@ namespace UnturnedBlackout.Database.Data
             Music = music;
             IsMuted = isMuted;
             MuteExpiry = muteExpiry;
+            Quests = quests;
+            QuestsSearchByType = questsSearchByType;
         }
 
         public bool TryGetNeededXP(out int xp)

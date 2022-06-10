@@ -172,6 +172,7 @@
     <Compile Include="Database\Data\LoadoutPerk.cs" />
     <Compile Include="Database\Data\PlayerData.cs" />
     <Compile Include="Database\Data\PlayerLoadout.cs" />
+    <Compile Include="Database\Data\PlayerQuest.cs" />
     <Compile Include="Enums\EAttachment.cs" />
     <Compile Include="Enums\EFlagState.cs" />
     <Compile Include="Enums\EGamePhase.cs" />

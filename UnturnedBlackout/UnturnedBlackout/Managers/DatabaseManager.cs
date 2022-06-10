@@ -16,6 +16,7 @@ using UnturnedBlackout.Enums;
 using UnturnedBlackout.Models.Data;
 using UnturnedBlackout.Models.Webhook;
 using Timer = System.Timers.Timer;
+using PlayerQuest = UnturnedBlackout.Database.Data.PlayerQuest;
 
 namespace UnturnedBlackout.Managers
 {
@@ -65,6 +66,9 @@ namespace UnturnedBlackout.Managers
         public Dictionary<ushort, Glove> Gloves { get; set; }
         public Dictionary<int, Card> Cards { get; set; }
         public Dictionary<int, XPLevel> Levels { get; set; }
+
+        public Dictionary<int, Quest> QuestsSearchByID { get; set; }
+        public List<Quest> Quests { get; set; }
 
         // Default Data
         public LoadoutData DefaultLoadout { get; set; }
@@ -189,7 +193,7 @@ namespace UnturnedBlackout.Managers
                 await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{GlovesTableName}` ( `GloveID` SMALLINT UNSIGNED NOT NULL , `GloveName` VARCHAR(255) NOT NULL , `GloveDesc` TEXT NOT NULL , `GloveRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `IconLink` TEXT NOT NULL , `ScrapAmount` INT UNSIGNED NOT NULL , `BuyPrice` INT UNSIGNED NOT NULL , `Coins` INT UNSIGNED NOT NULL , `LevelRequirement` INT NOT NULL , PRIMARY KEY (`GloveID`));", Conn).ExecuteScalarAsync();
                 await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{LevelsTableName}` ( `Level` INT UNSIGNED NOT NULL , `XPNeeded` INT UNSIGNED NOT NULL , `IconLinkLarge` TEXT NOT NULL , `IconLinkMedium` TEXT NOT NULL , `IconLinkSmall` TEXT NOT NULL , PRIMARY KEY (`Level`));", Conn).ExecuteScalarAsync();
                 await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{OptionsTableName}` ( `DailyLeaderboardWipe` BIGINT NOT NULL , `WeeklyLeaderboardWipe` BIGINT NOT NULL , `DailyLeaderboardRankedRewards` TEXT NOT NULL , `DailyLeaderboardPercentileRewards` TEXT NOT NULL , `WeeklyLeaderboardRankedRewards` TEXT NOT NULL , `WeeklyLeaderboardPercentileRewards` TEXT NOT NULL, `SeasonalLeaderboardRankedRewards` TEXT NOT NULL , `SeasonalLeaderboardPercentileRewards` TEXT NOT NULL);", Conn).ExecuteScalarAsync();
-                await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{QuestsTableName}` ( `QuestID` INT UNSIGNED NOT NULL AUTO_INCREMENT , QuestType ENUM('Kill', 'Death', 'Win', 'MultiKill', 'Killstreak', 'ShotsFired', 'ShotsHit', 'Headshots', 'GadgetsUsed', 'TimePlayed') NOT NULL , `QuestConditions` TEXT NOT NULL , `TargetAmount` INT UNSIGNED NOT NULL , `XP` INT UNSIGNED NOT NULL , PRIMARY KEY (`QuestID`));", Conn).ExecuteScalarAsync();
+                await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{QuestsTableName}` ( `QuestID` INT UNSIGNED NOT NULL AUTO_INCREMENT , `QuestDesc` TEXT NOT NULL , QuestType ENUM('Kill', 'Death', 'Win', 'MultiKill', 'Killstreak', 'Headshots', 'GadgetsUsed', 'TimePlayed') NOT NULL , `QuestConditions` TEXT NOT NULL , `TargetAmount` INT UNSIGNED NOT NULL , `XP` INT UNSIGNED NOT NULL , PRIMARY KEY (`QuestID`));", Conn).ExecuteScalarAsync();
                 
                 // PLAYERS DATA
                 await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PlayersTableName}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `SteamName` TEXT NOT NULL , `AvatarLink` VARCHAR(200) NOT NULL , `XP` INT UNSIGNED NOT NULL DEFAULT '0' , `Level` INT UNSIGNED NOT NULL DEFAULT '1' , `Credits` INT UNSIGNED NOT NULL DEFAULT '0' , `Scrap` INT UNSIGNED NOT NULL DEFAULT '0' , `Coins` INT UNSIGNED NOT NULL DEFAULT '0' , `Kills` INT UNSIGNED NOT NULL DEFAULT '0' , `HeadshotKills` INT UNSIGNED NOT NULL DEFAULT '0' , `HighestKillstreak` INT UNSIGNED NOT NULL DEFAULT '0' , `HighestMultiKills` INT UNSIGNED NOT NULL DEFAULT '0' , `KillsConfirmed` INT UNSIGNED NOT NULL DEFAULT '0' , `KillsDenied` INT UNSIGNED NOT NULL DEFAULT '0' , `FlagsCaptured` INT UNSIGNED NOT NULL DEFAULT '0' , `FlagsSaved` INT UNSIGNED NOT NULL DEFAULT '0' , `AreasTaken` INT UNSIGNED NOT NULL DEFAULT '0' , `Deaths` INT UNSIGNED NOT NULL DEFAULT '0' , `Music` BOOLEAN NOT NULL DEFAULT TRUE , `IsMuted` BOOLEAN NOT NULL DEFAULT FALSE , `MuteExpiry` BIGINT NOT NULL , PRIMARY KEY (`SteamID`));", Conn).ExecuteScalarAsync();
@@ -206,7 +210,7 @@ namespace UnturnedBlackout.Managers
                 await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PlayersCardsTableName}` (`SteamID` BIGINT UNSIGNED NOT NULL , `CardID` INT UNSIGNED NOT NULL , `IsBought` BOOLEAN NOT NULL , CONSTRAINT `ub_steam_id_7` FOREIGN KEY (`SteamID`) REFERENCES `{PlayersTableName}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_card_id` FOREIGN KEY (`CardID`) REFERENCES `{CardsTableName}` (`CardID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `CardID`));", Conn).ExecuteScalarAsync();
                 await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PlayersGlovesTableName}` (`SteamID` BIGINT UNSIGNED NOT NULL , `GloveID` SMALLINT UNSIGNED NOT NULL , `IsBought` BOOLEAN NOT NULl , CONSTRAINT `ub_steam_id_8` FOREIGN KEY (`SteamID`) REFERENCES `{PlayersTableName}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_glove_id` FOREIGN KEY (`GloveID`) REFERENCES `{GlovesTableName}` (`GloveID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `GloveID`));", Conn).ExecuteScalarAsync();
                 await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PlayersLoadoutsTableName}` (`SteamID` BIGINT UNSIGNED NOT NULL , `LoadoutID` INT UNSIGNED NOT NULL , `IsActive` BOOLEAN NOT NULL , `Loadout` TEXT NOT NULL , CONSTRAINT `ub_steam_id_9` FOREIGN KEY (`SteamID`) REFERENCES `{PlayersTableName}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID`, `LoadoutID`));", Conn).ExecuteScalarAsync();
-                await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PlayersQuestsTableName}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `QuestID` INT UNSIGNED NOT NULL , `Amount` INT UNSIGNED NOT NULL , `QuestEndDate` BIGINT NOT NULL , CONSTRAINT `ub_steam_id_14` FOREIGN KEY (`SteamID`) REFERENCES `{PlayersTableName}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_quest_id` FOREIGN KEY (`QuestID`) REFERENCES `{QuestsTableName}` (`QuestID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `QuestID`));", Conn).ExecuteScalarAsync();
+                await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PlayersQuestsTableName}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `QuestID` INT UNSIGNED NOT NULL , `Amount` INT UNSIGNED NOT NULL , `QuestEnd` BIGINT NOT NULL , CONSTRAINT `ub_steam_id_14` FOREIGN KEY (`SteamID`) REFERENCES `{PlayersTableName}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_quest_id` FOREIGN KEY (`QuestID`) REFERENCES `{QuestsTableName}` (`QuestID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `QuestID`));", Conn).ExecuteScalarAsync();
 
             }
             catch (Exception ex)
@@ -219,7 +223,7 @@ namespace UnturnedBlackout.Managers
                 await Conn.CloseAsync();
             }
         }
-
+        
         public async Task GetBaseDataAsync()
         {
             using MySqlConnection Conn = new(ConnectionString);
@@ -1041,6 +1045,66 @@ namespace UnturnedBlackout.Managers
                     rdr.Close();
                 }
 
+                Logging.Debug("Reading quests from base data");
+                rdr = (MySqlDataReader)await new MySqlCommand($"SELECT `QuestID`, `QuestDesc`, `QuestType`-1, `QuestConditions`, `TargetAmount`, `XP` FROM `{QuestsTableName}`;", Conn).ExecuteReaderAsync();
+                try
+                {
+                    var questsSearchByID = new Dictionary<int, Quest>();
+                    var quests = new List<Quest>();
+                    
+                    while (await rdr.ReadAsync())
+                    {
+                        if (!int.TryParse(rdr[0].ToString(), out int questID))
+                        {
+                            continue;
+                        }
+
+                        // Get quest desc
+                        var questDesc = rdr[1].ToString();
+                        
+                        if (!int.TryParse(rdr[2].ToString(), out int questTypeInt))
+                        {
+                            continue;
+                        }
+
+                        var questType = (EQuestType)questTypeInt;
+                        var questConditions = rdr[3].ToString();
+                        var conditions = Utility.GetQuestConditionsFromString(questConditions);
+                        
+                        if (!int.TryParse(rdr[4].ToString(), out int targetAmount))
+                        {
+                            continue;
+                        }
+                        
+                        if (!int.TryParse(rdr[5].ToString(), out int xp))
+                        {
+                            continue;
+                        }
+
+                        var quest = new Quest(questID, questDesc, questType, conditions, targetAmount, xp);
+                        if (!questsSearchByID.ContainsKey(questID))
+                        {
+                            questsSearchByID.Add(questID, quest);
+                            quests.Add(quest);
+                        }
+                        else
+                        {
+                            Logging.Debug($"Found a duplicate quest with id {questID}, ignoring this");
+                        }
+                    }
+                    QuestsSearchByID = questsSearchByID;
+                    Quests = quests;
+                    
+                    Logging.Debug($"Successfully read {quests.Count} quests from the table");
+                } catch (Exception ex)
+                {
+                    Logger.Log("Error reading data from quests table");
+                    Logger.Log(ex);
+                } finally
+                {
+                    rdr.Close();
+                }
+
                 Logging.Debug("Building a default loadout for new players");
                 try
                 {
@@ -1150,7 +1214,7 @@ namespace UnturnedBlackout.Managers
                 await new MySqlCommand($"INSERT IGNORE INTO `{PlayersLeaderboardDailyTableName}` ( `SteamID` ) VALUES ({player.CSteamID});", Conn).ExecuteScalarAsync();
                 await new MySqlCommand($"INSERT IGNORE INTO `{PlayersLeaderboardWeeklyTableName}` ( `SteamID` ) VALUES ({player.CSteamID});", Conn).ExecuteScalarAsync();
                 await new MySqlCommand($"INSERT IGNORE INTO `{PlayersLeaderboardSeasonalTableName}` ( `SteamID` ) VALUES ({player.CSteamID});", Conn).ExecuteScalarAsync();
-
+                
                 Logging.Debug($"Giving {steamName} the guns");
                 foreach (var gun in Guns.Values)
                 {
@@ -1380,8 +1444,8 @@ namespace UnturnedBlackout.Managers
                         {
                             PlayerData.Remove(player.CSteamID);
                         }
-
-                        PlayerData.Add(player.CSteamID, new PlayerData(player.CSteamID, steamName, avatarLink, xp, level, credits, scrap, coins, kills, headshotKills, highestKillstreak, highestMultiKills, killsConfirmed, killsDenied, flagsCaptured, flagsSaved, areasTaken, deaths, music, isMuted, muteExpiry));
+                        
+                        PlayerData.Add(player.CSteamID, new PlayerData(player.CSteamID, steamName, avatarLink, xp, level, credits, scrap, coins, kills, headshotKills, highestKillstreak, highestMultiKills, killsConfirmed, killsDenied, flagsCaptured, flagsSaved, areasTaken, deaths, music, isMuted, muteExpiry, new List<PlayerQuest>(), new Dictionary<EQuestType, List<PlayerQuest>>()));
                     }
                 }
                 catch (Exception ex)
@@ -1394,6 +1458,148 @@ namespace UnturnedBlackout.Managers
                     rdr.Close();
                 }
 
+                Logging.Debug($"Getting leaderboard daily data for {player.CharacterName} from the daily table");
+                rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PlayersLeaderboardDailyTableName}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
+                try
+                {
+                    while (await rdr.ReadAsync())
+                    {
+                        if (!PlayerData.TryGetValue(player.CSteamID, out PlayerData data))
+                        {
+                            continue;
+                        }
+
+                        if (!uint.TryParse(rdr[1].ToString(), out uint kills))
+                        {
+                            continue;
+                        }
+
+                        if (!uint.TryParse(rdr[2].ToString(), out uint headshotKills))
+                        {
+                            continue;
+                        }
+
+                        if (!uint.TryParse(rdr[3].ToString(), out uint deaths))
+                        {
+                            continue;
+                        }
+
+                        var leaderboardData = new LeaderboardData(player.CSteamID, data.SteamName, data.Level, kills, headshotKills, deaths);
+                        if (!PlayerDailyLeaderboardLookup.ContainsKey(player.CSteamID))
+                        {
+                            PlayerDailyLeaderboardLookup.Add(player.CSteamID, leaderboardData);
+                            PlayerDailyLeaderboard.Add(leaderboardData);
+                        }
+                    }
+                } catch (Exception ex)
+                {
+                    Logging.Debug($"Error reading player daily data for {player.CharacterName}");
+                    Logger.Log(ex);
+                } finally
+                {
+                    rdr.Close();
+                }
+
+                Logging.Debug($"Getting leaderboard weekly data for {player.CharacterName} from the weekly table");
+                rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PlayersLeaderboardWeeklyTableName}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
+                try
+                {
+                    while (await rdr.ReadAsync())
+                    {
+                        if (!PlayerData.TryGetValue(player.CSteamID, out PlayerData data))
+                        {
+                            continue;
+                        }
+
+                        if (!uint.TryParse(rdr[1].ToString(), out uint kills))
+                        {
+                            continue;
+                        }
+
+                        if (!uint.TryParse(rdr[2].ToString(), out uint headshotKills))
+                        {
+                            continue;
+                        }
+
+                        if (!uint.TryParse(rdr[3].ToString(), out uint deaths))
+                        {
+                            continue;
+                        }
+
+                        var leaderboardData = new LeaderboardData(player.CSteamID, data.SteamName, data.Level, kills, headshotKills, deaths);
+                        if (!PlayerWeeklyLeaderboardLookup.ContainsKey(player.CSteamID))
+                        {
+                            PlayerWeeklyLeaderboardLookup.Add(player.CSteamID, leaderboardData);
+                            PlayerWeeklyLeaderboard.Add(leaderboardData);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logging.Debug($"Error reading player weekly data for {player.CharacterName}");
+                    Logger.Log(ex);
+                }
+                finally
+                {
+                    rdr.Close();
+                }
+
+                Logging.Debug($"Getting leaderboard seasonal data for {player.CharacterName} from the seasonal table");
+                rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PlayersLeaderboardSeasonalTableName}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
+                try
+                {
+                    while (await rdr.ReadAsync())
+                    {
+                        if (!PlayerData.TryGetValue(player.CSteamID, out PlayerData data))
+                        {
+                            continue;
+                        }
+
+                        if (!uint.TryParse(rdr[1].ToString(), out uint kills))
+                        {
+                            continue;
+                        }
+
+                        if (!uint.TryParse(rdr[2].ToString(), out uint headshotKills))
+                        {
+                            continue;
+                        }
+
+                        if (!uint.TryParse(rdr[3].ToString(), out uint deaths))
+                        {
+                            continue;
+                        }
+
+                        var leaderboardData = new LeaderboardData(player.CSteamID, data.SteamName, data.Level, kills, headshotKills, deaths);
+                        if (!PlayerSeasonalLeaderboardLookup.ContainsKey(player.CSteamID))
+                        {
+                            PlayerSeasonalLeaderboardLookup.Add(player.CSteamID, leaderboardData);
+                            PlayerSeasonalLeaderboard.Add(leaderboardData);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logging.Debug($"Error reading player seasonal data for {player.CharacterName}");
+                    Logger.Log(ex);
+                }
+                finally
+                {
+                    rdr.Close();
+                }
+
+                Logging.Debug($"Getting all time data for {player.CharacterName} from the all time table");
+                if (PlayerData.TryGetValue(player.CSteamID, out PlayerData playerData))
+                {
+                    var leaderboardData = new LeaderboardData(player.CSteamID, playerData.SteamName, playerData.Level, playerData.Kills, playerData.HeadshotKills, playerData.Deaths);
+                    if (!PlayerAllTimeLeaderboardLookup.ContainsKey(player.CSteamID))
+                    {
+                        PlayerAllTimeLeaderboardLookup.Add(player.CSteamID, leaderboardData);
+                        PlayerAllTimeKill.Add(leaderboardData);
+                        PlayerAllTimeLevel.Add(leaderboardData);
+                    }
+                }
+                
                 if (!PlayerData.ContainsKey(player.CSteamID))
                 {
                     Logging.Debug("Error finding player data, returning");
@@ -1837,6 +2043,57 @@ namespace UnturnedBlackout.Managers
                     rdr.Close();
                 }
 
+                Logging.Debug($"Getting quests for {player.CharacterName}");
+                rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PlayersQuestsTableName}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
+                try
+                {
+                    var playerQuests = new List<PlayerQuest>();
+                    var playerQuestsSearchByType = new Dictionary<EQuestType, List<PlayerQuest>>();
+                    
+                    while (await rdr.ReadAsync())
+                    {
+                        if (!int.TryParse(rdr[1].ToString(), out int questID))
+                        {
+                            continue;
+                        }
+
+                        if (!QuestsSearchByID.TryGetValue(questID, out Quest quest))
+                        {
+                            Logging.Debug($"Error finding quest with id {questID} for {player.CharacterName}, ignoring it");
+                            continue;
+                        }
+
+                        if (!int.TryParse(rdr[2].ToString(), out int amount))
+                        {
+                            continue;
+                        }
+
+                        if (!long.TryParse(rdr[3].ToString(), out long questEndDate))
+                        {
+                            continue;
+                        }
+
+                        var questEndDateTime = DateTimeOffset.FromUnixTimeSeconds(questEndDate);
+
+                        var playerQuest = new PlayerQuest(player.CSteamID, quest, amount, questEndDateTime);
+                        playerQuests.Add(playerQuest);
+                        if (!playerQuestsSearchByType.ContainsKey(quest.QuestType))
+                        {
+                            playerQuestsSearchByType.Add(quest.QuestType, new List<PlayerQuest>());
+                        }
+                        playerQuestsSearchByType[quest.QuestType].Add(playerQuest);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log($"Error reading quests data for {player.CharacterName}");
+                    Logger.Log(ex);
+                }
+                finally
+                {
+                    rdr.Close();
+                }
+                
                 Logging.Debug($"Getting loadouts for {player.CharacterName}");
                 rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PlayersLoadoutsTableName}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
                 try

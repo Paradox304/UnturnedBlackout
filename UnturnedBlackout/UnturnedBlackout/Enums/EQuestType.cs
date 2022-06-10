@@ -8,15 +8,13 @@ namespace UnturnedBlackout.Enums
 {
     public enum EQuestType
     {
-        Kill,
-        Death,
-        Win,
-        MultiKill,
-        Killstreak,
-        ShotsFired,
-        ShotsHit,
-        Headshots,
-        GadgetsUsed,
-        TimePlayed
+        Kill, // Kill a certain amount of players
+        Death, // Die a certain amount of times
+        Win, // Win a certain amount of games
+        MultiKill, // Kill a certain amount of players in a row
+        Killstreak, // Kill a certain amount of players before dying
+        Headshots, // Hit a player on the skull
+        GadgetsUsed, // Use a certain amount of gadgets
+        TimePlayed // Play for a certain amount of time
     }
 }

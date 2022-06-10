@@ -322,6 +322,49 @@ namespace UnturnedBlackout
             return percentileRewards;
         }
 
+        public static Dictionary<EQuestCondition, List<int>> GetQuestConditionsFromString(string text)
+        {
+            Logging.Debug("Getting quest conditions from string");
+            var questConditions = new Dictionary<EQuestCondition, List<int>>();
+
+            var letterRegex = new Regex("([a-zA-Z]*)");
+            var numberRegex = new Regex(@"(\d+)");
+
+            foreach (var conditionTxt in text.Split(','))
+            {
+                Logging.Debug($"Getting condition with text {conditionTxt}");
+                if (!letterRegex.IsMatch(conditionTxt) || !numberRegex.IsMatch(conditionTxt))
+                {
+                    Logging.Debug($"There isn't a text or number in the condition text");
+                    continue;
+                }
+
+                var letterRegexMatch = letterRegex.Match(conditionTxt).Value;
+                if (!Enum.TryParse(letterRegexMatch, true, out EQuestCondition condition))
+                {
+                    Logging.Debug($"Cant find condition type with the match {letterRegexMatch}");
+                    continue;
+                }
+
+                var numberRegexMatch = numberRegex.Match(conditionTxt).Value;
+                if (!int.TryParse(numberRegexMatch, out int conditionValue))
+                {
+                    Logging.Debug($"Cant find condition value with the match {numberRegexMatch}");
+                    continue;
+                }
+
+                Logging.Debug($"Found condition with type {condition} and value {conditionValue}");
+                if (!questConditions.ContainsKey(condition))
+                {
+                    questConditions.Add(condition, new List<int>());
+                }
+
+                questConditions[condition].Add(conditionValue);
+            }
+
+            return questConditions;
+        }
+        
         public static int GetLoadoutAmount(UnturnedPlayer player)
         {
             var amount = Plugin.Instance.Configuration.Instance.DefaultLoadoutAmount;
