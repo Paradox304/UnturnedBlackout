@@ -4852,7 +4852,8 @@ namespace UnturnedBlackout.Instances
             {
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Leaderboards BUTTON {i}", false);
             }
-            
+
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Leaderboards Level BUTTON", LeaderboardPage == ELeaderboardPage.All);
             if (data.Count == 0)
             {
                 return;
@@ -4938,6 +4939,46 @@ namespace UnturnedBlackout.Instances
             }
 
             ShowLeaderboardPage(LeaderboardPageID - 1);
+        }
+        
+        public void SearchLeaderboardPlayer(string input)
+        {
+            var data = GetLeaderboardData();
+            
+            for (int i = 0; i <= 9; i++)
+            {
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Leaderboards BUTTON {i}", false);
+            }
+            
+            ThreadPool.QueueUserWorkItem((o) =>
+            {
+                var searchPlayers = data.OrderByDescending(k => Utility.CalculateSimilarityBetweenStrings(input, k.SteamName)).Take(10).ToList();
+                TaskDispatcher.QueueOnMainThread(() =>
+                {
+                    for (int i = 0; i <= 9; i++)
+                    {
+                        if (searchPlayers.Count < (i + 1))
+                        {
+                            break;
+                        }
+                        
+                        var playerData = searchPlayers[i];
+                        var kills = (decimal)(playerData.Kills + playerData.HeadshotKills);
+                        var deaths = (decimal)playerData.Deaths;
+
+                        var ratio = playerData.Deaths == 0 ? String.Format("{0:n}", kills) : String.Format("{0:n}", Math.Round(kills / deaths, 2));
+
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Leaderboards BUTTON {i}", true);
+                        EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Leaderboards Rank TEXT {i}", (data.IndexOf(playerData) + 1).ToString());
+                        EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Leaderboards Level TEXT {i}", playerData.Level.ToString());
+                        EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Leaderboards Level IMAGE {i}", Plugin.Instance.DBManager.Levels.TryGetValue((int)playerData.Level, out XPLevel level) ? level.IconLinkMedium : "");
+                        EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Leaderboards Name TEXT {i}", playerData.SteamName);
+                        EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Leaderboards Kills TEXT {i}", (playerData.Kills + playerData.HeadshotKills).ToString());
+                        EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Leaderboards Deaths TEXT {i}", playerData.Deaths.ToString());
+                        EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Leaderboards KDR TEXT {i}", ratio.ToString());
+                    }
+                });
+            });
         }
         
         public List<LeaderboardData> GetLeaderboardData() =>

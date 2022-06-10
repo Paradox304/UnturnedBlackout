@@ -4194,7 +4194,7 @@ namespace UnturnedBlackout.Managers
                     }
 
                     // Change the wipe date
-                    var newWipeDate = DateTimeOffset.UtcNow.AddDays(1);
+                    var newWipeDate = DateTimeOffset.UtcNow.AddDays(7);
                     new MySqlCommand($"UPDATE `{OptionsTableName}` SET `WeeklyLeaderboardWipe` = {newWipeDate.ToUnixTimeSeconds()};", Conn).ExecuteScalar();
                     ServerOptions.WeeklyLeaderboardWipe = newWipeDate;
                 }

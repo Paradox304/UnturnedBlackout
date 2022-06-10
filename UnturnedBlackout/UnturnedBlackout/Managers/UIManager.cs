@@ -1225,7 +1225,7 @@ namespace UnturnedBlackout.Managers
                 case "SERVER Leaderboards Daily BUTTON":
                     handler.SelectLeaderboardPage(ELeaderboardPage.Daily);
                     return;
-                case "SERVER Leaderboards Season BUTTON":
+                case "SERVER Leaderboards Seasonal BUTTON":
                     handler.SelectLeaderboardPage(ELeaderboardPage.Seasonal);
                     return;
                 case "SERVER Leaderboards Kill BUTTON":
@@ -1303,6 +1303,9 @@ namespace UnturnedBlackout.Managers
             {
                 case "SERVER Loadout Rename INPUTFIELD":
                     handler.SendLoadoutName(text);
+                    return;
+                case "SERVER Leaderboards Search INPUTFIELD":
+                    handler.SearchLeaderboardPlayer(text);
                     return;
             }
         }
