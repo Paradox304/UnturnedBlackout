@@ -14,7 +14,6 @@ namespace UnturnedBlackout.Enums
         MultiKill, // Kill a certain amount of players in a row
         Killstreak, // Kill a certain amount of players before dying
         Headshots, // Hit a player on the skull
-        GadgetsUsed, // Use a certain amount of gadgets
-        TimePlayed // Play for a certain amount of time
+        GadgetsUsed // Use a certain amount of gadgets
     }
 }

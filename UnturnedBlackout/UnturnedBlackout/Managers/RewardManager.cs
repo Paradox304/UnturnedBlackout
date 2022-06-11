@@ -11,9 +11,9 @@ namespace UnturnedBlackout.Managers
     {
         public RewardManager()
         {
-
+            
         }
-
+        
         public void GiveReward(CSteamID steamID, List<Reward> rewards)
         {
             var db = Plugin.Instance.DBManager;

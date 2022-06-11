@@ -193,7 +193,7 @@ namespace UnturnedBlackout.Managers
                 await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{GlovesTableName}` ( `GloveID` SMALLINT UNSIGNED NOT NULL , `GloveName` VARCHAR(255) NOT NULL , `GloveDesc` TEXT NOT NULL , `GloveRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `IconLink` TEXT NOT NULL , `ScrapAmount` INT UNSIGNED NOT NULL , `BuyPrice` INT UNSIGNED NOT NULL , `Coins` INT UNSIGNED NOT NULL , `LevelRequirement` INT NOT NULL , PRIMARY KEY (`GloveID`));", Conn).ExecuteScalarAsync();
                 await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{LevelsTableName}` ( `Level` INT UNSIGNED NOT NULL , `XPNeeded` INT UNSIGNED NOT NULL , `IconLinkLarge` TEXT NOT NULL , `IconLinkMedium` TEXT NOT NULL , `IconLinkSmall` TEXT NOT NULL , PRIMARY KEY (`Level`));", Conn).ExecuteScalarAsync();
                 await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{OptionsTableName}` ( `DailyLeaderboardWipe` BIGINT NOT NULL , `WeeklyLeaderboardWipe` BIGINT NOT NULL , `DailyLeaderboardRankedRewards` TEXT NOT NULL , `DailyLeaderboardPercentileRewards` TEXT NOT NULL , `WeeklyLeaderboardRankedRewards` TEXT NOT NULL , `WeeklyLeaderboardPercentileRewards` TEXT NOT NULL, `SeasonalLeaderboardRankedRewards` TEXT NOT NULL , `SeasonalLeaderboardPercentileRewards` TEXT NOT NULL);", Conn).ExecuteScalarAsync();
-                await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{QuestsTableName}` ( `QuestID` INT UNSIGNED NOT NULL AUTO_INCREMENT , `QuestDesc` TEXT NOT NULL , QuestType ENUM('Kill', 'Death', 'Win', 'MultiKill', 'Killstreak', 'Headshots', 'GadgetsUsed', 'TimePlayed') NOT NULL , `QuestConditions` TEXT NOT NULL , `TargetAmount` INT UNSIGNED NOT NULL , `XP` INT UNSIGNED NOT NULL , PRIMARY KEY (`QuestID`));", Conn).ExecuteScalarAsync();
+                await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{QuestsTableName}` ( `QuestID` INT UNSIGNED NOT NULL AUTO_INCREMENT , `QuestDesc` TEXT NOT NULL , QuestType ENUM('Kill', 'Death', 'Win', 'MultiKill', 'Killstreak', 'Headshots', 'GadgetsUsed') NOT NULL , `QuestConditions` TEXT NOT NULL , `TargetAmount` INT UNSIGNED NOT NULL , `XP` INT UNSIGNED NOT NULL , PRIMARY KEY (`QuestID`));", Conn).ExecuteScalarAsync();
                 
                 // PLAYERS DATA
                 await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PlayersTableName}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `SteamName` TEXT NOT NULL , `AvatarLink` VARCHAR(200) NOT NULL , `XP` INT UNSIGNED NOT NULL DEFAULT '0' , `Level` INT UNSIGNED NOT NULL DEFAULT '1' , `Credits` INT UNSIGNED NOT NULL DEFAULT '0' , `Scrap` INT UNSIGNED NOT NULL DEFAULT '0' , `Coins` INT UNSIGNED NOT NULL DEFAULT '0' , `Kills` INT UNSIGNED NOT NULL DEFAULT '0' , `HeadshotKills` INT UNSIGNED NOT NULL DEFAULT '0' , `HighestKillstreak` INT UNSIGNED NOT NULL DEFAULT '0' , `HighestMultiKills` INT UNSIGNED NOT NULL DEFAULT '0' , `KillsConfirmed` INT UNSIGNED NOT NULL DEFAULT '0' , `KillsDenied` INT UNSIGNED NOT NULL DEFAULT '0' , `FlagsCaptured` INT UNSIGNED NOT NULL DEFAULT '0' , `FlagsSaved` INT UNSIGNED NOT NULL DEFAULT '0' , `AreasTaken` INT UNSIGNED NOT NULL DEFAULT '0' , `Deaths` INT UNSIGNED NOT NULL DEFAULT '0' , `Music` BOOLEAN NOT NULL DEFAULT TRUE , `IsMuted` BOOLEAN NOT NULL DEFAULT FALSE , `MuteExpiry` BIGINT NOT NULL , PRIMARY KEY (`SteamID`));", Conn).ExecuteScalarAsync();
@@ -2084,6 +2084,7 @@ namespace UnturnedBlackout.Managers
                         playerQuestsSearchByType[quest.QuestType].Add(playerQuest);
                     }
                     Logging.Debug($"Got {playerQuestsSearchByType.Count} quests registered to player");
+
                     if (playerQuests.Count == 0 || playerQuests[0].QuestEnd.UtcDateTime < DateTime.UtcNow)
                     {
                         Logging.Debug("Quests have expired, generate different quests");
@@ -2106,7 +2107,6 @@ namespace UnturnedBlackout.Managers
                             }
                             playerQuestsSearchByType[quest.QuestType].Add(playerQuest);
                             //randomQuests.Remove(quest);
-
                             await new MySqlCommand($"INSERT INTO `{PlayersQuestsTableName}` (`SteamID` , `QuestID`, `Amount`, `QuestEnd`) VALUES ({player.CSteamID}, {quest.QuestID}, 0, {expiryDate.ToUnixTimeSeconds()}", Conn).ExecuteScalarAsync();
                         }
                     }
@@ -3981,6 +3981,7 @@ namespace UnturnedBlackout.Managers
         }
 
         // Mute
+
         private void CheckMutedPlayers(object sender, System.Timers.ElapsedEventArgs e)
         {
             try
@@ -4025,6 +4026,7 @@ namespace UnturnedBlackout.Managers
         }
 
         // Leaderboard
+
         private void RefreshLeaderboardData(object sender, System.Timers.ElapsedEventArgs e)
         {
             using MySqlConnection Conn = new(ConnectionString);
@@ -4584,6 +4586,44 @@ namespace UnturnedBlackout.Managers
             finally
             {
                 Conn.Close();
+            }
+        }
+
+        // Updating quest amount
+
+        public async Task IncreasePlayerQuestAmountAsync(CSteamID steamID, int questID, int amount)
+        {
+            using MySqlConnection Conn = new(ConnectionString);
+            try
+            {
+                await Conn.OpenAsync();
+                await new MySqlCommand($"UPDATE `{PlayersQuestsTableName}` SET `Amount` = `Amount` + {amount} WHERE `SteamID` = {steamID} AND `QuestID` = {questID};", Conn).ExecuteScalarAsync();
+                var obj = await new MySqlCommand($"SELECT `Amount` FROM `{PlayersQuestsTableName}` WHERE `SteamID` = {steamID} AND `QuestID` = {questID};", Conn).ExecuteScalarAsync();
+
+                if (obj is uint newAmount)
+                {
+                    if (!PlayerData.TryGetValue(steamID, out PlayerData data))
+                    {
+                        Logger.Log($"Error finding player data for player with steam id {steamID}");
+                        return;
+                    }
+
+                    var quest = data.Quests.FirstOrDefault(k => k.Quest.QuestID == questID);
+                    if (quest == null)
+                    {
+                        Logger.Log($"Error finding quest with id {questID} for player with steam id {steamID}");
+                        return;
+                    }
+
+                    quest.Amount = Convert.ToInt32(newAmount);
+                }
+            } catch (Exception ex)
+            {
+                Logger.Log($"Error updating player quest amount of {steamID} for quest {questID} by amount {amount}");
+                Logger.Log(ex);
+            } finally
+            {
+                await Conn.CloseAsync();
             }
         }
     }
