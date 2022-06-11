@@ -304,6 +304,12 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
+            if (GamePhase != EGamePhase.Started)
+            {
+                vPlayer.GamePlayer.OnDeath(CSteamID.Nil, 0);
+                return;
+            }
+            
             if (vPlayer.GamePlayer.HasScoreboard)
             {
                 vPlayer.GamePlayer.HasScoreboard = false;
@@ -317,11 +323,12 @@ namespace UnturnedBlackout.GameTypes
             vPlayer.OnDeath(updatedKiller);
             vPlayer.GamePlayer.OnDeath(updatedKiller, Config.KC.RespawnSeconds);
             vPlayer.Team.OnDeath(vPlayer.GamePlayer.SteamID);
-            ItemManager.dropItem(new Item(vPlayer.Team.DogTagID, true), vPlayer.GamePlayer.Player.Player.transform.position, true, true, true);
             ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DBManager.IncreasePlayerDeathsAsync(vPlayer.GamePlayer.SteamID, 1));
 
             TaskDispatcher.QueueOnMainThread(() =>
             {
+                ItemManager.dropItem(new Item(vPlayer.Team.DogTagID, true), vPlayer.GamePlayer.Player.Player.transform.position, true, true, true);
+                
                 var kPlayer = GetKCPlayer(updatedKiller);
                 if (kPlayer == null)
                 {
@@ -370,6 +377,7 @@ namespace UnturnedBlackout.GameTypes
                         xpGained += Config.KC.XPPerMeleeKill;
                         xpText += Plugin.Instance.Translate("Melee_Kill").ToRich();
                         equipmentUsed = kPlayer.GamePlayer.ActiveLoadout.Knife?.Knife?.KnifeID ?? 0;
+                        Logging.Debug($"Player died through melee, setting equipment to {equipmentUsed}");
                         break;
                     case EDeathCause.GUN:
                         if (limb == ELimb.SKULL)
@@ -382,7 +390,18 @@ namespace UnturnedBlackout.GameTypes
                             xpGained += Config.KC.XPPerKill;
                             xpText += Plugin.Instance.Translate("Normal_Kill").ToRich();
                         }
-                        equipmentUsed = kPlayer.GamePlayer.Player.Player.equipment.itemID;
+                        var equipment = kPlayer.GamePlayer.Player.Player.equipment.itemID;
+                        if (equipment == (kPlayer.GamePlayer.ActiveLoadout.PrimarySkin?.SkinID ?? 0))
+                        {
+                            equipmentUsed = kPlayer.GamePlayer.ActiveLoadout.Primary.Gun.GunID;
+                        } else if (equipment == (kPlayer.GamePlayer.ActiveLoadout.SecondarySkin?.SkinID ?? 0))
+                        {
+                            equipmentUsed = kPlayer.GamePlayer.ActiveLoadout.Secondary.Gun.GunID;
+                        } else
+                        {
+                            equipmentUsed = equipment;
+                        }
+                        Logging.Debug($"Player died through gun, setting equipment to {equipmentUsed}");
                         break;
                     case EDeathCause.CHARGE:
                     case EDeathCause.GRENADE:
@@ -391,8 +410,10 @@ namespace UnturnedBlackout.GameTypes
                         xpGained += Config.KC.XPPerLethalKill;
                         xpText += Plugin.Instance.Translate("Lethal_Kill").ToRich();
                         equipmentUsed = kPlayer.GamePlayer.ActiveLoadout.Lethal?.Gadget?.GadgetID ?? 0;
+                        Logging.Debug($"Player died through lethal, setting equipment to {equipmentUsed}");
                         break;
                     default:
+                        Logging.Debug($"Player died through {cause}, equipment remained at 0");
                         break;
                 }
                 xpText += "\n";
@@ -445,6 +466,7 @@ namespace UnturnedBlackout.GameTypes
 
                 if (equipmentUsed != 0)
                 {
+                    Logging.Debug($"Sending killfeed with equipment {equipmentUsed}");
                     OnKill(kPlayer.GamePlayer, vPlayer.GamePlayer, equipmentUsed, kPlayer.Team.Info.KillFeedHexCode, vPlayer.Team.Info.KillFeedHexCode);
                 }
 

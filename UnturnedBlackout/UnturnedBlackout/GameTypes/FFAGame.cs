@@ -321,6 +321,7 @@ namespace UnturnedBlackout.GameTypes
                         xpGained += Config.FFA.XPPerMeleeKill;
                         xpText += Plugin.Instance.Translate("Melee_Kill").ToRich();
                         equipmentUsed = kPlayer.GamePlayer.ActiveLoadout.Knife?.Knife?.KnifeID ?? 0;
+                        Logging.Debug($"Player died through melee, setting equipment to {equipmentUsed}");
                         break;
                     case EDeathCause.GUN:
                         if (limb == ELimb.SKULL)
@@ -333,7 +334,20 @@ namespace UnturnedBlackout.GameTypes
                             xpGained += Config.FFA.XPPerKill;
                             xpText += Plugin.Instance.Translate("Normal_Kill").ToRich();
                         }
-                        equipmentUsed = kPlayer.GamePlayer.Player.Player.equipment.itemID;
+                        var equipment = kPlayer.GamePlayer.Player.Player.equipment.itemID;
+                        if (equipment == (kPlayer.GamePlayer.ActiveLoadout.PrimarySkin?.SkinID ?? 0))
+                        {
+                            equipmentUsed = kPlayer.GamePlayer.ActiveLoadout.Primary.Gun.GunID;
+                        }
+                        else if (equipment == (kPlayer.GamePlayer.ActiveLoadout.SecondarySkin?.SkinID ?? 0))
+                        {
+                            equipmentUsed = kPlayer.GamePlayer.ActiveLoadout.Secondary.Gun.GunID;
+                        }
+                        else
+                        {
+                            equipmentUsed = equipment;
+                        }
+                        Logging.Debug($"Player died through gun, setting equipment to {equipmentUsed}");
                         break;
                     case EDeathCause.CHARGE:
                     case EDeathCause.GRENADE:
@@ -342,8 +356,10 @@ namespace UnturnedBlackout.GameTypes
                         xpGained += Config.FFA.XPPerLethalKill;
                         xpText += Plugin.Instance.Translate("Lethal_Kill").ToRich();
                         equipmentUsed = kPlayer.GamePlayer.ActiveLoadout.Lethal?.Gadget?.GadgetID ?? 0;
+                        Logging.Debug($"Player died through lethal, setting equipment to {equipmentUsed}");
                         break;
                     default:
+                        Logging.Debug($"Player died through {cause}, setting equipment to 0");
                         break;
                 }
                 xpText += "\n";
@@ -396,6 +412,7 @@ namespace UnturnedBlackout.GameTypes
 
                 if (equipmentUsed != 0)
                 {
+                    Logging.Debug($"Sending killfeed with equipment {equipmentUsed}");
                     OnKill(kPlayer.GamePlayer, fPlayer.GamePlayer, equipmentUsed, Config.FFA.KillFeedHexCode, Config.FFA.KillFeedHexCode);
                 }
 

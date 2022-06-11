@@ -276,6 +276,7 @@ namespace UnturnedBlackout.Models.Global
                 TaskDispatcher.QueueOnMainThread(() => Player.Player.life.ServerRespawn(false));
                 return;
             }
+            
             if (m_DamageChecker.Enabled)
             {
                 m_DamageChecker.Stop();
@@ -285,7 +286,6 @@ namespace UnturnedBlackout.Models.Global
                 Plugin.Instance.StopCoroutine(Healer);
             }
             Plugin.Instance.UIManager.RemoveKillCard(this);
-            Plugin.Instance.UIManager.ClearMidgameLoadoutUI(this);
 
             var killerPlayer = Plugin.Instance.GameManager.GetGamePlayer(killer);
             if (killer == null)
