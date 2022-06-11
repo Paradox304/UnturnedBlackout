@@ -31,6 +31,7 @@ namespace UnturnedBlackout
 
         public int VoiceChatFont { get; set; }
 
+        public bool UnlockAllItems { get; set; }
         public bool EnableDebugLogs { get; set; }
 
         public Vector3 LobbySpawn { get; set; }
@@ -96,6 +97,7 @@ namespace UnturnedBlackout
 
             VoiceChatFont = 30;
 
+            UnlockAllItems = false;
             EnableDebugLogs = true;
 
             LobbySpawn = Vector3.zero;

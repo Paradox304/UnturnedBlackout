@@ -1207,7 +1207,7 @@ namespace UnturnedBlackout.Managers
             {
                 Logging.Debug($"Adding {steamName} to the DB");
                 await Conn.OpenAsync();
-                var cmd = new MySqlCommand($"INSERT INTO `{PlayersTableName}` ( `SteamID` , `SteamName` , `AvatarLink` , `MuteExpiry` ) VALUES ({player.CSteamID}, @name, '{avatarLink}' , {DateTimeOffset.UtcNow.ToUnixTimeSeconds()}) ON DUPLICATE KEY UPDATE `AvatarLink` = '{avatarLink}', `SteamName` = @name;", Conn);
+                var cmd = new MySqlCommand($"INSERT INTO `{PlayersTableName}` ( `SteamID` , `SteamName` , `AvatarLink` , `MuteExpiry`, `Coins` ) VALUES ({player.CSteamID}, @name, '{avatarLink}' , {DateTimeOffset.UtcNow.ToUnixTimeSeconds()} , {(Config.UnlockAllItems ? 10000000 : 0 )}) ON DUPLICATE KEY UPDATE `AvatarLink` = '{avatarLink}', `SteamName` = @name;", Conn);
                 cmd.Parameters.AddWithValue("@name", steamName.ToUnrich());
                 await cmd.ExecuteScalarAsync();
 
@@ -2085,6 +2085,7 @@ namespace UnturnedBlackout.Managers
                     }
                     Logging.Debug($"Got {playerQuestsSearchByType.Count} quests registered to player");
 
+                    rdr.Close();
                     if (playerQuests.Count == 0 || playerQuests[0].QuestEnd.UtcDateTime < DateTime.UtcNow)
                     {
                         Logging.Debug("Quests have expired, generate different quests");
@@ -2094,10 +2095,11 @@ namespace UnturnedBlackout.Managers
 
                         await new MySqlCommand($"DELETE FROM `{PlayersQuestsTableName}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteScalarAsync();
                         var randomQuests = Quests.ToList();
-
+                        
                         var expiryDate = DateTimeOffset.UtcNow.AddDays(1);
                         for (var i = 0; i < 5; i++)
                         {
+                            if (Quests.Count == 0) break;
                             var quest = randomQuests[UnityEngine.Random.Range(0, randomQuests.Count)];
                             var playerQuest = new PlayerQuest(player.CSteamID, quest, 0, expiryDate);
                             playerQuests.Add(playerQuest);
@@ -2420,6 +2422,7 @@ namespace UnturnedBlackout.Managers
 
         public async Task DecreasePlayerCreditsAsync(CSteamID steamID, uint credits)
         {
+            if (Config.UnlockAllItems) return;
             using MySqlConnection Conn = new(ConnectionString);
             try
             {
@@ -4589,7 +4592,7 @@ namespace UnturnedBlackout.Managers
             }
         }
 
-        // Updating quest amount
+        // Quest
 
         public async Task IncreasePlayerQuestAmountAsync(CSteamID steamID, int questID, int amount)
         {
