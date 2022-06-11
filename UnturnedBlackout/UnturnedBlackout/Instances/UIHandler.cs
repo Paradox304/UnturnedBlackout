@@ -4943,6 +4943,7 @@ namespace UnturnedBlackout.Instances
         
         public void SearchLeaderboardPlayer(string input)
         {
+            Logging.Debug($"Searching for player: {input}");
             var data = GetLeaderboardData();
             
             for (int i = 0; i <= 9; i++)
@@ -4952,16 +4953,12 @@ namespace UnturnedBlackout.Instances
             
             ThreadPool.QueueUserWorkItem((o) =>
             {
-                var searchPlayers = data.OrderByDescending(k => Utility.CalculateSimilarityBetweenStrings(input, k.SteamName)).Take(10).ToList();
+                var searchPlayers = data.Where(k => k.SteamName.Contains(input)).Take(10).ToList();
                 TaskDispatcher.QueueOnMainThread(() =>
                 {
-                    for (int i = 0; i <= 9; i++)
+                    var maxCount = Math.Min(10, searchPlayers.Count);
+                    for (int i = 0; i < maxCount; i++)
                     {
-                        if (searchPlayers.Count < (i + 1))
-                        {
-                            break;
-                        }
-                        
                         var playerData = searchPlayers[i];
                         var kills = (decimal)(playerData.Kills + playerData.HeadshotKills);
                         var deaths = (decimal)playerData.Deaths;

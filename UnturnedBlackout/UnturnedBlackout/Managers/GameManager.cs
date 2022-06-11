@@ -40,8 +40,7 @@ namespace UnturnedBlackout.Managers
 
         public void StartGames()
         {
-            //var gameModes = new List<byte> { (byte)EGameType.FFA, (byte)EGameType.CTF, (byte)EGameType.KC, (byte)EGameType.TDM };
-            var gameModes = new List<byte> { 0 };
+            var gameModes = new List<byte> { (byte)EGameType.FFA, (byte)EGameType.CTF, (byte)EGameType.KC, (byte)EGameType.TDM };
             
             for (int i = 1; i <= Config.GamesCount; i++)
             {

@@ -9,6 +9,7 @@ namespace UnturnedBlackout.Enums
     public enum EQuestCondition
     {
         Gun, // Gun you are using
+        GunType, // Gun type you are using
         Gadget, // Gadget you are using
         Knife, // Knife you are using
         Killstreak, // Killstreak you are using [TURRET/RPG/AGM/CHOPPER GUNNER ETC]

@@ -418,27 +418,6 @@ namespace UnturnedBlackout
                  _ => "",
              };
 
-
-        public static double CalculateSimilarityBetweenStrings(string str1, string str2)
-        {
-            var str1Array = str1.ToCharArray();
-            var str2Array = str2.ToCharArray();
-            var str1Length = str1Array.Length;
-            var str2Length = str2Array.Length;
-            var maxLength = Math.Max(str1Length, str2Length);
-            var minLength = Math.Min(str1Length, str2Length);
-            var similarity = 0.0;
-            for (var i = 0; i < minLength; i++)
-            {
-                if (str1Array[i] == str2Array[i])
-                {
-                    similarity++;
-                }
-            }
-            similarity /= maxLength;
-            return similarity;
-        }
-        
         public static string ToColor(this object value, bool isPlayer)
         {
             return isPlayer ? $"<color={Plugin.Instance.Configuration.Instance.PlayerColorHexCode}>{value}</color>" : value.ToString();

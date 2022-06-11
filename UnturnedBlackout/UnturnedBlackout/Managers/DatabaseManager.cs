@@ -4030,7 +4030,7 @@ namespace UnturnedBlackout.Managers
 
         // Leaderboard
 
-        private void RefreshLeaderboardData(object sender, System.Timers.ElapsedEventArgs e)
+        private async void RefreshLeaderboardData(object sender, System.Timers.ElapsedEventArgs e)
         {
             using MySqlConnection Conn = new(ConnectionString);
             try
@@ -4142,6 +4142,19 @@ namespace UnturnedBlackout.Managers
                     rdr.Close();
                 }
 
+                foreach (var data in PlayerData.Values)
+                {
+                    if (PlayerDailyLeaderboardLookup.ContainsKey(data.SteamID))
+                    {
+                        continue;
+                    }
+
+                    var leaderboardData = new LeaderboardData(data.SteamID, data.SteamName, data.Level, 0, 0, 0);
+                    PlayerDailyLeaderboard.Add(leaderboardData);
+                    PlayerDailyLeaderboardLookup.Add(data.SteamID, leaderboardData);
+                    await new MySqlCommand($"INSERT INTO `{PlayersLeaderboardDailyTableName}` ( `SteamID` ) VALUES ( {data.SteamID} );", Conn).ExecuteScalarAsync();
+                }
+                
                 Logging.Debug("Getting weekly leaderboard data");
                 rdr = new MySqlCommand($"SELECT `{PlayersLeaderboardWeeklyTableName}`.`SteamID`, `{PlayersTableName}`.`SteamName`, `{PlayersTableName}`.`Level`, `{PlayersLeaderboardWeeklyTableName}`.`Kills`, `{PlayersLeaderboardWeeklyTableName}`.`HeadshotKills`, `{PlayersLeaderboardWeeklyTableName}`.`Deaths` FROM `{PlayersLeaderboardWeeklyTableName}` INNER JOIN `{PlayersTableName}` ON `{PlayersLeaderboardWeeklyTableName}`.`SteamID` = `{PlayersTableName}`.`SteamID` ORDER BY (`{PlayersLeaderboardWeeklyTableName}`.`Kills` + `{PlayersLeaderboardWeeklyTableName}`.`HeadshotKills`) DESC;", Conn).ExecuteReader();
                 try
@@ -4197,6 +4210,19 @@ namespace UnturnedBlackout.Managers
                 finally
                 {
                     rdr.Close();
+                }
+
+                foreach (var data in PlayerData.Values)
+                {
+                    if (PlayerWeeklyLeaderboardLookup.ContainsKey(data.SteamID))
+                    {
+                        continue;
+                    }
+
+                    var leaderboardData = new LeaderboardData(data.SteamID, data.SteamName, data.Level, 0, 0, 0);
+                    PlayerWeeklyLeaderboard.Add(leaderboardData);
+                    PlayerWeeklyLeaderboardLookup.Add(data.SteamID, leaderboardData);
+                    await new MySqlCommand($"INSERT INTO `{PlayersLeaderboardWeeklyTableName}` ( `SteamID` ) VALUES ( {data.SteamID} );", Conn).ExecuteScalarAsync();
                 }
 
                 Logging.Debug("Getting seasonal leaderboard data");
@@ -4391,14 +4417,17 @@ namespace UnturnedBlackout.Managers
                     });
 
                     // Wipe the Daily leaderboard data
-                    new MySqlCommand($"UPDATE `{PlayersLeaderboardDailyTableName}` SET `Kills` = 0, `HeadshotKills` = 0, `Deaths` = 0;", Conn).ExecuteScalar();
+                    new MySqlCommand($"DELETE FROM `{PlayersLeaderboardDailyTableName}`;", Conn).ExecuteScalar();
 
-                    foreach (var data in PlayerDailyLeaderboard)
+                    PlayerDailyLeaderboard.Clear();
+                    PlayerDailyLeaderboardLookup.Clear();
+                    
+                    foreach (var data in PlayerData.Values)
                     {
-                        data.Kills = 0;
-                        data.HeadshotKills = 0;
-                        data.Deaths = 0;
-                    }
+                        var leaderboardData = new LeaderboardData(data.SteamID, data.SteamName, data.Level, 0, 0, 0);
+                        PlayerDailyLeaderboard.Add(leaderboardData);
+                        PlayerDailyLeaderboardLookup.Add(data.SteamID, leaderboardData);
+                    } 
 
                     // Change the wipe date
                     var newWipeDate = DateTimeOffset.UtcNow.AddDays(1);
@@ -4482,15 +4511,18 @@ namespace UnturnedBlackout.Managers
                         }
                         Logging.Debug("Sent embed");
                     });
-
+                    
                     // Wipe the Weekly leaderboard data
-                    new MySqlCommand($"UPDATE `{PlayersLeaderboardWeeklyTableName}` SET `Kills` = 0, `HeadshotKills` = 0, `Deaths` = 0;", Conn).ExecuteScalar();
+                    new MySqlCommand($"DELETE FROM `{PlayersLeaderboardWeeklyTableName}`;", Conn).ExecuteScalar();
+                    
+                    PlayerWeeklyLeaderboard.Clear();
+                    PlayerWeeklyLeaderboardLookup.Clear();
 
-                    foreach (var data in PlayerWeeklyLeaderboard)
+                    foreach (var data in PlayerData.Values)
                     {
-                        data.Kills = 0;
-                        data.HeadshotKills = 0;
-                        data.Deaths = 0;
+                        var leaderboardData = new LeaderboardData(data.SteamID, data.SteamName, data.Level, 0, 0, 0);
+                        PlayerWeeklyLeaderboard.Add(leaderboardData);
+                        PlayerWeeklyLeaderboardLookup.Add(data.SteamID, leaderboardData);
                     }
 
                     // Change the wipe date

@@ -190,10 +190,8 @@ namespace UnturnedBlackout.GameTypes
             BlueTeam.Destroy();
             RedTeam.Destroy();
 
-            //var gameModes = new List<byte> { (byte)EGameType.CTF, (byte)EGameType.FFA, (byte)EGameType.TDM, (byte)EGameType.KC };
-            //gameModes.Remove((byte)GameMode);
-            
-            var gameModes = new List<byte> { 0 };
+            var gameModes = new List<byte> { (byte)EGameType.CTF, (byte)EGameType.FFA, (byte)EGameType.TDM, (byte)EGameType.KC };
+            gameModes.Remove((byte)GameMode);
             var gameMode = (EGameType)gameModes[UnityEngine.Random.Range(0, gameModes.Count)];
 
             var locations = Plugin.Instance.GameManager.AvailableLocations.ToList();
