@@ -285,6 +285,7 @@ namespace UnturnedBlackout.GameTypes
                     return;
                 }
 
+                var questConditions = new Dictionary<EQuestCondition, int>();
                 Logging.Debug($"Killer found, killer name: {kPlayer.GamePlayer.Player.CharacterName}");
 
                 if (fPlayer.GamePlayer.LastDamager.Count > 0 && fPlayer.GamePlayer.LastDamager.Peek() == kPlayer.GamePlayer.SteamID)
