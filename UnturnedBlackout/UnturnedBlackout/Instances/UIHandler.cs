@@ -5071,7 +5071,7 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Quest Description TEXT {i}", quest.Quest.QuestDesc);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Quest Target TEXT {i}", $"{quest.Amount}/{quest.Quest.TargetAmount}");
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Quest Reward TEXT {i}", $"+{quest.Quest.XP}XP");
-                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Quest Bar Fill {i}", quest.Amount == 0 ? " " : new string(' ', Math.Min(183, quest.Amount * 183 / quest.Quest.TargetAmount)));
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Quest Bar Fill {i}", quest.Amount == 0 ? " " : new string(' ', Math.Min(183, quest.Amount * 183 / quest.Quest.TargetAmount)));
             }
         }
         
