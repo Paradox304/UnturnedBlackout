@@ -328,7 +328,7 @@ namespace UnturnedBlackout
             var questConditions = new Dictionary<EQuestCondition, List<int>>();
 
             var letterRegex = new Regex("([a-zA-Z]*)");
-            var numberRegex = new Regex(@"(\d+)");
+            var numberRegex = new Regex(@"([0-9-]+)");
 
             foreach (var conditionTxt in text.Split(','))
             {

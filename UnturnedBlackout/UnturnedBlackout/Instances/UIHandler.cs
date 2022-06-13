@@ -1246,6 +1246,11 @@ namespace UnturnedBlackout.Instances
 
         public void ClearMidgameLoadouts()
         {
+            var gPlayer = Plugin.Instance.GameManager.GetGamePlayer(Player);
+            if (gPlayer != null)
+            {
+                gPlayer.HasMidgameLoadout = false;
+            }
             EffectManager.askEffectClearByID(MidgameLoadoutSelectionID, TransportConnection);
             Player.Player.disablePluginWidgetFlag(EPluginWidgetFlags.Modal);
         }
@@ -4953,7 +4958,8 @@ namespace UnturnedBlackout.Instances
             
             ThreadPool.QueueUserWorkItem((o) =>
             {
-                var searchPlayers = data.Where(k => k.SteamName.Contains(input)).Take(10).ToList();
+                var inputLower = input.ToLower();
+                var searchPlayers = data.Where(k => k.SteamName.ToLower().Contains(inputLower)).Take(10).ToList();
                 TaskDispatcher.QueueOnMainThread(() =>
                 {
                     var maxCount = Math.Min(10, searchPlayers.Count);

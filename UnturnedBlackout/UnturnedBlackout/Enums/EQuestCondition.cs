@@ -15,7 +15,8 @@ namespace UnturnedBlackout.Enums
         Killstreak, // Killstreak you are using [TURRET/RPG/AGM/CHOPPER GUNNER ETC]
         Map, // Map you are playing on
         Gamemode, // Gamemode you are playing on
-        TargetMKKS, // Amount of multi kill/killstreak you need to get
+        TargetMK, // Amount of multi kill you need to get
+        TargetKS, // Amount of killstreak you need to get
         Special // FOR SPECIAL TYPE OF QUESTS [DO NOT SET THIS ON YOUR OWN, ASK ME BEFOREHAND]
     }
 }

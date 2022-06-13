@@ -193,7 +193,7 @@ namespace UnturnedBlackout.Managers
                 await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{GlovesTableName}` ( `GloveID` SMALLINT UNSIGNED NOT NULL , `GloveName` VARCHAR(255) NOT NULL , `GloveDesc` TEXT NOT NULL , `GloveRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `IconLink` TEXT NOT NULL , `ScrapAmount` INT UNSIGNED NOT NULL , `BuyPrice` INT UNSIGNED NOT NULL , `Coins` INT UNSIGNED NOT NULL , `LevelRequirement` INT NOT NULL , PRIMARY KEY (`GloveID`));", Conn).ExecuteScalarAsync();
                 await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{LevelsTableName}` ( `Level` INT UNSIGNED NOT NULL , `XPNeeded` INT UNSIGNED NOT NULL , `IconLinkLarge` TEXT NOT NULL , `IconLinkMedium` TEXT NOT NULL , `IconLinkSmall` TEXT NOT NULL , PRIMARY KEY (`Level`));", Conn).ExecuteScalarAsync();
                 await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{OptionsTableName}` ( `DailyLeaderboardWipe` BIGINT NOT NULL , `WeeklyLeaderboardWipe` BIGINT NOT NULL , `DailyLeaderboardRankedRewards` TEXT NOT NULL , `DailyLeaderboardPercentileRewards` TEXT NOT NULL , `WeeklyLeaderboardRankedRewards` TEXT NOT NULL , `WeeklyLeaderboardPercentileRewards` TEXT NOT NULL, `SeasonalLeaderboardRankedRewards` TEXT NOT NULL , `SeasonalLeaderboardPercentileRewards` TEXT NOT NULL);", Conn).ExecuteScalarAsync();
-                await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{QuestsTableName}` ( `QuestID` INT UNSIGNED NOT NULL AUTO_INCREMENT , `QuestDesc` TEXT NOT NULL , QuestType ENUM('Kill', 'Death', 'Win', 'MultiKill', 'Killstreak', 'Headshots', 'GadgetsUsed') NOT NULL , `QuestTier` ENUM('Easy', 'Medium', 'Hard') NOT NULL , `QuestConditions` TEXT NOT NULL , `TargetAmount` INT UNSIGNED NOT NULL , `XP` INT UNSIGNED NOT NULL , PRIMARY KEY (`QuestID`));", Conn).ExecuteScalarAsync();
+                await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{QuestsTableName}` ( `QuestID` INT UNSIGNED NOT NULL AUTO_INCREMENT , `QuestTitle` TEXT NOT NULL , `QuestDesc` TEXT NOT NULL , QuestType ENUM('Kill', 'Death', 'Win', 'MultiKill', 'Killstreak', 'Headshots', 'GadgetsUsed') NOT NULL , `QuestTier` ENUM('Easy', 'Medium', 'Hard') NOT NULL , `QuestConditions` TEXT NOT NULL , `TargetAmount` INT UNSIGNED NOT NULL , `XP` INT UNSIGNED NOT NULL , PRIMARY KEY (`QuestID`));", Conn).ExecuteScalarAsync();
                 
                 // PLAYERS DATA
                 await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PlayersTableName}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `SteamName` TEXT NOT NULL , `AvatarLink` VARCHAR(200) NOT NULL , `XP` INT UNSIGNED NOT NULL DEFAULT '0' , `Level` INT UNSIGNED NOT NULL DEFAULT '1' , `Credits` INT UNSIGNED NOT NULL DEFAULT '0' , `Scrap` INT UNSIGNED NOT NULL DEFAULT '0' , `Coins` INT UNSIGNED NOT NULL DEFAULT '0' , `Kills` INT UNSIGNED NOT NULL DEFAULT '0' , `HeadshotKills` INT UNSIGNED NOT NULL DEFAULT '0' , `HighestKillstreak` INT UNSIGNED NOT NULL DEFAULT '0' , `HighestMultiKills` INT UNSIGNED NOT NULL DEFAULT '0' , `KillsConfirmed` INT UNSIGNED NOT NULL DEFAULT '0' , `KillsDenied` INT UNSIGNED NOT NULL DEFAULT '0' , `FlagsCaptured` INT UNSIGNED NOT NULL DEFAULT '0' , `FlagsSaved` INT UNSIGNED NOT NULL DEFAULT '0' , `AreasTaken` INT UNSIGNED NOT NULL DEFAULT '0' , `Deaths` INT UNSIGNED NOT NULL DEFAULT '0' , `Music` BOOLEAN NOT NULL DEFAULT TRUE , `IsMuted` BOOLEAN NOT NULL DEFAULT FALSE , `MuteExpiry` BIGINT NOT NULL , PRIMARY KEY (`SteamID`));", Conn).ExecuteScalarAsync();
@@ -1046,7 +1046,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 Logging.Debug("Reading quests from base data");
-                rdr = (MySqlDataReader)await new MySqlCommand($"SELECT `QuestID`, `QuestDesc`, `QuestType`-1, `QuestTier`-1, `QuestConditions`, `TargetAmount`, `XP` FROM `{QuestsTableName}`;", Conn).ExecuteReaderAsync();
+                rdr = (MySqlDataReader)await new MySqlCommand($"SELECT `QuestID`, `QuestTitle`, `QuestDesc`, `QuestType`-1, `QuestTier`-1, `QuestConditions`, `TargetAmount`, `XP` FROM `{QuestsTableName}`;", Conn).ExecuteReaderAsync();
                 try
                 {
                     var questsSearchByID = new Dictionary<int, Quest>();
@@ -1059,35 +1059,35 @@ namespace UnturnedBlackout.Managers
                             continue;
                         }
 
-                        // Get quest desc
-                        var questDesc = rdr[1].ToString();
+                        var questTitle = rdr[1].ToString();
+                        var questDesc = rdr[2].ToString();
                         
-                        if (!int.TryParse(rdr[2].ToString(), out int questTypeInt))
+                        if (!int.TryParse(rdr[3].ToString(), out int questTypeInt))
                         {
                             continue;
                         }
                         var questType = (EQuestType)questTypeInt;
 
-                        if (!int.TryParse(rdr[3].ToString(), out int questTierInt))
+                        if (!int.TryParse(rdr[4].ToString(), out int questTierInt))
                         {
                             continue;
                         }
                         var questTier = (EQuestTier)questTierInt;
                         
-                        var questConditions = rdr[4].ToString();
+                        var questConditions = rdr[5].ToString();
                         var conditions = Utility.GetQuestConditionsFromString(questConditions);
                         
-                        if (!int.TryParse(rdr[5].ToString(), out int targetAmount))
+                        if (!int.TryParse(rdr[6].ToString(), out int targetAmount))
                         {
                             continue;
                         }
                         
-                        if (!int.TryParse(rdr[6].ToString(), out int xp))
+                        if (!int.TryParse(rdr[7].ToString(), out int xp))
                         {
                             continue;
                         }
 
-                        var quest = new Quest(questID, questDesc, questType, questTier, conditions, targetAmount, xp);
+                        var quest = new Quest(questID, questTitle, questDesc, questType, questTier, conditions, targetAmount, xp);
                         if (!questsSearchByID.ContainsKey(questID))
                         {
                             questsSearchByID.Add(questID, quest);
@@ -2103,15 +2103,20 @@ namespace UnturnedBlackout.Managers
                         var easyQuests = Quests.Where(k => k.QuestTier == EQuestTier.Easy).ToList();
                         var mediumQuests = Quests.Where(k => k.QuestTier == EQuestTier.Medium).ToList();
                         var hardQuests = Quests.Where(k => k.QuestTier == EQuestTier.Hard).ToList();
-                        var expiryDate = DateTimeOffset.UtcNow.AddDays(1);
+                        var expiryDate = ServerOptions.DailyLeaderboardWipe;
 
                         if (easyQuests.Count >= 2 && mediumQuests.Count >= 2 && hardQuests.Count != 0)
                         {
                             var questsToAdd = new List<Quest>();
                             for (var i = 0; i < 2; i++)
                             {
-                                questsToAdd.Add(easyQuests[UnityEngine.Random.Range(0, easyQuests.Count)]);
-                                questsToAdd.Add(mediumQuests[UnityEngine.Random.Range(0, mediumQuests.Count)]);
+                                var randomEasyQuest = easyQuests[UnityEngine.Random.Range(0, easyQuests.Count)];
+                                var randomMediumQuest = mediumQuests[UnityEngine.Random.Range(0, mediumQuests.Count)];
+                                questsToAdd.Add(randomEasyQuest);
+                                questsToAdd.Add(randomMediumQuest);
+                                easyQuests.Remove(randomEasyQuest);
+                                mediumQuests.Remove(randomMediumQuest);
+                                
                                 if (i == 0) questsToAdd.Add(hardQuests[UnityEngine.Random.Range(0, hardQuests.Count)]);
                             }
                             
@@ -2124,7 +2129,7 @@ namespace UnturnedBlackout.Managers
                                     playerQuestsSearchByType.Add(quest.QuestType, new List<PlayerQuest>());
                                 }
                                 playerQuestsSearchByType[quest.QuestType].Add(playerQuest);
-                                await new MySqlCommand($"INSERT INTO `{PlayersQuestsTableName}` (`SteamID` , `QuestID`, `Amount`, `QuestEnd`) VALUES ({player.CSteamID}, {quest.QuestID}, 0, {expiryDate.ToUnixTimeSeconds()}", Conn).ExecuteScalarAsync();
+                                await new MySqlCommand($"INSERT INTO `{PlayersQuestsTableName}` (`SteamID` , `QuestID`, `Amount`, `QuestEnd`) VALUES ({player.CSteamID}, {quest.QuestID}, 0, {expiryDate.ToUnixTimeSeconds()});", Conn).ExecuteScalarAsync();
                             }
                         }
 

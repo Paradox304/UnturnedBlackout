@@ -25,6 +25,7 @@ namespace UnturnedBlackout.Models.Global
         public Loadout ActiveLoadout { get; set; }
 
         public bool HasScoreboard { get; set; }
+        public bool HasMidgameLoadout { get; set; }
         public bool HasSpawnProtection { get; set; }
         public Stack<CSteamID> LastDamager { get; set; }
 
@@ -154,6 +155,17 @@ namespace UnturnedBlackout.Models.Global
         {
             HasTactical = false;
             Plugin.Instance.HUDManager.UpdateGadget(this, true, true);
+            if (Plugin.Instance.GameManager.TryGetCurrentGame(SteamID, out Game game))
+            {
+                var questConditions = new Dictionary<EQuestCondition, int>
+                {
+                    { EQuestCondition.Map, game.Location.LocationID },
+                    { EQuestCondition.Gamemode, (int)game.GameMode },
+                    { EQuestCondition.Gadget, ActiveLoadout.Tactical.Gadget.GadgetID }
+                };
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.QuestManager.CheckQuest(SteamID, EQuestType.GadgetsUsed, questConditions));
+            }
+            
             if (m_TacticalChecker.Enabled)
             {
                 m_TacticalChecker.Stop();
@@ -166,6 +178,17 @@ namespace UnturnedBlackout.Models.Global
         {
             HasLethal = false;
             Plugin.Instance.HUDManager.UpdateGadget(this, false, true);
+            if (Plugin.Instance.GameManager.TryGetCurrentGame(SteamID, out Game game))
+            {
+                var questConditions = new Dictionary<EQuestCondition, int>
+                {
+                    { EQuestCondition.Map, game.Location.LocationID },
+                    { EQuestCondition.Gamemode, (int)game.GameMode },
+                    { EQuestCondition.Gadget, ActiveLoadout.Lethal.Gadget.GadgetID }
+                };
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.QuestManager.CheckQuest(SteamID, EQuestType.GadgetsUsed, questConditions));
+            }
+            
             if (m_LethalChecker.Enabled)
             {
                 m_LethalChecker.Stop();

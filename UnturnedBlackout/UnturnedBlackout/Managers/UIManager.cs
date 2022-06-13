@@ -324,7 +324,8 @@ namespace UnturnedBlackout.Managers
 
         public void ClearDeathUI(GamePlayer player)
         {
-            player.Player.Player.disablePluginWidgetFlag(EPluginWidgetFlags.Modal);
+            if (!player.HasMidgameLoadout)
+                player.Player.Player.disablePluginWidgetFlag(EPluginWidgetFlags.Modal);
             EffectManager.askEffectClearByID(DeathID, player.TransportConnection);
         }
 
@@ -394,6 +395,7 @@ namespace UnturnedBlackout.Managers
 
         public void ClearMidgameLoadoutUI(GamePlayer player)
         {
+            player.HasMidgameLoadout = false;
             player.Player.Player.disablePluginWidgetFlag(EPluginWidgetFlags.Modal);
             EffectManager.askEffectClearByID(27643, player.TransportConnection);
         }

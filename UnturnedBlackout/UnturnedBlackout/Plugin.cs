@@ -30,7 +30,8 @@ namespace UnturnedBlackout
             DBManager = new DatabaseManager();
             DataManager = new DataManager();
             RewardManager = new RewardManager();
-
+            QuestManager = new QuestManager();
+            
             StartCoroutine(Day());
 
             Level.onPostLevelLoaded += OnLevelLoaded;
@@ -134,8 +135,9 @@ namespace UnturnedBlackout
                     break;
                 case 1:
                     Logging.Debug("Sending loadout change");
-                    if (game.GamePhase == Enums.EGamePhase.Started || game.GamePhase == Enums.EGamePhase.WaitingForPlayers)
+                    if (game.GamePhase != Enums.EGamePhase.Ending && !gPlayer.HasMidgameLoadout)
                     {
+                        gPlayer.HasMidgameLoadout = true;
                         UIManager.ShowMidgameLoadoutUI(gPlayer);
                     }
                     break;
@@ -288,6 +290,7 @@ namespace UnturnedBlackout
         };
 
         public static Harmony Harmony { get; set; }
+        public QuestManager QuestManager { get; set; }
         public UIManager UIManager { get; set; }
         public HUDManager HUDManager { get; set; }
         public GameManager GameManager { get; set; }

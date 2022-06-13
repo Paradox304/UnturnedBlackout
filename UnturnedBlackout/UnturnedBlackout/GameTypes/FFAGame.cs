@@ -112,6 +112,7 @@ namespace UnturnedBlackout.GameTypes
                 if (index == 0)
                 {
                     var xp = player.XP * Config.FFA.WinMultipler;
+                    TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.QuestManager.CheckQuest(player.GamePlayer.SteamID, EQuestType.Win, new Dictionary<EQuestCondition, int> { { EQuestCondition.Map, Location.LocationID }, { EQuestCondition.Gamemode, (int)GameMode } }));
                     ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DBManager.IncreasePlayerXPAsync(player.GamePlayer.SteamID, (uint)xp));
                 }
             }
@@ -285,7 +286,12 @@ namespace UnturnedBlackout.GameTypes
                     return;
                 }
 
-                var questConditions = new Dictionary<EQuestCondition, int>();
+                var questConditions = new Dictionary<EQuestCondition, int>
+                {
+                    { EQuestCondition.Map, Location.LocationID },
+                    { EQuestCondition.Gamemode, (int)GameMode }
+                };
+                
                 Logging.Debug($"Killer found, killer name: {kPlayer.GamePlayer.Player.CharacterName}");
 
                 if (fPlayer.GamePlayer.LastDamager.Count > 0 && fPlayer.GamePlayer.LastDamager.Peek() == kPlayer.GamePlayer.SteamID)
@@ -323,6 +329,7 @@ namespace UnturnedBlackout.GameTypes
                         xpText += Plugin.Instance.Translate("Melee_Kill").ToRich();
                         equipmentUsed = kPlayer.GamePlayer.ActiveLoadout.Knife?.Knife?.KnifeID ?? 0;
                         Logging.Debug($"Player died through melee, setting equipment to {equipmentUsed}");
+                        questConditions.Add(EQuestCondition.Knife, equipmentUsed);
                         break;
                     case EDeathCause.GUN:
                         if (limb == ELimb.SKULL)
@@ -336,12 +343,14 @@ namespace UnturnedBlackout.GameTypes
                             xpText += Plugin.Instance.Translate("Normal_Kill").ToRich();
                         }
                         var equipment = kPlayer.GamePlayer.Player.Player.equipment.itemID;
-                        if (equipment == (kPlayer.GamePlayer.ActiveLoadout.PrimarySkin?.SkinID ?? 0))
+                        if (equipment == (kPlayer.GamePlayer.ActiveLoadout.PrimarySkin?.SkinID ?? 0) || equipment == (kPlayer.GamePlayer.ActiveLoadout.Primary?.Gun?.GunID ?? 0))
                         {
+                            questConditions.Add(EQuestCondition.GunType, (int)kPlayer.GamePlayer.ActiveLoadout.Primary.Gun.GunType);
                             equipmentUsed = kPlayer.GamePlayer.ActiveLoadout.Primary.Gun.GunID;
                         }
-                        else if (equipment == (kPlayer.GamePlayer.ActiveLoadout.SecondarySkin?.SkinID ?? 0))
+                        else if (equipment == (kPlayer.GamePlayer.ActiveLoadout.SecondarySkin?.SkinID ?? 0) || equipment == (kPlayer.GamePlayer.ActiveLoadout.Secondary?.Gun?.GunID ?? 0))
                         {
+                            questConditions.Add(EQuestCondition.GunType, (int)kPlayer.GamePlayer.ActiveLoadout.Secondary.Gun.GunType);
                             equipmentUsed = kPlayer.GamePlayer.ActiveLoadout.Secondary.Gun.GunID;
                         }
                         else
@@ -349,6 +358,7 @@ namespace UnturnedBlackout.GameTypes
                             equipmentUsed = equipment;
                         }
                         Logging.Debug($"Player died through gun, setting equipment to {equipmentUsed}");
+                        questConditions.Add(EQuestCondition.Gun, equipmentUsed);
                         break;
                     case EDeathCause.CHARGE:
                     case EDeathCause.GRENADE:
@@ -358,6 +368,7 @@ namespace UnturnedBlackout.GameTypes
                         xpText += Plugin.Instance.Translate("Lethal_Kill").ToRich();
                         equipmentUsed = kPlayer.GamePlayer.ActiveLoadout.Lethal?.Gadget?.GadgetID ?? 0;
                         Logging.Debug($"Player died through lethal, setting equipment to {equipmentUsed}");
+                        questConditions.Add(EQuestCondition.Gadget, equipmentUsed);
                         break;
                     default:
                         Logging.Debug($"Player died through {cause}, setting equipment to 0");
@@ -366,7 +377,7 @@ namespace UnturnedBlackout.GameTypes
                 xpText += "\n";
 
                 kPlayer.KillStreak++;
-
+                questConditions.Add(EQuestCondition.TargetKS, kPlayer.KillStreak);
                 if (kPlayer.MultipleKills == 0)
                 {
                     kPlayer.MultipleKills++;
@@ -388,6 +399,7 @@ namespace UnturnedBlackout.GameTypes
                     xpText += Plugin.Instance.Translate("Shutdown_Kill").ToRich() + "\n";
                 }
 
+                questConditions.Add(EQuestCondition.TargetMK, kPlayer.MultipleKills);
                 if (kPlayer.PlayersKilled.ContainsKey(fPlayer.GamePlayer.SteamID))
                 {
                     kPlayer.PlayersKilled[fPlayer.GamePlayer.SteamID] += 1;
@@ -426,6 +438,15 @@ namespace UnturnedBlackout.GameTypes
                     Plugin.Instance.StartCoroutine(GameEnd());
                 }
 
+                Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer.SteamID, EQuestType.Kill, questConditions);
+                Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer.SteamID, EQuestType.MultiKill, questConditions);
+                Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer.SteamID, EQuestType.Killstreak, questConditions);
+                if (limb == ELimb.SKULL && cause == EDeathCause.GUN)
+                {
+                    Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer.SteamID, EQuestType.Headshots, questConditions);
+                }
+                Plugin.Instance.QuestManager.CheckQuest(fPlayer.GamePlayer.SteamID, EQuestType.Death, questConditions);
+                
                 ThreadPool.QueueUserWorkItem(async (o) =>
                 {
                     if (cause == EDeathCause.GUN && limb == ELimb.SKULL)
