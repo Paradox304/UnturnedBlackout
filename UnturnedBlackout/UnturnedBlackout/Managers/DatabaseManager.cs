@@ -4154,19 +4154,6 @@ namespace UnturnedBlackout.Managers
                 {
                     rdr.Close();
                 }
-
-                foreach (var data in PlayerData.Values)
-                {
-                    if (PlayerDailyLeaderboardLookup.ContainsKey(data.SteamID))
-                    {
-                        continue;
-                    }
-
-                    var leaderboardData = new LeaderboardData(data.SteamID, data.SteamName, data.Level, 0, 0, 0);
-                    PlayerDailyLeaderboard.Add(leaderboardData);
-                    PlayerDailyLeaderboardLookup.Add(data.SteamID, leaderboardData);
-                    await new MySqlCommand($"INSERT INTO `{PlayersLeaderboardDailyTableName}` ( `SteamID` ) VALUES ( {data.SteamID} );", Conn).ExecuteScalarAsync();
-                }
                 
                 Logging.Debug("Getting weekly leaderboard data");
                 rdr = new MySqlCommand($"SELECT `{PlayersLeaderboardWeeklyTableName}`.`SteamID`, `{PlayersTableName}`.`SteamName`, `{PlayersTableName}`.`Level`, `{PlayersLeaderboardWeeklyTableName}`.`Kills`, `{PlayersLeaderboardWeeklyTableName}`.`HeadshotKills`, `{PlayersLeaderboardWeeklyTableName}`.`Deaths` FROM `{PlayersLeaderboardWeeklyTableName}` INNER JOIN `{PlayersTableName}` ON `{PlayersLeaderboardWeeklyTableName}`.`SteamID` = `{PlayersTableName}`.`SteamID` ORDER BY (`{PlayersLeaderboardWeeklyTableName}`.`Kills` + `{PlayersLeaderboardWeeklyTableName}`.`HeadshotKills`) DESC;", Conn).ExecuteReader();
@@ -4225,17 +4212,24 @@ namespace UnturnedBlackout.Managers
                     rdr.Close();
                 }
 
+                Logging.Debug("Checking if any players dont have weekly or daily leaderboard data");
                 foreach (var data in PlayerData.Values)
                 {
-                    if (PlayerWeeklyLeaderboardLookup.ContainsKey(data.SteamID))
+                    if (!PlayerDailyLeaderboardLookup.ContainsKey(data.SteamID))
                     {
-                        continue;
+                        var dailyLeaderboardData = new LeaderboardData(data.SteamID, data.SteamName, data.Level, 0, 0, 0);
+                        PlayerDailyLeaderboard.Add(dailyLeaderboardData);
+                        PlayerDailyLeaderboardLookup.Add(data.SteamID, dailyLeaderboardData);
+                        await new MySqlCommand($"INSERT INTO `{PlayersLeaderboardDailyTableName}` ( `SteamID` ) VALUES ( {data.SteamID} );", Conn).ExecuteScalarAsync();
                     }
-
-                    var leaderboardData = new LeaderboardData(data.SteamID, data.SteamName, data.Level, 0, 0, 0);
-                    PlayerWeeklyLeaderboard.Add(leaderboardData);
-                    PlayerWeeklyLeaderboardLookup.Add(data.SteamID, leaderboardData);
-                    await new MySqlCommand($"INSERT INTO `{PlayersLeaderboardWeeklyTableName}` ( `SteamID` ) VALUES ( {data.SteamID} );", Conn).ExecuteScalarAsync();
+                    
+                    if (!PlayerWeeklyLeaderboardLookup.ContainsKey(data.SteamID))
+                    {
+                        var weeklyLeaderboardData = new LeaderboardData(data.SteamID, data.SteamName, data.Level, 0, 0, 0);
+                        PlayerWeeklyLeaderboard.Add(weeklyLeaderboardData);
+                        PlayerWeeklyLeaderboardLookup.Add(data.SteamID, weeklyLeaderboardData);
+                        await new MySqlCommand($"INSERT INTO `{PlayersLeaderboardWeeklyTableName}` ( `SteamID` ) VALUES ( {data.SteamID} );", Conn).ExecuteScalarAsync();
+                    }
                 }
 
                 Logging.Debug("Getting seasonal leaderboard data");
@@ -4350,10 +4344,10 @@ namespace UnturnedBlackout.Managers
                 {
                     rdr.Close();
                 }
-
+                
                 Logging.Debug("Checking if daily leaderboard is to be wiped");
                 var bulkRewards = new List<(CSteamID, List<Reward>)>();
-                if (ServerOptions.DailyLeaderboardWipe.UtcDateTime < DateTime.UtcNow)
+                if (ServerOptions.DailyLeaderboardWipe < DateTimeOffset.UtcNow)
                 {
                     Logging.Debug("Daily leaderboard has to be wiped, giving ranked rewards");
 
@@ -4449,7 +4443,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 Logging.Debug("Checking if weekly leaderboard is to be wiped");
-                if (ServerOptions.WeeklyLeaderboardWipe.UtcDateTime < DateTime.UtcNow)
+                if (ServerOptions.WeeklyLeaderboardWipe < DateTimeOffset.UtcNow)
                 {
                     Logging.Debug("Weekly leaderboard has to be wiped, giving ranked rewards");
 
@@ -4621,6 +4615,49 @@ namespace UnturnedBlackout.Managers
                         }
                         Logging.Debug("Sent embed");
                     });
+                }
+
+                Logging.Debug("Checking if quests are to be wiped");
+                foreach (var data in PlayerData.Values)
+                {
+                    if (data.Quests[0].QuestEnd > DateTimeOffset.UtcNow)
+                    {
+                        continue;
+                    }
+
+                    Logging.Debug($"Quests of {data.SteamName} are to be wiped, generating new");
+
+                    var playerQuests = new List<PlayerQuest>();
+                    var playerQuestsSearchByType = new Dictionary<EQuestType, List<PlayerQuest>>();
+                    
+                    await new MySqlCommand($"DELETE FROM `{PlayersQuestsTableName}` WHERE `SteamID` = {data.SteamID};", Conn).ExecuteScalarAsync();
+                    var expiryDate = ServerOptions.DailyLeaderboardWipe;
+                    var questsToAdd = new List<Quest>();
+                    for (var i = 0; i < 6; i++)
+                    {
+                        Logging.Debug($"i: {i}, Tier: {(EQuestTier)i}");
+                        var randomQuests = Quests.Where(k => (int)k.QuestTier == i).ToList();
+                        Logging.Debug($"FOund {randomQuests.Count} random quests");
+                        var randomQuest = randomQuests[UnityEngine.Random.Range(0, randomQuests.Count)];
+                        questsToAdd.Add(randomQuest);
+                    }
+
+                    foreach (var quest in questsToAdd)
+                    {
+                        var playerQuest = new PlayerQuest(data.SteamID, quest, 0, expiryDate);
+                        playerQuests.Add(playerQuest);
+                        if (!playerQuestsSearchByType.ContainsKey(quest.QuestType))
+                        {
+                            playerQuestsSearchByType.Add(quest.QuestType, new List<PlayerQuest>());
+                        }
+                        playerQuestsSearchByType[quest.QuestType].Add(playerQuest);
+                        await new MySqlCommand($"INSERT INTO `{PlayersQuestsTableName}` (`SteamID` , `QuestID`, `Amount`, `QuestEnd`) VALUES ({data.SteamID}, {quest.QuestID}, 0, {expiryDate.ToUnixTimeSeconds()});", Conn).ExecuteScalarAsync();
+                    }
+
+                    data.Quests = playerQuests;
+                    data.QuestsSearchByType = playerQuestsSearchByType;
+                    
+                    Logging.Debug($"Generated {playerQuests.Count} quests for player");
                 }
 
                 Logging.Debug($"Sending {bulkRewards.Count} bulk rewards");

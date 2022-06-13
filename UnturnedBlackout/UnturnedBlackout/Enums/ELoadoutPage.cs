@@ -24,5 +24,6 @@
         Card,
         Tactical,
         Lethal
+
     }
 }

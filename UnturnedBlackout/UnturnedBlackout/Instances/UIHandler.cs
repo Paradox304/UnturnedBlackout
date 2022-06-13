@@ -776,7 +776,6 @@ namespace UnturnedBlackout.Instances
 
         public void ShowGames()
         {
-            Logging.Debug($"Showing games for {Player.CharacterName}");
             var games = Plugin.Instance.GameManager.Games;
             PlayPage = EPlayPage.Games;
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Play Refresh BUTTON", false);
@@ -789,7 +788,6 @@ namespace UnturnedBlackout.Instances
                 }
 
                 var game = games[index];
-                Logging.Debug($"Index: {index}, players: {game.GetPlayerCount()}, max players: {game.Location.GetMaxPlayers(game.GameMode)}, phase: {game.GamePhase}");
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Play BUTTON {index}", true);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Play Map TEXT {index}", game.Location.LocationName);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Play Mode TEXT {index}", Plugin.Instance.Translate($"{game.GameMode}_Name_Full"));
@@ -822,7 +820,6 @@ namespace UnturnedBlackout.Instances
 
         public void ShowLoadouts()
         {
-            Logging.Debug($"Showing loadouts to {Player.CharacterName}");
             MainPage = EMainPage.Loadout;
 
             if (!LoadoutPages.TryGetValue(1, out PageLoadout firstPage))
@@ -847,7 +844,6 @@ namespace UnturnedBlackout.Instances
             {
                 return;
             }
-            Logging.Debug($"Forwarding loadout page for {Player.CharacterName}, Current Page {LoadoutPageID}");
 
             if (!LoadoutPages.TryGetValue(LoadoutPageID + 1, out PageLoadout nextPage) && !LoadoutPages.TryGetValue(1, out nextPage))
             {
@@ -864,7 +860,6 @@ namespace UnturnedBlackout.Instances
             {
                 return;
             }
-            Logging.Debug($"Backwarding loadout page for {Player.CharacterName}, Current Page {LoadoutPageID}");
 
             if (!LoadoutPages.TryGetValue(LoadoutPageID - 1, out PageLoadout prevPage) && !LoadoutPages.TryGetValue(LoadoutPages.Keys.Max(), out prevPage))
             {
@@ -877,7 +872,6 @@ namespace UnturnedBlackout.Instances
 
         public void ReloadLoadoutPage()
         {
-            Logging.Debug($"Reloading loadout page for {Player.CharacterName}, Current Page {LoadoutPageID}");
             if (!LoadoutPages.TryGetValue(LoadoutPageID, out PageLoadout page))
             {
                 Logging.Debug($"Error finding current loadout page with page id {LoadoutPageID} for {Player.CharacterName}");
@@ -889,7 +883,6 @@ namespace UnturnedBlackout.Instances
 
         public void ShowLoadoutPage(PageLoadout page)
         {
-            Logging.Debug($"Showing loadout page for {Player.CharacterName} with id {page.PageID}");
             LoadoutPageID = page.PageID;
 
             for (int i = 0; i <= 9; i++)
@@ -908,7 +901,6 @@ namespace UnturnedBlackout.Instances
 
         public void ReloadLoadout()
         {
-            Logging.Debug($"Reloading loadout for {Player.CharacterName}, selected loadout {LoadoutID}");
             if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout currentLoadout))
             {
                 Logging.Debug($"Couldnt find the current selected loadout");
@@ -920,7 +912,6 @@ namespace UnturnedBlackout.Instances
 
         public void SelectedLoadout(int selected)
         {
-            Logging.Debug($"{Player.CharacterName} selected loadout at {selected}");
             if (!LoadoutPages.TryGetValue(LoadoutPageID, out PageLoadout currentPage))
             {
                 Logging.Debug($"Couldnt find the current selected page at {LoadoutPageID}");
@@ -938,12 +929,10 @@ namespace UnturnedBlackout.Instances
 
         public void ShowLoadout(Loadout loadout)
         {
-            Logging.Debug($"Showing loadout with id {loadout.LoadoutID} for {Player.CharacterName}");
             LoadoutID = loadout.LoadoutID;
 
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Loadout Equip BUTTON", !loadout.IsActive);
             // Primary
-            Logging.Debug($"Primary is null {loadout.Primary == null}, is skin null {loadout.SecondarySkin == null}");
             EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Loadout Primary IMAGE", loadout.PrimarySkin == null ? (loadout.Primary == null ? "" : loadout.Primary.Gun.IconLink) : loadout.PrimarySkin.IconLink);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Loadout Primary TEXT", loadout.Primary == null ? "" : loadout.Primary.Gun.GunName);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Loadout Primary Level TEXT", loadout.Primary == null ? "" : loadout.Primary.Level.ToString());
@@ -951,14 +940,12 @@ namespace UnturnedBlackout.Instances
             {
                 var attachmentType = (EAttachment)i;
                 loadout.PrimaryAttachments.TryGetValue(attachmentType, out LoadoutAttachment attachment);
-                Logging.Debug($"Primary attachment {attachmentType} is null {attachment == null}");
                 EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Loadout Primary {attachmentType} IMAGE", attachment == null ? Utility.GetDefaultAttachmentImage(attachmentType.ToString()) : attachment.Attachment.IconLink);
             }
             EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Loadout Primary Charm IMAGE", loadout.PrimaryGunCharm == null ? Utility.GetDefaultAttachmentImage("charm") : loadout.PrimaryGunCharm.GunCharm.IconLink);
             EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Loadout Primary Skin IMAGE", loadout.PrimarySkin == null ? Utility.GetDefaultAttachmentImage("skin") : loadout.PrimarySkin.PatternLink);
 
             // Secondary
-            Logging.Debug($"Secondary is null {loadout.Secondary == null}, is skin null {loadout.SecondarySkin == null}");
             EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Loadout Secondary IMAGE", loadout.SecondarySkin == null ? (loadout.Secondary == null ? "" : loadout.Secondary.Gun.IconLink) : loadout.SecondarySkin.IconLink);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Loadout Secondary TEXT", loadout.Secondary == null ? "" : loadout.Secondary.Gun.GunName);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Loadout Secondary Level TEXT", loadout.Secondary == null ? "" : loadout.Secondary.Level.ToString());
@@ -966,24 +953,20 @@ namespace UnturnedBlackout.Instances
             {
                 var attachmentType = (EAttachment)i;
                 loadout.SecondaryAttachments.TryGetValue(attachmentType, out LoadoutAttachment attachment);
-                Logging.Debug($"Secondary attachment {attachmentType} is null {attachment == null}");
                 EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Loadout Secondary {attachmentType} IMAGE", attachment == null ? Utility.GetDefaultAttachmentImage(attachmentType.ToString()) : attachment.Attachment.IconLink);
             }
             EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Loadout Secondary Charm IMAGE", loadout.SecondaryGunCharm == null ? Utility.GetDefaultAttachmentImage("charm") : loadout.SecondaryGunCharm.GunCharm.IconLink);
             EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Loadout Secondary Skin IMAGE", loadout.SecondarySkin == null ? Utility.GetDefaultAttachmentImage("skin") : loadout.SecondarySkin.PatternLink);
 
             // Knife
-            Logging.Debug($"Knife is null {loadout.Knife == null}");
             EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Loadout Knife IMAGE", loadout.Knife == null ? "" : loadout.Knife.Knife.IconLink);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Loadout Knife TEXT", loadout.Knife == null ? "" : loadout.Knife.Knife.KnifeName);
 
             // Tactical
-            Logging.Debug($"Tactical is null {loadout.Tactical == null}");
             EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Loadout Tactical IMAGE", loadout.Tactical == null ? "" : loadout.Tactical.Gadget.IconLink);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Loadout Tactical TEXT", loadout.Tactical == null ? "" : loadout.Tactical.Gadget.GadgetName);
 
             // Lethal
-            Logging.Debug($"Lethal is null {loadout.Lethal == null}");
             EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Loadout Lethal IMAGE", loadout.Lethal == null ? "" : loadout.Lethal.Gadget.IconLink);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Loadout Lethal TEXT", loadout.Lethal == null ? "" : loadout.Lethal.Gadget.GadgetName);
 
@@ -998,25 +981,21 @@ namespace UnturnedBlackout.Instances
             // Killstreak
             for (int i = 0; i <= 2; i++)
             {
-                Logging.Debug($"Killstreak at {i} is null {loadout.Killstreaks.Count < (i + 1)}");
                 EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Loadout Killstreak IMAGE {i}", loadout.Killstreaks.Count < (i + 1) ? "" : loadout.Killstreaks[i].Killstreak.IconLink);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Loadout Killstreak TEXT {i}", loadout.Killstreaks.Count < (i + 1) ? "" : loadout.Killstreaks[i].Killstreak.KillstreakName);
             }
 
             // Card
-            Logging.Debug($"Card is null {loadout.Card == null}");
             EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Loadout Card IMAGE", loadout.Card == null ? "" : loadout.Card.Card.IconLink);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Loadout Card TEXT", loadout.Card == null ? "" : loadout.Card.Card.CardName);
 
             // Glove
-            Logging.Debug($"Glove is null {loadout.Glove == null}");
             EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Loadout Glove IMAGE", loadout.Glove == null ? "" : loadout.Glove.Glove.IconLink);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Loadout Glove TEXT", loadout.Glove == null ? "" : loadout.Glove.Glove.GloveName);
         }
 
         public void EquipLoadout()
         {
-            Logging.Debug($"{Player.CharacterName} activated loadout with id {LoadoutID}");
             if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
             {
                 Logging.Debug($"Error finding loadout with id {LoadoutID} for {Player.CharacterName}");
@@ -1041,13 +1020,11 @@ namespace UnturnedBlackout.Instances
 
         public void SendLoadoutName(string name)
         {
-            Logging.Debug($"{Player.CharacterName} sent loadout name with {name} for loadout with id {LoadoutID}");
             LoadoutNameText = name;
         }
 
         public void RenameLoadout()
         {
-            Logging.Debug($"{Player.CharacterName} is trying to rename loadout to {LoadoutNameText} for loadout with id {LoadoutID}");
             if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
             {
                 Logging.Debug($"Error getting current loadout with id {LoadoutID} for {Player.CharacterName}");
@@ -1078,7 +1055,6 @@ namespace UnturnedBlackout.Instances
 
         public void ShowMidgameLoadouts()
         {
-            Logging.Debug($"Showing midgame loadouts to {Player.CharacterName}");
             MainPage = EMainPage.Loadout;
 
             Player.Player.enablePluginWidgetFlag(EPluginWidgetFlags.Modal);
@@ -1105,7 +1081,6 @@ namespace UnturnedBlackout.Instances
             {
                 return;
             }
-            Logging.Debug($"Forwarding midgame loadout page for {Player.CharacterName}, Current Page {LoadoutPageID}");
 
             if (!LoadoutPages.TryGetValue(LoadoutPageID + 1, out PageLoadout nextPage) && !LoadoutPages.TryGetValue(1, out nextPage))
             {
@@ -1122,7 +1097,6 @@ namespace UnturnedBlackout.Instances
             {
                 return;
             }
-            Logging.Debug($"Backwarding midgame loadout page for {Player.CharacterName}, Current Page {LoadoutPageID}");
 
             if (!LoadoutPages.TryGetValue(LoadoutPageID - 1, out PageLoadout prevPage) && !LoadoutPages.TryGetValue(LoadoutPages.Keys.Max(), out prevPage))
             {
@@ -1135,7 +1109,6 @@ namespace UnturnedBlackout.Instances
 
         public void ShowMidgameLoadoutPage(PageLoadout page)
         {
-            Logging.Debug($"Showing midgame loadout page for {Player.CharacterName} with id {page.PageID}");
             LoadoutPageID = page.PageID;
 
             for (int i = 0; i <= 9; i++)
@@ -1154,7 +1127,6 @@ namespace UnturnedBlackout.Instances
 
         public void SelectedMidgameLoadout(int selected)
         {
-            Logging.Debug($"{Player.CharacterName} selected midgame loadout at {selected}");
             if (!LoadoutPages.TryGetValue(LoadoutPageID, out PageLoadout currentPage))
             {
                 Logging.Debug($"Couldnt find the current selected page at {LoadoutPageID}");
@@ -1172,12 +1144,10 @@ namespace UnturnedBlackout.Instances
 
         public void ShowMidgameLoadout(Loadout loadout)
         {
-            Logging.Debug($"Showing midgame loadout with id {loadout.LoadoutID} for {Player.CharacterName}");
             LoadoutID = loadout.LoadoutID;
 
             EffectManager.sendUIEffectVisibility(MidgameLoadoutSelectionKey, TransportConnection, true, "SERVER Loadout Equip BUTTON", !loadout.IsActive);
             // Primary
-            Logging.Debug($"Primary is null {loadout.Primary == null}, is skin null {loadout.SecondarySkin == null}");
             EffectManager.sendUIEffectImageURL(MidgameLoadoutSelectionKey, TransportConnection, true, "SERVER Loadout Primary IMAGE", loadout.PrimarySkin == null ? (loadout.Primary == null ? "" : loadout.Primary.Gun.IconLink) : loadout.PrimarySkin.IconLink);
             EffectManager.sendUIEffectText(MidgameLoadoutSelectionKey, TransportConnection, true, "SERVER Loadout Primary TEXT", loadout.Primary == null ? "" : loadout.Primary.Gun.GunName);
             EffectManager.sendUIEffectText(MidgameLoadoutSelectionKey, TransportConnection, true, "SERVER Loadout Primary Level TEXT", loadout.Primary == null ? "" : loadout.Primary.Level.ToString());
@@ -1185,14 +1155,12 @@ namespace UnturnedBlackout.Instances
             {
                 var attachmentType = (EAttachment)i;
                 loadout.PrimaryAttachments.TryGetValue(attachmentType, out LoadoutAttachment attachment);
-                Logging.Debug($"Primary attachment {attachmentType} is null {attachment == null}");
                 EffectManager.sendUIEffectImageURL(MidgameLoadoutSelectionKey, TransportConnection, true, $"SERVER Loadout Primary {attachmentType} IMAGE", attachment == null ? Utility.GetDefaultAttachmentImage(attachmentType.ToString()) : attachment.Attachment.IconLink);
             }
             EffectManager.sendUIEffectImageURL(MidgameLoadoutSelectionKey, TransportConnection, true, "SERVER Loadout Primary Charm IMAGE", loadout.PrimaryGunCharm == null ? Utility.GetDefaultAttachmentImage("charm") : loadout.PrimaryGunCharm.GunCharm.IconLink);
             EffectManager.sendUIEffectImageURL(MidgameLoadoutSelectionKey, TransportConnection, true, "SERVER Loadout Primary Skin IMAGE", loadout.PrimarySkin == null ? Utility.GetDefaultAttachmentImage("skin") : loadout.PrimarySkin.PatternLink);
 
             // Secondary
-            Logging.Debug($"Secondary is null {loadout.Secondary == null}, is skin null {loadout.SecondarySkin == null}");
             EffectManager.sendUIEffectImageURL(MidgameLoadoutSelectionKey, TransportConnection, true, "SERVER Loadout Secondary IMAGE", loadout.SecondarySkin == null ? (loadout.Secondary == null ? "" : loadout.Secondary.Gun.IconLink) : loadout.SecondarySkin.IconLink);
             EffectManager.sendUIEffectText(MidgameLoadoutSelectionKey, TransportConnection, true, "SERVER Loadout Secondary TEXT", loadout.Secondary == null ? "" : loadout.Secondary.Gun.GunName);
             EffectManager.sendUIEffectText(MidgameLoadoutSelectionKey, TransportConnection, true, "SERVER Loadout Secondary Level TEXT", loadout.Secondary == null ? "" : loadout.Secondary.Level.ToString());
@@ -1200,24 +1168,20 @@ namespace UnturnedBlackout.Instances
             {
                 var attachmentType = (EAttachment)i;
                 loadout.SecondaryAttachments.TryGetValue(attachmentType, out LoadoutAttachment attachment);
-                Logging.Debug($"Secondary attachment {attachmentType} is null {attachment == null}");
                 EffectManager.sendUIEffectImageURL(MidgameLoadoutSelectionKey, TransportConnection, true, $"SERVER Loadout Secondary {attachmentType} IMAGE", attachment == null ? Utility.GetDefaultAttachmentImage(attachmentType.ToString()) : attachment.Attachment.IconLink);
             }
             EffectManager.sendUIEffectImageURL(MidgameLoadoutSelectionKey, TransportConnection, true, "SERVER Loadout Secondary Charm IMAGE", loadout.SecondaryGunCharm == null ? Utility.GetDefaultAttachmentImage("charm") : loadout.SecondaryGunCharm.GunCharm.IconLink);
             EffectManager.sendUIEffectImageURL(MidgameLoadoutSelectionKey, TransportConnection, true, "SERVER Loadout Secondary Skin IMAGE", loadout.SecondarySkin == null ? Utility.GetDefaultAttachmentImage("skin") : loadout.SecondarySkin.PatternLink);
 
             // Knife
-            Logging.Debug($"Knife is null {loadout.Knife == null}");
             EffectManager.sendUIEffectImageURL(MidgameLoadoutSelectionKey, TransportConnection, true, "SERVER Loadout Knife IMAGE", loadout.Knife == null ? "" : loadout.Knife.Knife.IconLink);
             EffectManager.sendUIEffectText(MidgameLoadoutSelectionKey, TransportConnection, true, "SERVER Loadout Knife TEXT", loadout.Knife == null ? "" : loadout.Knife.Knife.KnifeName);
 
             // Tactical
-            Logging.Debug($"Tactical is null {loadout.Tactical == null}");
             EffectManager.sendUIEffectImageURL(MidgameLoadoutSelectionKey, TransportConnection, true, "SERVER Loadout Tactical IMAGE", loadout.Tactical == null ? "" : loadout.Tactical.Gadget.IconLink);
             EffectManager.sendUIEffectText(MidgameLoadoutSelectionKey, TransportConnection, true, "SERVER Loadout Tactical TEXT", loadout.Tactical == null ? "" : loadout.Tactical.Gadget.GadgetName);
 
             // Lethal
-            Logging.Debug($"Lethal is null {loadout.Lethal == null}");
             EffectManager.sendUIEffectImageURL(MidgameLoadoutSelectionKey, TransportConnection, true, "SERVER Loadout Lethal IMAGE", loadout.Lethal == null ? "" : loadout.Lethal.Gadget.IconLink);
             EffectManager.sendUIEffectText(MidgameLoadoutSelectionKey, TransportConnection, true, "SERVER Loadout Lethal TEXT", loadout.Lethal == null ? "" : loadout.Lethal.Gadget.GadgetName);
 
@@ -1232,25 +1196,21 @@ namespace UnturnedBlackout.Instances
             // Killstreak
             for (int i = 0; i <= 2; i++)
             {
-                Logging.Debug($"Killstreak at {i} is null {loadout.Killstreaks.Count < (i + 1)}");
                 EffectManager.sendUIEffectImageURL(MidgameLoadoutSelectionKey, TransportConnection, true, $"SERVER Loadout Killstreak IMAGE {i}", loadout.Killstreaks.Count < (i + 1) ? "" : loadout.Killstreaks[i].Killstreak.IconLink);
                 EffectManager.sendUIEffectText(MidgameLoadoutSelectionKey, TransportConnection, true, $"SERVER Loadout Killstreak TEXT {i}", loadout.Killstreaks.Count < (i + 1) ? "" : loadout.Killstreaks[i].Killstreak.KillstreakName);
             }
 
             // Card
-            Logging.Debug($"Card is null {loadout.Card == null}");
             EffectManager.sendUIEffectImageURL(MidgameLoadoutSelectionKey, TransportConnection, true, $"SERVER Loadout Card IMAGE", loadout.Card == null ? "" : loadout.Card.Card.IconLink);
             EffectManager.sendUIEffectText(MidgameLoadoutSelectionKey, TransportConnection, true, $"SERVER Loadout Card TEXT", loadout.Card == null ? "" : loadout.Card.Card.CardName);
 
             // Glove
-            Logging.Debug($"Glove is null {loadout.Glove == null}");
             EffectManager.sendUIEffectImageURL(MidgameLoadoutSelectionKey, TransportConnection, true, $"SERVER Loadout Glove IMAGE", loadout.Glove == null ? "" : loadout.Glove.Glove.IconLink);
             EffectManager.sendUIEffectText(MidgameLoadoutSelectionKey, TransportConnection, true, $"SERVER Loadout Glove TEXT", loadout.Glove == null ? "" : loadout.Glove.Glove.GloveName);
         }
 
         public void EquipMidgameLoadout()
         {
-            Logging.Debug($"{Player.CharacterName} activated loadout midgame with id {LoadoutID}");
             if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
             {
                 Logging.Debug($"Error finding loadout with id {LoadoutID} for {Player.CharacterName}");
@@ -1292,7 +1252,6 @@ namespace UnturnedBlackout.Instances
 
         public void ShowLoadoutSubPage(ELoadoutPage page)
         {
-            Logging.Debug($"Showing loadout sub page {page} for {Player.CharacterName}");
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Type TEXT", page.ToFriendlyName());
             LoadoutPage = page;
 
@@ -1312,7 +1271,6 @@ namespace UnturnedBlackout.Instances
 
         public void ShowLoadoutTab(ELoadoutTab tab)
         {
-            Logging.Debug($"Showing loadout tab {tab} for {Player.CharacterName}");
             LoadoutTab = tab;
 
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
@@ -1720,7 +1678,6 @@ namespace UnturnedBlackout.Instances
 
         public void ForwardLoadoutTab()
         {
-            Logging.Debug($"{Player.CharacterName} is trying to forward the loadout tab {LoadoutTab}, Current Page {LoadoutPage}, Current Page ID {LoadoutTabPageID}");
             if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
             {
                 Logging.Debug($"Error finding loadout with id {LoadoutID} for {Player.CharacterName}");
@@ -2049,7 +2006,6 @@ namespace UnturnedBlackout.Instances
 
         public void BackwardLoadoutTab()
         {
-            Logging.Debug($"{Player.CharacterName} is trying to backward the loadout tab {LoadoutTab}, Current Page {LoadoutPage}, Current Page ID {LoadoutTabPageID}");
 
             if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
             {
@@ -2379,7 +2335,6 @@ namespace UnturnedBlackout.Instances
 
         public void ReloadLoadoutTab()
         {
-            Logging.Debug($"Reloading current loadout tab page for {Player.CharacterName}, Current Page {LoadoutPage}, Current Page ID {LoadoutTabPageID}");
             if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
             {
                 Logging.Debug($"Error finding loadout with id {LoadoutID} for {Player.CharacterName}");
@@ -2707,7 +2662,6 @@ namespace UnturnedBlackout.Instances
 
         public void ShowGunPage(PageGun page)
         {
-            Logging.Debug($"Showing gun page to {Player.CharacterName} with page id {page.PageID}");
             LoadoutTabPageID = page.PageID;
 
             if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout currentLoadout))
@@ -2737,7 +2691,6 @@ namespace UnturnedBlackout.Instances
 
         public void ShowAttachmentPage(PageAttachment page, LoadoutGun gun)
         {
-            Logging.Debug($"Showing attachment page to {Player.CharacterName} with page id {page.PageID}");
             LoadoutTabPageID = page.PageID;
 
             if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout currentLoadout))
@@ -2767,7 +2720,6 @@ namespace UnturnedBlackout.Instances
 
         public void ShowGunCharmPage(PageGunCharm page)
         {
-            Logging.Debug($"Showing gun charm page to {Player.CharacterName} with page id {page.PageID}");
             LoadoutTabPageID = page.PageID;
 
             if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout currentLoadout))
@@ -2794,7 +2746,6 @@ namespace UnturnedBlackout.Instances
 
         public void ShowGunSkinPage(PageGunSkin page)
         {
-            Logging.Debug($"Showing gun skin page to {Player.CharacterName} with page id {page.PageID}");
             LoadoutTabPageID = page.PageID;
 
             if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout currentLoadout))
@@ -2821,7 +2772,6 @@ namespace UnturnedBlackout.Instances
 
         public void ShowKnifePage(PageKnife page)
         {
-            Logging.Debug($"Showing knife page to {Player.CharacterName} with page id {page.PageID}");
             LoadoutTabPageID = page.PageID;
 
             if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout currentLoadout))
@@ -2848,7 +2798,6 @@ namespace UnturnedBlackout.Instances
 
         public void ShowPerkPage(PagePerk page)
         {
-            Logging.Debug($"Showing perk page to {Player.CharacterName} with page id {page.PageID}");
             LoadoutTabPageID = page.PageID;
 
             if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout currentLoadout))
@@ -2878,7 +2827,6 @@ namespace UnturnedBlackout.Instances
 
         public void ShowGadgetPage(PageGadget page)
         {
-            Logging.Debug($"Showing gadget page to {Player.CharacterName} with page id {page.PageID}");
             LoadoutTabPageID = page.PageID;
 
             if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout currentLoadout))
@@ -2908,7 +2856,6 @@ namespace UnturnedBlackout.Instances
 
         public void ShowCardPage(PageCard page)
         {
-            Logging.Debug($"Showing card page to {Player.CharacterName} with page id {page.PageID}");
             LoadoutTabPageID = page.PageID;
 
             if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout currentLoadout))
@@ -2935,7 +2882,6 @@ namespace UnturnedBlackout.Instances
 
         public void ShowGlovePage(PageGlove page)
         {
-            Logging.Debug($"Showing glove page to {Player.CharacterName} with page id {page.PageID}");
             LoadoutTabPageID = page.PageID;
 
             if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout currentLoadout))
@@ -2962,7 +2908,6 @@ namespace UnturnedBlackout.Instances
 
         public void ShowKillstreakPage(PageKillstreak page)
         {
-            Logging.Debug($"Showing killstreak page to {Player.CharacterName} with page id {page.PageID}");
             LoadoutTabPageID = page.PageID;
 
             if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout currentLoadout))
@@ -2992,7 +2937,6 @@ namespace UnturnedBlackout.Instances
 
         public void ReloadSelectedItem()
         {
-            Logging.Debug($"Reloading selected item for {Player.CharacterName}, selected item {SelectedItemID}, page {LoadoutPage}");
             if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
             {
                 Logging.Debug($"Error finding current loadout with id {LoadoutID} for {Player.CharacterName}");
@@ -3181,7 +3125,6 @@ namespace UnturnedBlackout.Instances
 
         public void SelectedItem(int selected)
         {
-            Logging.Debug($"{Player.CharacterName} selected an item at {selected}, Tab {LoadoutTab}, Page {LoadoutPage}");
             if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
             {
                 Logging.Debug($"Error finding current loadout with id {LoadoutID} for {Player.CharacterName}");
@@ -3618,7 +3561,6 @@ namespace UnturnedBlackout.Instances
         public void ShowGun(LoadoutGun gun)
         {
             SelectedItemID = gun.Gun.GunID;
-            Logging.Debug($"Showing gun with id {gun.Gun.GunID} to {Player.CharacterName}");
             if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
             {
                 Logging.Debug($"Error finding loadout with id {LoadoutID} for {Player.CharacterName}");
@@ -3644,7 +3586,6 @@ namespace UnturnedBlackout.Instances
         public void ShowAttachment(LoadoutAttachment attachment, LoadoutGun gun)
         {
             SelectedItemID = attachment.Attachment.AttachmentID;
-            Logging.Debug($"Showing attachment with id {attachment.Attachment.AttachmentID} to {Player.CharacterName}");
             if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
             {
                 Logging.Debug($"Error finding loadout with id {LoadoutID} for {Player.CharacterName}");
@@ -3674,7 +3615,6 @@ namespace UnturnedBlackout.Instances
         public void ShowGunCharm(LoadoutGunCharm gunCharm)
         {
             SelectedItemID = gunCharm.GunCharm.CharmID;
-            Logging.Debug($"Showing gun charm with id {gunCharm.GunCharm.CharmID} to {Player.CharacterName}");
             if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
             {
                 Logging.Debug($"Error finding loadout with id {LoadoutID} for {Player.CharacterName}");
@@ -3696,7 +3636,6 @@ namespace UnturnedBlackout.Instances
         public void ShowGunSkin(GunSkin skin)
         {
             SelectedItemID = skin.ID;
-            Logging.Debug($"Showing gun skin with id {skin.ID} to {Player.CharacterName}");
             if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
             {
                 Logging.Debug($"Error finding loadout with id {LoadoutID} for {Player.CharacterName}");
@@ -3716,7 +3655,6 @@ namespace UnturnedBlackout.Instances
         public void ShowKnife(LoadoutKnife knife)
         {
             SelectedItemID = knife.Knife.KnifeID;
-            Logging.Debug($"Showing knife with id {knife.Knife.KnifeID} to {Player.CharacterName}");
             if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
             {
                 Logging.Debug($"Error finding loadout with id {LoadoutID} for {Player.CharacterName}");
@@ -3738,7 +3676,6 @@ namespace UnturnedBlackout.Instances
         public void ShowPerk(LoadoutPerk perk)
         {
             SelectedItemID = perk.Perk.PerkID;
-            Logging.Debug($"Showing perk with id {perk.Perk.PerkID} to {Player.CharacterName}");
             if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
             {
                 Logging.Debug($"Error finding loadout with id {LoadoutID} for {Player.CharacterName}");
@@ -3760,7 +3697,6 @@ namespace UnturnedBlackout.Instances
         public void ShowGadget(LoadoutGadget gadget)
         {
             SelectedItemID = gadget.Gadget.GadgetID;
-            Logging.Debug($"Showing gadget with id {gadget.Gadget.GadgetID} to {Player.CharacterName}");
             if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
             {
                 Logging.Debug($"Error finding loadout with id {LoadoutID} for {Player.CharacterName}");
@@ -3782,7 +3718,6 @@ namespace UnturnedBlackout.Instances
         public void ShowCard(LoadoutCard card)
         {
             SelectedItemID = card.Card.CardID;
-            Logging.Debug($"Showing card with id {card.Card.CardID} to {Player.CharacterName}");
             if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
             {
                 Logging.Debug($"Error finding loadout with id {LoadoutID} for {Player.CharacterName}");
@@ -3804,7 +3739,6 @@ namespace UnturnedBlackout.Instances
         public void ShowGlove(LoadoutGlove glove)
         {
             SelectedItemID = glove.Glove.GloveID;
-            Logging.Debug($"Showing glove with id {glove.Glove.GloveID} to {Player.CharacterName}");
             if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
             {
                 Logging.Debug($"Error finding loadout with id {LoadoutID} for {Player.CharacterName}");
@@ -3826,7 +3760,6 @@ namespace UnturnedBlackout.Instances
         public void ShowKillstreak(LoadoutKillstreak killstreak)
         {
             SelectedItemID = killstreak.Killstreak.KillstreakID;
-            Logging.Debug($"Showing killstreak with id {killstreak.Killstreak.KillstreakID} to {Player.CharacterName}");
             if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
             {
                 Logging.Debug($"Error finding loadout with id {LoadoutID} for {Player.CharacterName}");
@@ -3864,7 +3797,6 @@ namespace UnturnedBlackout.Instances
 
         public void BuySelectedItem()
         {
-            Logging.Debug($"{Player.CharacterName} trying to buy selected item with id {SelectedItemID}, page {LoadoutPage}, tab {LoadoutTab}");
             if (!DB.PlayerData.TryGetValue(Player.CSteamID, out PlayerData data))
             {
                 Logging.Debug($"Error finding player data with steam id {Player.CSteamID}");
@@ -4203,7 +4135,6 @@ namespace UnturnedBlackout.Instances
 
         public void UnlockSelectedItem()
         {
-            Logging.Debug($"{Player.CharacterName} trying to unlock selected item with id {SelectedItemID}, page {LoadoutPage}, tab {LoadoutTab}");
             if (!DB.PlayerData.TryGetValue(Player.CSteamID, out PlayerData data))
             {
                 Logging.Debug($"Error finding player data with steam id {Player.CSteamID}");
@@ -4542,7 +4473,6 @@ namespace UnturnedBlackout.Instances
 
         public void EquipSelectedItem()
         {
-            Logging.Debug($"{Player.CharacterName} trying to equip selected item with id {SelectedItemID}, page {LoadoutPage}, tab {LoadoutTab}");
             var loadoutManager = Plugin.Instance.LoadoutManager;
             if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
             {
@@ -4792,7 +4722,6 @@ namespace UnturnedBlackout.Instances
 
         public void DequipSelectedItem()
         {
-            Logging.Debug($"{Player.CharacterName} trying to dequip selected item with id {SelectedItemID}, page {LoadoutPage}, tab {LoadoutTab}");
             var loadoutManager = Plugin.Instance.LoadoutManager;
             if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
             {
@@ -5005,11 +4934,9 @@ namespace UnturnedBlackout.Instances
             var lowerIndex = 10 * (pageNum - 1);
             var upperIndex = Math.Min(lowerIndex + 9, data.Count - 1);
 
-            Logging.Debug($"PAGE: {pageNum}, Lower Index: {lowerIndex}, Upper Index: {upperIndex}");
             var index = 0;
             for (int i = lowerIndex; i <= upperIndex; i++)
             {
-                Logging.Debug($"INDEX {index}, i: {i}");
                 var playerData = data[i];
                 var kills = (decimal)(playerData.Kills + playerData.HeadshotKills);
                 var deaths = (decimal)playerData.Deaths;
@@ -5053,7 +4980,6 @@ namespace UnturnedBlackout.Instances
         
         public void SearchLeaderboardPlayer(string input)
         {
-            Logging.Debug($"Searching for player: {input}");
             var data = GetLeaderboardData();
             
             for (int i = 0; i <= 9; i++)

@@ -200,7 +200,6 @@ namespace UnturnedBlackout
 
         public static Dictionary<int, List<Reward>> GetRankedRewardsFromString(string text)
         {
-            Logging.Debug("Getting ranked rewards from string");
             var rewardsRanked = new Dictionary<int, List<Reward>>();
 
             int rank = 0;
@@ -209,7 +208,6 @@ namespace UnturnedBlackout
 
             foreach (var rewardsTxt in text.Split(','))
             {
-                Logging.Debug($"Getting rewards for rank {rank}");
                 var rewards = new List<Reward>();
                 foreach (var rewardTxt in rewardsTxt.Split(' '))
                 {
@@ -218,7 +216,6 @@ namespace UnturnedBlackout
                         continue;
                     }
 
-                    Logging.Debug($"Found reward with text {rewardTxt}");
                     if (!letterRegex.IsMatch(rewardTxt) || !numberRegex.IsMatch(rewardTxt))
                     {
                         Logging.Debug($"There isn't a text or number in the reward text");
@@ -239,10 +236,8 @@ namespace UnturnedBlackout
                         continue;
                     }
 
-                    Logging.Debug($"Found reward with type {rewardType} and value {rewardValue}");
                     rewards.Add(new Reward(rewardType, rewardValue));
                 }
-                Logging.Debug($"Found total {rewards.Count} rewards for rank {rank}");
                 rewardsRanked.Add(rank, rewards);
                 rank++;
             }
@@ -250,10 +245,8 @@ namespace UnturnedBlackout
             return rewardsRanked;
         }
 
-
         public static List<PercentileReward> GetPercentileRewardsFromString(string text)
         {
-            Logging.Debug("Getting percentile rewards from string");
             var percentileRewards = new List<PercentileReward>();
 
             var letterRegex = new Regex("([a-zA-Z]+)");
@@ -265,7 +258,6 @@ namespace UnturnedBlackout
 
             foreach (var percRewards in text.Split(','))
             {
-                Logging.Debug($"Getting percentage in {percRewards}");
                 if (!percentRegex.IsMatch(percRewards))
                 {
                     Logging.Debug("Could'nt find percentage");
@@ -281,7 +273,6 @@ namespace UnturnedBlackout
 
                 var upperPercentile = lowerPercentile + percentage;
                 var rewardsTxt = percRewards.Remove(0, percRewards.IndexOf('-') + 1);
-                Logging.Debug($"Getting rewards from reward text {rewardsTxt}");
                 var rewards = new List<Reward>();
                 foreach (var rewardTxt in rewardsTxt.Split(' '))
                 {
@@ -290,7 +281,6 @@ namespace UnturnedBlackout
                         continue;
                     }
 
-                    Logging.Debug($"Found reward with text {rewardTxt}");
                     if (!letterRegex.IsMatch(rewardTxt) || !numberRegex.IsMatch(rewardTxt))
                     {
                         Logging.Debug($"There isn't a text or number in the reward text");
@@ -311,10 +301,8 @@ namespace UnturnedBlackout
                         continue;
                     }
 
-                    Logging.Debug($"Found reward with type {rewardType} and value {rewardValue}");
                     rewards.Add(new Reward(rewardType, rewardValue));
                 }
-                Logging.Debug($"Found total {rewards.Count} rewards for lower percentile {lowerPercentile} and upper percentile {upperPercentile}");
                 percentileRewards.Add(new PercentileReward(lowerPercentile, upperPercentile, rewards));
                 lowerPercentile = upperPercentile;
             }
@@ -324,15 +312,18 @@ namespace UnturnedBlackout
 
         public static Dictionary<EQuestCondition, List<int>> GetQuestConditionsFromString(string text)
         {
-            Logging.Debug("Getting quest conditions from string");
             var questConditions = new Dictionary<EQuestCondition, List<int>>();
 
             var letterRegex = new Regex("([a-zA-Z]+)");
-            var numberRegex = new Regex(@"([0-9-]+)");
+            var numberRegex = new Regex("([0-9-]+)");
 
             foreach (var conditionTxt in text.Split(','))
             {
-                Logging.Debug($"Getting condition with text {conditionTxt}");
+                if (string.IsNullOrEmpty(conditionTxt))
+                {
+                    continue;
+                }
+                
                 if (!letterRegex.IsMatch(conditionTxt) || !numberRegex.IsMatch(conditionTxt))
                 {
                     Logging.Debug($"There isn't a text or number in the condition text");
@@ -353,7 +344,6 @@ namespace UnturnedBlackout
                     continue;
                 }
 
-                Logging.Debug($"Found condition with type {condition} and value {conditionValue}");
                 if (!questConditions.ContainsKey(condition))
                 {
                     questConditions.Add(condition, new List<int>());
