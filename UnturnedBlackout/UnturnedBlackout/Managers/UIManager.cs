@@ -87,8 +87,13 @@ namespace UnturnedBlackout.Managers
 
         public void UnregisterUIHandler(UnturnedPlayer player)
         {
-            UIHandlers.RemoveAll(k => k.SteamID == player.CSteamID);
-            UIHandlersLookup.Remove(player.CSteamID);
+            if (UIHandlersLookup.TryGetValue(player.CSteamID, out UIHandler handler))
+            {
+                handler.Destroy();
+
+                UIHandlers.Remove(handler);
+                UIHandlersLookup.Remove(player.CSteamID);
+            }
         }
 
         public void ShowMenuUI(UnturnedPlayer player)

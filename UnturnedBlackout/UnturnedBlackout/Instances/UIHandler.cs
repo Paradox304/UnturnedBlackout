@@ -4,6 +4,7 @@ using SDG.NetTransport;
 using SDG.Unturned;
 using Steamworks;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -14,6 +15,7 @@ using UnturnedBlackout.Enums;
 using UnturnedBlackout.GameTypes;
 using UnturnedBlackout.Managers;
 using UnturnedBlackout.Models.UI;
+using Timer = System.Timers.Timer;
 
 namespace UnturnedBlackout.Instances
 {
@@ -32,6 +34,8 @@ namespace UnturnedBlackout.Instances
         public PlayerLoadout PlayerLoadout { get; set; }
         public PlayerData PlayerData { get; set; }
 
+        public Coroutine TimerRefresher { get; set; }
+        
         public ITransportConnection TransportConnection { get; set; }
         public Config Config { get; set; }
 
@@ -99,10 +103,21 @@ namespace UnturnedBlackout.Instances
 
             PlayerData = data;
             PlayerLoadout = loadout;
+            
+            TimerRefresher = Plugin.Instance.StartCoroutine(RefreshTimer());
+            
             BuildPages();
             ResetUIValues();
         }
 
+        public void Destroy()
+        {
+            if (TimerRefresher != null)
+            {
+                Plugin.Instance.StopCoroutine(TimerRefresher);
+            }
+        }
+        
         public void BuildPages()
         {
             BuildLoadoutPages();
@@ -5057,10 +5072,6 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Quest Target TEXT {i}", $"{quest.Amount}/{quest.Quest.TargetAmount}");
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Quest Reward TEXT {i}", $"+{quest.Quest.XP}XP");
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Quest Bar Fill {i}", quest.Amount == 0 ? " " : new string(' ', Math.Min(183, quest.Amount * 183 / quest.Quest.TargetAmount)));
-                if (i == 0)
-                {
-                    EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Quest Expire TEXT", $"EXPIRES IN: {(quest.QuestEnd - DateTime.UtcNow).ToString(@"hh\:mm\:ss")}");
-                }
             }
         }
         
@@ -5086,6 +5097,20 @@ namespace UnturnedBlackout.Instances
             {
                 await Plugin.Instance.DBManager.ChangePlayerMusicAsync(SteamID, isMusic);
             });
+        } 
+
+        public IEnumerator RefreshTimer()
+        {
+            while (PlayerData != null)
+            {
+                yield return new WaitForSeconds(1f);
+                if (MainPage == EMainPage.Leaderboard)
+                {
+                    EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Leaderboards Reset TEXT", GetLeaderboardRefreshTime());
+                }
+
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Quest Expire TEXT", $"EXPIRES IN: {(DateTimeOffset.UtcNow > PlayerData.Quests[0].QuestEnd ? "00:00:00" : (DateTimeOffset.UtcNow - PlayerData.Quests[0].QuestEnd).ToString(@"hh\:mm\:ss"))}");
+            }
         }
     }
 }
