@@ -21,7 +21,7 @@ namespace UnturnedBlackout.Models.Data
         public ushort Lethal { get; set; }
         public List<int> Killstreaks { get; set; }
         public List<int> Perks { get; set; }
-        public ushort Glove { get; set; }
+        public int Glove { get; set; }
         public int Card { get; set; }
 
         public LoadoutData(Loadout loadout)
@@ -45,7 +45,7 @@ namespace UnturnedBlackout.Models.Data
         }
 
         [JsonConstructor]
-        public LoadoutData(string loadoutName, ushort primary, int primarySkin, ushort primaryGunCharm, List<ushort> primaryAttachments, ushort secondary, int secondarySkin, ushort secondaryGunCharm, List<ushort> secondaryAttachments, ushort knife, ushort tactical, ushort lethal, List<int> killstreaks, List<int> perks, ushort glove, int card)
+        public LoadoutData(string loadoutName, ushort primary, int primarySkin, ushort primaryGunCharm, List<ushort> primaryAttachments, ushort secondary, int secondarySkin, ushort secondaryGunCharm, List<ushort> secondaryAttachments, ushort knife, ushort tactical, ushort lethal, List<int> killstreaks, List<int> perks, int glove, int card)
         {
             LoadoutName = loadoutName;
             Primary = primary;

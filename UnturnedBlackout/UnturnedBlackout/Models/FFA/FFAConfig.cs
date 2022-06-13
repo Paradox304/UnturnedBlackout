@@ -1,4 +1,5 @@
-﻿using UnturnedBlackout.Models.Global;
+﻿using System.Collections.Generic;
+using UnturnedBlackout.Models.Global;
 
 namespace UnturnedBlackout.Models.FFA
 {
@@ -8,6 +9,7 @@ namespace UnturnedBlackout.Models.FFA
         public int EndSeconds { get; set; }
 
         public Kit Kit { get; set; }
+        public List<TeamGlove> TeamGloves { get; set; }
         public string KillFeedHexCode { get; set; }
         public string ChatPlayerHexCode { get; set; }
         public string ChatMessageHexCode { get; set; }
@@ -36,11 +38,12 @@ namespace UnturnedBlackout.Models.FFA
 
         }
 
-        public FFAConfig(int startSeconds, int endSeconds, Kit kit, string killFeedHexCode, string chatPlayerHexCode, string chatMessageHexCode, int xPPerKill, int xPPerMeleeKill, int xPPerKillHeadshot, int xPPerLethalKill, int xPPerAssist, int baseXPMK, int increaseXPPerMK, int mKSeconds, int shutdownXP, int dominationXP, float winMultipler, int scoreLimit, int spawnProtectionSeconds, int respawnSeconds)
+        public FFAConfig(int startSeconds, int endSeconds, Kit kit, List<TeamGlove> teamGloves, string killFeedHexCode, string chatPlayerHexCode, string chatMessageHexCode, int xPPerKill, int xPPerMeleeKill, int xPPerKillHeadshot, int xPPerLethalKill, int xPPerAssist, int baseXPMK, int increaseXPPerMK, int mKSeconds, int shutdownXP, int dominationXP, float winMultipler, int scoreLimit, int spawnProtectionSeconds, int respawnSeconds)
         {
             StartSeconds = startSeconds;
             EndSeconds = endSeconds;
             Kit = kit;
+            TeamGloves = teamGloves;
             KillFeedHexCode = killFeedHexCode;
             ChatPlayerHexCode = chatPlayerHexCode;
             ChatMessageHexCode = chatMessageHexCode;

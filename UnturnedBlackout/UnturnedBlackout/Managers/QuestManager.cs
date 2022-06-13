@@ -52,7 +52,8 @@ namespace UnturnedBlackout.Managers
 
                     Logging.Debug($"Condition {condition.Key} found in questConditions, checking condition value {conditionValue}");
 
-                    if (!condition.Value.Contains(conditionValue) && !condition.Value.Contains(-1))
+                    var isConditionMinimum = IsConditionMinimum(condition.Key);
+                    if (!condition.Value.Contains(conditionValue) && !condition.Value.Exists(k => isConditionMinimum && conditionValue >= k) && !condition.Value.Contains(-1))
                     {
                         Logging.Debug($"Condition {condition.Key} value {conditionValue} not found in condition's value and -1 is also not found in condition's value, skipping");
                         conditionsMet = false;
@@ -79,6 +80,16 @@ namespace UnturnedBlackout.Managers
                     await db.IncreasePlayerQuestAmountAsync(steamID, quest.Quest.QuestID, 1);
                 });
             }
+        }
+
+        public bool IsConditionMinimum(EQuestCondition condition)
+        {
+            var conditionInt = (int)condition;
+            if (conditionInt >= 9 && conditionInt <= 12)
+            {
+                return true;
+            }
+            return false;
         }
     }
 }

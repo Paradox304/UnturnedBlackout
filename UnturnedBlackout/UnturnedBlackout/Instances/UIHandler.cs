@@ -66,6 +66,7 @@ namespace UnturnedBlackout.Instances
         public Dictionary<int, PageGun> ShotgunPages { get; set; }
         public Dictionary<int, PageGun> ARPages { get; set; }
         public Dictionary<int, PageGun> SniperPages { get; set; }
+        public Dictionary<int, PageGun> CarbinePages { get; set; }
         public Dictionary<ushort, Dictionary<EAttachment, Dictionary<int, PageAttachment>>> AttachmentPages { get; set; }
         public Dictionary<int, PageGunCharm> GunCharmPages { get; set; }
         public Dictionary<ushort, Dictionary<int, PageGunSkin>> GunSkinPages { get; set; }
@@ -102,78 +103,6 @@ namespace UnturnedBlackout.Instances
             ResetUIValues();
         }
 
-        public void ShowUI()
-        {
-            EffectManager.sendUIEffect(ID, Key, TransportConnection, true);
-            Player.Player.enablePluginWidgetFlag(EPluginWidgetFlags.Modal);
-            SetupMainMenu();
-        }
-
-        public void HideUI()
-        {
-            EffectManager.askEffectClearByID(ID, TransportConnection);
-            Player.Player.disablePluginWidgetFlag(EPluginWidgetFlags.Modal);
-            ResetUIValues();
-        }
-
-        public void ResetUIValues()
-        {
-            MainPage = EMainPage.None;
-        }
-
-        public void SetupMainMenu()
-        {
-            if (!Plugin.Instance.DBManager.PlayerData.TryGetValue(SteamID, out PlayerData data))
-            {
-                return;
-            }
-
-            EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Player Icon", data.AvatarLink);
-            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Player Name", data.SteamName);
-            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Unbox BUTTON", false);
-            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Store BUTTON", false);
-            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Achievements BUTTON", false);
-            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Quest BUTTON", false);
-            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Battlepass BUTTON", false);
-
-            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Version TEXT", Plugin.Instance.Translate("Version").ToRich());
-            ClearChat();
-            ShowXP();
-            OnMusicChanged(data.Music);
-        }
-
-        public void ReloadMainMenu()
-        {
-            // Code to update the balance or sumthin
-        }
-
-        public void ShowXP()
-        {
-            if (!Plugin.Instance.DBManager.PlayerData.TryGetValue(SteamID, out PlayerData data))
-            {
-                return;
-            }
-
-            var ui = Plugin.Instance.UIManager;
-            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER XP Num", Plugin.Instance.Translate("Level_Show", data.Level).ToRich());
-            EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER XP Icon", Plugin.Instance.DBManager.Levels.TryGetValue((int)data.Level, out XPLevel level) ? level.IconLinkMedium : "");
-            int spaces = 0;
-            if (data.TryGetNeededXP(out int neededXP))
-            {
-                spaces = Math.Min(176, neededXP == 0 ? 0 : (int)(data.XP * 176 / neededXP));
-            }
-            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER XP Bar Fill", spaces == 0 ? " " : new string(' ', spaces));
-        }
-
-        public void ClearChat()
-        {
-            var steamPlayer = Player.SteamPlayer();
-            for (int i = 0; i <= 10; i++)
-            {
-                ChatManager.serverSendMessage("", Color.white, toPlayer: steamPlayer);
-            }
-        }
-
         public void BuildPages()
         {
             BuildLoadoutPages();
@@ -183,6 +112,7 @@ namespace UnturnedBlackout.Instances
             BuildSniperPages();
             BuildLMGPages();
             BuildARPages();
+            BuildCarbinePages();
             BuildGunSkinPages();
             BuildGunCharmPages();
             BuildAttachmentPages();
@@ -395,6 +325,35 @@ namespace UnturnedBlackout.Instances
                 SniperPages.Add(page, new PageGun(page, gunItems));
             }
             Logging.Debug($"Created {SniperPages.Count} sniper pages for {Player.CharacterName}");
+        }
+        
+        public void BuildCarbinePages()
+        {
+            var guns = PlayerLoadout.Guns.Values.Where(k => k.Gun.GunType == EGun.CARBINES).OrderBy(k => k.Gun.LevelRequirement).ToList();
+            var gunItems = new Dictionary<int, LoadoutGun>();
+            CarbinePages = new Dictionary<int, PageGun>();
+            int index = 0;
+            int page = 1;
+            Logging.Debug($"Creating carbine pages for {Player.CharacterName}, found {guns.Count()} snipers");
+
+            foreach (var gun in guns)
+            {
+                gunItems.Add(index, gun);
+                if (index == MaxItemsPerPage)
+                {
+                    CarbinePages.Add(page, new PageGun(page, gunItems));
+                    index = 0;
+                    page++;
+                    gunItems = new Dictionary<int, LoadoutGun>();
+                    continue;
+                }
+                index++;
+            }
+            if (gunItems.Count != 0)
+            {
+                CarbinePages.Add(page, new PageGun(page, gunItems));
+            }
+            Logging.Debug($"Created {CarbinePages.Count} carbine pages for {Player.CharacterName}");
         }
 
         public void BuildGunSkinPages()
@@ -699,6 +658,80 @@ namespace UnturnedBlackout.Instances
             }
             Logging.Debug($"Created {KillstreakPages.Count} killstreak pages for {Player.CharacterName}");
         }
+
+        // Main Page
+
+        public void ShowUI()
+        {
+            EffectManager.sendUIEffect(ID, Key, TransportConnection, true);
+            Player.Player.enablePluginWidgetFlag(EPluginWidgetFlags.Modal);
+            SetupMainMenu();
+        }
+
+        public void HideUI()
+        {
+            EffectManager.askEffectClearByID(ID, TransportConnection);
+            Player.Player.disablePluginWidgetFlag(EPluginWidgetFlags.Modal);
+            ResetUIValues();
+        }
+
+        public void ResetUIValues()
+        {
+            MainPage = EMainPage.None;
+        }
+
+        public void SetupMainMenu()
+        {
+            if (!Plugin.Instance.DBManager.PlayerData.TryGetValue(SteamID, out PlayerData data))
+            {
+                return;
+            }
+
+            EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Player Icon", data.AvatarLink);
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Player Name", data.SteamName);
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Unbox BUTTON", false);
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Store BUTTON", false);
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Achievements BUTTON", false);
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Battlepass BUTTON", false);
+
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Version TEXT", Plugin.Instance.Translate("Version").ToRich());
+            ClearChat();
+            ShowXP();
+            ShowQuestCompletion();
+            OnMusicChanged(data.Music);
+        }
+
+        public void ReloadMainMenu()
+        {
+            // Code to update the balance or sumthin
+        }
+
+        public void ShowXP()
+        {
+            if (!Plugin.Instance.DBManager.PlayerData.TryGetValue(SteamID, out PlayerData data))
+            {
+                return;
+            }
+
+            var ui = Plugin.Instance.UIManager;
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER XP Num", Plugin.Instance.Translate("Level_Show", data.Level).ToRich());
+            EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER XP Icon", Plugin.Instance.DBManager.Levels.TryGetValue((int)data.Level, out XPLevel level) ? level.IconLinkMedium : "");
+            int spaces = 0;
+            if (data.TryGetNeededXP(out int neededXP))
+            {
+                spaces = Math.Min(176, neededXP == 0 ? 0 : (int)(data.XP * 176 / neededXP));
+            }
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER XP Bar Fill", spaces == 0 ? " " : new string(' ', spaces));
+        }
+        
+        public void ClearChat()
+        {
+            var steamPlayer = Player.SteamPlayer();
+            for (int i = 0; i <= 10; i++)
+            {
+                ChatManager.serverSendMessage("", Color.white, toPlayer: steamPlayer);
+            }
+        }        
 
         // Play Page
 
@@ -1664,6 +1697,24 @@ namespace UnturnedBlackout.Instances
                         ShowGunPage(firstPage);
                         break;
                     }
+
+                case ELoadoutTab.CARBINES:
+                    {
+                        if (!CarbinePages.TryGetValue(1, out PageGun firstPage))
+                        {
+                            Logging.Debug($"Error finding first page for carbines for {Player.CharacterName}");
+                            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
+                            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+                            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", "");
+                            return;
+                        }
+
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
+                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
+
+                        ShowGunPage(firstPage);
+                        break;
+                    }
             }
         }
 
@@ -1975,6 +2026,18 @@ namespace UnturnedBlackout.Instances
                         if (!SniperPages.TryGetValue(LoadoutTabPageID + 1, out PageGun nextPage) && !SniperPages.TryGetValue(1, out nextPage))
                         {
                             Logging.Debug($"Error finding next page for snipers for {Player.CharacterName}");
+                            return;
+                        }
+
+                        ShowGunPage(nextPage);
+                        break;
+                    }
+
+                case ELoadoutTab.CARBINES:
+                    {
+                        if (!CarbinePages.TryGetValue(LoadoutTabPageID + 1, out PageGun nextPage) && !CarbinePages.TryGetValue(1, out nextPage))
+                        {
+                            Logging.Debug($"Error finding next page for carbines for {Player.CharacterName}");
                             return;
                         }
 
@@ -2299,6 +2362,18 @@ namespace UnturnedBlackout.Instances
                         ShowGunPage(prevPage);
                         break;
                     }
+
+                case ELoadoutTab.CARBINES:
+                    {
+                        if (!CarbinePages.TryGetValue(LoadoutTabPageID - 1, out PageGun prevPage) && !CarbinePages.TryGetValue(CarbinePages.Keys.Max(), out prevPage))
+                        {
+                            Logging.Debug($"Error finding next page for carbines for {Player.CharacterName}");
+                            return;
+                        }
+
+                        ShowGunPage(prevPage);
+                        break;
+                    }
             }
         }
 
@@ -2609,6 +2684,18 @@ namespace UnturnedBlackout.Instances
                         if (!SniperPages.TryGetValue(LoadoutTabPageID, out PageGun page))
                         {
                             Logging.Debug($"Error finding current page for snipers for {Player.CharacterName}");
+                            return;
+                        }
+
+                        ShowGunPage(page);
+                        break;
+                    }
+
+                case ELoadoutTab.CARBINES:
+                    {
+                        if (!CarbinePages.TryGetValue(LoadoutTabPageID, out PageGun page))
+                        {
+                            Logging.Debug($"Error finding current page for carbines for {Player.CharacterName}");
                             return;
                         }
 
@@ -3068,7 +3155,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutPage.Glove:
                     {
-                        if (!PlayerLoadout.Gloves.TryGetValue((ushort)SelectedItemID, out LoadoutGlove glove))
+                        if (!PlayerLoadout.Gloves.TryGetValue((int)SelectedItemID, out LoadoutGlove glove))
                         {
                             Logging.Debug($"Error finding glove with id {SelectedItemID} for {Player.CharacterName}");
                             return;
@@ -3495,6 +3582,24 @@ namespace UnturnedBlackout.Instances
                         if (!ARPages.TryGetValue(LoadoutTabPageID, out PageGun page))
                         {
                             Logging.Debug($"Error finding ar page {LoadoutTabPageID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        if (!page.Guns.TryGetValue(selected, out LoadoutGun gun))
+                        {
+                            Logging.Debug($"Error finding gun at {selected} for page with id {LoadoutTabPageID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        ShowGun(gun);
+                        break;
+                    }
+
+                case ELoadoutTab.CARBINES:
+                    {
+                        if (!CarbinePages.TryGetValue(LoadoutTabPageID, out PageGun page))
+                        {
+                            Logging.Debug($"Error finding carbine page {LoadoutTabPageID} for {Player.CharacterName}");
                             return;
                         }
 
@@ -4071,7 +4176,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutPage.Glove:
                     {
-                        if (!PlayerLoadout.Gloves.TryGetValue((ushort)SelectedItemID, out LoadoutGlove glove))
+                        if (!PlayerLoadout.Gloves.TryGetValue((int)SelectedItemID, out LoadoutGlove glove))
                         {
                             Logging.Debug($"Error finding glove with id {SelectedItemID} for {Player.CharacterName}");
                             return;
@@ -4410,7 +4515,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutPage.Glove:
                     {
-                        if (!PlayerLoadout.Gloves.TryGetValue((ushort)SelectedItemID, out LoadoutGlove glove))
+                        if (!PlayerLoadout.Gloves.TryGetValue((int)SelectedItemID, out LoadoutGlove glove))
                         {
                             Logging.Debug($"Error finding glove with id {SelectedItemID} for {Player.CharacterName}");
                             return;
@@ -4652,7 +4757,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutPage.Glove:
                     {
-                        if (!PlayerLoadout.Gloves.TryGetValue((ushort)SelectedItemID, out LoadoutGlove glove))
+                        if (!PlayerLoadout.Gloves.TryGetValue((int)SelectedItemID, out LoadoutGlove glove))
                         {
                             Logging.Debug($"Error finding glove with id {SelectedItemID} for {Player.CharacterName}");
                             return;
@@ -5007,12 +5112,40 @@ namespace UnturnedBlackout.Instances
         public string GetLeaderboardRefreshTime() =>
             LeaderboardPage switch
             {
-                ELeaderboardPage.Daily => (DB.ServerOptions.DailyLeaderboardWipe.UtcDateTime - DateTime.UtcNow).ToString(@"dd\:hh\:mm"),
-                ELeaderboardPage.Weekly => (DB.ServerOptions.WeeklyLeaderboardWipe.UtcDateTime - DateTime.UtcNow).ToString(@"dd\:hh\:mm"),
+                ELeaderboardPage.Daily => (DB.ServerOptions.DailyLeaderboardWipe.UtcDateTime - DateTime.UtcNow).ToString(@"hh\:mm\:ss"),
+                ELeaderboardPage.Weekly => (DB.ServerOptions.WeeklyLeaderboardWipe.UtcDateTime - DateTime.UtcNow).ToString(@"dd\:hh\:mm\:ss"),
                 _ => "00:00:00"
             };
 
+        // Quest
+
+        public void ShowQuests()
+        {
+            var quests = PlayerData.Quests.OrderBy(k => (int)k.Quest.QuestTier).ToList();
+            var maxCount = Math.Min(5, quests.Count);
+            for (int i = 0; i < maxCount; i++)
+            {
+                var quest = quests[i];
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Quest Complete {i}", quest.Amount >= quest.Quest.TargetAmount);
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Quest Description TEXT {i}", quest.Quest.QuestDesc);
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Quest Target TEXT {i}", $"{quest.Amount}/{quest.Quest.TargetAmount}");
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Quest Reward TEXT {i}", $"+{quest.Quest.XP}XP");
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Quest Bar Fill {i}", quest.Amount == 0 ? " " : new string(' ', Math.Min(183, quest.Amount * 183 / quest.Quest.TargetAmount)));
+                if (i == 0)
+                {
+                    EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Quest Expire TEXT", $"EXPIRES IN: {(quest.QuestEnd - DateTime.UtcNow).ToString(@"hh\:mm\:ss")}");
+                }
+            }
+        }
         
+        public void ShowQuestCompletion()
+        {
+            var completedQuests = PlayerData.Quests.Count(k => k.Amount >= k.Quest.TargetAmount);
+            var totalQuests = PlayerData.Quests.Count;
+
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Quest Complete", completedQuests == totalQuests);
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Quest Complete Count TEXT", $"{completedQuests}/{totalQuests}");
+        }
         
         // Events
 

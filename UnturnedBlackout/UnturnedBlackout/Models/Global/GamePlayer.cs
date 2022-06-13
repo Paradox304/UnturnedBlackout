@@ -332,11 +332,11 @@ namespace UnturnedBlackout.Models.Global
         }
 
         // Equipping and refilling on guns on respawn
-        public void OnRevived(Kit kit)
+        public void OnRevived(Kit kit, List<TeamGlove> gloves)
         {
             if (IsPendingLoadoutChange)
             {
-                Plugin.Instance.LoadoutManager.GiveLoadout(this, kit);
+                Plugin.Instance.LoadoutManager.GiveLoadout(this, kit, gloves);
                 IsPendingLoadoutChange = false;
                 Plugin.Instance.UIManager.ClearDeathUI(this);
                 return;
@@ -456,7 +456,7 @@ namespace UnturnedBlackout.Models.Global
             }
 
             var flagCarryingSpeed = isCarryingFlag ? Plugin.Instance.Configuration.Instance.CTF.FlagCarryingSpeed : 0f;
-            var updatedMovement = 1f;
+            var updatedMovement = 1f + flagCarryingSpeed;
             if (Player.Player.equipment.itemID == (ActiveLoadout.Primary?.Gun?.GunID ?? 0) || Player.Player.equipment.itemID == (ActiveLoadout.PrimarySkin?.SkinID ?? 0))
             {
                 updatedMovement = (PrimaryMovementChange + SecondaryMovementChange) + (isADS ? PrimaryMovementChangeADS : 0) + flagCarryingSpeed;

@@ -146,7 +146,7 @@ namespace UnturnedBlackout.GameTypes
                 if (player.Team == wonTeam)
                 {
                     var xp = player.XP * Config.TDM.WinMultipler;
-                    TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.QuestManager.CheckQuest(player.GamePlayer.SteamID, EQuestType.Win, new Dictionary<EQuestCondition, int> { { EQuestCondition.Map, Location.LocationID }, { EQuestCondition.Gamemode, (int)GameMode } }));
+                    TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.QuestManager.CheckQuest(player.GamePlayer.SteamID, EQuestType.Win, new Dictionary<EQuestCondition, int> { { EQuestCondition.Map, Location.LocationID }, { EQuestCondition.Gamemode, (int)GameMode }, { EQuestCondition.WinKills, player.Kills } }));
                     ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DBManager.IncreasePlayerXPAsync(player.GamePlayer.SteamID, (uint)xp));
                 }
                 Plugin.Instance.UIManager.SetupPreEndingUI(player.GamePlayer, EGameType.TDM, player.Team.TeamID == wonTeam.TeamID, BlueTeam.Score, RedTeam.Score, BlueTeam.Info.TeamName, RedTeam.Info.TeamName);
@@ -449,14 +449,15 @@ namespace UnturnedBlackout.GameTypes
                 {
                     kPlayer.MultipleKills = 1;
                 }
+                questConditions.Add(EQuestCondition.TargetMK, kPlayer.MultipleKills);
 
                 if (victimKS > Config.ShutdownKillStreak)
                 {
                     xpGained += Config.TDM.ShutdownXP;
                     xpText += Plugin.Instance.Translate("Shutdown_Kill").ToRich() + "\n";
+                    Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer.SteamID, EQuestType.Shutdown, questConditions);
                 }
                 
-                questConditions.Add(EQuestCondition.TargetMK, kPlayer.MultipleKills);
                 if (kPlayer.PlayersKilled.ContainsKey(tPlayer.GamePlayer.SteamID))
                 {
                     kPlayer.PlayersKilled[tPlayer.GamePlayer.SteamID] += 1;
@@ -464,12 +465,14 @@ namespace UnturnedBlackout.GameTypes
                     {
                         xpGained += Config.TDM.DominationXP;
                         xpText += Plugin.Instance.Translate("Domination_Kill").ToRich() + "\n";
+                        Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer.SteamID, EQuestType.Domination, questConditions);
                     }
                 }
                 else
                 {
                     kPlayer.PlayersKilled.Add(tPlayer.GamePlayer.SteamID, 1);
                 }
+                
                 kPlayer.LastKill = DateTime.UtcNow;
                 kPlayer.XP += xpGained;
                 Players.Sort((x, y) => y.Kills.CompareTo(x.Kills));
@@ -583,7 +586,7 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
-            tPlayer.GamePlayer.OnRevived(tPlayer.Team.Info.TeamKits[UnityEngine.Random.Range(0, tPlayer.Team.Info.TeamKits.Count)]);
+            tPlayer.GamePlayer.OnRevived(tPlayer.Team.Info.TeamKits[UnityEngine.Random.Range(0, tPlayer.Team.Info.TeamKits.Count)], tPlayer.Team.Info.TeamGloves);
         }
 
         public override void OnPlayerRespawn(GamePlayer player, ref Vector3 respawnPosition)
@@ -667,7 +670,7 @@ namespace UnturnedBlackout.GameTypes
         public void GiveLoadout(TDMPlayer player)
         {
             player.GamePlayer.Player.Player.inventory.ClearInventory();
-            Plugin.Instance.LoadoutManager.GiveLoadout(player.GamePlayer, player.Team.Info.TeamKits[UnityEngine.Random.Range(0, player.Team.Info.TeamKits.Count)]);
+            Plugin.Instance.LoadoutManager.GiveLoadout(player.GamePlayer, player.Team.Info.TeamKits[UnityEngine.Random.Range(0, player.Team.Info.TeamKits.Count)], player.Team.Info.TeamGloves);
         }
 
         public void SpawnPlayer(TDMPlayer player)

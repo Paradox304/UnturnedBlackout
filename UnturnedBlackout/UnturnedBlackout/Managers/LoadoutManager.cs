@@ -304,7 +304,7 @@ namespace UnturnedBlackout.Managers
             });
         }
 
-        public void EquipGlove(UnturnedPlayer player, int loadoutID, ushort newGlove)
+        public void EquipGlove(UnturnedPlayer player, int loadoutID, int newGlove)
         {
             Logging.Debug($"{player.CharacterName} is trying to switch glove to {newGlove} for loadout with id {loadoutID}");
             if (!DB.PlayerLoadouts.TryGetValue(player.CSteamID, out PlayerLoadout loadout))
@@ -575,7 +575,7 @@ namespace UnturnedBlackout.Managers
             });
         }
 
-        public void GiveLoadout(GamePlayer player, Kit kit)
+        public void GiveLoadout(GamePlayer player, Kit kit, List<TeamGlove> gloves)
         {
             Logging.Debug($"Giving loadout to {player.Player.CharacterName}");
             var inv = player.Player.Player.inventory;
@@ -605,7 +605,8 @@ namespace UnturnedBlackout.Managers
             // Giving glove to player
             if (activeLoadout.Glove != null)
             {
-                inv.forceAddItem(new Item(activeLoadout.Glove.Glove.GloveID, true), true);
+                var glove = gloves.FirstOrDefault(k => k.GloveID == activeLoadout.Glove.Glove.GloveID);
+                inv.forceAddItem(new Item(glove.ItemID, true), true);
             }
 
             // Giving primary to player

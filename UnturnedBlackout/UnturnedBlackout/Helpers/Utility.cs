@@ -204,7 +204,7 @@ namespace UnturnedBlackout
             var rewardsRanked = new Dictionary<int, List<Reward>>();
 
             int rank = 0;
-            var letterRegex = new Regex("([a-zA-Z]*)");
+            var letterRegex = new Regex("([a-zA-Z]+)");
             var numberRegex = new Regex(@"(\d+)");
 
             foreach (var rewardsTxt in text.Split(','))
@@ -256,7 +256,7 @@ namespace UnturnedBlackout
             Logging.Debug("Getting percentile rewards from string");
             var percentileRewards = new List<PercentileReward>();
 
-            var letterRegex = new Regex("([a-zA-Z]*)");
+            var letterRegex = new Regex("([a-zA-Z]+)");
             var numberRegex = new Regex(@"(\d+)");
 
             var percentRegex = new Regex("([0-9]*)%");
@@ -327,7 +327,7 @@ namespace UnturnedBlackout
             Logging.Debug("Getting quest conditions from string");
             var questConditions = new Dictionary<EQuestCondition, List<int>>();
 
-            var letterRegex = new Regex("([a-zA-Z]*)");
+            var letterRegex = new Regex("([a-zA-Z]+)");
             var numberRegex = new Regex(@"([0-9-]+)");
 
             foreach (var conditionTxt in text.Split(','))

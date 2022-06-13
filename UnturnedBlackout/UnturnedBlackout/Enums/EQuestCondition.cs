@@ -17,6 +17,10 @@ namespace UnturnedBlackout.Enums
         Gamemode, // Gamemode you are playing on
         TargetMK, // Amount of multi kill you need to get
         TargetKS, // Amount of killstreak you need to get
+        WinKills, // Amount of kills at the time of match win
+        WinTags, // Amount of dogtags collected at the time of match win
+        WinFlagsCaptured, // Amount of flags captured at the time of match win
+        WinFlagsSaved, // Amount of flags saved at the time of match win
         Special // FOR SPECIAL TYPE OF QUESTS [DO NOT SET THIS ON YOUR OWN, ASK ME BEFOREHAND]
     }
 }

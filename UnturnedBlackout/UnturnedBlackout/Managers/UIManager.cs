@@ -1050,6 +1050,9 @@ namespace UnturnedBlackout.Managers
                 case "SERVER Leaderboards BUTTON":
                     handler.ShowLeaderboards();
                     return;
+                case "SERVER Quest BUTTON":
+                    handler.ShowQuests();
+                    return;
                 case "SERVER Exit BUTTON":
                     Provider.kick(player.channel.owner.playerID.steamID, "You exited");
                     return;
@@ -1196,6 +1199,9 @@ namespace UnturnedBlackout.Managers
                     return;
                 case "SERVER Item SRs BUTTON":
                     handler.ShowLoadoutTab(ELoadoutTab.SNIPER_RIFLES);
+                    return;
+                case "SERVER Item Carbines BUTTON":
+                    handler.ShowLoadoutTab(ELoadoutTab.CARBINES);
                     return;
                 case "SERVER Item Back BUTTON":
                     handler.ReloadLoadout();

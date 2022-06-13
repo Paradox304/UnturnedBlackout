@@ -2,7 +2,7 @@
 {
     public class Glove
     {
-        public ushort GloveID { get; set; }
+        public int GloveID { get; set; }
         public string GloveName { get; set; }
         public string GloveDesc { get; set; }
         public string GloveRarity { get; set; }
@@ -12,7 +12,7 @@
         public int Coins { get; set; }
         public int LevelRequirement { get; set; }
 
-        public Glove(ushort gloveID, string gloveName, string gloveDesc, string gloveRarity, string iconLink, int scrapAmount, int buyPrice, int coins, int levelRequirement)
+        public Glove(int gloveID, string gloveName, string gloveDesc, string gloveRarity, string iconLink, int scrapAmount, int buyPrice, int coins, int levelRequirement)
         {
             GloveID = gloveID;
             GloveName = gloveName;
