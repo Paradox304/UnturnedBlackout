@@ -165,7 +165,7 @@ namespace UnturnedBlackout.Models.Global
                 };
                 TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.QuestManager.CheckQuest(SteamID, EQuestType.GadgetsUsed, questConditions));
             }
-            
+
             if (m_TacticalChecker.Enabled)
             {
                 m_TacticalChecker.Stop();
@@ -188,7 +188,7 @@ namespace UnturnedBlackout.Models.Global
                 };
                 TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.QuestManager.CheckQuest(SteamID, EQuestType.GadgetsUsed, questConditions));
             }
-            
+
             if (m_LethalChecker.Enabled)
             {
                 m_LethalChecker.Stop();
@@ -299,7 +299,7 @@ namespace UnturnedBlackout.Models.Global
                 TaskDispatcher.QueueOnMainThread(() => Player.Player.life.ServerRespawn(false));
                 return;
             }
-            
+
             if (m_DamageChecker.Enabled)
             {
                 m_DamageChecker.Stop();

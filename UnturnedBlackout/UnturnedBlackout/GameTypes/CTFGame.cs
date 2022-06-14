@@ -164,8 +164,8 @@ namespace UnturnedBlackout.GameTypes
                 if (player.Team == wonTeam)
                 {
                     var xp = player.XP * Config.CTF.WinMultipler;
-                    TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.QuestManager.CheckQuest(player.GamePlayer.SteamID, EQuestType.Win, new Dictionary<EQuestCondition, int> { { EQuestCondition.Map, Location.LocationID }, { EQuestCondition.Gamemode, (int)GameMode }, { EQuestCondition.WinFlagsCaptured, player.FlagsCaptured }, { EQuestCondition.WinFlagsSaved, player.FlagsSaved }, { EQuestCondition.WinKills, player.Kills } }));                    
-                    ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DBManager.IncreasePlayerXPAsync(player.GamePlayer.SteamID, (uint)xp));
+                    TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.QuestManager.CheckQuest(player.GamePlayer.SteamID, EQuestType.Win, new Dictionary<EQuestCondition, int> { { EQuestCondition.Map, Location.LocationID }, { EQuestCondition.Gamemode, (int)GameMode }, { EQuestCondition.WinFlagsCaptured, player.FlagsCaptured }, { EQuestCondition.WinFlagsSaved, player.FlagsSaved }, { EQuestCondition.WinKills, player.Kills } }));
+                    ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DBManager.IncreasePlayerXPAsync(player.GamePlayer.SteamID, (int)xp));
                 }
                 Plugin.Instance.UIManager.SetupPreEndingUI(player.GamePlayer, EGameType.CTF, player.Team.TeamID == wonTeam.TeamID, BlueTeam.Score, RedTeam.Score, BlueTeam.Info.TeamName, RedTeam.Info.TeamName);
                 player.GamePlayer.Player.Player.quests.askSetRadioFrequency(CSteamID.Nil, Frequency);
@@ -387,7 +387,7 @@ namespace UnturnedBlackout.GameTypes
                     { EQuestCondition.Map, Location.LocationID },
                     { EQuestCondition.Gamemode, (int)GameMode }
                 };
-                
+
                 Logging.Debug($"Killer found, killer name: {kPlayer.GamePlayer.Player.CharacterName}");
 
                 if (cPlayer.GamePlayer.LastDamager.Count > 0 && cPlayer.GamePlayer.LastDamager.Peek() == kPlayer.GamePlayer.SteamID)
@@ -406,7 +406,8 @@ namespace UnturnedBlackout.GameTypes
                         {
                             Plugin.Instance.UIManager.ShowXPUI(assister.GamePlayer, Config.CTF.XPPerAssist, Plugin.Instance.Translate("Assist_Kill", cPlayer.GamePlayer.Player.CharacterName.ToUnrich()));
                         }
-                        ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DBManager.IncreasePlayerXPAsync(assister.GamePlayer.SteamID, (uint)Config.CTF.XPPerAssist));
+                        ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DBManager.IncreasePlayerXPAsync(assister.GamePlayer.SteamID,
+                            Config.CTF.XPPerAssist));
                     }
                     cPlayer.GamePlayer.LastDamager.Clear();
                 }
@@ -491,7 +492,7 @@ namespace UnturnedBlackout.GameTypes
                     kPlayer.MultipleKills = 1;
                 }
                 questConditions.Add(EQuestCondition.TargetMK, kPlayer.MultipleKills);
-                
+
                 if (victimKS > Config.ShutdownKillStreak)
                 {
                     xpGained += Config.CTF.ShutdownXP;
@@ -548,7 +549,7 @@ namespace UnturnedBlackout.GameTypes
                     {
                         await Plugin.Instance.DBManager.IncreasePlayerKillsAsync(kPlayer.GamePlayer.SteamID, 1);
                     }
-                    await Plugin.Instance.DBManager.IncreasePlayerXPAsync(kPlayer.GamePlayer.SteamID, (uint)xpGained);
+                    await Plugin.Instance.DBManager.IncreasePlayerXPAsync(kPlayer.GamePlayer.SteamID, xpGained);
                     if ((kPlayer.GamePlayer.ActiveLoadout.Primary != null && kPlayer.GamePlayer.ActiveLoadout.Primary.Gun.GunID == equipmentUsed) || (kPlayer.GamePlayer.ActiveLoadout.Secondary != null && kPlayer.GamePlayer.ActiveLoadout.Secondary.Gun.GunID == equipmentUsed))
                     {
                         await Plugin.Instance.DBManager.IncreasePlayerGunXPAsync(kPlayer.GamePlayer.SteamID, equipmentUsed, xpGained);
@@ -703,7 +704,7 @@ namespace UnturnedBlackout.GameTypes
                     ThreadPool.QueueUserWorkItem(async (o) =>
                     {
                         await Plugin.Instance.DBManager.IncreasePlayerFlagsSavedAsync(cPlayer.GamePlayer.SteamID, 1);
-                        await Plugin.Instance.DBManager.IncreasePlayerXPAsync(cPlayer.GamePlayer.SteamID, (uint)Config.CTF.XPPerFlagSaved);
+                        await Plugin.Instance.DBManager.IncreasePlayerXPAsync(cPlayer.GamePlayer.SteamID, Config.CTF.XPPerFlagSaved);
                     });
                     return;
                 }
@@ -748,7 +749,7 @@ namespace UnturnedBlackout.GameTypes
                     ThreadPool.QueueUserWorkItem(async (o) =>
                     {
                         await Plugin.Instance.DBManager.IncreasePlayerFlagsCapturedAsync(cPlayer.GamePlayer.SteamID, 1);
-                        await Plugin.Instance.DBManager.IncreasePlayerXPAsync(cPlayer.GamePlayer.SteamID, (uint)Config.CTF.XPPerFlagCaptured);
+                        await Plugin.Instance.DBManager.IncreasePlayerXPAsync(cPlayer.GamePlayer.SteamID, Config.CTF.XPPerFlagCaptured);
                     });
                 }
                 else
@@ -830,7 +831,7 @@ namespace UnturnedBlackout.GameTypes
                     return;
                 }
 
-                var iconLink = Plugin.Instance.DBManager.Levels.TryGetValue((int)data.Level, out XPLevel level) ? level.IconLinkSmall : "";
+                var iconLink = Plugin.Instance.DBManager.Levels.TryGetValue(data.Level, out XPLevel level) ? level.IconLinkSmall : "";
                 var updatedText = $"<color={tPlayer.Team.Info.ChatPlayerHexCode}>{player.Player.CharacterName.ToUnrich()}</color>: <color={tPlayer.Team.Info.ChatMessageHexCode}>{text.ToUnrich()}</color>";
 
                 if (chatMode == EChatMode.GLOBAL)

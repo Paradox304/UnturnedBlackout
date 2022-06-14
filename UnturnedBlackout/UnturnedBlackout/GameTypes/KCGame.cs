@@ -148,7 +148,7 @@ namespace UnturnedBlackout.GameTypes
                 {
                     var xp = player.XP * Config.KC.WinMultipler;
                     TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.QuestManager.CheckQuest(player.GamePlayer.SteamID, EQuestType.Win, new Dictionary<EQuestCondition, int> { { EQuestCondition.Map, Location.LocationID }, { EQuestCondition.Gamemode, (int)GameMode }, { EQuestCondition.WinKills, player.Kills }, { EQuestCondition.WinTags, player.KillsDenied + player.KillsConfirmed } }));
-                    ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DBManager.IncreasePlayerXPAsync(player.GamePlayer.SteamID, (uint)xp));
+                    ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DBManager.IncreasePlayerXPAsync(player.GamePlayer.SteamID, (int)xp));
                 }
                 Plugin.Instance.UIManager.SetupPreEndingUI(player.GamePlayer, EGameType.KC, player.Team.TeamID == wonTeam.TeamID, BlueTeam.Score, RedTeam.Score, BlueTeam.Info.TeamName, RedTeam.Info.TeamName);
                 player.GamePlayer.Player.Player.quests.askSetRadioFrequency(CSteamID.Nil, Frequency);
@@ -310,7 +310,7 @@ namespace UnturnedBlackout.GameTypes
                 vPlayer.GamePlayer.OnDeath(CSteamID.Nil, 0);
                 return;
             }
-            
+
             if (vPlayer.GamePlayer.HasScoreboard)
             {
                 vPlayer.GamePlayer.HasScoreboard = false;
@@ -329,7 +329,7 @@ namespace UnturnedBlackout.GameTypes
             TaskDispatcher.QueueOnMainThread(() =>
             {
                 ItemManager.dropItem(new Item(vPlayer.Team.DogTagID, true), vPlayer.GamePlayer.Player.Player.transform.position, true, true, true);
-                
+
                 var kPlayer = GetKCPlayer(updatedKiller);
                 if (kPlayer == null)
                 {
@@ -347,7 +347,7 @@ namespace UnturnedBlackout.GameTypes
                     { EQuestCondition.Map, Location.LocationID },
                     { EQuestCondition.Gamemode, (int)GameMode }
                 };
-                
+
                 Logging.Debug($"Killer found, killer name: {kPlayer.GamePlayer.Player.CharacterName}");
 
                 if (vPlayer.GamePlayer.LastDamager.Count > 0 && vPlayer.GamePlayer.LastDamager.Peek() == kPlayer.GamePlayer.SteamID)
@@ -366,7 +366,7 @@ namespace UnturnedBlackout.GameTypes
                         {
                             Plugin.Instance.UIManager.ShowXPUI(assister.GamePlayer, Config.KC.XPPerAssist, Plugin.Instance.Translate("Assist_Kill", vPlayer.GamePlayer.Player.CharacterName.ToUnrich()).ToRich());
                         }
-                        ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DBManager.IncreasePlayerXPAsync(assister.GamePlayer.SteamID, (uint)Config.KC.XPPerAssist));
+                        ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DBManager.IncreasePlayerXPAsync(assister.GamePlayer.SteamID, Config.KC.XPPerAssist));
                     }
                     vPlayer.GamePlayer.LastDamager.Clear();
                 }
@@ -455,7 +455,7 @@ namespace UnturnedBlackout.GameTypes
                     xpText += Plugin.Instance.Translate("Shutdown_Kill").ToRich() + "\n";
                     Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer.SteamID, EQuestType.Shutdown, questConditions);
                 }
-                
+
                 if (kPlayer.PlayersKilled.ContainsKey(vPlayer.GamePlayer.SteamID))
                 {
                     kPlayer.PlayersKilled[vPlayer.GamePlayer.SteamID] += 1;
@@ -470,7 +470,7 @@ namespace UnturnedBlackout.GameTypes
                 {
                     kPlayer.PlayersKilled.Add(vPlayer.GamePlayer.SteamID, 1);
                 }
-                
+
                 kPlayer.LastKill = DateTime.UtcNow;
                 kPlayer.XP += xpGained;
 
@@ -480,7 +480,7 @@ namespace UnturnedBlackout.GameTypes
                 Plugin.Instance.UIManager.SendMultiKillSound(kPlayer.GamePlayer, kPlayer.MultipleKills);
                 kPlayer.CheckKills();
                 kPlayer.GamePlayer.OnKilled(vPlayer.GamePlayer);
-                
+
                 if (equipmentUsed != 0)
                 {
                     Logging.Debug($"Sending killfeed with equipment {equipmentUsed}");
@@ -506,7 +506,7 @@ namespace UnturnedBlackout.GameTypes
                     {
                         await Plugin.Instance.DBManager.IncreasePlayerKillsAsync(kPlayer.GamePlayer.SteamID, 1);
                     }
-                    await Plugin.Instance.DBManager.IncreasePlayerXPAsync(kPlayer.GamePlayer.SteamID, (uint)xpGained);
+                    await Plugin.Instance.DBManager.IncreasePlayerXPAsync(kPlayer.GamePlayer.SteamID, xpGained);
                     if ((kPlayer.GamePlayer.ActiveLoadout.Primary != null && kPlayer.GamePlayer.ActiveLoadout.Primary.Gun.GunID == equipmentUsed) || (kPlayer.GamePlayer.ActiveLoadout.Secondary != null && kPlayer.GamePlayer.ActiveLoadout.Secondary.Gun.GunID == equipmentUsed))
                     {
                         await Plugin.Instance.DBManager.IncreasePlayerGunXPAsync(kPlayer.GamePlayer.SteamID, equipmentUsed, xpGained);
@@ -626,7 +626,7 @@ namespace UnturnedBlackout.GameTypes
                     return;
                 }
 
-                var iconLink = Plugin.Instance.DBManager.Levels.TryGetValue((int)data.Level, out XPLevel level) ? level.IconLinkSmall : "";
+                var iconLink = Plugin.Instance.DBManager.Levels.TryGetValue(data.Level, out XPLevel level) ? level.IconLinkSmall : "";
                 var updatedText = $"<color={kPlayer.Team.Info.ChatPlayerHexCode}>{player.Player.CharacterName.ToUnrich()}</color>: <color={kPlayer.Team.Info.ChatMessageHexCode}>{text.ToUnrich()}</color>";
 
                 if (chatMode == EChatMode.GLOBAL)
@@ -692,7 +692,7 @@ namespace UnturnedBlackout.GameTypes
                 Plugin.Instance.UIManager.SendKillConfirmedSound(kPlayer.GamePlayer);
                 ThreadPool.QueueUserWorkItem(async (o) =>
                 {
-                    await Plugin.Instance.DBManager.IncreasePlayerXPAsync(kPlayer.GamePlayer.SteamID, (uint)Config.KC.XPPerKillDenied);
+                    await Plugin.Instance.DBManager.IncreasePlayerXPAsync(kPlayer.GamePlayer.SteamID, Config.KC.XPPerKillDenied);
                     await Plugin.Instance.DBManager.IncreasePlayerKillsDeniedAsync(kPlayer.GamePlayer.SteamID, 1);
                 });
 
@@ -707,7 +707,7 @@ namespace UnturnedBlackout.GameTypes
                 Plugin.Instance.UIManager.SendKillDeniedSound(kPlayer.GamePlayer);
                 ThreadPool.QueueUserWorkItem(async (o) =>
                 {
-                    await Plugin.Instance.DBManager.IncreasePlayerXPAsync(kPlayer.GamePlayer.SteamID, (uint)Config.KC.XPPerKillConfirmed);
+                    await Plugin.Instance.DBManager.IncreasePlayerXPAsync(kPlayer.GamePlayer.SteamID, Config.KC.XPPerKillConfirmed);
                     await Plugin.Instance.DBManager.IncreasePlayerKillsConfirmedAsync(kPlayer.GamePlayer.SteamID, 1);
                 });
 

@@ -15,7 +15,6 @@ using UnturnedBlackout.Enums;
 using UnturnedBlackout.GameTypes;
 using UnturnedBlackout.Managers;
 using UnturnedBlackout.Models.UI;
-using Timer = System.Timers.Timer;
 
 namespace UnturnedBlackout.Instances
 {
@@ -35,7 +34,7 @@ namespace UnturnedBlackout.Instances
         public PlayerData PlayerData { get; set; }
 
         public Coroutine TimerRefresher { get; set; }
-        
+
         public ITransportConnection TransportConnection { get; set; }
         public Config Config { get; set; }
 
@@ -103,9 +102,9 @@ namespace UnturnedBlackout.Instances
 
             PlayerData = data;
             PlayerLoadout = loadout;
-            
+
             TimerRefresher = Plugin.Instance.StartCoroutine(RefreshTimer());
-            
+
             BuildPages();
             ResetUIValues();
         }
@@ -117,7 +116,7 @@ namespace UnturnedBlackout.Instances
                 Plugin.Instance.StopCoroutine(TimerRefresher);
             }
         }
-        
+
         public void BuildPages()
         {
             BuildLoadoutPages();
@@ -341,7 +340,7 @@ namespace UnturnedBlackout.Instances
             }
             Logging.Debug($"Created {SniperPages.Count} sniper pages for {Player.CharacterName}");
         }
-        
+
         public void BuildCarbinePages()
         {
             var guns = PlayerLoadout.Guns.Values.Where(k => k.Gun.GunType == EGun.CARBINES).OrderBy(k => k.Gun.LevelRequirement).ToList();
@@ -730,15 +729,15 @@ namespace UnturnedBlackout.Instances
 
             var ui = Plugin.Instance.UIManager;
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER XP Num", Plugin.Instance.Translate("Level_Show", data.Level).ToRich());
-            EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER XP Icon", Plugin.Instance.DBManager.Levels.TryGetValue((int)data.Level, out XPLevel level) ? level.IconLinkMedium : "");
+            EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER XP Icon", Plugin.Instance.DBManager.Levels.TryGetValue(data.Level, out XPLevel level) ? level.IconLinkMedium : "");
             int spaces = 0;
             if (data.TryGetNeededXP(out int neededXP))
             {
-                spaces = Math.Min(176, neededXP == 0 ? 0 : (int)(data.XP * 176 / neededXP));
+                spaces = Math.Min(176, neededXP == 0 ? 0 : data.XP * 176 / neededXP);
             }
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER XP Bar Fill", spaces == 0 ? " " : new string(' ', spaces));
         }
-        
+
         public void ClearChat()
         {
             var steamPlayer = Player.SteamPlayer();
@@ -746,7 +745,7 @@ namespace UnturnedBlackout.Instances
             {
                 ChatManager.serverSendMessage("", Color.white, toPlayer: steamPlayer);
             }
-        }        
+        }
 
         // Play Page
 
@@ -3838,7 +3837,7 @@ namespace UnturnedBlackout.Instances
                         {
                             if (data.Credits >= gun.Gun.BuyPrice && !gun.IsBought)
                             {
-                                await DB.DecreasePlayerCreditsAsync(Player.CSteamID, (uint)gun.Gun.BuyPrice);
+                                await DB.DecreasePlayerCreditsAsync(Player.CSteamID, gun.Gun.BuyPrice);
                                 await DB.UpdatePlayerGunBoughtAsync(Player.CSteamID, gun.Gun.GunID, true);
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
@@ -3872,7 +3871,7 @@ namespace UnturnedBlackout.Instances
                         {
                             if (data.Credits >= attachment.Attachment.BuyPrice && !attachment.IsBought)
                             {
-                                await DB.DecreasePlayerCreditsAsync(Player.CSteamID, (uint)attachment.Attachment.BuyPrice);
+                                await DB.DecreasePlayerCreditsAsync(Player.CSteamID, attachment.Attachment.BuyPrice);
                                 await DB.UpdatePlayerGunAttachmentBoughtAsync(Player.CSteamID, gun.Gun.GunID, attachment.Attachment.AttachmentID, true);
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
@@ -3897,7 +3896,7 @@ namespace UnturnedBlackout.Instances
                         {
                             if (data.Credits >= gun.Gun.BuyPrice && !gun.IsBought)
                             {
-                                await DB.DecreasePlayerCreditsAsync(Player.CSteamID, (uint)gun.Gun.BuyPrice);
+                                await DB.DecreasePlayerCreditsAsync(Player.CSteamID, gun.Gun.BuyPrice);
                                 await DB.UpdatePlayerGunBoughtAsync(Player.CSteamID, gun.Gun.GunID, true);
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
@@ -3930,7 +3929,7 @@ namespace UnturnedBlackout.Instances
                         {
                             if (data.Credits >= attachment.Attachment.BuyPrice && !attachment.IsBought)
                             {
-                                await DB.DecreasePlayerCreditsAsync(Player.CSteamID, (uint)attachment.Attachment.BuyPrice);
+                                await DB.DecreasePlayerCreditsAsync(Player.CSteamID, attachment.Attachment.BuyPrice);
                                 await DB.UpdatePlayerGunAttachmentBoughtAsync(Player.CSteamID, gun.Gun.GunID, attachment.Attachment.AttachmentID, true);
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
@@ -3956,7 +3955,7 @@ namespace UnturnedBlackout.Instances
                         {
                             if (data.Credits >= gunCharm.GunCharm.BuyPrice && !gunCharm.IsBought)
                             {
-                                await DB.DecreasePlayerCreditsAsync(Player.CSteamID, (uint)gunCharm.GunCharm.BuyPrice);
+                                await DB.DecreasePlayerCreditsAsync(Player.CSteamID, gunCharm.GunCharm.BuyPrice);
                                 await DB.UpdatePlayerGunCharmBoughtAsync(Player.CSteamID, gunCharm.GunCharm.CharmID, true);
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
@@ -3981,7 +3980,7 @@ namespace UnturnedBlackout.Instances
                         {
                             if (data.Credits >= knife.Knife.BuyPrice && !knife.IsBought)
                             {
-                                await DB.DecreasePlayerCreditsAsync(Player.CSteamID, (uint)knife.Knife.BuyPrice);
+                                await DB.DecreasePlayerCreditsAsync(Player.CSteamID, knife.Knife.BuyPrice);
                                 await DB.UpdatePlayerKnifeBoughtAsync(Player.CSteamID, knife.Knife.KnifeID, true);
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
@@ -4006,7 +4005,7 @@ namespace UnturnedBlackout.Instances
                         {
                             if (data.Credits >= gadget.Gadget.BuyPrice && !gadget.IsBought)
                             {
-                                await DB.DecreasePlayerCreditsAsync(Player.CSteamID, (uint)gadget.Gadget.BuyPrice);
+                                await DB.DecreasePlayerCreditsAsync(Player.CSteamID, gadget.Gadget.BuyPrice);
                                 await DB.UpdatePlayerGadgetBoughtAsync(Player.CSteamID, gadget.Gadget.GadgetID, true);
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
@@ -4031,7 +4030,7 @@ namespace UnturnedBlackout.Instances
                         {
                             if (data.Credits >= gadget.Gadget.BuyPrice && !gadget.IsBought)
                             {
-                                await DB.DecreasePlayerCreditsAsync(Player.CSteamID, (uint)gadget.Gadget.BuyPrice);
+                                await DB.DecreasePlayerCreditsAsync(Player.CSteamID, gadget.Gadget.BuyPrice);
                                 await DB.UpdatePlayerGadgetBoughtAsync(Player.CSteamID, gadget.Gadget.GadgetID, true);
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
@@ -4058,7 +4057,7 @@ namespace UnturnedBlackout.Instances
                         {
                             if (data.Credits >= perk.Perk.BuyPrice && !perk.IsBought)
                             {
-                                await DB.DecreasePlayerCreditsAsync(Player.CSteamID, (uint)perk.Perk.BuyPrice);
+                                await DB.DecreasePlayerCreditsAsync(Player.CSteamID, perk.Perk.BuyPrice);
                                 await DB.UpdatePlayerPerkBoughtAsync(Player.CSteamID, perk.Perk.PerkID, true);
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
@@ -4083,7 +4082,7 @@ namespace UnturnedBlackout.Instances
                         {
                             if (data.Credits >= killstreak.Killstreak.BuyPrice && !killstreak.IsBought)
                             {
-                                await DB.DecreasePlayerCreditsAsync(Player.CSteamID, (uint)killstreak.Killstreak.BuyPrice);
+                                await DB.DecreasePlayerCreditsAsync(Player.CSteamID, killstreak.Killstreak.BuyPrice);
                                 await DB.UpdatePlayerKillstreakBoughtAsync(Player.CSteamID, killstreak.Killstreak.KillstreakID, true);
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
@@ -4108,7 +4107,7 @@ namespace UnturnedBlackout.Instances
                         {
                             if (data.Credits >= card.Card.BuyPrice && !card.IsBought)
                             {
-                                await DB.DecreasePlayerCreditsAsync(Player.CSteamID, (uint)card.Card.BuyPrice);
+                                await DB.DecreasePlayerCreditsAsync(Player.CSteamID, card.Card.BuyPrice);
                                 await DB.UpdatePlayerCardBoughtAsync(Player.CSteamID, card.Card.CardID, true);
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
@@ -4133,7 +4132,7 @@ namespace UnturnedBlackout.Instances
                         {
                             if (data.Credits >= glove.Glove.BuyPrice && !glove.IsBought)
                             {
-                                await DB.DecreasePlayerCreditsAsync(Player.CSteamID, (uint)glove.Glove.BuyPrice);
+                                await DB.DecreasePlayerCreditsAsync(Player.CSteamID, glove.Glove.BuyPrice);
                                 await DB.UpdatePlayerGloveBoughtAsync(Player.CSteamID, glove.Glove.GloveID, true);
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
@@ -4176,7 +4175,7 @@ namespace UnturnedBlackout.Instances
                         {
                             if (data.Coins >= gun.Gun.GetCoins(data.Level) && !gun.IsBought && gun.Gun.LevelRequirement > PlayerData.Level)
                             {
-                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, (uint)gun.Gun.GetCoins(data.Level));
+                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, gun.Gun.GetCoins(data.Level));
                                 await DB.UpdatePlayerGunBoughtAsync(Player.CSteamID, gun.Gun.GunID, true);
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
@@ -4210,7 +4209,7 @@ namespace UnturnedBlackout.Instances
                         {
                             if (data.Coins >= attachment.GetCoins(gun.Level) && !attachment.IsBought && attachment.LevelRequirement > gun.Level)
                             {
-                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, (uint)attachment.GetCoins(gun.Level));
+                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, attachment.GetCoins(gun.Level));
                                 await DB.UpdatePlayerGunAttachmentBoughtAsync(Player.CSteamID, gun.Gun.GunID, attachment.Attachment.AttachmentID, true);
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
@@ -4235,7 +4234,7 @@ namespace UnturnedBlackout.Instances
                         {
                             if (data.Coins >= gun.Gun.GetCoins(data.Level) && !gun.IsBought && gun.Gun.LevelRequirement > PlayerData.Level)
                             {
-                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, (uint)gun.Gun.GetCoins(data.Level));
+                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, gun.Gun.GetCoins(data.Level));
                                 await DB.UpdatePlayerGunBoughtAsync(Player.CSteamID, gun.Gun.GunID, true);
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
@@ -4268,7 +4267,7 @@ namespace UnturnedBlackout.Instances
                         {
                             if (data.Coins >= attachment.GetCoins(gun.Level) && !attachment.IsBought && attachment.LevelRequirement > gun.Level)
                             {
-                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, (uint)attachment.GetCoins(gun.Level));
+                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, attachment.GetCoins(gun.Level));
                                 await DB.UpdatePlayerGunAttachmentBoughtAsync(Player.CSteamID, gun.Gun.GunID, attachment.Attachment.AttachmentID, true);
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
@@ -4294,7 +4293,7 @@ namespace UnturnedBlackout.Instances
                         {
                             if (data.Coins >= gunCharm.GunCharm.GetCoins(data.Level) && !gunCharm.IsBought && gunCharm.GunCharm.LevelRequirement > PlayerData.Level)
                             {
-                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, (uint)gunCharm.GunCharm.GetCoins(data.Level));
+                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, gunCharm.GunCharm.GetCoins(data.Level));
                                 await DB.UpdatePlayerGunCharmBoughtAsync(Player.CSteamID, gunCharm.GunCharm.CharmID, true);
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
@@ -4319,7 +4318,7 @@ namespace UnturnedBlackout.Instances
                         {
                             if (data.Coins >= knife.Knife.GetCoins(data.Level) && !knife.IsBought && knife.Knife.LevelRequirement > PlayerData.Level)
                             {
-                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, (uint)knife.Knife.GetCoins(data.Level));
+                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, knife.Knife.GetCoins(data.Level));
                                 await DB.UpdatePlayerKnifeBoughtAsync(Player.CSteamID, knife.Knife.KnifeID, true);
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
@@ -4344,7 +4343,7 @@ namespace UnturnedBlackout.Instances
                         {
                             if (data.Coins >= gadget.Gadget.GetCoins(data.Level) && !gadget.IsBought && gadget.Gadget.LevelRequirement > PlayerData.Level)
                             {
-                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, (uint)gadget.Gadget.GetCoins(data.Level));
+                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, gadget.Gadget.GetCoins(data.Level));
                                 await DB.UpdatePlayerGadgetBoughtAsync(Player.CSteamID, gadget.Gadget.GadgetID, true);
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
@@ -4369,7 +4368,7 @@ namespace UnturnedBlackout.Instances
                         {
                             if (data.Coins >= gadget.Gadget.GetCoins(data.Level) && !gadget.IsBought && gadget.Gadget.LevelRequirement > PlayerData.Level)
                             {
-                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, (uint)gadget.Gadget.GetCoins(data.Level));
+                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, gadget.Gadget.GetCoins(data.Level));
                                 await DB.UpdatePlayerGadgetBoughtAsync(Player.CSteamID, gadget.Gadget.GadgetID, true);
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
@@ -4396,7 +4395,7 @@ namespace UnturnedBlackout.Instances
                         {
                             if (data.Coins >= perk.Perk.GetCoins(data.Level) && !perk.IsBought && perk.Perk.LevelRequirement > PlayerData.Level)
                             {
-                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, (uint)perk.Perk.GetCoins(data.Level));
+                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, perk.Perk.GetCoins(data.Level));
                                 await DB.UpdatePlayerPerkBoughtAsync(Player.CSteamID, perk.Perk.PerkID, true);
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
@@ -4421,7 +4420,7 @@ namespace UnturnedBlackout.Instances
                         {
                             if (data.Coins >= killstreak.Killstreak.GetCoins(data.Level) && !killstreak.IsBought && killstreak.Killstreak.LevelRequirement > PlayerData.Level)
                             {
-                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, (uint)killstreak.Killstreak.GetCoins(data.Level));
+                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, killstreak.Killstreak.GetCoins(data.Level));
                                 await DB.UpdatePlayerKillstreakBoughtAsync(Player.CSteamID, killstreak.Killstreak.KillstreakID, true);
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
@@ -4446,7 +4445,7 @@ namespace UnturnedBlackout.Instances
                         {
                             if (data.Coins >= card.Card.GetCoins(data.Level) && !card.IsBought && card.Card.LevelRequirement > PlayerData.Level)
                             {
-                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, (uint)card.Card.GetCoins(data.Level));
+                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, card.Card.GetCoins(data.Level));
                                 await DB.UpdatePlayerCardBoughtAsync(Player.CSteamID, card.Card.CardID, true);
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
@@ -4471,7 +4470,7 @@ namespace UnturnedBlackout.Instances
                         {
                             if (data.Coins >= glove.Glove.GetCoins(data.Level) && !glove.IsBought && glove.Glove.LevelRequirement > PlayerData.Level)
                             {
-                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, (uint)glove.Glove.GetCoins(data.Level));
+                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, glove.Glove.GetCoins(data.Level));
                                 await DB.UpdatePlayerGloveBoughtAsync(Player.CSteamID, glove.Glove.GloveID, true);
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
@@ -4901,7 +4900,7 @@ namespace UnturnedBlackout.Instances
         {
             var data = GetLeaderboardData();
             var dataLookup = GetLeaderboardDataLookup();
-            
+
             for (int i = 0; i <= 10; i++)
             {
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Leaderboards BUTTON {i}", false);
@@ -4923,13 +4922,13 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Leaderboards BUTTON 10", true);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Leaderboards Rank TEXT 10", (data.IndexOf(playerData) + 1).ToString());
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Leaderboards Level TEXT 10", playerData.Level.ToString());
-                EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Leaderboards Level IMAGE 10", Plugin.Instance.DBManager.Levels.TryGetValue((int)playerData.Level, out XPLevel level) ? level.IconLinkMedium : "");
+                EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Leaderboards Level IMAGE 10", Plugin.Instance.DBManager.Levels.TryGetValue(playerData.Level, out XPLevel level) ? level.IconLinkMedium : "");
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Leaderboards Name TEXT 10", playerData.SteamName);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Leaderboards Kills TEXT 10", (playerData.Kills + playerData.HeadshotKills).ToString());
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Leaderboards Deaths TEXT 10", playerData.Deaths.ToString());
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Leaderboards KDR TEXT 10", ratio.ToString());
             }
-            
+
             ShowLeaderboardPage(1);
         }
 
@@ -4937,7 +4936,7 @@ namespace UnturnedBlackout.Instances
         {
             LeaderboardPageID = pageNum;
             var data = GetLeaderboardData();
-            
+
             for (int i = 0; i <= 9; i++)
             {
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Leaderboards BUTTON {i}", false);
@@ -4945,7 +4944,7 @@ namespace UnturnedBlackout.Instances
 
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Leaderboards Page TEXT", $"Page {pageNum}");
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Leaderboards Reset TEXT", GetLeaderboardRefreshTime());
-            
+
             var lowerIndex = 10 * (pageNum - 1);
             var upperIndex = Math.Min(lowerIndex + 9, data.Count - 1);
 
@@ -4961,7 +4960,7 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Leaderboards BUTTON {index}", true);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Leaderboards Rank TEXT {index}", (i + 1).ToString());
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Leaderboards Level TEXT {index}", playerData.Level.ToString());
-                EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Leaderboards Level IMAGE {index}", Plugin.Instance.DBManager.Levels.TryGetValue((int)playerData.Level, out XPLevel level) ? level.IconLinkMedium : "");
+                EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Leaderboards Level IMAGE {index}", Plugin.Instance.DBManager.Levels.TryGetValue(playerData.Level, out XPLevel level) ? level.IconLinkMedium : "");
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Leaderboards Name TEXT {index}", playerData.SteamName);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Leaderboards Kills TEXT {index}", (playerData.Kills + playerData.HeadshotKills).ToString());
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Leaderboards Deaths TEXT {index}", playerData.Deaths.ToString());
@@ -4973,7 +4972,7 @@ namespace UnturnedBlackout.Instances
         public void ForwardLeaderboardPage()
         {
             var data = GetLeaderboardData();
-            
+
             if ((data.Count - 1) < LeaderboardPageID * 8)
             {
                 ShowLeaderboard();
@@ -4992,16 +4991,16 @@ namespace UnturnedBlackout.Instances
 
             ShowLeaderboardPage(LeaderboardPageID - 1);
         }
-        
+
         public void SearchLeaderboardPlayer(string input)
         {
             var data = GetLeaderboardData();
-            
+
             for (int i = 0; i <= 9; i++)
             {
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Leaderboards BUTTON {i}", false);
             }
-            
+
             ThreadPool.QueueUserWorkItem((o) =>
             {
                 var inputLower = input.ToLower();
@@ -5020,7 +5019,7 @@ namespace UnturnedBlackout.Instances
                         EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Leaderboards BUTTON {i}", true);
                         EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Leaderboards Rank TEXT {i}", (data.IndexOf(playerData) + 1).ToString());
                         EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Leaderboards Level TEXT {i}", playerData.Level.ToString());
-                        EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Leaderboards Level IMAGE {i}", Plugin.Instance.DBManager.Levels.TryGetValue((int)playerData.Level, out XPLevel level) ? level.IconLinkMedium : "");
+                        EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Leaderboards Level IMAGE {i}", Plugin.Instance.DBManager.Levels.TryGetValue(playerData.Level, out XPLevel level) ? level.IconLinkMedium : "");
                         EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Leaderboards Name TEXT {i}", playerData.SteamName);
                         EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Leaderboards Kills TEXT {i}", (playerData.Kills + playerData.HeadshotKills).ToString());
                         EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Leaderboards Deaths TEXT {i}", playerData.Deaths.ToString());
@@ -5029,7 +5028,7 @@ namespace UnturnedBlackout.Instances
                 });
             });
         }
-        
+
         public List<LeaderboardData> GetLeaderboardData() =>
             LeaderboardPage switch
             {
@@ -5074,7 +5073,7 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Quest Bar Fill {i}", quest.Amount == 0 ? " " : new string(' ', Math.Min(183, quest.Amount * 183 / quest.Quest.TargetAmount)));
             }
         }
-        
+
         public void ShowQuestCompletion()
         {
             var completedQuests = PlayerData.Quests.Count(k => k.Amount >= k.Quest.TargetAmount);
@@ -5083,7 +5082,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Quest Complete", completedQuests == totalQuests);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Quest Complete Count TEXT", $"{completedQuests}/{totalQuests}");
         }
-        
+
         // Events
 
         public void OnMusicChanged(bool isMusic)
@@ -5097,7 +5096,7 @@ namespace UnturnedBlackout.Instances
             {
                 await Plugin.Instance.DBManager.ChangePlayerMusicAsync(SteamID, isMusic);
             });
-        } 
+        }
 
         public IEnumerator RefreshTimer()
         {

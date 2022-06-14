@@ -1,9 +1,6 @@
 ﻿using Rocket.API;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnturnedBlackout.Enums;
 
 namespace UnturnedBlackout.Commands
@@ -35,7 +32,7 @@ namespace UnturnedBlackout.Commands
                 Utility.Say(caller, $"<color=red>Correct Usage: {Syntax}</color>");
                 return;
             }
-            
+
             if (!Enum.TryParse(command[1], true, out EGameType gameMode))
             {
                 Utility.Say(caller, $"<color=red>Correct Usage: {Syntax}</color>");
@@ -55,7 +52,7 @@ namespace UnturnedBlackout.Commands
                     Plugin.Instance.DataManager.Data.CTFSpawnPoints.RemoveAll(k => k.LocationID == mapID);
                     break;
             }
-        
+
             Plugin.Instance.DataManager.SaveJson();
             Utility.Say(caller, $"<color=green>Wiped spawnpoints for map {mapID} for gamemode {gameMode}</color>");
         }

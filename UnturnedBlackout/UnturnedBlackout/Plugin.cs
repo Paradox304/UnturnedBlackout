@@ -4,6 +4,7 @@ using Rocket.Core.Plugins;
 using Rocket.Unturned.Permissions;
 using SDG.Unturned;
 using Steamworks;
+using System;
 using System.Collections;
 using System.Linq;
 using System.Reflection;
@@ -31,7 +32,7 @@ namespace UnturnedBlackout
             DataManager = new DataManager();
             RewardManager = new RewardManager();
             QuestManager = new QuestManager();
-            
+
             StartCoroutine(Day());
 
             Level.onPostLevelLoaded += OnLevelLoaded;
@@ -81,13 +82,10 @@ namespace UnturnedBlackout
             var ply = Provider.pending.FirstOrDefault(k => k.playerID.steamID == player);
             if (ply == null) return;
 
-            Logging.Debug($"Player joining");
             var newName = ply.playerID.characterName.ToUnrich();
             var chars = newName.Count();
-            Logging.Debug($"Found {chars} characters in player name {newName}");
             if (chars > Configuration.Instance.MaxPlayerNameCharacters)
             {
-                Logging.Debug($"Name is over the limit, removing {chars - Configuration.Instance.MaxPlayerNameCharacters} characters from the position {Configuration.Instance.MaxPlayerNameCharacters - 1}");
                 newName = newName.Remove(Configuration.Instance.MaxPlayerNameCharacters, chars - Configuration.Instance.MaxPlayerNameCharacters);
                 newName += "...";
             }

@@ -12,28 +12,28 @@ namespace UnturnedBlackout.Database.Data
         public CSteamID SteamID { get; set; }
         public string SteamName { get; set; }
         public string AvatarLink { get; set; }
-        public uint XP { get; set; }
-        public uint Level { get; set; }
-        public uint Credits { get; set; }
-        public uint Scrap { get; set; }
-        public uint Coins { get; set; }
-        public uint Kills { get; set; }
-        public uint HeadshotKills { get; set; }
-        public uint HighestKillstreak { get; set; }
-        public uint HighestMultiKills { get; set; }
-        public uint KillsConfirmed { get; set; }
-        public uint KillsDenied { get; set; }
-        public uint FlagsCaptured { get; set; }
-        public uint FlagsSaved { get; set; }
-        public uint AreasTaken { get; set; }
-        public uint Deaths { get; set; }
+        public int XP { get; set; }
+        public int Level { get; set; }
+        public int Credits { get; set; }
+        public int Scrap { get; set; }
+        public int Coins { get; set; }
+        public int Kills { get; set; }
+        public int HeadshotKills { get; set; }
+        public int HighestKillstreak { get; set; }
+        public int HighestMultiKills { get; set; }
+        public int KillsConfirmed { get; set; }
+        public int KillsDenied { get; set; }
+        public int FlagsCaptured { get; set; }
+        public int FlagsSaved { get; set; }
+        public int AreasTaken { get; set; }
+        public int Deaths { get; set; }
         public bool Music { get; set; }
         public bool IsMuted { get; set; }
         public DateTimeOffset MuteExpiry { get; set; }
         public List<PlayerQuest> Quests { get; set; }
         public Dictionary<EQuestType, List<PlayerQuest>> QuestsSearchByType { get; set; }
 
-        public PlayerData(CSteamID steamID, string steamName, string avatarLink, uint xP, uint level, uint credits, uint scrap, uint coins, uint kills, uint headshotKills, uint highestKillstreak, uint highestMultiKills, uint killsConfirmed, uint killsDenied, uint flagsCaptured, uint flagsSaved, uint areasTaken, uint deaths, bool music, bool isMuted, DateTimeOffset muteExpiry, List<PlayerQuest> quests, Dictionary<EQuestType, List<PlayerQuest>> questsSearchByType)
+        public PlayerData(CSteamID steamID, string steamName, string avatarLink, int xP, int level, int credits, int scrap, int coins, int kills, int headshotKills, int highestKillstreak, int highestMultiKills, int killsConfirmed, int killsDenied, int flagsCaptured, int flagsSaved, int areasTaken, int deaths, bool music, bool isMuted, DateTimeOffset muteExpiry, List<PlayerQuest> quests, Dictionary<EQuestType, List<PlayerQuest>> questsSearchByType)
         {
             SteamID = steamID;
             SteamName = steamName;
@@ -62,7 +62,7 @@ namespace UnturnedBlackout.Database.Data
 
         public bool TryGetNeededXP(out int xp)
         {
-            if (Plugin.Instance.DBManager.Levels.TryGetValue((int)Level + 1, out XPLevel level))
+            if (Plugin.Instance.DBManager.Levels.TryGetValue(Level + 1, out XPLevel level))
             {
                 xp = level.XPNeeded;
                 return true;
@@ -77,7 +77,7 @@ namespace UnturnedBlackout.Database.Data
             {
                 ThreadPool.QueueUserWorkItem(async (o) =>
                 {
-                    await Plugin.Instance.DBManager.UpdatePlayerHighestMultiKillsAsync(SteamID, (uint)multiKills);
+                    await Plugin.Instance.DBManager.UpdatePlayerHighestMultiKillsAsync(SteamID, multiKills);
                 });
             }
         }
@@ -88,7 +88,7 @@ namespace UnturnedBlackout.Database.Data
             {
                 ThreadPool.QueueUserWorkItem(async (o) =>
                 {
-                    await Plugin.Instance.DBManager.UpdatePlayerHighestKillStreakAsync(SteamID, (uint)killStreak);
+                    await Plugin.Instance.DBManager.UpdatePlayerHighestKillStreakAsync(SteamID, killStreak);
                 });
             }
         }

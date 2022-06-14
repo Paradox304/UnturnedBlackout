@@ -11,9 +11,9 @@ namespace UnturnedBlackout.Managers
     {
         public RewardManager()
         {
-            
+
         }
-        
+
         public void GiveReward(CSteamID steamID, List<Reward> rewards)
         {
             var db = Plugin.Instance.DBManager;
@@ -52,13 +52,13 @@ namespace UnturnedBlackout.Managers
                             await db.AddPlayerCardAsync(steamID, (int)reward.RewardValue, true);
                             break;
                         case ERewardType.Credit:
-                            await db.IncreasePlayerCreditsAsync(steamID, Convert.ToUInt32(reward.RewardValue));
+                            await db.IncreasePlayerCreditsAsync(steamID, (int)reward.RewardValue);
                             break;
                         case ERewardType.Coin:
-                            await db.IncreasePlayerCoinsAsync(steamID, Convert.ToUInt32(reward.RewardValue));
+                            await db.IncreasePlayerCoinsAsync(steamID, (int)reward.RewardValue);
                             break;
                         case ERewardType.LevelXP:
-                            await db.IncreasePlayerXPAsync(steamID, Convert.ToUInt32(reward.RewardValue));
+                            await db.IncreasePlayerXPAsync(steamID, (int)reward.RewardValue);
                             break;
                         case ERewardType.BattlepassXP:
                             break;
@@ -108,13 +108,13 @@ namespace UnturnedBlackout.Managers
                                 await db.AddPlayerCardAsync(bulkReward.Item1, (int)reward.RewardValue, true);
                                 break;
                             case ERewardType.Credit:
-                                await db.IncreasePlayerCreditsAsync(bulkReward.Item1, Convert.ToUInt32(reward.RewardValue));
+                                await db.IncreasePlayerCreditsAsync(bulkReward.Item1, (int)reward.RewardValue);
                                 break;
                             case ERewardType.Coin:
-                                await db.IncreasePlayerCoinsAsync(bulkReward.Item1, Convert.ToUInt32(reward.RewardValue));
+                                await db.IncreasePlayerCoinsAsync(bulkReward.Item1, (int)reward.RewardValue);
                                 break;
                             case ERewardType.LevelXP:
-                                await db.IncreasePlayerXPAsync(bulkReward.Item1, Convert.ToUInt32(reward.RewardValue));
+                                await db.IncreasePlayerXPAsync(bulkReward.Item1, (int)reward.RewardValue);
                                 break;
                             case ERewardType.BattlepassXP:
                                 break;

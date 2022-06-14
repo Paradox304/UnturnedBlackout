@@ -1,11 +1,7 @@
-﻿using Rocket.Core.Utils;
-using Steamworks;
-using System;
+﻿using Steamworks;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using UnturnedBlackout.Database.Data;
 using UnturnedBlackout.Enums;
 
@@ -15,13 +11,13 @@ namespace UnturnedBlackout.Managers
     {
         public QuestManager()
         {
-            
+
         }
 
         public void CheckQuest(CSteamID steamID, EQuestType questType, Dictionary<EQuestCondition, int> questConditions)
         {
             Logging.Debug($"Checking quest {questType} for {steamID} with conditions {questConditions.Count}");
-            
+
             var db = Plugin.Instance.DBManager;
             if (!db.PlayerData.TryGetValue(steamID, out PlayerData data))
             {
@@ -74,7 +70,7 @@ namespace UnturnedBlackout.Managers
                     Logging.Debug($"Quest with id {quest.Quest.QuestID} is completed for player");
                     // future code to increase the battlepass xp given by the quest here
                 }
-                
+
                 ThreadPool.QueueUserWorkItem(async (o) =>
                 {
                     await db.IncreasePlayerQuestAmountAsync(steamID, quest.Quest.QuestID, 1);

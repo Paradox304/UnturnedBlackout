@@ -323,7 +323,7 @@ namespace UnturnedBlackout
                 {
                     continue;
                 }
-                
+
                 if (!letterRegex.IsMatch(conditionTxt) || !numberRegex.IsMatch(conditionTxt))
                 {
                     Logging.Debug($"There isn't a text or number in the condition text");
@@ -354,7 +354,7 @@ namespace UnturnedBlackout
 
             return questConditions;
         }
-        
+
         public static int GetLoadoutAmount(UnturnedPlayer player)
         {
             var amount = Plugin.Instance.Configuration.Instance.DefaultLoadoutAmount;
