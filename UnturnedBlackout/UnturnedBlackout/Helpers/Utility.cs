@@ -197,47 +197,55 @@ namespace UnturnedBlackout
             }
             return text;
         }
+        
+        public static List<Reward> GetRewardsFromString(string text)
+        {
+            var rewards = new List<Reward>();
 
+            var letterRegex = new Regex(@"([a-zA-Z]+)");
+            var numberRegex = new Regex(@"(\d+)");
+            
+            foreach (var reward in text.Split(' '))
+            {
+                if (string.IsNullOrEmpty(reward))
+                {
+                    continue;
+                }
+
+                if (!letterRegex.IsMatch(reward) || !numberRegex.IsMatch(reward))
+                {
+                    Logging.Debug($"There isn't a text or number in the reward text");
+                    continue;
+                }
+
+                var letterRegexMatch = letterRegex.Match(reward).Value;
+                if (!Enum.TryParse(letterRegexMatch, true, out ERewardType rewardType))
+                {
+                    Logging.Debug($"Cant find reward type with the match {letterRegexMatch}");
+                    continue;
+                }
+
+                var numberRegexMatch = numberRegex.Match(reward).Value;
+                if (!int.TryParse(numberRegexMatch, out int rewardValue))
+                {
+                    Logging.Debug($"Cant find reward value with the match {numberRegexMatch}");
+                    continue;
+                }
+
+                rewards.Add(new Reward(rewardType, rewardValue));
+            }
+
+            return rewards;
+        }
+        
         public static Dictionary<int, List<Reward>> GetRankedRewardsFromString(string text)
         {
             var rewardsRanked = new Dictionary<int, List<Reward>>();
-
             int rank = 0;
-            var letterRegex = new Regex("([a-zA-Z]+)");
-            var numberRegex = new Regex(@"(\d+)");
 
             foreach (var rewardsTxt in text.Split(','))
             {
-                var rewards = new List<Reward>();
-                foreach (var rewardTxt in rewardsTxt.Split(' '))
-                {
-                    if (string.IsNullOrEmpty(rewardTxt))
-                    {
-                        continue;
-                    }
-
-                    if (!letterRegex.IsMatch(rewardTxt) || !numberRegex.IsMatch(rewardTxt))
-                    {
-                        Logging.Debug($"There isn't a text or number in the reward text");
-                        continue;
-                    }
-
-                    var letterRegexMatch = letterRegex.Match(rewardTxt).Value;
-                    if (!Enum.TryParse(letterRegexMatch, true, out ERewardType rewardType))
-                    {
-                        Logging.Debug($"Cant find reward type with the match {letterRegexMatch}");
-                        continue;
-                    }
-
-                    var numberRegexMatch = numberRegex.Match(rewardTxt).Value;
-                    if (!int.TryParse(numberRegexMatch, out int rewardValue))
-                    {
-                        Logging.Debug($"Cant find reward value with the match {numberRegexMatch}");
-                        continue;
-                    }
-
-                    rewards.Add(new Reward(rewardType, rewardValue));
-                }
+                var rewards = GetRewardsFromString(rewardsTxt);
                 rewardsRanked.Add(rank, rewards);
                 rank++;
             }
@@ -248,10 +256,6 @@ namespace UnturnedBlackout
         public static List<PercentileReward> GetPercentileRewardsFromString(string text)
         {
             var percentileRewards = new List<PercentileReward>();
-
-            var letterRegex = new Regex("([a-zA-Z]+)");
-            var numberRegex = new Regex(@"(\d+)");
-
             var percentRegex = new Regex("([0-9]*)%");
 
             int lowerPercentile = 0;
@@ -273,36 +277,7 @@ namespace UnturnedBlackout
 
                 var upperPercentile = lowerPercentile + percentage;
                 var rewardsTxt = percRewards.Remove(0, percRewards.IndexOf('-') + 1);
-                var rewards = new List<Reward>();
-                foreach (var rewardTxt in rewardsTxt.Split(' '))
-                {
-                    if (string.IsNullOrEmpty(rewardTxt))
-                    {
-                        continue;
-                    }
-
-                    if (!letterRegex.IsMatch(rewardTxt) || !numberRegex.IsMatch(rewardTxt))
-                    {
-                        Logging.Debug($"There isn't a text or number in the reward text");
-                        continue;
-                    }
-
-                    var letterRegexMatch = letterRegex.Match(rewardTxt).Value;
-                    if (!Enum.TryParse(letterRegexMatch, true, out ERewardType rewardType))
-                    {
-                        Logging.Debug($"Cant find reward type with the match {letterRegexMatch}");
-                        continue;
-                    }
-
-                    var numberRegexMatch = numberRegex.Match(rewardTxt).Value;
-                    if (!int.TryParse(numberRegexMatch, out int rewardValue))
-                    {
-                        Logging.Debug($"Cant find reward value with the match {numberRegexMatch}");
-                        continue;
-                    }
-
-                    rewards.Add(new Reward(rewardType, rewardValue));
-                }
+                var rewards = GetRewardsFromString(rewardsTxt);
                 percentileRewards.Add(new PercentileReward(lowerPercentile, upperPercentile, rewards));
                 lowerPercentile = upperPercentile;
             }

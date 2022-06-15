@@ -188,49 +188,47 @@ namespace UnturnedBlackout.Managers
             };
         }
 
-        public void SendLevelUpAnimation(GamePlayer player, int newRank)
+        public void SendAnimation(GamePlayer player, AnimationInfo animationInfo)
         {
             if (player.HasAnimationGoingOn)
             {
-                player.AnimationChecker = Plugin.Instance.StartCoroutine(player.CheckAnimation(ELevelUpAnimation.LevelUp, null));
+                player.PendingAnimations.Add(animationInfo);
                 return;
             }
 
-            if (!Plugin.Instance.DBManager.Levels.TryGetValue(newRank, out XPLevel level))
+            if (player.AnimationChecker != null)
             {
-                return;
+                Plugin.Instance.StopCoroutine(player.AnimationChecker);
             }
-
-            EffectManager.sendUIEffect(LevelUpID, LevelUpKey, player.TransportConnection, true);
-            EffectManager.sendUIEffectImageURL(LevelUpKey, player.TransportConnection, true, "LevelUpIcon", level.IconLinkLarge);
-            EffectManager.sendUIEffectText(LevelUpKey, player.TransportConnection, true, "LevelUpDesc", Plugin.Instance.Translate("Level_Up_Desc", newRank).ToRich());
-            EffectManager.sendUIEffectText(LevelUpKey, player.TransportConnection, true, "LevelUpText", Plugin.Instance.Translate("Level_Up_Text").ToRich());
-
-            if (player.AnimationStopper != null)
+            player.AnimationChecker = Plugin.Instance.StartCoroutine(player.CheckAnimation());
+            
+            switch (animationInfo.AnimationType)
             {
-                Plugin.Instance.StopCoroutine(player.AnimationStopper);
-            }
-            player.AnimationStopper = Plugin.Instance.StartCoroutine(player.StopAnimation());
-        }
+                case EAnimationType.LevelUp:
+                    {
+                        if (!Plugin.Instance.DBManager.Levels.TryGetValue((int)animationInfo.Info, out XPLevel level))
+                        {
+                            return;
+                        }
 
-        public void SendGunLevelUpAnimation(GamePlayer player, LoadoutGun gun)
-        {
-            if (player.HasAnimationGoingOn)
-            {
-                player.AnimationChecker = Plugin.Instance.StartCoroutine(player.CheckAnimation(ELevelUpAnimation.GunLevelUp, gun));
-                return;
+                        EffectManager.sendUIEffect(LevelUpID, LevelUpKey, player.TransportConnection, true);
+                        EffectManager.sendUIEffectImageURL(LevelUpKey, player.TransportConnection, true, "LevelUpIcon", level.IconLinkLarge);
+                        EffectManager.sendUIEffectText(LevelUpKey, player.TransportConnection, true, "LevelUpDesc", Plugin.Instance.Translate("Level_Up_Desc", level.Level).ToRich());
+                        EffectManager.sendUIEffectText(LevelUpKey, player.TransportConnection, true, "LevelUpText", Plugin.Instance.Translate("Level_Up_Text").ToRich());
+                        break;
+                    }
+                case EAnimationType.GunLevelUp:
+                    {
+                        var gun = animationInfo.Info as LoadoutGun;
+                        EffectManager.sendUIEffect(GunLevelUpID, GunLevelUpKey, player.TransportConnection, true);
+                        EffectManager.sendUIEffectImageURL(GunLevelUpKey, player.TransportConnection, true, "LevelUpIcon", gun.Gun.IconLink);
+                        EffectManager.sendUIEffectText(GunLevelUpKey, player.TransportConnection, true, "LevelUpDesc", Plugin.Instance.Translate("Gun_Level_Up_Desc", gun.Gun.GunName, gun.Level).ToRich());
+                        EffectManager.sendUIEffectText(GunLevelUpKey, player.TransportConnection, true, "LevelUpText", Plugin.Instance.Translate("Gun_Level_Up_Text").ToRich());
+                        break;
+                    }
+                default:
+                    break;
             }
-
-            EffectManager.sendUIEffect(GunLevelUpID, GunLevelUpKey, player.TransportConnection, true);
-            EffectManager.sendUIEffectImageURL(GunLevelUpKey, player.TransportConnection, true, "LevelUpIcon", gun.Gun.IconLink);
-            EffectManager.sendUIEffectText(GunLevelUpKey, player.TransportConnection, true, "LevelUpDesc", Plugin.Instance.Translate("Gun_Level_Up_Desc", gun.Gun.GunName, gun.Level).ToRich());
-            EffectManager.sendUIEffectText(GunLevelUpKey, player.TransportConnection, true, "LevelUpText", Plugin.Instance.Translate("Gun_Level_Up_Text").ToRich());
-
-            if (player.AnimationStopper != null)
-            {
-                Plugin.Instance.StopCoroutine(player.AnimationStopper);
-            }
-            player.AnimationStopper = Plugin.Instance.StartCoroutine(player.StopAnimation());
         }
 
         public void SendKillfeed(List<GamePlayer> players, EGameType type, List<Feed> killfeed)

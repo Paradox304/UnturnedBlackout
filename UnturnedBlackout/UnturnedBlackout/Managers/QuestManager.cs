@@ -76,6 +76,8 @@ namespace UnturnedBlackout.Managers
                     await db.IncreasePlayerQuestAmountAsync(steamID, quest.Quest.QuestID, 1);
                 });
             }
+
+            ThreadPool.QueueUserWorkItem((o) => Plugin.Instance.AchievementManager.CheckAchievement(steamID, questType, questConditions));
         }
 
         public bool IsConditionMinimum(EQuestCondition condition)

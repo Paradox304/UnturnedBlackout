@@ -17,6 +17,8 @@ using UnturnedBlackout.Models.Data;
 using UnturnedBlackout.Models.Webhook;
 using PlayerQuest = UnturnedBlackout.Database.Data.PlayerQuest;
 using Timer = System.Timers.Timer;
+using Achievement = UnturnedBlackout.Database.Base.Achievement;
+using UnturnedBlackout.Models.Global;
 
 namespace UnturnedBlackout.Managers
 {
@@ -70,6 +72,9 @@ namespace UnturnedBlackout.Managers
         public Dictionary<int, Quest> QuestsSearchByID { get; set; }
         public List<Quest> Quests { get; set; }
 
+        public Dictionary<int, Achievement> AchievementsSearchByID { get; set; }
+        public List<Achievement> Achievements { get; set; }
+        
         // Default Data
         public LoadoutData DefaultLoadout { get; set; }
         public List<Gun> DefaultGuns { get; set; }
@@ -114,6 +119,9 @@ namespace UnturnedBlackout.Managers
         // QUESTS
         public const string PlayersQuestsTableName = "UB_Players_Quests";
 
+        // ACHIEVEMENTS
+        public const string PlayersAchievementsTableName = "UB_Players_Achievements";
+        
         // Base Data
         // GUNS
         public const string GunsTableName = "UB_Guns";
@@ -148,6 +156,10 @@ namespace UnturnedBlackout.Managers
         // Quests
         public const string QuestsTableName = "UB_Quests";
 
+        // ACHIEVEMENTS
+        public const string AchievementsTableName = "UB_Achievements";
+        public const string AchievementsTiersTableName = "UB_Achievements_Tiers";
+        
         public DatabaseManager()
         {
             Config = Plugin.Instance.Configuration.Instance;
@@ -194,7 +206,9 @@ namespace UnturnedBlackout.Managers
                 await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{LevelsTableName}` ( `Level` INT NOT NULL , `XPNeeded` INT NOT NULL , `IconLinkLarge` TEXT NOT NULL , `IconLinkMedium` TEXT NOT NULL , `IconLinkSmall` TEXT NOT NULL , PRIMARY KEY (`Level`));", Conn).ExecuteScalarAsync();
                 await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{OptionsTableName}` ( `DailyLeaderboardWipe` BIGINT NOT NULL , `WeeklyLeaderboardWipe` BIGINT NOT NULL , `DailyLeaderboardRankedRewards` TEXT NOT NULL , `DailyLeaderboardPercentileRewards` TEXT NOT NULL , `WeeklyLeaderboardRankedRewards` TEXT NOT NULL , `WeeklyLeaderboardPercentileRewards` TEXT NOT NULL, `SeasonalLeaderboardRankedRewards` TEXT NOT NULL , `SeasonalLeaderboardPercentileRewards` TEXT NOT NULL);", Conn).ExecuteScalarAsync();
                 await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{QuestsTableName}` ( `QuestID` INT NOT NULL AUTO_INCREMENT , `QuestTitle` TEXT NOT NULL , `QuestDesc` TEXT NOT NULL , QuestType ENUM('Kill', 'Death', 'Win', 'MultiKill', 'Killstreak', 'Headshots', 'GadgetsUsed', 'FlagsCaptured', 'FlagsSaved', 'Dogtags', 'Shutdown', 'Domination') NOT NULL , `QuestTier` ENUM('Easy1', 'Easy2', 'Easy3', 'Medium1', 'Medium2', 'Hard1') NOT NULL , `QuestConditions` TEXT NOT NULL , `TargetAmount` INT NOT NULL , `XP` INT NOT NULL , PRIMARY KEY (`QuestID`));", Conn).ExecuteScalarAsync();
-
+                await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{AchievementsTableName}` ( `AchievementID` INT NOT NULL AUTO_INCREMENT , `AchievementType` ENUM('Kill', 'Death', 'Win', 'MultiKill', 'Killstreak', 'Headshots', 'GadgetsUsed', 'FlagsCaptured', 'FlagsSaved', 'Dogtags', 'Shutdown', 'Domination') NOT NULL , `AchievementConditions` TEXT NOT NULL , PRIMARY KEY (`AchievementID`));", Conn).ExecuteScalarAsync();
+                await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{AchievementsTiersTableName}` ( `AchievementID` INT NOT NULL , `TierID` INT NOT NULL , `TierTitle` TEXT NOT NULL , `TierDesc` TEXT NOT NULL , `TierPrevSmall` TEXT NOT NULL , `TierPrevLarge` TEXT NOT NULL , `TargetAmount` INT NOT NULL , `Rewards` TEXT NOT NULL , `RemoveRewards` TEXT NOT NULL , CONSTRAINT `ub_achievement_id` FOREIGN KEY (`AchievementID`) REFERENCES `{AchievementsTableName}` (`AchievementID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`AchievementID`, `TierID`));", Conn).ExecuteScalarAsync();
+                
                 // PLAYERS DATA
                 await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PlayersTableName}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `SteamName` TEXT NOT NULL , `AvatarLink` VARCHAR(200) NOT NULL , `XP` INT NOT NULL DEFAULT '0' , `Level` INT NOT NULL DEFAULT '1' , `Credits` INT NOT NULL DEFAULT '0' , `Scrap` INT NOT NULL DEFAULT '0' , `Coins` INT NOT NULL DEFAULT '0' , `Kills` INT NOT NULL DEFAULT '0' , `HeadshotKills` INT NOT NULL DEFAULT '0' , `HighestKillstreak` INT NOT NULL DEFAULT '0' , `HighestMultiKills` INT NOT NULL DEFAULT '0' , `KillsConfirmed` INT NOT NULL DEFAULT '0' , `KillsDenied` INT NOT NULL DEFAULT '0' , `FlagsCaptured` INT NOT NULL DEFAULT '0' , `FlagsSaved` INT NOT NULL DEFAULT '0' , `AreasTaken` INT NOT NULL DEFAULT '0' , `Deaths` INT NOT NULL DEFAULT '0' , `Music` BOOLEAN NOT NULL DEFAULT TRUE , `IsMuted` BOOLEAN NOT NULL DEFAULT FALSE , `MuteExpiry` BIGINT NOT NULL , PRIMARY KEY (`SteamID`));", Conn).ExecuteScalarAsync();
                 await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PlayersLeaderboardDailyTableName}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `Kills` INT NOT NULL DEFAULT '0' , `HeadshotKills` INT NOT NULL DEFAULT '0' , `Deaths` INT NOT NULL DEFAULT '0' , CONSTRAINT `ub_steam_id_11` FOREIGN KEY (`SteamID`) REFERENCES `{PlayersTableName}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID`));", Conn).ExecuteScalarAsync();
@@ -211,7 +225,7 @@ namespace UnturnedBlackout.Managers
                 await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PlayersGlovesTableName}` (`SteamID` BIGINT UNSIGNED NOT NULL , `GloveID` INT NOT NULL , `IsBought` BOOLEAN NOT NULl , CONSTRAINT `ub_steam_id_8` FOREIGN KEY (`SteamID`) REFERENCES `{PlayersTableName}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_glove_id` FOREIGN KEY (`GloveID`) REFERENCES `{GlovesTableName}` (`GloveID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `GloveID`));", Conn).ExecuteScalarAsync();
                 await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PlayersLoadoutsTableName}` (`SteamID` BIGINT UNSIGNED NOT NULL , `LoadoutID` INT NOT NULL , `IsActive` BOOLEAN NOT NULL , `Loadout` TEXT NOT NULL , CONSTRAINT `ub_steam_id_9` FOREIGN KEY (`SteamID`) REFERENCES `{PlayersTableName}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID`, `LoadoutID`));", Conn).ExecuteScalarAsync();
                 await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PlayersQuestsTableName}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `QuestID` INT NOT NULL , `Amount` INT NOT NULL , `QuestEnd` BIGINT NOT NULL , CONSTRAINT `ub_steam_id_14` FOREIGN KEY (`SteamID`) REFERENCES `{PlayersTableName}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_quest_id` FOREIGN KEY (`QuestID`) REFERENCES `{QuestsTableName}` (`QuestID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `QuestID`));", Conn).ExecuteScalarAsync();
-
+                await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PlayersAchievementsTableName}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `AchievementID` INT NOT NULL , `CurrentTier` INT NOT NULL DEFAULT '0' , `Amount` INT NOT NULL DEFAULT '0' , CONSTRAINT `ub_steam_id_15` FOREIGN KEY (`SteamID`) REFERENCES `{PlayersTableName}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_achievement_id_2` FOREIGN KEY (`AchievementID`) REFERENCES `{AchievementsTableName}` (`AchievementID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID`, `AchievementID`));", Conn).ExecuteScalarAsync();
             }
             catch (Exception ex)
             {
@@ -254,8 +268,8 @@ namespace UnturnedBlackout.Managers
 
                         var attachmentName = rdr[1].ToString();
                         var attachmentDesc = rdr[2].ToString();
-                        var attachmentPros = rdr[3].ToString().Split(',').ToList();
-                        var attachmentCons = rdr[4].ToString().Split(',').ToList();
+                        var attachmentPros = rdr[3].ToString().Split(',').Where(k => !string.IsNullOrEmpty(k)).ToList();
+                        var attachmentCons = rdr[4].ToString().Split(',').Where(k => !string.IsNullOrEmpty(k)).ToList();
                         if (!int.TryParse(rdr[5].ToString(), out int attachmentTypeInt))
                         {
                             continue;
@@ -1115,6 +1129,105 @@ namespace UnturnedBlackout.Managers
                     rdr.Close();
                 }
 
+                Logging.Debug("Reading achievements for base data");
+                rdr = (MySqlDataReader)await new MySqlCommand($"SELECT `AchievementID`, `AchievementType`-1, `AchievementConditions` FROM `{AchievementsTableName}`;", Conn).ExecuteReaderAsync();
+                try
+                {
+                    var achievements = new List<Achievement>();
+                    var achievementsSearchByID = new Dictionary<int, Achievement>();
+                    while (await rdr.ReadAsync())
+                    {
+                        if (!int.TryParse(rdr[0].ToString(), out int achievementID))
+                        {
+                            continue;
+                        }
+
+                        if (!int.TryParse(rdr[1].ToString(), out int achievementTypeInt))
+                        {
+                            continue;
+                        }
+
+                        var achievementType = (EQuestType)achievementTypeInt;
+                        var achievementConditions = rdr[2].ToString();
+                        var conditions = Utility.GetQuestConditionsFromString(achievementConditions);
+                        var achievement = new Achievement(achievementID, achievementType, conditions, new(), new());
+                        if (!achievementsSearchByID.ContainsKey(achievementID))
+                        {
+                            achievementsSearchByID.Add(achievementID, achievement);
+                            achievements.Add(achievement);
+                        }
+                        else
+                        {
+                            Logging.Debug($"Found a duplicate achievement with id {achievementID}, ignoring this");
+                        }
+                    }
+                    AchievementsSearchByID = achievementsSearchByID;
+                    Achievements = achievements;
+
+                    Logging.Debug($"Successfully read {achievements.Count} achievements from the table");
+                } catch (Exception ex)
+                {
+                    Logger.Log("Error reading data from achievements table");
+                    Logger.Log(ex);
+                } finally
+                {
+                    rdr.Close();
+                }
+
+                Logging.Debug("Reading achievements tiers for base data");
+                rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{AchievementsTiersTableName}`;", Conn).ExecuteReaderAsync();
+                try
+                {
+                    while (await rdr.ReadAsync())
+                    {
+                        if (!int.TryParse(rdr[0].ToString(), out int achievementID))
+                        {
+                            continue;
+                        }
+
+                        if (!AchievementsSearchByID.TryGetValue(achievementID, out Achievement achievement))
+                        {
+                            continue;
+                        }
+
+                        if (!int.TryParse(rdr[1].ToString(), out int tierID))
+                        {
+                            continue;
+                        }
+
+                        var tierTitle = rdr[2].ToString();
+                        var tierDesc = rdr[3].ToString();
+                        var tierPrevSmall = rdr[4].ToString();
+                        var tierPrevLarge = rdr[5].ToString();
+                        if (!int.TryParse(rdr[6].ToString(), out int targetAmount))
+                        {
+                            continue;
+                        }
+                        var rewards = Utility.GetRewardsFromString(rdr[7].ToString());
+                        var removeRewards = Utility.GetRewardsFromString(rdr[8].ToString());
+                        var achievementTier = new AchievementTier(achievement, tierID, tierTitle, tierDesc, tierPrevSmall, tierPrevLarge, targetAmount, rewards, removeRewards);
+                    
+                        if (!achievement.TiersLookup.ContainsKey(tierID))
+                        {
+                            achievement.TiersLookup.Add(tierID, achievementTier);
+                            achievement.Tiers.Add(achievementTier);
+                        } else
+                        {
+                            Logging.Debug($"Found a duplicate achievement tier with id {tierID} for achievement with id {achievementID}, ignoring this");
+                        }
+                    }
+                    
+                    Logging.Debug($"Loaded total {Achievements.Sum(k => k.Tiers.Count)} for {Achievements.Count} achievements");
+                } catch (Exception ex)
+                {
+                    Logger.Log("Error reading data from achievements table");
+                    Logger.Log(ex);
+                }
+                finally
+                {
+                    rdr.Close();
+                }
+                
                 Logging.Debug("Building a default loadout for new players");
                 try
                 {
@@ -1322,6 +1435,13 @@ namespace UnturnedBlackout.Managers
                     await new MySqlCommand($"INSERT IGNORE INTO `{PlayersCardsTableName}` (`SteamID` , `CardID` , `IsBought`) VALUES ({player.CSteamID} , {card.CardID} ,  {card.LevelRequirement == 0});", Conn).ExecuteScalarAsync();
                 }
 
+                Logging.Debug($"Giving {steamName} the achievements");
+                foreach (var achievement in Achievements)
+                {
+                    Logging.Debug($"Adding achievement with id {achievement.AchievementID}");
+                    await new MySqlCommand($"INSERT IGNORE INTO `{PlayersAchievementsTableName}` (`SteamID`, `AchievementID`) VALUES ({player.CSteamID}, {achievement.AchievementID});", Conn).ExecuteScalarAsync();
+                }
+
                 var loadoutAmount = Utility.GetLoadoutAmount(player);
                 Logging.Debug($"{steamName} should have {loadoutAmount} loadouts, adding them");
                 var data = Plugin.Instance.DataManager.ConvertLoadoutToJson(DefaultLoadout);
@@ -1455,7 +1575,7 @@ namespace UnturnedBlackout.Managers
                             PlayerData.Remove(player.CSteamID);
                         }
 
-                        PlayerData.Add(player.CSteamID, new PlayerData(player.CSteamID, steamName, avatarLink, xp, level, credits, scrap, coins, kills, headshotKills, highestKillstreak, highestMultiKills, killsConfirmed, killsDenied, flagsCaptured, flagsSaved, areasTaken, deaths, music, isMuted, muteExpiry, new List<PlayerQuest>(), new Dictionary<EQuestType, List<PlayerQuest>>()));
+                        PlayerData.Add(player.CSteamID, new PlayerData(player.CSteamID, steamName, avatarLink, xp, level, credits, scrap, coins, kills, headshotKills, highestKillstreak, highestMultiKills, killsConfirmed, killsDenied, flagsCaptured, flagsSaved, areasTaken, deaths, music, isMuted, muteExpiry, new(), new(), new(), new(), new()));
                     }
                 }
                 catch (Exception ex)
@@ -1610,6 +1730,161 @@ namespace UnturnedBlackout.Managers
                         PlayerAllTimeKill.Add(leaderboardData);
                         PlayerAllTimeLevel.Add(leaderboardData);
                     }
+                }
+
+                Logging.Debug($"Getting quests for {player.CharacterName}");
+                rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PlayersQuestsTableName}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
+                try
+                {
+                    var playerQuests = new List<PlayerQuest>();
+                    var playerQuestsSearchByType = new Dictionary<EQuestType, List<PlayerQuest>>();
+
+                    while (await rdr.ReadAsync())
+                    {
+                        if (!int.TryParse(rdr[1].ToString(), out int questID))
+                        {
+                            continue;
+                        }
+
+                        if (!QuestsSearchByID.TryGetValue(questID, out Quest quest))
+                        {
+                            Logging.Debug($"Error finding quest with id {questID} for {player.CharacterName}, ignoring it");
+                            continue;
+                        }
+
+                        if (!int.TryParse(rdr[2].ToString(), out int amount))
+                        {
+                            continue;
+                        }
+
+                        if (!long.TryParse(rdr[3].ToString(), out long questEndDate))
+                        {
+                            continue;
+                        }
+
+                        var questEndDateTime = DateTimeOffset.FromUnixTimeSeconds(questEndDate);
+
+                        var playerQuest = new PlayerQuest(player.CSteamID, quest, amount, questEndDateTime);
+                        playerQuests.Add(playerQuest);
+                        if (!playerQuestsSearchByType.ContainsKey(quest.QuestType))
+                        {
+                            playerQuestsSearchByType.Add(quest.QuestType, new List<PlayerQuest>());
+                        }
+                        playerQuestsSearchByType[quest.QuestType].Add(playerQuest);
+                    }
+                    Logging.Debug($"Got {playerQuests.Count} quests registered to player");
+
+                    rdr.Close();
+                    if (playerQuests.Count == 0 || playerQuests[0].QuestEnd.UtcDateTime < DateTime.UtcNow)
+                    {
+                        Logging.Debug("Quests have expired, generate different quests");
+
+                        playerQuests.Clear();
+                        playerQuestsSearchByType.Clear();
+
+                        await new MySqlCommand($"DELETE FROM `{PlayersQuestsTableName}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteScalarAsync();
+                        var expiryDate = ServerOptions.DailyLeaderboardWipe;
+                        var questsToAdd = new List<Quest>();
+                        for (var i = 0; i < 6; i++)
+                        {
+                            Logging.Debug($"i: {i}, Tier: {(EQuestTier)i}");
+                            var randomQuests = Quests.Where(k => (int)k.QuestTier == i).ToList();
+                            Logging.Debug($"FOund {randomQuests.Count} random quests");
+                            var randomQuest = randomQuests[UnityEngine.Random.Range(0, randomQuests.Count)];
+                            questsToAdd.Add(randomQuest);
+                        }
+
+                        foreach (var quest in questsToAdd)
+                        {
+                            var playerQuest = new PlayerQuest(player.CSteamID, quest, 0, expiryDate);
+                            playerQuests.Add(playerQuest);
+                            if (!playerQuestsSearchByType.ContainsKey(quest.QuestType))
+                            {
+                                playerQuestsSearchByType.Add(quest.QuestType, new List<PlayerQuest>());
+                            }
+                            playerQuestsSearchByType[quest.QuestType].Add(playerQuest);
+                            await new MySqlCommand($"INSERT INTO `{PlayersQuestsTableName}` (`SteamID` , `QuestID`, `Amount`, `QuestEnd`) VALUES ({player.CSteamID}, {quest.QuestID}, 0, {expiryDate.ToUnixTimeSeconds()});", Conn).ExecuteScalarAsync();
+                        }
+
+                        Logging.Debug($"Generated {playerQuests.Count} quests for player");
+                    }
+
+                    playerData.Quests = playerQuests;
+                    playerData.QuestsSearchByType = playerQuestsSearchByType;
+
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log($"Error reading quests data for {player.CharacterName}");
+                    Logger.Log(ex);
+                }
+                finally
+                {
+                    rdr.Close();
+                }
+
+                Logging.Debug($"Getting achievements for {player.CharacterName}");
+                rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PlayersAchievementsTableName}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
+                try
+                {
+                    var achievements = new List<PlayerAchievement>();
+                    var achievementsSearchByType = new Dictionary<EQuestType, List<PlayerAchievement>>();
+                    var achievementsSearchByID = new Dictionary<int, PlayerAchievement>();
+
+                    while (await rdr.ReadAsync())
+                    {
+                        if (!int.TryParse(rdr[1].ToString(), out int achievementID))
+                        {
+                            continue;
+                        }
+
+                        if (!AchievementsSearchByID.TryGetValue(achievementID, out Achievement achievement))
+                        {
+                            Logging.Debug($"Error finding achievement with id {achievementID} for {player.CharacterName}, ignoring");
+                            continue;
+                        }
+
+                        if (!int.TryParse(rdr[2].ToString(), out int currentTier))
+                        {
+                            continue;
+                        }
+
+                        if (!int.TryParse(rdr[3].ToString(), out int amount))
+                        {
+                            continue;
+                        }
+
+                        // Create PlayerAchievmenet
+                        var playerAchievement = new PlayerAchievement(player.CSteamID, achievement, currentTier, amount);
+                        // add to achievementsSearchByID, achievementsSearchByType, achievements
+                        if (!achievementsSearchByID.ContainsKey(achievementID))
+                        {
+                            achievementsSearchByID.Add(achievementID, playerAchievement);
+                            if (!achievementsSearchByType.ContainsKey(achievement.AchievementType))
+                            {
+                                achievementsSearchByType.Add(achievement.AchievementType, new());
+                            }
+                            achievementsSearchByType[achievement.AchievementType].Add(playerAchievement);
+                            achievements.Add(playerAchievement);
+                        } else
+                        {
+                            Logging.Debug($"Error, achievement {achievementID} already exists for {player.CharacterName}, ignoring");
+                        }
+                    }
+
+                    Logging.Debug($"Got {achievements.Count} achievements registered to player");
+                    playerData.Achievements = achievements;
+                    playerData.AchievementsSearchByType = achievementsSearchByType;
+                    playerData.AchievementsSearchByID = achievementsSearchByID;
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log($"Error reading achievements data for {player.CharacterName}");
+                    Logger.Log(ex);
+                }
+                finally
+                {
+                    rdr.Close();
                 }
 
                 if (!PlayerData.ContainsKey(player.CSteamID))
@@ -2055,97 +2330,6 @@ namespace UnturnedBlackout.Managers
                     rdr.Close();
                 }
 
-                Logging.Debug($"Getting quests for {player.CharacterName}");
-                rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PlayersQuestsTableName}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
-                try
-                {
-                    var playerQuests = new List<PlayerQuest>();
-                    var playerQuestsSearchByType = new Dictionary<EQuestType, List<PlayerQuest>>();
-
-                    while (await rdr.ReadAsync())
-                    {
-                        if (!int.TryParse(rdr[1].ToString(), out int questID))
-                        {
-                            continue;
-                        }
-
-                        if (!QuestsSearchByID.TryGetValue(questID, out Quest quest))
-                        {
-                            Logging.Debug($"Error finding quest with id {questID} for {player.CharacterName}, ignoring it");
-                            continue;
-                        }
-
-                        if (!int.TryParse(rdr[2].ToString(), out int amount))
-                        {
-                            continue;
-                        }
-
-                        if (!long.TryParse(rdr[3].ToString(), out long questEndDate))
-                        {
-                            continue;
-                        }
-
-                        var questEndDateTime = DateTimeOffset.FromUnixTimeSeconds(questEndDate);
-
-                        var playerQuest = new PlayerQuest(player.CSteamID, quest, amount, questEndDateTime);
-                        playerQuests.Add(playerQuest);
-                        if (!playerQuestsSearchByType.ContainsKey(quest.QuestType))
-                        {
-                            playerQuestsSearchByType.Add(quest.QuestType, new List<PlayerQuest>());
-                        }
-                        playerQuestsSearchByType[quest.QuestType].Add(playerQuest);
-                    }
-                    Logging.Debug($"Got {playerQuests.Count} quests registered to player");
-
-                    rdr.Close();
-                    if (playerQuests.Count == 0 || playerQuests[0].QuestEnd.UtcDateTime < DateTime.UtcNow)
-                    {
-                        Logging.Debug("Quests have expired, generate different quests");
-
-                        playerQuests.Clear();
-                        playerQuestsSearchByType.Clear();
-
-                        await new MySqlCommand($"DELETE FROM `{PlayersQuestsTableName}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteScalarAsync();
-                        var expiryDate = ServerOptions.DailyLeaderboardWipe;
-                        var questsToAdd = new List<Quest>();
-                        for (var i = 0; i < 6; i++)
-                        {
-                            Logging.Debug($"i: {i}, Tier: {(EQuestTier)i}");
-                            var randomQuests = Quests.Where(k => (int)k.QuestTier == i).ToList();
-                            Logging.Debug($"FOund {randomQuests.Count} random quests");
-                            var randomQuest = randomQuests[UnityEngine.Random.Range(0, randomQuests.Count)];
-                            questsToAdd.Add(randomQuest);
-                        }
-
-                        foreach (var quest in questsToAdd)
-                        {
-                            var playerQuest = new PlayerQuest(player.CSteamID, quest, 0, expiryDate);
-                            playerQuests.Add(playerQuest);
-                            if (!playerQuestsSearchByType.ContainsKey(quest.QuestType))
-                            {
-                                playerQuestsSearchByType.Add(quest.QuestType, new List<PlayerQuest>());
-                            }
-                            playerQuestsSearchByType[quest.QuestType].Add(playerQuest);
-                            await new MySqlCommand($"INSERT INTO `{PlayersQuestsTableName}` (`SteamID` , `QuestID`, `Amount`, `QuestEnd`) VALUES ({player.CSteamID}, {quest.QuestID}, 0, {expiryDate.ToUnixTimeSeconds()});", Conn).ExecuteScalarAsync();
-                        }
-
-                        Logging.Debug($"Generated {playerQuests.Count} quests for player");
-                    }
-
-                    playerData.Quests = playerQuests;
-                    playerData.QuestsSearchByType = playerQuestsSearchByType;
-
-                }
-                catch (Exception ex)
-                {
-                    Logger.Log($"Error reading quests data for {player.CharacterName}");
-                    Logger.Log(ex);
-                }
-                finally
-                {
-                    rdr.Close();
-                }
-
                 Logging.Debug($"Getting loadouts for {player.CharacterName}");
                 rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PlayersLoadoutsTableName}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
                 try
@@ -2391,7 +2575,7 @@ namespace UnturnedBlackout.Managers
                                     var player = Plugin.Instance.GameManager.GetGamePlayer(data.SteamID);
                                     if (player != null)
                                     {
-                                        Plugin.Instance.UIManager.SendLevelUpAnimation(player, level);
+                                        Plugin.Instance.UIManager.SendAnimation(player, new AnimationInfo(EAnimationType.LevelUp, level));
                                     }
                                 });
                             }
@@ -3028,7 +3212,7 @@ namespace UnturnedBlackout.Managers
                 if (!Guns.TryGetValue(gunID, out Gun gun))
                 {
                     Logging.Debug($"Error finding gun with id {gunID} to add to {steamID}");
-                    throw new Exception();
+                    return;
                 }
 
                 await new MySqlCommand($"INSERT INTO `{PlayersGunsTableName}` (`SteamID` , `GunID` , `Level` , `XP` , `GunKills` , `IsBought` , `Attachments`) VALUES ({steamID} , {gunID} , 1 , 0 , 0 , {isBought} , '{Utility.CreateStringFromDefaultAttachments(gun.DefaultAttachments) + Utility.CreateStringFromRewardAttachments(gun.RewardAttachments.Values.ToList())}') ON DUPLICATE KEY UPDATE `IsBought` = {isBought};", Conn).ExecuteScalarAsync();
@@ -3094,12 +3278,12 @@ namespace UnturnedBlackout.Managers
                     if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
                     {
                         Logging.Debug($"Error finding loadout for player with steam id {steamID}");
-                        throw new Exception();
+                        return;
                     }
                     if (!loadout.Guns.TryGetValue(gunID, out LoadoutGun gun))
                     {
                         Logging.Debug($"Error finding loadout gun with id {gunID} for player with steam id {steamID}");
-                        throw new Exception();
+                        return;
                     }
 
                     gun.XP = newXP;
@@ -3121,7 +3305,7 @@ namespace UnturnedBlackout.Managers
                                 var player = Plugin.Instance.GameManager.GetGamePlayer(steamID);
                                 if (player != null)
                                 {
-                                    Plugin.Instance.UIManager.SendGunLevelUpAnimation(player, gun);
+                                    Plugin.Instance.UIManager.SendAnimation(player, new AnimationInfo(EAnimationType.GunLevelUp, gun));
                                 }
                             });
                         }
@@ -3152,13 +3336,13 @@ namespace UnturnedBlackout.Managers
                     if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
                     {
                         Logging.Debug($"Error finding loadout for player with steam id {steamID}");
-                        throw new Exception();
+                        return;
                     }
 
                     if (!loadout.Guns.TryGetValue(gunID, out LoadoutGun gun))
                     {
                         Logging.Debug($"Error finding loadout gun with id {gunID} for player with steam id {steamID}");
-                        throw new Exception();
+                        return;
                     }
 
                     gun.GunKills = newKills;
@@ -3186,13 +3370,13 @@ namespace UnturnedBlackout.Managers
                 if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
                 {
                     Logging.Debug($"Error finding loadout for player with steam id {steamID}");
-                    throw new Exception();
+                    return;
                 }
 
                 if (!loadout.Guns.TryGetValue(gunID, out LoadoutGun gun))
                 {
                     Logging.Debug($"Error finding loadout gun with id {gunID} for player with steam id {steamID}");
-                    throw new Exception();
+                    return;
                 }
 
                 gun.IsBought = isBought;
@@ -3220,19 +3404,19 @@ namespace UnturnedBlackout.Managers
                 if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
                 {
                     Logging.Debug($"Error finding loadout for player with steam id {steamID}");
-                    throw new Exception();
+                    return;
                 }
 
                 if (!loadout.Guns.TryGetValue(gunID, out LoadoutGun gun))
                 {
                     Logging.Debug($"Error finding loadout gun with id {gunID} for player with steam id {steamID}");
-                    throw new Exception();
+                    return;
                 }
 
                 if (!gun.Attachments.TryGetValue(attachmentID, out LoadoutAttachment attachment))
                 {
                     Logging.Debug($"Error finding loadout attachment with id {attachmentID} for loadout gun with id {gunID} for player with steam id {steamID}");
-                    throw new Exception();
+                    return;
                 }
 
                 attachment.IsBought = isBought;
@@ -3274,13 +3458,13 @@ namespace UnturnedBlackout.Managers
                 if (!GunSkinsSearchByID.TryGetValue(id, out GunSkin skin))
                 {
                     Logging.Debug($"Error finding gun skin with id {id}");
-                    throw new Exception();
+                    return;
                 }
 
                 if (loadout.GunSkinsSearchByID.ContainsKey(id))
                 {
                     Logging.Debug($"Found gun skin with id {id} already registered to player with steam id {steamID}");
-                    throw new Exception();
+                    return;
                 }
 
                 loadout.GunSkinsSearchByID.Add(id, skin);
@@ -3326,7 +3510,7 @@ namespace UnturnedBlackout.Managers
                 if (!GunCharms.TryGetValue(gunCharmID, out GunCharm gunCharm))
                 {
                     Logging.Debug($"Error finding gun charm with id {gunCharmID}");
-                    throw new Exception();
+                    return;
                 }
 
                 if (loadout.GunCharms.ContainsKey(gunCharmID))
@@ -3350,6 +3534,37 @@ namespace UnturnedBlackout.Managers
             }
         }
 
+        public async Task RemovePlayerGunCharmAsync(CSteamID steamID, ushort gunCharmID)
+        {
+            using MySqlConnection Conn = new(ConnectionString);
+            try
+            {
+                await Conn.OpenAsync();
+
+                await new MySqlCommand($"DELETE FROM `{PlayersGunsCharmsTableName}` WHERE `SteamID` = {steamID} AND `CharmID` = {gunCharmID};", Conn).ExecuteScalarAsync();
+                if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                {
+                    Logging.Debug($"Couldnt find loadout for player with steam id {steamID}");
+                    return;
+                }
+
+                if (!GunCharms.TryGetValue(gunCharmID, out GunCharm gunCharm))
+                {
+                    Logging.Debug($"Error finding gun charm with id {gunCharmID}");
+                    return;
+                }
+
+                loadout.GunCharms.Remove(gunCharmID);
+            } catch (Exception ex)
+            {
+                Logger.Log($"Error removing gun charm with id {gunCharmID} to player with steam id {steamID}");
+                Logger.Log(ex);
+            } finally
+            {
+                await Conn.CloseAsync();
+            }
+        }
+        
         public async Task UpdatePlayerGunCharmBoughtAsync(CSteamID steamID, ushort gunCharmID, bool isBought)
         {
             using MySqlConnection Conn = new(ConnectionString);
@@ -3359,13 +3574,13 @@ namespace UnturnedBlackout.Managers
                 if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
                 {
                     Logging.Debug($"Error finding loadout for player with steam id {steamID}");
-                    throw new Exception();
+                    return;
                 }
 
                 if (!loadout.GunCharms.TryGetValue(gunCharmID, out LoadoutGunCharm gunCharm))
                 {
                     Logging.Debug($"Error finding loadout gun charm with id {gunCharmID} for player with steam id {steamID}");
-                    throw new Exception();
+                    return;
                 }
 
                 gunCharm.IsBought = isBought;
@@ -3393,7 +3608,7 @@ namespace UnturnedBlackout.Managers
                 if (!Knives.TryGetValue(knifeID, out Knife knife))
                 {
                     Logging.Debug($"Error finding knife with id {knifeID}");
-                    throw new Exception();
+                    return;
                 }
 
                 await new MySqlCommand($"INSERT INTO `{PlayersKnivesTableName}` (`SteamID` , `KnifeID` , `KnifeKills` , `IsBought`) VALUES ({steamID} , {knifeID} , {isBought}) ON DUPLICATE KEY UPDATE `IsBought` = {isBought};", Conn).ExecuteScalarAsync();
@@ -3434,13 +3649,13 @@ namespace UnturnedBlackout.Managers
                 if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
                 {
                     Logging.Debug($"Error finding loadout for player with steam id {steamID}");
-                    throw new Exception();
+                    return;
                 }
 
                 if (!loadout.Knives.TryGetValue(knifeID, out LoadoutKnife knife))
                 {
                     Logging.Debug($"Error finding loadout knife with id {knifeID} for player with steam id {steamID}");
-                    throw new Exception();
+                    return;
                 }
 
                 await new MySqlCommand($"UPDATE `{PlayersKnivesTableName}` SET `KnifeKills` = `KnifeKills` + {kills} WHERE `SteamID` = {steamID} AND `KnifeID` = {knifeID};", Conn).ExecuteScalarAsync();
@@ -3470,13 +3685,13 @@ namespace UnturnedBlackout.Managers
                 if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
                 {
                     Logging.Debug($"Error finding loadout for player with steam id {steamID}");
-                    throw new Exception();
+                    return;
                 }
 
                 if (!loadout.Knives.TryGetValue(knifeID, out LoadoutKnife knife))
                 {
                     Logging.Debug($"Error finding loadout knife with id {knifeID} for player with steam id {steamID}");
-                    throw new Exception();
+                    return;
                 }
 
                 knife.IsBought = isBought;
@@ -3511,7 +3726,7 @@ namespace UnturnedBlackout.Managers
                 if (!Perks.TryGetValue(perkID, out Perk perk))
                 {
                     Logging.Debug($"Error finding perk with id {perkID}");
-                    throw new Exception();
+                    return;
                 }
 
                 if (loadout.Perks.ContainsKey(perkID))
@@ -3545,13 +3760,13 @@ namespace UnturnedBlackout.Managers
                 if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
                 {
                     Logging.Debug($"Error finding loadout for player with steam id {steamID}");
-                    throw new Exception();
+                    return;
                 }
 
                 if (!loadout.Perks.TryGetValue(perkID, out LoadoutPerk perk))
                 {
                     Logging.Debug($"Error finding loadout perk with id {perkID} for player with steam id {steamID}");
-                    throw new Exception();
+                    return;
                 }
 
                 perk.IsBought = isBought;
@@ -3586,7 +3801,7 @@ namespace UnturnedBlackout.Managers
                 if (!Gadgets.TryGetValue(gadgetID, out Gadget gadget))
                 {
                     Logging.Debug($"Error finding gadget with id {gadgetID}");
-                    throw new Exception();
+                    return;
                 }
 
                 if (loadout.Gadgets.ContainsKey(gadgetID))
@@ -3619,13 +3834,13 @@ namespace UnturnedBlackout.Managers
                 if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
                 {
                     Logging.Debug($"Error finding loadout for player with steam id {steamID}");
-                    throw new Exception();
+                    return;
                 }
 
                 if (!loadout.Gadgets.TryGetValue(gadgetID, out LoadoutGadget gadget))
                 {
                     Logging.Debug($"Error finding loadout gadget with id {gadgetID} for player with steam id {steamID}");
-                    throw new Exception();
+                    return;
                 }
 
                 await new MySqlCommand($"UPDATE `{PlayersGadgetsTableName}` SET `GadgetKills` = `GadgetKills` + {kills} WHERE `SteamID` = {steamID} AND `GadgetID` = {gadgetID};", Conn).ExecuteScalarAsync();
@@ -3655,13 +3870,13 @@ namespace UnturnedBlackout.Managers
                 if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
                 {
                     Logging.Debug($"Error finding loadout for player with steam id {steamID}");
-                    throw new Exception();
+                    return;
                 }
 
                 if (!loadout.Gadgets.TryGetValue(gadgetID, out LoadoutGadget gadget))
                 {
                     Logging.Debug($"Error finding loadout gadget with id {gadgetID} for player with steam id {steamID}");
-                    throw new Exception();
+                    return;
                 }
 
                 gadget.IsBought = isBought;
@@ -3696,7 +3911,7 @@ namespace UnturnedBlackout.Managers
                 if (!Killstreaks.TryGetValue(killstreakID, out Killstreak killstreak))
                 {
                     Logging.Debug($"Error finding killstreak with id {killstreakID}");
-                    throw new Exception();
+                    return;
                 }
 
                 if (loadout.Killstreaks.ContainsKey(killstreakID))
@@ -3729,13 +3944,13 @@ namespace UnturnedBlackout.Managers
                 if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
                 {
                     Logging.Debug($"Error finding loadout for player with steam id {steamID}");
-                    throw new Exception();
+                    return;
                 }
 
                 if (!loadout.Killstreaks.TryGetValue(killstreakID, out LoadoutKillstreak killstreak))
                 {
                     Logging.Debug($"Error finding loadout killstreak with id {killstreakID} for player with steam id {steamID}");
-                    throw new Exception();
+                    return;
                 }
 
                 await new MySqlCommand($"UPDATE `{PlayersKillstreaksTableName}` SET `KillstreakKills` = `KillstreakKills` + {kills} WHERE `SteamID` = {steamID} AND `KillstreakID` = {killstreakID};", Conn).ExecuteScalarAsync();
@@ -3765,13 +3980,13 @@ namespace UnturnedBlackout.Managers
                 if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
                 {
                     Logging.Debug($"Error finding loadout for player with steam id {steamID}");
-                    throw new Exception();
+                    return;
                 }
 
                 if (!loadout.Killstreaks.TryGetValue(killstreakID, out LoadoutKillstreak killstreak))
                 {
                     Logging.Debug($"Error finding loadout killstreak with id {killstreakID} for player with steam id {steamID}");
-                    throw new Exception();
+                    return;
                 }
 
                 killstreak.IsBought = isBought;
@@ -3806,7 +4021,7 @@ namespace UnturnedBlackout.Managers
                 if (!Cards.TryGetValue(cardID, out Card card))
                 {
                     Logging.Debug($"Error finding card with id {cardID}");
-                    throw new Exception();
+                    return;
                 }
 
                 if (loadout.Cards.ContainsKey(cardID))
@@ -3839,13 +4054,13 @@ namespace UnturnedBlackout.Managers
                 if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
                 {
                     Logging.Debug($"Error finding loadout for player with steam id {steamID}");
-                    throw new Exception();
+                    return;
                 }
 
                 if (!loadout.Cards.TryGetValue(cardID, out LoadoutCard card))
                 {
                     Logging.Debug($"Error finding loadout card with id {cardID} for player with steam id {steamID}");
-                    throw new Exception();
+                    return;
                 }
 
                 card.IsBought = isBought;
@@ -3854,6 +4069,38 @@ namespace UnturnedBlackout.Managers
             catch (Exception ex)
             {
                 Logger.Log($"Error changing is bought to {isBought} for card with id {cardID} for player with steam id {steamID}");
+                Logger.Log(ex);
+            }
+            finally
+            {
+                await Conn.CloseAsync();
+            }
+        }
+
+        public async Task RemovePlayerCardAsync(CSteamID steamID, int cardID)
+        {
+            using MySqlConnection Conn = new(ConnectionString);
+            try
+            {
+                await Conn.OpenAsync();
+                await new MySqlCommand($"DELETE FROM `{PlayersCardsTableName}` WHERE `SteamID` = {steamID} AND `CardID` = {cardID};", Conn).ExecuteScalarAsync();
+                if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                {
+                    Logging.Debug($"Error finding loadout for player with steam id {steamID}");
+                    return;
+                }
+
+                if (!loadout.Cards.TryGetValue(cardID, out LoadoutCard card))
+                {
+                    Logging.Debug($"Error finding loadout card with id {cardID} for player with steam id {steamID}");
+                    return;
+                }
+
+                loadout.Cards.Remove(cardID);
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"Error removing card with id {cardID} from player with steam id {steamID}");
                 Logger.Log(ex);
             }
             finally
@@ -3880,7 +4127,7 @@ namespace UnturnedBlackout.Managers
                 if (!Gloves.TryGetValue(gloveID, out Glove glove))
                 {
                     Logging.Debug($"Error finding glove with id {gloveID}");
-                    throw new Exception();
+                    return;
                 }
 
                 if (loadout.Gloves.ContainsKey(gloveID))
@@ -3913,13 +4160,13 @@ namespace UnturnedBlackout.Managers
                 if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
                 {
                     Logging.Debug($"Error finding loadout for player with steam id {steamID}");
-                    throw new Exception();
+                    return;
                 }
 
                 if (!loadout.Gloves.TryGetValue(gloveID, out LoadoutGlove glove))
                 {
                     Logging.Debug($"Error finding loadout glove with id {gloveID} for player with steam id {steamID}");
-                    throw new Exception();
+                    return;
                 }
 
                 glove.IsBought = isBought;
@@ -3947,13 +4194,13 @@ namespace UnturnedBlackout.Managers
                 if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
                 {
                     Logging.Debug($"Error finding loadout for player with steam id {steamID}");
-                    throw new Exception();
+                    return;
                 }
 
                 if (!loadout.Loadouts.TryGetValue(loadoutID, out Loadout playerLoadout))
                 {
                     Logging.Debug($"Error finding loadout with id {loadoutID} for player with steam id {steamID}");
-                    throw new Exception();
+                    return;
                 }
 
                 var loadoutData = new LoadoutData(playerLoadout);
@@ -3979,13 +4226,13 @@ namespace UnturnedBlackout.Managers
                 if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
                 {
                     Logging.Debug($"Error finding loadout for player with steam id {steamID}");
-                    throw new Exception();
+                    return;
                 }
 
                 if (!loadout.Loadouts.TryGetValue(loadoutID, out Loadout playerLoadout))
                 {
                     Logging.Debug($"Error finding loadout for player with id {loadoutID}");
-                    throw new Exception();
+                    return;
                 }
 
                 playerLoadout.IsActive = isActive;
@@ -4714,6 +4961,64 @@ namespace UnturnedBlackout.Managers
             catch (Exception ex)
             {
                 Logger.Log($"Error updating player quest amount of {steamID} for quest {questID} by amount {amount}");
+                Logger.Log(ex);
+            }
+            finally
+            {
+                await Conn.CloseAsync();
+            }
+        }
+
+        // Achievement
+
+        public async Task UpdatePlayerAchievementTierAsync(CSteamID steamID, int achievementID, int currentTier)
+        {
+            using MySqlConnection Conn = new(ConnectionString);
+            try
+            {
+                await Conn.OpenAsync();
+                await new MySqlCommand($"UPDATE `{PlayersAchievementsTableName}` SET `CurrentTier` = {currentTier} WHERE `SteamID` = {steamID} AND `AchievementID` = {achievementID};", Conn).ExecuteScalarAsync();
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"Error updating player achievement tier of {steamID} for achievement {achievementID} to {currentTier}");
+                Logger.Log(ex);
+            }
+            finally
+            {
+                await Conn.CloseAsync();
+            }
+        }
+
+        public async Task IncreasePlayerAchievementAmountAsync(CSteamID steamID, int achievementID, int amount)
+        {
+            using MySqlConnection Conn = new(ConnectionString);
+            try
+            {
+                await Conn.OpenAsync();
+                await new MySqlCommand($"UPDATE `{PlayersAchievementsTableName}` SET `Amount` = `Amount` + {amount} WHERE `SteamID` = {steamID} AND `AchievementID` = {achievementID};", Conn).ExecuteScalarAsync();
+                var obj = await new MySqlCommand($"SELECT `Amount` FROM `{PlayersAchievementsTableName}` WHERE `SteamID` = {steamID} AND `AchievementID` = {achievementID};", Conn).ExecuteScalarAsync();
+
+                if (obj is int newAmount)
+                {
+                    if (!PlayerData.TryGetValue(steamID, out PlayerData data))
+                    {
+                        Logger.Log($"Error finding player data for player with steam id {steamID}");
+                        return;
+                    }
+
+                    if (!data.AchievementsSearchByID.TryGetValue(achievementID, out PlayerAchievement achievement))
+                    {
+                        Logger.Log($"Error finding achievement with id {achievementID} for player with steam id {steamID}");
+                        return;
+                    }
+
+                    achievement.Amount = newAmount;
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"Error updating player achievement amount of {steamID} for achievement {achievementID} by amount {amount}");
                 Logger.Log(ex);
             }
             finally

@@ -144,6 +144,8 @@
     <Compile Include="Commands\UnmuteCommand.cs" />
     <Compile Include="Commands\WipeSpawnsCommand.cs" />
     <Compile Include="Config.cs" />
+    <Compile Include="Database\Base\Achievement.cs" />
+    <Compile Include="Database\Base\AchievementTier.cs" />
     <Compile Include="Database\Base\Card.cs" />
     <Compile Include="Database\Base\Gadget.cs" />
     <Compile Include="Database\Base\Glove.cs" />
@@ -170,6 +172,7 @@
     <Compile Include="Database\Data\LoadoutKillstreak.cs" />
     <Compile Include="Database\Data\LoadoutKnife.cs" />
     <Compile Include="Database\Data\LoadoutPerk.cs" />
+    <Compile Include="Database\Data\PlayerAchievement.cs" />
     <Compile Include="Database\Data\PlayerData.cs" />
     <Compile Include="Database\Data\PlayerLoadout.cs" />
     <Compile Include="Database\Data\PlayerQuest.cs" />
@@ -180,7 +183,7 @@
     <Compile Include="Enums\EGun.cs" />
     <Compile Include="Enums\ELeaderboardPage.cs" />
     <Compile Include="Enums\ELeaderboardTab.cs" />
-    <Compile Include="Enums\ELevelUpAnimation.cs" />
+    <Compile Include="Enums\EAnimationType.cs" />
     <Compile Include="Enums\ELoadoutPage.cs" />
     <Compile Include="Enums\ELoadoutTab.cs" />
     <Compile Include="Enums\EMainPage.cs" />
@@ -197,6 +200,7 @@
     <Compile Include="GameTypes\TDMGame.cs" />
     <Compile Include="Helpers\Logging.cs" />
     <Compile Include="Instances\UIHandler.cs" />
+    <Compile Include="Managers\AchievementManager.cs" />
     <Compile Include="Managers\DatabaseManager.cs" />
     <Compile Include="Managers\DataManager.cs" />
     <Compile Include="Managers\DiscordManager.cs" />
@@ -207,6 +211,7 @@
     <Compile Include="Managers\RewardManager.cs" />
     <Compile Include="Managers\UIManager.cs" />
     <Compile Include="Models\Data\LoadoutData.cs" />
+    <Compile Include="Models\Global\AnimationInfo.cs" />
     <Compile Include="Models\Global\ArenaLocation.cs" />
     <Compile Include="Models\CTF\CTFConfig.cs" />
     <Compile Include="Models\CTF\CTFPlayer.cs" />

@@ -30,7 +30,8 @@ namespace UnturnedBlackout.Models.Global
         public Stack<CSteamID> LastDamager { get; set; }
 
         public bool HasAnimationGoingOn { get; set; }
-
+        public List<AnimationInfo> PendingAnimations { get; set; }
+        
         public byte LastEquippedPage { get; set; }
         public byte LastEquippedX { get; set; }
         public byte LastEquippedY { get; set; }
@@ -51,7 +52,6 @@ namespace UnturnedBlackout.Models.Global
         public Coroutine Healer { get; set; }
         public Coroutine RespawnTimer { get; set; }
         public Coroutine VoiceChatChecker { get; set; }
-        public Coroutine AnimationStopper { get; set; }
         public Coroutine AnimationChecker { get; set; }
         public Timer m_RemoveSpawnProtection { get; set; }
         public Timer m_DamageChecker { get; set; }
@@ -65,7 +65,8 @@ namespace UnturnedBlackout.Models.Global
             TransportConnection = transportConnection;
             PreviousStance = EPlayerStance.STAND;
             LastDamager = new Stack<CSteamID>(100);
-
+            PendingAnimations = new();
+            
             m_RemoveSpawnProtection = new Timer(1 * 1000);
             m_RemoveSpawnProtection.Elapsed += RemoveSpawnProtection;
 
@@ -405,38 +406,16 @@ namespace UnturnedBlackout.Models.Global
         }
 
         // Animation
-        public IEnumerator StopAnimation()
+        public IEnumerator CheckAnimation()
         {
             HasAnimationGoingOn = true;
             yield return new WaitForSeconds(5);
             HasAnimationGoingOn = false;
-        }
 
-        public IEnumerator CheckAnimation(ELevelUpAnimation levelUpAnimationType, LoadoutGun gun)
-        {
-            while (true)
+            if (PendingAnimations.Count > 0)
             {
-                yield return new WaitForSeconds(1);
-                if (!HasAnimationGoingOn)
-                {
-                    if (levelUpAnimationType == ELevelUpAnimation.LevelUp)
-                    {
-                        if (!Plugin.Instance.DBManager.PlayerData.TryGetValue(SteamID, out PlayerData data))
-                        {
-                            yield break;
-                        }
-
-                        Plugin.Instance.UIManager.SendLevelUpAnimation(this, data.Level);
-                    }
-                    else
-                    {
-                        if (gun != null)
-                        {
-                            Plugin.Instance.UIManager.SendGunLevelUpAnimation(this, gun);
-                        }
-                    }
-                    break;
-                }
+                Plugin.Instance.UIManager.SendAnimation(this, PendingAnimations[0]);
+                PendingAnimations.RemoveAt(0);
             }
         }
 
@@ -560,11 +539,6 @@ namespace UnturnedBlackout.Models.Global
                 Plugin.Instance.StopCoroutine(VoiceChatChecker);
             }
 
-            if (AnimationStopper != null)
-            {
-                Plugin.Instance.StopCoroutine(AnimationStopper);
-            }
-
             if (AnimationChecker != null)
             {
                 Plugin.Instance.StopCoroutine(AnimationChecker);
@@ -579,6 +553,7 @@ namespace UnturnedBlackout.Models.Global
             HasAnimationGoingOn = false;
             IsPendingLoadoutChange = false;
             LastDamager.Clear();
+            PendingAnimations.Clear();
             Plugin.Instance.UIManager.ClearDeathUI(this);
         }
     }

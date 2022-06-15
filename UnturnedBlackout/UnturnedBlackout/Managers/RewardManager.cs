@@ -21,8 +21,7 @@ namespace UnturnedBlackout.Managers
             {
                 foreach (var reward in rewards)
                 {
-                    var type = reward.RewardType;
-                    switch (type)
+                    switch (reward.RewardType)
                     {
                         case ERewardType.Gun:
                             await db.AddPlayerGunAsync(steamID, Convert.ToUInt16(reward.RewardValue), true);
@@ -63,6 +62,28 @@ namespace UnturnedBlackout.Managers
                         case ERewardType.BattlepassXP:
                             break;
                         case ERewardType.Crate:
+                            break;
+                    }
+                }
+            });
+        }
+
+        public void RemoveReward(CSteamID steamID, List<Reward> removeRewards)
+        {
+            var db = Plugin.Instance.DBManager;
+            ThreadPool.QueueUserWorkItem(async (o) =>
+            {
+                foreach (var reward in removeRewards)
+                {
+                    switch (reward.RewardType)
+                    {
+                        case ERewardType.GunCharm:
+                            await db.RemovePlayerGunCharmAsync(steamID, Convert.ToUInt16(reward.RewardValue));
+                            break;
+                        case ERewardType.Card:
+                            await db.RemovePlayerCardAsync(steamID, (int)reward.RewardValue);
+                            break;
+                        default:
                             break;
                     }
                 }

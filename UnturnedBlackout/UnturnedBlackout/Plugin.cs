@@ -32,7 +32,8 @@ namespace UnturnedBlackout
             DataManager = new DataManager();
             RewardManager = new RewardManager();
             QuestManager = new QuestManager();
-
+            AchievementManager = new AchievementManager();
+            
             StartCoroutine(Day());
 
             Level.onPostLevelLoaded += OnLevelLoaded;
@@ -289,6 +290,7 @@ namespace UnturnedBlackout
 
         public static Harmony Harmony { get; set; }
         public QuestManager QuestManager { get; set; }
+        public AchievementManager AchievementManager { get; set; }
         public UIManager UIManager { get; set; }
         public HUDManager HUDManager { get; set; }
         public GameManager GameManager { get; set; }
