@@ -152,7 +152,8 @@ namespace UnturnedBlackout.Managers
 
         // SERVER OPTIONS
         public const string OptionsTableName = "UB_Options";
-
+        public const string ServersTableName = "UB_Servers";
+        
         // Quests
         public const string QuestsTableName = "UB_Quests";
 

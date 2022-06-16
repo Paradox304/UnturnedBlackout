@@ -69,6 +69,10 @@ namespace UnturnedBlackout.Managers
                 {
                     Logging.Debug($"Quest with id {quest.Quest.QuestID} is completed for player");
                     // future code to increase the battlepass xp given by the quest here
+                    ThreadPool.QueueUserWorkItem(async (o) =>
+                    {
+                        await db.IncreasePlayerXPAsync(steamID, quest.Quest.XP);
+                    });
                 }
 
                 ThreadPool.QueueUserWorkItem(async (o) =>

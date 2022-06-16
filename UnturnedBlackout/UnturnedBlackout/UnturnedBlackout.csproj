@@ -161,6 +161,7 @@
     <Compile Include="Database\Base\Perk.cs" />
     <Compile Include="Database\Base\Quest.cs" />
     <Compile Include="Database\Base\Reward.cs" />
+    <Compile Include="Database\Base\Server.cs" />
     <Compile Include="Database\Base\XPLevel.cs" />
     <Compile Include="Database\Data\Loadout.cs" />
     <Compile Include="Database\Data\LoadoutAttachment.cs" />
