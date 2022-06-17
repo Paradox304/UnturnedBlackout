@@ -762,6 +762,10 @@ namespace UnturnedBlackout.Instances
             {
                 ShowGames();
                 SelectedGameID = 0;
+            } else (playPage == EPlayPage.Servers)
+            {
+                ShowServers();
+                SelectedGameID = 0;
             }
         }
 
@@ -793,14 +797,16 @@ namespace UnturnedBlackout.Instances
             var games = Plugin.Instance.GameManager.Games;
             PlayPage = EPlayPage.Games;
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Play Refresh BUTTON", false);
-            for (int index = 0; index <= 13; index++)
+            
+            for (int i = 0; i <= 13; i++)
             {
-                if ((index + 1) > games.Count)
-                {
-                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Play BUTTON {index}", false);
-                    continue;
-                }
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Play BUTTON {i}", false);
+            }
 
+            var maxCount = Math.Min(14, games.Count);
+
+            for (int index = 0; index < maxCount; index++)
+            {
                 var game = games[index];
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Play BUTTON {index}", true);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Play Map TEXT {index}", game.Location.LocationName);
@@ -828,6 +834,27 @@ namespace UnturnedBlackout.Instances
         {
             int index = Plugin.Instance.GameManager.Games.IndexOf(game);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Play Players TEXT {index}", $"{game.GetPlayerCount()}/{game.Location.GetMaxPlayers(game.GameMode)}");
+        }
+        
+        // Play Servers Page
+        
+        public void ShowServers()
+        {
+            PlayPage = EPlayPage.Servers;
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Play Refresh BUTTON", true);
+
+            for (int i = 0; i <= 13; i++)
+            {
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Play BUTTON {i}", false);
+            }
+
+            var servers = DB.Servers;
+            var maxCount = Math.Min(14, servers.Count);
+
+            for (int index = 0; index < maxCount; index++)
+            {
+
+            }
         }
 
         // Loadout Page
