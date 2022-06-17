@@ -30,6 +30,8 @@ namespace UnturnedBlackout.GameTypes
         public Coroutine GameStarter { get; set; }
         public Coroutine GameEnder { get; set; }
 
+        public Coroutine FlagChecker { get; set; }
+        
         public uint Frequency { get; set; }
 
         public CTFGame(ArenaLocation location) : base(EGameType.CTF, location)

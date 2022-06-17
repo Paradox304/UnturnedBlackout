@@ -77,6 +77,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>Libraries\SDG.NetTransport.dll</HintPath>
     </Reference>
+    <Reference Include="SteamServerQuery.NET, Version=1.0.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\SteamServerQuery.NET.1.0.2\lib\netstandard2.0\SteamServerQuery.NET.dll</HintPath>
+    </Reference>
     <Reference Include="Steamworks.NET, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>Libraries\Steamworks.NET.dll</HintPath>
@@ -210,6 +213,7 @@
     <Compile Include="Managers\LoadoutManager.cs" />
     <Compile Include="Managers\QuestManager.cs" />
     <Compile Include="Managers\RewardManager.cs" />
+    <Compile Include="Managers\ServerManager.cs" />
     <Compile Include="Managers\UIManager.cs" />
     <Compile Include="Models\Data\LoadoutData.cs" />
     <Compile Include="Models\Global\AnimationInfo.cs" />

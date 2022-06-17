@@ -298,6 +298,7 @@ namespace UnturnedBlackout
         public DatabaseManager DBManager { get; set; }
         public LoadoutManager LoadoutManager { get; set; }
         public RewardManager RewardManager { get; set; }
+        public ServerManager ServerManager { get; set; }
         public static Plugin Instance { get; set; }
     }
 }

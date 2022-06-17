@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -14,19 +15,31 @@ namespace UnturnedBlackout.Database.Base
         
         public uint IPNo { get; set; }
         public ushort PortNo { get; set; }
-
+        
+        // Details got from the timer
+        public string Name { get; set; }
+        public int Players { get; set; }
+        public int MaxPlayers { get; set; }
+        public bool IsOnline { get; set; }
+        
         public Server(string iP, string port, string serverName)
         {
             IP = iP;
             Port = port;
             ServerName = serverName;
-            
-            if (!uint.TryParse(IP.Replace('.', ' '), out uint ipNo))
+
+            if (!IPAddress.TryParse(IP, out IPAddress ipAddress))
             {
                 throw new ArgumentException("IP is not correct");
             }
+            
+            var ipBytes = ipAddress.GetAddressBytes();
+            var ip = (uint)ipBytes[3] << 24;
+            ip += (uint)ipBytes[2] << 16;
+            ip += (uint)ipBytes[1] << 8;
+            ip += ipBytes[0];
 
-            IPNo = ipNo;
+            IPNo = ip;
             if (!ushort.TryParse(Port, out ushort portNo))
             {
                 throw new ArgumentException("Port is not correct");
