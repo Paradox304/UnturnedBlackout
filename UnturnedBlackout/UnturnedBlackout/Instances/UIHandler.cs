@@ -762,7 +762,7 @@ namespace UnturnedBlackout.Instances
             {
                 ShowGames();
                 SelectedGameID = 0;
-            } else (playPage == EPlayPage.Servers)
+            } else if (playPage == EPlayPage.Servers)
             {
                 ShowServers();
                 SelectedGameID = 0;
