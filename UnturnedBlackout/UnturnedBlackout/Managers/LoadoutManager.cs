@@ -606,6 +606,8 @@ namespace UnturnedBlackout.Managers
             if (activeLoadout.Glove != null)
             {
                 var glove = gloves.FirstOrDefault(k => k.GloveID == activeLoadout.Glove.Glove.GloveID);
+                player.Player.Player.clothing.thirdClothes.shirt = 0;
+                player.Player.Player.clothing.askWearShirt(0, 0, new byte[0], true);
                 inv.forceAddItem(new Item(glove.ItemID, true), true);
             }
 
