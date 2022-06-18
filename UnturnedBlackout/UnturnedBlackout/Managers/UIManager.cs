@@ -994,18 +994,8 @@ namespace UnturnedBlackout.Managers
         }
 
         // EVENTS
-        public void OnGamesUpdated()
-        {
-            foreach (var handler in UIHandlers)
-            {
-                if (handler.MainPage == EMainPage.Play && handler.PlayPage == EPlayPage.Games)
-                {
-                    handler.ShowGames();
-                }
-            }
-        }
-
-        public void OnGameUpdated(Game game)
+        
+        public void OnGameUpdated()
         {
             foreach (var handler in UIHandlers)
             {
@@ -1023,6 +1013,17 @@ namespace UnturnedBlackout.Managers
                 if (handler.MainPage == EMainPage.Play && handler.PlayPage == EPlayPage.Games)
                 {
                     handler.UpdateGamePlayerCount(game);
+                }
+            }
+        }
+
+        public void OnServersUpdated()
+        {
+            foreach (var handler in UIHandlers)
+            {
+                if (handler.MainPage == EMainPage.Play && handler.PlayPage == EPlayPage.Servers)
+                {
+                    handler.ShowServers();
                 }
             }
         }

@@ -43,7 +43,7 @@ namespace UnturnedBlackout.GameTypes
         {
             TaskDispatcher.QueueOnMainThread(() => WipeItems());
             GamePhase = EGamePhase.Starting;
-            Plugin.Instance.UIManager.OnGameUpdated(this);
+            Plugin.Instance.UIManager.OnGameUpdated();
             foreach (var player in Players)
             {
                 Plugin.Instance.UIManager.ClearWaitingForPlayersUI(player.GamePlayer);
@@ -61,7 +61,7 @@ namespace UnturnedBlackout.GameTypes
                 }
             }
             GamePhase = EGamePhase.Started;
-            Plugin.Instance.UIManager.OnGameUpdated(this);
+            Plugin.Instance.UIManager.OnGameUpdated();
             foreach (var player in Players)
             {
                 player.GamePlayer.GiveMovement(player.GamePlayer.Player.Player.equipment.useable is UseableGun gun && gun.isAiming, false, false);
@@ -97,7 +97,7 @@ namespace UnturnedBlackout.GameTypes
             }
 
             GamePhase = EGamePhase.Ending;
-            Plugin.Instance.UIManager.OnGameUpdated(this);
+            Plugin.Instance.UIManager.OnGameUpdated();
             for (int index = 0; index < Players.Count; index++)
             {
                 var player = Players[index];

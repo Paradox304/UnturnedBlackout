@@ -80,7 +80,7 @@ namespace UnturnedBlackout.Managers
             Logging.Debug("Game is created, adding the game to the list, and releasing the location from available locations");
             Games.Add(game);
             AvailableLocations.Remove(location.LocationID);
-            Plugin.Instance.UIManager.OnGamesUpdated();
+            Plugin.Instance.UIManager.OnGameUpdated();
         }
 
         public void EndGame(Game game)

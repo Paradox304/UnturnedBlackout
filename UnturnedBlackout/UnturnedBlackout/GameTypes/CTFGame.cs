@@ -151,7 +151,7 @@ namespace UnturnedBlackout.GameTypes
             }
 
             GamePhase = EGamePhase.Ending;
-            Plugin.Instance.UIManager.OnGameUpdated(this);
+            Plugin.Instance.UIManager.OnGameUpdated();
 
             foreach (var player in Players)
             {

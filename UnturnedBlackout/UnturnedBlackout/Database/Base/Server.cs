@@ -15,6 +15,10 @@ namespace UnturnedBlackout.Database.Base
         
         public uint IPNo { get; set; }
         public ushort PortNo { get; set; }
+
+        public string FriendlyIP { get; set; }
+        public string ServerBanner { get; set; }
+        public string ServerDesc { get; set; }
         
         // Details got from the timer
         public string Name { get; set; }
@@ -22,24 +26,27 @@ namespace UnturnedBlackout.Database.Base
         public int MaxPlayers { get; set; }
         public bool IsOnline { get; set; }
         
-        public Server(string iP, string port, string serverName)
+        public Server(string iP, string port, string serverName, string friendlyIP, string serverBanner, string serverDesc)
         {
             IP = iP;
             Port = port;
             ServerName = serverName;
-
+            FriendlyIP = friendlyIP;
+            ServerBanner = serverBanner;
+            ServerDesc = serverDesc;
+            
             if (!IPAddress.TryParse(IP, out IPAddress ipAddress))
             {
                 throw new ArgumentException("IP is not correct");
             }
             
             var ipBytes = ipAddress.GetAddressBytes();
-            var ip = (uint)ipBytes[3] << 24;
-            ip += (uint)ipBytes[2] << 16;
-            ip += (uint)ipBytes[1] << 8;
-            ip += ipBytes[0];
-
-            IPNo = ip;
+            if (BitConverter.IsLittleEndian)
+            {
+                Array.Reverse(ipBytes);
+            } 
+            IPNo = BitConverter.ToUInt32(ipBytes, 0);
+            
             if (!ushort.TryParse(Port, out ushort portNo))
             {
                 throw new ArgumentException("Port is not correct");

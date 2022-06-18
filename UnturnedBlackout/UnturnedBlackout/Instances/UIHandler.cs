@@ -772,6 +772,8 @@ namespace UnturnedBlackout.Instances
         public void SelectedPlayButton(int selected)
         {
             var games = Plugin.Instance.GameManager.Games;
+            var servers = Plugin.Instance.DBManager.Servers;
+            
             if (PlayPage == EPlayPage.Games)
             {
                 if ((selected + 1) > games.Count)
@@ -779,7 +781,16 @@ namespace UnturnedBlackout.Instances
                     return;
                 }
                 ShowGame(games[selected]);
+            } else if (PlayPage == EPlayPage.Servers)
+            {
+                if ((selected + 1) > servers.Count)
+                {
+                    return;
+                }
+                ShowServer(servers[selected]);
             }
+
+            SelectedGameID = selected;
         }
 
         public void ClickedJoinButton()
@@ -787,6 +798,13 @@ namespace UnturnedBlackout.Instances
             if (PlayPage == EPlayPage.Games)
             {
                 Plugin.Instance.GameManager.AddPlayerToGame(Player, SelectedGameID);
+            } else if (PlayPage == EPlayPage.Servers)
+            {
+                var server = Plugin.Instance.DBManager.Servers[SelectedGameID];
+                if (server.IsOnline)
+                {
+                    Player.Player.sendRelayToServer(server.IPNo, server.PortNo, "", false);
+                }
             }
         }
 
@@ -820,8 +838,6 @@ namespace UnturnedBlackout.Instances
 
         public void ShowGame(Game game)
         {
-            SelectedGameID = Plugin.Instance.GameManager.Games.IndexOf(game);
-
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Play Server TEXT", "");
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Play Mode TEXT", Plugin.Instance.Translate($"{game.GameMode}_Name_Full"));
             EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Play IMAGE", game.Location.ImageLink);
@@ -841,7 +857,7 @@ namespace UnturnedBlackout.Instances
         public void ShowServers()
         {
             PlayPage = EPlayPage.Servers;
-            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Play Refresh BUTTON", true);
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Play Refresh BUTTON", false);
 
             for (int i = 0; i <= 13; i++)
             {
@@ -853,10 +869,28 @@ namespace UnturnedBlackout.Instances
 
             for (int index = 0; index < maxCount; index++)
             {
-
+                var server = servers[index];
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Play BUTTON {index}", true);
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Play Server TEXT {index}", string.IsNullOrEmpty(server.Name) ? server.ServerName : server.Name);
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Play Status TEXT {index}", server.IsOnline ? "Online" : "Offline");
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Play Players TEXT {index}", server.IsOnline ? $"{server.Players}/{server.MaxPlayers}" : "0/0");
             }
+
+            SelectedPlayButton(SelectedGameID);
         }
 
+        public void ShowServer(Server server)
+        {
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Play Server TEXT", string.IsNullOrEmpty(server.Name) ? server.ServerName : server.Name);
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Play Mode TEXT", " ");
+            EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Play IMAGE", server.ServerBanner);
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Play Map TEXT", " ");
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Play Description TEXT", server.ServerDesc);
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Play Join BUTTON", server.IsOnline);
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Play Ping TEXT", " ");
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Play IP TEXT", $"{server.FriendlyIP}:{server.Port}");
+        }
+        
         // Loadout Page
 
         public void ShowLoadouts()

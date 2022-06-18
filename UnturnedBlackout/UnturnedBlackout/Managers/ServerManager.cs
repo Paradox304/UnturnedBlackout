@@ -1,15 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnturnedBlackout.Database.Base;
-using Timer = System.Timers.Timer;
-using System.Threading;
-using System.Timers;
-using SteamServerQuery;
+﻿using Rocket.Core.Utils;
 using SDG.Unturned;
-using Rocket.Core.Utils;
+using SteamServerQuery;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace UnturnedBlackout.Managers
 {
@@ -48,7 +41,9 @@ namespace UnturnedBlackout.Managers
                         Logging.Debug("Error connecting to server, setting online to false");
                         server.IsOnline = false;
                     }
-                }                
+                }
+
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.OnServersUpdated());
             }
         }
     }
