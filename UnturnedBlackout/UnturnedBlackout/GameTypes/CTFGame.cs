@@ -952,6 +952,12 @@ namespace UnturnedBlackout.GameTypes
             }
             else
             {
+                if (player.ScoreboardCooldown > DateTime.UtcNow)
+                {
+                    return;
+                }
+                player.ScoreboardCooldown = DateTime.UtcNow.AddSeconds(5);
+                
                 cPlayer.GamePlayer.HasScoreboard = true;
                 CTFTeam wonTeam;
                 if (BlueTeam.Score > RedTeam.Score)

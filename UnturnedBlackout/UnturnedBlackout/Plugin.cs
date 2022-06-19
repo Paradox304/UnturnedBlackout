@@ -130,16 +130,6 @@ namespace UnturnedBlackout
             {
                 case 0:
                     Logging.Debug("Sending scoreboard");
-                    if (ScoreboardCooldown.TryGetValue(gPlayer.SteamID, out DateTime cooldown) && !gPlayer.HasScoreboard)
-                    {
-                        if (cooldown > DateTime.UtcNow)
-                        {
-                            return;
-                        }
-                        ScoreboardCooldown.Remove(gPlayer.SteamID);
-                    }
-
-                    ScoreboardCooldown.Add(gPlayer.SteamID, DateTime.UtcNow.AddSeconds(5));
                     game.OnChangeFiremode(gPlayer);
                     break;
                 case 1:
@@ -309,7 +299,6 @@ namespace UnturnedBlackout
         public LoadoutManager LoadoutManager { get; set; }
         public RewardManager RewardManager { get; set; }
         public ServerManager ServerManager { get; set; }
-        public Dictionary<CSteamID, DateTime> ScoreboardCooldown { get; set; }
         public static Plugin Instance { get; set; }
     }
 }

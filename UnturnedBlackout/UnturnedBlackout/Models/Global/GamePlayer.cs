@@ -25,6 +25,7 @@ namespace UnturnedBlackout.Models.Global
         public Loadout ActiveLoadout { get; set; }
 
         public bool HasScoreboard { get; set; }
+        public DateTime ScoreboardCooldown { get; set; }
         public bool HasMidgameLoadout { get; set; }
         public bool HasSpawnProtection { get; set; }
         public Stack<CSteamID> LastDamager { get; set; }
@@ -66,6 +67,7 @@ namespace UnturnedBlackout.Models.Global
             PreviousStance = EPlayerStance.STAND;
             LastDamager = new Stack<CSteamID>(100);
             PendingAnimations = new();
+            ScoreboardCooldown = DateTime.UtcNow;
             
             m_RemoveSpawnProtection = new Timer(1 * 1000);
             m_RemoveSpawnProtection.Elapsed += RemoveSpawnProtection;
