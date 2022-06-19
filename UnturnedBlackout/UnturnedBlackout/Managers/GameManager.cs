@@ -143,6 +143,15 @@ namespace UnturnedBlackout.Managers
 
         private void OnPlayerJoined(UnturnedPlayer player)
         {
+            player.Player.quests.leaveGroup(true);
+            if (Players.ContainsKey(player.CSteamID))
+            {
+                Players.Remove(player.CSteamID);
+            }
+
+            Players.Add(player.CSteamID, new GamePlayer(player, player.Player.channel.GetOwnerTransportConnection()));
+            SendPlayerToLobby(player);
+            
             var db = Plugin.Instance.DBManager;
             ThreadPool.QueueUserWorkItem(async (o) =>
             {
@@ -165,15 +174,6 @@ namespace UnturnedBlackout.Managers
                 TaskDispatcher.QueueOnMainThread(() =>
                 {
                     Plugin.Instance.UIManager.RegisterUIHandler(player);
-
-                    player.Player.quests.leaveGroup(true);
-                    if (Players.ContainsKey(player.CSteamID))
-                    {
-                        Players.Remove(player.CSteamID);
-                    }
-
-                    Players.Add(player.CSteamID, new GamePlayer(player, player.Player.channel.GetOwnerTransportConnection()));
-                    SendPlayerToLobby(player);
                 });
             });
         }

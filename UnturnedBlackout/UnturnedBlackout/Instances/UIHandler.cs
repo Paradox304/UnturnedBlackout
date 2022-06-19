@@ -752,8 +752,7 @@ namespace UnturnedBlackout.Instances
         public void ShowPlayPage()
         {
             MainPage = EMainPage.Play;
-            ShowGames();
-            SelectedGameID = 0;
+            ShowPlayPage(EPlayPage.Games);
         }
 
         public void ShowPlayPage(EPlayPage playPage)
@@ -872,7 +871,7 @@ namespace UnturnedBlackout.Instances
                 var server = servers[index];
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Play BUTTON {index}", true);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Play Server TEXT {index}", string.IsNullOrEmpty(server.Name) ? server.ServerName : server.Name);
-                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Play Status TEXT {index}", server.IsOnline ? "Online" : "Offline");
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Play Status TEXT {index}", server.IsOnline ? "<color=#36ff3c>Online</color>" : "<color=#ed2626>Offline</color>");
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Play Players TEXT {index}", server.IsOnline ? $"{server.Players}/{server.MaxPlayers}" : "0/0");
             }
 
