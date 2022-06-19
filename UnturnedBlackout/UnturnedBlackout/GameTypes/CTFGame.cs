@@ -966,6 +966,7 @@ namespace UnturnedBlackout.GameTypes
                 {
                     wonTeam = new CTFTeam(-1, true, new TeamInfo(), 0, Vector3.zero);
                 }
+                
                 Plugin.Instance.UIManager.SetupCTFLeaderboard(cPlayer, Players, Location, wonTeam, BlueTeam, RedTeam, true);
                 Plugin.Instance.UIManager.ShowCTFLeaderboard(cPlayer.GamePlayer);
             }

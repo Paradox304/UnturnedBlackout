@@ -6,6 +6,7 @@ using SDG.Unturned;
 using Steamworks;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
@@ -21,6 +22,7 @@ namespace UnturnedBlackout
         protected override void Load()
         {
             Instance = this;
+            ScoreboardCooldown = new();
             if (Harmony == null)
             {
                 Harmony = new Harmony("UnturnedBlackout");
@@ -119,17 +121,25 @@ namespace UnturnedBlackout
                 return;
             }
 
-            Logging.Debug("Found player");
             if (!GameManager.TryGetCurrentGame(gPlayer.SteamID, out Game game))
             {
                 return;
             }
-
-            Logging.Debug("Game found");
+            
             switch (key)
             {
                 case 0:
                     Logging.Debug("Sending scoreboard");
+                    if (ScoreboardCooldown.TryGetValue(gPlayer.SteamID, out DateTime cooldown) && !gPlayer.HasScoreboard)
+                    {
+                        if (cooldown > DateTime.UtcNow)
+                        {
+                            return;
+                        }
+                        ScoreboardCooldown.Remove(gPlayer.SteamID);
+                    }
+
+                    ScoreboardCooldown.Add(gPlayer.SteamID, DateTime.UtcNow.AddSeconds(5));
                     game.OnChangeFiremode(gPlayer);
                     break;
                 case 1:
@@ -299,6 +309,7 @@ namespace UnturnedBlackout
         public LoadoutManager LoadoutManager { get; set; }
         public RewardManager RewardManager { get; set; }
         public ServerManager ServerManager { get; set; }
+        public Dictionary<CSteamID, DateTime> ScoreboardCooldown { get; set; }
         public static Plugin Instance { get; set; }
     }
 }
