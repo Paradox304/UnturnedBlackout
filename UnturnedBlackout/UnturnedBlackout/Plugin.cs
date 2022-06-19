@@ -6,6 +6,7 @@ using SDG.Unturned;
 using Steamworks;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
@@ -21,6 +22,7 @@ namespace UnturnedBlackout
         protected override void Load()
         {
             Instance = this;
+            ScoreboardCooldown = new();
             if (Harmony == null)
             {
                 Harmony = new Harmony("UnturnedBlackout");
@@ -119,13 +121,11 @@ namespace UnturnedBlackout
                 return;
             }
 
-            Logging.Debug("Found player");
             if (!GameManager.TryGetCurrentGame(gPlayer.SteamID, out Game game))
             {
                 return;
             }
-
-            Logging.Debug("Game found");
+            
             switch (key)
             {
                 case 0:

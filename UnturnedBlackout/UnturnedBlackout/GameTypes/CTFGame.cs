@@ -952,6 +952,12 @@ namespace UnturnedBlackout.GameTypes
             }
             else
             {
+                if (player.ScoreboardCooldown > DateTime.UtcNow)
+                {
+                    return;
+                }
+                player.ScoreboardCooldown = DateTime.UtcNow.AddSeconds(5);
+                
                 cPlayer.GamePlayer.HasScoreboard = true;
                 CTFTeam wonTeam;
                 if (BlueTeam.Score > RedTeam.Score)
@@ -966,6 +972,7 @@ namespace UnturnedBlackout.GameTypes
                 {
                     wonTeam = new CTFTeam(-1, true, new TeamInfo(), 0, Vector3.zero);
                 }
+                
                 Plugin.Instance.UIManager.SetupCTFLeaderboard(cPlayer, Players, Location, wonTeam, BlueTeam, RedTeam, true);
                 Plugin.Instance.UIManager.ShowCTFLeaderboard(cPlayer.GamePlayer);
             }

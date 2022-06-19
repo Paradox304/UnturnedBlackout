@@ -665,6 +665,12 @@ namespace UnturnedBlackout.GameTypes
             }
             else
             {
+                if (player.ScoreboardCooldown > DateTime.UtcNow)
+                {
+                    return;
+                }
+                player.ScoreboardCooldown = DateTime.UtcNow.AddSeconds(5);
+                
                 fPlayer.GamePlayer.HasScoreboard = true;
                 Plugin.Instance.UIManager.SetupFFALeaderboard(fPlayer, Players, Location, true);
                 Plugin.Instance.UIManager.ShowFFALeaderboard(fPlayer.GamePlayer);
