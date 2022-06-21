@@ -22,7 +22,6 @@ namespace UnturnedBlackout
         protected override void Load()
         {
             Instance = this;
-            ScoreboardCooldown = new();
             if (Harmony == null)
             {
                 Harmony = new Harmony("UnturnedBlackout");
