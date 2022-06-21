@@ -13,6 +13,8 @@
         FlagsSaved, // Save a certain amount of flags
         Dogtags, // Collect a certain amount of dogtags
         Shutdown, // Shutdown players
-        Domination // Dominate players
+        Domination, // Dominate players
+        FlagKiller, // Kill flag carriers
+        Revenge, // Kill the player after being killed by them
     }
 }

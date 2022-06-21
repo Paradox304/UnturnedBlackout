@@ -353,8 +353,11 @@ namespace UnturnedBlackout.GameTypes
             cPlayer.GamePlayer.OnDeath(updatedKiller, Config.CTF.RespawnSeconds);
 
             var otherTeam = cPlayer.Team == BlueTeam ? RedTeam : BlueTeam;
+            var isFlagCarrier = false;
+
             if (cPlayer.IsCarryingFlag)
             {
+                isFlagCarrier = true;
                 if (player.clothing.backpack == otherTeam.FlagID)
                 {
                     ItemManager.dropItem(new Item(otherTeam.FlagID, true), player.transform.position, true, true, true);
@@ -517,6 +520,21 @@ namespace UnturnedBlackout.GameTypes
                     kPlayer.PlayersKilled.Add(cPlayer.GamePlayer.SteamID, 1);
                 }
 
+                if (isFlagCarrier)
+                {
+                    xpGained += Config.CTF.XPPerFlagKiller;
+                    xpText += Plugin.Instance.Translate("Flag_Killer").ToRich() + "\n";
+                    Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer.SteamID, EQuestType.FlagKiller, questConditions);
+                }
+
+                if (cPlayer.GamePlayer.SteamID == kPlayer.GamePlayer.LastKiller)
+                {
+                    xpGained += Config.CTF.RevengeXP;
+                    xpText += Plugin.Instance.Translate("Revenge_Kill").ToRich() + "\n";
+                    Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer.SteamID, EQuestType.Revenge, questConditions);
+                }
+
+                kPlayer.GamePlayer.LastKiller = CSteamID.Nil;
                 kPlayer.LastKill = DateTime.UtcNow;
                 kPlayer.XP += xpGained;
                 Players.Sort((x, y) => y.Kills.CompareTo(x.Kills));

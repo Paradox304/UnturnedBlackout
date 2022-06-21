@@ -471,6 +471,13 @@ namespace UnturnedBlackout.GameTypes
                     kPlayer.PlayersKilled.Add(vPlayer.GamePlayer.SteamID, 1);
                 }
 
+                if (vPlayer.GamePlayer.SteamID == kPlayer.GamePlayer.LastKiller)
+                {
+                    xpGained += Config.KC.RevengeXP;
+                    xpText += Plugin.Instance.Translate("Revenge_Kill").ToRich() + "\n";
+                    Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer.SteamID, EQuestType.Revenge, questConditions);
+                }
+
                 kPlayer.LastKill = DateTime.UtcNow;
                 kPlayer.XP += xpGained;
 

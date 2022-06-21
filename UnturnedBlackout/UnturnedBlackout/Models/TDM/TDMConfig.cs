@@ -17,6 +17,7 @@
 
         public int ShutdownXP { get; set; }
         public int DominationXP { get; set; }
+        public int RevengeXP { get; set; }
 
         public float WinMultipler { get; set; }
 
@@ -29,7 +30,7 @@
 
         }
 
-        public TDMConfig(int startSeconds, int endSeconds, int xPPerKill, int xPPerMeleeKill, int xPPerKillHeadshot, int xPPerLethalKill, int xPPerAssist, int baseXPMK, int increaseXPPerMK, int mKSeconds, int shutdownXP, int dominationXP, float winMultipler, int scoreLimit, int spawnProtectionSeconds, int respawnSeconds)
+        public TDMConfig(int startSeconds, int endSeconds, int xPPerKill, int xPPerMeleeKill, int xPPerKillHeadshot, int xPPerLethalKill, int xPPerAssist, int baseXPMK, int increaseXPPerMK, int mKSeconds, int shutdownXP, int dominationXP, int revengeXP, float winMultipler, int scoreLimit, int spawnProtectionSeconds, int respawnSeconds)
         {
             StartSeconds = startSeconds;
             EndSeconds = endSeconds;
@@ -43,6 +44,7 @@
             MKSeconds = mKSeconds;
             ShutdownXP = shutdownXP;
             DominationXP = dominationXP;
+            RevengeXP = revengeXP;
             WinMultipler = winMultipler;
             ScoreLimit = scoreLimit;
             SpawnProtectionSeconds = spawnProtectionSeconds;

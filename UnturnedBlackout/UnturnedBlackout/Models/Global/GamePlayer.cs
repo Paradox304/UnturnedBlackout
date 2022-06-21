@@ -29,6 +29,7 @@ namespace UnturnedBlackout.Models.Global
         public bool HasMidgameLoadout { get; set; }
         public bool HasSpawnProtection { get; set; }
         public Stack<CSteamID> LastDamager { get; set; }
+        public CSteamID LastKiller { get; set; }
 
         public bool HasAnimationGoingOn { get; set; }
         public List<AnimationInfo> PendingAnimations { get; set; }
@@ -301,6 +302,11 @@ namespace UnturnedBlackout.Models.Global
             {
                 TaskDispatcher.QueueOnMainThread(() => Player.Player.life.ServerRespawn(false));
                 return;
+            }
+
+            if (killer != SteamID)
+            {
+                LastKiller = killer;
             }
 
             if (m_DamageChecker.Enabled)
