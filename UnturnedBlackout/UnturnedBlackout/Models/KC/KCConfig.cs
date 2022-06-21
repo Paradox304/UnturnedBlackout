@@ -13,6 +13,8 @@
 
         public int XPPerKillConfirmed { get; set; }
         public int XPPerKillDenied { get; set; }
+        public int CollectorXP { get; set; }
+        public int CollectorTags { get; set; }
 
         public int BaseXPMK { get; set; }
         public int IncreaseXPPerMK { get; set; }
@@ -21,6 +23,8 @@
         public int ShutdownXP { get; set; }
         public int DominationXP { get; set; }
         public int RevengeXP { get; set; }
+        public int FirstKillXP { get; set; }
+        public int LongshotXP { get; set; }
 
         public float WinMultipler { get; set; }
 
@@ -35,8 +39,7 @@
         {
 
         }
-
-        public KCConfig(int startSeconds, int endSeconds, int xPPerKill, int xPPerMeleeKill, int xPPerKillHeadshot, int xPPerLethalKill, int xPPerAssist, int xPPerKillConfirmed, int xPPerKillDenied, int baseXPMK, int increaseXPPerMK, int mKSeconds, int shutdownXP, int dominationXP, int revengeXP, float winMultipler, int scoreLimit, int spawnProtectionSeconds, int respawnSeconds, ushort redDogTagID, ushort blueDogTagID)
+        public KCConfig(int startSeconds, int endSeconds, int xPPerKill, int xPPerMeleeKill, int xPPerKillHeadshot, int xPPerLethalKill, int xPPerAssist, int xPPerKillConfirmed, int xPPerKillDenied, int collectorXP, int collectorTags, int baseXPMK, int increaseXPPerMK, int mKSeconds, int shutdownXP, int dominationXP, int revengeXP, int firstKillXP, int longshotXP, float winMultipler, int scoreLimit, int spawnProtectionSeconds, int respawnSeconds, ushort redDogTagID, ushort blueDogTagID)
         {
             StartSeconds = startSeconds;
             EndSeconds = endSeconds;
@@ -47,12 +50,16 @@
             XPPerAssist = xPPerAssist;
             XPPerKillConfirmed = xPPerKillConfirmed;
             XPPerKillDenied = xPPerKillDenied;
+            CollectorXP = collectorXP;
+            CollectorTags = collectorTags;
             BaseXPMK = baseXPMK;
             IncreaseXPPerMK = increaseXPPerMK;
             MKSeconds = mKSeconds;
             ShutdownXP = shutdownXP;
             DominationXP = dominationXP;
             RevengeXP = revengeXP;
+            FirstKillXP = firstKillXP;
+            LongshotXP = longshotXP;
             WinMultipler = winMultipler;
             ScoreLimit = scoreLimit;
             SpawnProtectionSeconds = spawnProtectionSeconds;

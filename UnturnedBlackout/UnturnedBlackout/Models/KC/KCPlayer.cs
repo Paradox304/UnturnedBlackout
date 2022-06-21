@@ -21,6 +21,7 @@ namespace UnturnedBlackout.Models.KC
         public int MultipleKills { get; set; }
         public int KillsConfirmed { get; set; }
         public int KillsDenied { get; set; }
+        public int CollectorTags { get; set; }
 
         public DateTime LastKill { get; set; }
         public Dictionary<CSteamID, int> PlayersKilled { get; set; }
@@ -49,6 +50,7 @@ namespace UnturnedBlackout.Models.KC
             KillStreak = 0;
             MultipleKills = 0;
             Deaths++;
+            CollectorTags = 0;
 
             LastKill = DateTime.UtcNow;
             PlayersKilled.Remove(killer);

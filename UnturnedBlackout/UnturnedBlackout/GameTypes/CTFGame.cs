@@ -417,6 +417,7 @@ namespace UnturnedBlackout.GameTypes
                     cPlayer.GamePlayer.LastDamager.Clear();
                 }
 
+                var isFirstKill = Players[0].Kills == 0;
                 kPlayer.Kills++;
                 kPlayer.Score += Config.KillPoints;
 
@@ -532,6 +533,20 @@ namespace UnturnedBlackout.GameTypes
                     xpGained += Config.CTF.RevengeXP;
                     xpText += Plugin.Instance.Translate("Revenge_Kill").ToRich() + "\n";
                     Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer.SteamID, EQuestType.Revenge, questConditions);
+                }
+
+                if (isFirstKill)
+                {
+                    xpGained += Config.CTF.FirstKillXP;
+                    xpText += Plugin.Instance.Translate("First_Kill").ToRich() + "\n";
+                    Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer.SteamID, EQuestType.FirstKill, questConditions);
+                }
+
+                if ((cPlayer.GamePlayer.Player.Position - kPlayer.GamePlayer.Player.Position).sqrMagnitude > Config.LongshotRange)
+                {
+                    xpGained += Config.CTF.LongshotXP;
+                    xpText += Plugin.Instance.Translate("Longshot_Kill").ToRich() + "\n";
+                    Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer.SteamID, EQuestType.Longshot, questConditions);
                 }
 
                 kPlayer.GamePlayer.LastKiller = CSteamID.Nil;

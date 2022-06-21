@@ -371,6 +371,7 @@ namespace UnturnedBlackout.GameTypes
                     vPlayer.GamePlayer.LastDamager.Clear();
                 }
 
+                var isFirstKill = Players[0].Kills == 0;
                 kPlayer.Kills++;
                 kPlayer.Score += Config.KillPoints;
 
@@ -476,6 +477,20 @@ namespace UnturnedBlackout.GameTypes
                     xpGained += Config.KC.RevengeXP;
                     xpText += Plugin.Instance.Translate("Revenge_Kill").ToRich() + "\n";
                     Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer.SteamID, EQuestType.Revenge, questConditions);
+                }
+
+                if (isFirstKill)
+                {
+                    xpGained += Config.KC.FirstKillXP;
+                    xpText += Plugin.Instance.Translate("First_Kill").ToRich() + "\n";
+                    Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer.SteamID, EQuestType.FirstKill, questConditions);
+                }
+
+                if ((vPlayer.GamePlayer.Player.Position - kPlayer.GamePlayer.Player.Position).sqrMagnitude > Config.LongshotRange)
+                {
+                    xpGained += Config.KC.LongshotXP;
+                    xpText += Plugin.Instance.Translate("Longshot_Kill").ToRich() + "\n";
+                    Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer.SteamID, EQuestType.Longshot, questConditions);
                 }
 
                 kPlayer.LastKill = DateTime.UtcNow;
@@ -690,12 +705,16 @@ namespace UnturnedBlackout.GameTypes
                 { EQuestCondition.Gamemode, (int)GameMode }
             };
 
+            var xpGained = 0;
+            var xpText = "";
+
             if (kPlayer.Team.DogTagID == P.item.id)
             {
                 kPlayer.Score += Config.KillDeniedPoints;
                 kPlayer.XP += Config.KC.XPPerKillDenied;
                 kPlayer.KillsDenied++;
-                Plugin.Instance.UIManager.ShowXPUI(kPlayer.GamePlayer, Config.KC.XPPerKillDenied, Plugin.Instance.Translate("Kill_Denied").ToRich());
+                xpGained += Config.KC.XPPerKillDenied;
+                xpText += Plugin.Instance.Translate("Kill_Denied").ToRich() + "\n";
                 Plugin.Instance.UIManager.SendKillConfirmedSound(kPlayer.GamePlayer);
                 ThreadPool.QueueUserWorkItem(async (o) =>
                 {
@@ -710,7 +729,8 @@ namespace UnturnedBlackout.GameTypes
                 kPlayer.XP += Config.KC.XPPerKillConfirmed;
                 kPlayer.KillsConfirmed++;
                 kPlayer.Team.Score++;
-                Plugin.Instance.UIManager.ShowXPUI(kPlayer.GamePlayer, Config.KC.XPPerKillConfirmed, Plugin.Instance.Translate("Kill_Confirmed").ToRich());
+                xpGained += Config.KC.XPPerKillConfirmed;
+                xpText += Plugin.Instance.Translate("Kill_Confirmed").ToRich() + "\n";
                 Plugin.Instance.UIManager.SendKillDeniedSound(kPlayer.GamePlayer);
                 ThreadPool.QueueUserWorkItem(async (o) =>
                 {
@@ -735,6 +755,22 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
+            kPlayer.CollectorTags += 1;
+            if (kPlayer.CollectorTags == Config.KC.CollectorTags)
+            {
+                kPlayer.CollectorTags = 0;
+
+                xpGained += Config.KC.CollectorXP;
+                xpText += Plugin.Instance.Translate("Collector").ToRich();
+                ThreadPool.QueueUserWorkItem(async (o) =>
+                {
+                    await Plugin.Instance.DBManager.IncreasePlayerXPAsync(player.CSteamID, Config.KC.CollectorXP);
+                });
+
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.QuestManager.CheckQuest(player.CSteamID, EQuestType.Collector, questConditions));
+            }
+
+            Plugin.Instance.UIManager.ShowXPUI(kPlayer.GamePlayer, xpGained, xpText);
             TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.QuestManager.CheckQuest(player.CSteamID, EQuestType.Dogtags, questConditions));
             player.Player.inventory.removeItem((byte)inventoryGroup, inventoryIndex);
         }

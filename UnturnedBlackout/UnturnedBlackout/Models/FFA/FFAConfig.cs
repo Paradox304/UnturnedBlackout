@@ -27,6 +27,8 @@ namespace UnturnedBlackout.Models.FFA
         public int ShutdownXP { get; set; }
         public int DominationXP { get; set; }
         public int RevengeXP { get; set; }
+        public int FirstKillXP { get; set; }
+        public int LongshotXP { get; set; }
 
         public float WinMultipler { get; set; }
 
@@ -39,7 +41,7 @@ namespace UnturnedBlackout.Models.FFA
 
         }
 
-        public FFAConfig(int startSeconds, int endSeconds, Kit kit, List<TeamGlove> teamGloves, string killFeedHexCode, string chatPlayerHexCode, string chatMessageHexCode, int xPPerKill, int xPPerMeleeKill, int xPPerKillHeadshot, int xPPerLethalKill, int xPPerAssist, int baseXPMK, int increaseXPPerMK, int mKSeconds, int shutdownXP, int dominationXP, int revengeXP, float winMultipler, int scoreLimit, int spawnProtectionSeconds, int respawnSeconds)
+        public FFAConfig(int startSeconds, int endSeconds, Kit kit, List<TeamGlove> teamGloves, string killFeedHexCode, string chatPlayerHexCode, string chatMessageHexCode, int xPPerKill, int xPPerMeleeKill, int xPPerKillHeadshot, int xPPerLethalKill, int xPPerAssist, int baseXPMK, int increaseXPPerMK, int mKSeconds, int shutdownXP, int dominationXP, int revengeXP, int firstKillXP, int longshotXP, float winMultipler, int scoreLimit, int spawnProtectionSeconds, int respawnSeconds)
         {
             StartSeconds = startSeconds;
             EndSeconds = endSeconds;
@@ -59,6 +61,8 @@ namespace UnturnedBlackout.Models.FFA
             ShutdownXP = shutdownXP;
             DominationXP = dominationXP;
             RevengeXP = revengeXP;
+            FirstKillXP = firstKillXP;
+            LongshotXP = longshotXP;
             WinMultipler = winMultipler;
             ScoreLimit = scoreLimit;
             SpawnProtectionSeconds = spawnProtectionSeconds;

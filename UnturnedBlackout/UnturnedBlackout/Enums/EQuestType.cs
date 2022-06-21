@@ -16,5 +16,8 @@
         Domination, // Dominate players
         FlagKiller, // Kill flag carriers
         Revenge, // Kill the player after being killed by them
+        FirstKill, // Get the first kill of the match
+        Longshot, // Get a kill from more than X meters
+        Collector // Collect X tags in a row
     }
 }

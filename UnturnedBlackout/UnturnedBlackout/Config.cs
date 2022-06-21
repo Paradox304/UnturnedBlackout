@@ -57,6 +57,7 @@ namespace UnturnedBlackout
 
         public int DominationKills { get; set; }
         public int ShutdownKillStreak { get; set; }
+        public float LongshotRange { get; set; }
 
         public int SpawnSwitchThreshold { get; set; }
         public int SpawnSwitchCountSeconds { get; set; }
@@ -123,6 +124,7 @@ namespace UnturnedBlackout
 
             DominationKills = 5;
             ShutdownKillStreak = 5;
+            LongshotRange = 100f;
 
             SpawnSwitchThreshold = 10;
             SpawnSwitchCountSeconds = 15;
@@ -144,10 +146,10 @@ namespace UnturnedBlackout
                 new DefaultSkill("OVERKILL", 1)
             };
 
-            FFA = new FFAConfig(15, 600, new Kit(new List<ushort> { 173, 2, 1446 }), new List<TeamGlove> { new TeamGlove(1, 100) }, "white", "#dcb4ff", "#dcb4ff", 50, 60, 50, 50, 20, 10, 5, 10, 10, 15, 15, 1.5f, 15, 2, 4);
-            TDM = new TDMConfig(15, 600, 50, 60, 50, 50, 20, 10, 10, 5, 10, 15, 15, 1.5f, 15, 2, 4);
-            KC = new KCConfig(15, 600, 50, 60, 50, 50, 20, 10, 10, 10, 10, 5, 10, 15, 15, 1.5f, 15, 2, 4, 26820, 26821);
-            CTF = new CTFConfig(15, 600, 50, 60, 50, 50, 20, 10, 10, 10, 10, 10, 5, 10, 15, 15, 1.5f, 3, 2, 4, 26820, 26821, 0.75f);
+            FFA = new FFAConfig();
+            TDM = new TDMConfig();
+            CTF = new CTFConfig();
+            KC = new KCConfig();
 
             ArenaLocations = new List<ArenaLocation>
             {

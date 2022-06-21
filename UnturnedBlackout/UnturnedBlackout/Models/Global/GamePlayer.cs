@@ -560,6 +560,7 @@ namespace UnturnedBlackout.Models.Global
             HasScoreboard = false;
             HasAnimationGoingOn = false;
             IsPendingLoadoutChange = false;
+            LastKiller = CSteamID.Nil;
             LastDamager.Clear();
             PendingAnimations.Clear();
             Plugin.Instance.UIManager.ClearDeathUI(this);
