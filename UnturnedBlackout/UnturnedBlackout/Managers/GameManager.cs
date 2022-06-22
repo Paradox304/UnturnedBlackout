@@ -44,20 +44,15 @@ namespace UnturnedBlackout.Managers
 
             for (int i = 1; i <= Config.GamesCount; i++)
             {
-                Logging.Debug($"Getting the location");
-                Logging.Debug($"{AvailableLocations.Count} locations to choose from");
                 var locationID = AvailableLocations[UnityEngine.Random.Range(0, AvailableLocations.Count)];
                 var location = Config.ArenaLocations.FirstOrDefault(k => k.LocationID == locationID);
                 var gameMode = (EGameType)gameModes[UnityEngine.Random.Range(0, gameModes.Count)];
-                Logging.Debug($"Found {gameMode}");
-                Logging.Debug($"Found {location.LocationName}");
                 StartGame(location, gameMode);
             }
         }
 
         public void StartGame(ArenaLocation location, EGameType gameMode)
         {
-            Logging.Debug($"Starting game with location {location.LocationID} for gamemode {gameMode}");
             Game game = null;
             switch (gameMode)
             {
@@ -77,7 +72,6 @@ namespace UnturnedBlackout.Managers
                     break;
             }
 
-            Logging.Debug("Game is created, adding the game to the list, and releasing the location from available locations");
             Games.Add(game);
             AvailableLocations.Remove(location.LocationID);
             Plugin.Instance.UIManager.OnGameUpdated();
@@ -85,8 +79,6 @@ namespace UnturnedBlackout.Managers
 
         public void EndGame(Game game)
         {
-            Logging.Debug($"Ending game for location {game.Location.LocationName} for gamemode {game.GameMode}");
-            Logging.Debug("Destroying the game, removing the game from the list, and adding the location to available locations");
             game.Destroy();
             Games.Remove(game);
             AvailableLocations.Add(game.Location.LocationID);
