@@ -107,6 +107,7 @@ namespace UnturnedBlackout.Instances
 
             BuildPages();
             ResetUIValues();
+            ShowUI();
         }
 
         public void Destroy()
