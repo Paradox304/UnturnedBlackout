@@ -29,30 +29,25 @@
 
         public TDMConfig()
         {
-
-        }
-
-        public TDMConfig(int startSeconds, int endSeconds, int xPPerKill, int xPPerMeleeKill, int xPPerKillHeadshot, int xPPerLethalKill, int xPPerAssist, int baseXPMK, int increaseXPPerMK, int mKSeconds, int shutdownXP, int dominationXP, int revengeXP, int firstKillXP, int longshotXP, float winMultipler, int scoreLimit, int spawnProtectionSeconds, int respawnSeconds)
-        {
-            StartSeconds = startSeconds;
-            EndSeconds = endSeconds;
-            XPPerKill = xPPerKill;
-            XPPerMeleeKill = xPPerMeleeKill;
-            XPPerKillHeadshot = xPPerKillHeadshot;
-            XPPerLethalKill = xPPerLethalKill;
-            XPPerAssist = xPPerAssist;
-            BaseXPMK = baseXPMK;
-            IncreaseXPPerMK = increaseXPPerMK;
-            MKSeconds = mKSeconds;
-            ShutdownXP = shutdownXP;
-            DominationXP = dominationXP;
-            RevengeXP = revengeXP;
-            FirstKillXP = firstKillXP;
-            LongshotXP = longshotXP;
-            WinMultipler = winMultipler;
-            ScoreLimit = scoreLimit;
-            SpawnProtectionSeconds = spawnProtectionSeconds;
-            RespawnSeconds = respawnSeconds;
+            StartSeconds = 0;
+            EndSeconds = 0;
+            XPPerKill = 0;
+            XPPerMeleeKill = 0;
+            XPPerKillHeadshot = 0;
+            XPPerLethalKill = 0;
+            XPPerAssist = 0;
+            BaseXPMK = 0;
+            IncreaseXPPerMK = 0;
+            MKSeconds = 0;
+            ShutdownXP = 0;
+            DominationXP = 0;
+            RevengeXP = 0;
+            FirstKillXP = 0;
+            LongshotXP = 0;
+            WinMultipler = 0;
+            ScoreLimit = 0;
+            SpawnProtectionSeconds = 0;
+            RespawnSeconds = 0;
         }
     }
 }

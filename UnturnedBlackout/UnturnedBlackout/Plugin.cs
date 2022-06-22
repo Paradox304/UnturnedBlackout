@@ -27,13 +27,6 @@ namespace UnturnedBlackout
                 Harmony = new Harmony("UnturnedBlackout");
                 Harmony.PatchAll(Assembly);
             }
-
-            UIManager = new UIManager();
-            DBManager = new DatabaseManager();
-            DataManager = new DataManager();
-            RewardManager = new RewardManager();
-            QuestManager = new QuestManager();
-            AchievementManager = new AchievementManager();
             
             StartCoroutine(Day());
 
@@ -182,9 +175,25 @@ namespace UnturnedBlackout
 
         private void OnLevelLoaded(int level)
         {
+            Logging.Debug("Level loaded, intiliazing all the managers");
+            UIManager = new UIManager();
+            Logging.Debug("Init UI");
+            DBManager = new DatabaseManager();
+            Logging.Debug("Init Database");
+            DataManager = new DataManager();
+            Logging.Debug("Init Data");
+            RewardManager = new RewardManager();
+            Logging.Debug("Init Reward");
+            QuestManager = new QuestManager();
+            Logging.Debug("Init Quest");
+            AchievementManager = new AchievementManager();
+            Logging.Debug("Init Achievement");
             GameManager = new GameManager();
+            Logging.Debug("Init Game");
             HUDManager = new HUDManager();
+            Logging.Debug("Init HUD");
 
+            Logging.Debug("Making all masks have earpieces");
             var shouldFillAfterDetach = typeof(ItemMagazineAsset).GetProperty("shouldFillAfterDetach", BindingFlags.Public | BindingFlags.Instance);
             var magazines = Assets.find(EAssetType.ITEM).OfType<ItemMagazineAsset>();
             foreach (var mag in magazines)

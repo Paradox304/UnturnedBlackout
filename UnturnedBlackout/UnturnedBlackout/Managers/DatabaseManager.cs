@@ -19,6 +19,8 @@ using PlayerQuest = UnturnedBlackout.Database.Data.PlayerQuest;
 using Timer = System.Timers.Timer;
 using Achievement = UnturnedBlackout.Database.Base.Achievement;
 using UnturnedBlackout.Models.Global;
+using UnityEngine;
+using Logger = Rocket.Core.Logging.Logger;
 
 namespace UnturnedBlackout.Managers
 {
@@ -433,7 +435,16 @@ namespace UnturnedBlackout.Managers
                                     Logging.Debug($"Could'nt find reward attachment with id {id} for gun {gunID} with name {gunName}");
                             }
                         }
-                        var gun = new Gun(gunID, gunName, gunDesc, gunType, rarity, movementChange, movementChangeADS, iconLink, magAmount, coins, buyPrice, scrapAmount, levelRequirement, isPrimary, defaultAttachments, rewardAttachments, rewardAttachmentsInverse, levelXPNeeded);
+
+                        if (Assets.find(EAssetType.ITEM, gunID) is not ItemGunAsset gunAsset)
+                        {
+                            Logging.Debug($"Error finding gun asset of the gun with id {gunID} and name {gunName} ignoring the gun");
+                            continue;
+                        }
+
+                        var longshotRange = Mathf.Pow(gunAsset.damageFalloffRange * 100, 2);
+
+                        var gun = new Gun(gunID, gunName, gunDesc, gunType, rarity, movementChange, movementChangeADS, iconLink, magAmount, coins, buyPrice, scrapAmount, levelRequirement, isPrimary, defaultAttachments, rewardAttachments, rewardAttachmentsInverse, levelXPNeeded, longshotRange);
                         if (!guns.ContainsKey(gunID))
                         {
                             guns.Add(gunID, gun);

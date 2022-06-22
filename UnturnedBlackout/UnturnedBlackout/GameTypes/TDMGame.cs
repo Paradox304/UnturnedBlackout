@@ -379,6 +379,7 @@ namespace UnturnedBlackout.GameTypes
                 int xpGained = 0;
                 string xpText = "";
                 ushort equipmentUsed = 0;
+                var longshotRange = 0f;
 
                 switch (cause)
                 {
@@ -405,11 +406,13 @@ namespace UnturnedBlackout.GameTypes
                         {
                             questConditions.Add(EQuestCondition.GunType, (int)kPlayer.GamePlayer.ActiveLoadout.Primary.Gun.GunType);
                             equipmentUsed = kPlayer.GamePlayer.ActiveLoadout.Primary.Gun.GunID;
+                            longshotRange = kPlayer.GamePlayer.ActiveLoadout.Secondary.Gun.LongshotRange;
                         }
                         else if (equipment == (kPlayer.GamePlayer.ActiveLoadout.SecondarySkin?.SkinID ?? 0) || equipment == (kPlayer.GamePlayer.ActiveLoadout.Secondary?.Gun?.GunID ?? 0))
                         {
                             questConditions.Add(EQuestCondition.GunType, (int)kPlayer.GamePlayer.ActiveLoadout.Secondary.Gun.GunType);
                             equipmentUsed = kPlayer.GamePlayer.ActiveLoadout.Secondary.Gun.GunID;
+                            longshotRange = kPlayer.GamePlayer.ActiveLoadout.Secondary.Gun.LongshotRange;
                         }
                         else
                         {
@@ -488,7 +491,7 @@ namespace UnturnedBlackout.GameTypes
                     Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer.SteamID, EQuestType.FirstKill, questConditions);
                 }
 
-                if ((tPlayer.GamePlayer.Player.Position - kPlayer.GamePlayer.Player.Position).sqrMagnitude > Config.LongshotRange)
+                if (cause == EDeathCause.GUN && (tPlayer.GamePlayer.Player.Position - kPlayer.GamePlayer.Player.Position).sqrMagnitude > longshotRange)
                 {
                     xpGained += Config.TDM.LongshotXP;
                     xpText += Plugin.Instance.Translate("Longshot_Kill").ToRich() + "\n";
