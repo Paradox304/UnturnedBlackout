@@ -497,6 +497,7 @@ namespace UnturnedBlackout.GameTypes
                     Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer.SteamID, EQuestType.Longshot, questConditions);
                 }
 
+                kPlayer.GamePlayer.LastKiller = CSteamID.Nil;
                 kPlayer.LastKill = DateTime.UtcNow;
                 kPlayer.XP += xpGained;
 
