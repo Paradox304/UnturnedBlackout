@@ -531,6 +531,13 @@ namespace UnturnedBlackout.GameTypes
                     Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer.SteamID, EQuestType.FlagKiller, questConditions);
                 }
 
+                if (kPlayer.IsCarryingFlag)
+                {
+                    xpGained += Config.CTF.XPPerFlagDenied;
+                    xpText += Plugin.Instance.Translate("Flag_Denied").ToRich() + "\n";
+                    Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer.SteamID, EQuestType.FlagDenied, questConditions);
+                }
+
                 if (cPlayer.GamePlayer.SteamID == kPlayer.GamePlayer.LastKiller)
                 {
                     xpGained += Config.CTF.RevengeXP;
@@ -550,6 +557,13 @@ namespace UnturnedBlackout.GameTypes
                     xpGained += Config.CTF.LongshotXP;
                     xpText += Plugin.Instance.Translate("Longshot_Kill").ToRich() + "\n";
                     Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer.SteamID, EQuestType.Longshot, questConditions);
+                }
+
+                if (kPlayer.GamePlayer.Player.Player.life.health < Config.HealthSurvivorKill)
+                {
+                    xpGained += Config.CTF.SurvivorXP;
+                    xpText += Plugin.Instance.Translate("Survivor_Kill").ToRich() + "\n";
+                    Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer.SteamID, EQuestType.Survivor, questConditions);
                 }
 
                 kPlayer.GamePlayer.LastKiller = CSteamID.Nil;

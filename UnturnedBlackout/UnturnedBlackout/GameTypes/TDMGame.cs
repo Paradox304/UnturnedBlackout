@@ -498,6 +498,13 @@ namespace UnturnedBlackout.GameTypes
                     Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer.SteamID, EQuestType.Longshot, questConditions);
                 }
 
+                if (kPlayer.GamePlayer.Player.Player.life.health < Config.HealthSurvivorKill)
+                {
+                    xpGained += Config.TDM.SurvivorXP;
+                    xpText += Plugin.Instance.Translate("Survivor_Kill").ToRich() + "\n";
+                    Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer.SteamID, EQuestType.Survivor, questConditions);
+                }
+
                 kPlayer.GamePlayer.LastKiller = CSteamID.Nil;
                 kPlayer.LastKill = DateTime.UtcNow;
                 kPlayer.XP += xpGained;

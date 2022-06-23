@@ -29,6 +29,7 @@ namespace UnturnedBlackout.Models.FFA
         public int RevengeXP { get; set; }
         public int FirstKillXP { get; set; }
         public int LongshotXP { get; set; }
+        public int SurvivorXP { get; set; }
 
         public float WinMultipler { get; set; }
 
@@ -58,6 +59,7 @@ namespace UnturnedBlackout.Models.FFA
             RevengeXP = 0;
             FirstKillXP = 0;
             LongshotXP = 0;
+            SurvivorXP = 0;
             WinMultipler = 0;
             ScoreLimit = 0;
             SpawnProtectionSeconds = 0;

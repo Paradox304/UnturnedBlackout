@@ -15,9 +15,11 @@
         Shutdown, // Shutdown players
         Domination, // Dominate players
         FlagKiller, // Kill flag carriers
+        FlagDenied, // Kill people while carrying a flag
         Revenge, // Kill the player after being killed by them
         FirstKill, // Get the first kill of the match
         Longshot, // Get a kill from more than X meters
-        Collector // Collect X tags in a row
+        Survivor, // Get a kill with health below X
+        Collector, // Collect X tags in a row
     }
 }

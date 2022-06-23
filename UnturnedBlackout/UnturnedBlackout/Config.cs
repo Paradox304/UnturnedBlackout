@@ -57,6 +57,7 @@ namespace UnturnedBlackout
 
         public int DominationKills { get; set; }
         public int ShutdownKillStreak { get; set; }
+        public int HealthSurvivorKill { get; set; }
 
         public int SpawnSwitchThreshold { get; set; }
         public int SpawnSwitchCountSeconds { get; set; }
@@ -123,6 +124,7 @@ namespace UnturnedBlackout
 
             DominationKills = 5;
             ShutdownKillStreak = 5;
+            HealthSurvivorKill = 30;
 
             SpawnSwitchThreshold = 10;
             SpawnSwitchCountSeconds = 15;

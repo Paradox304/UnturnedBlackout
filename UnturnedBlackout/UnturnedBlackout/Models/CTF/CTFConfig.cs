@@ -14,6 +14,7 @@
         public int XPPerFlagCaptured { get; set; }
         public int XPPerFlagSaved { get; set; }
         public int XPPerFlagKiller { get; set; }
+        public int XPPerFlagDenied { get; set; }
 
         public int BaseXPMK { get; set; }
         public int IncreaseXPPerMK { get; set; }
@@ -24,6 +25,7 @@
         public int RevengeXP { get; set; }
         public int FirstKillXP { get; set; }
         public int LongshotXP { get; set; }
+        public int SurvivorXP { get; set; }
 
         public float WinMultipler { get; set; }
 
@@ -48,6 +50,7 @@
             XPPerFlagCaptured = 0;
             XPPerFlagSaved = 0;
             XPPerFlagKiller = 0;
+            XPPerFlagDenied = 0;
             BaseXPMK = 0;
             IncreaseXPPerMK = 0;
             MKSeconds = 0;
@@ -56,6 +59,7 @@
             RevengeXP = 0;
             FirstKillXP = 0;
             LongshotXP = 0;
+            SurvivorXP = 0;
             WinMultipler = 0;
             ScoreLimit = 0;
             SpawnProtectionSeconds = 0;
