@@ -257,7 +257,6 @@
     <Compile Include="Models\Global\GamePlayer.cs" />
     <Compile Include="Models\Data\PositionsData.cs" />
     <Compile Include="Models\TDM\TDMTeam.cs" />
-    <Compile Include="Patches\FiremodePatch.cs" />
     <Compile Include="Patches\GroupPatch.cs" />
     <Compile Include="Patches\TriggerTrapPatch.cs" />
     <Compile Include="Plugin.cs" />

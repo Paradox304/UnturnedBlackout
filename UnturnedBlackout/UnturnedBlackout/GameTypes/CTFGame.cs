@@ -1006,7 +1006,7 @@ namespace UnturnedBlackout.GameTypes
                 {
                     return;
                 }
-                player.ScoreboardCooldown = DateTime.UtcNow.AddSeconds(5);
+                player.ScoreboardCooldown = DateTime.UtcNow.AddSeconds(1);
                 
                 cPlayer.GamePlayer.HasScoreboard = true;
                 CTFTeam wonTeam;

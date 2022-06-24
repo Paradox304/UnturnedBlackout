@@ -878,7 +878,7 @@ namespace UnturnedBlackout.GameTypes
                 {
                     return;
                 }
-                player.ScoreboardCooldown = DateTime.UtcNow.AddSeconds(5);
+                player.ScoreboardCooldown = DateTime.UtcNow.AddSeconds(1);
                 
                 kPlayer.GamePlayer.HasScoreboard = true;
                 KCTeam wonTeam;

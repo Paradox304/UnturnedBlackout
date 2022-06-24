@@ -434,8 +434,10 @@ namespace UnturnedBlackout.GameTypes
                     Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer.SteamID, EQuestType.FirstKill, questConditions);
                 }
 
+                Logging.Debug($"Checking if {(fPlayer.GamePlayer.Player.Position - kPlayer.GamePlayer.Player.Position).sqrMagnitude} is greater than {longshotRange}");
                 if (cause == EDeathCause.GUN && (fPlayer.GamePlayer.Player.Position - kPlayer.GamePlayer.Player.Position).sqrMagnitude > longshotRange)
                 {
+                    Logging.Debug("It is and cause is a gun, send longshot range");
                     xpGained += Config.FFA.LongshotXP;
                     xpText += Plugin.Instance.Translate("Longshot_Kill").ToRich() + "\n";
                     Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer.SteamID, EQuestType.Longshot, questConditions);
@@ -702,7 +704,7 @@ namespace UnturnedBlackout.GameTypes
                 {
                     return;
                 }
-                player.ScoreboardCooldown = DateTime.UtcNow.AddSeconds(5);
+                player.ScoreboardCooldown = DateTime.UtcNow.AddSeconds(1);
                 
                 fPlayer.GamePlayer.HasScoreboard = true;
                 Plugin.Instance.UIManager.SetupFFALeaderboard(fPlayer, Players, Location, true);

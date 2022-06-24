@@ -406,7 +406,7 @@ namespace UnturnedBlackout.GameTypes
                         {
                             questConditions.Add(EQuestCondition.GunType, (int)kPlayer.GamePlayer.ActiveLoadout.Primary.Gun.GunType);
                             equipmentUsed = kPlayer.GamePlayer.ActiveLoadout.Primary.Gun.GunID;
-                            longshotRange = kPlayer.GamePlayer.ActiveLoadout.Secondary.Gun.LongshotRange;
+                            longshotRange = kPlayer.GamePlayer.ActiveLoadout.Primary.Gun.LongshotRange;
                         }
                         else if (equipment == (kPlayer.GamePlayer.ActiveLoadout.SecondarySkin?.SkinID ?? 0) || equipment == (kPlayer.GamePlayer.ActiveLoadout.Secondary?.Gun?.GunID ?? 0))
                         {
@@ -791,7 +791,7 @@ namespace UnturnedBlackout.GameTypes
                 {
                     return;
                 }
-                player.ScoreboardCooldown = DateTime.UtcNow.AddSeconds(5);
+                player.ScoreboardCooldown = DateTime.UtcNow.AddSeconds(1);
                 
                 tPlayer.GamePlayer.HasScoreboard = true;
                 TDMTeam wonTeam;

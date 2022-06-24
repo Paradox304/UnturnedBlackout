@@ -97,6 +97,10 @@ namespace UnturnedBlackout
             ply.vestItem = 0;
 
             ply.skinItems = new int[0];
+
+            //FieldInfo field = typeof(SteamPending).GetField
+            //("_skin", BindingFlags.Instance | BindingFlags.NonPublic);
+            //field.SetValue(ply, new Color(250, 231, 218));
         }
 
         private void OnHotkeyPressed(Player player, uint simulation, byte key, bool state)
@@ -106,7 +110,6 @@ namespace UnturnedBlackout
                 return;
             }
 
-            Logging.Debug($"HOTKEY PRESSED: {player.channel.owner.playerID.characterName}, KEY: {key}, STATE: {state}");
             var gPlayer = GameManager.GetGamePlayer(player);
             if (gPlayer == null)
             {
@@ -117,7 +120,8 @@ namespace UnturnedBlackout
             {
                 return;
             }
-            
+
+            Logging.Debug($"HOTKEY PRESSED: {player.channel.owner.playerID.characterName}, KEY: {key}, STATE: {state}");
             switch (key)
             {
                 case 0:

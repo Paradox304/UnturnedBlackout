@@ -442,8 +442,9 @@ namespace UnturnedBlackout.Managers
                             continue;
                         }
 
+                        Logging.Debug($"Gun: {gunName}, ID: {gunID}, DamageFalloffRange: {gunAsset.damageFalloffRange}");
                         var longshotRange = Mathf.Pow(gunAsset.damageFalloffRange * 100, 2);
-
+                        Logging.Debug($"Converted longshot range {longshotRange}");
                         var gun = new Gun(gunID, gunName, gunDesc, gunType, rarity, movementChange, movementChangeADS, iconLink, magAmount, coins, buyPrice, scrapAmount, levelRequirement, isPrimary, defaultAttachments, rewardAttachments, rewardAttachmentsInverse, levelXPNeeded, longshotRange);
                         if (!guns.ContainsKey(gunID))
                         {
