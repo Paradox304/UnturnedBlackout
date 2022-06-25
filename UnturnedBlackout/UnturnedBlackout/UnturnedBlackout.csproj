@@ -149,6 +149,7 @@
     <Compile Include="Config.cs" />
     <Compile Include="Database\Base\Achievement.cs" />
     <Compile Include="Database\Base\AchievementTier.cs" />
+    <Compile Include="Database\Base\BattlepassTier.cs" />
     <Compile Include="Database\Base\Card.cs" />
     <Compile Include="Database\Base\Gadget.cs" />
     <Compile Include="Database\Base\Glove.cs" />
@@ -177,6 +178,7 @@
     <Compile Include="Database\Data\LoadoutKnife.cs" />
     <Compile Include="Database\Data\LoadoutPerk.cs" />
     <Compile Include="Database\Data\PlayerAchievement.cs" />
+    <Compile Include="Database\Data\PlayerBattlepass.cs" />
     <Compile Include="Database\Data\PlayerData.cs" />
     <Compile Include="Database\Data\PlayerLoadout.cs" />
     <Compile Include="Database\Data\PlayerQuest.cs" />

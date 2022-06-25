@@ -101,10 +101,31 @@ namespace UnturnedBlackout
             return readerText.Split(',').Select(k => int.TryParse(k, out var id) ? id : -1).Where(k => k != -1).ToList();
         }
 
+        public static HashSet<int> GetHashSetIntFromReaderResult(this object readerResult)
+        {
+            var readerText = readerResult.ToString();
+            if (readerText == "")
+            {
+                return new HashSet<int>();
+            }
+
+            return readerText.Split(',').Select(k => int.TryParse(k, out var id) ? id : -1).Where(k => k != -1).ToHashSet();
+        }
+
         public static string GetStringFromIntList(this List<int> listInt)
         {
             var text = "";
             foreach (var id in listInt)
+            {
+                text += $"{id},";
+            }
+            return text;
+        }
+
+        public static string GetStringFromHashSetInt(this HashSet<int> hashsetInt)
+        {
+            var text = "";
+            foreach (var id in hashsetInt)
             {
                 text += $"{id},";
             }
@@ -201,43 +222,52 @@ namespace UnturnedBlackout
         public static List<Reward> GetRewardsFromString(string text)
         {
             var rewards = new List<Reward>();
-
-            var letterRegex = new Regex(@"([a-zA-Z]+)");
-            var numberRegex = new Regex(@"(\d+)");
             
-            foreach (var reward in text.Split(' '))
+            foreach (var rewardText in text.Split(' '))
             {
-                if (string.IsNullOrEmpty(reward))
+                var reward = GetRewardFromString(rewardText);
+                if (reward != null)
                 {
-                    continue;
+                    rewards.Add(reward);
                 }
-
-                if (!letterRegex.IsMatch(reward) || !numberRegex.IsMatch(reward))
-                {
-                    Logging.Debug($"There isn't a text or number in the reward text");
-                    continue;
-                }
-
-                var letterRegexMatch = letterRegex.Match(reward).Value;
-                if (!Enum.TryParse(letterRegexMatch, true, out ERewardType rewardType))
-                {
-                    Logging.Debug($"Cant find reward type with the match {letterRegexMatch}");
-                    continue;
-                }
-
-                var numberRegexMatch = numberRegex.Match(reward).Value;
-                if (!int.TryParse(numberRegexMatch, out int rewardValue))
-                {
-                    Logging.Debug($"Cant find reward value with the match {numberRegexMatch}");
-                    continue;
-                }
-
-                rewards.Add(new Reward(rewardType, rewardValue));
             }
 
             return rewards;
         }
         
+        public static Reward GetRewardFromString(string text)
+        {
+            var letterRegex = new Regex(@"([a-zA-Z]+)");
+            var numberRegex = new Regex(@"(\d+)");
+
+            if (string.IsNullOrEmpty(text))
+            {
+                return null;
+            }
+
+            if (!letterRegex.IsMatch(text) || !numberRegex.IsMatch(text))
+            {
+                Logging.Debug($"There isn't a text or number in the reward text");
+                return null;
+            }
+
+            var letterRegexMatch = letterRegex.Match(text).Value;
+            if (!Enum.TryParse(letterRegexMatch, true, out ERewardType rewardType))
+            {
+                Logging.Debug($"Cant find reward type with the match {letterRegexMatch}");
+                return null;
+            }
+
+            var numberRegexMatch = numberRegex.Match(text).Value;
+            if (!int.TryParse(numberRegexMatch, out int rewardValue))
+            {
+                Logging.Debug($"Cant find reward value with the match {numberRegexMatch}");
+                return null;
+            }
+
+            return new Reward(rewardType, rewardValue);
+        }
+
         public static Dictionary<int, List<Reward>> GetRankedRewardsFromString(string text)
         {
             var rewardsRanked = new Dictionary<int, List<Reward>>();

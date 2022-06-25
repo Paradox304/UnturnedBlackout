@@ -9,11 +9,6 @@ namespace UnturnedBlackout.Managers
 {
     public class QuestManager
     {
-        public QuestManager()
-        {
-
-        }
-
         public void CheckQuest(CSteamID steamID, EQuestType questType, Dictionary<EQuestCondition, int> questConditions)
         {
             Logging.Debug($"Checking quest {questType} for {steamID} with conditions {questConditions.Count}");
@@ -68,9 +63,9 @@ namespace UnturnedBlackout.Managers
                 if (quest.Amount >= quest.Quest.TargetAmount)
                 {
                     Logging.Debug($"Quest with id {quest.Quest.QuestID} is completed for player");
-                    // future code to increase the battlepass xp given by the quest here
                     ThreadPool.QueueUserWorkItem(async (o) =>
                     {
+                        await db.IncreasePlayerBPXPAsync(steamID, quest.Quest.XP);
                         await db.IncreasePlayerXPAsync(steamID, quest.Quest.XP);
                     });
                 }
