@@ -30,6 +30,8 @@ namespace UnturnedBlackout.Database.Data
         public bool Music { get; set; }
         public bool IsMuted { get; set; }
         public DateTimeOffset MuteExpiry { get; set; }
+        public bool HasBattlepass { get; set; }
+
         public List<PlayerQuest> Quests { get; set; }
         public Dictionary<EQuestType, List<PlayerQuest>> QuestsSearchByType { get; set; }
         public List<PlayerAchievement> Achievements { get; set; }
@@ -37,7 +39,7 @@ namespace UnturnedBlackout.Database.Data
         public Dictionary<int, PlayerAchievement> AchievementsSearchByID { get; set; }
         public PlayerBattlepass Battlepass { get; set; }
 
-        public PlayerData(CSteamID steamID, string steamName, string avatarLink, int xP, int level, int credits, int scrap, int coins, int kills, int headshotKills, int highestKillstreak, int highestMultiKills, int killsConfirmed, int killsDenied, int flagsCaptured, int flagsSaved, int areasTaken, int deaths, bool music, bool isMuted, DateTimeOffset muteExpiry, List<PlayerQuest> quests, Dictionary<EQuestType, List<PlayerQuest>> questsSearchByType, List<PlayerAchievement> achievements, Dictionary<EQuestType, List<PlayerAchievement>> achievementsSearchByType, Dictionary<int, PlayerAchievement> achievementsSearchByID, PlayerBattlepass battlepass)
+        public PlayerData(CSteamID steamID, string steamName, string avatarLink, int xP, int level, int credits, int scrap, int coins, int kills, int headshotKills, int highestKillstreak, int highestMultiKills, int killsConfirmed, int killsDenied, int flagsCaptured, int flagsSaved, int areasTaken, int deaths, bool music, bool isMuted, DateTimeOffset muteExpiry, bool hasBattlepass, List<PlayerQuest> quests, Dictionary<EQuestType, List<PlayerQuest>> questsSearchByType, List<PlayerAchievement> achievements, Dictionary<EQuestType, List<PlayerAchievement>> achievementsSearchByType, Dictionary<int, PlayerAchievement> achievementsSearchByID, PlayerBattlepass battlepass)
         {
             SteamID = steamID;
             SteamName = steamName;
@@ -60,6 +62,7 @@ namespace UnturnedBlackout.Database.Data
             Music = music;
             IsMuted = isMuted;
             MuteExpiry = muteExpiry;
+            HasBattlepass = hasBattlepass;
             Quests = quests;
             QuestsSearchByType = questsSearchByType;
             Achievements = achievements;

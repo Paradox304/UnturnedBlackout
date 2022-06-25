@@ -1689,12 +1689,17 @@ namespace UnturnedBlackout.Managers
 
                         var muteExpiry = DateTimeOffset.FromUnixTimeSeconds(muteUnixSeconds);
 
+                        if (!bool.TryParse(rdr[21].ToString(), out bool hasBattlepass))
+                        {
+                            continue;
+                        }
+                         
                         if (PlayerData.ContainsKey(player.CSteamID))
                         {
                             PlayerData.Remove(player.CSteamID);
                         }
 
-                        PlayerData.Add(player.CSteamID, new PlayerData(player.CSteamID, steamName, avatarLink, xp, level, credits, scrap, coins, kills, headshotKills, highestKillstreak, highestMultiKills, killsConfirmed, killsDenied, flagsCaptured, flagsSaved, areasTaken, deaths, music, isMuted, muteExpiry, new(), new(), new(), new(), new(), new()));
+                        PlayerData.Add(player.CSteamID, new PlayerData(player.CSteamID, steamName, avatarLink, xp, level, credits, scrap, coins, kills, headshotKills, highestKillstreak, highestMultiKills, killsConfirmed, killsDenied, flagsCaptured, flagsSaved, areasTaken, deaths, music, isMuted, muteExpiry, hasBattlepass, new(), new(), new(), new(), new(), new()));
                     }
                 }
                 catch (Exception ex)
