@@ -234,11 +234,11 @@ namespace UnturnedBlackout
 
             return rewards;
         }
-        
+
         public static Reward GetRewardFromString(string text)
         {
             var letterRegex = new Regex(@"([a-zA-Z]+)");
-            var numberRegex = new Regex(@"(\d+)");
+            var numberRegex = new Regex(@"([0-9.]+)");
 
             if (string.IsNullOrEmpty(text))
             {
@@ -259,13 +259,13 @@ namespace UnturnedBlackout
             }
 
             var numberRegexMatch = numberRegex.Match(text).Value;
-            if (!int.TryParse(numberRegexMatch, out int rewardValue))
+            if (string.IsNullOrEmpty(numberRegexMatch))
             {
-                Logging.Debug($"Cant find reward value with the match {numberRegexMatch}");
+                Logging.Debug($"Number regex match is coming empty");
                 return null;
-            }
+            } 
 
-            return new Reward(rewardType, rewardValue);
+            return new Reward(rewardType, numberRegexMatch);
         }
 
         public static Dictionary<int, List<Reward>> GetRankedRewardsFromString(string text)

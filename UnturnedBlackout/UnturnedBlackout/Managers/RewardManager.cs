@@ -58,6 +58,12 @@ namespace UnturnedBlackout.Managers
                             break;
                         case ERewardType.Crate:
                             break;
+                        case ERewardType.BPBooster:
+                            await db.IncreasePlayerBPBoosterAsync(steamID, (float)reward.RewardValue);
+                            break;
+                        case ERewardType.XPBooster:
+                            await db.IncreasePlayerXPBoosterAsync(steamID, (float)reward.RewardValue);
+                            break;
                     }
                 }
             });
@@ -135,6 +141,12 @@ namespace UnturnedBlackout.Managers
                             case ERewardType.BattlepassXP:
                                 break;
                             case ERewardType.Crate:
+                                break;
+                            case ERewardType.BPBooster:
+                                await db.IncreasePlayerBPBoosterAsync(bulkReward.Item1, (float)reward.RewardValue);
+                                break;
+                            case ERewardType.XPBooster:
+                                await db.IncreasePlayerXPBoosterAsync(bulkReward.Item1, (float)reward.RewardValue);
                                 break;
                         }
                     }

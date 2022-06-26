@@ -15,6 +15,8 @@
         Coin,
         LevelXP,
         BattlepassXP,
-        Crate
+        Crate,
+        XPBooster,
+        BPBooster
     }
 }

@@ -3366,6 +3366,53 @@ namespace UnturnedBlackout.Managers
             }
         }
 
+        public async Task IncreasePlayerXPBoosterAsync(CSteamID steamID, float increaseXPBooster)
+        {
+            using MySqlConnection Conn = new(ConnectionString);
+
+            try
+            {
+                await Conn.OpenAsync();
+
+                await new MySqlCommand($"UPDATE `{PlayersTableName}` SET `XPBooster` = `XPBooster` + {increaseXPBooster} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+
+                if (PlayerData.TryGetValue(steamID, out PlayerData data))
+                {
+                    data.XPBooster += increaseXPBooster;
+                }
+            } catch (Exception ex)
+            {
+                Logger.Log($"Error increasing the xp booster for player with steam id {steamID} by {increaseXPBooster}");
+                Logger.Log(ex);
+            } finally
+            {
+                await Conn.CloseAsync();
+            }
+        }
+
+        public async Task IncreasePlayerBPBoosterAsync(CSteamID steamID, float increaseBPBooster)
+        {
+            using MySqlConnection Conn = new(ConnectionString);
+
+            try
+            {
+                await Conn.OpenAsync();
+
+                await new MySqlCommand($"UPDATE `{PlayersTableName}` SET `BPBooster` = `BPBooster` + {increaseBPBooster} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                if (PlayerData.TryGetValue(steamID, out PlayerData data))
+                {
+                    data.BPBooster += increaseBPBooster;
+                }
+            } catch (Exception ex)
+            {
+                Logger.Log($"Error increasing bp booster for player with steam id {steamID} by {increaseBPBooster}");
+                Logger.Log(ex);
+            } finally
+            {
+                await Conn.CloseAsync();
+            }
+        }
+
         // Player Guns
 
         public async Task AddPlayerGunAsync(CSteamID steamID, ushort gunID, bool isBought)
