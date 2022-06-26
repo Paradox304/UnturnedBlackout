@@ -265,6 +265,11 @@ namespace UnturnedBlackout
                 return null;
             } 
 
+            if (numberRegexMatch[0] == '.')
+            {
+                numberRegexMatch.Remove(0, 1);
+            }
+
             return new Reward(rewardType, numberRegexMatch);
         }
 
