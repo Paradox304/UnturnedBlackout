@@ -6,6 +6,7 @@ using Steamworks;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Timers;
 using UnityEngine;
@@ -140,13 +141,21 @@ namespace UnturnedBlackout.Models.Global
             if (loadout.Tactical != null)
             {
                 HasTactical = true;
-                m_TacticalChecker.Interval = loadout.Tactical.Gadget.GiveSeconds * 1000;
+                var tactician = loadout.Perks.Values.FirstOrDefault(k => k.Perk.SkillType.ToLower() == "tactician");
+                var tacticianPercent = tactician == null ? 1f : (1 - (tactician.Perk.SkillLevel / 100));
+                Logging.Debug($"{Player.CharacterName} has tactician perk {tactician == null}, percentage applied {tacticianPercent}");
+                m_TacticalChecker.Interval = loadout.Tactical.Gadget.GiveSeconds * 1000 * tacticianPercent;
+                Logging.Debug($"Interval: {m_TacticalChecker.Interval}");
             }
 
             if (loadout.Lethal != null)
             {
                 HasLethal = true;
-                m_LethalChecker.Interval = loadout.Lethal.Gadget.GiveSeconds * 1000;
+                var grenadier = loadout.Perks.Values.FirstOrDefault(k => k.Perk.SkillType.ToLower() == "grenadier");
+                var grenadierPercent = grenadier == null ? 1f : (1 - (grenadier.Perk.SkillLevel / 100));
+                Logging.Debug($"{Player.CharacterName} has grenadier perk {grenadier == null}, percentage applied {grenadierPercent}");
+                m_LethalChecker.Interval = loadout.Lethal.Gadget.GiveSeconds * 1000 * grenadierPercent;
+                Logging.Debug($"Interval: {m_LethalChecker.Interval}");
             }
 
             Plugin.Instance.HUDManager.UpdateGadget(this, false, !HasLethal);
@@ -271,6 +280,7 @@ namespace UnturnedBlackout.Models.Global
         public IEnumerator HealPlayer()
         {
             var seconds = Plugin.Instance.Configuration.Instance.HealSeconds;
+            var medic = ActiveLoadout.Perks.Values.FirstOrDefault(k => k.Perk.SkillType.ToLower() == "medic")?.Perk?.SkillLevel ?? 0;
             while (true)
             {
                 yield return new WaitForSeconds(seconds);
@@ -280,7 +290,7 @@ namespace UnturnedBlackout.Models.Global
                     LastDamager.Clear();
                     break;
                 }
-                Player.Player.life.serverModifyHealth(Plugin.Instance.Configuration.Instance.HealAmount);
+                Player.Player.life.serverModifyHealth(Plugin.Instance.Configuration.Instance.HealAmount + medic);
             }
         }
 
