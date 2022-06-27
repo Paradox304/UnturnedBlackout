@@ -52,7 +52,7 @@ namespace UnturnedBlackout.GameTypes
                 SpawnPlayer(player, true);
             }
 
-            for (int seconds = Config.FFA.StartSeconds; seconds >= 0; seconds--)
+            for (int seconds = Config.FFA.FileData.StartSeconds; seconds >= 0; seconds--)
             {
                 yield return new WaitForSeconds(1);
                 foreach (var player in Players)
@@ -76,7 +76,7 @@ namespace UnturnedBlackout.GameTypes
 
         public IEnumerator EndGame()
         {
-            for (int seconds = Config.FFA.EndSeconds; seconds >= 0; seconds--)
+            for (int seconds = Config.FFA.FileData.EndSeconds; seconds >= 0; seconds--)
             {
                 yield return new WaitForSeconds(1);
                 TimeSpan timeSpan = TimeSpan.FromSeconds(seconds);
@@ -111,7 +111,7 @@ namespace UnturnedBlackout.GameTypes
                 Plugin.Instance.UIManager.SetupPreEndingUI(player.GamePlayer, EGameType.FFA, index == 0, 0, 0, "", "");
                 if (index == 0)
                 {
-                    var xp = player.XP * Config.FFA.WinMultipler;
+                    var xp = player.XP * Config.FFA.FileData.WinMultiplier;
                     TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.QuestManager.CheckQuest(player.GamePlayer.SteamID, EQuestType.Win, new Dictionary<EQuestCondition, int> { { EQuestCondition.Map, Location.LocationID }, { EQuestCondition.Gamemode, (int)GameMode }, { EQuestCondition.WinKills, player.Kills } }));
                     ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DBManager.IncreasePlayerXPAsync(player.GamePlayer.SteamID, (int)xp));
                 }
@@ -126,7 +126,7 @@ namespace UnturnedBlackout.GameTypes
             {
                 Plugin.Instance.UIManager.ShowFFALeaderboard(player.GamePlayer);
             }
-            yield return new WaitForSeconds(Config.EndingLeaderboardSeconds);
+            yield return new WaitForSeconds(Config.Base.FileData.EndingLeaderboardSeconds);
             foreach (var player in Players.ToList())
             {
                 RemovePlayerFromGame(player.GamePlayer);
@@ -135,17 +135,14 @@ namespace UnturnedBlackout.GameTypes
 
             Players = new List<FFAPlayer>();
 
-            var gameModes = new List<byte> { (byte)EGameType.CTF, (byte)EGameType.FFA, (byte)EGameType.TDM, (byte)EGameType.KC };
-            gameModes.Remove((byte)GameMode);
-            var gameMode = (EGameType)gameModes[UnityEngine.Random.Range(0, gameModes.Count)];
-
             var locations = Plugin.Instance.GameManager.AvailableLocations.ToList();
             locations.Add(Location.LocationID);
             var randomLocation = locations[UnityEngine.Random.Range(0, locations.Count)];
-            var location = Config.ArenaLocations.FirstOrDefault(k => k.LocationID == randomLocation);
+            var location = Config.Locations.FileData.ArenaLocations.FirstOrDefault(k => k.LocationID == randomLocation);
+            var gameMode = Plugin.Instance.GameManager.GetRandomGameMode(location?.LocationID ?? Location.LocationID);
             GamePhase = EGamePhase.Ended;
             Plugin.Instance.GameManager.EndGame(this);
-            Plugin.Instance.GameManager.StartGame(location ?? Location, gameMode);
+            Plugin.Instance.GameManager.StartGame(location ?? Location, gameMode.Item1, gameMode.Item2);
         }
 
         public override IEnumerator AddPlayerToGame(GamePlayer player)
@@ -268,7 +265,7 @@ namespace UnturnedBlackout.GameTypes
 
             Logging.Debug($"Game player died, player name: {fPlayer.GamePlayer.Player.CharacterName}");
             fPlayer.OnDeath(updatedKiller);
-            fPlayer.GamePlayer.OnDeath(updatedKiller, Config.FFA.RespawnSeconds);
+            fPlayer.GamePlayer.OnDeath(updatedKiller, Config.FFA.FileData.RespawnSeconds);
 
             ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DBManager.IncreasePlayerDeathsAsync(fPlayer.GamePlayer.SteamID, 1));
 
@@ -305,19 +302,19 @@ namespace UnturnedBlackout.GameTypes
                     if (assister != null && assister != kPlayer)
                     {
                         assister.Assists++;
-                        assister.Score += Config.AssistPoints;
+                        assister.Score += Config.Points.FileData.AssistPoints;
                         if (!assister.GamePlayer.Player.Player.life.isDead)
                         {
-                            Plugin.Instance.UIManager.ShowXPUI(assister.GamePlayer, Config.FFA.XPPerAssist, Plugin.Instance.Translate("Assist_Kill", fPlayer.GamePlayer.Player.CharacterName.ToUnrich()));
+                            Plugin.Instance.UIManager.ShowXPUI(assister.GamePlayer, Config.Medals.FileData.AssistKillXP, Plugin.Instance.Translate("Assist_Kill", fPlayer.GamePlayer.Player.CharacterName.ToUnrich()));
                         }
-                        ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DBManager.IncreasePlayerXPAsync(assister.GamePlayer.SteamID, Config.FFA.XPPerAssist));
+                        ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DBManager.IncreasePlayerXPAsync(assister.GamePlayer.SteamID, Config.Medals.FileData.AssistKillXP));
                     }
                     fPlayer.GamePlayer.LastDamager.Clear();
                 }
 
                 var isFirstKill = Players[0].Kills == 0;
                 kPlayer.Kills++;
-                kPlayer.Score += Config.KillPoints;
+                kPlayer.Score += Config.Points.FileData.KillPoints;
 
                 int xpGained = 0;
                 string xpText = "";
@@ -327,7 +324,7 @@ namespace UnturnedBlackout.GameTypes
                 switch (cause)
                 {
                     case EDeathCause.MELEE:
-                        xpGained += Config.FFA.XPPerMeleeKill;
+                        xpGained += Config.Medals.FileData.MeleeKillXP;
                         xpText += Plugin.Instance.Translate("Melee_Kill").ToRich();
                         equipmentUsed = kPlayer.GamePlayer.ActiveLoadout.Knife?.Knife?.KnifeID ?? 0;
                         Logging.Debug($"Player died through melee, setting equipment to {equipmentUsed}");
@@ -336,12 +333,12 @@ namespace UnturnedBlackout.GameTypes
                     case EDeathCause.GUN:
                         if (limb == ELimb.SKULL)
                         {
-                            xpGained += Config.FFA.XPPerKillHeadshot;
+                            xpGained += Config.Medals.FileData.HeadshotKillXP;
                             xpText += Plugin.Instance.Translate("Headshot_Kill").ToRich();
                         }
                         else
                         {
-                            xpGained += Config.FFA.XPPerKill;
+                            xpGained += Config.Medals.FileData.NormalKillXP;
                             xpText += Plugin.Instance.Translate("Normal_Kill").ToRich();
                         }
                         var equipment = kPlayer.GamePlayer.Player.Player.equipment.itemID;
@@ -368,7 +365,7 @@ namespace UnturnedBlackout.GameTypes
                     case EDeathCause.GRENADE:
                     case EDeathCause.LANDMINE:
                     case EDeathCause.BURNING:
-                        xpGained += Config.FFA.XPPerLethalKill;
+                        xpGained += Config.Medals.FileData.LethalKillXP;
                         xpText += Plugin.Instance.Translate("Lethal_Kill").ToRich();
                         equipmentUsed = kPlayer.GamePlayer.ActiveLoadout.Lethal?.Gadget?.GadgetID ?? 0;
                         Logging.Debug($"Player died through lethal, setting equipment to {equipmentUsed}");
@@ -388,7 +385,7 @@ namespace UnturnedBlackout.GameTypes
                 }
                 else if ((DateTime.UtcNow - kPlayer.LastKill).TotalSeconds <= 10)
                 {
-                    xpGained += Config.FFA.BaseXPMK + (++kPlayer.MultipleKills * Config.FFA.IncreaseXPPerMK);
+                    xpGained += Config.Medals.FileData.BaseXPMK + (++kPlayer.MultipleKills * Config.Medals.FileData.IncreaseXPPerMK);
                     var multiKillText = Plugin.Instance.Translate($"Multiple_Kills_Show_{kPlayer.MultipleKills}").ToRich();
                     xpText += (multiKillText == $"Multiple_Kills_Show_{kPlayer.MultipleKills}" ? Plugin.Instance.Translate("Multiple_Kills_Show", kPlayer.MultipleKills).ToRich() : multiKillText) + "\n";
                 }
@@ -398,9 +395,9 @@ namespace UnturnedBlackout.GameTypes
                 }
                 questConditions.Add(EQuestCondition.TargetMK, kPlayer.MultipleKills);
 
-                if (victimKS > Config.ShutdownKillStreak)
+                if (victimKS > Config.Medals.FileData.ShutdownKillStreak)
                 {
-                    xpGained += Config.FFA.ShutdownXP;
+                    xpGained += Config.Medals.FileData.ShutdownXP;
                     xpText += Plugin.Instance.Translate("Shutdown_Kill").ToRich() + "\n";
                     Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer.SteamID, EQuestType.Shutdown, questConditions);
                 }
@@ -408,9 +405,9 @@ namespace UnturnedBlackout.GameTypes
                 if (kPlayer.PlayersKilled.ContainsKey(fPlayer.GamePlayer.SteamID))
                 {
                     kPlayer.PlayersKilled[fPlayer.GamePlayer.SteamID] += 1;
-                    if (kPlayer.PlayersKilled[fPlayer.GamePlayer.SteamID] > Config.DominationKills)
+                    if (kPlayer.PlayersKilled[fPlayer.GamePlayer.SteamID] > Config.Medals.FileData.DominationKills)
                     {
-                        xpGained += Config.FFA.DominationXP;
+                        xpGained += Config.Medals.FileData.DominationXP;
                         xpText += Plugin.Instance.Translate("Domination_Kill").ToRich() + "\n";
                         Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer.SteamID, EQuestType.Domination, questConditions);
                     }
@@ -422,14 +419,14 @@ namespace UnturnedBlackout.GameTypes
 
                 if (fPlayer.GamePlayer.SteamID == kPlayer.GamePlayer.LastKiller)
                 {
-                    xpGained += Config.FFA.RevengeXP;
+                    xpGained += Config.Medals.FileData.RevengeXP;
                     xpText += Plugin.Instance.Translate("Revenge_Kill").ToRich() + "\n";
                     Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer.SteamID, EQuestType.Revenge, questConditions);
                 }
 
                 if (isFirstKill)
                 {
-                    xpGained += Config.FFA.FirstKillXP;
+                    xpGained += Config.Medals.FileData.FirstKillXP;
                     xpText += Plugin.Instance.Translate("First_Kill").ToRich() + "\n";
                     Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer.SteamID, EQuestType.FirstKill, questConditions);
                 }
@@ -438,14 +435,14 @@ namespace UnturnedBlackout.GameTypes
                 if (cause == EDeathCause.GUN && (fPlayer.GamePlayer.Player.Position - kPlayer.GamePlayer.Player.Position).sqrMagnitude > longshotRange)
                 {
                     Logging.Debug("It is and cause is a gun, send longshot range");
-                    xpGained += Config.FFA.LongshotXP;
+                    xpGained += Config.Medals.FileData.LongshotXP;
                     xpText += Plugin.Instance.Translate("Longshot_Kill").ToRich() + "\n";
                     Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer.SteamID, EQuestType.Longshot, questConditions);
                 }
 
-                if (kPlayer.GamePlayer.Player.Player.life.health < Config.HealthSurvivorKill)
+                if (kPlayer.GamePlayer.Player.Player.life.health < Config.Medals.FileData.HealthSurvivorKill)
                 {
-                    xpGained += Config.FFA.SurvivorXP;
+                    xpGained += Config.Medals.FileData.SurvivorXP;
                     xpText += Plugin.Instance.Translate("Survivor_Kill").ToRich() + "\n";
                     Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer.SteamID, EQuestType.Survivor, questConditions);
                 }
@@ -464,14 +461,14 @@ namespace UnturnedBlackout.GameTypes
                 if (equipmentUsed != 0)
                 {
                     Logging.Debug($"Sending killfeed with equipment {equipmentUsed}");
-                    OnKill(kPlayer.GamePlayer, fPlayer.GamePlayer, equipmentUsed, Config.FFA.KillFeedHexCode, Config.FFA.KillFeedHexCode);
+                    OnKill(kPlayer.GamePlayer, fPlayer.GamePlayer, equipmentUsed, Config.FFA.FileData.KillFeedHexCode, Config.FFA.FileData.KillFeedHexCode);
                 }
 
                 foreach (var ply in Players)
                 {
                     Plugin.Instance.UIManager.UpdateFFATopUI(ply, Players);
                 }
-                if (kPlayer.Kills == Config.FFA.ScoreLimit)
+                if (kPlayer.Kills == Config.FFA.FileData.ScoreLimit)
                 {
                     Plugin.Instance.StartCoroutine(GameEnd());
                 }
@@ -560,7 +557,7 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
-            fPlayer.GamePlayer.OnRevived(Config.FFA.Kit, Config.FFA.TeamGloves);
+            fPlayer.GamePlayer.OnRevived(Config.FFA.FileData.Kit, Config.FFA.FileData.TeamGloves);
         }
 
         public override void OnPlayerRespawn(GamePlayer player, ref Vector3 respawnPosition)
@@ -578,7 +575,7 @@ namespace UnturnedBlackout.GameTypes
             }
 
             respawnPosition = spawnPoint.GetSpawnPoint();
-            player.GiveSpawnProtection(Config.FFA.SpawnProtectionSeconds);
+            player.GiveSpawnProtection(Config.FFA.FileData.SpawnProtectionSeconds);
         }
 
         public override void OnChatMessageSent(GamePlayer player, EChatMode chatMode, string text, ref bool isVisible)
@@ -605,7 +602,7 @@ namespace UnturnedBlackout.GameTypes
                 }
 
                 var iconLink = Plugin.Instance.DBManager.Levels.TryGetValue(data.Level, out XPLevel level) ? level.IconLinkSmall : "";
-                var updatedText = $"<color={Config.FFA.ChatPlayerHexCode}>{player.Player.CharacterName.ToUnrich()}</color>: <color={Config.FFA.ChatMessageHexCode}>{text.ToUnrich()}</color>";
+                var updatedText = $"<color={Config.FFA.FileData.ChatPlayerHexCode}>{player.Player.CharacterName.ToUnrich()}</color>: <color={Config.FFA.FileData.ChatMessageHexCode}>{text.ToUnrich()}</color>";
 
                 foreach (var reciever in Players)
                 {
@@ -622,7 +619,7 @@ namespace UnturnedBlackout.GameTypes
         public void GiveLoadout(FFAPlayer player)
         {
             player.GamePlayer.Player.Player.inventory.ClearInventory();
-            Plugin.Instance.LoadoutManager.GiveLoadout(player.GamePlayer, Config.FFA.Kit, Config.FFA.TeamGloves);
+            Plugin.Instance.LoadoutManager.GiveLoadout(player.GamePlayer, Config.FFA.FileData.Kit, Config.FFA.FileData.TeamGloves);
         }
 
         public void SpawnPlayer(FFAPlayer player, bool seperateSpawnPoint)
@@ -633,7 +630,7 @@ namespace UnturnedBlackout.GameTypes
                 Plugin.Instance.StartCoroutine(SpawnUsedUp(spawnPoint));
             }
             player.GamePlayer.Player.Player.teleportToLocationUnsafe(spawnPoint.GetSpawnPoint(), 0);
-            player.GamePlayer.GiveSpawnProtection(Config.FFA.SpawnProtectionSeconds);
+            player.GamePlayer.GiveSpawnProtection(Config.FFA.FileData.SpawnProtectionSeconds);
         }
 
         public override void PlayerThrowableSpawned(GamePlayer player, UseableThrowable throwable)
@@ -705,7 +702,7 @@ namespace UnturnedBlackout.GameTypes
                     return;
                 }
                 player.ScoreboardCooldown = DateTime.UtcNow.AddSeconds(1);
-                
+
                 fPlayer.GamePlayer.HasScoreboard = true;
                 Plugin.Instance.UIManager.SetupFFALeaderboard(fPlayer, Players, Location, true);
                 Plugin.Instance.UIManager.ShowFFALeaderboard(fPlayer.GamePlayer);
@@ -743,7 +740,7 @@ namespace UnturnedBlackout.GameTypes
         {
             SpawnPoints.Remove(spawnPoint);
             UnavailableSpawnPoints.Add(spawnPoint);
-            yield return new WaitForSeconds(Config.SpawnUnavailableSeconds);
+            yield return new WaitForSeconds(Config.Base.FileData.SpawnUnavailableSeconds);
             SpawnPoints.Add(spawnPoint);
             UnavailableSpawnPoints.Remove(spawnPoint);
         }

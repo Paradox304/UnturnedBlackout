@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnturnedBlackout.Enums;
+using UnturnedBlackout.Managers;
 using UnturnedBlackout.Models.Feed;
 using UnturnedBlackout.Models.Global;
 
@@ -16,7 +17,13 @@ namespace UnturnedBlackout.GameTypes
 {
     public abstract class Game
     {
-        public Config Config { get; set; }
+        public ConfigManager Config
+        {
+            get
+            {
+                return Plugin.Instance.ConfigManager;
+            }
+        }
 
         public EGameType GameMode { get; set; }
         public ArenaLocation Location { get; set; }
@@ -34,7 +41,6 @@ namespace UnturnedBlackout.GameTypes
         public Game(EGameType gameMode, ArenaLocation location, bool isHardcore)
         {
             GameMode = gameMode;
-            Config = Plugin.Instance.Configuration.Instance;
             Location = location;
             IsHardcore = isHardcore;
             GamePhase = EGamePhase.WaitingForPlayers;
@@ -206,7 +212,7 @@ namespace UnturnedBlackout.GameTypes
             }
 
             var feed = new Feed($"<color={killerColor}>{killer.Player.CharacterName.ToUnrich()}</color> {icon.Symbol} <color={victimColor}>{victim.Player.CharacterName.ToUnrich()}</color>", DateTime.UtcNow);
-            if (Killfeed.Count < Config.MaxKillFeed)
+            if (Killfeed.Count < Config.Base.FileData.MaxKillFeed)
             {
                 Killfeed.Add(feed);
                 OnKillfeedUpdated();
@@ -229,8 +235,8 @@ namespace UnturnedBlackout.GameTypes
         {
             while (true)
             {
-                yield return new WaitForSeconds(Config.KillFeedSeconds);
-                if (Killfeed.RemoveAll(k => (DateTime.UtcNow - k.Time).TotalSeconds >= Config.KillFeedSeconds) > 0)
+                yield return new WaitForSeconds(Config.Base.FileData.KillFeedSeconds);
+                if (Killfeed.RemoveAll(k => (DateTime.UtcNow - k.Time).TotalSeconds >= Config.Base.FileData.KillFeedSeconds) > 0)
                 {
                     OnKillfeedUpdated();
                 }

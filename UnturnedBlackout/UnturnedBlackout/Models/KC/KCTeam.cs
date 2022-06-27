@@ -4,13 +4,21 @@ using System;
 using System.Collections.Generic;
 using System.Timers;
 using UnturnedBlackout.GameTypes;
+using UnturnedBlackout.Managers;
 using UnturnedBlackout.Models.Global;
 
 namespace UnturnedBlackout.Models.KC
 {
     public class KCTeam
     {
-        public Config Config { get; set; }
+        public ConfigManager Config
+        {
+            get
+            {
+                return Plugin.Instance.ConfigManager;
+            }
+        }
+
         public KCGame Game { get; set; }
         public TeamInfo Info { get; set; }
 
@@ -29,7 +37,6 @@ namespace UnturnedBlackout.Models.KC
 
         public KCTeam(KCGame game, int teamID, bool isDummy, ushort dogTagID, TeamInfo info)
         {
-            Config = Plugin.Instance.Configuration.Instance;
             TeamID = teamID;
             if (!isDummy)
             {
@@ -43,7 +50,7 @@ namespace UnturnedBlackout.Models.KC
                 Frequency = Utility.GetFreeFrequency();
                 IngameGroup = GroupManager.addGroup(GroupManager.generateUniqueGroupID(), Info.TeamName);
 
-                m_CheckSpawnSwitch = new Timer(Plugin.Instance.Configuration.Instance.SpawnSwitchTimeFrame * 1000);
+                m_CheckSpawnSwitch = new Timer(Config.Base.FileData.SpawnSwitchTimeFrame * 1000);
                 m_CheckSpawnSwitch.Elapsed += SpawnSwitch;
             }
         }
@@ -72,10 +79,10 @@ namespace UnturnedBlackout.Models.KC
                 return;
             }
 
-            if ((DateTime.UtcNow - lastDeath).TotalSeconds < Config.SpawnSwitchCountSeconds)
+            if ((DateTime.UtcNow - lastDeath).TotalSeconds < Config.Base.FileData.SpawnSwitchCountSeconds)
             {
                 SpawnThreshold++;
-                if (SpawnThreshold > Config.SpawnSwitchThreshold)
+                if (SpawnThreshold > Config.Base.FileData.SpawnSwitchThreshold)
                 {
                     if (m_CheckSpawnSwitch.Enabled)
                     {
@@ -94,7 +101,7 @@ namespace UnturnedBlackout.Models.KC
 
         private void SpawnSwitch(object sender, ElapsedEventArgs e)
         {
-            if (SpawnThreshold > Config.SpawnSwitchThreshold)
+            if (SpawnThreshold > Config.Base.FileData.SpawnSwitchThreshold)
             {
                 Game.SwitchSpawn();
             }

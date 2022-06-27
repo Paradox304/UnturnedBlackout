@@ -16,7 +16,13 @@ namespace UnturnedBlackout.Managers
 {
     public class GameManager
     {
-        public Config Config { get; set; }
+        public ConfigManager Config
+        {
+            get
+            {
+                return Plugin.Instance.ConfigManager;
+            }
+        }
 
         public Dictionary<CSteamID, GamePlayer> Players { get; set; }
         public List<Game> Games { get; set; }
@@ -25,10 +31,9 @@ namespace UnturnedBlackout.Managers
 
         public GameManager()
         {
-            Config = Plugin.Instance.Configuration.Instance;
             Players = new Dictionary<CSteamID, GamePlayer>();
             Games = new List<Game>();
-            AvailableLocations = Config.ArenaLocations.Select(k => k.LocationID).ToList();
+            AvailableLocations = Config.Locations.FileData.ArenaLocations.Select(k => k.LocationID).ToList();
 
             U.Events.OnPlayerConnected += OnPlayerJoined;
             U.Events.OnPlayerDisconnected += OnPlayerLeft;
@@ -40,10 +45,10 @@ namespace UnturnedBlackout.Managers
 
         public void StartGames()
         {
-            for (int i = 1; i <= Config.GamesCount; i++)
+            for (int i = 1; i <= Config.Base.FileData.GamesCount; i++)
             {
                 var locationID = AvailableLocations[UnityEngine.Random.Range(0, AvailableLocations.Count)];
-                var location = Config.ArenaLocations.FirstOrDefault(k => k.LocationID == locationID);
+                var location = Config.Locations.FileData.ArenaLocations.FirstOrDefault(k => k.LocationID == locationID);
                 var gameMode = GetRandomGameMode(locationID);
                 StartGame(location, gameMode.Item1, gameMode.Item2);
             }
@@ -141,7 +146,7 @@ namespace UnturnedBlackout.Managers
 
             Players.Add(player.CSteamID, new GamePlayer(player, player.Player.channel.GetOwnerTransportConnection()));
             SendPlayerToLobby(player);
-            
+
             var db = Plugin.Instance.DBManager;
             ThreadPool.QueueUserWorkItem(async (o) =>
             {
@@ -205,25 +210,18 @@ namespace UnturnedBlackout.Managers
             TaskDispatcher.QueueOnMainThread(() =>
             {
                 player.Player.life.ServerRespawn(false);
-                player.Player.teleportToLocationUnsafe(Config.LobbySpawn, 0);
+                player.Player.teleportToLocationUnsafe(Config.Base.FileData.LobbySpawn, 0);
                 Plugin.Instance.UIManager.ShowMenuUI(player);
             });
         }
 
         public (EGameType, bool) GetRandomGameMode(int locationID)
         {
-            Logging.Debug($"Getting random gamemode for location with id {locationID}");
-            var gameModes = new HashSet<EGameType> { EGameType.FFA, EGameType.CTF, EGameType.KC, EGameType.TDM };
-            foreach (var ignoredGameMode in Config.GamemodeOptions.Where(k => k.IgnoredLocations.Contains(locationID)))
-            {
-                Logging.Debug($"Gamemode with name {ignoredGameMode.GamemodeName} is ignored for location with id {locationID}");
-                gameModes.Remove(ignoredGameMode.GameType);
-            }
-
-            var gameModeOptions = gameModes.Select(k => Config.GamemodeOptions.FirstOrDefault(l => l.GameType == k)).Where(k => k != null).ToList();
+            Logging.Debug($"Getting list of random gamemodes for location with id {locationID}");
+            var gameModeOptions = Config.Gamemode.FileData.GamemodeOptions.Where(k => !k.IgnoredLocations.Contains(locationID)).ToList();
             Logging.Debug($"Found {gameModeOptions.Count} gamemode options to choose from");
             var option = CalculateRandomGameMode(gameModeOptions);
-            Logging.Debug($"Found gamemode with name {option.GamemodeName}");
+            Logging.Debug($"Found gamemode with name {option.GameType}");
             var isHardcore = option.HasHardcore && UnityEngine.Random.Range(0, 100) <= option.HardcoreChance;
             Logging.Debug($"hardcore: {isHardcore}");
             return (option.GameType, isHardcore);

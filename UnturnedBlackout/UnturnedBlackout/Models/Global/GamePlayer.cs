@@ -13,11 +13,20 @@ using UnityEngine;
 using UnturnedBlackout.Database.Data;
 using UnturnedBlackout.Enums;
 using UnturnedBlackout.GameTypes;
+using UnturnedBlackout.Managers;
 
 namespace UnturnedBlackout.Models.Global
 {
     public class GamePlayer
     {
+        public ConfigManager Config
+        {
+            get
+            {
+                return Plugin.Instance.ConfigManager;
+            }
+        }
+
         public CSteamID SteamID { get; set; }
         public UnturnedPlayer Player { get; set; }
         public ITransportConnection TransportConnection { get; set; }
@@ -34,7 +43,7 @@ namespace UnturnedBlackout.Models.Global
 
         public bool HasAnimationGoingOn { get; set; }
         public List<AnimationInfo> PendingAnimations { get; set; }
-        
+
         public byte LastEquippedPage { get; set; }
         public byte LastEquippedX { get; set; }
         public byte LastEquippedY { get; set; }
@@ -72,11 +81,11 @@ namespace UnturnedBlackout.Models.Global
             LastDamager = new Stack<CSteamID>(100);
             PendingAnimations = new();
             ScoreboardCooldown = DateTime.UtcNow;
-            
+
             m_RemoveSpawnProtection = new Timer(1 * 1000);
             m_RemoveSpawnProtection.Elapsed += RemoveSpawnProtection;
 
-            m_DamageChecker = new Timer(Plugin.Instance.Configuration.Instance.LastDamageAfterHealSeconds * 1000);
+            m_DamageChecker = new Timer(Config.Base.FileData.LastDamageAfterHealSeconds * 1000);
             m_DamageChecker.Elapsed += CheckDamage;
 
             m_TacticalChecker = new Timer(1 * 1000);
@@ -139,7 +148,7 @@ namespace UnturnedBlackout.Models.Global
             }
 
             var medic = ActiveLoadout.Perks.Values.FirstOrDefault(k => k.Perk.SkillType.ToLower() == "medic")?.Perk?.SkillLevel ?? 0;
-            HealAmount = Plugin.Instance.Configuration.Instance.HealAmount * (1 + (medic / 100));
+            HealAmount = Config.Base.FileData.HealAmount * (1 + (medic / 100));
             Logging.Debug($"{Player.CharacterName} Medic: {medic}, Heal Amount: {HealAmount}");
 
             Plugin.Instance.HUDManager.UpdateGadgetUI(this);
@@ -283,7 +292,7 @@ namespace UnturnedBlackout.Models.Global
 
         public IEnumerator HealPlayer()
         {
-            var seconds = Plugin.Instance.Configuration.Instance.HealSeconds;
+            var seconds = Config.Base.FileData.HealSeconds;
             while (true)
             {
                 yield return new WaitForSeconds(seconds);
@@ -455,7 +464,7 @@ namespace UnturnedBlackout.Models.Global
                 return;
             }
 
-            var flagCarryingSpeed = isCarryingFlag ? Plugin.Instance.Configuration.Instance.CTF.FlagCarryingSpeed : 0f;
+            var flagCarryingSpeed = isCarryingFlag ? Config.CTF.FileData.FlagCarryingSpeed : 0f;
             var updatedMovement = 1f + flagCarryingSpeed;
             if (Player.Player.equipment.itemID == (ActiveLoadout.Primary?.Gun?.GunID ?? 0) || Player.Player.equipment.itemID == (ActiveLoadout.PrimarySkin?.SkinID ?? 0))
             {
@@ -519,7 +528,7 @@ namespace UnturnedBlackout.Models.Global
                 yield return new WaitForSeconds(Player.Ping - 0.01f);
                 Player.Player.movement.pluginSpeedMultiplier += changeMovement;
                 Logging.Debug($"i: {i}, steps: {changeMovement}, player's speed: {Player.Player.movement.pluginSpeedMultiplier}");
-                yield return new WaitForSeconds(Plugin.Instance.Configuration.Instance.MovementStepsDelay);
+                yield return new WaitForSeconds(Config.Base.FileData.MovementStepsDelay);
             }
         }
 

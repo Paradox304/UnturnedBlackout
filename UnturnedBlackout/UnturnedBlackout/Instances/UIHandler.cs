@@ -36,7 +36,13 @@ namespace UnturnedBlackout.Instances
         public Coroutine TimerRefresher { get; set; }
 
         public ITransportConnection TransportConnection { get; set; }
-        public Config Config { get; set; }
+        public ConfigManager Config
+        {
+            get
+            {
+                return Plugin.Instance.ConfigManager;
+            }
+        }
 
         public EMainPage MainPage { get; set; }
 
@@ -87,7 +93,6 @@ namespace UnturnedBlackout.Instances
             SteamID = player.CSteamID;
             Player = player;
             TransportConnection = player.Player.channel.GetOwnerTransportConnection();
-            Config = Plugin.Instance.Configuration.Instance;
             DB = Plugin.Instance.DBManager;
             if (!DB.PlayerLoadouts.TryGetValue(player.CSteamID, out PlayerLoadout loadout))
             {
@@ -762,7 +767,8 @@ namespace UnturnedBlackout.Instances
             {
                 ShowGames();
                 SelectedGameID = 0;
-            } else if (playPage == EPlayPage.Servers)
+            }
+            else if (playPage == EPlayPage.Servers)
             {
                 ShowServers();
                 SelectedGameID = 0;
@@ -773,7 +779,7 @@ namespace UnturnedBlackout.Instances
         {
             var games = Plugin.Instance.GameManager.Games;
             var servers = Plugin.Instance.DBManager.Servers;
-            
+
             if (PlayPage == EPlayPage.Games)
             {
                 if ((selected + 1) > games.Count)
@@ -781,7 +787,8 @@ namespace UnturnedBlackout.Instances
                     return;
                 }
                 ShowGame(games[selected]);
-            } else if (PlayPage == EPlayPage.Servers)
+            }
+            else if (PlayPage == EPlayPage.Servers)
             {
                 if ((selected + 1) > servers.Count)
                 {
@@ -798,7 +805,8 @@ namespace UnturnedBlackout.Instances
             if (PlayPage == EPlayPage.Games)
             {
                 Plugin.Instance.GameManager.AddPlayerToGame(Player, SelectedGameID);
-            } else if (PlayPage == EPlayPage.Servers)
+            }
+            else if (PlayPage == EPlayPage.Servers)
             {
                 var server = Plugin.Instance.DBManager.Servers[SelectedGameID];
                 if (server.IsOnline)
@@ -815,7 +823,7 @@ namespace UnturnedBlackout.Instances
             var games = Plugin.Instance.GameManager.Games;
             PlayPage = EPlayPage.Games;
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Play Refresh BUTTON", false);
-            
+
             for (int i = 0; i <= 13; i++)
             {
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Play BUTTON {i}", false);
@@ -851,9 +859,9 @@ namespace UnturnedBlackout.Instances
             int index = Plugin.Instance.GameManager.Games.IndexOf(game);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Play Players TEXT {index}", $"{game.GetPlayerCount()}/{game.Location.GetMaxPlayers(game.GameMode)}");
         }
-        
+
         // Play Servers Page
-        
+
         public void ShowServers()
         {
             PlayPage = EPlayPage.Servers;
@@ -890,7 +898,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Play Ping TEXT", " ");
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Play IP TEXT", $"{server.FriendlyIP}:{server.Port}");
         }
-        
+
         // Loadout Page
 
         public void ShowLoadouts()

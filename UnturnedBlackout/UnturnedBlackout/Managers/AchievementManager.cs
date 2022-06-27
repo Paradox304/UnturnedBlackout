@@ -1,10 +1,6 @@
 ﻿using Steamworks;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using UnturnedBlackout.Database.Base;
 using UnturnedBlackout.Database.Data;
 using UnturnedBlackout.Enums;
@@ -29,7 +25,7 @@ namespace UnturnedBlackout.Managers
                 Logging.Debug($"Player has no achievement with type {achievementType}, returning");
                 return;
             }
-            
+
             Logging.Debug($"Found {achievements.Count} achievements with that type for player");
             foreach (var achievement in achievements)
             {
@@ -61,7 +57,7 @@ namespace UnturnedBlackout.Managers
                     Logging.Debug($"Conditions not met for achievement {achievement.Achievement.AchievementID}, skipping");
                     continue;
                 }
-                
+
                 Logging.Debug($"Conditions met for achievement {achievement.Achievement.AchievementID}, increasing achievement amount, current amount is {achievement.Amount}");
                 achievement.Amount += 1;
 

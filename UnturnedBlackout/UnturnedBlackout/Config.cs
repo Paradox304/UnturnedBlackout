@@ -1,6 +1,7 @@
 ﻿using Rocket.API;
 using System.Collections.Generic;
 using UnityEngine;
+using UnturnedBlackout.Enums;
 using UnturnedBlackout.Models.CTF;
 using UnturnedBlackout.Models.Feed;
 using UnturnedBlackout.Models.FFA;
@@ -17,13 +18,12 @@ namespace UnturnedBlackout
         public string DatabaseName { get; set; }
         public string DatabasePassword { get; set; }
         public string DatabasePort { get; set; }
-        public int CacheRefreshSeconds { get; set; }
-
-        public int MaxPlayerNameCharacters { get; set; }
-
-        public string PlayerColorHexCode { get; set; }
 
         public string WebhookURL { get; set; }
+
+        /*public int MaxPlayerNameCharacters { get; set; }
+
+        public string PlayerColorHexCode { get; set; }
 
         public int MaxKillFeed { get; set; }
         public int KillFeedFont { get; set; }
@@ -80,7 +80,7 @@ namespace UnturnedBlackout
         public List<TeamInfo> TeamsInfo { get; set; }
 
         public List<GamemodeOption> GamemodeOptions { get; set; }
-
+        */
         public void LoadDefaults()
         {
             DatabaseHost = "136.243.135.46";
@@ -88,12 +88,12 @@ namespace UnturnedBlackout
             DatabaseName = "s476_deathmatch";
             DatabasePassword = "k8gxtTbytcA5DXlqbn86e@+1";
             DatabasePort = "3306";
-            CacheRefreshSeconds = 600;
+            WebhookURL = "https://discord.com/api/webhooks/979000847197409280/e7Pbmjj_8bALCCDCbEDMCEVLX2ZSuIG3ymxbd-yb-IxkQ-sToxCkLJRmneeqB6LYVwgC";
 
+            /*
             MaxPlayerNameCharacters = 30;
 
             PlayerColorHexCode = "#FFFF00";
-            WebhookURL = "https://discord.com/api/webhooks/979000847197409280/e7Pbmjj_8bALCCDCbEDMCEVLX2ZSuIG3ymxbd-yb-IxkQ-sToxCkLJRmneeqB6LYVwgC";
             MaxKillFeed = 5;
             KillFeedFont = 12;
             KillFeedSeconds = 5;
@@ -177,11 +177,12 @@ namespace UnturnedBlackout
 
             GamemodeOptions = new List<GamemodeOption>
             {
-                new GamemodeOption("CTF", 10, true, 50, new List<int> { 1000}),
-                new GamemodeOption("FFA", 10, true, 50, new List<int> { 1000 }),
-                new GamemodeOption("TDM", 10, true, 50, new List<int> { 1000 }),
-                new GamemodeOption("KC", 10, true, 50, new List<int> { 1000 })
+                new GamemodeOption(EGameType.CTF, 10, true, 50, new List<int> { 1000}),
+                new GamemodeOption(EGameType.FFA, 10, true, 50, new List<int> { 1000 }),
+                new GamemodeOption(EGameType.TDM, 10, true, 50, new List<int> { 1000 }),
+                new GamemodeOption(EGameType.KC, 10, true, 50, new List<int> { 1000 })
             };
+            */
         }
     }
 }

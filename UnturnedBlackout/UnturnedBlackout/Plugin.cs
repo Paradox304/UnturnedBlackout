@@ -4,9 +4,7 @@ using Rocket.Core.Plugins;
 using Rocket.Unturned.Permissions;
 using SDG.Unturned;
 using Steamworks;
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
@@ -27,7 +25,7 @@ namespace UnturnedBlackout
                 Harmony = new Harmony("UnturnedBlackout");
                 Harmony.PatchAll(Assembly);
             }
-            
+
             StartCoroutine(Day());
 
             Level.onPostLevelLoaded += OnLevelLoaded;
@@ -79,9 +77,9 @@ namespace UnturnedBlackout
 
             var newName = ply.playerID.characterName.ToUnrich();
             var chars = newName.Count();
-            if (chars > Configuration.Instance.MaxPlayerNameCharacters)
+            if (chars > ConfigManager.Base.FileData.MaxPlayerNameCharacters)
             {
-                newName = newName.Remove(Configuration.Instance.MaxPlayerNameCharacters, chars - Configuration.Instance.MaxPlayerNameCharacters);
+                newName = newName.Remove(ConfigManager.Base.FileData.MaxPlayerNameCharacters, chars - ConfigManager.Base.FileData.MaxPlayerNameCharacters);
                 newName += "...";
             }
 
@@ -179,7 +177,8 @@ namespace UnturnedBlackout
 
         private void OnLevelLoaded(int level)
         {
-            Logging.Debug("Level loaded, intiliazing all the managers");
+            ConfigManager = new ConfigManager();
+            Logging.Debug("Init Config");
             UIManager = new UIManager();
             Logging.Debug("Init UI");
             DBManager = new DatabaseManager();
@@ -302,6 +301,7 @@ namespace UnturnedBlackout
         };
 
         public static Harmony Harmony { get; set; }
+        public ConfigManager ConfigManager { get; set; }
         public QuestManager QuestManager { get; set; }
         public AchievementManager AchievementManager { get; set; }
         public UIManager UIManager { get; set; }

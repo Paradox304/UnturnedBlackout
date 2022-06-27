@@ -218,11 +218,11 @@ namespace UnturnedBlackout
             }
             return text;
         }
-        
+
         public static List<Reward> GetRewardsFromString(string text)
         {
             var rewards = new List<Reward>();
-            
+
             foreach (var rewardText in text.Split(' '))
             {
                 var reward = GetRewardFromString(rewardText);
@@ -263,7 +263,7 @@ namespace UnturnedBlackout
             {
                 Logging.Debug($"Number regex match is coming empty");
                 return null;
-            } 
+            }
 
             if (numberRegexMatch[0] == '.')
             {
@@ -367,8 +367,9 @@ namespace UnturnedBlackout
 
         public static int GetLoadoutAmount(UnturnedPlayer player)
         {
-            var amount = Plugin.Instance.Configuration.Instance.DefaultLoadoutAmount;
-            foreach (var loadoutAmount in Plugin.Instance.Configuration.Instance.LoadoutAmounts.OrderByDescending(k => k.Amount))
+            var Config = Plugin.Instance.ConfigManager.Loadout.FileData;
+            var amount = Config.DefaultLoadoutAmount;
+            foreach (var loadoutAmount in Config.LoadoutAmounts.OrderByDescending(k => k.Amount))
             {
                 if (player.HasPermission(loadoutAmount.Permission))
                 {
@@ -420,7 +421,7 @@ namespace UnturnedBlackout
 
         public static string ToColor(this object value, bool isPlayer)
         {
-            return isPlayer ? $"<color={Plugin.Instance.Configuration.Instance.PlayerColorHexCode}>{value}</color>" : value.ToString();
+            return isPlayer ? $"<color={Plugin.Instance.ConfigManager.Base.FileData.PlayerColorHexCode}>{value}</color>" : value.ToString();
         }
 
         public static List<uint> UsedFrequencies = new();

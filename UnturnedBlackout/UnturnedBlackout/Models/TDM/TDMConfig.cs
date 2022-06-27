@@ -5,7 +5,7 @@
         public int StartSeconds { get; set; }
         public int EndSeconds { get; set; }
 
-        public int XPPerKill { get; set; }
+        /*public int XPPerKill { get; set; }
         public int XPPerMeleeKill { get; set; }
         public int XPPerKillHeadshot { get; set; }
         public int XPPerLethalKill { get; set; }
@@ -21,8 +21,8 @@
         public int FirstKillXP { get; set; }
         public int LongshotXP { get; set; }
         public int SurvivorXP { get; set; }
-
-        public float WinMultipler { get; set; }
+        */
+        public float WinMultiplier { get; set; }
 
         public int ScoreLimit { get; set; }
         public int SpawnProtectionSeconds { get; set; }
@@ -30,9 +30,9 @@
 
         public TDMConfig()
         {
-            StartSeconds = 0;
-            EndSeconds = 0;
-            XPPerKill = 0;
+            StartSeconds = 10;
+            EndSeconds = 600;
+            /*XPPerKill = 0;
             XPPerMeleeKill = 0;
             XPPerKillHeadshot = 0;
             XPPerLethalKill = 0;
@@ -45,11 +45,11 @@
             RevengeXP = 0;
             FirstKillXP = 0;
             LongshotXP = 0;
-            SurvivorXP = 0;
-            WinMultipler = 0;
-            ScoreLimit = 0;
-            SpawnProtectionSeconds = 0;
-            RespawnSeconds = 0;
+            SurvivorXP = 0;*/
+            WinMultiplier = 0.5f;
+            ScoreLimit = 75;
+            SpawnProtectionSeconds = 2;
+            RespawnSeconds = 3;
         }
     }
 }

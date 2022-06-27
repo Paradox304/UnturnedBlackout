@@ -21,10 +21,15 @@ namespace UnturnedBlackout.Managers
 {
     public class UIManager
     {
-        public Config Config { get; set; }
+        public ConfigManager Config
+        {
+            get
+            {
+                return Plugin.Instance.ConfigManager;
+            }
+        }
 
         public Dictionary<ushort, FeedIcon> KillFeedIcons { get; set; }
-
         public List<UIHandler> UIHandlers { get; set; }
         public Dictionary<CSteamID, UIHandler> UIHandlersLookup { get; set; }
 
@@ -65,8 +70,7 @@ namespace UnturnedBlackout.Managers
 
         public UIManager()
         {
-            Config = Plugin.Instance.Configuration.Instance;
-            KillFeedIcons = Config.KillFeedIcons.ToDictionary(k => k.WeaponID);
+            KillFeedIcons = Config.Killfeed.FileData.KillFeedIcons.ToDictionary(k => k.WeaponID);
 
             UIHandlers = new List<UIHandler>();
             UIHandlersLookup = new Dictionary<CSteamID, UIHandler>();
@@ -201,7 +205,7 @@ namespace UnturnedBlackout.Managers
                 Plugin.Instance.StopCoroutine(player.AnimationChecker);
             }
             player.AnimationChecker = Plugin.Instance.StartCoroutine(player.CheckAnimation());
-            
+
             switch (animationInfo.AnimationType)
             {
                 case EAnimationType.LevelUp:
@@ -259,12 +263,12 @@ namespace UnturnedBlackout.Managers
             }
             if (!string.IsNullOrEmpty(feedText))
             {
-                feedText = $"<size={Config.KillFeedFont}>{feedText}</size>";
+                feedText = $"<size={Config.Base.FileData.KillFeedFont}>{feedText}</size>";
             }
             foreach (var player in players)
             {
                 var playerName = player.Player.CharacterName;
-                var updatedText = new Regex($@"<color=[^>]*>{playerName.Replace("[", @"\[").Replace("]", @"\]").Replace("(", @"\(").Replace(")", @"\)").Replace("|", @"\|")}<\/color>", RegexOptions.IgnoreCase).Replace(feedText, $"<color={Config.PlayerColorHexCode}>{playerName}</color>");
+                var updatedText = new Regex($@"<color=[^>]*>{playerName.Replace("[", @"\[").Replace("]", @"\]").Replace("(", @"\(").Replace(")", @"\)").Replace("|", @"\|")}<\/color>", RegexOptions.IgnoreCase).Replace(feedText, $"<color={Config.Base.FileData.PlayerColorHexCode}>{playerName}</color>");
                 EffectManager.sendUIEffectText(key, player.TransportConnection, true, "Killfeed", updatedText);
             }
         }
@@ -300,7 +304,7 @@ namespace UnturnedBlackout.Managers
             }
             if (!string.IsNullOrEmpty(voiceChatText))
             {
-                voiceChatText = $"<size={Config.VoiceChatFont}>{voiceChatText}</size>";
+                voiceChatText = $"<size={Config.Base.FileData.VoiceChatFont}>{voiceChatText}</size>";
             }
             foreach (var player in players)
             {
@@ -526,8 +530,8 @@ namespace UnturnedBlackout.Managers
             EffectManager.sendUIEffectText(TDMKey, player.GamePlayer.TransportConnection, true, "TeamName", $"<color={player.Team.Info.TeamColorHexCode}>{player.Team.Info.TeamName}</color>");
 
             int index = player.Team.TeamID == (byte)ETeam.Blue ? 1 : 0;
-            int blueSpaces = blueTeam.Score * 96 / Config.TDM.ScoreLimit;
-            int redSpaces = redTeam.Score * 96 / Config.TDM.ScoreLimit;
+            int blueSpaces = blueTeam.Score * 96 / Config.TDM.FileData.ScoreLimit;
+            int redSpaces = redTeam.Score * 96 / Config.TDM.FileData.ScoreLimit;
             EffectManager.sendUIEffectText(TDMKey, player.GamePlayer.TransportConnection, true, $"RedNum{index}", redTeam.Score.ToString());
             EffectManager.sendUIEffectText(TDMKey, player.GamePlayer.TransportConnection, true, $"RedBarFill{index}", redSpaces == 0 ? " " : new string(' ', redSpaces));
 
@@ -544,7 +548,7 @@ namespace UnturnedBlackout.Managers
         {
             int index = player.Team.TeamID == (byte)ETeam.Blue ? 1 : 0;
             var team = (ETeam)changeTeam.TeamID;
-            int spaces = changeTeam.Score * 96 / Config.TDM.ScoreLimit;
+            int spaces = changeTeam.Score * 96 / Config.TDM.FileData.ScoreLimit;
 
             EffectManager.sendUIEffectText(TDMKey, player.GamePlayer.TransportConnection, true, $"{team}Num{index}", changeTeam.Score.ToString());
             EffectManager.sendUIEffectText(TDMKey, player.GamePlayer.TransportConnection, true, $"{team}BarFill{index}", spaces == 0 ? " " : new string(' ', spaces));
@@ -659,8 +663,8 @@ namespace UnturnedBlackout.Managers
             EffectManager.sendUIEffectText(KCKey, player.GamePlayer.TransportConnection, true, "TeamName", $"<color={player.Team.Info.TeamColorHexCode}>{player.Team.Info.TeamName}</color>");
 
             int index = player.Team.TeamID == (byte)ETeam.Blue ? 1 : 0;
-            int blueSpaces = blueTeam.Score * 96 / Config.TDM.ScoreLimit;
-            int redSpaces = redTeam.Score * 96 / Config.TDM.ScoreLimit;
+            int blueSpaces = blueTeam.Score * 96 / Config.TDM.FileData.ScoreLimit;
+            int redSpaces = redTeam.Score * 96 / Config.TDM.FileData.ScoreLimit;
             EffectManager.sendUIEffectText(KCKey, player.GamePlayer.TransportConnection, true, $"RedNum{index}", redTeam.Score.ToString());
             EffectManager.sendUIEffectText(KCKey, player.GamePlayer.TransportConnection, true, $"RedBarFill{index}", redSpaces == 0 ? " " : new string(' ', redSpaces));
 
@@ -677,7 +681,7 @@ namespace UnturnedBlackout.Managers
         {
             int index = player.Team.TeamID == (byte)ETeam.Blue ? 1 : 0;
             var team = (ETeam)changeTeam.TeamID;
-            int spaces = changeTeam.Score * 96 / Config.TDM.ScoreLimit;
+            int spaces = changeTeam.Score * 96 / Config.TDM.FileData.ScoreLimit;
 
             EffectManager.sendUIEffectText(KCKey, player.GamePlayer.TransportConnection, true, $"{team}Num{index}", changeTeam.Score.ToString());
             EffectManager.sendUIEffectText(KCKey, player.GamePlayer.TransportConnection, true, $"{team}BarFill{index}", spaces == 0 ? " " : new string(' ', spaces));
@@ -994,7 +998,7 @@ namespace UnturnedBlackout.Managers
         }
 
         // EVENTS
-        
+
         public void OnGameUpdated()
         {
             foreach (var handler in UIHandlers)

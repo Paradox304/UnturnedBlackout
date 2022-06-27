@@ -7,7 +7,7 @@ namespace UnturnedBlackout
     {
         public static void Debug(string message)
         {
-            if (Plugin.Instance.Configuration.Instance.EnableDebugLogs == true)
+            if (Plugin.Instance.ConfigManager.Base.FileData.EnableDebugLogs == true)
             {
                 Logger.Log($"[DEBUG] {message}");
             }

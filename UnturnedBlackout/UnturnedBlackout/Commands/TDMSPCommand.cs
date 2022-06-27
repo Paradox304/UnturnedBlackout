@@ -42,7 +42,7 @@ namespace UnturnedBlackout.Commands
                 return;
             }
 
-            var location = Plugin.Instance.Configuration.Instance.ArenaLocations.FirstOrDefault(k => k.LocationID == locationID);
+            var location = Plugin.Instance.ConfigManager.Locations.FileData.ArenaLocations.FirstOrDefault(k => k.LocationID == locationID);
             if (location == null)
             {
                 Utility.Say(caller, Plugin.Instance.Translate("Location_Not_Found").ToRich());

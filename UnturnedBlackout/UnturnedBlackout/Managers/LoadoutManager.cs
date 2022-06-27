@@ -703,7 +703,7 @@ namespace UnturnedBlackout.Managers
             // Giving perks to player
             var skill = player.Player.Player.skills;
             var skills = new Dictionary<(int, int), int>();
-            foreach (var defaultSkill in Plugin.Instance.Configuration.Instance.DefaultSkills)
+            foreach (var defaultSkill in Plugin.Instance.ConfigManager.DefaultSkills.FileData.DefaultSkills)
             {
                 if (PlayerSkills.TryParseIndices(defaultSkill.SkillName, out int specialtyIndex, out int skillIndex))
                 {

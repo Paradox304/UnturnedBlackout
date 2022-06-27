@@ -199,6 +199,8 @@
     <Compile Include="Enums\EQuestType.cs" />
     <Compile Include="Enums\ERewardType.cs" />
     <Compile Include="Enums\ETeam.cs" />
+    <Compile Include="FileReaders\IFileReader.cs" />
+    <Compile Include="FileReaders\XMLFileReader.cs" />
     <Compile Include="GameTypes\CTFGame.cs" />
     <Compile Include="GameTypes\FFAGame.cs" />
     <Compile Include="GameTypes\Game.cs" />
@@ -207,6 +209,7 @@
     <Compile Include="Helpers\Logging.cs" />
     <Compile Include="Instances\UIHandler.cs" />
     <Compile Include="Managers\AchievementManager.cs" />
+    <Compile Include="Managers\ConfigManager.cs" />
     <Compile Include="Managers\DatabaseManager.cs" />
     <Compile Include="Managers\DataManager.cs" />
     <Compile Include="Managers\DiscordManager.cs" />
@@ -217,6 +220,15 @@
     <Compile Include="Managers\RewardManager.cs" />
     <Compile Include="Managers\ServerManager.cs" />
     <Compile Include="Managers\UIManager.cs" />
+    <Compile Include="Models\Configuration\BaseValuesConfig.cs" />
+    <Compile Include="Models\Configuration\DefaultSkillsConfig.cs" />
+    <Compile Include="Models\Configuration\GamemodeConfig.cs" />
+    <Compile Include="Models\Configuration\KillFeedConfig.cs" />
+    <Compile Include="Models\Configuration\LoadoutConfig.cs" />
+    <Compile Include="Models\Configuration\LocationsConfig.cs" />
+    <Compile Include="Models\Configuration\MedalsConfig.cs" />
+    <Compile Include="Models\Configuration\PointsConfig.cs" />
+    <Compile Include="Models\Configuration\TeamsConfig.cs" />
     <Compile Include="Models\Data\LoadoutData.cs" />
     <Compile Include="Models\Global\AnimationInfo.cs" />
     <Compile Include="Models\Global\ArenaLocation.cs" />

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using System.Xml.Serialization;
 using UnturnedBlackout.Enums;
 
@@ -10,7 +6,6 @@ namespace UnturnedBlackout.Models.Global
 {
     public class GamemodeOption
     {
-        public string GamemodeName { get; set; }
         public EGameType GameType { get; set; }
         public int GamemodeWeight { get; set; }
         public bool HasHardcore { get; set; }
@@ -23,17 +18,13 @@ namespace UnturnedBlackout.Models.Global
 
         }
 
-        public GamemodeOption(string gamemodeName, int gamemodeWeight, bool hasHardcore, int hardcoreChance, List<int> ignoredLocations)
+        public GamemodeOption(EGameType gameType, int gamemodeWeight, bool hasHardcore, int hardcoreChance, List<int> ignoredLocations)
         {
-            GamemodeName = gamemodeName;
+            GameType = gameType;
             GamemodeWeight = gamemodeWeight;
             HasHardcore = hasHardcore;
             HardcoreChance = hardcoreChance;
             IgnoredLocations = ignoredLocations;
-            if (Enum.TryParse(gamemodeName, true, out EGameType gameType))
-            {
-                GameType = gameType;
-            }
         }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using MySql.Data.MySqlClient;
-using Rocket.Core.Logging;
 using Rocket.Core.Steam;
 using Rocket.Core.Utils;
 using Rocket.Unturned.Player;
@@ -10,17 +9,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using UnityEngine;
 using UnturnedBlackout.Database.Base;
 using UnturnedBlackout.Database.Data;
 using UnturnedBlackout.Enums;
 using UnturnedBlackout.Models.Data;
+using UnturnedBlackout.Models.Global;
 using UnturnedBlackout.Models.Webhook;
+using Achievement = UnturnedBlackout.Database.Base.Achievement;
+using Logger = Rocket.Core.Logging.Logger;
 using PlayerQuest = UnturnedBlackout.Database.Data.PlayerQuest;
 using Timer = System.Timers.Timer;
-using Achievement = UnturnedBlackout.Database.Base.Achievement;
-using UnturnedBlackout.Models.Global;
-using UnityEngine;
-using Logger = Rocket.Core.Logging.Logger;
 
 namespace UnturnedBlackout.Managers
 {
@@ -81,7 +80,7 @@ namespace UnturnedBlackout.Managers
         public List<BattlepassTier> BattlepassTiers { get; set; }
 
         public List<Server> Servers { get; set; }
-        
+
         // Default Data
         public LoadoutData DefaultLoadout { get; set; }
         public List<Gun> DefaultGuns { get; set; }
@@ -163,7 +162,7 @@ namespace UnturnedBlackout.Managers
         // SERVER OPTIONS
         public const string OptionsTableName = "UB_Options";
         public const string ServersTableName = "UB_Servers";
-        
+
         // Quests
         public const string QuestsTableName = "UB_Quests";
 
@@ -1183,7 +1182,7 @@ namespace UnturnedBlackout.Managers
                         {
                             continue;
                         }
-                        
+
                         var achievement = new Achievement(achievementID, achievementType, conditions, new(), new(), pageID);
                         if (!achievementsSearchByID.ContainsKey(achievementID))
                         {
@@ -1199,11 +1198,13 @@ namespace UnturnedBlackout.Managers
                     Achievements = achievements;
 
                     Logging.Debug($"Successfully read {achievements.Count} achievements from the table");
-                } catch (Exception ex)
+                }
+                catch (Exception ex)
                 {
                     Logger.Log("Error reading data from achievements table");
                     Logger.Log(ex);
-                } finally
+                }
+                finally
                 {
                     rdr.Close();
                 }
@@ -1240,19 +1241,21 @@ namespace UnturnedBlackout.Managers
                         var rewards = Utility.GetRewardsFromString(rdr[7].ToString());
                         var removeRewards = Utility.GetRewardsFromString(rdr[8].ToString());
                         var achievementTier = new AchievementTier(achievement, tierID, tierTitle, tierDesc, tierPrevSmall, tierPrevLarge, targetAmount, rewards, removeRewards);
-                    
+
                         if (!achievement.TiersLookup.ContainsKey(tierID))
                         {
                             achievement.TiersLookup.Add(tierID, achievementTier);
                             achievement.Tiers.Add(achievementTier);
-                        } else
+                        }
+                        else
                         {
                             Logging.Debug($"Found a duplicate achievement tier with id {tierID} for achievement with id {achievementID}, ignoring this");
                         }
                     }
-                    
+
                     Logging.Debug($"Loaded total {Achievements.Sum(k => k.Tiers.Count)} for {Achievements.Count} achievements");
-                } catch (Exception ex)
+                }
+                catch (Exception ex)
                 {
                     Logger.Log("Error reading data from achievements table");
                     Logger.Log(ex);
@@ -1300,11 +1303,13 @@ namespace UnturnedBlackout.Managers
                     Logging.Debug($"Successfully read {battlepassTiers.Count} battlepass tiers from the table");
                     BattlepassTiersSearchByID = battlepassTiersSearchByID;
                     BattlepassTiers = battlepassTiers;
-                } catch (Exception ex)
+                }
+                catch (Exception ex)
                 {
                     Logger.Log($"Error reading battlepass tiers from battlepass table");
                     Logger.Log(ex);
-                } finally
+                }
+                finally
                 {
                     rdr.Close();
                 }
@@ -1322,7 +1327,7 @@ namespace UnturnedBlackout.Managers
                         var friendlyIP = rdr[3].ToString();
                         var serverBanner = rdr[4].ToString();
                         var serverDesc = rdr[5].ToString();
-                        
+
                         var server = new Server(ip, port, serverName, friendlyIP, serverBanner, serverDesc);
                         if (server.IPNo == Provider.ip && server.PortNo == Provider.port)
                         {
@@ -1340,11 +1345,12 @@ namespace UnturnedBlackout.Managers
                 {
                     Logger.Log("Error reading data from servers table");
                     Logger.Log(ex);
-                } finally
+                }
+                finally
                 {
                     rdr.Close();
                 }
-                
+
                 Logging.Debug("Building a default loadout for new players");
                 try
                 {
@@ -1447,7 +1453,7 @@ namespace UnturnedBlackout.Managers
             {
                 Logging.Debug($"Adding {steamName} to the DB");
                 await Conn.OpenAsync();
-                var cmd = new MySqlCommand($"INSERT INTO `{PlayersTableName}` ( `SteamID` , `SteamName` , `AvatarLink` , `MuteExpiry`, `Coins` ) VALUES ({player.CSteamID}, @name, '{avatarLink}' , {DateTimeOffset.UtcNow.ToUnixTimeSeconds()} , {(Config.UnlockAllItems ? 10000000 : 0)}) ON DUPLICATE KEY UPDATE `AvatarLink` = '{avatarLink}', `SteamName` = @name;", Conn);
+                var cmd = new MySqlCommand($"INSERT INTO `{PlayersTableName}` ( `SteamID` , `SteamName` , `AvatarLink` , `MuteExpiry`, `Coins` ) VALUES ({player.CSteamID}, @name, '{avatarLink}' , {DateTimeOffset.UtcNow.ToUnixTimeSeconds()} , {(Plugin.Instance.ConfigManager.Base.FileData.UnlockAllItems ? 10000000 : 0)}) ON DUPLICATE KEY UPDATE `AvatarLink` = '{avatarLink}', `SteamName` = @name;", Conn);
                 cmd.Parameters.AddWithValue("@name", steamName.ToUnrich());
                 await cmd.ExecuteScalarAsync();
 
@@ -1694,7 +1700,7 @@ namespace UnturnedBlackout.Managers
                         {
                             continue;
                         }
-                         
+
                         if (!float.TryParse(rdr[22].ToString(), out float xpBooster))
                         {
                             continue;
@@ -2000,7 +2006,8 @@ namespace UnturnedBlackout.Managers
                             }
                             achievementsSearchByType[achievement.AchievementType].Add(playerAchievement);
                             achievements.Add(playerAchievement);
-                        } else
+                        }
+                        else
                         {
                             Logging.Debug($"Error, achievement {achievementID} already exists for {player.CharacterName}, ignoring");
                         }
@@ -2043,11 +2050,13 @@ namespace UnturnedBlackout.Managers
                         Logging.Debug($"Got battlepass with current tier {currentTier}, xp {xp} and claimed free rewards {claimedFreeRewards.Count} and claimed premium rewards {claimedPremiumRewards.Count} registered to the player");
                         playerData.Battlepass = new PlayerBattlepass(player.CSteamID, currentTier, xp, claimedFreeRewards, claimedPremiumRewards);
                     }
-                } catch (Exception ex)
+                }
+                catch (Exception ex)
                 {
                     Logger.Log($"Error reading battlepass data for {player.CharacterName}");
                     Logger.Log(ex);
-                } finally
+                }
+                finally
                 {
                     rdr.Close();
                 }
@@ -2772,7 +2781,7 @@ namespace UnturnedBlackout.Managers
 
         public async Task DecreasePlayerCreditsAsync(CSteamID steamID, int credits)
         {
-            if (Config.UnlockAllItems) return;
+            if (Plugin.Instance.ConfigManager.Base.FileData.UnlockAllItems) return;
             using MySqlConnection Conn = new(ConnectionString);
             try
             {
@@ -3362,11 +3371,13 @@ namespace UnturnedBlackout.Managers
                 {
                     data.XPBooster += increaseXPBooster;
                 }
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 Logger.Log($"Error increasing the xp booster for player with steam id {steamID} by {increaseXPBooster}");
                 Logger.Log(ex);
-            } finally
+            }
+            finally
             {
                 await Conn.CloseAsync();
             }
@@ -3385,11 +3396,13 @@ namespace UnturnedBlackout.Managers
                 {
                     data.BPBooster += increaseBPBooster;
                 }
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 Logger.Log($"Error increasing bp booster for player with steam id {steamID} by {increaseBPBooster}");
                 Logger.Log(ex);
-            } finally
+            }
+            finally
             {
                 await Conn.CloseAsync();
             }
@@ -3749,16 +3762,18 @@ namespace UnturnedBlackout.Managers
                 }
 
                 loadout.GunCharms.Remove(gunCharmID);
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 Logger.Log($"Error removing gun charm with id {gunCharmID} to player with steam id {steamID}");
                 Logger.Log(ex);
-            } finally
+            }
+            finally
             {
                 await Conn.CloseAsync();
             }
         }
-        
+
         public async Task UpdatePlayerGunCharmBoughtAsync(CSteamID steamID, ushort gunCharmID, bool isBought)
         {
             using MySqlConnection Conn = new(ConnectionString);
@@ -5106,7 +5121,7 @@ namespace UnturnedBlackout.Managers
                     {
                         Logging.Debug($"i: {i}, Tier: {(EQuestTier)i}");
                         if (i == 2) continue;
-                        
+
                         var randomQuests = Quests.Where(k => (int)k.QuestTier == i).ToList();
                         Logging.Debug($"FOund {randomQuests.Count} random quests");
                         var randomQuest = randomQuests[UnityEngine.Random.Range(0, randomQuests.Count)];
@@ -5328,16 +5343,18 @@ namespace UnturnedBlackout.Managers
                 data.Battlepass.ClaimedFreeRewards.Add(claimedFreeRewardTier);
                 await new MySqlCommand($"UPDATE `{PlayersBattlepassTableName}` SET `ClaimedFreeRewards` = '{data.Battlepass.ClaimedFreeRewards.GetStringFromHashSetInt()}' WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
 
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 Logger.Log($"Error updating claimed free rewards for player with steam id {steamID} and adding the tier {claimedFreeRewardTier}");
                 Logger.Log(ex);
-            } finally
+            }
+            finally
             {
                 await Conn.CloseAsync();
             }
         }
-        
+
         public async Task UpdatePlayerBPClaimedPremiumRewardsAsync(CSteamID steamID, int claimedPremiumRewardTier)
         {
             using MySqlConnection Conn = new(ConnectionString);

@@ -14,7 +14,7 @@ namespace UnturnedBlackout.Models.FFA
         public string ChatPlayerHexCode { get; set; }
         public string ChatMessageHexCode { get; set; }
 
-        public int XPPerKill { get; set; }
+        /*public int XPPerKill { get; set; }
         public int XPPerMeleeKill { get; set; }
         public int XPPerKillHeadshot { get; set; }
         public int XPPerLethalKill { get; set; }
@@ -30,8 +30,8 @@ namespace UnturnedBlackout.Models.FFA
         public int FirstKillXP { get; set; }
         public int LongshotXP { get; set; }
         public int SurvivorXP { get; set; }
-
-        public float WinMultipler { get; set; }
+        */
+        public float WinMultiplier { get; set; }
 
         public int ScoreLimit { get; set; }
         public int SpawnProtectionSeconds { get; set; }
@@ -39,14 +39,14 @@ namespace UnturnedBlackout.Models.FFA
 
         public FFAConfig()
         {
-            StartSeconds = 0;
-            EndSeconds = 0;
-            Kit = new Kit();
-            TeamGloves = new List<TeamGlove> { new TeamGlove() };
-            KillFeedHexCode = "";
-            ChatPlayerHexCode = "";
-            ChatMessageHexCode = "";
-            XPPerKill = 0;
+            StartSeconds = 10;
+            EndSeconds = 600;
+            Kit = new Kit(new List<ushort> { 54500, 54501, 54502, 54503, 54504, 54505, 54506 });
+            TeamGloves = new List<TeamGlove> { new TeamGlove(1, 13024), new TeamGlove(2, 13026) };
+            KillFeedHexCode = "#dcb4ff";
+            ChatPlayerHexCode = "#dcb4ff";
+            ChatMessageHexCode = "#dcb4ff";
+            /*XPPerKill = 0;
             XPPerMeleeKill = 0;
             XPPerKillHeadshot = 0;
             XPPerLethalKill = 0;
@@ -59,11 +59,11 @@ namespace UnturnedBlackout.Models.FFA
             RevengeXP = 0;
             FirstKillXP = 0;
             LongshotXP = 0;
-            SurvivorXP = 0;
-            WinMultipler = 0;
-            ScoreLimit = 0;
-            SpawnProtectionSeconds = 0;
-            RespawnSeconds = 0;
+            SurvivorXP = 0;*/
+            WinMultiplier = 0.5f;
+            ScoreLimit = 25;
+            SpawnProtectionSeconds = 2;
+            RespawnSeconds = 3;
         }
     }
 }
