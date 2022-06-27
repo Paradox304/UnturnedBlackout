@@ -30,7 +30,7 @@ namespace UnturnedBlackout.GameTypes
 
         public uint Frequency { get; set; }
 
-        public FFAGame(ArenaLocation location) : base(EGameType.FFA, location)
+        public FFAGame(ArenaLocation location, bool isHardcore) : base(EGameType.FFA, location, isHardcore)
         {
             SpawnPoints = Plugin.Instance.DataManager.Data.FFASpawnPoints.Where(k => k.LocationID == location.LocationID).ToList();
             Players = new List<FFAPlayer>();

@@ -228,6 +228,7 @@
     <Compile Include="Models\Feed\FeedIcon.cs" />
     <Compile Include="Models\FFA\FFAConfig.cs" />
     <Compile Include="Models\Global\DefaultSkill.cs" />
+    <Compile Include="Models\Global\GamemodeOption.cs" />
     <Compile Include="Models\Global\LoadoutAmount.cs" />
     <Compile Include="Models\Global\Kit.cs" />
     <Compile Include="Models\Global\TeamGlove.cs" />

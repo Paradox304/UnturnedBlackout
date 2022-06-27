@@ -20,6 +20,7 @@ namespace UnturnedBlackout.GameTypes
 
         public EGameType GameMode { get; set; }
         public ArenaLocation Location { get; set; }
+        public bool IsHardcore { get; set; }
 
         public EGamePhase GamePhase { get; set; }
 
@@ -30,12 +31,12 @@ namespace UnturnedBlackout.GameTypes
         public Coroutine VoteEnder { get; set; }
         public Coroutine KillFeedChecker { get; set; }
 
-        public Game(EGameType gameMode, ArenaLocation location)
+        public Game(EGameType gameMode, ArenaLocation location, bool isHardcore)
         {
             GameMode = gameMode;
             Config = Plugin.Instance.Configuration.Instance;
             Location = location;
-
+            IsHardcore = isHardcore;
             GamePhase = EGamePhase.WaitingForPlayers;
             Killfeed = new List<Feed>();
 

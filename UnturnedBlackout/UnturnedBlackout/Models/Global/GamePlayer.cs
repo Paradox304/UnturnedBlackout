@@ -49,6 +49,8 @@ namespace UnturnedBlackout.Models.Global
         public float SecondaryMovementChangeADS { get; set; }
         public float KnifeMovementChange { get; set; }
 
+        public float HealAmount { get; set; }
+
         public EPlayerStance PreviousStance { get; set; }
 
         public Coroutine MovementChanger { get; set; }
@@ -136,25 +138,27 @@ namespace UnturnedBlackout.Models.Global
                 m_TacticalChecker.Stop();
             }
 
+            var medic = ActiveLoadout.Perks.Values.FirstOrDefault(k => k.Perk.SkillType.ToLower() == "medic")?.Perk?.SkillLevel ?? 0;
+            HealAmount = Plugin.Instance.Configuration.Instance.HealAmount * (1 + (medic / 100));
+            Logging.Debug($"{Player.CharacterName} Medic: {medic}, Heal Amount: {HealAmount}");
+
             Plugin.Instance.HUDManager.UpdateGadgetUI(this);
 
             if (loadout.Tactical != null)
             {
                 HasTactical = true;
-                var tactician = loadout.Perks.Values.FirstOrDefault(k => k.Perk.SkillType.ToLower() == "tactician");
-                var tacticianPercent = tactician == null ? 1f : (1 - (tactician.Perk.SkillLevel / 100));
-                Logging.Debug($"{Player.CharacterName} has tactician perk {tactician == null}, percentage applied {tacticianPercent}");
-                m_TacticalChecker.Interval = loadout.Tactical.Gadget.GiveSeconds * 1000 * tacticianPercent;
+                var tactician = loadout.Perks.Values.FirstOrDefault(k => k.Perk.SkillType.ToLower() == "tactician")?.Perk?.SkillLevel ?? 0f;
+                Logging.Debug($"{Player.CharacterName} tactician {tactician}, percentage applied {1 - (tactician / 100)}");
+                m_TacticalChecker.Interval = (float)loadout.Tactical.Gadget.GiveSeconds * 1000 * (1 - (tactician / 100));
                 Logging.Debug($"Interval: {m_TacticalChecker.Interval}");
             }
 
             if (loadout.Lethal != null)
             {
                 HasLethal = true;
-                var grenadier = loadout.Perks.Values.FirstOrDefault(k => k.Perk.SkillType.ToLower() == "grenadier");
-                var grenadierPercent = grenadier == null ? 1f : (1 - (grenadier.Perk.SkillLevel / 100));
-                Logging.Debug($"{Player.CharacterName} has grenadier perk {grenadier == null}, percentage applied {grenadierPercent}");
-                m_LethalChecker.Interval = loadout.Lethal.Gadget.GiveSeconds * 1000 * grenadierPercent;
+                var grenadier = loadout.Perks.Values.FirstOrDefault(k => k.Perk.SkillType.ToLower() == "grenadier")?.Perk?.SkillLevel ?? 0f;
+                Logging.Debug($"{Player.CharacterName} grenadier {grenadier}, percentage applied {1 - (grenadier / 100)}");
+                m_LethalChecker.Interval = (float)loadout.Lethal.Gadget.GiveSeconds * 1000 * (1 - (grenadier / 100));
                 Logging.Debug($"Interval: {m_LethalChecker.Interval}");
             }
 
@@ -280,7 +284,6 @@ namespace UnturnedBlackout.Models.Global
         public IEnumerator HealPlayer()
         {
             var seconds = Plugin.Instance.Configuration.Instance.HealSeconds;
-            var medic = ActiveLoadout.Perks.Values.FirstOrDefault(k => k.Perk.SkillType.ToLower() == "medic")?.Perk?.SkillLevel ?? 0;
             while (true)
             {
                 yield return new WaitForSeconds(seconds);
@@ -290,7 +293,7 @@ namespace UnturnedBlackout.Models.Global
                     LastDamager.Clear();
                     break;
                 }
-                Player.Player.life.serverModifyHealth(Plugin.Instance.Configuration.Instance.HealAmount + medic);
+                Player.Player.life.serverModifyHealth(HealAmount);
             }
         }
 

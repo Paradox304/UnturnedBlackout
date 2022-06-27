@@ -40,33 +40,31 @@ namespace UnturnedBlackout.Managers
 
         public void StartGames()
         {
-            var gameModes = new List<byte> { (byte)EGameType.FFA, (byte)EGameType.CTF, (byte)EGameType.KC, (byte)EGameType.TDM };
-
             for (int i = 1; i <= Config.GamesCount; i++)
             {
                 var locationID = AvailableLocations[UnityEngine.Random.Range(0, AvailableLocations.Count)];
                 var location = Config.ArenaLocations.FirstOrDefault(k => k.LocationID == locationID);
-                var gameMode = (EGameType)gameModes[UnityEngine.Random.Range(0, gameModes.Count)];
-                StartGame(location, gameMode);
+                var gameMode = GetRandomGameMode(locationID);
+                StartGame(location, gameMode.Item1, gameMode.Item2);
             }
         }
 
-        public void StartGame(ArenaLocation location, EGameType gameMode)
+        public void StartGame(ArenaLocation location, EGameType gameMode, bool isHardcore)
         {
             Game game = null;
             switch (gameMode)
             {
                 case EGameType.FFA:
-                    game = new FFAGame(location);
+                    game = new FFAGame(location, isHardcore);
                     break;
                 case EGameType.TDM:
-                    game = new TDMGame(location);
+                    game = new TDMGame(location, isHardcore);
                     break;
                 case EGameType.KC:
-                    game = new KCGame(location);
+                    game = new KCGame(location, isHardcore);
                     break;
                 case EGameType.CTF:
-                    game = new CTFGame(location);
+                    game = new CTFGame(location, isHardcore);
                     break;
                 default:
                     break;
@@ -210,6 +208,41 @@ namespace UnturnedBlackout.Managers
                 player.Player.teleportToLocationUnsafe(Config.LobbySpawn, 0);
                 Plugin.Instance.UIManager.ShowMenuUI(player);
             });
+        }
+
+        public (EGameType, bool) GetRandomGameMode(int locationID)
+        {
+            Logging.Debug($"Getting random gamemode for location with id {locationID}");
+            var gameModes = new HashSet<EGameType> { EGameType.FFA, EGameType.CTF, EGameType.KC, EGameType.TDM };
+            foreach (var ignoredGameMode in Config.GamemodeOptions.Where(k => k.IgnoredLocations.Contains(locationID)))
+            {
+                Logging.Debug($"Gamemode with name {ignoredGameMode.GamemodeName} is ignored for location with id {locationID}");
+                gameModes.Remove(ignoredGameMode.GameType);
+            }
+
+            var gameModeOptions = gameModes.Select(k => Config.GamemodeOptions.FirstOrDefault(l => l.GameType == k)).Where(k => k != null).ToList();
+            Logging.Debug($"Found {gameModeOptions.Count} gamemode options to choose from");
+            var option = CalculateRandomGameMode(gameModeOptions);
+            Logging.Debug($"Found gamemode with name {option.GamemodeName}");
+            var isHardcore = option.HasHardcore && UnityEngine.Random.Range(0, 100) <= option.HardcoreChance;
+            Logging.Debug($"hardcore: {isHardcore}");
+            return (option.GameType, isHardcore);
+        }
+
+        public GamemodeOption CalculateRandomGameMode(List<GamemodeOption> options)
+        {
+            int poolSize = 0;
+            foreach (var option in options) poolSize += option.GamemodeWeight;
+            int randInt = UnityEngine.Random.Range(0, poolSize) + 1;
+
+            int accumulatedProbability = 0;
+            for (int i = 0; i < options.Count; i++)
+            {
+                accumulatedProbability += options[i].GamemodeWeight;
+                if (randInt <= accumulatedProbability)
+                    return options[i];
+            }
+            return options[UnityEngine.Random.Range(0, options.Count)];
         }
 
         public void Destroy()

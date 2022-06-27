@@ -38,7 +38,7 @@ namespace UnturnedBlackout
 
         public int LastDamageAfterHealSeconds { get; set; }
         public float HealSeconds { get; set; }
-        public int HealAmount { get; set; }
+        public float HealAmount { get; set; }
 
         public int GamesCount { get; set; }
 
@@ -78,6 +78,8 @@ namespace UnturnedBlackout
         public List<ArenaLocation> ArenaLocations { get; set; }
         public List<FeedIcon> KillFeedIcons { get; set; }
         public List<TeamInfo> TeamsInfo { get; set; }
+
+        public List<GamemodeOption> GamemodeOptions { get; set; }
 
         public void LoadDefaults()
         {
@@ -171,6 +173,14 @@ namespace UnturnedBlackout
             {
                 new TeamInfo(1, "Turned Ops", "#9ac5ff", "#9ac5ff", "#9ac5ff", "#9ac5ff", new List<Kit> { new Kit(new List<ushort> { 173, 2, 1446 }) }, new List<TeamGlove> { new TeamGlove(1, 100) }),
                 new TeamInfo(2, "Omega", "#ff7e7e", "#ff7e7e", "#ff7e7e", "#ff7e7e", new List<Kit> { new Kit(new List<ushort> { 165, 2, 1446 }) }, new List<TeamGlove> { new TeamGlove(1, 101) })
+            };
+
+            GamemodeOptions = new List<GamemodeOption>
+            {
+                new GamemodeOption("CTF", 10, true, 50, new List<int> { 1000}),
+                new GamemodeOption("FFA", 10, true, 50, new List<int> { 1000 }),
+                new GamemodeOption("TDM", 10, true, 50, new List<int> { 1000 }),
+                new GamemodeOption("KC", 10, true, 50, new List<int> { 1000 })
             };
         }
     }

@@ -34,7 +34,7 @@ namespace UnturnedBlackout.GameTypes
         
         public uint Frequency { get; set; }
 
-        public CTFGame(ArenaLocation location) : base(EGameType.CTF, location)
+        public CTFGame(ArenaLocation location, bool isHardcore) : base(EGameType.CTF, location, isHardcore)
         {
             SpawnPoints = new Dictionary<int, List<CTFSpawnPoint>>();
             var blueFlag = Vector3.zero;

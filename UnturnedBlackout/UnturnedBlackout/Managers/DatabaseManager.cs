@@ -1381,14 +1381,14 @@ namespace UnturnedBlackout.Managers
                     }
                     Logging.Debug($"Found {defaultSecondaryAttachments.Count} default secondary attachments");
                     var defaultPerk = new List<int>();
-                    foreach (var perk in defaultPerks)
+                    for (int i = 1; i <= 3; i++)
                     {
-                        defaultPerk.Add(perk.PerkID);
-                        if (defaultPerk.Count == 3)
-                        {
-                            break;
-                        }
+                        var randomPerks = defaultPerks.Where(k => k.PerkType == i).ToList();
+                        if (randomPerks.Count == 0) continue;
+                        var randomPerk = randomPerks[UnityEngine.Random.Range(0, randomPerks.Count)];
+                        defaultPerk.Add(randomPerk.PerkID);
                     }
+
                     Logging.Debug($"Found {defaultPerk.Count} default perks");
                     var defaultKnife = defaultKnives.Count > 0 ? defaultKnives[0] : null;
                     Logging.Debug($"Found default knife with id {defaultKnife?.KnifeID ?? 0}");
@@ -1553,7 +1553,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 Logging.Debug($"Giving {steamName} the battlepass");
-                await new MySqlCommand($"INSERT IGNORE INTO `{PlayersBattlepassTableName}` (`SteamID`) VALUES ({player.CSteamID});", Conn).ExecuteScalarAsync();
+                await new MySqlCommand($"INSERT IGNORE INTO `{PlayersBattlepassTableName}` (`SteamID` , `ClaimedFreeRewards` , `ClaimedPremiumRewards`) VALUES ({player.CSteamID} , '' , '');", Conn).ExecuteScalarAsync();
 
                 Logging.Debug($"Giving {steamName} the achievements");
                 foreach (var achievement in Achievements)
@@ -2506,37 +2506,31 @@ namespace UnturnedBlackout.Managers
                         {
                             continue;
                         }
-
                         if (!bool.TryParse(rdr[2].ToString(), out bool isActive))
                         {
                             continue;
                         }
-
                         if (loadouts.ContainsKey(loadoutID))
                         {
                             Logging.Debug($"Found a duplicate loadout with id {loadoutID} for {player.CharacterName}, ignoring it");
                             continue;
                         }
-
                         var loadoutData = Plugin.Instance.DataManager.ConvertLoadoutFromJson(rdr[3].ToString());
                         if (!guns.TryGetValue(loadoutData.Primary, out LoadoutGun primary) && loadoutData.Primary != 0)
                         {
                             Logging.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a primary with id {loadoutData.Primary} which is not owned by the player, not counting this loadout");
                             continue;
                         }
-
                         if (!gunCharms.TryGetValue(loadoutData.PrimaryGunCharm, out LoadoutGunCharm primaryGunCharm) && loadoutData.PrimaryGunCharm != 0)
                         {
                             Logging.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a primary gun charm with id {loadoutData.PrimaryGunCharm} which is not owned by the player, not counting this loadout");
                             continue;
                         }
-
                         if (!gunSkinsSearchByID.TryGetValue(loadoutData.PrimarySkin, out GunSkin primarySkin) && loadoutData.PrimarySkin != 0)
                         {
                             Logging.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a primary skin with id {loadoutData.PrimarySkin} which is not owned by the player, not counting this loadout");
                             continue;
                         }
-
                         var primaryAttachments = new Dictionary<EAttachment, LoadoutAttachment>();
                         foreach (var primaryAttachment in loadoutData.PrimaryAttachments)
                         {
@@ -2549,25 +2543,21 @@ namespace UnturnedBlackout.Managers
                                 Logging.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a primary attachment id with {primaryAttachment} which is not owned by the player, not counting it");
                             }
                         }
-
                         if (!guns.TryGetValue(loadoutData.Secondary, out LoadoutGun secondary) && loadoutData.Secondary != 0)
                         {
                             Logging.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a secondary with id {loadoutData.Secondary} which is not owned by the player, not counting this loadout");
                             continue;
                         }
-
                         if (!gunCharms.TryGetValue(loadoutData.SecondaryGunCharm, out LoadoutGunCharm secondaryGunCharm) && loadoutData.SecondaryGunCharm != 0)
                         {
                             Logging.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a secondary gun charm with id {loadoutData.SecondaryGunCharm} which is not owned by the player, not counting this loadout");
                             continue;
                         }
-
                         if (!gunSkinsSearchByID.TryGetValue(loadoutData.SecondarySkin, out GunSkin secondarySkin) && loadoutData.SecondarySkin != 0)
                         {
                             Logging.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a secondary skin with id {loadoutData.SecondarySkin} which is not owned by the player, not counting this loadout");
                             continue;
                         }
-
                         var secondaryAttachments = new Dictionary<EAttachment, LoadoutAttachment>();
                         foreach (var secondaryAttachment in loadoutData.SecondaryAttachments)
                         {
@@ -2580,25 +2570,21 @@ namespace UnturnedBlackout.Managers
                                 Logging.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a secondary attachment id with {secondaryAttachment} which is not owned by the player, not counting it");
                             }
                         }
-
                         if (!knives.TryGetValue(loadoutData.Knife, out LoadoutKnife knife) && loadoutData.Knife != 0)
                         {
                             Logging.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a knife with id {loadoutData.Knife} which is not owned by the player, not counting this loadout");
                             continue;
                         }
-
                         if (!gadgets.TryGetValue(loadoutData.Tactical, out LoadoutGadget tactical) && loadoutData.Tactical != 0)
                         {
                             Logging.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a tactical with id {loadoutData.Tactical} which is not owned by the player, not counting this loadout");
                             continue;
                         }
-
                         if (!gadgets.TryGetValue(loadoutData.Lethal, out LoadoutGadget lethal) && loadoutData.Lethal != 0)
                         {
                             Logging.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a lethal with id {loadoutData.Lethal} which is not owned by the player, not counting this loadout");
                             continue;
                         }
-
                         var loadoutKillstreaks = new List<LoadoutKillstreak>();
                         foreach (var killstreakID in loadoutData.Killstreaks)
                         {
@@ -2617,7 +2603,6 @@ namespace UnturnedBlackout.Managers
                         {
                             continue;
                         }
-
                         var loadoutPerks = new Dictionary<int, LoadoutPerk>();
                         foreach (var perkID in loadoutData.Perks)
                         {
@@ -2636,19 +2621,16 @@ namespace UnturnedBlackout.Managers
                         {
                             continue;
                         }
-
                         if (!gloves.TryGetValue(loadoutData.Glove, out LoadoutGlove glove) && loadoutData.Glove != 0)
                         {
                             Logging.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a glove with id {loadoutData.Glove} which is not owned by the player, not counting this loadout");
                             continue;
                         }
-
                         if (!cards.TryGetValue(loadoutData.Card, out LoadoutCard card) && loadoutData.Card != 0)
                         {
                             Logging.Debug($"Loadout with id {loadoutID} has a card with id {loadoutData.Card} which is not owned by the player, not counting this loadout");
                             continue;
                         }
-
                         loadouts.Add(loadoutID, new Loadout(loadoutID, loadoutData.LoadoutName, isActive, primary, primarySkin, primaryGunCharm, primaryAttachments, secondary, secondarySkin, secondaryGunCharm, secondaryAttachments, knife, tactical, lethal, loadoutKillstreaks, loadoutPerks, glove, card));
                     }
                     Logging.Debug($"Successfully got {loadouts.Count} loadouts for {player.CharacterName}");

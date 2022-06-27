@@ -35,7 +35,7 @@ namespace UnturnedBlackout.GameTypes
 
         public uint Frequency { get; set; }
 
-        public KCGame(ArenaLocation location) : base(EGameType.KC, location)
+        public KCGame(ArenaLocation location, bool isHardcore) : base(EGameType.KC, location, isHardcore)
         {
             SpawnPoints = new Dictionary<int, List<TDMSpawnPoint>>();
             foreach (var spawnPoint in Plugin.Instance.DataManager.Data.TDMSpawnPoints.Where(k => k.LocationID == location.LocationID))
