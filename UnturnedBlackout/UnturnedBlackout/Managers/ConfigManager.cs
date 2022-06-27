@@ -1,9 +1,7 @@
-﻿using System.Collections.Generic;
-using UnturnedBlackout.FileReaders;
+﻿using UnturnedBlackout.FileReaders;
 using UnturnedBlackout.Models.Configuration;
 using UnturnedBlackout.Models.CTF;
 using UnturnedBlackout.Models.FFA;
-using UnturnedBlackout.Models.Global;
 using UnturnedBlackout.Models.KC;
 using UnturnedBlackout.Models.TDM;
 
@@ -17,7 +15,7 @@ namespace UnturnedBlackout.Managers
         public XmlFileReader<LoadoutConfig> Loadout { get; set; }
         public XmlFileReader<DefaultSkillsConfig> DefaultSkills { get; set; }
         public XmlFileReader<TeamsConfig> Teams { get; set; }
-        public XmlFileReader<FFAConfig> FFA { get; set; } 
+        public XmlFileReader<FFAConfig> FFA { get; set; }
         public XmlFileReader<TDMConfig> TDM { get; set; }
         public XmlFileReader<KCConfig> KC { get; set; }
         public XmlFileReader<CTFConfig> CTF { get; set; }

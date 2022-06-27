@@ -1,13 +1,4 @@
 ﻿using Rocket.API;
-using System.Collections.Generic;
-using UnityEngine;
-using UnturnedBlackout.Enums;
-using UnturnedBlackout.Models.CTF;
-using UnturnedBlackout.Models.Feed;
-using UnturnedBlackout.Models.FFA;
-using UnturnedBlackout.Models.Global;
-using UnturnedBlackout.Models.KC;
-using UnturnedBlackout.Models.TDM;
 
 namespace UnturnedBlackout
 {
