@@ -15,10 +15,12 @@ namespace UnturnedBlackout.Database.Base
         public List<PercentileReward> SeasonalPercentileRewards { get; set; }
         public float XPBooster { get; set; }
         public float BPBooster { get; set; }
+        public float GunXPBooster { get; set; }
         public DateTimeOffset XPBoosterWipe { get; set; }
         public DateTimeOffset BPBoosterWipe { get; set; }
+        public DateTimeOffset GunXPBoosterWipe { get; set; }
 
-        public Options(DateTimeOffset dailyLeaderboardWipe, DateTimeOffset weeklyLeaderboardWipe, Dictionary<int, List<Reward>> dailyRankedRewards, List<PercentileReward> dailyPercentileRewards, Dictionary<int, List<Reward>> weeklyRankedRewards, List<PercentileReward> weeklyPercentileRewards, Dictionary<int, List<Reward>> seasonalRankedRewards, List<PercentileReward> seasonalPercentileRewards, float xPBooster, float bPBooster, DateTimeOffset xPBoosterWipe, DateTimeOffset bPBoosterWipe)
+        public Options(DateTimeOffset dailyLeaderboardWipe, DateTimeOffset weeklyLeaderboardWipe, Dictionary<int, List<Reward>> dailyRankedRewards, List<PercentileReward> dailyPercentileRewards, Dictionary<int, List<Reward>> weeklyRankedRewards, List<PercentileReward> weeklyPercentileRewards, Dictionary<int, List<Reward>> seasonalRankedRewards, List<PercentileReward> seasonalPercentileRewards, float xPBooster, float bPBooster, float gunXPBooster, DateTimeOffset xPBoosterWipe, DateTimeOffset bPBoosterWipe, DateTimeOffset gunXPBoosterWipe)
         {
             DailyLeaderboardWipe = dailyLeaderboardWipe;
             WeeklyLeaderboardWipe = weeklyLeaderboardWipe;
@@ -30,8 +32,10 @@ namespace UnturnedBlackout.Database.Base
             SeasonalPercentileRewards = seasonalPercentileRewards;
             XPBooster = xPBooster;
             BPBooster = bPBooster;
+            GunXPBooster = gunXPBooster;
             XPBoosterWipe = xPBoosterWipe;
             BPBoosterWipe = bPBoosterWipe;
+            GunXPBoosterWipe = gunXPBoosterWipe;
         }
     }
 }

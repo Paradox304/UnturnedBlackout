@@ -17,6 +17,7 @@
         BattlepassXP,
         Crate,
         XPBooster,
-        BPBooster
+        BPBooster,
+        GunXPBooster
     }
 }

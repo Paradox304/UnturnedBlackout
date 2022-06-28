@@ -29,6 +29,7 @@ namespace UnturnedBlackout.Models.Global
 
         public CSteamID SteamID { get; set; }
         public UnturnedPlayer Player { get; set; }
+        public PlayerData Data { get; set; }
         public ITransportConnection TransportConnection { get; set; }
 
         public bool IsPendingLoadoutChange { get; set; }
@@ -76,6 +77,12 @@ namespace UnturnedBlackout.Models.Global
         {
             SteamID = player.CSteamID;
             Player = player;
+            if (!Plugin.Instance.DBManager.PlayerData.TryGetValue(SteamID, out PlayerData data))
+            {
+                Provider.kick(SteamID, "Your data was not found, please contact any admin");
+                throw new Exception($"PLAYER DATA FOR PLAYER WITH {SteamID} NOT FOUND, KICKING THE PLAYER");
+            }
+            Data = data;
             TransportConnection = transportConnection;
             PreviousStance = EPlayerStance.STAND;
             LastDamager = new Stack<CSteamID>(100);

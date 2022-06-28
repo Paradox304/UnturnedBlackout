@@ -196,7 +196,6 @@ namespace UnturnedBlackout
             HUDManager = new HUDManager();
             Logging.Debug("Init HUD");
 
-            Logging.Debug("Making all masks have earpieces");
             var shouldFillAfterDetach = typeof(ItemMagazineAsset).GetProperty("shouldFillAfterDetach", BindingFlags.Public | BindingFlags.Instance);
             var magazines = Assets.find(EAssetType.ITEM).OfType<ItemMagazineAsset>();
             foreach (var mag in magazines)
