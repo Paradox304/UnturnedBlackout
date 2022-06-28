@@ -836,7 +836,7 @@ namespace UnturnedBlackout.Instances
                 var game = games[index];
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Play BUTTON {index}", true);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Play Map TEXT {index}", game.Location.LocationName);
-                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Play Mode TEXT {index}", Plugin.Instance.Translate($"{game.GameMode}_Name_Full"));
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Play Mode TEXT {index}", (game.IsHardcore ? "Hardcore " : "") + Plugin.Instance.Translate($"{game.GameMode}_Name_Full"));
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Play Players TEXT {index}", $"{game.GetPlayerCount()}/{game.Location.GetMaxPlayers(game.GameMode)}");
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Play Status TEXT {index}", game.GamePhase.ToFriendlyName());
             }
@@ -847,7 +847,7 @@ namespace UnturnedBlackout.Instances
         public void ShowGame(Game game)
         {
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Play Server TEXT", "");
-            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Play Mode TEXT", Plugin.Instance.Translate($"{game.GameMode}_Name_Full"));
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Play Mode TEXT", (game.IsHardcore ? "Hardcore " : "") + Plugin.Instance.Translate($"{game.GameMode}_Name_Full"));
             EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Play IMAGE", game.Location.ImageLink);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Play Map TEXT", game.Location.LocationName);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Play Description TEXT", Plugin.Instance.Translate($"{game.GameMode}_Description_Full"));

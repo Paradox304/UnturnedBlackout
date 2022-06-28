@@ -118,7 +118,7 @@ namespace UnturnedBlackout.GameTypes
             }
             TaskDispatcher.QueueOnMainThread(() =>
             {
-                Plugin.Instance.UIManager.SetupFFALeaderboard(Players, Location, false);
+                Plugin.Instance.UIManager.SetupFFALeaderboard(Players, Location, false, IsHardcore);
                 WipeItems();
             });
             yield return new WaitForSeconds(5);
@@ -199,7 +199,7 @@ namespace UnturnedBlackout.GameTypes
                     SpawnPlayer(fPlayer, true);
                     break;
                 case EGamePhase.Ending:
-                    Plugin.Instance.UIManager.SetupFFALeaderboard(fPlayer, Players, Location, true);
+                    Plugin.Instance.UIManager.SetupFFALeaderboard(fPlayer, Players, Location, true, IsHardcore);
                     Plugin.Instance.UIManager.ShowFFALeaderboard(fPlayer.GamePlayer);
                     break;
                 default:
@@ -522,6 +522,7 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
+            parameters.applyGlobalArmorMultiplier = IsHardcore;
             if (GamePhase != EGamePhase.Started)
             {
                 shouldAllow = false;
@@ -704,7 +705,7 @@ namespace UnturnedBlackout.GameTypes
                 player.ScoreboardCooldown = DateTime.UtcNow.AddSeconds(1);
 
                 fPlayer.GamePlayer.HasScoreboard = true;
-                Plugin.Instance.UIManager.SetupFFALeaderboard(fPlayer, Players, Location, true);
+                Plugin.Instance.UIManager.SetupFFALeaderboard(fPlayer, Players, Location, true, IsHardcore);
                 Plugin.Instance.UIManager.ShowFFALeaderboard(fPlayer.GamePlayer);
             }
         }

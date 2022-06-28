@@ -174,7 +174,7 @@ namespace UnturnedBlackout.GameTypes
             }
             TaskDispatcher.QueueOnMainThread(() =>
             {
-                Plugin.Instance.UIManager.SetupCTFLeaderboard(Players, Location, wonTeam, BlueTeam, RedTeam, false);
+                Plugin.Instance.UIManager.SetupCTFLeaderboard(Players, Location, wonTeam, BlueTeam, RedTeam, false, IsHardcore);
                 WipeItems();
             });
             yield return new WaitForSeconds(5);
@@ -270,7 +270,7 @@ namespace UnturnedBlackout.GameTypes
                     {
                         wonTeam = new CTFTeam(-1, true, new TeamInfo(), 0, Vector3.zero);
                     }
-                    Plugin.Instance.UIManager.SetupCTFLeaderboard(cPlayer, Players, Location, wonTeam, BlueTeam, RedTeam, true);
+                    Plugin.Instance.UIManager.SetupCTFLeaderboard(cPlayer, Players, Location, wonTeam, BlueTeam, RedTeam, true, IsHardcore);
                     Plugin.Instance.UIManager.ShowCTFLeaderboard(cPlayer.GamePlayer);
                     break;
                 default:
@@ -628,6 +628,7 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
+            parameters.applyGlobalArmorMultiplier = IsHardcore;
             if (GamePhase != EGamePhase.Started)
             {
                 shouldAllow = false;
@@ -1020,7 +1021,7 @@ namespace UnturnedBlackout.GameTypes
                     wonTeam = new CTFTeam(-1, true, new TeamInfo(), 0, Vector3.zero);
                 }
 
-                Plugin.Instance.UIManager.SetupCTFLeaderboard(cPlayer, Players, Location, wonTeam, BlueTeam, RedTeam, true);
+                Plugin.Instance.UIManager.SetupCTFLeaderboard(cPlayer, Players, Location, wonTeam, BlueTeam, RedTeam, true, IsHardcore);
                 Plugin.Instance.UIManager.ShowCTFLeaderboard(cPlayer.GamePlayer);
             }
         }
