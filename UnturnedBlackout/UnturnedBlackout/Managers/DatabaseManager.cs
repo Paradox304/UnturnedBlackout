@@ -1453,7 +1453,7 @@ namespace UnturnedBlackout.Managers
             {
                 Logging.Debug($"Adding {steamName} to the DB");
                 await Conn.OpenAsync();
-                var cmd = new MySqlCommand($"INSERT INTO `{PlayersTableName}` ( `SteamID` , `SteamName` , `AvatarLink` , `MuteExpiry`, `Coins` ) VALUES ({player.CSteamID}, @name, '{avatarLink}' , {DateTimeOffset.UtcNow.ToUnixTimeSeconds()} , {(Plugin.Instance.ConfigManager.Base.FileData.UnlockAllItems ? 10000000 : 0)}) ON DUPLICATE KEY UPDATE `AvatarLink` = '{avatarLink}', `SteamName` = @name;", Conn);
+                var cmd = new MySqlCommand($"INSERT INTO `{PlayersTableName}` ( `SteamID` , `SteamName` , `AvatarLink` , `MuteExpiry`, `Coins` ) VALUES ({player.CSteamID}, @name, '{avatarLink}' , {DateTimeOffset.UtcNow.ToUnixTimeSeconds()} , {(Plugin.Instance.Configuration.Instance.UnlockAllItems ? 10000000 : 0)}) ON DUPLICATE KEY UPDATE `AvatarLink` = '{avatarLink}', `SteamName` = @name;", Conn);
                 cmd.Parameters.AddWithValue("@name", steamName.ToUnrich());
                 await cmd.ExecuteScalarAsync();
 
@@ -2797,7 +2797,7 @@ namespace UnturnedBlackout.Managers
 
         public async Task DecreasePlayerCreditsAsync(CSteamID steamID, int credits)
         {
-            if (Plugin.Instance.ConfigManager.Base.FileData.UnlockAllItems) return;
+            if (Plugin.Instance.Configuration.Instance.UnlockAllItems) return;
             using MySqlConnection Conn = new(ConnectionString);
             try
             {

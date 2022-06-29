@@ -842,7 +842,7 @@ namespace UnturnedBlackout.Instances
 
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Play BUTTON {index}", true);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Play Map TEXT {index}", game.Location.LocationName);
-                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Play Mode TEXT {index}", (game.IsHardcore ? "<color=red>Hardcore</color> " : "") + $"<color={gameMode.GamemodeColor}>{Plugin.Instance.Translate($"{game.GameMode}_Name_Full")}</color>");
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Play Mode TEXT {index}", (game.IsHardcore ? $"<color={Config.Base.FileData.HardcoreColor}>Hardcore</color> " : "") + $"<color={gameMode.GamemodeColor}>{Plugin.Instance.Translate($"{game.GameMode}_Name_Full")}</color>");
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Play Players TEXT {index}", $"{game.GetPlayerCount()}/{game.Location.GetMaxPlayers(game.GameMode)}");
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Play Status TEXT {index}", game.GamePhase.ToFriendlyName());
             }
@@ -859,8 +859,7 @@ namespace UnturnedBlackout.Instances
             }
 
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Play Server TEXT", "");
-            Logging.Debug($"Sending {(game.IsHardcore ? "<color=red>Hardcore</color> " : "") + $"<color={gameMode.GamemodeColor}>{Plugin.Instance.Translate($"{game.GameMode}_Name_Full")}</color>"} to SERVER Play Mode TEXT");
-            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Play Mode TEXT", (game.IsHardcore ? "<color=red>Hardcore</color> " : "") + $"<color={gameMode.GamemodeColor}>{Plugin.Instance.Translate($"{game.GameMode}_Name_Full")}</color>");
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Play Mode TEXT", (game.IsHardcore ? $"<color={Config.Base.FileData.HardcoreColor}>Hardcore</color> " : "") + $"<color={gameMode.GamemodeColor}>{Plugin.Instance.Translate($"{game.GameMode}_Name_Full")}</color>");
             EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Play IMAGE", game.Location.ImageLink);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Play Map TEXT", game.Location.LocationName);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Play Description TEXT", Plugin.Instance.Translate($"{game.GameMode}_Description_Full"));

@@ -6,12 +6,12 @@ namespace UnturnedBlackout.Models.Configuration
     {
         public int MaxPlayerNameCharacters { get; set; }
         public string PlayerColorHexCode { get; set; }
+        public string HardcoreColor { get; set; }
         public string WebhookURL { get; set; }
         public int MaxKillFeed { get; set; }
         public int KillFeedFont { get; set; }
         public int KillFeedSeconds { get; set; }
         public int VoiceChatFont { get; set; }
-        public bool UnlockAllItems { get; set; }
         public bool EnableDebugLogs { get; set; }
         public Vector3 LobbySpawn { get; set; }
         public int LastDamageAfterHealSeconds { get; set; }
@@ -32,6 +32,7 @@ namespace UnturnedBlackout.Models.Configuration
             MaxPlayerNameCharacters = 20;
 
             PlayerColorHexCode = "#FFFF00";
+            HardcoreColor = "red";
             WebhookURL = "https://discord.com/api/webhooks/979000847197409280/e7Pbmjj_8bALCCDCbEDMCEVLX2ZSuIG3ymxbd-yb-IxkQ-sToxCkLJRmneeqB6LYVwgC";
             MaxKillFeed = 6;
             KillFeedFont = 40;
@@ -39,7 +40,6 @@ namespace UnturnedBlackout.Models.Configuration
 
             VoiceChatFont = 30;
 
-            UnlockAllItems = false;
             EnableDebugLogs = true;
 
             LobbySpawn = new Vector3(353.027039f, 54.5521927f, -3792.77026f);
