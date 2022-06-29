@@ -834,9 +834,15 @@ namespace UnturnedBlackout.Instances
             for (int index = 0; index < maxCount; index++)
             {
                 var game = games[index];
+                var gameMode = Config.Gamemode.FileData.GamemodeOptions.FirstOrDefault(k => k.GameType == game.GameMode);
+                if (gameMode == null)
+                {
+                    return;
+                }
+
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Play BUTTON {index}", true);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Play Map TEXT {index}", game.Location.LocationName);
-                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Play Mode TEXT {index}", (game.IsHardcore ? "Hardcore " : "") + Plugin.Instance.Translate($"{game.GameMode}_Name_Full"));
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Play Mode TEXT {index}", (game.IsHardcore ? "<color=red>Hardcore</color> " : "") + $"<color={gameMode.GamemodeColor}>{Plugin.Instance.Translate($"{game.GameMode}_Name_Full")}</color>");
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Play Players TEXT {index}", $"{game.GetPlayerCount()}/{game.Location.GetMaxPlayers(game.GameMode)}");
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Play Status TEXT {index}", game.GamePhase.ToFriendlyName());
             }

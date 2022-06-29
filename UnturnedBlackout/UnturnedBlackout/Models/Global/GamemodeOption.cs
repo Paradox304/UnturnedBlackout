@@ -8,6 +8,7 @@ namespace UnturnedBlackout.Models.Global
     {
         public EGameType GameType { get; set; }
         public int GamemodeWeight { get; set; }
+        public string GamemodeColor { get; set; }
         public bool HasHardcore { get; set; }
         public int HardcoreChance { get; set; }
         [XmlArrayItem(ElementName = "IgnoredLocation")]
@@ -18,10 +19,11 @@ namespace UnturnedBlackout.Models.Global
 
         }
 
-        public GamemodeOption(EGameType gameType, int gamemodeWeight, bool hasHardcore, int hardcoreChance, List<int> ignoredLocations)
+        public GamemodeOption(EGameType gameType, int gamemodeWeight, string gamemodeColor, bool hasHardcore, int hardcoreChance, List<int> ignoredLocations)
         {
             GameType = gameType;
             GamemodeWeight = gamemodeWeight;
+            GamemodeColor = gamemodeColor;
             HasHardcore = hasHardcore;
             HardcoreChance = hardcoreChance;
             IgnoredLocations = ignoredLocations;

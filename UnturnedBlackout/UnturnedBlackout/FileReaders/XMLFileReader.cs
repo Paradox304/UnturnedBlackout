@@ -11,10 +11,11 @@ namespace UnturnedBlackout.FileReaders
         public T FileData { get; protected set; }
 
         public string FilePath { get; }
+        public string URLPath { get; }
 
         protected XmlSerializer Serializer { get; }
 
-        public XmlFileReader(string filePath, params Type[] extraTypes)
+        public XmlFileReader(string filePath, string urlPath, params Type[] extraTypes)
         {
             if (string.IsNullOrWhiteSpace(filePath))
                 throw new ArgumentNullException(nameof(filePath),
@@ -22,6 +23,7 @@ namespace UnturnedBlackout.FileReaders
 
             FileData = new T();
             FilePath = Path.ChangeExtension(filePath, "xml");
+            URLPath = urlPath;
             Serializer = new XmlSerializer(typeof(T), extraTypes);
             Load();
         }

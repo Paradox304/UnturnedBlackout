@@ -11,6 +11,7 @@ namespace UnturnedBlackout
         public string DatabasePort { get; set; }
 
         public string WebhookURL { get; set; }
+        public string URL { get; set; }
 
         /*public int MaxPlayerNameCharacters { get; set; }
 
@@ -80,6 +81,7 @@ namespace UnturnedBlackout
             DatabasePassword = "k8gxtTbytcA5DXlqbn86e@+1";
             DatabasePort = "3306";
             WebhookURL = "https://discord.com/api/webhooks/979000847197409280/e7Pbmjj_8bALCCDCbEDMCEVLX2ZSuIG3ymxbd-yb-IxkQ-sToxCkLJRmneeqB6LYVwgC";
+            URL = "http://213.32.6.3:27090/";
 
             /*
             MaxPlayerNameCharacters = 30;
