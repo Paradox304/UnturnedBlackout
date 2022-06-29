@@ -553,8 +553,9 @@ namespace UnturnedBlackout.GameTypes
                     break;
             }
 
-            Logging.Debug($"{player.GamePlayer.Player.CharacterName} got damaged, perk name {damageReducePerkName}, damage amount: {parameters.damage}");
-            parameters.damage -= (player.GamePlayer.ActiveLoadout.PerksSearchByType.TryGetValue(damageReducePerkName, out LoadoutPerk damageReducerPerk) ? damageReducerPerk.Perk.SkillLevel : 0f) * parameters.damage;
+            var damageReducePercent = player.GamePlayer.ActiveLoadout.PerksSearchByType.TryGetValue(damageReducePerkName, out LoadoutPerk damageReducerPerk) ? ((float)damageReducerPerk.Perk.SkillLevel / 100) : 0f;
+            Logging.Debug($"{player.GamePlayer.Player.CharacterName} got damaged, perk name {damageReducePerkName}, damage reduce percent: {damageReducePercent} damage amount: {parameters.damage}");
+            parameters.damage -= damageReducePercent * parameters.damage;
             Logging.Debug($"Damage after perk calculation: {parameters.damage}");
 
             player.GamePlayer.OnDamaged(parameters.killer);
@@ -565,8 +566,9 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
-            Logging.Debug($"{kPlayer.GamePlayer.Player.CharacterName} damaged someone, perk name {damageIncreasePerkName}, damage amount: {parameters.damage}");
-            parameters.damage += (kPlayer.GamePlayer.ActiveLoadout.PerksSearchByType.TryGetValue(damageIncreasePerkName, out LoadoutPerk damageIncreaserPerk) ? damageIncreaserPerk.Perk.SkillLevel : 0f) * parameters.damage;
+            var damageIncreasePercent = kPlayer.GamePlayer.ActiveLoadout.PerksSearchByType.TryGetValue(damageIncreasePerkName, out LoadoutPerk damageIncreaserPerk) ? ((float)damageIncreaserPerk.Perk.SkillLevel / 100) : 0f;
+            Logging.Debug($"{kPlayer.GamePlayer.Player.CharacterName} damaged someone, damage increase percent {damageIncreasePercent} perk name {damageIncreasePerkName}, damage amount: {parameters.damage}");
+            parameters.damage += damageIncreasePercent * parameters.damage;
             Logging.Debug($"Damage after perk calculation: {parameters.damage}");
 
             if (kPlayer.GamePlayer.HasSpawnProtection)

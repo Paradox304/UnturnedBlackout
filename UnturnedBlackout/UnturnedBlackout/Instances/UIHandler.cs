@@ -852,8 +852,15 @@ namespace UnturnedBlackout.Instances
 
         public void ShowGame(Game game)
         {
+            var gameMode = Config.Gamemode.FileData.GamemodeOptions.FirstOrDefault(k => k.GameType == game.GameMode);
+            if (gameMode == null)
+            {
+                return;
+            }
+
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Play Server TEXT", "");
-            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Play Mode TEXT", (game.IsHardcore ? "Hardcore " : "") + Plugin.Instance.Translate($"{game.GameMode}_Name_Full"));
+            Logging.Debug($"Sending {(game.IsHardcore ? "<color=red>Hardcore</color> " : "") + $"<color={gameMode.GamemodeColor}>{Plugin.Instance.Translate($"{game.GameMode}_Name_Full")}</color>"} to SERVER Play Mode TEXT");
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Play Mode TEXT", (game.IsHardcore ? "<color=red>Hardcore</color> " : "") + $"<color={gameMode.GamemodeColor}>{Plugin.Instance.Translate($"{game.GameMode}_Name_Full")}</color>");
             EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Play IMAGE", game.Location.ImageLink);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Play Map TEXT", game.Location.LocationName);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Play Description TEXT", Plugin.Instance.Translate($"{game.GameMode}_Description_Full"));

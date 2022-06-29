@@ -391,7 +391,7 @@ namespace UnturnedBlackout.Managers
                 playerLoadout.Perks.Add(perk.Perk.PerkType, perk);
             }
 
-            playerLoadout.PerksSearchByType.Add(currentPerk.Perk.SkillType, perk);
+            playerLoadout.PerksSearchByType.Add(perk.Perk.SkillType, perk);
             ThreadPool.QueueUserWorkItem(async (o) =>
             {
                 await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
