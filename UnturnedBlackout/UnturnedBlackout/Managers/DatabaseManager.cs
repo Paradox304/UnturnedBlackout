@@ -2631,6 +2631,17 @@ namespace UnturnedBlackout.Managers
                                 break;
                             }
                         }
+                        var perksSearchByType = new Dictionary<string, LoadoutPerk>(StringComparer.OrdinalIgnoreCase);
+                        foreach (var perk in loadoutPerks.Values)
+                        {
+                            if (perksSearchByType.ContainsKey(perk.Perk.SkillType))
+                            {
+                                Logging.Debug($"There is perk with type {perk.Perk.SkillType} already in the loadout, ignoring");
+                            } else
+                            {
+                                perksSearchByType.Add(perk.Perk.SkillType, perk);
+                            }
+                        }
                         if (!shouldContinue)
                         {
                             continue;
@@ -2645,7 +2656,7 @@ namespace UnturnedBlackout.Managers
                             Logging.Debug($"Loadout with id {loadoutID} has a card with id {loadoutData.Card} which is not owned by the player, not counting this loadout");
                             continue;
                         }
-                        loadouts.Add(loadoutID, new Loadout(loadoutID, loadoutData.LoadoutName, isActive, primary, primarySkin, primaryGunCharm, primaryAttachments, secondary, secondarySkin, secondaryGunCharm, secondaryAttachments, knife, tactical, lethal, loadoutKillstreaks, loadoutPerks, glove, card));
+                        loadouts.Add(loadoutID, new Loadout(loadoutID, loadoutData.LoadoutName, isActive, primary, primarySkin, primaryGunCharm, primaryAttachments, secondary, secondarySkin, secondaryGunCharm, secondaryAttachments, knife, tactical, lethal, loadoutKillstreaks, loadoutPerks, perksSearchByType, glove, card));
                     }
                     Logging.Debug($"Successfully got {loadouts.Count} loadouts for {player.CharacterName}");
                 }
@@ -4548,23 +4559,24 @@ namespace UnturnedBlackout.Managers
                 {
                     while (rdr.Read())
                     {
+            
                         if (!long.TryParse(rdr[0].ToString(), out long dailyLeaderboardWipeUnix))
                         {
                             continue;
                         }
-
+ 
                         var dailyLeaderboardWipe = DateTimeOffset.FromUnixTimeSeconds(dailyLeaderboardWipeUnix);
-
+     
                         if (!long.TryParse(rdr[1].ToString(), out long weeklyLeaderboardWipeUnix))
                         {
                             continue;
                         }
-
+             
                         var weeklyLeaderboardWipe = DateTimeOffset.FromUnixTimeSeconds(weeklyLeaderboardWipeUnix);
-
+                
                         var dailyRanked = Utility.GetRankedRewardsFromString(rdr[2].ToString());
                         var dailyPercentile = Utility.GetPercentileRewardsFromString(rdr[3].ToString());
-
+            
                         var weeklyRanked = Utility.GetRankedRewardsFromString(rdr[4].ToString());
                         var weeklyPercentile = Utility.GetPercentileRewardsFromString(rdr[5].ToString());
 
@@ -4592,19 +4604,16 @@ namespace UnturnedBlackout.Managers
                         }
 
                         var xpBoosterWipe = DateTimeOffset.FromUnixTimeSeconds(xpBoosterWipeUnix);
-
                         if (!long.TryParse(rdr[12].ToString(), out long bpBoosterWipeUnix))
                         {
                             continue;
                         }
 
                         var bpBoosterWipe = DateTimeOffset.FromUnixTimeSeconds(bpBoosterWipeUnix);
-
                         if (!long.TryParse(rdr[13].ToString(), out long gunXPBoosterWipeUnix))
                         {
                             continue;
                         }
-
                         var gunXPBoosterWipe = DateTimeOffset.FromUnixTimeSeconds(gunXPBoosterWipeUnix);
                         ServerOptions = new Options(dailyLeaderboardWipe, weeklyLeaderboardWipe, dailyRanked, dailyPercentile, weeklyRanked, weeklyPercentile, seasonalRanked, seasonalPercentile, xpBooster, bpBooster, gunXPBooster, xpBoosterWipe, bpBoosterWipe, gunXPBoosterWipe);
                     }

@@ -381,8 +381,9 @@ namespace UnturnedBlackout.Managers
                 return;
             }
 
-            if (playerLoadout.Perks.ContainsKey(perk.Perk.PerkType))
+            if (playerLoadout.Perks.TryGetValue(perk.Perk.PerkType, out LoadoutPerk currentPerk))
             {
+                playerLoadout.PerksSearchByType.Remove(currentPerk.Perk.SkillType);
                 playerLoadout.Perks[perk.Perk.PerkType] = perk;
             }
             else
@@ -390,6 +391,7 @@ namespace UnturnedBlackout.Managers
                 playerLoadout.Perks.Add(perk.Perk.PerkType, perk);
             }
 
+            playerLoadout.PerksSearchByType.Add(currentPerk.Perk.SkillType, perk);
             ThreadPool.QueueUserWorkItem(async (o) =>
             {
                 await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
@@ -417,7 +419,7 @@ namespace UnturnedBlackout.Managers
                 return;
             }
 
-            if (!playerLoadout.Perks.Remove(perk.Perk.PerkType))
+            if (!playerLoadout.Perks.Remove(perk.Perk.PerkType) && !playerLoadout.PerksSearchByType.Remove(perk.Perk.SkillType))
             {
                 Logging.Debug($"Perk with id {oldPerk} was not equipped for {player.CharacterName} for loadout with id {loadoutID}");
                 return;

@@ -154,7 +154,7 @@ namespace UnturnedBlackout.Models.Global
                 m_TacticalChecker.Stop();
             }
 
-            var medic = ActiveLoadout.Perks.Values.FirstOrDefault(k => k.Perk.SkillType.ToLower() == "medic")?.Perk?.SkillLevel ?? 0;
+            var medic = loadout.PerksSearchByType.TryGetValue("medic", out LoadoutPerk medicPerk) ? medicPerk.Perk.SkillLevel : 0f;
             HealAmount = Config.Base.FileData.HealAmount * (1 + (medic / 100));
             Logging.Debug($"{Player.CharacterName} Medic: {medic}, Heal Amount: {HealAmount}");
 
@@ -163,7 +163,7 @@ namespace UnturnedBlackout.Models.Global
             if (loadout.Tactical != null)
             {
                 HasTactical = true;
-                var tactician = loadout.Perks.Values.FirstOrDefault(k => k.Perk.SkillType.ToLower() == "tactician")?.Perk?.SkillLevel ?? 0f;
+                var tactician = loadout.PerksSearchByType.TryGetValue("tactician", out LoadoutPerk tacticianPerk) ? tacticianPerk.Perk.SkillLevel : 0f;
                 Logging.Debug($"{Player.CharacterName} tactician {tactician}, percentage applied {1 - (tactician / 100)}");
                 m_TacticalChecker.Interval = (float)loadout.Tactical.Gadget.GiveSeconds * 1000 * (1 - (tactician / 100));
                 Logging.Debug($"Interval: {m_TacticalChecker.Interval}");
@@ -172,7 +172,7 @@ namespace UnturnedBlackout.Models.Global
             if (loadout.Lethal != null)
             {
                 HasLethal = true;
-                var grenadier = loadout.Perks.Values.FirstOrDefault(k => k.Perk.SkillType.ToLower() == "grenadier")?.Perk?.SkillLevel ?? 0f;
+                var grenadier = loadout.PerksSearchByType.TryGetValue("grenadier", out LoadoutPerk grenadierPerk) ? grenadierPerk.Perk.SkillLevel : 0f;
                 Logging.Debug($"{Player.CharacterName} grenadier {grenadier}, percentage applied {1 - (grenadier / 100)}");
                 m_LethalChecker.Interval = (float)loadout.Lethal.Gadget.GiveSeconds * 1000 * (1 - (grenadier / 100));
                 Logging.Debug($"Interval: {m_LethalChecker.Interval}");

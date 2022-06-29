@@ -580,6 +580,28 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
+            var damageReducePerkName = "none";
+            var damageIncreasePerkName = "none";
+            switch (parameters.cause)
+            {
+                case EDeathCause.SENTRY:
+                case EDeathCause.GUN:
+                    damageReducePerkName = "bulletproof";
+                    damageIncreasePerkName = "gundamage";
+                    break;
+                case EDeathCause.CHARGE:
+                case EDeathCause.GRENADE:
+                case EDeathCause.LANDMINE:
+                case EDeathCause.BURNING:
+                    damageReducePerkName = "tank";
+                    damageIncreasePerkName = "lethaldamage";
+                    break;
+            }
+
+            Logging.Debug($"{player.GamePlayer.Player.CharacterName} got damaged, perk name {damageReducePerkName}, damage amount: {parameters.damage}");
+            parameters.damage -= (player.GamePlayer.ActiveLoadout.PerksSearchByType.TryGetValue(damageReducePerkName, out LoadoutPerk damageReducerPerk) ? damageReducerPerk.Perk.SkillLevel : 0f) * parameters.damage;
+            Logging.Debug($"Damage after perk calculation: {parameters.damage}");
+
             player.GamePlayer.OnDamaged(parameters.killer);
 
             var kPlayer = GetKCPlayer(parameters.killer);
@@ -593,6 +615,10 @@ namespace UnturnedBlackout.GameTypes
                 shouldAllow = false;
                 return;
             }
+
+            Logging.Debug($"{kPlayer.GamePlayer.Player.CharacterName} damaged someone, perk name {damageIncreasePerkName}, damage amount: {parameters.damage}");
+            parameters.damage += (kPlayer.GamePlayer.ActiveLoadout.PerksSearchByType.TryGetValue(damageIncreasePerkName, out LoadoutPerk damageIncreaserPerk) ? damageIncreaserPerk.Perk.SkillLevel : 0f) * parameters.damage;
+            Logging.Debug($"Damage after perk calculation: {parameters.damage}");
 
             if (kPlayer.GamePlayer.HasSpawnProtection)
             {
