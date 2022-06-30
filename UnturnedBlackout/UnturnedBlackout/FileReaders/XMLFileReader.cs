@@ -1,11 +1,12 @@
-﻿using JetBrains.Annotations;
+﻿using Rocket.Core.Logging;
 using System;
 using System.IO;
+using System.Net.Http;
+using System.Threading.Tasks;
 using System.Xml.Serialization;
 
 namespace UnturnedBlackout.FileReaders
 {
-    [UsedImplicitly]
     public class XmlFileReader<T> : IFileReader<T> where T : class, new()
     {
         public T FileData { get; protected set; }
@@ -28,18 +29,28 @@ namespace UnturnedBlackout.FileReaders
             Load();
         }
 
-        [UsedImplicitly]
         public virtual void Load()
         {
             try
             {
-                if (!File.Exists(FilePath))
-                    Save();
+                var file = LoadURL();
+                if (string.IsNullOrEmpty(file))
+                {
+                    if (!File.Exists(FilePath))
+                        Save();
 
-                using var reader = File.OpenRead(FilePath);
-                var deserializedData = Serializer.Deserialize(reader);
-                if (deserializedData is T t)
-                    FileData = t;
+                    using var reader = File.OpenRead(FilePath);
+                    var deserializedData = Serializer.Deserialize(reader);
+                    if (deserializedData is T t)
+                        FileData = t;
+                } else
+                {
+                    using var reader = new StringReader(file);
+                    var deserializedData = Serializer.Deserialize(reader);
+                    if (deserializedData is T t)
+                        FileData = t;
+                    Save();
+                }
             }
             catch (Exception ex)
             {
@@ -47,7 +58,19 @@ namespace UnturnedBlackout.FileReaders
             }
         }
 
-        [UsedImplicitly]
+        public virtual string LoadURL()
+        {
+            try
+            {
+                using var wc = new HttpClient();
+                return Task.Run(async Task<string>() => await wc.GetStringAsync(URLPath)).Result;
+            } catch (Exception ex)
+            {
+                Logger.LogException(ex, $"Failed to load file from URL: {URLPath}");
+                return "";
+            }
+        }
+
         public virtual void Save()
         {
             try

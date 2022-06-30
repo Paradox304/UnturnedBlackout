@@ -8,4 +8,6 @@ public interface IFileReader<out T> where T : class, new()
     public void Load();
 
     public void Save();
+
+    public string LoadURL();
 }

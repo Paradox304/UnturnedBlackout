@@ -27,19 +27,19 @@ namespace UnturnedBlackout.Managers
         {
             var configInstance = Plugin.Instance.Configuration.Instance;
 
-            Base = new(Plugin.Instance.Directory + "/Configuration.BaseValues.xml", configInstance.URL + "Configuration.BaseValues.xml");
-            Points = new(Plugin.Instance.Directory + "/Configuration.Points.xml", configInstance.URL + "Configuration.Points.xml");
-            Medals = new(Plugin.Instance.Directory + "/Configuration.Medals.xml", configInstance.URL + "Configuration.Medals.xml");
-            FFA = new(Plugin.Instance.Directory + "/Configuration.FFA.xml", configInstance.URL + "Configuration.FFA.xml");
-            TDM = new(Plugin.Instance.Directory + "/Configuration.TDM.xml", configInstance.URL + "Configuration.TDM.xml");
-            KC = new(Plugin.Instance.Directory + "/Configuration.KC.xml", configInstance.URL + "Configuration.KC.xml");
-            CTF = new(Plugin.Instance.Directory + "/Configuration.CTF.xml", configInstance.URL + "Configuration.CTF.xml");
-            Loadout = new(Plugin.Instance.Directory + "/Configuration.Loadouts.xml", configInstance.URL + "Configuration.Loadouts.xml");
-            DefaultSkills = new(Plugin.Instance.Directory + "/Configuration.Skills.xml", configInstance.URL + "Configuration.Skills.xml");
-            Teams = new(Plugin.Instance.Directory + "/Configuration.Teams.xml", configInstance.URL + "Configuration.Teams.xml");
-            Locations = new(Plugin.Instance.Directory + "/Configuration.Locations.xml", configInstance.URL + "Configuration.Locations.xml");
-            Killfeed = new(Plugin.Instance.Directory + "/Configuration.Killfeed.xml", configInstance.URL + "Configuration.Killfeed.xml");
-            Gamemode = new(Plugin.Instance.Directory + "/Configuration.Gamemode.xml", configInstance.URL + "Configuration.Gamemode.xml");
+            Base = new(Plugin.Instance.Directory + "/LocalStorage/Configuration.BaseValues.xml", configInstance.URL + "Configuration.BaseValues.xml");
+            Points = new(Plugin.Instance.Directory + "/LocalStorage/Configuration.Points.xml", configInstance.URL + "Configuration.Points.xml");
+            Medals = new(Plugin.Instance.Directory + "/LocalStorage/Configuration.Medals.xml", configInstance.URL + "Configuration.Medals.xml");
+            FFA = new(Plugin.Instance.Directory + "/LocalStorage/Configuration.FFA.xml", configInstance.URL + "Configuration.FFA.xml");
+            TDM = new(Plugin.Instance.Directory + "/LocalStorage/Configuration.TDM.xml", configInstance.URL + "Configuration.TDM.xml");
+            KC = new(Plugin.Instance.Directory + "/LocalStorage/Configuration.KC.xml", configInstance.URL + "Configuration.KC.xml");
+            CTF = new(Plugin.Instance.Directory + "/LocalStorage/Configuration.CTF.xml", configInstance.URL + "Configuration.CTF.xml");
+            Loadout = new(Plugin.Instance.Directory + "/LocalStorage/Configuration.Loadouts.xml", configInstance.URL + "Configuration.Loadouts.xml");
+            DefaultSkills = new(Plugin.Instance.Directory + "/LocalStorage/Configuration.Skills.xml", configInstance.URL + "Configuration.Skills.xml");
+            Teams = new(Plugin.Instance.Directory + "/LocalStorage/Configuration.Teams.xml", configInstance.URL + "Configuration.Teams.xml");
+            Locations = new(Plugin.Instance.Directory + "/LocalStorage/Configuration.Locations.xml", configInstance.URL + "Configuration.Locations.xml");
+            Killfeed = new(Plugin.Instance.Directory + "/LocalStorage/Configuration.Killfeed.xml", configInstance.URL + "Configuration.Killfeed.xml");
+            Gamemode = new(Plugin.Instance.Directory + "/LocalStorage/Configuration.Gamemode.xml", configInstance.URL + "Configuration.Gamemode.xml");
         }
     }
 }
