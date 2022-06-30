@@ -5,6 +5,8 @@
         LevelUp,
         GunLevelUp,
         QuestCompletion,
-        AchievementCompletion
+        AchievementCompletion,
+        BattlepassTierCompletion,
+        ItemUnlock
     }
 }

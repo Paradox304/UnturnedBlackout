@@ -220,6 +220,7 @@
     <Compile Include="Managers\RewardManager.cs" />
     <Compile Include="Managers\ServerManager.cs" />
     <Compile Include="Managers\UIManager.cs" />
+    <Compile Include="Models\Animation\AnimationItemUnlock.cs" />
     <Compile Include="Models\Configuration\BaseValuesConfig.cs" />
     <Compile Include="Models\Configuration\DefaultSkillsConfig.cs" />
     <Compile Include="Models\Configuration\GamemodeConfig.cs" />
@@ -230,7 +231,7 @@
     <Compile Include="Models\Configuration\PointsConfig.cs" />
     <Compile Include="Models\Configuration\TeamsConfig.cs" />
     <Compile Include="Models\Data\LoadoutData.cs" />
-    <Compile Include="Models\Global\AnimationInfo.cs" />
+    <Compile Include="Models\Animation\AnimationInfo.cs" />
     <Compile Include="Models\Global\ArenaLocation.cs" />
     <Compile Include="Models\CTF\CTFConfig.cs" />
     <Compile Include="Models\CTF\CTFPlayer.cs" />

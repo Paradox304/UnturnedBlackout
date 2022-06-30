@@ -14,6 +14,7 @@ using UnturnedBlackout.Database.Data;
 using UnturnedBlackout.Enums;
 using UnturnedBlackout.GameTypes;
 using UnturnedBlackout.Managers;
+using UnturnedBlackout.Models.Animation;
 
 namespace UnturnedBlackout.Models.Global
 {
