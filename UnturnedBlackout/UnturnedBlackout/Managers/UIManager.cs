@@ -10,12 +10,14 @@ using UnturnedBlackout.Database.Data;
 using UnturnedBlackout.Enums;
 using UnturnedBlackout.GameTypes;
 using UnturnedBlackout.Instances;
+using UnturnedBlackout.Models.Animation;
 using UnturnedBlackout.Models.CTF;
 using UnturnedBlackout.Models.Feed;
 using UnturnedBlackout.Models.FFA;
 using UnturnedBlackout.Models.Global;
 using UnturnedBlackout.Models.KC;
 using UnturnedBlackout.Models.TDM;
+using PlayerQuest = UnturnedBlackout.Database.Data.PlayerQuest;
 
 namespace UnturnedBlackout.Managers
 {
@@ -64,6 +66,18 @@ namespace UnturnedBlackout.Managers
 
         public const ushort GunLevelUpID = 27642;
         public const short GunLevelUpKey = 27642;
+
+        public const ushort ItemUnlockID = 27647;
+        public const short ItemUnlockKey = 27647;
+
+        public const ushort QuestCompletionID = 27648;
+        public const short QuestCompletionKey = 27648;
+
+        public const ushort BattlepassTierCompletionID = 27645;
+        public const short BattlepassTierCompletionKey = 27645;
+
+        public const ushort AchievementCompletionID = 27646;
+        public const short AchievementCompletionKey = 27646;
 
         public const ushort LoadingUIID = 27640;
         public const short LoadingUIKey = 27640;
@@ -217,8 +231,8 @@ namespace UnturnedBlackout.Managers
 
                         EffectManager.sendUIEffect(LevelUpID, LevelUpKey, player.TransportConnection, true);
                         EffectManager.sendUIEffectImageURL(LevelUpKey, player.TransportConnection, true, "LevelUpIcon", level.IconLinkLarge);
-                        EffectManager.sendUIEffectText(LevelUpKey, player.TransportConnection, true, "LevelUpDesc", Plugin.Instance.Translate("Level_Up_Desc", level.Level).ToRich());
-                        EffectManager.sendUIEffectText(LevelUpKey, player.TransportConnection, true, "LevelUpText", Plugin.Instance.Translate("Level_Up_Text").ToRich());
+                        EffectManager.sendUIEffectText(LevelUpKey, player.TransportConnection, true, "LevelUpDesc", " ");
+                        EffectManager.sendUIEffectText(LevelUpKey, player.TransportConnection, true, "LevelUpTxt", $"LEVEL {level.Level}");
                         break;
                     }
                 case EAnimationType.GunLevelUp:
@@ -226,8 +240,38 @@ namespace UnturnedBlackout.Managers
                         var gun = animationInfo.Info as LoadoutGun;
                         EffectManager.sendUIEffect(GunLevelUpID, GunLevelUpKey, player.TransportConnection, true);
                         EffectManager.sendUIEffectImageURL(GunLevelUpKey, player.TransportConnection, true, "LevelUpIcon", gun.Gun.IconLink);
-                        EffectManager.sendUIEffectText(GunLevelUpKey, player.TransportConnection, true, "LevelUpDesc", Plugin.Instance.Translate("Gun_Level_Up_Desc", gun.Gun.GunName, gun.Level).ToRich());
-                        EffectManager.sendUIEffectText(GunLevelUpKey, player.TransportConnection, true, "LevelUpText", Plugin.Instance.Translate("Gun_Level_Up_Text").ToRich());
+                        EffectManager.sendUIEffectText(GunLevelUpKey, player.TransportConnection, true, "LevelUpDesc", $"Level {gun.Level}");
+                        EffectManager.sendUIEffectText(GunLevelUpKey, player.TransportConnection, true, "LevelUpTxt", gun.Gun.GunName);
+                        break;
+                    }
+                case EAnimationType.QuestCompletion:
+                    {
+                        var quest = animationInfo.Info as Quest;
+                        EffectManager.sendUIEffect(QuestCompletionID, QuestCompletionKey, player.TransportConnection, true);
+                        EffectManager.sendUIEffectText(QuestCompletionKey, player.TransportConnection, true, "LevelUpDesc", quest.QuestTitle);
+                        break;
+                    }
+                case EAnimationType.BattlepassTierCompletion:
+                    {
+                        var tier = animationInfo.Info as BattlepassTier;
+                        EffectManager.sendUIEffect(BattlepassTierCompletionID, BattlepassTierCompletionKey, player.TransportConnection, true);
+                        EffectManager.sendUIEffectText(BattlepassTierCompletionKey, player.TransportConnection, true, "LevelUpDesc", tier.TierID.ToString());
+                        break;
+                    }
+                case EAnimationType.ItemUnlock:
+                    {
+                        var itemUnlock = animationInfo.Info as AnimationItemUnlock;
+                        EffectManager.sendUIEffect(ItemUnlockID, ItemUnlockKey, player.TransportConnection, true);
+                        EffectManager.sendUIEffectImageURL(ItemUnlockKey, player.TransportConnection, true, "LevelUpIcon", itemUnlock.ItemIcon);
+                        EffectManager.sendUIEffectText(ItemUnlockKey, player.TransportConnection, true, "LevelUpTxt", itemUnlock.ItemType);
+                        EffectManager.sendUIEffectText(ItemUnlockKey, player.TransportConnection, true, "LevelUpDesc", itemUnlock.ItemName);
+                        break;
+                    }
+                case EAnimationType.AchievementCompletion:
+                    {
+                        var achievement = animationInfo.Info as AchievementTier;
+                        EffectManager.sendUIEffectText(AchievementCompletionID, AchievementCompletionKey, player.TransportConnection, true);
+                        EffectManager.sendUIEffectImageURL(AchievementCompletionKey, player.TransportConnection, true, "LevelUpDesc", achievement.TierDesc);
                         break;
                     }
                 default:

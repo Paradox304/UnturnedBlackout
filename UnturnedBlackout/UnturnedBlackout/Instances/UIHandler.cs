@@ -5174,15 +5174,16 @@ namespace UnturnedBlackout.Instances
         public void ShowQuests()
         {
             var quests = PlayerData.Quests.OrderBy(k => (int)k.Quest.QuestTier).ToList();
-            var maxCount = Math.Min(5, quests.Count);
+            var maxCount = Math.Min(6, quests.Count);
             for (int i = 0; i < maxCount; i++)
             {
                 var quest = quests[i];
-                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Quest Complete {i}", quest.Amount >= quest.Quest.TargetAmount);
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Quest Complete {i} Toggler", quest.Amount >= quest.Quest.TargetAmount);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Quest Description TEXT {i}", quest.Quest.QuestDesc);
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Quest Title TEXT {i}", quest.Quest.QuestTitle);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Quest Target TEXT {i}", $"{quest.Amount}/{quest.Quest.TargetAmount}");
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Quest Reward TEXT {i}", $"+{quest.Quest.XP}XP");
-                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Quest Bar Fill {i}", quest.Amount == 0 ? " " : new string(' ', Math.Min(183, quest.Amount * 183 / quest.Quest.TargetAmount)));
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Quest Bar Fill {i}", quest.Amount == 0 ? " " : new string(' ', Math.Min(256, quest.Amount * 256 / quest.Quest.TargetAmount)));
             }
         }
 

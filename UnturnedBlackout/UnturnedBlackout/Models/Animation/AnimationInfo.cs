@@ -1,6 +1,6 @@
 ﻿using UnturnedBlackout.Enums;
 
-namespace UnturnedBlackout.Models.Global
+namespace UnturnedBlackout.Models.Animation
 {
     public class AnimationInfo
     {
