@@ -779,7 +779,7 @@ namespace UnturnedBlackout.Instances
         {
             var games = Plugin.Instance.GameManager.Games;
             var servers = Plugin.Instance.DBManager.Servers;
-
+            Logging.Debug($"{Player.CharacterName} selected play button with id {selected}");
             if (PlayPage == EPlayPage.Games)
             {
                 if ((selected + 1) > games.Count)
@@ -823,6 +823,7 @@ namespace UnturnedBlackout.Instances
             var games = Plugin.Instance.GameManager.Games;
             PlayPage = EPlayPage.Games;
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Play Refresh BUTTON", false);
+            Logging.Debug($"Showing games to {Player.CharacterName}, with SelectedGameID {SelectedGameID}");
 
             for (int i = 0; i <= 13; i++)
             {
@@ -858,6 +859,7 @@ namespace UnturnedBlackout.Instances
                 return;
             }
 
+            Logging.Debug($"Showing game to play with ID {SelectedGameID}");
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Play Server TEXT", "");
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Play Mode TEXT", (game.IsHardcore ? $"<color={Config.Base.FileData.HardcoreColor}>Hardcore</color> " : "") + $"<color={gameMode.GamemodeColor}>{Plugin.Instance.Translate($"{game.GameMode}_Name_Full")}</color>");
             EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Play IMAGE", game.Location.ImageLink);
