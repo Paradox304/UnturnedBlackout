@@ -141,6 +141,7 @@ namespace UnturnedBlackout.Managers
             SendPlayerToLobby(player);
 
             var db = Plugin.Instance.DBManager;
+            Plugin.Instance.UIManager.SendLoadingUI(player, false, EGameType.None, null, "LOADING...");
             ThreadPool.QueueUserWorkItem(async (o) =>
             {
                 var avatarURL = "";
@@ -161,6 +162,7 @@ namespace UnturnedBlackout.Managers
 
                 TaskDispatcher.QueueOnMainThread(() =>
                 {
+                    Plugin.Instance.UIManager.ClearLoadingUI(player);
                     player.Player.quests.leaveGroup(true);
                     if (Players.ContainsKey(player.CSteamID))
                     {

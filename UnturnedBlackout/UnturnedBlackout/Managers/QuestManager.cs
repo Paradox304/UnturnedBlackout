@@ -4,13 +4,15 @@ using System.Linq;
 using System.Threading;
 using UnturnedBlackout.Database.Data;
 using UnturnedBlackout.Enums;
+using UnturnedBlackout.Models.Global;
 
 namespace UnturnedBlackout.Managers
 {
     public class QuestManager
     {
-        public void CheckQuest(CSteamID steamID, EQuestType questType, Dictionary<EQuestCondition, int> questConditions)
+        public void CheckQuest(GamePlayer player, EQuestType questType, Dictionary<EQuestCondition, int> questConditions)
         {
+            var steamID = player.Player.CSteamID;
             Logging.Debug($"Checking quest {questType} for {steamID} with conditions {questConditions.Count}");
 
             var db = Plugin.Instance.DBManager;
@@ -63,11 +65,15 @@ namespace UnturnedBlackout.Managers
                 if (quest.Amount >= quest.Quest.TargetAmount)
                 {
                     Logging.Debug($"Quest with id {quest.Quest.QuestID} is completed for player");
+
+                    Plugin.Instance.UIManager.SendAnimation(player, new Models.Animation.AnimationInfo(EAnimationType.QuestCompletion, quest.Quest));
                     ThreadPool.QueueUserWorkItem(async (o) =>
                     {
                         await db.IncreasePlayerBPXPAsync(steamID, quest.Quest.XP);
-                        await db.IncreasePlayerXPAsync(steamID, quest.Quest.XP);
                     });
+                } else if (quest.Amount * 100 / quest.Quest.TargetAmount % 10 == 0)
+                {
+                    // Send code for 10% quest completion
                 }
 
                 ThreadPool.QueueUserWorkItem(async (o) =>
@@ -76,7 +82,7 @@ namespace UnturnedBlackout.Managers
                 });
             }
 
-            ThreadPool.QueueUserWorkItem((o) => Plugin.Instance.AchievementManager.CheckAchievement(steamID, questType, questConditions));
+            ThreadPool.QueueUserWorkItem((o) => Plugin.Instance.AchievementManager.CheckAchievement(player, questType, questConditions));
         }
 
         public bool IsConditionMinimum(EQuestCondition condition)

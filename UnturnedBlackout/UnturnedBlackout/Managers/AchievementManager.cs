@@ -4,13 +4,15 @@ using System.Threading;
 using UnturnedBlackout.Database.Base;
 using UnturnedBlackout.Database.Data;
 using UnturnedBlackout.Enums;
+using UnturnedBlackout.Models.Global;
 
 namespace UnturnedBlackout.Managers
 {
     public class AchievementManager
     {
-        public void CheckAchievement(CSteamID steamID, EQuestType achievementType, Dictionary<EQuestCondition, int> achievementConditions)
+        public void CheckAchievement(GamePlayer player, EQuestType achievementType, Dictionary<EQuestCondition, int> achievementConditions)
         {
+            var steamID = player.Player.CSteamID;
             Logging.Debug($"Checking achievement {achievementType} for {steamID} with conditions {achievementConditions.Count}");
 
             var db = Plugin.Instance.DBManager;
@@ -60,6 +62,14 @@ namespace UnturnedBlackout.Managers
 
                 Logging.Debug($"Conditions met for achievement {achievement.Achievement.AchievementID}, increasing achievement amount, current amount is {achievement.Amount}");
                 achievement.Amount += 1;
+
+                if (achievement.Achievement.TiersLookup.TryGetValue(achievement.CurrentTier + 1, out AchievementTier nextTier))
+                {
+                    if (achievement.Amount == nextTier.TargetAmount)
+                    {
+                        Plugin.Instance.UIManager.SendAnimation(player, new Models.Animation.AnimationInfo(EAnimationType.AchievementCompletion, nextTier));
+                    }
+                }
 
                 ThreadPool.QueueUserWorkItem(async (o) =>
                 {

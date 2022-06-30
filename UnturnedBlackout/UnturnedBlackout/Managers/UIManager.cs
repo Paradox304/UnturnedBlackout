@@ -2,9 +2,11 @@
 using SDG.Unturned;
 using Steamworks;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using UnityEngine;
 using UnturnedBlackout.Database.Base;
 using UnturnedBlackout.Database.Data;
 using UnturnedBlackout.Enums;
@@ -34,6 +36,8 @@ namespace UnturnedBlackout.Managers
         public Dictionary<ushort, FeedIcon> KillFeedIcons { get; set; }
         public List<UIHandler> UIHandlers { get; set; }
         public Dictionary<CSteamID, UIHandler> UIHandlersLookup { get; set; }
+
+        public Dictionary<CSteamID, Coroutine> TipSender { get; set; }
 
         public const ushort WaitingForPlayersID = 27641;
         public const short WaitingForPlayersKey = 27641;
@@ -86,9 +90,9 @@ namespace UnturnedBlackout.Managers
         {
             KillFeedIcons = Config.Killfeed.FileData.KillFeedIcons.ToDictionary(k => k.WeaponID);
 
-            UIHandlers = new List<UIHandler>();
-            UIHandlersLookup = new Dictionary<CSteamID, UIHandler>();
-
+            UIHandlers = new();
+            UIHandlersLookup = new();
+            TipSender = new();
             EffectManager.onEffectButtonClicked += OnButtonClicked;
             EffectManager.onEffectTextCommitted += OnTextCommitted;
         }
@@ -111,6 +115,11 @@ namespace UnturnedBlackout.Managers
 
                 UIHandlers.Remove(handler);
                 UIHandlersLookup.Remove(player.CSteamID);
+            }
+
+            if (TipSender.TryGetValue(player.CSteamID, out Coroutine tipSender))
+            {
+                Plugin.Instance.StopCoroutine(tipSender);
             }
         }
 
@@ -263,7 +272,7 @@ namespace UnturnedBlackout.Managers
                         var itemUnlock = animationInfo.Info as AnimationItemUnlock;
                         EffectManager.sendUIEffect(ItemUnlockID, ItemUnlockKey, player.TransportConnection, true);
                         EffectManager.sendUIEffectImageURL(ItemUnlockKey, player.TransportConnection, true, "LevelUpIcon", itemUnlock.ItemIcon);
-                        EffectManager.sendUIEffectText(ItemUnlockKey, player.TransportConnection, true, "LevelUpTxt", itemUnlock.ItemType);
+                        EffectManager.sendUIEffectText(ItemUnlockKey, player.TransportConnection, true, "LevelUpTxt", "UNLOCKED");
                         EffectManager.sendUIEffectText(ItemUnlockKey, player.TransportConnection, true, "LevelUpDesc", itemUnlock.ItemName);
                         break;
                     }
@@ -395,20 +404,75 @@ namespace UnturnedBlackout.Managers
             EffectManager.askEffectClearByID(KillCardID, player.TransportConnection);
         }
 
-        public void SendLoadingUI(GamePlayer player, EGameType gameMode, ArenaLocation location)
+        public void SendLoadingUI(UnturnedPlayer player, bool isMatch, EGameType gameMode, ArenaLocation location, string loadingText = "LOADING...")
         {
-            player.Player.Player.enablePluginWidgetFlag(EPluginWidgetFlags.Modal);
-            EffectManager.sendUIEffect(LoadingUIID, LoadingUIKey, player.TransportConnection, true);
-            EffectManager.sendUIEffectImageURL(LoadingUIKey, player.TransportConnection, true, "MapIMG", location.ImageLink);
-            EffectManager.sendUIEffectVisibility(LoadingUIKey, player.TransportConnection, true, $"Gamemode{gameMode}Icon", true);
-            EffectManager.sendUIEffectText(LoadingUIKey, player.TransportConnection, true, "MapTxt", location.LocationName);
-            EffectManager.sendUIEffectText(LoadingUIKey, player.TransportConnection, true, "GamemodeTxt", Plugin.Instance.Translate($"{gameMode}_Name_Full").ToRich());
+            var transportConnection = player.Player.channel.owner.transportConnection;
+
+            player.Player.enablePluginWidgetFlag(EPluginWidgetFlags.Modal);
+
+            EffectManager.sendUIEffect(LoadingUIID, LoadingUIKey, transportConnection, true);
+            EffectManager.sendUIEffectVisibility(LoadingUIKey, transportConnection, true, "Scene Loading Match Toggler", isMatch);
+            EffectManager.sendUIEffectVisibility(LoadingUIKey, transportConnection, true, "Scene Loading Menu Toggler", !isMatch);
+
+            if (isMatch)
+            {
+                var gameModeOption = Config.Gamemode.FileData.GamemodeOptions.FirstOrDefault(k => k.GameType == gameMode);
+                if (gameModeOption == null)
+                {
+                    return;
+                }
+
+                EffectManager.sendUIEffectImageURL(LoadingUIKey, transportConnection, true, "LOADING Map Image", location.ImageLink);
+                EffectManager.sendUIEffectImageURL(LoadingUIKey, transportConnection, true, $"LOADING Gamemode Icon", gameModeOption.GamemodeIcon);
+                EffectManager.sendUIEffectText(LoadingUIKey, transportConnection, true, "LOADING Map TEXT", location.LocationName);
+                EffectManager.sendUIEffectText(LoadingUIKey, transportConnection, true, "LOADING Gamemode TEXT", Plugin.Instance.Translate($"{gameMode}_Name_Full").ToRich());
+                EffectManager.sendUIEffectText(LoadingUIKey, transportConnection, true, "LOADING Bar Fill", "　");
+            }
+            EffectManager.sendUIEffectText(LoadingUIKey, transportConnection, true, "LOADING Bar TEXT", loadingText);
+
+            if (TipSender.TryGetValue(player.CSteamID, out Coroutine tipSender))
+            {
+                Plugin.Instance.StopCoroutine(tipSender);
+                TipSender.Remove(player.CSteamID);
+            }
+
+            TipSender.Add(player.CSteamID, Plugin.Instance.StartCoroutine(SendTip(player)));
         }
 
-        public void ClearLoadingUI(GamePlayer player)
+        public void UpdateLoadingBar(UnturnedPlayer player, string bar, string loadingText = "LOADING...")
         {
-            player.Player.Player.disablePluginWidgetFlag(EPluginWidgetFlags.Modal);
-            EffectManager.askEffectClearByID(LoadingUIID, player.TransportConnection);
+            var transportConnection = player.Player.channel.owner.transportConnection;
+            EffectManager.sendUIEffectText(LoadingUIKey, transportConnection, true, "LOADING Bar TEXT", loadingText);
+            EffectManager.sendUIEffectText(LoadingUIKey, transportConnection, true, "LOADING Bar Fill", bar);
+        }
+
+        public void UpdateLoadingTip(UnturnedPlayer player, string tip)
+        {
+            EffectManager.sendUIEffectText(LoadingUIKey, player.Player.channel.owner.transportConnection, true, "LOADING Tip Description TEXT", tip);
+        }
+
+        public void ClearLoadingUI(UnturnedPlayer player)
+        {
+            if (TipSender.TryGetValue(player.CSteamID, out Coroutine tipSender))
+            {
+                Plugin.Instance.StopCoroutine(tipSender);
+                TipSender.Remove(player.CSteamID);
+            }
+
+            player.Player.disablePluginWidgetFlag(EPluginWidgetFlags.Modal);
+            EffectManager.askEffectClearByID(LoadingUIID, player.Player.channel.owner.transportConnection);
+        }
+
+        public IEnumerator SendTip(UnturnedPlayer player)
+        {
+            var db = Plugin.Instance.DBManager;
+            var nextTip = 0;
+            while (true)
+            {
+                yield return new WaitForSeconds(5);
+                UpdateLoadingTip(player, db.ServerOptions.GameTips[nextTip]);
+                nextTip = db.ServerOptions.GameTips.Count == nextTip ? 0 : nextTip + 1;
+            }
         }
 
         public void SendPreEndingUI(GamePlayer player)

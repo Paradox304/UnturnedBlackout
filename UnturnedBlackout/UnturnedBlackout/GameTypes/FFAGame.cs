@@ -112,7 +112,7 @@ namespace UnturnedBlackout.GameTypes
                 if (index == 0)
                 {
                     var xp = player.XP * Config.FFA.FileData.WinMultiplier;
-                    TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.QuestManager.CheckQuest(player.GamePlayer.SteamID, EQuestType.Win, new Dictionary<EQuestCondition, int> { { EQuestCondition.Map, Location.LocationID }, { EQuestCondition.Gamemode, (int)GameMode }, { EQuestCondition.WinKills, player.Kills } }));
+                    TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.QuestManager.CheckQuest(player.GamePlayer, EQuestType.Win, new Dictionary<EQuestCondition, int> { { EQuestCondition.Map, Location.LocationID }, { EQuestCondition.Gamemode, (int)GameMode }, { EQuestCondition.WinKills, player.Kills } }));
                     ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DBManager.IncreasePlayerXPAsync(player.GamePlayer.SteamID, (int)xp));
                 }
             }
@@ -163,8 +163,12 @@ namespace UnturnedBlackout.GameTypes
             PlayersLookup.Add(player.SteamID, fPlayer);
             Plugin.Instance.UIManager.OnGameCountUpdated(this);
 
-            Plugin.Instance.UIManager.SendLoadingUI(player, GameMode, Location);
-            yield return new WaitForSeconds(5);
+            Plugin.Instance.UIManager.SendLoadingUI(player.Player, true, GameMode, Location);
+            for (int seconds = 5; seconds > 0; seconds--)
+            {
+                yield return new WaitForSeconds(1);
+                Plugin.Instance.UIManager.UpdateLoadingBar(player.Player, new string('　', Math.Min(96, seconds * 96 / 5)));
+            }
             var currentPos = player.Player.Position;
             player.Player.Player.teleportToLocationUnsafe(new Vector3(currentPos.x, currentPos.y + 100, currentPos.z), 0);
             GiveLoadout(fPlayer);
@@ -209,7 +213,7 @@ namespace UnturnedBlackout.GameTypes
                     break;
             }
 
-            Plugin.Instance.UIManager.ClearLoadingUI(player);
+            Plugin.Instance.UIManager.ClearLoadingUI(player.Player);
         }
 
         public override void RemovePlayerFromGame(GamePlayer player)
@@ -399,7 +403,7 @@ namespace UnturnedBlackout.GameTypes
                 {
                     xpGained += Config.Medals.FileData.ShutdownXP;
                     xpText += Plugin.Instance.Translate("Shutdown_Kill").ToRich() + "\n";
-                    Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer.SteamID, EQuestType.Shutdown, questConditions);
+                    Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer, EQuestType.Shutdown, questConditions);
                 }
 
                 if (kPlayer.PlayersKilled.ContainsKey(fPlayer.GamePlayer.SteamID))
@@ -409,7 +413,7 @@ namespace UnturnedBlackout.GameTypes
                     {
                         xpGained += Config.Medals.FileData.DominationXP;
                         xpText += Plugin.Instance.Translate("Domination_Kill").ToRich() + "\n";
-                        Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer.SteamID, EQuestType.Domination, questConditions);
+                        Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer, EQuestType.Domination, questConditions);
                     }
                 }
                 else
@@ -421,14 +425,14 @@ namespace UnturnedBlackout.GameTypes
                 {
                     xpGained += Config.Medals.FileData.RevengeXP;
                     xpText += Plugin.Instance.Translate("Revenge_Kill").ToRich() + "\n";
-                    Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer.SteamID, EQuestType.Revenge, questConditions);
+                    Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer, EQuestType.Revenge, questConditions);
                 }
 
                 if (isFirstKill)
                 {
                     xpGained += Config.Medals.FileData.FirstKillXP;
                     xpText += Plugin.Instance.Translate("First_Kill").ToRich() + "\n";
-                    Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer.SteamID, EQuestType.FirstKill, questConditions);
+                    Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer, EQuestType.FirstKill, questConditions);
                 }
 
                 Logging.Debug($"Checking if {(fPlayer.GamePlayer.Player.Position - kPlayer.GamePlayer.Player.Position).sqrMagnitude} is greater than {longshotRange}");
@@ -437,14 +441,14 @@ namespace UnturnedBlackout.GameTypes
                     Logging.Debug("It is and cause is a gun, send longshot range");
                     xpGained += Config.Medals.FileData.LongshotXP;
                     xpText += Plugin.Instance.Translate("Longshot_Kill").ToRich() + "\n";
-                    Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer.SteamID, EQuestType.Longshot, questConditions);
+                    Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer, EQuestType.Longshot, questConditions);
                 }
 
                 if (kPlayer.GamePlayer.Player.Player.life.health < Config.Medals.FileData.HealthSurvivorKill)
                 {
                     xpGained += Config.Medals.FileData.SurvivorXP;
                     xpText += Plugin.Instance.Translate("Survivor_Kill").ToRich() + "\n";
-                    Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer.SteamID, EQuestType.Survivor, questConditions);
+                    Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer, EQuestType.Survivor, questConditions);
                 }
 
                 kPlayer.GamePlayer.LastKiller = CSteamID.Nil;
@@ -473,14 +477,14 @@ namespace UnturnedBlackout.GameTypes
                     Plugin.Instance.StartCoroutine(GameEnd());
                 }
 
-                Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer.SteamID, EQuestType.Kill, questConditions);
-                Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer.SteamID, EQuestType.MultiKill, questConditions);
-                Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer.SteamID, EQuestType.Killstreak, questConditions);
+                Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer, EQuestType.Kill, questConditions);
+                Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer, EQuestType.MultiKill, questConditions);
+                Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer, EQuestType.Killstreak, questConditions);
                 if (limb == ELimb.SKULL && cause == EDeathCause.GUN)
                 {
-                    Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer.SteamID, EQuestType.Headshots, questConditions);
+                    Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer, EQuestType.Headshots, questConditions);
                 }
-                Plugin.Instance.QuestManager.CheckQuest(fPlayer.GamePlayer.SteamID, EQuestType.Death, questConditions);
+                Plugin.Instance.QuestManager.CheckQuest(fPlayer.GamePlayer, EQuestType.Death, questConditions);
 
                 ThreadPool.QueueUserWorkItem(async (o) =>
                 {

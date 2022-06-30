@@ -80,6 +80,8 @@ namespace UnturnedBlackout.Managers
         public Dictionary<int, BattlepassTier> BattlepassTiersSearchByID { get; set; }
         public List<BattlepassTier> BattlepassTiers { get; set; }
 
+        public Dictionary<int, List<AnimationItemUnlock>> ItemsSearchByLevel { get; set; }
+
         public List<Server> Servers { get; set; }
 
         // Default Data
@@ -220,7 +222,7 @@ namespace UnturnedBlackout.Managers
                 await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{CardsTableName}` ( `CardID` INT NOT NULL , `CardName` VARCHAR(255) NOT NULL , `CardDesc` TEXT NOT NULL , `CardRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `IconLink` TEXT NOT NULL , `CardLink` TEXT NOT NULL , `ScrapAmount` INT NOT NULL , `BuyPrice` INT NOT NULL , `Coins` INT NOT NULL , `LevelRequirement` INT NOT NULL , PRIMARY KEY (`CardID`));", Conn).ExecuteScalarAsync();
                 await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{GlovesTableName}` ( `GloveID` INT NOT NULL , `GloveName` VARCHAR(255) NOT NULL , `GloveDesc` TEXT NOT NULL , `GloveRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `IconLink` TEXT NOT NULL , `ScrapAmount` INT NOT NULL , `BuyPrice` INT NOT NULL , `Coins` INT NOT NULL , `LevelRequirement` INT NOT NULL , PRIMARY KEY (`GloveID`));", Conn).ExecuteScalarAsync();
                 await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{LevelsTableName}` ( `Level` INT NOT NULL , `XPNeeded` INT NOT NULL , `IconLinkLarge` TEXT NOT NULL , `IconLinkMedium` TEXT NOT NULL , `IconLinkSmall` TEXT NOT NULL , PRIMARY KEY (`Level`));", Conn).ExecuteScalarAsync();
-                await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{OptionsTableName}` ( `DailyLeaderboardWipe` BIGINT NOT NULL , `WeeklyLeaderboardWipe` BIGINT NOT NULL , `DailyLeaderboardRankedRewards` TEXT NOT NULL , `DailyLeaderboardPercentileRewards` TEXT NOT NULL , `WeeklyLeaderboardRankedRewards` TEXT NOT NULL , `WeeklyLeaderboardPercentileRewards` TEXT NOT NULL, `SeasonalLeaderboardRankedRewards` TEXT NOT NULL , `SeasonalLeaderboardPercentileRewards` TEXT NOT NULL , `XPBooster` DECIMAL(6,3) NOT NULL , `BPBooster` DECIMAL(6,3) NOT NULL , `GunXPBooster` DECIMAL(6,3) NOT NULL , `XPBoosterWipe` BIGINT NOT NULL , `BPBoosterWipe` BIGINT NOT NULL , `GunXPBoosterWipe` BIGINT NOT NULL);", Conn).ExecuteScalarAsync();
+                await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{OptionsTableName}` ( `DailyLeaderboardWipe` BIGINT NOT NULL , `WeeklyLeaderboardWipe` BIGINT NOT NULL , `DailyLeaderboardRankedRewards` TEXT NOT NULL , `DailyLeaderboardPercentileRewards` TEXT NOT NULL , `WeeklyLeaderboardRankedRewards` TEXT NOT NULL , `WeeklyLeaderboardPercentileRewards` TEXT NOT NULL, `SeasonalLeaderboardRankedRewards` TEXT NOT NULL , `SeasonalLeaderboardPercentileRewards` TEXT NOT NULL , `XPBooster` DECIMAL(6,3) NOT NULL , `BPBooster` DECIMAL(6,3) NOT NULL , `GunXPBooster` DECIMAL(6,3) NOT NULL , `XPBoosterWipe` BIGINT NOT NULL , `BPBoosterWipe` BIGINT NOT NULL , `GunXPBoosterWipe` BIGINT NOT NULL , `GameTips` TEXT NOT NULL);", Conn).ExecuteScalarAsync();
                 await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{ServersTableName}`  ( `IP` TEXT NOT NULL , `Port` TEXT NOT NULL , `ServerName` TEXT NOT NULL , `FriendlyIP` TEXT NOT NULL , `ServerBanner` TEXT NOT NULL , `ServerDesc` TEXT NOT NULL );", Conn).ExecuteScalarAsync(); ;
                 await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{QuestsTableName}` ( `QuestID` INT NOT NULL AUTO_INCREMENT , `QuestTitle` TEXT NOT NULL , `QuestDesc` TEXT NOT NULL , QuestType ENUM('Kill', 'Death', 'Win', 'MultiKill', 'Killstreak', 'Headshots', 'GadgetsUsed', 'FlagsCaptured', 'FlagsSaved', 'Dogtags', 'Shutdown', 'Domination', 'FlagKiller', 'FlagDenied', 'Revenge', 'FirstKill', 'Longshot', 'Survivor', 'Collector') NOT NULL , `QuestTier` ENUM('Easy1', 'Easy2', 'Easy3', 'Medium1', 'Medium2', 'Hard1') NOT NULL , `QuestConditions` TEXT NOT NULL , `TargetAmount` INT NOT NULL , `XP` INT NOT NULL , PRIMARY KEY (`QuestID`));", Conn).ExecuteScalarAsync();
                 await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{AchievementsTableName}` ( `AchievementID` INT NOT NULL AUTO_INCREMENT , `AchievementType` ENUM('Kill', 'Death', 'Win', 'MultiKill', 'Killstreak', 'Headshots', 'GadgetsUsed', 'FlagsCaptured', 'FlagsSaved', 'Dogtags', 'Shutdown', 'Domination', 'FlagKiller', 'FlagDenied', 'Revenge', 'FirstKill', 'Longshot', 'Survivor', 'Collector') NOT NULL , `AchievementConditions` TEXT NOT NULL , `PageID` INT NOT NULL , PRIMARY KEY (`AchievementID`));", Conn).ExecuteScalarAsync();
@@ -273,6 +275,8 @@ namespace UnturnedBlackout.Managers
                 var defaultPerks = new List<Perk>();
                 var defaultGloves = new List<Glove>();
                 var defaultCards = new List<Card>();
+
+                var itemsSearchByLevel = new Dictionary<int, List<AnimationItemUnlock>>();
 
                 var rdr = (MySqlDataReader)await new MySqlCommand($"SELECT `AttachmentID`, `AttachmentName`, `AttachmentDesc`, `AttachmentPros` , `AttachmentCons` , `AttachmentType`-1, `AttachmentRarity`, `MovementChange`, `MovementChangeADS`, `IconLink`, `BuyPrice`, `Coins` FROM `{AttachmentsTableName}`;", Conn).ExecuteReaderAsync();
                 try
@@ -465,11 +469,19 @@ namespace UnturnedBlackout.Managers
                         else
                         {
                             Logging.Debug($"Found a duplicate with id {gunID}, ignoring this");
+                            break;
                         }
 
                         if (levelRequirement == 0)
                         {
                             defaultGuns.Add(gun);
+                        } else if (levelRequirement > 0)
+                        {
+                            if (!itemsSearchByLevel.ContainsKey(levelRequirement))
+                            {
+                                itemsSearchByLevel.Add(levelRequirement, new());
+                            }
+                            itemsSearchByLevel[levelRequirement].Add(new AnimationItemUnlock(gun.IconLink, "GUN", gun.GunName));
                         }
                     }
 
@@ -686,7 +698,9 @@ namespace UnturnedBlackout.Managers
                         else
                         {
                             Logging.Debug($"Found a duplicate knife with id {knifeID}, ignoring this");
+                            break;
                         }
+
                         if (levelRequirement == 0)
                         {
                             defaultKnives.Add(knife);
@@ -760,10 +774,19 @@ namespace UnturnedBlackout.Managers
                         else
                         {
                             Logging.Debug($"Found a duplicate gadget with id {gadgetID}, ignoring this");
+                            break;
                         }
+
                         if (levelRequirement == 0)
                         {
                             defaultGadgets.Add(gadget);
+                        } else if (levelRequirement > 0)
+                        {
+                            if (!itemsSearchByLevel.ContainsKey(levelRequirement))
+                            {
+                                itemsSearchByLevel.Add(levelRequirement, new());
+                            }
+                            itemsSearchByLevel[levelRequirement].Add(new AnimationItemUnlock(gadget.IconLink, isTactical ? "TACTICAL" : "LETHAL", gadget.GadgetName));
                         }
                     }
 
@@ -829,10 +852,20 @@ namespace UnturnedBlackout.Managers
                         else
                         {
                             Logging.Debug($"Found a duplicate killstrea with id {killstreakID}, ignoring it");
+                            break;
                         }
+
                         if (levelRequirement == 0)
                         {
                             defaultKillstreaks.Add(killstreak);
+                        }
+                        else if (levelRequirement > 0)
+                        {
+                            if (!itemsSearchByLevel.ContainsKey(levelRequirement))
+                            {
+                                itemsSearchByLevel.Add(levelRequirement, new());
+                            }
+                            itemsSearchByLevel[levelRequirement].Add(new AnimationItemUnlock(killstreak.IconLink, "KILLSTREAK", killstreak.KillstreakName));
                         }
                     }
 
@@ -904,10 +937,20 @@ namespace UnturnedBlackout.Managers
                         else
                         {
                             Logging.Debug($"Found a duplicate perk with id {perkID}, ignoring this");
+                            break;
                         }
+
                         if (levelRequirement == 0)
                         {
                             defaultPerks.Add(perk);
+                        }
+                        else if (levelRequirement > 0)
+                        {
+                            if (!itemsSearchByLevel.ContainsKey(levelRequirement))
+                            {
+                                itemsSearchByLevel.Add(levelRequirement, new());
+                            }
+                            itemsSearchByLevel[levelRequirement].Add(new AnimationItemUnlock(perk.IconLink, "PERK", perk.PerkName));
                         }
                     }
 
@@ -968,10 +1011,20 @@ namespace UnturnedBlackout.Managers
                         else
                         {
                             Logging.Debug($"Found a duplicate glove with id {gloveID}");
+                            break;
                         }
+
                         if (levelRequirement == 0)
                         {
                             defaultGloves.Add(glove);
+                        }
+                        else if (levelRequirement > 0)
+                        {
+                            if (!itemsSearchByLevel.ContainsKey(levelRequirement))
+                            {
+                                itemsSearchByLevel.Add(levelRequirement, new());
+                            }
+                            itemsSearchByLevel[levelRequirement].Add(new AnimationItemUnlock(glove.IconLink, "GLOVE", glove.GloveName));
                         }
                     }
 
@@ -1033,10 +1086,20 @@ namespace UnturnedBlackout.Managers
                         else
                         {
                             Logging.Debug($"Found a duplicate card with id {cardID}, ignoring this");
+                            break;
                         }
+
                         if (levelRequirement == 0)
                         {
                             defaultCards.Add(card);
+                        }
+                        else if (levelRequirement > 0)
+                        {
+                            if (!itemsSearchByLevel.ContainsKey(levelRequirement))
+                            {
+                                itemsSearchByLevel.Add(levelRequirement, new());
+                            }
+                            itemsSearchByLevel[levelRequirement].Add(new AnimationItemUnlock(card.IconLink, "CARD", card.CardName));
                         }
                     }
 
@@ -1052,6 +1115,8 @@ namespace UnturnedBlackout.Managers
                 {
                     rdr.Close();
                 }
+
+                ItemsSearchByLevel = itemsSearchByLevel;
 
                 Logging.Debug("Reading levels from base data");
                 rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{LevelsTableName}`;", Conn).ExecuteReaderAsync();
@@ -1453,6 +1518,7 @@ namespace UnturnedBlackout.Managers
             try
             {
                 Logging.Debug($"Adding {steamName} to the DB");
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.1f)), loadingText: "CHECKING PLAYER DATA..."));
                 await Conn.OpenAsync();
                 var cmd = new MySqlCommand($"INSERT INTO `{PlayersTableName}` ( `SteamID` , `SteamName` , `AvatarLink` , `MuteExpiry`, `Coins` ) VALUES ({player.CSteamID}, @name, '{avatarLink}' , {DateTimeOffset.UtcNow.ToUnixTimeSeconds()} , {(Plugin.Instance.Configuration.Instance.UnlockAllItems ? 10000000 : 0)}) ON DUPLICATE KEY UPDATE `AvatarLink` = '{avatarLink}', `SteamName` = @name;", Conn);
                 cmd.Parameters.AddWithValue("@name", steamName.ToUnrich());
@@ -1463,6 +1529,7 @@ namespace UnturnedBlackout.Managers
                 await new MySqlCommand($"INSERT IGNORE INTO `{PlayersLeaderboardSeasonalTableName}` ( `SteamID` ) VALUES ({player.CSteamID});", Conn).ExecuteScalarAsync();
 
                 Logging.Debug($"Giving {steamName} the guns");
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.15f)), loadingText: "CHECKING GUNS..."));
                 foreach (var gun in Guns.Values)
                 {
                     if (gun.LevelRequirement < 0)
@@ -1488,6 +1555,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 Logging.Debug($"Giving {steamName} the knives");
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.2f)), loadingText: "CHECKING KNIVES..."));
                 foreach (var knife in Knives.Values)
                 {
                     if (knife.LevelRequirement < 0)
@@ -1500,6 +1568,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 Logging.Debug($"Giving {steamName} the gadgets");
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.25f)), loadingText: "CHECKING GADGETS..."));
                 foreach (var gadget in Gadgets.Values)
                 {
                     if (gadget.LevelRequirement < 0)
@@ -1512,6 +1581,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 Logging.Debug($"Giving {steamName} the killstreaks");
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.3f)), loadingText: "CHECKING KILLSTREAKS..."));
                 foreach (var killstreak in Killstreaks.Values)
                 {
                     if (killstreak.LevelRequirement < 0)
@@ -1524,6 +1594,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 Logging.Debug($"Giving {steamName} the perks");
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.35f)), loadingText: "CHECKING PERKS..."));
                 foreach (var perk in Perks.Values)
                 {
                     if (perk.LevelRequirement < 0)
@@ -1536,6 +1607,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 Logging.Debug($"Giving {steamName} the gloves");
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.4f)), loadingText: "CHECKING GLOVES..."));
                 foreach (var glove in Gloves.Values)
                 {
                     if (glove.LevelRequirement < 0)
@@ -1548,6 +1620,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 Logging.Debug($"Giving {steamName} the cards");
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.45f)), loadingText: "CHECKING CARDS..."));
                 foreach (var card in Cards.Values)
                 {
                     if (card.LevelRequirement < 0)
@@ -1560,9 +1633,11 @@ namespace UnturnedBlackout.Managers
                 }
 
                 Logging.Debug($"Giving {steamName} the battlepass");
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.47f)), loadingText: "CHECKING BATTLEPASS..."));
                 await new MySqlCommand($"INSERT IGNORE INTO `{PlayersBattlepassTableName}` (`SteamID` , `ClaimedFreeRewards` , `ClaimedPremiumRewards`) VALUES ({player.CSteamID} , '' , '');", Conn).ExecuteScalarAsync();
 
                 Logging.Debug($"Giving {steamName} the achievements");
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.5f)), loadingText: "CHECKING ACHIEVEMENTS..."));
                 foreach (var achievement in Achievements)
                 {
                     Logging.Debug($"Adding achievement with id {achievement.AchievementID}");
@@ -1570,6 +1645,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 var loadoutAmount = Utility.GetLoadoutAmount(player);
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.51f)), loadingText: "CHECKING LOADOUTS..."));
                 Logging.Debug($"{steamName} should have {loadoutAmount} loadouts, adding them");
                 var data = Plugin.Instance.DataManager.ConvertLoadoutToJson(DefaultLoadout);
                 for (int i = 1; i <= loadoutAmount; i++)
@@ -1597,6 +1673,7 @@ namespace UnturnedBlackout.Managers
             try
             {
                 Logging.Debug($"Getting data for {player.CharacterName} from the main table");
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.6f)), loadingText: "LOADING PLAYER DATA..."));
                 await Conn.OpenAsync();
                 var rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PlayersTableName}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
                 try
@@ -1736,6 +1813,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 Logging.Debug($"Getting leaderboard daily data for {player.CharacterName} from the daily table");
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.65f)), loadingText: "LOADING LEADERBOARD DATA..."));
                 rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PlayersLeaderboardDailyTableName}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
                 try
                 {
@@ -1880,6 +1958,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 Logging.Debug($"Getting quests for {player.CharacterName}");
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.7f)), loadingText: "LOADING QUESTS..."));
                 rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PlayersQuestsTableName}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
                 try
                 {
@@ -1971,6 +2050,7 @@ namespace UnturnedBlackout.Managers
                     rdr.Close();
                 }
 
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.73f)), loadingText: "LOADING ACHIEVEMENTS..."));
                 Logging.Debug($"Getting achievements for {player.CharacterName}");
                 rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PlayersAchievementsTableName}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
                 try
@@ -2035,6 +2115,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 Logging.Debug($"Getting battlepass for {player.CharacterName}");
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.8f)), loadingText: "LOADING BATTLEPASS..."));
                 rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PlayersBattlepassTableName}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
                 try
                 {
@@ -2086,7 +2167,9 @@ namespace UnturnedBlackout.Managers
                 Dictionary<int, LoadoutGlove> gloves = new();
                 Dictionary<int, Loadout> loadouts = new();
 
+
                 Logging.Debug($"Getting guns for {player.CharacterName}");
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.82f)), loadingText: "LOADING GUNS..."));
                 rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PlayersGunsTableName}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
                 try
                 {
@@ -2146,6 +2229,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 Logging.Debug($"Checking gun attachments for {player.CharacterName}");
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.84f)), loadingText: "LOADING ATTACHMENTS..."));
                 try
                 {
                     foreach (var gun in guns.Values)
@@ -2168,6 +2252,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 Logging.Debug($"Getting gun skins for {player.CharacterName}");
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.86f)), loadingText: "LOADING SKINS..."));
                 var gunSkinsTxt = await new MySqlCommand($"SELECT `SkinIDs` FROM `{PlayersGunsSkinsTableName}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteScalarAsync();
                 if (gunSkinsTxt is string gunSkinsText)
                 {
@@ -2200,6 +2285,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 Logging.Debug($"Getting gun charms for {player.CharacterName}");
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.88f)), loadingText: "LOADING CHARMS..."));
                 rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PlayersGunsCharmsTableName}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
                 try
                 {
@@ -2243,6 +2329,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 Logging.Debug($"Getting knives for {player.CharacterName}");
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.9f)), loadingText: "LOADING KNIVES..."));
                 rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PlayersKnivesTableName}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
                 try
                 {
@@ -2290,6 +2377,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 Logging.Debug($"Getting perks for {player.CharacterName}");
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.91f)), loadingText: "LOADING PERKS..."));
                 rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PlayersPerksTableName}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
                 try
                 {
@@ -2332,6 +2420,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 Logging.Debug($"Getting gadgets for {player.CharacterName}");
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.93f)), loadingText: "LOADING GADGETS..."));
                 rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PlayersGadgetsTableName}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
                 try
                 {
@@ -2379,6 +2468,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 Logging.Debug($"Getting killstreaks for {player.CharacterName}");
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.94f)), loadingText: "LOADING KILLSTREAKS..."));
                 rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PlayersKillstreaksTableName}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
                 try
                 {
@@ -2426,6 +2516,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 Logging.Debug($"Getting cards for {player.CharacterName}");
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.97f)), loadingText: "LOADING CARDS..."));
                 rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PlayersCardsTableName}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
                 try
                 {
@@ -2469,6 +2560,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 Logging.Debug($"Getting gloves for {player.CharacterName}");
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.98f)), loadingText: "LOADING GLOVES..."));
                 rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PlayersGlovesTableName}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
                 try
                 {
@@ -2511,6 +2603,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 Logging.Debug($"Getting loadouts for {player.CharacterName}");
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.99f)), loadingText: "LOADING LOADOUTS..."));
                 rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PlayersLoadoutsTableName}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
                 try
                 {
@@ -2671,6 +2764,7 @@ namespace UnturnedBlackout.Managers
                     rdr.Close();
                 }
 
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', 96), loadingText: "FINALISING..."));
                 Logging.Debug($"Checking if player has more loadouts for {player.CharacterName}");
                 try
                 {
@@ -2749,6 +2843,14 @@ namespace UnturnedBlackout.Managers
                                     if (player != null)
                                     {
                                         Plugin.Instance.UIManager.SendAnimation(player, new AnimationInfo(EAnimationType.LevelUp, level));
+                                        if (ItemsSearchByLevel.TryGetValue(level, out List<AnimationItemUnlock> unlocks))
+                                        {
+                                            foreach (var unlock in unlocks)
+                                            {
+                                                Plugin.Instance.UIManager.SendAnimation(player, new AnimationInfo(EAnimationType.ItemUnlock, unlock));
+                                            }
+                                        }
+                                        
                                     }
                                 });
                             }
@@ -3555,6 +3657,10 @@ namespace UnturnedBlackout.Managers
                                 if (player != null)
                                 {
                                     Plugin.Instance.UIManager.SendAnimation(player, new AnimationInfo(EAnimationType.GunLevelUp, gun));
+                                    if (gun.Gun.RewardAttachments.TryGetValue(gun.Level, out GunAttachment attachment))
+                                    {
+                                        Plugin.Instance.UIManager.SendAnimation(player, new AnimationInfo(EAnimationType.ItemUnlock, new AnimationItemUnlock(attachment.IconLink, "", $"{attachment.AttachmentName} [{gun.Gun.GunName}]")));
+                                    }
                                 }
                             });
                         }
@@ -4615,8 +4721,10 @@ namespace UnturnedBlackout.Managers
                         {
                             continue;
                         }
+
+                        var gameTips = rdr[14].ToString().Split(',').ToList();
                         var gunXPBoosterWipe = DateTimeOffset.FromUnixTimeSeconds(gunXPBoosterWipeUnix);
-                        ServerOptions = new Options(dailyLeaderboardWipe, weeklyLeaderboardWipe, dailyRanked, dailyPercentile, weeklyRanked, weeklyPercentile, seasonalRanked, seasonalPercentile, xpBooster, bpBooster, gunXPBooster, xpBoosterWipe, bpBoosterWipe, gunXPBoosterWipe);
+                        ServerOptions = new Options(dailyLeaderboardWipe, weeklyLeaderboardWipe, dailyRanked, dailyPercentile, weeklyRanked, weeklyPercentile, seasonalRanked, seasonalPercentile, xpBooster, bpBooster, gunXPBooster, xpBoosterWipe, bpBoosterWipe, gunXPBoosterWipe, gameTips);
                     }
                 }
                 catch (Exception ex)

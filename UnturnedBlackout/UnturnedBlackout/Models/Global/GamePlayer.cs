@@ -197,7 +197,7 @@ namespace UnturnedBlackout.Models.Global
                     { EQuestCondition.Gamemode, (int)game.GameMode },
                     { EQuestCondition.Gadget, ActiveLoadout.Tactical.Gadget.GadgetID }
                 };
-                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.QuestManager.CheckQuest(SteamID, EQuestType.GadgetsUsed, questConditions));
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.QuestManager.CheckQuest(this, EQuestType.GadgetsUsed, questConditions));
             }
 
             if (m_TacticalChecker.Enabled)
@@ -220,7 +220,7 @@ namespace UnturnedBlackout.Models.Global
                     { EQuestCondition.Gamemode, (int)game.GameMode },
                     { EQuestCondition.Gadget, ActiveLoadout.Lethal.Gadget.GadgetID }
                 };
-                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.QuestManager.CheckQuest(SteamID, EQuestType.GadgetsUsed, questConditions));
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.QuestManager.CheckQuest(this, EQuestType.GadgetsUsed, questConditions));
             }
 
             if (m_LethalChecker.Enabled)

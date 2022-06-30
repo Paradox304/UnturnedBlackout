@@ -7,6 +7,7 @@ namespace UnturnedBlackout.Models.Global
     public class GamemodeOption
     {
         public EGameType GameType { get; set; }
+        public string GamemodeIcon { get; set; }
         public int GamemodeWeight { get; set; }
         public string GamemodeColor { get; set; }
         public bool HasHardcore { get; set; }
@@ -19,9 +20,10 @@ namespace UnturnedBlackout.Models.Global
 
         }
 
-        public GamemodeOption(EGameType gameType, int gamemodeWeight, string gamemodeColor, bool hasHardcore, int hardcoreChance, List<int> ignoredLocations)
+        public GamemodeOption(EGameType gameType, string gamemodeIcon, int gamemodeWeight, string gamemodeColor, bool hasHardcore, int hardcoreChance, List<int> ignoredLocations)
         {
             GameType = gameType;
+            GamemodeIcon = gamemodeIcon;
             GamemodeWeight = gamemodeWeight;
             GamemodeColor = gamemodeColor;
             HasHardcore = hasHardcore;
