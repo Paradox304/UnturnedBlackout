@@ -13,6 +13,7 @@ using UnityEngine;
 using UnturnedBlackout.Database.Base;
 using UnturnedBlackout.Database.Data;
 using UnturnedBlackout.Enums;
+using UnturnedBlackout.Models.Animation;
 using UnturnedBlackout.Models.Data;
 using UnturnedBlackout.Models.Global;
 using UnturnedBlackout.Models.Webhook;

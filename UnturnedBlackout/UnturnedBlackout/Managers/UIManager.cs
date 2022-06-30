@@ -270,7 +270,7 @@ namespace UnturnedBlackout.Managers
                 case EAnimationType.AchievementCompletion:
                     {
                         var achievement = animationInfo.Info as AchievementTier;
-                        EffectManager.sendUIEffectText(AchievementCompletionID, AchievementCompletionKey, player.TransportConnection, true);
+                        EffectManager.sendUIEffect(AchievementCompletionID, AchievementCompletionKey, player.TransportConnection, true);
                         EffectManager.sendUIEffectImageURL(AchievementCompletionKey, player.TransportConnection, true, "LevelUpDesc", achievement.TierDesc);
                         break;
                     }
