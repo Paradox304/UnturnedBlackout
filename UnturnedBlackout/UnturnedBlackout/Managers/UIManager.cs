@@ -86,6 +86,9 @@ namespace UnturnedBlackout.Managers
         public const ushort LoadingUIID = 27640;
         public const short LoadingUIKey = 27640;
 
+        public const ushort FlagPopupID = 27900;
+        public const short FlagPopupKey = 27900;
+
         public UIManager()
         {
             KillFeedIcons = Config.Killfeed.FileData.KillFeedIcons.ToDictionary(k => k.WeaponID);
@@ -1079,12 +1082,11 @@ namespace UnturnedBlackout.Managers
 
         public void SendCTFFlagStates(CTFTeam team, ETeam flag, List<CTFPlayer> players, EFlagState state)
         {
-            var flagID = flag == ETeam.Blue ? 27901 : 27900;
-
             foreach (var player in players)
             {
-                EffectManager.sendUIEffect((ushort)flagID, (short)flagID, player.GamePlayer.TransportConnection, true);
-                EffectManager.sendUIEffectText((short)flagID, player.GamePlayer.TransportConnection, true, "FlagTxt", Plugin.Instance.Translate($"CTF_{(player.Team.TeamID == team.TeamID ? "Team" : "Enemy")}_{state}_Flag").ToRich());
+                EffectManager.sendUIEffect(FlagPopupID, FlagPopupKey, player.GamePlayer.TransportConnection, true);
+                EffectManager.sendUIEffectVisibility(FlagPopupKey, player.GamePlayer.TransportConnection, true, $"FLAG {flag} TOGGLER", true);
+                EffectManager.sendUIEffectText(FlagPopupKey, player.GamePlayer.TransportConnection, true, "FlagTxt", Plugin.Instance.Translate($"CTF_{(player.Team.TeamID == team.TeamID ? "Team" : "Enemy")}_{state}_Flag").ToRich());
             }
         }
 

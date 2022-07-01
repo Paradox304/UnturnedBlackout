@@ -2013,10 +2013,7 @@ namespace UnturnedBlackout.Managers
                         var questsToAdd = new List<Quest>();
                         for (var i = 0; i < 6; i++)
                         {
-                            Logging.Debug($"i: {i}, Tier: {(EQuestTier)i}");
-                            if (i == 2) continue;
                             var randomQuests = Quests.Where(k => (int)k.QuestTier == i).ToList();
-                            Logging.Debug($"FOund {randomQuests.Count} random quests");
                             var randomQuest = randomQuests[UnityEngine.Random.Range(0, randomQuests.Count)];
                             questsToAdd.Add(randomQuest);
                         }
@@ -5279,11 +5276,7 @@ namespace UnturnedBlackout.Managers
                     var questsToAdd = new List<Quest>();
                     for (var i = 0; i < 6; i++)
                     {
-                        Logging.Debug($"i: {i}, Tier: {(EQuestTier)i}");
-                        if (i == 2) continue;
-
                         var randomQuests = Quests.Where(k => (int)k.QuestTier == i).ToList();
-                        Logging.Debug($"FOund {randomQuests.Count} random quests");
                         var randomQuest = randomQuests[UnityEngine.Random.Range(0, randomQuests.Count)];
                         questsToAdd.Add(randomQuest);
                     }
