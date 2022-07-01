@@ -89,6 +89,9 @@ namespace UnturnedBlackout.Managers
         public const ushort FlagPopupID = 27900;
         public const short FlagPopupKey = 27900;
 
+        public const ushort GamemodePopupID = 27610;
+        public const short GamemodePopupKey = 27610;
+
         public UIManager()
         {
             KillFeedIcons = Config.Killfeed.FileData.KillFeedIcons.ToDictionary(k => k.WeaponID);
@@ -122,7 +125,10 @@ namespace UnturnedBlackout.Managers
 
             if (TipSender.TryGetValue(player.CSteamID, out Coroutine tipSender))
             {
-                Plugin.Instance.StopCoroutine(tipSender);
+                if (tipSender != null)
+                {
+                    Plugin.Instance.StopCoroutine(tipSender);
+                }
             }
         }
 
@@ -416,6 +422,7 @@ namespace UnturnedBlackout.Managers
             EffectManager.sendUIEffect(LoadingUIID, LoadingUIKey, transportConnection, true);
             EffectManager.sendUIEffectVisibility(LoadingUIKey, transportConnection, true, "Scene Loading Match Toggler", isMatch);
             EffectManager.sendUIEffectVisibility(LoadingUIKey, transportConnection, true, "Scene Loading Menu Toggler", !isMatch);
+            EffectManager.sendUIEffectText(LoadingUIKey, transportConnection, true, "LOADING Bar TEXT", loadingText);
 
             if (isMatch)
             {
@@ -431,11 +438,13 @@ namespace UnturnedBlackout.Managers
                 EffectManager.sendUIEffectText(LoadingUIKey, transportConnection, true, "LOADING Gamemode TEXT", Plugin.Instance.Translate($"{gameMode}_Name_Full").ToRich());
                 EffectManager.sendUIEffectText(LoadingUIKey, transportConnection, true, "LOADING Bar Fill", "　");
             }
-            EffectManager.sendUIEffectText(LoadingUIKey, transportConnection, true, "LOADING Bar TEXT", loadingText);
 
             if (TipSender.TryGetValue(player.CSteamID, out Coroutine tipSender))
             {
-                Plugin.Instance.StopCoroutine(tipSender);
+                if (tipSender != null)
+                {
+                    Plugin.Instance.StopCoroutine(tipSender);
+                }
                 TipSender.Remove(player.CSteamID);
             }
 
@@ -458,7 +467,10 @@ namespace UnturnedBlackout.Managers
         {
             if (TipSender.TryGetValue(player.CSteamID, out Coroutine tipSender))
             {
-                Plugin.Instance.StopCoroutine(tipSender);
+                if (tipSender != null)
+                {
+                    Plugin.Instance.StopCoroutine(tipSender);
+                }
                 TipSender.Remove(player.CSteamID);
             }
 
@@ -472,9 +484,13 @@ namespace UnturnedBlackout.Managers
             var nextTip = 0;
             while (true)
             {
-                yield return new WaitForSeconds(5);
                 UpdateLoadingTip(player, db.ServerOptions.GameTips[nextTip]);
-                nextTip = db.ServerOptions.GameTips.Count == nextTip ? 0 : nextTip + 1;
+                nextTip++;
+                if (nextTip == db.ServerOptions.GameTips.Count)
+                {
+                    nextTip = 0;
+                }
+                yield return new WaitForSeconds(10);
             }
         }
 
@@ -518,6 +534,20 @@ namespace UnturnedBlackout.Managers
             EffectManager.askEffectClearByID(27643, player.TransportConnection);
         }
 
+        public void SendGamemodePopup(GamePlayer player, EGameType gameMode)
+        {
+            var option = Config.Gamemode.FileData.GamemodeOptions.FirstOrDefault(k => k.GameType == gameMode);
+            if (option == null)
+            {
+                return;
+            }
+            EffectManager.sendUIEffect(GamemodePopupID, GamemodePopupKey, player.TransportConnection, true);
+            EffectManager.sendUIEffectImageURL(GamemodePopupKey, player.TransportConnection, true, "GAMEMODE Icon", option.GamemodeIcon);
+            EffectManager.sendUIEffectText(GamemodePopupKey, player.TransportConnection, true, "GAMEMODE Title TEXT", Plugin.Instance.Translate($"{gameMode}_Name").ToRich());
+            EffectManager.sendUIEffectText(GamemodePopupKey, player.TransportConnection, true, "GAMEMODE Description TEXT", Plugin.Instance.Translate($"{gameMode}_Desc").ToRich());
+        }
+
+
         // FFA RELATED UI
 
         public void SendFFAHUD(GamePlayer player)
@@ -525,7 +555,7 @@ namespace UnturnedBlackout.Managers
             EffectManager.sendUIEffect(FFAID, FFAKey, player.TransportConnection, true);
 
             EffectManager.sendUIEffectVisibility(FFAKey, player.TransportConnection, true, "ScoreCounter", true);
-            EffectManager.sendUIEffect(27610, 27610, player.TransportConnection, true, Plugin.Instance.Translate("FFA_Name").ToRich(), Plugin.Instance.Translate("FFA_Desc").ToRich());
+            SendGamemodePopup(player, EGameType.FFA);
             EffectManager.sendUIEffectVisibility(FFAKey, player.TransportConnection, true, "Timer", true);
         }
 
@@ -635,7 +665,7 @@ namespace UnturnedBlackout.Managers
         {
             EffectManager.sendUIEffect(TDMID, TDMKey, player.GamePlayer.TransportConnection, true);
             EffectManager.sendUIEffectVisibility(TDMKey, player.GamePlayer.TransportConnection, true, player.Team.TeamID == (byte)ETeam.Blue ? "BlueTeam" : "RedTeam", true);
-            EffectManager.sendUIEffect(27611, 27611, player.GamePlayer.TransportConnection, true, Plugin.Instance.Translate("TDM_Name").ToRich(), Plugin.Instance.Translate("TDM_Desc").ToRich());
+            SendGamemodePopup(player.GamePlayer, EGameType.TDM);
             EffectManager.sendUIEffectVisibility(TDMKey, player.GamePlayer.TransportConnection, true, "Timer", true);
             EffectManager.sendUIEffectVisibility(TDMKey, player.GamePlayer.TransportConnection, true, "Team", true);
             EffectManager.sendUIEffectText(TDMKey, player.GamePlayer.TransportConnection, true, "TeamName", $"<color={player.Team.Info.TeamColorHexCode}>{player.Team.Info.TeamName}</color>");
@@ -768,7 +798,7 @@ namespace UnturnedBlackout.Managers
         {
             EffectManager.sendUIEffect(KCID, KCKey, player.GamePlayer.TransportConnection, true);
             EffectManager.sendUIEffectVisibility(KCKey, player.GamePlayer.TransportConnection, true, player.Team.TeamID == (byte)ETeam.Blue ? "BlueTeam" : "RedTeam", true);
-            EffectManager.sendUIEffect(27612, 27612, player.GamePlayer.TransportConnection, true, Plugin.Instance.Translate("KC_Name").ToRich(), Plugin.Instance.Translate("KC_Desc").ToRich());
+            SendGamemodePopup(player.GamePlayer, EGameType.KC);
             EffectManager.sendUIEffectVisibility(KCKey, player.GamePlayer.TransportConnection, true, "Timer", true);
             EffectManager.sendUIEffectVisibility(KCKey, player.GamePlayer.TransportConnection, true, "Team", true);
             EffectManager.sendUIEffectText(KCKey, player.GamePlayer.TransportConnection, true, "TeamName", $"<color={player.Team.Info.TeamColorHexCode}>{player.Team.Info.TeamName}</color>");
@@ -923,7 +953,7 @@ namespace UnturnedBlackout.Managers
 
             EffectManager.sendUIEffect(CTFID, CTFKey, player.GamePlayer.TransportConnection, true);
             EffectManager.sendUIEffectVisibility(CTFKey, player.GamePlayer.TransportConnection, true, "Timer", true);
-            EffectManager.sendUIEffect(27613, 27613, player.GamePlayer.TransportConnection, true, Plugin.Instance.Translate("CTF_Name").ToRich(), Plugin.Instance.Translate("CTF_Desc").ToRich());
+            SendGamemodePopup(player.GamePlayer, EGameType.CTF);
             EffectManager.sendUIEffectVisibility(CTFKey, player.GamePlayer.TransportConnection, true, player.Team == blueTeam ? "BlueTeam" : "RedTeam", true);
             EffectManager.sendUIEffectText(CTFKey, player.GamePlayer.TransportConnection, true, $"RedNum{index}", redTeam.Score.ToString());
             EffectManager.sendUIEffectText(CTFKey, player.GamePlayer.TransportConnection, true, $"BlueNum{index}", blueTeam.Score.ToString());
@@ -1085,7 +1115,7 @@ namespace UnturnedBlackout.Managers
             foreach (var player in players)
             {
                 EffectManager.sendUIEffect(FlagPopupID, FlagPopupKey, player.GamePlayer.TransportConnection, true);
-                EffectManager.sendUIEffectVisibility(FlagPopupKey, player.GamePlayer.TransportConnection, true, $"FLAG {flag} TOGGLER", true);
+                EffectManager.sendUIEffectVisibility(FlagPopupKey, player.GamePlayer.TransportConnection, true, $"FLAG {flag} Toggler", true);
                 EffectManager.sendUIEffectText(FlagPopupKey, player.GamePlayer.TransportConnection, true, "FlagTxt", Plugin.Instance.Translate($"CTF_{(player.Team.TeamID == team.TeamID ? "Team" : "Enemy")}_{state}_Flag").ToRich());
             }
         }

@@ -111,8 +111,10 @@ namespace UnturnedBlackout.GameTypes
         public void OnTrapTriggered(GamePlayer player, BarricadeDrop drop)
         {
             var trapOwner = Plugin.Instance.GameManager.GetGamePlayer(new CSteamID(drop.GetServersideData().owner));
+            Logging.Debug($"Trap triggered by {player.Player.CharacterName}, owner is {(trapOwner?.Player?.CharacterName ?? "None")}");
             if (trapOwner != null)
             {
+                Logging.Debug("Trap owner is not null, adding trap owner to the player's last damager");
                 if (player.LastDamager.Count > 0 && player.LastDamager.Peek() == trapOwner.SteamID)
                 {
                     return;

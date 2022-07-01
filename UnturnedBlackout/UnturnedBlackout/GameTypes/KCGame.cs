@@ -206,12 +206,11 @@ namespace UnturnedBlackout.GameTypes
 
             Plugin.Instance.UIManager.OnGameCountUpdated(this);
             Plugin.Instance.UIManager.SendLoadingUI(player.Player, true, GameMode, Location);
-            for (int seconds = 5; seconds > 0; seconds--)
+            for (int seconds = 1; seconds <= 5; seconds++)
             {
                 yield return new WaitForSeconds(1);
                 Plugin.Instance.UIManager.UpdateLoadingBar(player.Player, new string('　', Math.Min(96, seconds * 96 / 5)));
             }
-            yield return new WaitForSeconds(5);
             var currentPos = player.Player.Position;
             player.Player.Player.teleportToLocationUnsafe(new Vector3(currentPos.x, currentPos.y + 100, currentPos.z), 0);
             GiveLoadout(kPlayer);
@@ -320,9 +319,9 @@ namespace UnturnedBlackout.GameTypes
             }
 
             var victimKS = vPlayer.KillStreak;
-            var updatedKiller = cause == EDeathCause.LANDMINE ? (vPlayer.GamePlayer.LastDamager.Count > 0 ? vPlayer.GamePlayer.LastDamager.Pop() : killer) : killer;
+            var updatedKiller = cause == EDeathCause.LANDMINE || cause == EDeathCause.SHRED ? (vPlayer.GamePlayer.LastDamager.Count > 0 ? vPlayer.GamePlayer.LastDamager.Pop() : killer) : killer;
 
-            Logging.Debug($"Game player died, player name: {vPlayer.GamePlayer.Player.CharacterName}");
+            Logging.Debug($"Game player died, player name: {vPlayer.GamePlayer.Player.CharacterName}, cause: {cause}");
             vPlayer.OnDeath(updatedKiller);
             vPlayer.GamePlayer.OnDeath(updatedKiller, Config.KC.FileData.RespawnSeconds);
             vPlayer.Team.OnDeath(vPlayer.GamePlayer.SteamID);
@@ -335,6 +334,7 @@ namespace UnturnedBlackout.GameTypes
                 var kPlayer = GetKCPlayer(updatedKiller);
                 if (kPlayer == null)
                 {
+                    Logging.Debug("Killer not found, returning");
                     return;
                 }
 
@@ -426,6 +426,7 @@ namespace UnturnedBlackout.GameTypes
                     case EDeathCause.GRENADE:
                     case EDeathCause.LANDMINE:
                     case EDeathCause.BURNING:
+                    case EDeathCause.SHRED:
                         xpGained += Config.Medals.FileData.LethalKillXP;
                         xpText += Plugin.Instance.Translate("Lethal_Kill").ToRich();
                         equipmentUsed = kPlayer.GamePlayer.ActiveLoadout.Lethal?.Gadget?.GadgetID ?? 0;
@@ -598,6 +599,7 @@ namespace UnturnedBlackout.GameTypes
                 case EDeathCause.GRENADE:
                 case EDeathCause.LANDMINE:
                 case EDeathCause.BURNING:
+                case EDeathCause.SHRED:
                     damageReducePerkName = "tank";
                     damageIncreasePerkName = "lethaldamage";
                     break;

@@ -21,6 +21,7 @@ namespace UnturnedBlackout.Models.Configuration
         public float MovementStepsDelay { get; set; }
         public int SpawnUnavailableSeconds { get; set; }
         public int EndingLeaderboardSeconds { get; set; }
+        public int SendingTipSeconds { get; set; }
 
         public int SpawnSwitchThreshold { get; set; }
         public int SpawnSwitchCountSeconds { get; set; }

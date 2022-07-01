@@ -10,52 +10,52 @@ namespace UnturnedBlackout.Patches
     public static class TriggerTrapPatch
     {
         [HarmonyPrefix]
-        public static bool Prefix(Collider other, InteractableTrap __instance)
+        public static void Prefix(Collider other, InteractableTrap __instance)
         {
             if (!other.transform.CompareTag("Player"))
             {
-                return true;
+                return;
             }
 
             if (!Provider.isPvP || other.transform.CompareTag("Vehicle"))
             {
-                return false;
+                return;
             }
 
             var player = DamageTool.getPlayer(other.transform);
             var drop = BarricadeManager.FindBarricadeByRootTransform(__instance.transform.parent);
             if (player == null)
             {
-                return true;
+                return;
             }
 
             if (drop == null)
             {
-                return true;
+                return;
             }
 
             var gPlayer = Plugin.Instance.GameManager.GetGamePlayer(player);
             if (gPlayer == null)
             {
-                return true;
+                return;
             }
             if (!Plugin.Instance.GameManager.TryGetCurrentGame(gPlayer.SteamID, out Game game))
             {
-                return true;
+                return;
             }
             var data = drop.GetServersideData();
             if (data == null)
             {
-                return true;
+                return;
             }
 
             if (gPlayer.SteamID.m_SteamID == data.owner || (data.group != 0UL && data.group == gPlayer.Player.Player.quests.groupID.m_SteamID))
             {
-                return false;
+                return;
             }
 
-            TaskDispatcher.QueueOnMainThread(() => game.OnTrapTriggered(gPlayer, drop));
-            return true;
+            game.OnTrapTriggered(gPlayer, drop);
+            return;
         }
     }
 }
