@@ -190,14 +190,16 @@ namespace UnturnedBlackout.Managers
             PlayerLoadouts = new Dictionary<CSteamID, PlayerLoadout>();
 
             IsPendingSeasonalWipe = false;
-            ThreadPool.QueueUserWorkItem(async (o) =>
+
+            Task.Run(async () =>
             {
                 await LoadDatabaseAsync();
                 await GetBaseDataAsync();
+            }).Wait();
 
-                Plugin.Instance.LoadoutManager = new LoadoutManager();
-                Plugin.Instance.ServerManager = new ServerManager();
-                m_MuteChecker.Start();
+            m_MuteChecker.Start();
+            ThreadPool.QueueUserWorkItem(async (o) =>
+            {
                 RefreshLeaderboardData(null, null);
                 m_LeaderboardChecker.Start();
             });

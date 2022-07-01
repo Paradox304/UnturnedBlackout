@@ -28,7 +28,7 @@ namespace UnturnedBlackout
 
             StartCoroutine(Day());
 
-            Level.onPostLevelLoaded += OnLevelLoaded;
+            Level.onLevelLoaded += OnLevelLoaded;
             PlayerVoice.onRelayVoice += OnVoice;
 
             ObjectManager.onDamageObjectRequested += OnDamageObject;
@@ -49,7 +49,7 @@ namespace UnturnedBlackout
             HUDManager.Destroy();
             UIManager.Destroy();
 
-            Level.onPostLevelLoaded -= OnLevelLoaded;
+            Level.onLevelLoaded -= OnLevelLoaded;
             PlayerVoice.onRelayVoice -= OnVoice;
 
             ObjectManager.onDamageObjectRequested -= OnDamageObject;
@@ -183,6 +183,10 @@ namespace UnturnedBlackout
             Logging.Debug("Init UI");
             DBManager = new DatabaseManager();
             Logging.Debug("Init Database");
+            LoadoutManager = new LoadoutManager();
+            Logging.Debug("Init loadout");
+            ServerManager = new ServerManager();
+            Logging.Debug("Init server");
             DataManager = new DataManager();
             Logging.Debug("Init Data");
             RewardManager = new RewardManager();
