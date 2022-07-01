@@ -320,7 +320,7 @@ namespace UnturnedBlackout.GameTypes
             }
 
             var victimKS = tPlayer.KillStreak;
-            var updatedKiller = cause == EDeathCause.LANDMINE || cause == EDeathCause.SHRED ? (tPlayer.GamePlayer.LastDamager.Count > 0 ? tPlayer.GamePlayer.LastDamager.Pop() : killer) : killer;
+            var updatedKiller = cause == EDeathCause.WATER ? tPlayer.GamePlayer.SteamID : (cause == EDeathCause.LANDMINE || cause == EDeathCause.SHRED ? (tPlayer.GamePlayer.LastDamager.Count > 0 ? tPlayer.GamePlayer.LastDamager.Pop() : killer) : killer);
 
             Logging.Debug($"Game player died, player name: {tPlayer.GamePlayer.Player.CharacterName}, cause: {cause}");
             tPlayer.OnDeath(updatedKiller);
