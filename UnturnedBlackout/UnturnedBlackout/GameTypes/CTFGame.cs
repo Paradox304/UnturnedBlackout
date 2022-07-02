@@ -193,14 +193,17 @@ namespace UnturnedBlackout.GameTypes
             BlueTeam.Destroy();
             RedTeam.Destroy();
 
-            var locations = Plugin.Instance.GameManager.AvailableLocations.ToList();
-            locations.Add(Location.LocationID);
-            var randomLocation = locations[UnityEngine.Random.Range(0, locations.Count)];
-            var location = Config.Locations.FileData.ArenaLocations.FirstOrDefault(k => k.LocationID == randomLocation);
-            var gameMode = Plugin.Instance.GameManager.GetRandomGameMode(location?.LocationID ?? Location.LocationID);
-            GamePhase = EGamePhase.Ended;
-            Plugin.Instance.GameManager.EndGame(this);
-            Plugin.Instance.GameManager.StartGame(location ?? Location, gameMode.Item1, gameMode.Item2);
+            var locations = Plugin.Instance.GameManager.AvailableLocations;
+            lock (locations)
+            {
+                locations.Add(Location.LocationID);
+                var randomLocation = locations[UnityEngine.Random.Range(0, locations.Count)];
+                var location = Config.Locations.FileData.ArenaLocations.FirstOrDefault(k => k.LocationID == randomLocation);
+                var gameMode = Plugin.Instance.GameManager.GetRandomGameMode(location?.LocationID ?? Location.LocationID);
+                GamePhase = EGamePhase.Ended;
+                Plugin.Instance.GameManager.EndGame(this);
+                Plugin.Instance.GameManager.StartGame(location ?? Location, gameMode.Item1, gameMode.Item2);
+            }
         }
 
         public override IEnumerator AddPlayerToGame(GamePlayer player)
@@ -1026,6 +1029,12 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
+            if (player.ScoreboardCooldown > DateTime.UtcNow)
+            {
+                return;
+            }
+            player.ScoreboardCooldown = DateTime.UtcNow.AddSeconds(1);
+
             if (cPlayer.GamePlayer.HasScoreboard)
             {
                 cPlayer.GamePlayer.HasScoreboard = false;
@@ -1033,12 +1042,6 @@ namespace UnturnedBlackout.GameTypes
             }
             else
             {
-                if (player.ScoreboardCooldown > DateTime.UtcNow)
-                {
-                    return;
-                }
-                player.ScoreboardCooldown = DateTime.UtcNow.AddSeconds(1);
-
                 cPlayer.GamePlayer.HasScoreboard = true;
                 CTFTeam wonTeam;
                 if (BlueTeam.Score > RedTeam.Score)
@@ -1077,7 +1080,7 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
-            if (GamePhase != EGamePhase.Started)
+            if (GamePhase == EGamePhase.Starting)
             {
                 return;
             }
@@ -1093,7 +1096,7 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
-            if (GamePhase != EGamePhase.Started)
+            if (GamePhase == EGamePhase.Starting)
             {
                 return;
             }

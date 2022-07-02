@@ -3655,7 +3655,16 @@ namespace UnturnedBlackout.Managers
                                 var player = Plugin.Instance.GameManager.GetGamePlayer(steamID);
                                 if (player != null)
                                 {
-                                    Plugin.Instance.UIManager.SendAnimation(player, new AnimationInfo(EAnimationType.GunLevelUp, gun));
+                                    var icon = gun.Gun.IconLink;
+                                    if ((player.ActiveLoadout?.Primary?.Gun?.GunID ?? 0) == gun.Gun.GunID && (player.ActiveLoadout?.PrimarySkin?.Gun?.GunID ?? 0) == gun.Gun.GunID)
+                                    {
+                                        icon = player.ActiveLoadout.PrimarySkin.IconLink;
+                                    } else if ((player.ActiveLoadout?.Secondary?.Gun?.GunID ?? 0) == gun.Gun.GunID && (player.ActiveLoadout?.SecondarySkin?.Gun?.GunID ?? 0) == gun.Gun.GunID)
+                                    {
+                                        icon = player.ActiveLoadout.SecondarySkin.IconLink;
+                                    }
+
+                                    Plugin.Instance.UIManager.SendAnimation(player, new AnimationInfo(EAnimationType.GunLevelUp, new AnimationItemUnlock(icon, gun.Level.ToString(), gun.Gun.GunName)));
                                     if (gun.Gun.RewardAttachments.TryGetValue(gun.Level, out GunAttachment attachment))
                                     {
                                         Plugin.Instance.UIManager.SendAnimation(player, new AnimationInfo(EAnimationType.ItemUnlock, new AnimationItemUnlock(attachment.IconLink, "", $"{attachment.AttachmentName} [{gun.Gun.GunName}]")));

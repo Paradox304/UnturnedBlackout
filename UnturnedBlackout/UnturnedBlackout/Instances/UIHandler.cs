@@ -3696,7 +3696,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Unlock BUTTON", !attachment.IsBought && attachment.LevelRequirement > gun.Level);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Unlock TEXT", !attachment.IsBought && attachment.LevelRequirement > gun.Level ? $"UNLOCK ({attachment.GetCoins(gun.Level)} COINS)" : "");
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Equip BUTTON", attachment.IsBought && ((LoadoutPage.ToString().StartsWith("AttachmentPrimary") && !loadout.PrimaryAttachments.ContainsValue(attachment)) || (LoadoutPage.ToString().StartsWith("AttachmentSecondary") && !loadout.SecondaryAttachments.ContainsValue(attachment))));
-            if (attachment.Attachment.AttachmentType != EAttachment.Sights && attachment.Attachment.AttachmentType != EAttachment.Magazine)
+            if (attachment.Attachment.AttachmentType != EAttachment.Magazine)
             {
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Dequip BUTTON", attachment.IsBought && ((LoadoutPage.ToString().StartsWith("AttachmentPrimary") && loadout.PrimaryAttachments.ContainsValue(attachment)) || (LoadoutPage.ToString().StartsWith("AttachmentSecondary") && loadout.SecondaryAttachments.ContainsValue(attachment))));
             }

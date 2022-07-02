@@ -177,14 +177,17 @@ namespace UnturnedBlackout.GameTypes
                 m_SpawnSwitcher.Stop();
             }
 
-            var locations = Plugin.Instance.GameManager.AvailableLocations.ToList();
-            locations.Add(Location.LocationID);
-            var randomLocation = locations[UnityEngine.Random.Range(0, locations.Count)];
-            var location = Config.Locations.FileData.ArenaLocations.FirstOrDefault(k => k.LocationID == randomLocation);
-            var gameMode = Plugin.Instance.GameManager.GetRandomGameMode(location?.LocationID ?? Location.LocationID);
-            GamePhase = EGamePhase.Ended;
-            Plugin.Instance.GameManager.EndGame(this);
-            Plugin.Instance.GameManager.StartGame(location ?? Location, gameMode.Item1, gameMode.Item2);
+            var locations = Plugin.Instance.GameManager.AvailableLocations;
+            lock (locations)
+            {
+                locations.Add(Location.LocationID);
+                var randomLocation = locations[UnityEngine.Random.Range(0, locations.Count)];
+                var location = Config.Locations.FileData.ArenaLocations.FirstOrDefault(k => k.LocationID == randomLocation);
+                var gameMode = Plugin.Instance.GameManager.GetRandomGameMode(location?.LocationID ?? Location.LocationID);
+                GamePhase = EGamePhase.Ended;
+                Plugin.Instance.GameManager.EndGame(this);
+                Plugin.Instance.GameManager.StartGame(location ?? Location, gameMode.Item1, gameMode.Item2);
+            }
         }
 
         public override IEnumerator AddPlayerToGame(GamePlayer player)
@@ -811,6 +814,12 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
+            if (player.ScoreboardCooldown > DateTime.UtcNow)
+            {
+                return;
+            }
+            player.ScoreboardCooldown = DateTime.UtcNow.AddSeconds(1);
+
             if (tPlayer.GamePlayer.HasScoreboard)
             {
                 tPlayer.GamePlayer.HasScoreboard = false;
@@ -818,12 +827,6 @@ namespace UnturnedBlackout.GameTypes
             }
             else
             {
-                if (player.ScoreboardCooldown > DateTime.UtcNow)
-                {
-                    return;
-                }
-                player.ScoreboardCooldown = DateTime.UtcNow.AddSeconds(1);
-
                 tPlayer.GamePlayer.HasScoreboard = true;
                 TDMTeam wonTeam;
                 if (BlueTeam.Score > RedTeam.Score)
@@ -856,7 +859,7 @@ namespace UnturnedBlackout.GameTypes
 
         public override void PlayerEquipmentChanged(GamePlayer player)
         {
-            if (IsPlayerIngame(player.SteamID) && GamePhase == EGamePhase.Started)
+            if (IsPlayerIngame(player.SteamID) && GamePhase != EGamePhase.Starting)
             {
                 player.GiveMovement(player.Player.Player.equipment.useable is UseableGun gun && gun.isAiming, false, true);
             }
@@ -864,7 +867,7 @@ namespace UnturnedBlackout.GameTypes
 
         public override void PlayerAimingChanged(GamePlayer player, bool isAiming)
         {
-            if (IsPlayerIngame(player.SteamID) && GamePhase == EGamePhase.Started)
+            if (IsPlayerIngame(player.SteamID) && GamePhase != EGamePhase.Starting)
             {
                 player.GiveMovement(isAiming, false, false);
             }

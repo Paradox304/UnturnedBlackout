@@ -255,11 +255,11 @@ namespace UnturnedBlackout.Managers
                     }
                 case EAnimationType.GunLevelUp:
                     {
-                        var gun = animationInfo.Info as LoadoutGun;
+                        var gun = animationInfo.Info as AnimationItemUnlock;
                         EffectManager.sendUIEffect(GunLevelUpID, GunLevelUpKey, player.TransportConnection, true);
-                        EffectManager.sendUIEffectImageURL(GunLevelUpKey, player.TransportConnection, true, "LevelUpIcon", gun.Gun.IconLink);
-                        EffectManager.sendUIEffectText(GunLevelUpKey, player.TransportConnection, true, "LevelUpDesc", $"Level {gun.Level}");
-                        EffectManager.sendUIEffectText(GunLevelUpKey, player.TransportConnection, true, "LevelUpTxt", gun.Gun.GunName);
+                        EffectManager.sendUIEffectImageURL(GunLevelUpKey, player.TransportConnection, true, "LevelUpIcon", gun.ItemIcon);
+                        EffectManager.sendUIEffectText(GunLevelUpKey, player.TransportConnection, true, "LevelUpDesc", $"Level {gun.ItemType}");
+                        EffectManager.sendUIEffectText(GunLevelUpKey, player.TransportConnection, true, "LevelUpTxt", gun.ItemName);
                         break;
                     }
                 case EAnimationType.QuestCompletion:
