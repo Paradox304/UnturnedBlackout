@@ -809,7 +809,7 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
-            if (GamePhase != EGamePhase.Started)
+            if (GamePhase == EGamePhase.Ending)
             {
                 return;
             }
