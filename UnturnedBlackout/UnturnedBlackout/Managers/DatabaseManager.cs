@@ -1300,15 +1300,16 @@ namespace UnturnedBlackout.Managers
 
                         var tierTitle = rdr[2].ToString();
                         var tierDesc = rdr[3].ToString();
-                        var tierPrevSmall = rdr[4].ToString();
-                        var tierPrevLarge = rdr[5].ToString();
-                        if (!int.TryParse(rdr[6].ToString(), out int targetAmount))
+                        var tierColor = rdr[4].ToString();
+                        var tierPrevSmall = rdr[5].ToString();
+                        var tierPrevLarge = rdr[6].ToString();
+                        if (!int.TryParse(rdr[7].ToString(), out int targetAmount))
                         {
                             continue;
                         }
-                        var rewards = Utility.GetRewardsFromString(rdr[7].ToString());
-                        var removeRewards = Utility.GetRewardsFromString(rdr[8].ToString());
-                        var achievementTier = new AchievementTier(achievement, tierID, tierTitle, tierDesc, tierPrevSmall, tierPrevLarge, targetAmount, rewards, removeRewards);
+                        var rewards = Utility.GetRewardsFromString(rdr[8].ToString());
+                        var removeRewards = Utility.GetRewardsFromString(rdr[9].ToString());
+                        var achievementTier = new AchievementTier(achievement, tierID, tierTitle, tierDesc, tierColor, tierPrevSmall, tierPrevLarge, targetAmount, rewards, removeRewards);
 
                         if (!achievement.TiersLookup.ContainsKey(tierID))
                         {
