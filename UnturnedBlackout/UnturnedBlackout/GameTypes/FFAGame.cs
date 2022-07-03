@@ -761,7 +761,7 @@ namespace UnturnedBlackout.GameTypes
 
         public override void PlayerEquipmentChanged(GamePlayer player)
         {
-            if (IsPlayerIngame(player.SteamID) && GamePhase == EGamePhase.Starting)
+            if (IsPlayerIngame(player.SteamID) && GamePhase != EGamePhase.Starting)
             {
                 player.GiveMovement(player.Player.Player.equipment.useable is UseableGun gun && gun.isAiming, false, true);
             }
