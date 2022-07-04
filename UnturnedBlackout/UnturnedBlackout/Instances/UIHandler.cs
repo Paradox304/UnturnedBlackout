@@ -24,7 +24,7 @@ namespace UnturnedBlackout.Instances
         public const short Key = 27632;
         public const ushort MidgameLoadoutSelectionID = 27643;
         public const short MidgameLoadoutSelectionKey = 27643;
-        public const int MaxItemsPerPage = 9;
+        public const int MaxItemsPerPage = 19;
         public const int MaxSkinsCharmsPerPage = 15;
 
         public DatabaseManager DB { get; set; }
