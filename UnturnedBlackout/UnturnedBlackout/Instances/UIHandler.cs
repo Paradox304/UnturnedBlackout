@@ -5309,7 +5309,7 @@ namespace UnturnedBlackout.Instances
                 if (achievement.TryGetNextTier(out AchievementTier nextTier))
                 {
                     EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Achievements Claimable {i}", achievement.Amount >= nextTier.TargetAmount);
-                    var fillTxt = achievement.Amount == 0 ? " " : new string(' ', Math.Min(100, achievement.Amount * 100 / nextTier.TargetAmount));
+                    var fillTxt = achievement.Amount == 0 ? " " : new string(' ', Math.Min(68, achievement.Amount * 68 / nextTier.TargetAmount));
 
                     switch (achievement.CurrentTier)
                     {
@@ -5380,6 +5380,8 @@ namespace UnturnedBlackout.Instances
 
         public void SelectedAchievement(int selected)
         {
+            SelectedAchievementID = selected;
+
             if (!AchievementPages.TryGetValue(AchievementMainPage, out Dictionary<int, PageAchievement> achievementPages) || !achievementPages.TryGetValue(AchievementSubPage, out PageAchievement page))
             {
                 Logging.Debug($"Error getting current page of achievement for {Player.CharacterName}");
@@ -5419,7 +5421,7 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Achievements Claim BUTTON", nextTier != null && achievement.Amount >= targetAmount);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Achievements Target TEXT", $"{achievement.Amount}/{targetAmount}");
 
-                var fill = achievement.Amount == 0 ? " " : new string(' ', Math.Min(100, achievement.Amount * 100 / targetAmount));
+                var fill = achievement.Amount == 0 ? " " : new string(' ', Math.Min(291, achievement.Amount * 291 / targetAmount));
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Achievements Fill 0", fill);
             }
 
