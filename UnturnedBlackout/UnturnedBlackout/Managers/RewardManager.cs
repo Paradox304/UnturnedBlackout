@@ -112,7 +112,7 @@ namespace UnturnedBlackout.Managers
                                 await db.AddPlayerGunCharmAsync(bulkReward.Item1, Convert.ToUInt16(reward.RewardValue), true);
                                 break;
                             case ERewardType.GunSkin:
-                                await db.AddPlayerGunSkinAsync(bulkReward.Item1, (int)reward.RewardValue);
+                                await db.AddPlayerGunSkinAsync(bulkReward.Item1, Convert.ToInt32(reward.RewardValue));
                                 break;
                             case ERewardType.Knife:
                                 await db.AddPlayerKnifeAsync(bulkReward.Item1, Convert.ToUInt16(reward.RewardValue), true);
@@ -121,25 +121,25 @@ namespace UnturnedBlackout.Managers
                                 await db.AddPlayerGadgetAsync(bulkReward.Item1, Convert.ToUInt16(reward.RewardValue), true);
                                 break;
                             case ERewardType.Killstreak:
-                                await db.AddPlayerKillstreakAsync(bulkReward.Item1, (int)reward.RewardValue, true);
+                                await db.AddPlayerKillstreakAsync(bulkReward.Item1, Convert.ToInt32(reward.RewardValue), true);
                                 break;
                             case ERewardType.Perk:
-                                await db.AddPlayerPerkAsync(bulkReward.Item1, (int)reward.RewardValue, true);
+                                await db.AddPlayerPerkAsync(bulkReward.Item1, Convert.ToInt32(reward.RewardValue), true);
                                 break;
                             case ERewardType.Glove:
                                 await db.AddPlayerGloveAsync(bulkReward.Item1, Convert.ToUInt16(reward.RewardValue), true);
                                 break;
                             case ERewardType.Card:
-                                await db.AddPlayerCardAsync(bulkReward.Item1, (int)reward.RewardValue, true);
+                                await db.AddPlayerCardAsync(bulkReward.Item1, Convert.ToInt32(reward.RewardValue), true);
                                 break;
                             case ERewardType.Credit:
-                                await db.IncreasePlayerCreditsAsync(bulkReward.Item1, (int)reward.RewardValue);
+                                await db.IncreasePlayerCreditsAsync(bulkReward.Item1, Convert.ToInt32(reward.RewardValue));
                                 break;
                             case ERewardType.Coin:
-                                await db.IncreasePlayerCoinsAsync(bulkReward.Item1, (int)reward.RewardValue);
+                                await db.IncreasePlayerCoinsAsync(bulkReward.Item1, Convert.ToInt32(reward.RewardValue));
                                 break;
                             case ERewardType.LevelXP:
-                                await db.IncreasePlayerXPAsync(bulkReward.Item1, (int)reward.RewardValue);
+                                await db.IncreasePlayerXPAsync(bulkReward.Item1, Convert.ToInt32(reward.RewardValue));
                                 break;
                             case ERewardType.BattlepassXP:
                                 break;

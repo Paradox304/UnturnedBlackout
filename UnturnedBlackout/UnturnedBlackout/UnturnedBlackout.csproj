@@ -284,6 +284,7 @@
     <Compile Include="Models\TDM\TDMPlayer.cs" />
     <Compile Include="Models\Global\TeamInfo.cs" />
     <Compile Include="Models\Global\VoteChoice.cs" />
+    <Compile Include="Models\UI\PageAchievement.cs" />
     <Compile Include="Models\UI\PageAttachment.cs" />
     <Compile Include="Models\UI\PageCard.cs" />
     <Compile Include="Models\UI\PageGadget.cs" />

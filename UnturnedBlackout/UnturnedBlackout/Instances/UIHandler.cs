@@ -67,6 +67,10 @@ namespace UnturnedBlackout.Instances
         public ELeaderboardTab LeaderboardTab { get; set; }
         public int LeaderboardPageID { get; set; }
 
+        // Achievement
+        public int AchievementMainPage { get; set; }
+        public int AchievementSubPage { get; set; }
+        public int SelectedAchievementID { get; set; }
 
         public Dictionary<int, PageLoadout> LoadoutPages { get; set; }
         public Dictionary<int, PageGun> PistolPages { get; set; }
@@ -86,6 +90,7 @@ namespace UnturnedBlackout.Instances
         public Dictionary<int, PageCard> CardPages { get; set; }
         public Dictionary<int, PageGlove> GlovePages { get; set; }
         public Dictionary<int, PageKillstreak> KillstreakPages { get; set; }
+        public Dictionary<int, Dictionary<int, PageAchievement>> AchievementPages { get; set; }
 
         public UIHandler(UnturnedPlayer player)
         {
@@ -143,6 +148,7 @@ namespace UnturnedBlackout.Instances
             BuildCardPages();
             BuildGlovePages();
             BuildKillstreakPages();
+            BuildAchievementPages();
         }
 
         public void BuildLoadoutPages()
@@ -679,6 +685,38 @@ namespace UnturnedBlackout.Instances
             Logging.Debug($"Created {KillstreakPages.Count} killstreak pages for {Player.CharacterName}");
         }
 
+        public void BuildAchievementPages()
+        {
+            AchievementPages = new Dictionary<int, Dictionary<int, PageAchievement>>();
+            Logging.Debug($"Creating achievement pages for {Player.CharacterName}, found {PlayerData.Achievements.Count} achievements");
+            for (int i = 1; i <= 5; i++)
+            {
+                Logging.Debug($"Creating achievement pages for main page {i} for {Player.CharacterName}");
+                AchievementPages.Add(i, new Dictionary<int, PageAchievement>());
+                int index = 0;
+                int page = 1;
+                var achievements = new Dictionary<int, PlayerAchievement>();
+                foreach (var achievement in PlayerData.Achievements.Where(k => k.Achievement.PageID == i).OrderByDescending(k => k.CurrentTier).ThenByDescending(k => k.TryGetNextTier(out AchievementTier nextTier) ? (k.Amount * 100 / nextTier.TargetAmount) : 100))
+                {
+                    achievements.Add(index, achievement);
+                    if (index == 48)
+                    {
+                        AchievementPages[i].Add(page, new PageAchievement(page, achievements));
+                        achievements = new Dictionary<int, PlayerAchievement>();
+                        index = 0;
+                        page++;
+                        continue;
+                    }
+                    index++;
+                }
+                if (achievements.Count != 0)
+                {
+                    AchievementPages[i].Add(page, new PageAchievement(page, achievements));
+                }
+                Logging.Debug($"Created {AchievementPages[i].Count} for achievement type {i} for {Player.CharacterName}");
+            }
+        }
+
         // Main Page
 
         public void ShowUI()
@@ -711,7 +749,6 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Player Name", data.SteamName);
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Unbox BUTTON", false);
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Store BUTTON", false);
-            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Achievements BUTTON", false);
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Battlepass BUTTON", false);
 
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Version TEXT", Plugin.Instance.Translate("Version").ToRich());
@@ -3678,7 +3715,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Description TEXT", true);
             gun.TryGetNeededXP(out int neededXP);
             var spaces = neededXP != 0 ? (gun.XP * 188 / neededXP) : 0;
-            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item XP Bar Fill", spaces == 0 ? "" : new string(' ', spaces));
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item XP Bar Fill", spaces == 0 ? " " : new string(' ', spaces));
             SendRarityName(gun.Gun.GunRarity);
         }
 
@@ -5196,6 +5233,267 @@ namespace UnturnedBlackout.Instances
 
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Quest Complete", completedQuests == totalQuests);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Quest Complete Count TEXT", $"{completedQuests}/{totalQuests}");
+        }
+
+        // Achievement
+
+        public void ShowAchievements()
+        {
+            MainPage = EMainPage.Achievements;
+            SelectedAchievementMainPage(1);
+        }
+
+        public void SelectedAchievementMainPage(int mainPage)
+        {
+            AchievementMainPage = mainPage;
+
+
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Achievements Previous BUTTON", false);
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Achievements Next BUTTON", false);
+
+            for (int i = 0; i <= 48; i++)
+            {
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Achievements BUTTON {i}", false);
+            }
+
+            if (!AchievementPages.TryGetValue(mainPage, out Dictionary<int, PageAchievement> achievementPages))
+            {
+                Logging.Debug($"Error finding achievement pages for main page {mainPage}");
+                return;
+            }
+
+            if (!achievementPages.TryGetValue(1, out PageAchievement firstPage))
+            {
+                Logging.Debug($"Error finding first page of achievement of main page {mainPage}");
+                return;
+            }
+
+
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Achievements Previous BUTTON", achievementPages.Count > 1);
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Achievements Next BUTTON", achievementPages.Count > 1);
+
+            ShowAchievementSubPage(firstPage);
+        }
+
+        public void ShowAchievementSubPage(PageAchievement page)
+        {
+            AchievementSubPage = page.PageID;
+            Logging.Debug($"Showing achievement page to {Player.CharacterName} with main page {AchievementMainPage} and sub page {AchievementSubPage}");
+
+            for (int i = 0; i <= 48; i++)
+            {
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Achievements BUTTON {i}", false);
+            }
+
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Achievements Page TEXT", $"Page {page.PageID}");
+
+            for (int i = 0; i <= 48; i++)
+            {
+                if (!page.Achievements.TryGetValue(i, out PlayerAchievement achievement))
+                {
+                    break;
+                }
+
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Achievements BUTTON {i}", true);
+                var tier = achievement.GetCurrentTier();
+                if (tier != null)
+                {
+                    EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Achievements IMAGE {i}", tier.TierPrevLarge);
+                }
+
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Achievements Basic {i}", achievement.CurrentTier == 0);
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Achievements Bronze {i}", achievement.CurrentTier == 1);
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Achievements Silver {i}", achievement.CurrentTier == 2);
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Achievements Gold {i}", achievement.CurrentTier == 3);
+
+                if (achievement.TryGetNextTier(out AchievementTier nextTier))
+                {
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Achievements Claimable {i}", achievement.Amount >= nextTier.TargetAmount);
+                    var fillTxt = achievement.Amount == 0 ? " " : new string(' ', Math.Min(100, achievement.Amount * 100 / nextTier.TargetAmount));
+
+                    switch (achievement.CurrentTier)
+                    {
+                        case 0:
+                            EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Achievements Basic Fill {i}", fillTxt);
+                            break;
+                        case 1:
+                            EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Achievements Bronze Fill {i}", fillTxt);
+                            break;
+                        case 2:
+                            EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Achievements Silver Fill {i}", fillTxt);
+                            break;
+                        case 3:
+                            EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Achievements Gold Fill {i}", fillTxt);
+                            break;
+                    }
+                }
+            }
+        }
+
+        public void ForwardAchievementSubPage()
+        {
+            if (!AchievementPages.TryGetValue(AchievementMainPage, out Dictionary<int, PageAchievement> achievementPages))
+            {
+                Logging.Debug($"Error finding achievement pages for main page {AchievementMainPage}");
+                ShowAchievements();
+                return;
+            }
+
+            if (!achievementPages.TryGetValue(AchievementSubPage + 1, out PageAchievement nextPage) || !achievementPages.TryGetValue(1, out nextPage))
+            {
+                Logging.Debug($"Error finding next achievement page");
+                SelectedAchievementMainPage(AchievementMainPage);
+                return;
+            }
+
+            ShowAchievementSubPage(nextPage);
+        }
+
+        public void BackwardAchievementSubPage()
+        {
+            if (!AchievementPages.TryGetValue(AchievementMainPage, out Dictionary<int, PageAchievement> achievementPages))
+            {
+                Logging.Debug($"Error finding achievement pages for main page {AchievementMainPage}");
+                ShowAchievements();
+                return;
+            }
+
+            if (!achievementPages.TryGetValue(AchievementSubPage - 1, out PageAchievement nextPage) || !achievementPages.TryGetValue(achievementPages.Keys.Max(), out nextPage))
+            {
+                Logging.Debug("Error finding next achievement page");
+                SelectedAchievementMainPage(AchievementMainPage);
+                return;
+            }
+
+            ShowAchievementSubPage(nextPage);
+        }
+
+        public void ReloadAchievementSubPage()
+        {
+            if (!AchievementPages.TryGetValue(AchievementMainPage, out Dictionary<int, PageAchievement> achievementPages) || !achievementPages.TryGetValue(AchievementSubPage, out PageAchievement page))
+            {
+                return;
+            }
+
+            ShowAchievementSubPage(page);
+        }
+
+        public void SelectedAchievement(int selected)
+        {
+            if (!AchievementPages.TryGetValue(AchievementMainPage, out Dictionary<int, PageAchievement> achievementPages) || !achievementPages.TryGetValue(AchievementSubPage, out PageAchievement page))
+            {
+                Logging.Debug($"Error getting current page of achievement for {Player.CharacterName}");
+                return;
+            }
+
+            if (!page.Achievements.TryGetValue(selected, out PlayerAchievement achievement))
+            {
+                Logging.Debug($"Error getting selected achievement with id {selected} for {Player.CharacterName}");
+                return;
+            }
+
+            var tier = achievement.GetCurrentTier();
+            if (tier != null)
+            {
+                EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Achievements IMAGE", tier.TierPrevLarge);
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Achievements TEXT", tier.TierTitle);
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Achievements Description TEXT", tier.TierDesc);
+
+                var targetAmount = tier.TargetAmount;
+                if (achievement.TryGetNextTier(out AchievementTier nextTier))
+                {
+                    targetAmount = nextTier.TargetAmount;
+                    if (nextTier.Rewards.Count >= 1 && TryGetAchievementReward(nextTier.Rewards[0], out string rewardName, out _))
+                    {
+                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Achievements Item TEXT", rewardName);
+                    } else
+                    {
+                        EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Achievements Item TEXT", "None");
+                    }
+                }
+                else
+                {
+                    EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Achievements Item TEXT", "None");
+                }
+
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Achievements Claim BUTTON", nextTier != null && achievement.Amount >= targetAmount);
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Achievements Target TEXT", $"{achievement.Amount}/{targetAmount}");
+
+                var fill = achievement.Amount == 0 ? " " : new string(' ', Math.Min(100, achievement.Amount * 100 / targetAmount));
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Achievements Fill 0", fill);
+            }
+
+            for (int i = 1; i <= 4; i++)
+            {
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Achievements Reward Claimed {i}", achievement.CurrentTier >= i);
+
+                if (!achievement.Achievement.TiersLookup.TryGetValue(i, out AchievementTier rewardTier) || rewardTier.Rewards.Count == 0 || !TryGetAchievementReward(rewardTier.Rewards[0], out _, out string rewardImage))
+                {
+                    EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Achievements Reward IMAGE {i}", "");
+                    continue;
+                }
+
+                EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Achievements Reward IMAGE {i}", rewardImage);
+            }
+        }
+
+        public void ReloadSelectedAchievement()
+        {
+
+        }
+
+        public bool TryGetAchievementReward(Reward reward, out string rewardName, out string rewardImage)
+        {
+            rewardName = "";
+            rewardImage = "";
+
+            switch (reward.RewardType)
+            {
+                case ERewardType.Card:
+                    Logging.Debug($"");
+                    if (!DB.Cards.TryGetValue(Convert.ToInt32(reward.RewardValue), out Card card))
+                    {
+                        return false;
+                    }
+                    rewardName = $"<color={Utility.GetRarityColor(card.CardRarity)}>{card.CardName}</color>";
+                    rewardImage = card.IconLink;
+                    return true;
+                case ERewardType.GunSkin:
+                    if (!DB.GunSkinsSearchByID.TryGetValue(Convert.ToInt32(reward.RewardValue), out GunSkin skin))
+                    {
+                        return false;
+                    }
+                    rewardName = $"<color={Utility.GetRarityColor(skin.SkinRarity)}>{skin.SkinName}</color>";
+                    rewardImage = skin.IconLink;
+                    return true;
+                case ERewardType.Glove:
+                    if (!DB.Gloves.TryGetValue(Convert.ToUInt16(reward.RewardValue), out Glove glove))
+                    {
+                        return false;
+                    }
+                    rewardName = $"<color={Utility.GetRarityColor(glove.GloveRarity)}>{glove.GloveName}</color>";
+                    rewardImage = glove.IconLink;
+                    return true;
+                case ERewardType.Gun:
+                    if (!DB.Guns.TryGetValue(Convert.ToUInt16(reward.RewardValue), out Gun gun))
+                    {
+                        return false;
+                    }
+                    rewardName = $"<color={Utility.GetRarityColor(gun.GunRarity)}>{gun.GunName}</color>";
+                    rewardImage = gun.IconLink;
+                    return true;
+                case ERewardType.Coin:
+                    rewardName = $"<color=white>{reward.RewardValue} Coins</color>";
+                    return true;
+                case ERewardType.Credit:
+                    rewardName = $"<color=white>{reward.RewardValue} Credits</color>";
+                    return true;
+                case ERewardType.LevelXP:
+                    rewardName = $"<color=white>{reward.RewardValue} XP</color>";
+                    return true;
+                default:
+                    return false;
+            }   
         }
 
         // Events

@@ -17,5 +17,21 @@ namespace UnturnedBlackout.Database.Data
             CurrentTier = currentTier;
             Amount = amount;
         }
+
+        public bool TryGetNextTier(out AchievementTier nextTier)
+        {
+            nextTier = null;
+            if (Achievement.TiersLookup.TryGetValue(CurrentTier + 1, out AchievementTier tier))
+            {
+                nextTier = tier;
+                return true;
+            }
+            return false;
+        }
+
+        public AchievementTier GetCurrentTier()
+        {
+            return Achievement.TiersLookup.TryGetValue(CurrentTier, out AchievementTier tier) ? tier : null;
+        }
     }
 }

@@ -267,9 +267,10 @@ namespace UnturnedBlackout
 
             if (numberRegexMatch[0] == '.')
             {
-                numberRegexMatch.Remove(0, 1);
+                numberRegexMatch = numberRegexMatch.Remove(0, 1);
             }
 
+            Logging.Debug($"Reward Type: {rewardType}, Reward Value: {numberRegexMatch}");
             return new Reward(rewardType, numberRegexMatch);
         }
 
@@ -423,6 +424,22 @@ namespace UnturnedBlackout
         {
             return isPlayer ? $"<color={Plugin.Instance.ConfigManager.Base.FileData.PlayerColorHexCode}>{value}</color>" : value.ToString();
         }
+
+        public static string GetRarityColor(string rarity) =>
+            rarity.ToLower() switch
+            {
+                "common" => "#FFFFFF",
+                "uncommon" => "#1F871F",
+                "rare" => "#4B64C8",
+                "epic" => "#964BFA",
+                "legendary" => "#C832FA",
+                "mythical" => "#FA3219",
+                "yellow" => "yellow",
+                "orange" => "orange",
+                "cyan" => "cyan",
+                "green" => "green",
+                _ => throw new ArgumentOutOfRangeException("rarity", "Rarity is not as expected")
+            };
 
         public static List<uint> UsedFrequencies = new();
     }

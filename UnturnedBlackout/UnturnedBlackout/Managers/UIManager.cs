@@ -542,6 +542,7 @@ namespace UnturnedBlackout.Managers
                 return;
             }
             EffectManager.sendUIEffect(GamemodePopupID, GamemodePopupKey, player.TransportConnection, true);
+            EffectManager.sendUIEffectVisibility(GamemodePopupKey, player.TransportConnection, true, $"GAMEMODE {gameMode} Toggler", true);
             EffectManager.sendUIEffectImageURL(GamemodePopupKey, player.TransportConnection, true, "GAMEMODE Icon", option.GamemodeIcon);
             EffectManager.sendUIEffectText(GamemodePopupKey, player.TransportConnection, true, "GAMEMODE Title TEXT", Plugin.Instance.Translate($"{gameMode}_Name").ToRich());
             EffectManager.sendUIEffectText(GamemodePopupKey, player.TransportConnection, true, "GAMEMODE Description TEXT", Plugin.Instance.Translate($"{gameMode}_Desc").ToRich());
@@ -1172,6 +1173,18 @@ namespace UnturnedBlackout.Managers
             }
         }
 
+        public void OnAchievementsUpdated(GamePlayer player)
+        {
+            if (UIHandlersLookup.TryGetValue(player.SteamID, out UIHandler handler))
+            {
+                if (handler.MainPage == EMainPage.Achievements)
+                {
+                    handler.ReloadAchievementSubPage();
+                    handler.ReloadSelectedAchievement();
+                }
+            }
+        }
+
         private void OnButtonClicked(Player player, string buttonName)
         {
             Logging.Debug($"{player.channel.owner.playerID.characterName} clicked {buttonName}");
@@ -1399,6 +1412,21 @@ namespace UnturnedBlackout.Managers
                 case "SERVER Leaderboards Back BUTTON":
                     handler.SetupMainMenu();
                     return;
+                case "SERVER Achievements BUTTON":
+                    handler.ShowAchievements();
+                    return;
+                case "SERVER Achievements Next BUTTON":
+                    handler.ForwardAchievementSubPage();
+                    return;
+                case "SERVER Achievements Previous BUTTON":
+                    handler.BackwardAchievementSubPage();
+                    return;
+                case "SERVER Achievements Claim BUTTON":
+                    if (handler.MainPage == EMainPage.Achievements)
+                    {
+                        Plugin.Instance.AchievementManager.ClaimAchievementTier(ply.CSteamID, handler.SelectedAchievementID);
+                    }
+                    return;
                 case "KnobOff":
                     handler.OnMusicChanged(true);
                     return;
@@ -1421,6 +1449,19 @@ namespace UnturnedBlackout.Managers
                 if (int.TryParse(buttonName.Replace("SERVER Item BUTTON", ""), out int selected) || int.TryParse(buttonName.Replace("SERVER Item Grid BUTTON", ""), out selected))
                 {
                     handler.SelectedItem(selected);
+                }
+            }
+            else if (buttonName.StartsWith("SERVER Achievements Page"))
+            {
+                if (int.TryParse(buttonName.Replace("SERVER Achievements Page", "").Replace("BUTTON", ""), out int selected))
+                {
+                    handler.SelectedAchievementMainPage(selected);
+                }
+            } else if (buttonName.StartsWith("SERVER Achievements BUTTON"))
+            {
+                if (int.TryParse(buttonName.Replace("SERVER Achievements BUTTON", ""), out int selected))
+                {
+                    handler.SelectedAchievement(selected);
                 }
             }
             else if (buttonName.StartsWith("SERVER Loadout BUTTON"))
