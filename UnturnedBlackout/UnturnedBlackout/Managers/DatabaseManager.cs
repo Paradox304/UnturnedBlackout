@@ -5441,6 +5441,52 @@ namespace UnturnedBlackout.Managers
             }
         }
 
+        public async Task GenerateAchievementTiersAsync(int achievementID, string tierTitle)
+        {
+            using MySqlConnection Conn = new(ConnectionString);
+            try
+            {
+                await Conn.OpenAsync();
+                for (int i = 0; i <= 4; i++)
+                {
+                    var targetAmount = 0;
+                    var color = "";
+
+                    switch (i)
+                    {
+                        case 1:
+                            targetAmount = 100;
+                            color = "<color=#a8723d>Bronze</color>";
+                            break;
+                        case 2:
+                            targetAmount = 250;
+                            color = "<color=#bfbebd>Silver</color>";
+                            break;
+                        case 3:
+                            targetAmount = 1000;
+                            color = "<color=#e6de49>Gold</color>";
+                            break;
+                        case 4:
+                            targetAmount = 2500;
+                            color = "<color=#60f7cd>Diamond</color>";
+                            break;
+                        default:
+                            break;
+                    }
+                    await new MySqlCommand($"INSERT INTO `{AchievementsTiersTableName}` (`AchievementID` , `TierID` , `TierTitle` , `TierDesc` , `TierColor` , `TierPrevSmall` , `TierPrevLarge` , `TargetAmount` , `Rewards` , `RemoveRewards`) VALUES ({achievementID} , {i} , '{tierTitle}' , ' ', '{color}' , ' ', ' ', {targetAmount} , ' ' , ' ' );", Conn).ExecuteScalarAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"Error generating 5 tiers for achievement with id {achievementID}");
+                Logger.Log(ex);
+            }
+            finally
+            {
+                await Conn.CloseAsync();
+            }
+        }
+
         // Player Battlepass
         public async Task IncreasePlayerBPXPAsync(CSteamID steamID, int xp)
         {
