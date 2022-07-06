@@ -1173,9 +1173,9 @@ namespace UnturnedBlackout.Managers
             }
         }
 
-        public void OnAchievementsUpdated(GamePlayer player)
+        public void OnAchievementsUpdated(CSteamID steamID)
         {
-            if (UIHandlersLookup.TryGetValue(player.SteamID, out UIHandler handler))
+            if (UIHandlersLookup.TryGetValue(steamID, out UIHandler handler))
             {
                 if (handler.MainPage == EMainPage.Achievements)
                 {

@@ -34,6 +34,7 @@ namespace UnturnedBlackout.Instances
         public PlayerData PlayerData { get; set; }
 
         public Coroutine TimerRefresher { get; set; }
+        public Coroutine AchievementPageShower { get; set; }
 
         public ITransportConnection TransportConnection { get; set; }
         public ConfigManager Config
@@ -5267,10 +5268,14 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Achievements Previous BUTTON", achievementPages.Count > 1);
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Achievements Next BUTTON", achievementPages.Count > 1);
 
-            ShowAchievementSubPage(firstPage);
+            if (AchievementPageShower != null)
+            {
+                Plugin.Instance.StopCoroutine(AchievementPageShower);
+            }
+            AchievementPageShower = Plugin.Instance.StartCoroutine(ShowAchievementSubPage(firstPage));
         }
 
-        public void ShowAchievementSubPage(PageAchievement page)
+        public IEnumerator ShowAchievementSubPage(PageAchievement page)
         {
             AchievementSubPage = page.PageID;
             Logging.Debug($"Showing achievement page to {Player.CharacterName} with main page {AchievementMainPage} and sub page {AchievementSubPage}");
@@ -5279,6 +5284,7 @@ namespace UnturnedBlackout.Instances
 
             for (int i = 0; i <= 48; i++)
             {
+                yield return new WaitForSeconds(0.01f);
                 if (!page.Achievements.TryGetValue(i, out PlayerAchievement achievement))
                 {
                     break;
@@ -5336,7 +5342,11 @@ namespace UnturnedBlackout.Instances
                 return;
             }
 
-            ShowAchievementSubPage(nextPage);
+            if (AchievementPageShower != null)
+            {
+                Plugin.Instance.StopCoroutine(AchievementPageShower);
+            }
+            AchievementPageShower = Plugin.Instance.StartCoroutine(ShowAchievementSubPage(nextPage));
         }
 
         public void BackwardAchievementSubPage()
@@ -5355,7 +5365,11 @@ namespace UnturnedBlackout.Instances
                 return;
             }
 
-            ShowAchievementSubPage(nextPage);
+            if (AchievementPageShower != null)
+            {
+                Plugin.Instance.StopCoroutine(AchievementPageShower);
+            }
+            AchievementPageShower = Plugin.Instance.StartCoroutine(ShowAchievementSubPage(nextPage));
         }
 
         public void ReloadAchievementSubPage()
@@ -5365,13 +5379,15 @@ namespace UnturnedBlackout.Instances
                 return;
             }
 
-            ShowAchievementSubPage(page);
+            if (AchievementPageShower != null)
+            {
+                Plugin.Instance.StopCoroutine(AchievementPageShower);
+            }
+            AchievementPageShower = Plugin.Instance.StartCoroutine(ShowAchievementSubPage(page));
         }
 
         public void SelectedAchievement(int selected)
         {
-            SelectedAchievementID = selected;
-
             if (!AchievementPages.TryGetValue(AchievementMainPage, out Dictionary<int, PageAchievement> achievementPages) || !achievementPages.TryGetValue(AchievementSubPage, out PageAchievement page))
             {
                 Logging.Debug($"Error getting current page of achievement for {Player.CharacterName}");
@@ -5383,6 +5399,13 @@ namespace UnturnedBlackout.Instances
                 Logging.Debug($"Error getting selected achievement with id {selected} for {Player.CharacterName}");
                 return;
             }
+
+            ShowAchievement(achievement);
+        }
+
+        public void ShowAchievement(PlayerAchievement achievement)
+        {
+            SelectedAchievementID = achievement.Achievement.AchievementID;
 
             var tier = achievement.GetCurrentTier();
             if (tier != null)
@@ -5398,7 +5421,8 @@ namespace UnturnedBlackout.Instances
                     if (nextTier.Rewards.Count >= 1 && TryGetAchievementReward(nextTier.Rewards[0], out string rewardName, out _))
                     {
                         EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Achievements Item TEXT", rewardName);
-                    } else
+                    }
+                    else
                     {
                         EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Achievements Item TEXT", "None");
                     }
@@ -5431,7 +5455,13 @@ namespace UnturnedBlackout.Instances
 
         public void ReloadSelectedAchievement()
         {
+            if (!PlayerData.AchievementsSearchByID.TryGetValue(SelectedAchievementID, out PlayerAchievement achievement))
+            {
+                Logging.Debug($"Unable to find selected achievement with id {SelectedAchievementID} for {Player.CharacterName}");
+                return;
+            }
 
+            ShowAchievement(achievement);
         }
 
         public bool TryGetAchievementReward(Reward reward, out string rewardName, out string rewardImage)
@@ -5442,7 +5472,6 @@ namespace UnturnedBlackout.Instances
             switch (reward.RewardType)
             {
                 case ERewardType.Card:
-                    Logging.Debug($"");
                     if (!DB.Cards.TryGetValue(Convert.ToInt32(reward.RewardValue), out Card card))
                     {
                         return false;

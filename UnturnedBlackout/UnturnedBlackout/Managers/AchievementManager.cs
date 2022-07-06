@@ -113,7 +113,8 @@ namespace UnturnedBlackout.Managers
             achievement.CurrentTier = nextTier.TierID;
             Plugin.Instance.RewardManager.GiveReward(steamID, nextTier.Rewards);
             Plugin.Instance.RewardManager.RemoveReward(steamID, nextTier.RemoveRewards);
-            
+            Plugin.Instance.UIManager.OnAchievementsUpdated(steamID);
+
             ThreadPool.QueueUserWorkItem(async (o) =>
             {
                 await Plugin.Instance.DBManager.UpdatePlayerAchievementTierAsync(steamID, achievementID, nextTier.TierID);
