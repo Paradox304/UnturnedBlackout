@@ -5251,11 +5251,6 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Achievements Previous BUTTON", false);
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Achievements Next BUTTON", false);
 
-            for (int i = 0; i <= 48; i++)
-            {
-                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Achievements BUTTON {i}", false);
-            }
-
             if (!AchievementPages.TryGetValue(mainPage, out Dictionary<int, PageAchievement> achievementPages))
             {
                 Logging.Debug($"Error finding achievement pages for main page {mainPage}");
@@ -5279,11 +5274,6 @@ namespace UnturnedBlackout.Instances
         {
             AchievementSubPage = page.PageID;
             Logging.Debug($"Showing achievement page to {Player.CharacterName} with main page {AchievementMainPage} and sub page {AchievementSubPage}");
-
-            for (int i = 0; i <= 48; i++)
-            {
-                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Achievements BUTTON {i}", false);
-            }
 
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Achievements Page TEXT", $"Page {page.PageID}");
 
