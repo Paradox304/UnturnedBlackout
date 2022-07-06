@@ -5248,6 +5248,10 @@ namespace UnturnedBlackout.Instances
         {
             AchievementMainPage = mainPage;
 
+            if (AchievementPageShower != null)
+            {
+                Plugin.Instance.StopCoroutine(AchievementPageShower);
+            }
 
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Achievements Previous BUTTON", false);
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Achievements Next BUTTON", false);
@@ -5268,10 +5272,6 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Achievements Previous BUTTON", achievementPages.Count > 1);
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Achievements Next BUTTON", achievementPages.Count > 1);
 
-            if (AchievementPageShower != null)
-            {
-                Plugin.Instance.StopCoroutine(AchievementPageShower);
-            }
             AchievementPageShower = Plugin.Instance.StartCoroutine(ShowAchievementSubPage(firstPage));
         }
 
@@ -5304,7 +5304,7 @@ namespace UnturnedBlackout.Instances
 
                 if (achievement.TryGetNextTier(out AchievementTier nextTier))
                 {
-                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Achievements Claimable {i}", achievement.Amount >= nextTier.TargetAmount);
+                    
                     var fillTxt = achievement.Amount == 0 ? " " : new string(' ', Math.Min(68, achievement.Amount * 68 / nextTier.TargetAmount));
 
                     switch (achievement.CurrentTier)
@@ -5323,6 +5323,8 @@ namespace UnturnedBlackout.Instances
                             break;
                     }
                 }
+
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Achievements Claimable {i}", nextTier != null && achievement.Amount >= nextTier.TargetAmount);
             }
         }
 
@@ -5376,13 +5378,17 @@ namespace UnturnedBlackout.Instances
         {
             if (!AchievementPages.TryGetValue(AchievementMainPage, out Dictionary<int, PageAchievement> achievementPages) || !achievementPages.TryGetValue(AchievementSubPage, out PageAchievement page))
             {
+                Logging.Debug($"Unable to find selected page with main page {AchievementMainPage} and sub page {AchievementSubPage}");
                 return;
             }
 
+            Logging.Debug("1");
             if (AchievementPageShower != null)
             {
+                Logging.Debug("2");
                 Plugin.Instance.StopCoroutine(AchievementPageShower);
             }
+            Logging.Debug("3");
             AchievementPageShower = Plugin.Instance.StartCoroutine(ShowAchievementSubPage(page));
         }
 
