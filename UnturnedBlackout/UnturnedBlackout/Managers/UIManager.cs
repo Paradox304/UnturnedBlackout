@@ -92,6 +92,9 @@ namespace UnturnedBlackout.Managers
         public const ushort GamemodePopupID = 27610;
         public const short GamemodePopupKey = 27610;
 
+        public const ushort QuestProgressionID = 27639;
+        public const short QuestProgressionKey = 27639;
+
         public UIManager()
         {
             KillFeedIcons = Config.Killfeed.FileData.KillFeedIcons.ToDictionary(k => k.WeaponID);
@@ -548,6 +551,18 @@ namespace UnturnedBlackout.Managers
             EffectManager.sendUIEffectText(GamemodePopupKey, player.TransportConnection, true, "GAMEMODE Description TEXT", Plugin.Instance.Translate($"{gameMode}_Desc").ToRich());
         }
 
+        public void SendQuestProgression(GamePlayer player, List<PlayerQuest> questsUpdate)
+        {
+            EffectManager.sendUIEffect(QuestProgressionID, QuestProgressionKey, player.TransportConnection, true);
+            foreach (var quest in questsUpdate)
+            {
+                var i = (int)quest.Quest.QuestTier;
+                EffectManager.sendUIEffectVisibility(QuestProgressionKey, player.TransportConnection, true, $"QUEST Item {i}", true);
+                EffectManager.sendUIEffectText(QuestProgressionKey, player.TransportConnection, true, $"QUEST Description {i} TEXT", quest.Quest.QuestDesc);
+                EffectManager.sendUIEffectText(QuestProgressionKey, player.TransportConnection, true, $"QUEST Target {i} TEXT", $"{quest.Amount} / {quest.Quest.TargetAmount}");
+                EffectManager.sendUIEffectText(QuestProgressionKey, player.TransportConnection, true, $"QUEST Progress {i} Fill", quest.Amount == 0 ? " " : new string(' ', Math.Min(267, quest.Amount * 267 / quest.Quest.TargetAmount)));
+            }
+        }
 
         // FFA RELATED UI
 
