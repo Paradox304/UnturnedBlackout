@@ -10,12 +10,15 @@ namespace UnturnedBlackout.Models.FFA
         public float Y { get; set; }
         public float Z { get; set; }
 
-        public FFASpawnPoint(int locationID, float x, float y, float z)
+        public float Yaw { get; set; }
+
+        public FFASpawnPoint(int locationID, float x, float y, float z, float yaw)
         {
             LocationID = locationID;
             X = x;
             Y = y;
             Z = z;
+            Yaw = yaw;
         }
 
         public Vector3 GetSpawnPoint()

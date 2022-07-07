@@ -11,13 +11,16 @@ namespace UnturnedBlackout.Models.TDM
         public float Y { get; set; }
         public float Z { get; set; }
 
-        public TDMSpawnPoint(int locationID, int groupID, float x, float y, float z)
+        public float Yaw { get; set; }
+
+        public TDMSpawnPoint(int locationID, int groupID, float x, float y, float z, float yaw)
         {
             LocationID = locationID;
             GroupID = groupID;
             X = x;
             Y = y;
             Z = z;
+            Yaw = yaw;
         }
 
         public Vector3 GetSpawnPoint()

@@ -753,7 +753,7 @@ namespace UnturnedBlackout.GameTypes
             }
 
             var spawnPoint = spawnPoints[UnityEngine.Random.Range(0, spawnPoints.Count)];
-            player.GamePlayer.Player.Player.teleportToLocationUnsafe(spawnPoint.GetSpawnPoint(), 0);
+            player.GamePlayer.Player.Player.teleportToLocationUnsafe(spawnPoint.GetSpawnPoint(), spawnPoint.Yaw);
             player.GamePlayer.GiveSpawnProtection(Config.TDM.FileData.SpawnProtectionSeconds);
         }
 

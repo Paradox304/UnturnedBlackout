@@ -668,7 +668,7 @@ namespace UnturnedBlackout.GameTypes
             {
                 Plugin.Instance.StartCoroutine(SpawnUsedUp(spawnPoint));
             }
-            player.GamePlayer.Player.Player.teleportToLocationUnsafe(spawnPoint.GetSpawnPoint(), 0);
+            player.GamePlayer.Player.Player.teleportToLocationUnsafe(spawnPoint.GetSpawnPoint(), spawnPoint.Yaw);
             player.GamePlayer.GiveSpawnProtection(Config.FFA.FileData.SpawnProtectionSeconds);
         }
 
