@@ -5242,6 +5242,12 @@ namespace UnturnedBlackout.Instances
         {
             MainPage = EMainPage.Achievements;
             SelectedAchievementMainPage(1);
+
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Achievements Page 1 TEXT", "Weapons");
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Achievements Page 2 TEXT", "Other");
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Achievements Page 3 BUTTON", false);
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Achievements Page 4 BUTTON", false);
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Achievements Page 5 BUTTON", false);
         }
 
         public void SelectedAchievementMainPage(int mainPage)

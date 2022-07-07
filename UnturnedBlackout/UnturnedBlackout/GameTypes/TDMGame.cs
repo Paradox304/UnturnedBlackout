@@ -884,19 +884,6 @@ namespace UnturnedBlackout.GameTypes
             {
                 m_SpawnSwitcher.Stop();
             }
-            var keys = SpawnPoints.Keys.ToList();
-            if (keys.Count == 0)
-            {
-                return;
-            }
-            var sp = BlueTeam.SpawnPoint;
-            keys.Remove(sp);
-            BlueTeam.SpawnPoint = keys[UnityEngine.Random.Range(0, keys.Count)];
-            keys.Add(sp);
-            keys.Remove(BlueTeam.SpawnPoint);
-            keys.Remove(RedTeam.SpawnPoint);
-            RedTeam.SpawnPoint = keys[UnityEngine.Random.Range(0, keys.Count)];
-            m_SpawnSwitcher.Start();
 
             if (RedTeam.m_CheckSpawnSwitch.Enabled)
             {
@@ -909,6 +896,39 @@ namespace UnturnedBlackout.GameTypes
                 BlueTeam.m_CheckSpawnSwitch.Stop();
                 BlueTeam.SpawnThreshold = 0;
             }
+
+            var keys = SpawnPoints.Keys.ToList();
+            if (keys.Count == 0)
+            {
+                return;
+            }
+
+            Logging.Debug($"Switching spawns, current spawn blue: {BlueTeam.SpawnPoint}, current spawn red: {RedTeam.SpawnPoint}");
+            var currentSpawn = (BlueTeam.SpawnPoint, RedTeam.SpawnPoint);
+            var forwardPossibleSpawn = (BlueTeam.SpawnPoint + 2, RedTeam.SpawnPoint + 2); // If blue has 0 and red has 1, the next possible group is 2 and 3
+            var backwardPossibleSpawn = (BlueTeam.SpawnPoint - 2, RedTeam.SpawnPoint - 2); // If blue has 2 and 3, the backward possible group is 0 and 1
+
+            // check if forward is possible
+            if (keys.Contains(forwardPossibleSpawn.Item1) && keys.Contains(forwardPossibleSpawn.Item2))
+            {
+                Logging.Debug($"Foward possible with blue: {forwardPossibleSpawn.Item1}, with red: {forwardPossibleSpawn.Item2}");
+                BlueTeam.SpawnPoint = forwardPossibleSpawn.Item1;
+                RedTeam.SpawnPoint = forwardPossibleSpawn.Item2;
+            } // Check if backward is possible
+            else if (keys.Contains(backwardPossibleSpawn.Item1) && keys.Contains(backwardPossibleSpawn.Item2))
+            {
+                Logging.Debug($"Foward possible with blue: {backwardPossibleSpawn.Item1}, with red: {backwardPossibleSpawn.Item2}");
+                BlueTeam.SpawnPoint = backwardPossibleSpawn.Item1;
+                RedTeam.SpawnPoint = backwardPossibleSpawn.Item2;
+            } // If all else fails, switch the current spawn
+            else
+            {
+                Logging.Debug("No forward and backward possible, switching the current spawns");
+                BlueTeam.SpawnPoint = currentSpawn.Item2;
+                RedTeam.SpawnPoint = currentSpawn.Item1;
+            }
+
+            m_SpawnSwitcher.Start();
         }
 
         public TDMPlayer GetTDMPlayer(CSteamID steamID)
