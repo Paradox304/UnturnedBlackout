@@ -663,6 +663,8 @@ namespace UnturnedBlackout.GameTypes
 
         public void SpawnPlayer(FFAPlayer player, bool seperateSpawnPoint)
         {
+            if (SpawnPoints.Count == 0) return;
+
             var spawnPoint = seperateSpawnPoint ? SpawnPoints[Players.IndexOf(player)] : (SpawnPoints.Count > 0 ? SpawnPoints[UnityEngine.Random.Range(0, SpawnPoints.Count)] : UnavailableSpawnPoints[UnityEngine.Random.Range(0, UnavailableSpawnPoints.Count)]);
             if (!seperateSpawnPoint && SpawnPoints.Count > 0)
             {
