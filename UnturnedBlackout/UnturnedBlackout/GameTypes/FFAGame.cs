@@ -666,6 +666,7 @@ namespace UnturnedBlackout.GameTypes
             if (SpawnPoints.Count == 0) return;
 
             var spawnPoint = seperateSpawnPoint ? SpawnPoints[Players.IndexOf(player)] : (SpawnPoints.Count > 0 ? SpawnPoints[UnityEngine.Random.Range(0, SpawnPoints.Count)] : UnavailableSpawnPoints[UnityEngine.Random.Range(0, UnavailableSpawnPoints.Count)]);
+            Logging.Debug($"Spawning {player.GamePlayer.Player.CharacterName} on {Location.LocationName}, spawnpoint found: x: {spawnPoint.X}, y: {spawnPoint.Y}, z: {spawnPoint.Z}, yaw: {spawnPoint.Yaw}");
             if (!seperateSpawnPoint && SpawnPoints.Count > 0)
             {
                 Plugin.Instance.StartCoroutine(SpawnUsedUp(spawnPoint));
