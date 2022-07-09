@@ -601,21 +601,23 @@ namespace UnturnedBlackout.GameTypes
             fPlayer.GamePlayer.OnRevived(Config.FFA.FileData.Kit, Config.FFA.FileData.TeamGloves);
         }
 
-        public override void OnPlayerRespawn(GamePlayer player, ref Vector3 respawnPosition)
+        public override void OnPlayerRespawn(GamePlayer player, ref Vector3 respawnPosition, ref float yaw)
         {
-            if (GetFFAPlayer(player.Player) == null)
+            if (!IsPlayerIngame(player.SteamID))
             {
                 return;
             }
 
-            var spawnPoint = SpawnPoints.Count > 0 ? SpawnPoints[UnityEngine.Random.Range(0, SpawnPoints.Count)] : UnavailableSpawnPoints[UnityEngine.Random.Range(0, UnavailableSpawnPoints.Count)];
+            /*var spawnPoint = SpawnPoints.Count > 0 ? SpawnPoints[UnityEngine.Random.Range(0, SpawnPoints.Count)] : UnavailableSpawnPoints[UnityEngine.Random.Range(0, UnavailableSpawnPoints.Count)];
 
             if (SpawnPoints.Count > 0)
             {
                 Plugin.Instance.StartCoroutine(SpawnUsedUp(spawnPoint));
-            }
+            }*/
 
+            var spawnPoint = GetFreeSpawn();
             respawnPosition = spawnPoint.GetSpawnPoint();
+            yaw = spawnPoint.Yaw;
             player.GiveSpawnProtection(Config.FFA.FileData.SpawnProtectionSeconds);
         }
 
@@ -668,12 +670,14 @@ namespace UnturnedBlackout.GameTypes
         {
             if (SpawnPoints.Count == 0) return;
 
-            var spawnPoint = seperateSpawnPoint ? SpawnPoints[Players.IndexOf(player)] : (SpawnPoints.Count > 0 ? SpawnPoints[UnityEngine.Random.Range(0, SpawnPoints.Count)] : UnavailableSpawnPoints[UnityEngine.Random.Range(0, UnavailableSpawnPoints.Count)]);
+            /*var spawnPoint = seperateSpawnPoint ? SpawnPoints[Players.IndexOf(player)] : (SpawnPoints.Count > 0 ? SpawnPoints[UnityEngine.Random.Range(0, SpawnPoints.Count)] : UnavailableSpawnPoints[UnityEngine.Random.Range(0, UnavailableSpawnPoints.Count)]);
             Logging.Debug($"Spawning {player.GamePlayer.Player.CharacterName} on {Location.LocationName}, spawnpoint found: x: {spawnPoint.X}, y: {spawnPoint.Y}, z: {spawnPoint.Z}, yaw: {spawnPoint.Yaw}");
             if (!seperateSpawnPoint && SpawnPoints.Count > 0)
             {
                 Plugin.Instance.StartCoroutine(SpawnUsedUp(spawnPoint));
-            }
+            }*/
+
+            var spawnPoint = GetFreeSpawn();
             player.GamePlayer.Player.Player.teleportToLocationUnsafe(spawnPoint.GetSpawnPoint(), spawnPoint.Yaw);
             player.GamePlayer.GiveSpawnProtection(Config.FFA.FileData.SpawnProtectionSeconds);
         }
@@ -804,6 +808,17 @@ namespace UnturnedBlackout.GameTypes
         {
             return PlayersLookup.TryGetValue(player.channel.owner.playerID.steamID, out FFAPlayer fPlayer) ? fPlayer : null;
         }
+
+        public FFASpawnPoint GetFreeSpawn()
+        {
+            return SpawnPoints.FirstOrDefault(k => !IsPlayerNearPosition(k.GetSpawnPoint(), Location.PositionCheck)) ?? SpawnPoints[UnityEngine.Random.Range(0, SpawnPoints.Count)];
+        }
+
+        public bool IsPlayerNearPosition(Vector3 position, float radius)
+        {
+            return Players.Exists(k => (k.GamePlayer.Player.Position - position).sqrMagnitude < radius);
+        }
+
 
         public override bool IsPlayerIngame(CSteamID steamID)
         {

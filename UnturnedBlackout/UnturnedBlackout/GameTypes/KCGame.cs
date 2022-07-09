@@ -652,7 +652,7 @@ namespace UnturnedBlackout.GameTypes
             kPlayer.GamePlayer.OnRevived(kPlayer.Team.Info.TeamKits[UnityEngine.Random.Range(0, kPlayer.Team.Info.TeamKits.Count)], kPlayer.Team.Info.TeamGloves);
         }
 
-        public override void OnPlayerRespawn(GamePlayer player, ref Vector3 respawnPosition)
+        public override void OnPlayerRespawn(GamePlayer player, ref Vector3 respawnPosition, ref float yaw)
         {
             var kPlayer = GetKCPlayer(player.Player);
             if (kPlayer == null)
@@ -672,6 +672,8 @@ namespace UnturnedBlackout.GameTypes
 
             var spawnPoint = spawnPoints[UnityEngine.Random.Range(0, spawnPoints.Count)];
             respawnPosition = spawnPoint.GetSpawnPoint();
+            yaw = spawnPoint.Yaw;
+
             player.GiveSpawnProtection(Config.KC.FileData.SpawnProtectionSeconds);
         }
 

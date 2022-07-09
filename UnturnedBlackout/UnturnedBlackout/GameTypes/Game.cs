@@ -131,7 +131,7 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
-            OnPlayerRespawn(gPlayer, ref position);
+            OnPlayerRespawn(gPlayer, ref position, ref yaw);
         }
 
         private void OnTakeItem(Player player, byte x, byte y, uint instanceID, byte to_x, byte to_y, byte to_rot, byte to_page, ItemData itemData, ref bool shouldAllow)
@@ -285,7 +285,7 @@ namespace UnturnedBlackout.GameTypes
 
         public abstract bool IsPlayerIngame(CSteamID steamID);
         public abstract void OnPlayerRevived(UnturnedPlayer player);
-        public abstract void OnPlayerRespawn(GamePlayer player, ref Vector3 respawnPosition);
+        public abstract void OnPlayerRespawn(GamePlayer player, ref Vector3 respawnPosition, ref float yaw);
         public abstract void OnPlayerDead(Player player, CSteamID killer, ELimb limb, EDeathCause cause);
         public abstract void OnPlayerDamage(ref DamagePlayerParameters parameters, ref bool shouldAllow);
         public abstract IEnumerator AddPlayerToGame(GamePlayer player);

@@ -366,7 +366,7 @@ namespace UnturnedBlackout.GameTypes
                 isFlagCarrier = true;
                 if (player.clothing.backpack == otherTeam.FlagID)
                 {
-                    ItemManager.dropItem(new Item(otherTeam.FlagID, true), player.transform.position, true, true, true);
+                    ItemManager.dropItem(new Item(otherTeam.FlagID, true), cause == EDeathCause.WATER ? otherTeam.FlagSP : player.transform.position, true, true, true);
                 }
                 cPlayer.IsCarryingFlag = false;
                 cPlayer.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1f);
@@ -718,7 +718,7 @@ namespace UnturnedBlackout.GameTypes
             cPlayer.GamePlayer.OnRevived(cPlayer.Team.Info.TeamKits[UnityEngine.Random.Range(0, cPlayer.Team.Info.TeamKits.Count)], cPlayer.Team.Info.TeamGloves);
         }
 
-        public override void OnPlayerRespawn(GamePlayer player, ref Vector3 respawnPosition)
+        public override void OnPlayerRespawn(GamePlayer player, ref Vector3 respawnPosition, ref float yaw)
         {
             var cPlayer = GetCTFPlayer(player.Player);
             if (cPlayer == null)
@@ -738,6 +738,7 @@ namespace UnturnedBlackout.GameTypes
 
             var spawnPoint = spawnPoints[UnityEngine.Random.Range(0, spawnPoints.Count)];
             respawnPosition = spawnPoint.GetSpawnPoint();
+            yaw = spawnPoint.Yaw;
             player.GiveSpawnProtection(Config.CTF.FileData.SpawnProtectionSeconds);
         }
 

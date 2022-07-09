@@ -20,13 +20,15 @@ namespace UnturnedBlackout.Models.Global
         public int TDMMinCount { get; set; }
         public int KCMinCount { get; set; }
         public int CTFMinCount { get; set; }
+       
+        public float PositionCheck { get; set; }
 
         public ArenaLocation()
         {
 
         }
 
-        public ArenaLocation(int locationID, string locationName, string imageLink, int navMesh, int blueTeamID, int redTeamID, int fFACount, int tDMCount, int kCCount, int cTFCount, int fFAMinCount, int tDMMinCount, int kCMinCount, int cTFMinCount)
+        public ArenaLocation(int locationID, string locationName, string imageLink, int navMesh, int blueTeamID, int redTeamID, int fFACount, int tDMCount, int kCCount, int cTFCount, int fFAMinCount, int tDMMinCount, int kCMinCount, int cTFMinCount, float positionCheck)
         {
             LocationID = locationID;
             LocationName = locationName;
@@ -42,40 +44,31 @@ namespace UnturnedBlackout.Models.Global
             TDMMinCount = tDMMinCount;
             KCMinCount = kCMinCount;
             CTFMinCount = cTFMinCount;
+            PositionCheck = positionCheck;
         }
 
         public int GetMaxPlayers(EGameType type)
         {
-            switch (type)
+            return type switch
             {
-                case EGameType.FFA:
-                    return FFACount;
-                case EGameType.TDM:
-                    return TDMCount;
-                case EGameType.KC:
-                    return KCCount;
-                case EGameType.CTF:
-                    return CTFCount;
-                default:
-                    return 0;
-            }
+                EGameType.FFA => FFACount,
+                EGameType.TDM => TDMCount,
+                EGameType.KC => KCCount,
+                EGameType.CTF => CTFCount,
+                _ => 0,
+            };
         }
 
         public int GetMinPlayers(EGameType type)
         {
-            switch (type)
+            return type switch
             {
-                case EGameType.FFA:
-                    return FFAMinCount;
-                case EGameType.TDM:
-                    return TDMMinCount;
-                case EGameType.KC:
-                    return KCMinCount;
-                case EGameType.CTF:
-                    return CTFMinCount;
-                default:
-                    return 0;
-            }
+                EGameType.FFA => FFAMinCount,
+                EGameType.TDM => TDMMinCount,
+                EGameType.KC => KCMinCount,
+                EGameType.CTF => CTFMinCount,
+                _ => 0,
+            };
         }
     }
 }
