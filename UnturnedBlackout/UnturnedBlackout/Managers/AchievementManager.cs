@@ -16,11 +16,7 @@ namespace UnturnedBlackout.Managers
             Logging.Debug($"Checking achievement {achievementType} for {steamID} with conditions {achievementConditions.Count}");
 
             var db = Plugin.Instance.DBManager;
-            if (!db.PlayerData.TryGetValue(steamID, out PlayerData data))
-            {
-                Logging.Debug($"Error finding player data for player with steamID {steamID}");
-                return;
-            }
+            var data = player.Data;
 
             if (!data.AchievementsSearchByType.TryGetValue(achievementType, out List<PlayerAchievement> achievements))
             {

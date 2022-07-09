@@ -625,10 +625,7 @@ namespace UnturnedBlackout.Managers
             {
                 var player = players[i];
                 bool isPlayer = player == ply;
-                if (!Plugin.Instance.DBManager.PlayerData.TryGetValue(player.GamePlayer.SteamID, out PlayerData data))
-                {
-                    return;
-                }
+                var data = player.GamePlayer.Data;
 
                 var kills = (decimal)player.Kills;
                 var deaths = (decimal)player.Deaths;
@@ -734,10 +731,7 @@ namespace UnturnedBlackout.Managers
             {
                 var ply = bluePlayers[i];
                 bool isPlayer = player == ply;
-                if (!Plugin.Instance.DBManager.PlayerData.TryGetValue(ply.GamePlayer.SteamID, out PlayerData data))
-                {
-                    continue;
-                }
+                var data = ply.GamePlayer.Data;
 
                 var kills = (decimal)ply.Kills;
                 var deaths = (decimal)ply.Deaths;
@@ -759,10 +753,7 @@ namespace UnturnedBlackout.Managers
             {
                 var ply = redPlayers[i];
                 bool isPlayer = player == ply;
-                if (!Plugin.Instance.DBManager.PlayerData.TryGetValue(ply.GamePlayer.SteamID, out PlayerData data))
-                {
-                    continue;
-                }
+                var data = ply.GamePlayer.Data;
 
                 var kills = (decimal)ply.Kills;
                 var deaths = (decimal)ply.Deaths;
@@ -867,10 +858,7 @@ namespace UnturnedBlackout.Managers
             {
                 var ply = bluePlayers[i];
                 bool isPlayer = player == ply;
-                if (!Plugin.Instance.DBManager.PlayerData.TryGetValue(ply.GamePlayer.SteamID, out PlayerData data))
-                {
-                    continue;
-                }
+                var data = ply.GamePlayer.Data;
 
                 var kills = (decimal)ply.Kills;
                 var deaths = (decimal)ply.Deaths;
@@ -894,10 +882,7 @@ namespace UnturnedBlackout.Managers
             {
                 var ply = redPlayers[i];
                 bool isPlayer = player == ply;
-                if (!Plugin.Instance.DBManager.PlayerData.TryGetValue(ply.GamePlayer.SteamID, out PlayerData data))
-                {
-                    continue;
-                }
+                var data = ply.GamePlayer.Data;
 
                 var kills = (decimal)ply.Kills;
                 var deaths = (decimal)ply.Deaths;
@@ -1053,10 +1038,7 @@ namespace UnturnedBlackout.Managers
             {
                 var ply = bluePlayers[i];
                 bool isPlayer = player == ply;
-                if (!Plugin.Instance.DBManager.PlayerData.TryGetValue(ply.GamePlayer.SteamID, out PlayerData data))
-                {
-                    continue;
-                }
+                var data = ply.GamePlayer.Data;
 
                 var kills = (decimal)ply.Kills;
                 var deaths = (decimal)ply.Deaths;
@@ -1080,10 +1062,7 @@ namespace UnturnedBlackout.Managers
             {
                 var ply = redPlayers[i];
                 bool isPlayer = player == ply;
-                if (!Plugin.Instance.DBManager.PlayerData.TryGetValue(ply.GamePlayer.SteamID, out PlayerData data))
-                {
-                    continue;
-                }
+                var data = ply.GamePlayer.Data;
 
                 var kills = (decimal)ply.Kills;
                 var deaths = (decimal)ply.Deaths;

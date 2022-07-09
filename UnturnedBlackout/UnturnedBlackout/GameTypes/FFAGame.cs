@@ -635,7 +635,8 @@ namespace UnturnedBlackout.GameTypes
             isVisible = false;
             TaskDispatcher.QueueOnMainThread(() =>
             {
-                if (!Plugin.Instance.DBManager.PlayerData.TryGetValue(player.SteamID, out PlayerData data) || data.IsMuted)
+                var data = player.Data;
+                if (data.IsMuted)
                 {
                     var expiryTime = data.MuteExpiry.UtcDateTime - DateTime.UtcNow;
                     Utility.Say(player.Player, $"<color=red>You are muted for{(expiryTime.Days == 0 ? "" : $" {expiryTime.Days} Days ")}{(expiryTime.Hours == 0 ? "" : $" {expiryTime.Hours} Hours")} {expiryTime.Minutes} Minutes");

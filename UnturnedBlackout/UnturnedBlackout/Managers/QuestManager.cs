@@ -14,11 +14,7 @@ namespace UnturnedBlackout.Managers
         {
             var steamID = player.Player.CSteamID;
             var db = Plugin.Instance.DBManager;
-            if (!db.PlayerData.TryGetValue(steamID, out PlayerData data))
-            {
-                Logging.Debug($"Error finding player data for player with steamID {steamID}");
-                return;
-            }
+            var data = player.Data;
 
             if (!data.QuestsSearchByType.TryGetValue(questType, out List<PlayerQuest> quests))
             {

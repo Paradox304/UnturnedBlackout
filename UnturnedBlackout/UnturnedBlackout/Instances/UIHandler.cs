@@ -741,13 +741,8 @@ namespace UnturnedBlackout.Instances
 
         public void SetupMainMenu()
         {
-            if (!Plugin.Instance.DBManager.PlayerData.TryGetValue(SteamID, out PlayerData data))
-            {
-                return;
-            }
-
-            EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Player Icon", data.AvatarLink);
-            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Player Name", data.SteamName);
+            EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Player Icon", PlayerData.AvatarLink);
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Player Name", PlayerData.SteamName);
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Unbox BUTTON", false);
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Store BUTTON", false);
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Battlepass BUTTON", false);
@@ -756,7 +751,7 @@ namespace UnturnedBlackout.Instances
             ClearChat();
             ShowXP();
             ShowQuestCompletion();
-            OnMusicChanged(data.Music);
+            OnMusicChanged(PlayerData.Music);
         }
 
         public void ReloadMainMenu()
@@ -766,18 +761,13 @@ namespace UnturnedBlackout.Instances
 
         public void ShowXP()
         {
-            if (!Plugin.Instance.DBManager.PlayerData.TryGetValue(SteamID, out PlayerData data))
-            {
-                return;
-            }
-
             var ui = Plugin.Instance.UIManager;
-            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER XP Num", Plugin.Instance.Translate("Level_Show", data.Level).ToRich());
-            EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER XP Icon", Plugin.Instance.DBManager.Levels.TryGetValue(data.Level, out XPLevel level) ? level.IconLinkMedium : "");
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER XP Num", Plugin.Instance.Translate("Level_Show", PlayerData.Level).ToRich());
+            EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER XP Icon", Plugin.Instance.DBManager.Levels.TryGetValue(PlayerData.Level, out XPLevel level) ? level.IconLinkMedium : "");
             int spaces = 0;
-            if (data.TryGetNeededXP(out int neededXP))
+            if (PlayerData.TryGetNeededXP(out int neededXP))
             {
-                spaces = Math.Min(176, neededXP == 0 ? 0 : data.XP * 176 / neededXP);
+                spaces = Math.Min(176, neededXP == 0 ? 0 : PlayerData.XP * 176 / neededXP);
             }
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER XP Bar Fill", spaces == 0 ? " " : new string(' ', spaces));
         }
@@ -3963,12 +3953,6 @@ namespace UnturnedBlackout.Instances
 
         public void BuySelectedItem()
         {
-            if (!DB.PlayerData.TryGetValue(Player.CSteamID, out PlayerData data))
-            {
-                Logging.Debug($"Error finding player data with steam id {Player.CSteamID}");
-                return;
-            }
-
             if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
             {
                 Logging.Debug($"Error finding loadout with id {LoadoutID} for {Player.CharacterName}");
@@ -3987,7 +3971,7 @@ namespace UnturnedBlackout.Instances
 
                         ThreadPool.QueueUserWorkItem(async (o) =>
                         {
-                            if (data.Credits >= gun.Gun.BuyPrice && !gun.IsBought)
+                            if (PlayerData.Credits >= gun.Gun.BuyPrice && !gun.IsBought)
                             {
                                 await DB.DecreasePlayerCreditsAsync(Player.CSteamID, gun.Gun.BuyPrice);
                                 await DB.UpdatePlayerGunBoughtAsync(Player.CSteamID, gun.Gun.GunID, true);
@@ -4021,7 +4005,7 @@ namespace UnturnedBlackout.Instances
 
                         ThreadPool.QueueUserWorkItem(async (o) =>
                         {
-                            if (data.Credits >= attachment.Attachment.BuyPrice && !attachment.IsBought)
+                            if (PlayerData.Credits >= attachment.Attachment.BuyPrice && !attachment.IsBought)
                             {
                                 await DB.DecreasePlayerCreditsAsync(Player.CSteamID, attachment.Attachment.BuyPrice);
                                 await DB.UpdatePlayerGunAttachmentBoughtAsync(Player.CSteamID, gun.Gun.GunID, attachment.Attachment.AttachmentID, true);
@@ -4046,7 +4030,7 @@ namespace UnturnedBlackout.Instances
 
                         ThreadPool.QueueUserWorkItem(async (o) =>
                         {
-                            if (data.Credits >= gun.Gun.BuyPrice && !gun.IsBought)
+                            if (PlayerData.Credits >= gun.Gun.BuyPrice && !gun.IsBought)
                             {
                                 await DB.DecreasePlayerCreditsAsync(Player.CSteamID, gun.Gun.BuyPrice);
                                 await DB.UpdatePlayerGunBoughtAsync(Player.CSteamID, gun.Gun.GunID, true);
@@ -4079,7 +4063,7 @@ namespace UnturnedBlackout.Instances
 
                         ThreadPool.QueueUserWorkItem(async (o) =>
                         {
-                            if (data.Credits >= attachment.Attachment.BuyPrice && !attachment.IsBought)
+                            if (PlayerData.Credits >= attachment.Attachment.BuyPrice && !attachment.IsBought)
                             {
                                 await DB.DecreasePlayerCreditsAsync(Player.CSteamID, attachment.Attachment.BuyPrice);
                                 await DB.UpdatePlayerGunAttachmentBoughtAsync(Player.CSteamID, gun.Gun.GunID, attachment.Attachment.AttachmentID, true);
@@ -4105,7 +4089,7 @@ namespace UnturnedBlackout.Instances
 
                         ThreadPool.QueueUserWorkItem(async (o) =>
                         {
-                            if (data.Credits >= gunCharm.GunCharm.BuyPrice && !gunCharm.IsBought)
+                            if (PlayerData.Credits >= gunCharm.GunCharm.BuyPrice && !gunCharm.IsBought)
                             {
                                 await DB.DecreasePlayerCreditsAsync(Player.CSteamID, gunCharm.GunCharm.BuyPrice);
                                 await DB.UpdatePlayerGunCharmBoughtAsync(Player.CSteamID, gunCharm.GunCharm.CharmID, true);
@@ -4130,7 +4114,7 @@ namespace UnturnedBlackout.Instances
 
                         ThreadPool.QueueUserWorkItem(async (o) =>
                         {
-                            if (data.Credits >= knife.Knife.BuyPrice && !knife.IsBought)
+                            if (PlayerData.Credits >= knife.Knife.BuyPrice && !knife.IsBought)
                             {
                                 await DB.DecreasePlayerCreditsAsync(Player.CSteamID, knife.Knife.BuyPrice);
                                 await DB.UpdatePlayerKnifeBoughtAsync(Player.CSteamID, knife.Knife.KnifeID, true);
@@ -4155,7 +4139,7 @@ namespace UnturnedBlackout.Instances
 
                         ThreadPool.QueueUserWorkItem(async (o) =>
                         {
-                            if (data.Credits >= gadget.Gadget.BuyPrice && !gadget.IsBought)
+                            if (PlayerData.Credits >= gadget.Gadget.BuyPrice && !gadget.IsBought)
                             {
                                 await DB.DecreasePlayerCreditsAsync(Player.CSteamID, gadget.Gadget.BuyPrice);
                                 await DB.UpdatePlayerGadgetBoughtAsync(Player.CSteamID, gadget.Gadget.GadgetID, true);
@@ -4180,7 +4164,7 @@ namespace UnturnedBlackout.Instances
 
                         ThreadPool.QueueUserWorkItem(async (o) =>
                         {
-                            if (data.Credits >= gadget.Gadget.BuyPrice && !gadget.IsBought)
+                            if (PlayerData.Credits >= gadget.Gadget.BuyPrice && !gadget.IsBought)
                             {
                                 await DB.DecreasePlayerCreditsAsync(Player.CSteamID, gadget.Gadget.BuyPrice);
                                 await DB.UpdatePlayerGadgetBoughtAsync(Player.CSteamID, gadget.Gadget.GadgetID, true);
@@ -4207,7 +4191,7 @@ namespace UnturnedBlackout.Instances
 
                         ThreadPool.QueueUserWorkItem(async (o) =>
                         {
-                            if (data.Credits >= perk.Perk.BuyPrice && !perk.IsBought)
+                            if (PlayerData.Credits >= perk.Perk.BuyPrice && !perk.IsBought)
                             {
                                 await DB.DecreasePlayerCreditsAsync(Player.CSteamID, perk.Perk.BuyPrice);
                                 await DB.UpdatePlayerPerkBoughtAsync(Player.CSteamID, perk.Perk.PerkID, true);
@@ -4232,7 +4216,7 @@ namespace UnturnedBlackout.Instances
 
                         ThreadPool.QueueUserWorkItem(async (o) =>
                         {
-                            if (data.Credits >= killstreak.Killstreak.BuyPrice && !killstreak.IsBought)
+                            if (PlayerData.Credits >= killstreak.Killstreak.BuyPrice && !killstreak.IsBought)
                             {
                                 await DB.DecreasePlayerCreditsAsync(Player.CSteamID, killstreak.Killstreak.BuyPrice);
                                 await DB.UpdatePlayerKillstreakBoughtAsync(Player.CSteamID, killstreak.Killstreak.KillstreakID, true);
@@ -4257,7 +4241,7 @@ namespace UnturnedBlackout.Instances
 
                         ThreadPool.QueueUserWorkItem(async (o) =>
                         {
-                            if (data.Credits >= card.Card.BuyPrice && !card.IsBought)
+                            if (PlayerData.Credits >= card.Card.BuyPrice && !card.IsBought)
                             {
                                 await DB.DecreasePlayerCreditsAsync(Player.CSteamID, card.Card.BuyPrice);
                                 await DB.UpdatePlayerCardBoughtAsync(Player.CSteamID, card.Card.CardID, true);
@@ -4282,7 +4266,7 @@ namespace UnturnedBlackout.Instances
 
                         ThreadPool.QueueUserWorkItem(async (o) =>
                         {
-                            if (data.Credits >= glove.Glove.BuyPrice && !glove.IsBought)
+                            if (PlayerData.Credits >= glove.Glove.BuyPrice && !glove.IsBought)
                             {
                                 await DB.DecreasePlayerCreditsAsync(Player.CSteamID, glove.Glove.BuyPrice);
                                 await DB.UpdatePlayerGloveBoughtAsync(Player.CSteamID, glove.Glove.GloveID, true);
@@ -4301,12 +4285,6 @@ namespace UnturnedBlackout.Instances
 
         public void UnlockSelectedItem()
         {
-            if (!DB.PlayerData.TryGetValue(Player.CSteamID, out PlayerData data))
-            {
-                Logging.Debug($"Error finding player data with steam id {Player.CSteamID}");
-                return;
-            }
-
             if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
             {
                 Logging.Debug($"Error finding loadout with id {LoadoutID} for {Player.CharacterName}");
@@ -4325,9 +4303,9 @@ namespace UnturnedBlackout.Instances
 
                         ThreadPool.QueueUserWorkItem(async (o) =>
                         {
-                            if (data.Coins >= gun.Gun.GetCoins(data.Level) && !gun.IsBought && gun.Gun.LevelRequirement > PlayerData.Level)
+                            if (PlayerData.Coins >= gun.Gun.GetCoins(PlayerData.Level) && !gun.IsBought && gun.Gun.LevelRequirement > PlayerData.Level)
                             {
-                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, gun.Gun.GetCoins(data.Level));
+                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, gun.Gun.GetCoins(PlayerData.Level));
                                 await DB.UpdatePlayerGunBoughtAsync(Player.CSteamID, gun.Gun.GunID, true);
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
@@ -4359,7 +4337,7 @@ namespace UnturnedBlackout.Instances
 
                         ThreadPool.QueueUserWorkItem(async (o) =>
                         {
-                            if (data.Coins >= attachment.GetCoins(gun.Level) && !attachment.IsBought && attachment.LevelRequirement > gun.Level)
+                            if (PlayerData.Coins >= attachment.GetCoins(gun.Level) && !attachment.IsBought && attachment.LevelRequirement > gun.Level)
                             {
                                 await DB.DecreasePlayerCoinsAsync(Player.CSteamID, attachment.GetCoins(gun.Level));
                                 await DB.UpdatePlayerGunAttachmentBoughtAsync(Player.CSteamID, gun.Gun.GunID, attachment.Attachment.AttachmentID, true);
@@ -4384,9 +4362,9 @@ namespace UnturnedBlackout.Instances
 
                         ThreadPool.QueueUserWorkItem(async (o) =>
                         {
-                            if (data.Coins >= gun.Gun.GetCoins(data.Level) && !gun.IsBought && gun.Gun.LevelRequirement > PlayerData.Level)
+                            if (PlayerData.Coins >= gun.Gun.GetCoins(PlayerData.Level) && !gun.IsBought && gun.Gun.LevelRequirement > PlayerData.Level)
                             {
-                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, gun.Gun.GetCoins(data.Level));
+                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, gun.Gun.GetCoins(PlayerData.Level));
                                 await DB.UpdatePlayerGunBoughtAsync(Player.CSteamID, gun.Gun.GunID, true);
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
@@ -4417,7 +4395,7 @@ namespace UnturnedBlackout.Instances
 
                         ThreadPool.QueueUserWorkItem(async (o) =>
                         {
-                            if (data.Coins >= attachment.GetCoins(gun.Level) && !attachment.IsBought && attachment.LevelRequirement > gun.Level)
+                            if (PlayerData.Coins >= attachment.GetCoins(gun.Level) && !attachment.IsBought && attachment.LevelRequirement > gun.Level)
                             {
                                 await DB.DecreasePlayerCoinsAsync(Player.CSteamID, attachment.GetCoins(gun.Level));
                                 await DB.UpdatePlayerGunAttachmentBoughtAsync(Player.CSteamID, gun.Gun.GunID, attachment.Attachment.AttachmentID, true);
@@ -4443,9 +4421,9 @@ namespace UnturnedBlackout.Instances
 
                         ThreadPool.QueueUserWorkItem(async (o) =>
                         {
-                            if (data.Coins >= gunCharm.GunCharm.GetCoins(data.Level) && !gunCharm.IsBought && gunCharm.GunCharm.LevelRequirement > PlayerData.Level)
+                            if (PlayerData.Coins >= gunCharm.GunCharm.GetCoins(PlayerData.Level) && !gunCharm.IsBought && gunCharm.GunCharm.LevelRequirement > PlayerData.Level)
                             {
-                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, gunCharm.GunCharm.GetCoins(data.Level));
+                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, gunCharm.GunCharm.GetCoins(PlayerData.Level));
                                 await DB.UpdatePlayerGunCharmBoughtAsync(Player.CSteamID, gunCharm.GunCharm.CharmID, true);
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
@@ -4468,9 +4446,9 @@ namespace UnturnedBlackout.Instances
 
                         ThreadPool.QueueUserWorkItem(async (o) =>
                         {
-                            if (data.Coins >= knife.Knife.GetCoins(data.Level) && !knife.IsBought && knife.Knife.LevelRequirement > PlayerData.Level)
+                            if (PlayerData.Coins >= knife.Knife.GetCoins(PlayerData.Level) && !knife.IsBought && knife.Knife.LevelRequirement > PlayerData.Level)
                             {
-                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, knife.Knife.GetCoins(data.Level));
+                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, knife.Knife.GetCoins(PlayerData.Level));
                                 await DB.UpdatePlayerKnifeBoughtAsync(Player.CSteamID, knife.Knife.KnifeID, true);
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
@@ -4493,9 +4471,9 @@ namespace UnturnedBlackout.Instances
 
                         ThreadPool.QueueUserWorkItem(async (o) =>
                         {
-                            if (data.Coins >= gadget.Gadget.GetCoins(data.Level) && !gadget.IsBought && gadget.Gadget.LevelRequirement > PlayerData.Level)
+                            if (PlayerData.Coins >= gadget.Gadget.GetCoins(PlayerData.Level) && !gadget.IsBought && gadget.Gadget.LevelRequirement > PlayerData.Level)
                             {
-                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, gadget.Gadget.GetCoins(data.Level));
+                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, gadget.Gadget.GetCoins(PlayerData.Level));
                                 await DB.UpdatePlayerGadgetBoughtAsync(Player.CSteamID, gadget.Gadget.GadgetID, true);
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
@@ -4518,9 +4496,9 @@ namespace UnturnedBlackout.Instances
 
                         ThreadPool.QueueUserWorkItem(async (o) =>
                         {
-                            if (data.Coins >= gadget.Gadget.GetCoins(data.Level) && !gadget.IsBought && gadget.Gadget.LevelRequirement > PlayerData.Level)
+                            if (PlayerData.Coins >= gadget.Gadget.GetCoins(PlayerData.Level) && !gadget.IsBought && gadget.Gadget.LevelRequirement > PlayerData.Level)
                             {
-                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, gadget.Gadget.GetCoins(data.Level));
+                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, gadget.Gadget.GetCoins(PlayerData.Level));
                                 await DB.UpdatePlayerGadgetBoughtAsync(Player.CSteamID, gadget.Gadget.GadgetID, true);
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
@@ -4545,9 +4523,9 @@ namespace UnturnedBlackout.Instances
 
                         ThreadPool.QueueUserWorkItem(async (o) =>
                         {
-                            if (data.Coins >= perk.Perk.GetCoins(data.Level) && !perk.IsBought && perk.Perk.LevelRequirement > PlayerData.Level)
+                            if (PlayerData.Coins >= perk.Perk.GetCoins(PlayerData.Level) && !perk.IsBought && perk.Perk.LevelRequirement > PlayerData.Level)
                             {
-                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, perk.Perk.GetCoins(data.Level));
+                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, perk.Perk.GetCoins(PlayerData.Level));
                                 await DB.UpdatePlayerPerkBoughtAsync(Player.CSteamID, perk.Perk.PerkID, true);
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
@@ -4570,9 +4548,9 @@ namespace UnturnedBlackout.Instances
 
                         ThreadPool.QueueUserWorkItem(async (o) =>
                         {
-                            if (data.Coins >= killstreak.Killstreak.GetCoins(data.Level) && !killstreak.IsBought && killstreak.Killstreak.LevelRequirement > PlayerData.Level)
+                            if (PlayerData.Coins >= killstreak.Killstreak.GetCoins(PlayerData.Level) && !killstreak.IsBought && killstreak.Killstreak.LevelRequirement > PlayerData.Level)
                             {
-                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, killstreak.Killstreak.GetCoins(data.Level));
+                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, killstreak.Killstreak.GetCoins(PlayerData.Level));
                                 await DB.UpdatePlayerKillstreakBoughtAsync(Player.CSteamID, killstreak.Killstreak.KillstreakID, true);
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
@@ -4595,9 +4573,9 @@ namespace UnturnedBlackout.Instances
 
                         ThreadPool.QueueUserWorkItem(async (o) =>
                         {
-                            if (data.Coins >= card.Card.GetCoins(data.Level) && !card.IsBought && card.Card.LevelRequirement > PlayerData.Level)
+                            if (PlayerData.Coins >= card.Card.GetCoins(PlayerData.Level) && !card.IsBought && card.Card.LevelRequirement > PlayerData.Level)
                             {
-                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, card.Card.GetCoins(data.Level));
+                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, card.Card.GetCoins(PlayerData.Level));
                                 await DB.UpdatePlayerCardBoughtAsync(Player.CSteamID, card.Card.CardID, true);
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
@@ -4620,9 +4598,9 @@ namespace UnturnedBlackout.Instances
 
                         ThreadPool.QueueUserWorkItem(async (o) =>
                         {
-                            if (data.Coins >= glove.Glove.GetCoins(data.Level) && !glove.IsBought && glove.Glove.LevelRequirement > PlayerData.Level)
+                            if (PlayerData.Coins >= glove.Glove.GetCoins(PlayerData.Level) && !glove.IsBought && glove.Glove.LevelRequirement > PlayerData.Level)
                             {
-                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, glove.Glove.GetCoins(data.Level));
+                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, glove.Glove.GetCoins(PlayerData.Level));
                                 await DB.UpdatePlayerGloveBoughtAsync(Player.CSteamID, glove.Glove.GloveID, true);
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {

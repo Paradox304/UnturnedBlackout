@@ -49,10 +49,7 @@ namespace UnturnedBlackout.Models.FFA
 
         public void CheckKills()
         {
-            if (!Plugin.Instance.DBManager.PlayerData.TryGetValue(GamePlayer.SteamID, out PlayerData data))
-            {
-                return;
-            }
+            var data = GamePlayer.Data;
             data.CheckKillstreak(KillStreak);
             data.CheckMultipleKills(MultipleKills);
         }

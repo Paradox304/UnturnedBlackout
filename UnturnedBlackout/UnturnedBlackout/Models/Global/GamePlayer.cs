@@ -317,11 +317,7 @@ namespace UnturnedBlackout.Models.Global
         // Kill Card
         public void OnKilled(GamePlayer victim)
         {
-            if (!Plugin.Instance.DBManager.PlayerData.TryGetValue(victim.SteamID, out PlayerData victimData))
-            {
-                return;
-            }
-
+            var victimData = victim.Data;
             Plugin.Instance.UIManager.SendKillCard(this, victim, victimData);
         }
 
