@@ -236,6 +236,7 @@ namespace UnturnedBlackout.GameTypes
             Plugin.Instance.UIManager.SendPreEndingUI(cPlayer.GamePlayer);
             SpawnPlayer(cPlayer);
             Plugin.Instance.UIManager.ClearLoadingUI(player.Player);
+            Plugin.Instance.UIManager.SendVoiceChatUI(player);
 
             switch (GamePhase)
             {
@@ -297,6 +298,7 @@ namespace UnturnedBlackout.GameTypes
 
             Plugin.Instance.UIManager.ClearCTFHUD(player);
             Plugin.Instance.UIManager.ClearPreEndingUI(player);
+            Plugin.Instance.UIManager.ClearVoiceChatUI(player);
 
             if (GamePhase == EGamePhase.Starting)
             {

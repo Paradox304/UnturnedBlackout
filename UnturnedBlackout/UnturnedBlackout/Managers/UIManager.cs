@@ -95,6 +95,9 @@ namespace UnturnedBlackout.Managers
         public const ushort QuestProgressionID = 27639;
         public const short QuestProgressionKey = 27639;
 
+        public const ushort VoiceChatID = 27622;
+        public const short VoiceChatKey = 27622;
+
         public UIManager()
         {
             KillFeedIcons = Config.Killfeed.FileData.KillFeedIcons.ToDictionary(k => k.WeaponID);
@@ -150,6 +153,7 @@ namespace UnturnedBlackout.Managers
                 handler.HideUI();
             }
         }
+
 
         // ALL GAMES RELATED UI
         public void SendWaitingForPlayersUI(GamePlayer player, int playerCount, int waitingPlayers)
@@ -338,30 +342,13 @@ namespace UnturnedBlackout.Managers
             }
         }
 
-        public void SendVoiceChat(List<GamePlayer> players, EGameType type, bool isEnding, List<GamePlayer> playersTalking)
+        public void SendVoiceChatUI(GamePlayer player)
         {
-            short key = PreEndingUIKey;
-            if (!isEnding)
-            {
-                switch (type)
-                {
-                    case EGameType.FFA:
-                        key = FFAKey;
-                        break;
-                    case EGameType.TDM:
-                        key = TDMKey;
-                        break;
-                    case EGameType.KC:
-                        key = TDMKey;
-                        break;
-                    case EGameType.CTF:
-                        key = CTFKey;
-                        break;
-                    default:
-                        return;
-                }
-            }
+            EffectManager.sendUIEffect(VoiceChatID, VoiceChatKey, player.TransportConnection, true);
+        }
 
+        public void UpdateVoiceChatUI(List<GamePlayer> players, List<GamePlayer> playersTalking)
+        {
             var voiceChatText = "";
             foreach (var talking in playersTalking)
             {
@@ -373,8 +360,13 @@ namespace UnturnedBlackout.Managers
             }
             foreach (var player in players)
             {
-                EffectManager.sendUIEffectText(key, player.TransportConnection, true, "VoiceChatUsers", voiceChatText);
+                EffectManager.sendUIEffectText(VoiceChatKey, player.TransportConnection, true, "VoiceChatUsers", voiceChatText);
             }
+        }
+
+        public void ClearVoiceChatUI(GamePlayer player)
+        {
+            EffectManager.askEffectClearByID(VoiceChatID, player.TransportConnection);
         }
 
         public void SendDeathUI(GamePlayer victim, GamePlayer killer, PlayerData killerData)

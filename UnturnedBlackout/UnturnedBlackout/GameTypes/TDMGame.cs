@@ -220,6 +220,8 @@ namespace UnturnedBlackout.GameTypes
             Plugin.Instance.UIManager.SendPreEndingUI(tPlayer.GamePlayer);
             SpawnPlayer(tPlayer);
             Plugin.Instance.UIManager.ClearLoadingUI(player.Player);
+            Plugin.Instance.UIManager.SendVoiceChatUI(player);
+
             switch (GamePhase)
             {
                 case EGamePhase.WaitingForPlayers:
@@ -280,6 +282,7 @@ namespace UnturnedBlackout.GameTypes
 
             Plugin.Instance.UIManager.ClearTDMHUD(player);
             Plugin.Instance.UIManager.ClearPreEndingUI(player);
+            Plugin.Instance.UIManager.ClearVoiceChatUI(player);
 
             if (GamePhase == EGamePhase.Starting)
             {

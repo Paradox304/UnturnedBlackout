@@ -183,7 +183,7 @@ namespace UnturnedBlackout.GameTypes
             {
                 talkingPlayers = PlayersTalking.Where(k => players.Contains(k)).ToList();
             }
-            Plugin.Instance.UIManager.SendVoiceChat(players, GameMode, GamePhase == EGamePhase.Ending, talkingPlayers);
+            Plugin.Instance.UIManager.UpdateVoiceChatUI(players, talkingPlayers);
         }
 
         public void OnStanceChanged(PlayerStance obj)

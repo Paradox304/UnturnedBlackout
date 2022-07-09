@@ -217,6 +217,7 @@ namespace UnturnedBlackout.GameTypes
             }
 
             Plugin.Instance.UIManager.ClearLoadingUI(player.Player);
+            Plugin.Instance.UIManager.SendVoiceChatUI(player);
         }
 
         public override void RemovePlayerFromGame(GamePlayer player)
@@ -230,6 +231,7 @@ namespace UnturnedBlackout.GameTypes
 
             Plugin.Instance.UIManager.ClearPreEndingUI(player);
             Plugin.Instance.UIManager.ClearFFAHUD(player);
+            Plugin.Instance.UIManager.ClearVoiceChatUI(player);
 
             if (GamePhase == EGamePhase.Starting)
             {
