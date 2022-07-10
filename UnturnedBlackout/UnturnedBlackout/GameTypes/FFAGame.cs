@@ -49,7 +49,7 @@ namespace UnturnedBlackout.GameTypes
                 Plugin.Instance.UIManager.ClearWaitingForPlayersUI(player.GamePlayer);
                 player.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(0);
                 Plugin.Instance.UIManager.ShowCountdownUI(player.GamePlayer);
-                SpawnPlayer(player, true);
+                SpawnPlayer(player);
             }
 
             for (int seconds = Config.FFA.FileData.StartSeconds; seconds >= 0; seconds--)
@@ -198,12 +198,12 @@ namespace UnturnedBlackout.GameTypes
                             Plugin.Instance.UIManager.UpdateWaitingForPlayersUI(ply.GamePlayer, Players.Count, minPlayers);
                         }
                     }
-                    SpawnPlayer(fPlayer, true);
+                    SpawnPlayer(fPlayer);
                     break;
                 case EGamePhase.Starting:
                     player.Player.Player.movement.sendPluginSpeedMultiplier(0);
                     Plugin.Instance.UIManager.ShowCountdownUI(player);
-                    SpawnPlayer(fPlayer, true);
+                    SpawnPlayer(fPlayer);
                     break;
                 case EGamePhase.Ending:
                     Plugin.Instance.UIManager.SetupFFALeaderboard(fPlayer, Players, Location, true, IsHardcore);
@@ -212,7 +212,7 @@ namespace UnturnedBlackout.GameTypes
                 default:
                     Plugin.Instance.UIManager.SendFFAHUD(player);
                     Plugin.Instance.UIManager.UpdateFFATopUI(fPlayer, Players);
-                    SpawnPlayer(fPlayer, false);
+                    SpawnPlayer(fPlayer);
                     break;
             }
 
@@ -608,13 +608,6 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
-            /*var spawnPoint = SpawnPoints.Count > 0 ? SpawnPoints[UnityEngine.Random.Range(0, SpawnPoints.Count)] : UnavailableSpawnPoints[UnityEngine.Random.Range(0, UnavailableSpawnPoints.Count)];
-
-            if (SpawnPoints.Count > 0)
-            {
-                Plugin.Instance.StartCoroutine(SpawnUsedUp(spawnPoint));
-            }*/
-
             var spawnPoint = GetFreeSpawn();
             respawnPosition = spawnPoint.GetSpawnPoint();
             yaw = spawnPoint.Yaw;
@@ -666,16 +659,9 @@ namespace UnturnedBlackout.GameTypes
             Plugin.Instance.LoadoutManager.GiveLoadout(player.GamePlayer, Config.FFA.FileData.Kit, Config.FFA.FileData.TeamGloves);
         }
 
-        public void SpawnPlayer(FFAPlayer player, bool seperateSpawnPoint)
+        public void SpawnPlayer(FFAPlayer player)
         {
             if (SpawnPoints.Count == 0) return;
-
-            /*var spawnPoint = seperateSpawnPoint ? SpawnPoints[Players.IndexOf(player)] : (SpawnPoints.Count > 0 ? SpawnPoints[UnityEngine.Random.Range(0, SpawnPoints.Count)] : UnavailableSpawnPoints[UnityEngine.Random.Range(0, UnavailableSpawnPoints.Count)]);
-            Logging.Debug($"Spawning {player.GamePlayer.Player.CharacterName} on {Location.LocationName}, spawnpoint found: x: {spawnPoint.X}, y: {spawnPoint.Y}, z: {spawnPoint.Z}, yaw: {spawnPoint.Yaw}");
-            if (!seperateSpawnPoint && SpawnPoints.Count > 0)
-            {
-                Plugin.Instance.StartCoroutine(SpawnUsedUp(spawnPoint));
-            }*/
 
             var spawnPoint = GetFreeSpawn();
             player.GamePlayer.Player.Player.teleportToLocationUnsafe(spawnPoint.GetSpawnPoint(), spawnPoint.Yaw);
@@ -811,7 +797,7 @@ namespace UnturnedBlackout.GameTypes
 
         public FFASpawnPoint GetFreeSpawn()
         {
-            return SpawnPoints.FirstOrDefault(k => !IsPlayerNearPosition(k.GetSpawnPoint(), Location.PositionCheck)) ?? SpawnPoints[UnityEngine.Random.Range(0, SpawnPoints.Count)];
+            return SpawnPoints.Where(k => !IsPlayerNearPosition(k.GetSpawnPoint(), Location.PositionCheck)).ToList().RandomOrDefault() ?? SpawnPoints[UnityEngine.Random.Range(0, SpawnPoints.Count)];
         }
 
         public bool IsPlayerNearPosition(Vector3 position, float radius)

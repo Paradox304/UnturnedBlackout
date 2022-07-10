@@ -1002,18 +1002,19 @@ namespace UnturnedBlackout.GameTypes
             var forwardPossibleSpawn = (BlueTeam.SpawnPoint + 2, RedTeam.SpawnPoint + 2); // If blue has 0 and red has 1, the next possible group is 2 and 3
             var backwardPossibleSpawn = (BlueTeam.SpawnPoint - 2, RedTeam.SpawnPoint - 2); // If blue has 2 and 3, the backward possible group is 0 and 1
 
+            var shouldSwitch = UnityEngine.Random.Range(1, 101) > 50;
             // check if forward is possible
             if (keys.Contains(forwardPossibleSpawn.Item1) && keys.Contains(forwardPossibleSpawn.Item2))
             {
                 Logging.Debug($"Foward possible with blue: {forwardPossibleSpawn.Item1}, with red: {forwardPossibleSpawn.Item2}");
-                BlueTeam.SpawnPoint = forwardPossibleSpawn.Item1;
-                RedTeam.SpawnPoint = forwardPossibleSpawn.Item2;
+                BlueTeam.SpawnPoint = shouldSwitch ? forwardPossibleSpawn.Item1 : forwardPossibleSpawn.Item2;
+                RedTeam.SpawnPoint = shouldSwitch ? forwardPossibleSpawn.Item2 : forwardPossibleSpawn.Item1;
             } // Check if backward is possible
             else if (keys.Contains(backwardPossibleSpawn.Item1) && keys.Contains(backwardPossibleSpawn.Item2))
             {
                 Logging.Debug($"Foward possible with blue: {backwardPossibleSpawn.Item1}, with red: {backwardPossibleSpawn.Item2}");
-                BlueTeam.SpawnPoint = backwardPossibleSpawn.Item1;
-                RedTeam.SpawnPoint = backwardPossibleSpawn.Item2;
+                BlueTeam.SpawnPoint = shouldSwitch ? backwardPossibleSpawn.Item1 : backwardPossibleSpawn.Item2;
+                RedTeam.SpawnPoint = shouldSwitch ? backwardPossibleSpawn.Item2 : backwardPossibleSpawn.Item1;
             } // If all else fails, switch the current spawn
             else
             {

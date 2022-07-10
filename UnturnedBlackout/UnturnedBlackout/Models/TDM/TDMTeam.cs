@@ -72,16 +72,21 @@ namespace UnturnedBlackout.Models.TDM
 
         public void OnDeath(CSteamID steamID)
         {
+            Logging.Debug($"Player with {steamID} died, team: {Info.TeamName}");
             if (!Players.TryGetValue(steamID, out DateTime lastDeath))
             {
+                Logging.Debug($"Could'nt find player registered to the team, return");
                 return;
             }
 
+            Logging.Debug($"Last death: {lastDeath}, Current Time: {DateTime.UtcNow}, Seconds: {(DateTime.UtcNow - lastDeath).TotalSeconds}, Spawn Switch Count: {Config.Base.FileData.SpawnSwitchCountSeconds}");
             if ((DateTime.UtcNow - lastDeath).TotalSeconds < Config.Base.FileData.SpawnSwitchCountSeconds)
             {
+                Logging.Debug($"Player died within spawn switch count seconds, current threshold {SpawnThreshold}, increasing it by one");
                 SpawnThreshold++;
                 if (SpawnThreshold > Config.Base.FileData.SpawnSwitchThreshold)
                 {
+                    Logging.Debug($"Threshold reached limit: {Config.Base.FileData.SpawnSwitchThreshold}, switching spawns");
                     if (m_CheckSpawnSwitch.Enabled)
                     {
                         m_CheckSpawnSwitch.Stop();
@@ -99,6 +104,7 @@ namespace UnturnedBlackout.Models.TDM
 
         private void SpawnSwitch(object sender, ElapsedEventArgs e)
         {
+            Logging.Debug($"Spawn switch time frame reached, setting threshold back to 0 and waiting for kills");
             if (SpawnThreshold > Config.Base.FileData.SpawnSwitchThreshold)
             {
                 Game.SwitchSpawn();
