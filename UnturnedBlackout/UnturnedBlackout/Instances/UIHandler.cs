@@ -1400,6 +1400,7 @@ namespace UnturnedBlackout.Instances
 
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", "");
             if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
             {
@@ -1437,8 +1438,8 @@ namespace UnturnedBlackout.Instances
                                         return;
                                     }
 
-                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
-                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
+                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", gunSkinPages.Count > 1);
+                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", gunSkinPages.Count > 1);
                                     ShowGunSkinPage(firstPage);
                                     break;
                                 }
@@ -1457,8 +1458,8 @@ namespace UnturnedBlackout.Instances
                                         return;
                                     }
 
-                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
-                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
+                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", gunSkinPages.Count > 1);
+                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", gunSkinPages.Count > 1);
                                     ShowGunSkinPage(firstPage);
                                     break;
                                 }
@@ -1498,9 +1499,6 @@ namespace UnturnedBlackout.Instances
                                         return;
                                     }
 
-                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
-                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
-
                                     ShowAttachmentPage(firstPage, gun);
                                     break;
                                 }
@@ -1514,8 +1512,8 @@ namespace UnturnedBlackout.Instances
                                         return;
                                     }
 
-                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
-                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
+                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", GunCharmPages.Count > 1);
+                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", GunCharmPages.Count > 1);
 
                                     ShowGunCharmPage(firstPage);
                                     break;
@@ -1555,9 +1553,6 @@ namespace UnturnedBlackout.Instances
                                         return;
                                     }
 
-                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
-                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
-
                                     ShowAttachmentPage(firstPage, gun);
                                     break;
                                 }
@@ -1578,9 +1573,6 @@ namespace UnturnedBlackout.Instances
                                         return;
                                     }
 
-                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
-                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
-
                                     ShowPerkPage(firstPage);
                                     break;
                                 }
@@ -1593,8 +1585,6 @@ namespace UnturnedBlackout.Instances
                                         return;
                                     }
 
-                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
-                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
                                     ShowGadgetPage(firstPage);
                                     break;
                                 }
@@ -1607,8 +1597,6 @@ namespace UnturnedBlackout.Instances
                                         return;
                                     }
 
-                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
-                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
                                     ShowGadgetPage(firstPage);
                                     break;
                                 }
@@ -1621,8 +1609,8 @@ namespace UnturnedBlackout.Instances
                                         return;
                                     }
 
-                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
-                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
+                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", KnifePages.Count > 1);
+                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", KnifePages.Count > 1);
                                     ShowKnifePage(firstPage);
                                     break;
                                 }
@@ -1635,8 +1623,6 @@ namespace UnturnedBlackout.Instances
                                         return;
                                     }
 
-                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
-                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
                                     ShowKillstreakPage(firstPage);
                                     break;
                                 }
@@ -1649,8 +1635,8 @@ namespace UnturnedBlackout.Instances
                                         return;
                                     }
 
-                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
-                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
+                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", GlovePages.Count > 1);
+                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", GlovePages.Count > 1);
                                     ShowGlovePage(firstPage);
                                     break;
                                 }
@@ -1663,8 +1649,8 @@ namespace UnturnedBlackout.Instances
                                         return;
                                     }
 
-                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
-                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
+                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", CardPages.Count > 1);
+                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", CardPages.Count > 1);
                                     ShowCardPage(firstPage);
                                     break;
                                 }
@@ -1678,14 +1664,9 @@ namespace UnturnedBlackout.Instances
                         if (!PistolPages.TryGetValue(1, out PageGun firstPage))
                         {
                             Logging.Debug($"Error finding first page for pistols for {Player.CharacterName}");
-                            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
-                            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
                             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", "");
                             return;
                         }
-
-                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
-                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
 
                         ShowGunPage(firstPage);
                         break;
@@ -1696,14 +1677,9 @@ namespace UnturnedBlackout.Instances
                         if (!SMGPages.TryGetValue(1, out PageGun firstPage))
                         {
                             Logging.Debug($"Error finding first page for smgs for {Player.CharacterName}");
-                            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
-                            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
                             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", "");
                             return;
                         }
-
-                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
-                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
 
                         ShowGunPage(firstPage);
                         break;
@@ -1714,14 +1690,9 @@ namespace UnturnedBlackout.Instances
                         if (!ShotgunPages.TryGetValue(1, out PageGun firstPage))
                         {
                             Logging.Debug($"Error finding first page for shotguns for {Player.CharacterName}");
-                            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
-                            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
                             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", "");
                             return;
                         }
-
-                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
-                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
 
                         ShowGunPage(firstPage);
                         break;
@@ -1732,14 +1703,9 @@ namespace UnturnedBlackout.Instances
                         if (!LMGPages.TryGetValue(1, out PageGun firstPage))
                         {
                             Logging.Debug($"Error finding first page for lmgs for {Player.CharacterName}");
-                            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
-                            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
                             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", "");
                             return;
                         }
-
-                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
-                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
 
                         ShowGunPage(firstPage);
                         break;
@@ -1750,14 +1716,9 @@ namespace UnturnedBlackout.Instances
                         if (!ARPages.TryGetValue(1, out PageGun firstPage))
                         {
                             Logging.Debug($"Error finding first page for ARs for {Player.CharacterName}");
-                            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
-                            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
                             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", "");
                             return;
                         }
-
-                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
-                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
 
                         ShowGunPage(firstPage);
                         break;
@@ -1768,14 +1729,9 @@ namespace UnturnedBlackout.Instances
                         if (!SniperPages.TryGetValue(1, out PageGun firstPage))
                         {
                             Logging.Debug($"Error finding first page for snipers for {Player.CharacterName}");
-                            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
-                            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
                             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", "");
                             return;
                         }
-
-                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
-                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
 
                         ShowGunPage(firstPage);
                         break;
@@ -1786,14 +1742,9 @@ namespace UnturnedBlackout.Instances
                         if (!CarbinePages.TryGetValue(1, out PageGun firstPage))
                         {
                             Logging.Debug($"Error finding first page for carbines for {Player.CharacterName}");
-                            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", false);
-                            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", false);
                             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Page TEXT", "");
                             return;
                         }
-
-                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
-                        EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
 
                         ShowGunPage(firstPage);
                         break;
@@ -1886,9 +1837,6 @@ namespace UnturnedBlackout.Instances
                                         return;
                                     }
 
-                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
-                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
-
                                     ShowAttachmentPage(nextPage, gun);
                                     break;
                                 }
@@ -1939,9 +1887,6 @@ namespace UnturnedBlackout.Instances
                                         Logging.Debug($"Error finding next page of attachment with type {attachmentType} for gun with id {gun.Gun.GunID} for {Player.CharacterName}");
                                         return;
                                     }
-
-                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
-                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
 
                                     ShowAttachmentPage(nextPage, gun);
                                     break;
@@ -2215,8 +2160,6 @@ namespace UnturnedBlackout.Instances
                                         return;
                                     }
 
-                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
-                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
 
                                     ShowAttachmentPage(prevPage, gun);
                                     break;
@@ -2269,8 +2212,6 @@ namespace UnturnedBlackout.Instances
                                         return;
                                     }
 
-                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
-                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
 
                                     ShowAttachmentPage(prevPage, gun);
                                     break;
@@ -2542,9 +2483,6 @@ namespace UnturnedBlackout.Instances
                                         return;
                                     }
 
-                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
-                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
-
                                     ShowAttachmentPage(page, gun);
                                     break;
                                 }
@@ -2595,9 +2533,6 @@ namespace UnturnedBlackout.Instances
                                         Logging.Debug($"Error finding current page of attachment with type {attachmentType} for gun with id {gun.Gun.GunID} for {Player.CharacterName}");
                                         return;
                                     }
-
-                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Next BUTTON", true);
-                                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Item Previous BUTTON", true);
 
                                     ShowAttachmentPage(page, gun);
                                     break;
