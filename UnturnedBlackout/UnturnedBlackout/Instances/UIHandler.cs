@@ -5301,13 +5301,10 @@ namespace UnturnedBlackout.Instances
                 return;
             }
 
-            Logging.Debug("1");
             if (AchievementPageShower != null)
             {
-                Logging.Debug("2");
                 Plugin.Instance.StopCoroutine(AchievementPageShower);
             }
-            Logging.Debug("3");
             AchievementPageShower = Plugin.Instance.StartCoroutine(ShowAchievementSubPage(page));
         }
 
@@ -5427,6 +5424,14 @@ namespace UnturnedBlackout.Instances
                     }
                     rewardName = $"<color={Utility.GetRarityColor(gun.GunRarity)}>{gun.GunName}</color>";
                     rewardImage = gun.IconLink;
+                    return true;
+                case ERewardType.GunCharm:
+                    if (!DB.GunCharms.TryGetValue(Convert.ToUInt16(reward.RewardValue), out GunCharm gunCharm))
+                    {
+                        return false;
+                    }
+                    rewardName = $"<color={Utility.GetRarityColor(gunCharm.CharmRarity)}>{gunCharm.CharmName}</color>";
+                    rewardImage = gunCharm.IconLink;
                     return true;
                 case ERewardType.Coin:
                     rewardName = $"<color=white>{reward.RewardValue} Coins</color>";

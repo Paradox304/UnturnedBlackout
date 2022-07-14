@@ -3805,44 +3805,56 @@ namespace UnturnedBlackout.Managers
             try
             {
                 await Conn.OpenAsync();
+                Logging.Debug("1");
                 if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
                 {
                     Logging.Debug($"Couldnt finding loadout for player with steam id {steamID}");
                     var skins = await new MySqlCommand($"SELECT `SkinIDs` FROM `{PlayersGunsSkinsTableName}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                    Logging.Debug("2");
                     var ids = skins.GetIntListFromReaderResult();
+                    Logging.Debug($"3, {ids.Count}");
                     if (!ids.Contains(id))
                     {
+                        Logging.Debug("4");
                         ids.Add(id);
                         var newSkins = ids.GetStringFromIntList();
+                        Logging.Debug($"5, {newSkins}");
                         await new MySqlCommand($"UPDATE `{PlayersGunsSkinsTableName}` SET `SkinIDs` = '{newSkins}' WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
                     }
                     return;
                 }
 
+                Logging.Debug("2");
                 if (!GunSkinsSearchByID.TryGetValue(id, out GunSkin skin))
                 {
                     Logging.Debug($"Error finding gun skin with id {id}");
                     return;
                 }
 
+                Logging.Debug("3");
                 if (loadout.GunSkinsSearchByID.ContainsKey(id))
                 {
                     Logging.Debug($"Found gun skin with id {id} already registered to player with steam id {steamID}");
                     return;
                 }
 
+                Logging.Debug("4");
                 loadout.GunSkinsSearchByID.Add(id, skin);
-                if (loadout.GunSkinsSearchByGunID.TryGetValue(skin.Gun.GunID, out List<GunSkin> gunSkins))
+                if (!loadout.GunSkinsSearchByGunID.TryGetValue(skin.Gun.GunID, out List<GunSkin> gunSkins))
                 {
-                    gunSkins.Add(skin);
+                    Logging.Debug("5");
+                    loadout.GunSkinsSearchByGunID.Add(skin.Gun.GunID, new());
                 }
-                else
-                {
-                    loadout.GunSkinsSearchByGunID.Add(skin.Gun.GunID, new List<GunSkin> { skin });
-                }
+                Logging.Debug("6");
+                loadout.GunSkinsSearchByGunID[skin.Gun.GunID].Add(skin);
+
+                Logging.Debug("7");
                 loadout.GunSkinsSearchBySkinID.Add(skin.SkinID, skin);
 
-                await new MySqlCommand($"UPDATE `{PlayersGunsSkinsTableName}` SET `SkinIDs` = '{loadout.GunSkinsSearchByID.Keys.ToList().GetStringFromIntList()}' WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                Logging.Debug("8");
+                var skinsString = loadout.GunSkinsSearchByID.Keys.ToList().GetStringFromIntList();
+                Logging.Debug($"{skinsString}");
+                await new MySqlCommand($"UPDATE `{PlayersGunsSkinsTableName}` SET `SkinIDs` = '{skinsString}' WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
             }
             catch (Exception ex)
             {

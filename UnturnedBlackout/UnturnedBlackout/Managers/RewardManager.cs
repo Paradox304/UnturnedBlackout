@@ -11,9 +11,11 @@ namespace UnturnedBlackout.Managers
     {
         public void GiveReward(CSteamID steamID, List<Reward> rewards)
         {
+            Logging.Debug($"Giving rewards to {steamID}, rewards: {rewards.Count}");
             var db = Plugin.Instance.DBManager;
             ThreadPool.QueueUserWorkItem(async (o) =>
             {
+                Logging.Debug("Sending rewards");
                 foreach (var reward in rewards)
                 {
                     switch (reward.RewardType)
@@ -25,7 +27,7 @@ namespace UnturnedBlackout.Managers
                             await db.AddPlayerGunCharmAsync(steamID, Convert.ToUInt16(reward.RewardValue), true);
                             break;
                         case ERewardType.GunSkin:
-                            await db.AddPlayerGunSkinAsync(steamID, (int)reward.RewardValue);
+                            await db.AddPlayerGunSkinAsync(steamID, Convert.ToInt32(reward.RewardValue));
                             break;
                         case ERewardType.Knife:
                             await db.AddPlayerKnifeAsync(steamID, Convert.ToUInt16(reward.RewardValue), true);
@@ -34,38 +36,42 @@ namespace UnturnedBlackout.Managers
                             await db.AddPlayerGadgetAsync(steamID, Convert.ToUInt16(reward.RewardValue), true);
                             break;
                         case ERewardType.Killstreak:
-                            await db.AddPlayerKillstreakAsync(steamID, (int)reward.RewardValue, true);
+                            await db.AddPlayerKillstreakAsync(steamID, Convert.ToInt32(reward.RewardValue), true);
                             break;
                         case ERewardType.Perk:
-                            await db.AddPlayerPerkAsync(steamID, (int)reward.RewardValue, true);
+                            await db.AddPlayerPerkAsync(steamID, Convert.ToInt32(reward.RewardValue), true);
                             break;
                         case ERewardType.Glove:
                             await db.AddPlayerGloveAsync(steamID, Convert.ToUInt16(reward.RewardValue), true);
                             break;
                         case ERewardType.Card:
-                            await db.AddPlayerCardAsync(steamID, (int)reward.RewardValue, true);
+                            await db.AddPlayerCardAsync(steamID, Convert.ToInt32(reward.RewardValue), true);
                             break;
                         case ERewardType.Credit:
-                            await db.IncreasePlayerCreditsAsync(steamID, (int)reward.RewardValue);
+                            await db.IncreasePlayerCreditsAsync(steamID, Convert.ToInt32(reward.RewardValue));
                             break;
                         case ERewardType.Coin:
-                            await db.IncreasePlayerCoinsAsync(steamID, (int)reward.RewardValue);
+                            await db.IncreasePlayerCoinsAsync(steamID, Convert.ToInt32(reward.RewardValue));
                             break;
                         case ERewardType.LevelXP:
-                            await db.IncreasePlayerXPAsync(steamID, (int)reward.RewardValue);
+                            await db.IncreasePlayerXPAsync(steamID, Convert.ToInt32(reward.RewardValue));
                             break;
                         case ERewardType.BattlepassXP:
+                            await db.IncreasePlayerBPXPAsync(steamID, Convert.ToInt32(reward.RewardValue));
                             break;
                         case ERewardType.Crate:
                             break;
                         case ERewardType.BPBooster:
-                            await db.IncreasePlayerBPBoosterAsync(steamID, (float)reward.RewardValue);
+                            if (float.TryParse(reward.RewardValue.ToString(), out float booster))
+                                await db.IncreasePlayerBPBoosterAsync(steamID, booster);
                             break;
                         case ERewardType.XPBooster:
-                            await db.IncreasePlayerXPBoosterAsync(steamID, (float)reward.RewardValue);
+                            if (float.TryParse(reward.RewardValue.ToString(), out booster))
+                                await db.IncreasePlayerXPBoosterAsync(steamID, booster);
                             break;
                         case ERewardType.GunXPBooster:
-                            await db.IncreasePlayerGunXPBoosterAsync(steamID, (float)reward.RewardValue);
+                            if (float.TryParse(reward.RewardValue.ToString(), out booster))
+                                await db.IncreasePlayerGunXPBoosterAsync(steamID, booster);
                             break;
                     }
                 }
@@ -142,17 +148,21 @@ namespace UnturnedBlackout.Managers
                                 await db.IncreasePlayerXPAsync(bulkReward.Item1, Convert.ToInt32(reward.RewardValue));
                                 break;
                             case ERewardType.BattlepassXP:
+                                await db.IncreasePlayerBPXPAsync(bulkReward.Item1, Convert.ToInt32(reward.RewardValue));
                                 break;
                             case ERewardType.Crate:
                                 break;
                             case ERewardType.BPBooster:
-                                await db.IncreasePlayerBPBoosterAsync(bulkReward.Item1, (float)reward.RewardValue);
+                                if (float.TryParse(reward.RewardValue.ToString(), out float booster))
+                                    await db.IncreasePlayerBPBoosterAsync(bulkReward.Item1, booster);
                                 break;
                             case ERewardType.XPBooster:
-                                await db.IncreasePlayerXPBoosterAsync(bulkReward.Item1, (float)reward.RewardValue);
+                                if (float.TryParse(reward.RewardValue.ToString(), out booster))
+                                    await db.IncreasePlayerXPBoosterAsync(bulkReward.Item1, booster);
                                 break;
                             case ERewardType.GunXPBooster:
-                                await db.IncreasePlayerGunXPBoosterAsync(bulkReward.Item1, (float)reward.RewardValue);
+                                if (float.TryParse(reward.RewardValue.ToString(), out booster))
+                                    await db.IncreasePlayerGunXPBoosterAsync(bulkReward.Item1, booster);
                                 break;
                         }
                     }
