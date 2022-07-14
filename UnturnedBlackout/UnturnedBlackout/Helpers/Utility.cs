@@ -436,7 +436,7 @@ namespace UnturnedBlackout
                 "mythical" => "#FA3219",
                 "yellow" => "yellow",
                 "orange" => "orange",
-                "cyan" => "cyan",
+                "cyan" => "#31FFF9",
                 "green" => "green",
                 _ => throw new ArgumentOutOfRangeException("rarity", "Rarity is not as expected")
             };

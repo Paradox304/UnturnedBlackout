@@ -157,7 +157,6 @@ namespace UnturnedBlackout.Models.Global
 
             var medic = loadout.PerksSearchByType.TryGetValue("medic", out LoadoutPerk medicPerk) ? medicPerk.Perk.SkillLevel : 0f;
             HealAmount = Config.Base.FileData.HealAmount * (1 + (medic / 100));
-            Logging.Debug($"{Player.CharacterName} Medic: {medic}, Heal Amount: {HealAmount}");
 
             Plugin.Instance.HUDManager.UpdateGadgetUI(this);
 
@@ -165,18 +164,14 @@ namespace UnturnedBlackout.Models.Global
             {
                 HasTactical = true;
                 var tactician = loadout.PerksSearchByType.TryGetValue("tactician", out LoadoutPerk tacticianPerk) ? tacticianPerk.Perk.SkillLevel : 0f;
-                Logging.Debug($"{Player.CharacterName} tactician {tactician}, percentage applied {1 - (tactician / 100)}");
                 m_TacticalChecker.Interval = (float)loadout.Tactical.Gadget.GiveSeconds * 1000 * (1 - (tactician / 100));
-                Logging.Debug($"Interval: {m_TacticalChecker.Interval}");
             }
 
             if (loadout.Lethal != null)
             {
                 HasLethal = true;
                 var grenadier = loadout.PerksSearchByType.TryGetValue("grenadier", out LoadoutPerk grenadierPerk) ? grenadierPerk.Perk.SkillLevel : 0f;
-                Logging.Debug($"{Player.CharacterName} grenadier {grenadier}, percentage applied {1 - (grenadier / 100)}");
                 m_LethalChecker.Interval = (float)loadout.Lethal.Gadget.GiveSeconds * 1000 * (1 - (grenadier / 100));
-                Logging.Debug($"Interval: {m_LethalChecker.Interval}");
             }
 
             Plugin.Instance.HUDManager.UpdateGadget(this, false, !HasLethal);
@@ -511,7 +506,6 @@ namespace UnturnedBlackout.Models.Global
 
         public IEnumerator ChangeMovement(float newMovement)
         {
-            Logging.Debug($"Directly changing movement speed for {Player.CharacterName} to {newMovement}");
             var type = typeof(PlayerMovement);
             var info = type.GetField("SendPluginSpeedMultiplier", BindingFlags.NonPublic | BindingFlags.Static);
             var value = info.GetValue(null);
@@ -522,7 +516,6 @@ namespace UnturnedBlackout.Models.Global
 
         public IEnumerator ChangeMovementSteps(float changeMovement)
         {
-            Logging.Debug($"Doing steps speed changing for {Player.CharacterName}");
             for (int i = 1; i <= 2; i++)
             {
                 var type = typeof(PlayerMovement);
@@ -531,7 +524,6 @@ namespace UnturnedBlackout.Models.Global
                 ((ClientInstanceMethod<float>)value).Invoke(Player.Player.movement.GetNetId(), ENetReliability.Reliable, Player.Player.channel.GetOwnerTransportConnection(), Player.Player.movement.pluginSpeedMultiplier + changeMovement);
                 yield return new WaitForSeconds(Player.Ping - 0.01f);
                 Player.Player.movement.pluginSpeedMultiplier += changeMovement;
-                Logging.Debug($"i: {i}, steps: {changeMovement}, player's speed: {Player.Player.movement.pluginSpeedMultiplier}");
                 yield return new WaitForSeconds(Config.Base.FileData.MovementStepsDelay);
             }
         }

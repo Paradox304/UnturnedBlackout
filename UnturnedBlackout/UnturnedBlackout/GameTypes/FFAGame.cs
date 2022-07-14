@@ -138,13 +138,12 @@ namespace UnturnedBlackout.GameTypes
             var locations = Plugin.Instance.GameManager.AvailableLocations;
             lock (locations)
             {
-                locations.Add(Location.LocationID);
-                var randomLocation = locations[UnityEngine.Random.Range(0, locations.Count)];
+                var randomLocation = locations.Count > 0 ? locations[UnityEngine.Random.Range(0, locations.Count)] : Location.LocationID;
                 var location = Config.Locations.FileData.ArenaLocations.FirstOrDefault(k => k.LocationID == randomLocation);
-                var gameMode = Plugin.Instance.GameManager.GetRandomGameMode(location?.LocationID ?? Location.LocationID);
+                var gameMode = Plugin.Instance.GameManager.GetRandomGameMode(location.LocationID);
                 GamePhase = EGamePhase.Ended;
                 Plugin.Instance.GameManager.EndGame(this);
-                Plugin.Instance.GameManager.StartGame(location ?? Location, gameMode.Item1, gameMode.Item2);
+                Plugin.Instance.GameManager.StartGame(location, gameMode.Item1, gameMode.Item2);
             }
         }
 
@@ -337,7 +336,6 @@ namespace UnturnedBlackout.GameTypes
                         xpGained += Config.Medals.FileData.MeleeKillXP;
                         xpText += Plugin.Instance.Translate("Melee_Kill").ToRich();
                         equipmentUsed = kPlayer.GamePlayer.ActiveLoadout.Knife?.Knife?.KnifeID ?? 0;
-                        Logging.Debug($"Player died through melee, setting equipment to {equipmentUsed}");
                         questConditions.Add(EQuestCondition.Knife, equipmentUsed);
                         break;
                     case EDeathCause.GUN:
@@ -368,7 +366,6 @@ namespace UnturnedBlackout.GameTypes
                         {
                             equipmentUsed = equipment;
                         }
-                        Logging.Debug($"Player died through gun, setting equipment to {equipmentUsed}");
                         questConditions.Add(EQuestCondition.Gun, equipmentUsed);
                         break;
                     case EDeathCause.CHARGE:
@@ -379,11 +376,9 @@ namespace UnturnedBlackout.GameTypes
                         xpGained += Config.Medals.FileData.LethalKillXP;
                         xpText += Plugin.Instance.Translate("Lethal_Kill").ToRich();
                         equipmentUsed = kPlayer.GamePlayer.ActiveLoadout.Lethal?.Gadget?.GadgetID ?? 0;
-                        Logging.Debug($"Player died through lethal, setting equipment to {equipmentUsed}");
                         questConditions.Add(EQuestCondition.Gadget, equipmentUsed);
                         break;
                     default:
-                        Logging.Debug($"Player died through {cause}, setting equipment to 0");
                         break;
                 }
                 xpText += "\n";
@@ -442,10 +437,8 @@ namespace UnturnedBlackout.GameTypes
                     Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer, EQuestType.FirstKill, questConditions);
                 }
 
-                Logging.Debug($"Checking if {(fPlayer.GamePlayer.Player.Position - kPlayer.GamePlayer.Player.Position).sqrMagnitude} is greater than {longshotRange}");
                 if (cause == EDeathCause.GUN && (fPlayer.GamePlayer.Player.Position - kPlayer.GamePlayer.Player.Position).sqrMagnitude > longshotRange)
                 {
-                    Logging.Debug("It is and cause is a gun, send longshot range");
                     xpGained += Config.Medals.FileData.LongshotXP;
                     xpText += Plugin.Instance.Translate("Longshot_Kill").ToRich() + "\n";
                     Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer, EQuestType.Longshot, questConditions);
@@ -471,7 +464,6 @@ namespace UnturnedBlackout.GameTypes
 
                 if (equipmentUsed != 0)
                 {
-                    Logging.Debug($"Sending killfeed with equipment {equipmentUsed}");
                     OnKill(kPlayer.GamePlayer, fPlayer.GamePlayer, equipmentUsed, Config.FFA.FileData.KillFeedHexCode, Config.FFA.FileData.KillFeedHexCode);
                 }
 
@@ -566,9 +558,7 @@ namespace UnturnedBlackout.GameTypes
             }
 
             var damageReducePercent = player.GamePlayer.ActiveLoadout.PerksSearchByType.TryGetValue(damageReducePerkName, out LoadoutPerk damageReducerPerk) ? ((float)damageReducerPerk.Perk.SkillLevel / 100) : 0f;
-            Logging.Debug($"{player.GamePlayer.Player.CharacterName} got damaged, perk name {damageReducePerkName}, damage reduce percent: {damageReducePercent} damage amount: {parameters.damage}");
             parameters.damage -= damageReducePercent * parameters.damage;
-            Logging.Debug($"Damage after perk calculation: {parameters.damage}");
 
             player.GamePlayer.OnDamaged(parameters.killer);
 
@@ -579,9 +569,7 @@ namespace UnturnedBlackout.GameTypes
             }
 
             var damageIncreasePercent = kPlayer.GamePlayer.ActiveLoadout.PerksSearchByType.TryGetValue(damageIncreasePerkName, out LoadoutPerk damageIncreaserPerk) ? ((float)damageIncreaserPerk.Perk.SkillLevel / 100) : 0f;
-            Logging.Debug($"{kPlayer.GamePlayer.Player.CharacterName} damaged someone, damage increase percent {damageIncreasePercent} perk name {damageIncreasePerkName}, damage amount: {parameters.damage}");
             parameters.damage += damageIncreasePercent * parameters.damage;
-            Logging.Debug($"Damage after perk calculation: {parameters.damage}");
 
             if (kPlayer.GamePlayer.HasSpawnProtection)
             {

@@ -13,7 +13,6 @@ namespace UnturnedBlackout.Managers
         public void CheckAchievement(GamePlayer player, EQuestType achievementType, Dictionary<EQuestCondition, int> achievementConditions)
         {
             var steamID = player.Player.CSteamID;
-            Logging.Debug($"Checking achievement {achievementType} for {steamID} with conditions {achievementConditions.Count}");
 
             var db = Plugin.Instance.DBManager;
             var data = player.Data;
@@ -24,27 +23,20 @@ namespace UnturnedBlackout.Managers
                 return;
             }
 
-            Logging.Debug($"Found {achievements.Count} achievements with that type for player");
             foreach (var achievement in achievements)
             {
                 var conditionsMet = true;
-                Logging.Debug($"Checking achievement {achievement.Achievement.AchievementID}");
                 foreach (var condition in achievement.Achievement.AchievementConditions)
                 {
-                    Logging.Debug($"Checking condition {condition.Key}");
                     if (!achievementConditions.TryGetValue(condition.Key, out int conditionValue))
                     {
-                        Logging.Debug($"Condition {condition.Key} not found in achievementConditions, skipping");
                         conditionsMet = false;
                         break;
                     }
 
-                    Logging.Debug($"Condition {condition.Key} found in achievementConditions, checking condition value {conditionValue}");
-
                     var isConditionMinimum = IsConditionMinimum(condition.Key);
                     if (!condition.Value.Contains(conditionValue) && !condition.Value.Exists(k => isConditionMinimum && conditionValue >= k) && !condition.Value.Contains(-1))
                     {
-                        Logging.Debug($"Condition {condition.Key} value {conditionValue} not found in condition's value and -1 is also not found in condition's value, skipping");
                         conditionsMet = false;
                         break;
                     }
@@ -52,11 +44,9 @@ namespace UnturnedBlackout.Managers
 
                 if (!conditionsMet)
                 {
-                    Logging.Debug($"Conditions not met for achievement {achievement.Achievement.AchievementID}, skipping");
                     continue;
                 }
 
-                Logging.Debug($"Conditions met for achievement {achievement.Achievement.AchievementID}, increasing achievement amount, current amount is {achievement.Amount}");
                 achievement.Amount += 1;
 
                 if (achievement.Achievement.TiersLookup.TryGetValue(achievement.CurrentTier + 1, out AchievementTier nextTier))
@@ -76,8 +66,6 @@ namespace UnturnedBlackout.Managers
 
         public void ClaimAchievementTier(CSteamID steamID, int achievementID)
         {
-            Logging.Debug($"Claiming achievement tier {achievementID} for {steamID}");
-
             var db = Plugin.Instance.DBManager;
             if (!db.PlayerData.TryGetValue(steamID, out PlayerData data))
             {
@@ -91,21 +79,18 @@ namespace UnturnedBlackout.Managers
                 return;
             }
 
-            Logging.Debug($"Found achievement {achievement.Achievement.AchievementID} with current tier {achievement.CurrentTier} and amount {achievement.Amount} for player");
             if (!achievement.Achievement.TiersLookup.TryGetValue(achievement.CurrentTier + 1, out AchievementTier nextTier))
             {
                 Logging.Debug("Could'nt find next tier, returning");
                 return;
             }
 
-            Logging.Debug($"Found next tier {nextTier.TierID} with target amount {nextTier.TargetAmount}");
             if (achievement.Amount < nextTier.TargetAmount)
             {
                 Logging.Debug($"Amount {achievement.Amount} is less than target amount {nextTier.TargetAmount}, returning");
                 return;
             }
 
-            Logging.Debug($"Amount {achievement.Amount} is greater than target amount {nextTier.TargetAmount}, increasing current tier to {nextTier.TierID}");
             achievement.CurrentTier = nextTier.TierID;
             Plugin.Instance.RewardManager.GiveReward(steamID, nextTier.Rewards);
             Plugin.Instance.RewardManager.RemoveReward(steamID, nextTier.RemoveRewards);

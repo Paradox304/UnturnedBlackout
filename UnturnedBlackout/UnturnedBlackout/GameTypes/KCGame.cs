@@ -181,13 +181,12 @@ namespace UnturnedBlackout.GameTypes
             var locations = Plugin.Instance.GameManager.AvailableLocations;
             lock (locations)
             {
-                locations.Add(Location.LocationID);
-                var randomLocation = locations[UnityEngine.Random.Range(0, locations.Count)];
+                var randomLocation = locations.Count > 0 ? locations[UnityEngine.Random.Range(0, locations.Count)] : Location.LocationID;
                 var location = Config.Locations.FileData.ArenaLocations.FirstOrDefault(k => k.LocationID == randomLocation);
-                var gameMode = Plugin.Instance.GameManager.GetRandomGameMode(location?.LocationID ?? Location.LocationID);
+                var gameMode = Plugin.Instance.GameManager.GetRandomGameMode(location.LocationID);
                 GamePhase = EGamePhase.Ended;
                 Plugin.Instance.GameManager.EndGame(this);
-                Plugin.Instance.GameManager.StartGame(location ?? Location, gameMode.Item1, gameMode.Item2);
+                Plugin.Instance.GameManager.StartGame(location, gameMode.Item1, gameMode.Item2);
             }
         }
 
@@ -395,7 +394,6 @@ namespace UnturnedBlackout.GameTypes
                         xpGained += Config.Medals.FileData.MeleeKillXP;
                         xpText += Plugin.Instance.Translate("Melee_Kill").ToRich();
                         equipmentUsed = kPlayer.GamePlayer.ActiveLoadout.Knife?.Knife?.KnifeID ?? 0;
-                        Logging.Debug($"Player died through melee, setting equipment to {equipmentUsed}");
                         questConditions.Add(EQuestCondition.Knife, equipmentUsed);
                         break;
                     case EDeathCause.GUN:
@@ -426,7 +424,6 @@ namespace UnturnedBlackout.GameTypes
                         {
                             equipmentUsed = equipment;
                         }
-                        Logging.Debug($"Player died through gun, setting equipment to {equipmentUsed}");
                         questConditions.Add(EQuestCondition.Gun, equipmentUsed);
                         break;
                     case EDeathCause.CHARGE:
@@ -437,11 +434,9 @@ namespace UnturnedBlackout.GameTypes
                         xpGained += Config.Medals.FileData.LethalKillXP;
                         xpText += Plugin.Instance.Translate("Lethal_Kill").ToRich();
                         equipmentUsed = kPlayer.GamePlayer.ActiveLoadout.Lethal?.Gadget?.GadgetID ?? 0;
-                        Logging.Debug($"Player died through lethal, setting equipment to {equipmentUsed}");
                         questConditions.Add(EQuestCondition.Gadget, equipmentUsed);
                         break;
                     default:
-                        Logging.Debug($"Player died through {cause}, setting equipment to 0");
                         break;
                 }
                 xpText += "\n";
@@ -527,7 +522,6 @@ namespace UnturnedBlackout.GameTypes
 
                 if (equipmentUsed != 0)
                 {
-                    Logging.Debug($"Sending killfeed with equipment {equipmentUsed}");
                     OnKill(kPlayer.GamePlayer, vPlayer.GamePlayer, equipmentUsed, kPlayer.Team.Info.KillFeedHexCode, vPlayer.Team.Info.KillFeedHexCode);
                 }
 
@@ -612,9 +606,7 @@ namespace UnturnedBlackout.GameTypes
                     break;
             }
 
-            Logging.Debug($"{player.GamePlayer.Player.CharacterName} got damaged, perk name {damageReducePerkName}, damage amount: {parameters.damage}");
             parameters.damage -= (player.GamePlayer.ActiveLoadout.PerksSearchByType.TryGetValue(damageReducePerkName, out LoadoutPerk damageReducerPerk) ? ((float)damageReducerPerk.Perk.SkillLevel / 100) : 0f) * parameters.damage;
-            Logging.Debug($"Damage after perk calculation: {parameters.damage}");
 
             player.GamePlayer.OnDamaged(parameters.killer);
 
@@ -630,9 +622,7 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
-            Logging.Debug($"{kPlayer.GamePlayer.Player.CharacterName} damaged someone, perk name {damageIncreasePerkName}, damage amount: {parameters.damage}");
             parameters.damage += (kPlayer.GamePlayer.ActiveLoadout.PerksSearchByType.TryGetValue(damageIncreasePerkName, out LoadoutPerk damageIncreaserPerk) ? ((float)damageIncreaserPerk.Perk.SkillLevel / 100) : 0f) * parameters.damage;
-            Logging.Debug($"Damage after perk calculation: {parameters.damage}");
 
             if (kPlayer.GamePlayer.HasSpawnProtection)
             {
@@ -997,7 +987,6 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
-            Logging.Debug($"Switching spawns, current spawn blue: {BlueTeam.SpawnPoint}, current spawn red: {RedTeam.SpawnPoint}");
             var currentSpawn = (BlueTeam.SpawnPoint, RedTeam.SpawnPoint);
             var forwardPossibleSpawn = (BlueTeam.SpawnPoint + 2, RedTeam.SpawnPoint + 2); // If blue has 0 and red has 1, the next possible group is 2 and 3
             var backwardPossibleSpawn = (BlueTeam.SpawnPoint - 2, RedTeam.SpawnPoint - 2); // If blue has 2 and 3, the backward possible group is 0 and 1
@@ -1006,19 +995,16 @@ namespace UnturnedBlackout.GameTypes
             // check if forward is possible
             if (keys.Contains(forwardPossibleSpawn.Item1) && keys.Contains(forwardPossibleSpawn.Item2))
             {
-                Logging.Debug($"Foward possible with blue: {forwardPossibleSpawn.Item1}, with red: {forwardPossibleSpawn.Item2}");
                 BlueTeam.SpawnPoint = shouldSwitch ? forwardPossibleSpawn.Item1 : forwardPossibleSpawn.Item2;
                 RedTeam.SpawnPoint = shouldSwitch ? forwardPossibleSpawn.Item2 : forwardPossibleSpawn.Item1;
             } // Check if backward is possible
             else if (keys.Contains(backwardPossibleSpawn.Item1) && keys.Contains(backwardPossibleSpawn.Item2))
             {
-                Logging.Debug($"Foward possible with blue: {backwardPossibleSpawn.Item1}, with red: {backwardPossibleSpawn.Item2}");
                 BlueTeam.SpawnPoint = shouldSwitch ? backwardPossibleSpawn.Item1 : backwardPossibleSpawn.Item2;
                 RedTeam.SpawnPoint = shouldSwitch ? backwardPossibleSpawn.Item2 : backwardPossibleSpawn.Item1;
             } // If all else fails, switch the current spawn
             else
             {
-                Logging.Debug("No forward and backward possible, switching the current spawns");
                 BlueTeam.SpawnPoint = currentSpawn.Item2;
                 RedTeam.SpawnPoint = currentSpawn.Item1;
             }

@@ -46,12 +46,9 @@ namespace UnturnedBlackout.Managers
                     continue;
                 }
 
-                Logging.Debug($"Conditions met for quest {quest.Quest.QuestID}, increasing quest amount, current amount is {quest.Amount}, for {player.Player.CharacterName}");
                 quest.Amount += 1;
-                Logging.Debug($"Current quest amount: {quest.Amount}, target amount: {quest.Quest.TargetAmount}, remainder is: {quest.Amount * 100 / quest.Quest.TargetAmount % 100}");
                 if (quest.Amount >= quest.Quest.TargetAmount)
                 {
-                    Logging.Debug($"Quest with id {quest.Quest.QuestID} is completed for player");
                     Plugin.Instance.UIManager.SendAnimation(player, new Models.Animation.AnimationInfo(EAnimationType.QuestCompletion, quest.Quest));
                     ThreadPool.QueueUserWorkItem(async (o) =>
                     {
@@ -59,7 +56,6 @@ namespace UnturnedBlackout.Managers
                     });
                 } else if (quest.Amount * 100 / quest.Quest.TargetAmount % 10 == 0)
                 {
-                    Logging.Debug("10% progression achieved, sending update UI");
                     pendingQuestsProgression.Add(quest);
                 }
 
