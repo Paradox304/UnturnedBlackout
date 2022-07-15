@@ -26,7 +26,14 @@ namespace UnturnedBlackout.Managers
 {
     public class DatabaseManager
     {
-        public string ConnectionString { get; set; }
+        public MySqlConnectionStringBuilder Builder { get; set; }
+        public string ConnectionString
+        {
+            get
+            {
+                return Builder.ConnectionString;
+            }
+        }
         public Config Config { get; set; }
 
         public Timer m_MuteChecker { get; set; }
@@ -179,7 +186,15 @@ namespace UnturnedBlackout.Managers
         public DatabaseManager()
         {
             Config = Plugin.Instance.Configuration.Instance;
-            ConnectionString = $"server={Config.DatabaseHost};user={Config.DatabaseUsername};database={Config.DatabaseName};port={Config.DatabasePort};password={Config.DatabasePassword}";
+            Builder = new MySqlConnectionStringBuilder()
+            {
+                Server = Config.DatabaseHost,
+                Port = Convert.ToUInt32(Config.DatabasePort),
+                Database = Config.DatabaseName,
+                UserID = Config.DatabaseUsername,
+                Password = Config.DatabasePassword,
+                MaximumPoolSize = 500
+            };
             m_MuteChecker = new Timer(10 * 1000);
             m_MuteChecker.Elapsed += CheckMutedPlayers;
 
