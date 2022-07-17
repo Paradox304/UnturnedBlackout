@@ -61,6 +61,8 @@ namespace UnturnedBlackout.GameTypes
 
             m_SpawnSwitcher = new Timer(Config.Base.FileData.SpawnSwitchSeconds * 1000);
             m_SpawnSwitcher.Elapsed += SpawnSwitch;
+
+            GameStarter = Plugin.Instance.StartCoroutine(StartGame());
         }
 
         public IEnumerator StartGame()
@@ -181,6 +183,13 @@ namespace UnturnedBlackout.GameTypes
             var locations = Plugin.Instance.GameManager.AvailableLocations;
             lock (locations)
             {
+                var locString = "";
+                foreach (var loc in locations)
+                {
+                    var locc = Config.Locations.FileData.ArenaLocations.FirstOrDefault(k => k.LocationID == loc);
+                    locString += $"{locc.LocationName},";
+                }
+                Logging.Debug($"Game ending, locations available: {locString}");
                 var randomLocation = locations.Count > 0 ? locations[UnityEngine.Random.Range(0, locations.Count)] : Location.LocationID;
                 var location = Config.Locations.FileData.ArenaLocations.FirstOrDefault(k => k.LocationID == randomLocation);
                 var gameMode = Plugin.Instance.GameManager.GetRandomGameMode(location.LocationID);

@@ -45,17 +45,21 @@ namespace UnturnedBlackout.Managers
 
         public void StartGames()
         {
+            Logging.Debug("Starting games");
             for (int i = 1; i <= Config.Base.FileData.GamesCount; i++)
             {
+                Logging.Debug($"{AvailableLocations.Count} locations available");
                 var locationID = AvailableLocations[UnityEngine.Random.Range(0, AvailableLocations.Count)];
                 var location = Config.Locations.FileData.ArenaLocations.FirstOrDefault(k => k.LocationID == locationID);
                 var gameMode = GetRandomGameMode(locationID);
+                Logging.Debug($"Found Location: {location.LocationName}, GameMode: {gameMode.Item1}, IsHardcore: {gameMode.Item2}");
                 StartGame(location, gameMode.Item1, gameMode.Item2);
             }
         }
 
         public void StartGame(ArenaLocation location, EGameType gameMode, bool isHardcore)
         {
+            Logging.Debug($"Starting game");
             Game game = null;
             switch (gameMode)
             {
@@ -75,16 +79,31 @@ namespace UnturnedBlackout.Managers
                     break;
             }
 
+            Logging.Debug($"Game started, adding game to games and removing location from available locations");
             Games.Add(game);
-            AvailableLocations.Remove(location.LocationID);
+            if (!AvailableLocations.Contains(location.LocationID))
+            {
+                Logging.Debug($"LOCATION {location.LocationName} IS NOT FOUND IN THE AVAILABLE LOCATIONS, WHAT TO REMOVE????");
+            } else
+            {
+                AvailableLocations.Remove(location.LocationID);
+            }
             Plugin.Instance.UIManager.OnGameUpdated();
         }
 
         public void EndGame(Game game)
         {
+            Logging.Debug($"Ending game with location {game.Location.LocationName}");
             game.Destroy();
+            Logging.Debug($"Removing game and adding locations to available locations");
             Games.Remove(game);
-            AvailableLocations.Add(game.Location.LocationID);
+            if (AvailableLocations.Contains(game.Location.LocationID))
+            {
+                Logging.Debug($"LOCATION {game.Location.LocationName} IS ALREADY AVAILABLE IN THE AVAILABLELOCATIONS LIST, ERRORRRRR");
+            } else
+            {
+                AvailableLocations.Add(game.Location.LocationID);
+            }
         }
 
         public void AddPlayerToGame(UnturnedPlayer player, int selectedID)
