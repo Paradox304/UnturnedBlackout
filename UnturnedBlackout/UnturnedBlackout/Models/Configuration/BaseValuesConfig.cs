@@ -14,6 +14,7 @@ namespace UnturnedBlackout.Models.Configuration
         public int VoiceChatFont { get; set; }
         public bool EnableDebugLogs { get; set; }
         public Vector3 LobbySpawn { get; set; }
+        public float LobbyYaw { get; set; }
         public int LastDamageAfterHealSeconds { get; set; }
         public float HealSeconds { get; set; }
         public float HealAmount { get; set; }
@@ -44,6 +45,7 @@ namespace UnturnedBlackout.Models.Configuration
             EnableDebugLogs = true;
 
             LobbySpawn = new Vector3(353.027039f, 54.5521927f, -3792.77026f);
+            LobbyYaw = 100f;
 
             LastDamageAfterHealSeconds = 3;
             HealSeconds = 0.5f;

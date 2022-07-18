@@ -231,7 +231,7 @@ namespace UnturnedBlackout.Managers
             TaskDispatcher.QueueOnMainThread(() =>
             {
                 player.Player.life.ServerRespawn(false);
-                player.Player.teleportToLocationUnsafe(Config.Base.FileData.LobbySpawn, 0);
+                player.Player.teleportToLocationUnsafe(Config.Base.FileData.LobbySpawn, Config.Base.FileData.LobbyYaw);
                 Plugin.Instance.UIManager.ShowMenuUI(player);
             });
         }

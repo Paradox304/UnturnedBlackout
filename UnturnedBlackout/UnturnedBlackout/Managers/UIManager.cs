@@ -476,15 +476,9 @@ namespace UnturnedBlackout.Managers
         public IEnumerator SendTip(UnturnedPlayer player)
         {
             var db = Plugin.Instance.DBManager;
-            var nextTip = 0;
             while (true)
             {
-                UpdateLoadingTip(player, db.ServerOptions.GameTips[nextTip]);
-                nextTip++;
-                if (nextTip == db.ServerOptions.GameTips.Count)
-                {
-                    nextTip = 0;
-                }
+                UpdateLoadingTip(player, db.ServerOptions.GameTips[UnityEngine.Random.Range(0, db.ServerOptions.GameTips.Count)]);
                 yield return new WaitForSeconds(10);
             }
         }
