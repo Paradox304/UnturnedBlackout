@@ -48,6 +48,7 @@ namespace UnturnedBlackout
             GameManager.Destroy();
             HUDManager.Destroy();
             UIManager.Destroy();
+            ServerManager.Destroy();
 
             Level.onLevelLoaded -= OnLevelLoaded;
             PlayerVoice.onRelayVoice -= OnVoice;

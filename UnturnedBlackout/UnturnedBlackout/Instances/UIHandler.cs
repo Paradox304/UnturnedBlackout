@@ -850,7 +850,6 @@ namespace UnturnedBlackout.Instances
         {
             var games = Plugin.Instance.GameManager.Games;
             PlayPage = EPlayPage.Games;
-            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Play Refresh BUTTON", false);
             Logging.Debug($"Showing games to {Player.CharacterName}, with SelectedGameID {SelectedGameID}");
 
             for (int i = 0; i <= 13; i++)
@@ -907,8 +906,6 @@ namespace UnturnedBlackout.Instances
         public void ShowServers()
         {
             PlayPage = EPlayPage.Servers;
-            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Play Refresh BUTTON", false);
-
             for (int i = 0; i <= 13; i++)
             {
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Play BUTTON {i}", false);
@@ -922,7 +919,7 @@ namespace UnturnedBlackout.Instances
                 var server = servers[index];
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Play BUTTON {index}", true);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Play Server TEXT {index}", string.IsNullOrEmpty(server.Name) ? server.ServerName : server.Name);
-                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Play Status TEXT {index}", server.IsOnline ? "<color=#36ff3c>Online</color>" : "<color=#ed2626>Offline</color>");
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Play Status TEXT {index}", server.IsOnline ? "<color=#36ff3c>Online</color>" : ((DateTime.UtcNow - server.LastOnline).TotalSeconds < 120 ? "<color=#f5fa73>Restarting</color>" : "<color=#ed2626>Offline</color>"));
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Play Players TEXT {index}", server.IsOnline ? $"{server.Players}/{server.MaxPlayers}" : "0/0");
             }
 

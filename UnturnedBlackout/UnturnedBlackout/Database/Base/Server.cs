@@ -21,6 +21,7 @@ namespace UnturnedBlackout.Database.Base
         public int Players { get; set; }
         public int MaxPlayers { get; set; }
         public bool IsOnline { get; set; }
+        public DateTime LastOnline { get; set; }
 
         public Server(string iP, string port, string serverName, string friendlyIP, string serverBanner, string serverDesc)
         {
@@ -48,6 +49,8 @@ namespace UnturnedBlackout.Database.Base
                 throw new ArgumentException("Port is not correct");
             }
             PortNo = portNo;
+
+            LastOnline = DateTime.UtcNow;
         }
     }
 }
