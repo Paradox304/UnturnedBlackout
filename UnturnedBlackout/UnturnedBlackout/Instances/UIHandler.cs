@@ -791,15 +791,14 @@ namespace UnturnedBlackout.Instances
 
         public void ShowPlayPage(EPlayPage playPage)
         {
+            SelectedGameID = 0;
             if (playPage == EPlayPage.Games)
             {
                 ShowGames();
-                SelectedGameID = 0;
             }
             else if (playPage == EPlayPage.Servers)
             {
                 ShowServers();
-                SelectedGameID = 0;
             }
         }
 
@@ -5444,6 +5443,8 @@ namespace UnturnedBlackout.Instances
                     return false;
             }   
         }
+
+        // Battlepass
 
         // Events
 
