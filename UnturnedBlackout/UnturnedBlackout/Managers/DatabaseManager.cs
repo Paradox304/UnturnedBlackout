@@ -5567,7 +5567,7 @@ namespace UnturnedBlackout.Managers
             }
         }
 
-        public async Task UpdatePlayerBPClaimedFreeRewardsAsync(CSteamID steamID, int claimedFreeRewardTier)
+        public async Task UpdatePlayerBPClaimedFreeRewardsAsync(CSteamID steamID)
         {
             using MySqlConnection Conn = new(ConnectionString);
             try
@@ -5579,19 +5579,12 @@ namespace UnturnedBlackout.Managers
                     return;
                 }
 
-                if (data.Battlepass.ClaimedFreeRewards.Contains(claimedFreeRewardTier))
-                {
-                    Logging.Debug($"Player with steam id {steamID} has already claimed that free reward tier");
-                    return;
-                }
-
-                data.Battlepass.ClaimedFreeRewards.Add(claimedFreeRewardTier);
                 await new MySqlCommand($"UPDATE `{PlayersBattlepassTableName}` SET `ClaimedFreeRewards` = '{data.Battlepass.ClaimedFreeRewards.GetStringFromHashSetInt()}' WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
 
             }
             catch (Exception ex)
             {
-                Logger.Log($"Error updating claimed free rewards for player with steam id {steamID} and adding the tier {claimedFreeRewardTier}");
+                Logger.Log($"Error updating claimed free rewards for player with steam id {steamID}");
                 Logger.Log(ex);
             }
             finally
@@ -5600,7 +5593,7 @@ namespace UnturnedBlackout.Managers
             }
         }
 
-        public async Task UpdatePlayerBPClaimedPremiumRewardsAsync(CSteamID steamID, int claimedPremiumRewardTier)
+        public async Task UpdatePlayerBPClaimedPremiumRewardsAsync(CSteamID steamID)
         {
             using MySqlConnection Conn = new(ConnectionString);
             try
@@ -5611,20 +5604,12 @@ namespace UnturnedBlackout.Managers
                     Logging.Debug($"Error finding player data for steam id {steamID}");
                     return;
                 }
-
-                if (data.Battlepass.ClaimedPremiumRewards.Contains(claimedPremiumRewardTier))
-                {
-                    Logging.Debug($"Player with steam id {steamID} has already claimed that free reward tier");
-                    return;
-                }
-
-                data.Battlepass.ClaimedPremiumRewards.Add(claimedPremiumRewardTier);
                 await new MySqlCommand($"UPDATE `{PlayersBattlepassTableName}` SET `ClaimedPremiumRewards` = '{data.Battlepass.ClaimedPremiumRewards.GetStringFromHashSetInt()}' WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
 
             }
             catch (Exception ex)
             {
-                Logger.Log($"Error updating claimed premium rewards for player with steam id {steamID} and adding the tier {claimedPremiumRewardTier}");
+                Logger.Log($"Error updating claimed premium rewards for player with steam id {steamID}");
                 Logger.Log(ex);
             }
             finally

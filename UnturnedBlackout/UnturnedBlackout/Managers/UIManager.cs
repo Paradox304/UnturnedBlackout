@@ -1167,7 +1167,6 @@ namespace UnturnedBlackout.Managers
 
         private void OnButtonClicked(Player player, string buttonName)
         {
-            Logging.Debug($"{player.channel.owner.playerID.characterName} clicked {buttonName}");
             var ply = UnturnedPlayer.FromPlayer(player);
             bool isGame = Plugin.Instance.GameManager.TryGetCurrentGame(ply.CSteamID, out _);
 
@@ -1177,6 +1176,7 @@ namespace UnturnedBlackout.Managers
                 return;
             }
 
+            Logging.Debug($"{player.channel.owner.playerID.characterName} clicked {buttonName}");
             switch (buttonName)
             {
                 case "SERVER Play BUTTON":
@@ -1417,53 +1417,47 @@ namespace UnturnedBlackout.Managers
                     break;
             }
 
+            var numberRegexMatch = new Regex(@"([0-9]+)").Match(buttonName).Value;
+            if (!int.TryParse(numberRegexMatch, out int selected))
+            {
+                Logging.Debug($"Unable to find any number within the button name match: {numberRegexMatch}, returning");
+                return;
+            }
+
             if (buttonName.EndsWith("JoinButton"))
             {
-                if (int.TryParse(buttonName.Replace("Lobby", "").Replace("JoinButton", ""), out int selected))
-                {
-                    Plugin.Instance.GameManager.AddPlayerToGame(ply, selected);
-                }
+
+                Plugin.Instance.GameManager.AddPlayerToGame(ply, selected);
             }
             else if (buttonName.StartsWith("SERVER Item BUTTON") || buttonName.StartsWith("SERVER Item Grid BUTTON"))
             {
-                if (int.TryParse(buttonName.Replace("SERVER Item BUTTON", ""), out int selected) || int.TryParse(buttonName.Replace("SERVER Item Grid BUTTON", ""), out selected))
-                {
-                    handler.SelectedItem(selected);
-                }
+                handler.SelectedItem(selected);
             }
             else if (buttonName.StartsWith("SERVER Achievements Page"))
             {
-                if (int.TryParse(buttonName.Replace("SERVER Achievements Page", "").Replace("BUTTON", ""), out int selected))
-                {
-                    handler.SelectedAchievementMainPage(selected);
-                }
+                handler.SelectedAchievementMainPage(selected);
             } else if (buttonName.StartsWith("SERVER Achievements BUTTON"))
             {
-                if (int.TryParse(buttonName.Replace("SERVER Achievements BUTTON", ""), out int selected))
-                {
-                    handler.SelectedAchievement(selected);
-                }
+                handler.SelectedAchievement(selected);
             }
             else if (buttonName.StartsWith("SERVER Loadout BUTTON"))
             {
-                if (int.TryParse(buttonName.Replace("SERVER Loadout BUTTON", ""), out int selected))
+                if (!isGame)
                 {
-                    if (!isGame)
-                    {
-                        handler.SelectedLoadout(selected);
-                    }
-                    else
-                    {
-                        handler.SelectedMidgameLoadout(selected);
-                    }
+                    handler.SelectedLoadout(selected);
+                }
+                else
+                {
+                    handler.SelectedMidgameLoadout(selected);
                 }
             }
             else if (buttonName.StartsWith("SERVER Play BUTTON"))
             {
-                if (int.TryParse(buttonName.Replace("SERVER Play BUTTON", ""), out int selected))
-                {
-                    handler.SelectedPlayButton(selected);
-                }
+                handler.SelectedPlayButton(selected);
+            }
+            else if (buttonName.StartsWith("SERVER Battlepass"))
+            {
+                handler.SelectedBattlepassTier(buttonName.Split(' ')[2] == "T", selected);
             }
         }
 

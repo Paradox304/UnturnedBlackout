@@ -73,6 +73,9 @@ namespace UnturnedBlackout.Instances
         public int AchievementSubPage { get; set; }
         public int SelectedAchievementID { get; set; }
 
+        // Battlepass
+        public (bool, int) SelectedBattlepassTierID { get; set; }
+
         public Dictionary<int, PageLoadout> LoadoutPages { get; set; }
         public Dictionary<int, PageGun> PistolPages { get; set; }
         public Dictionary<int, PageGun> SMGPages { get; set; }
@@ -5336,7 +5339,7 @@ namespace UnturnedBlackout.Instances
                 if (achievement.TryGetNextTier(out AchievementTier nextTier))
                 {
                     targetAmount = nextTier.TargetAmount;
-                    if (nextTier.Rewards.Count >= 1 && TryGetRewardInfo(nextTier.Rewards[0], out string rewardName, out _))
+                    if (nextTier.Rewards.Count >= 1 && TryGetRewardInfo(nextTier.Rewards[0], out string rewardName, out _, out _))
                     {
                         EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Achievements Item TEXT", rewardName);
                     }
@@ -5361,7 +5364,7 @@ namespace UnturnedBlackout.Instances
             {
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Achievements Reward Claimed {i}", achievement.CurrentTier >= i);
 
-                if (!achievement.Achievement.TiersLookup.TryGetValue(i, out AchievementTier rewardTier) || rewardTier.Rewards.Count == 0 || !TryGetRewardInfo(rewardTier.Rewards[0], out _, out string rewardImage))
+                if (!achievement.Achievement.TiersLookup.TryGetValue(i, out AchievementTier rewardTier) || rewardTier.Rewards.Count == 0 || !TryGetRewardInfo(rewardTier.Rewards[0], out _, out string rewardImage, out _))
                 {
                     EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Achievements Reward IMAGE {i}", "");
                     continue;
@@ -5449,6 +5452,7 @@ namespace UnturnedBlackout.Instances
         }
 
         // Battlepass
+
         public void ShowBattlepass()
         {
             MainPage = EMainPage.Battlepass;
@@ -5465,7 +5469,7 @@ namespace UnturnedBlackout.Instances
             // Setup the XP bar
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Battlepass Tier Target TEXT", $"{bp.XP}/{(isBattlePassCompleted ? currentTier.XP : nextTier.XP)}");
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Battlepass Tier TEXT", $"{bp.CurrentTier}");
-            var fill = new string(' ', Math.Min(100, bp.XP * 100 / (isBattlePassCompleted ? currentTier.XP : nextTier.XP)));
+            var fill = new string(' ', Math.Min(72, bp.XP * 72 / (isBattlePassCompleted ? currentTier.XP : nextTier.XP)));
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Battlepass Tier XP Fill", fill);
             EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Battlepass IMAGE", "");
 
@@ -5496,14 +5500,45 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Battlepass Tier Completed Toggler {selected}", isTierUnlocked);
             if (!isTierUnlocked)
             {
-                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Battlepass Tier Fill {selected}", (selected - bp.CurrentTier) >= 2 ? " " : new string(' ', Math.Min(100, bp.XP * 100 / tier.XP)));
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Battlepass Tier Fill {selected}", (selected - bp.CurrentTier) >= 2 ? " " : new string(' ', Math.Min(70, bp.XP * 70 / tier.XP)));
             }
 
             // Setup top reward (free reward)
             var isRewardClaimed = bp.ClaimedFreeRewards.Contains(selected);
-            if (TryGetRewardInfo(tier.FreeReward, out string rewardName, out string rewardImage, out string rewardRarity))
+            if (TryGetRewardInfo(tier.FreeReward, out string topRewardName, out string topRewardImage, out string topRewardRarity))
             {
+                EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Battlepass T IMAGE {selected}", topRewardImage);
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Battlepass T TEXT {selected}", topRewardName);
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Battlepass T Locked {selected}", !isTierUnlocked && !isRewardClaimed);
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Battlepass T Claimed {selected}", isRewardClaimed);
+                SendRarity("SERVER Battlepass T", topRewardRarity, selected);
+            }
 
+            // Setup bottom reward (premium reward)
+            isRewardClaimed = bp.ClaimedPremiumRewards.Contains(selected);
+            if (TryGetRewardInfo(tier.PremiumReward, out string bottomRewardName, out string bottomRewardImage, out string bottomRewardRarity))
+            {
+                EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Battlepass B IMAGE {selected}", bottomRewardImage);
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Battlepass B TEXT {selected}", bottomRewardName);
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Battlepass B Locked {selected}", !isTierUnlocked || isRewardClaimed);
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Battlepass B Claimed {selected}", isRewardClaimed);
+                SendRarity("SERVER Battlepass B", bottomRewardRarity, selected);
+            }
+        }
+        
+        public void SelectedBattlepassTier(bool isTop, int selected)
+        {
+            SelectedBattlepassTierID = (isTop, selected);
+
+            if (!DB.BattlepassTiersSearchByID.TryGetValue(selected, out BattlepassTier tier))
+            {
+                Logging.Debug($"Error finding selected battlepass tier for {Player.CharacterName} with selected {selected}");
+                return;
+            }
+
+            if (TryGetRewardInfo(isTop ? tier.FreeReward : tier.PremiumReward, out _, out string rewardImage, out _))
+            {
+                EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Battlepass IMAGE", rewardImage);
             }
         }
 
