@@ -18,6 +18,22 @@ namespace UnturnedBlackout.Managers
             var db = Plugin.Instance.DBManager;
             var data = player.Data;
 
+            ThreadPool.QueueUserWorkItem((o) =>
+            {
+                try
+                {
+                    Plugin.Instance.AchievementManager.CheckAchievement(player, questType, questConditions);
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogException(ex, $"ERROR CHECKING ACHIEVEMENT WITH TYPE {questType} and conditions {questConditions}");
+                    foreach (var condition in questConditions)
+                    {
+                        Logging.Debug($"CONDITION TYPE: {condition.Key}, CONDITION VALUE: {condition.Value}");
+                    }
+                }
+            });
+
             if (!data.QuestsSearchByType.TryGetValue(questType, out List<PlayerQuest> quests))
             {
                 return;
@@ -73,21 +89,6 @@ namespace UnturnedBlackout.Managers
             {
                 //Plugin.Instance.UIManager.SendQuestProgression(player, pendingQuestsProgression);
             }
-
-            ThreadPool.QueueUserWorkItem((o) =>
-            {
-                try
-                {
-                    Plugin.Instance.AchievementManager.CheckAchievement(player, questType, questConditions);
-                } catch (Exception ex)
-                {
-                    Logger.LogException(ex, $"ERROR CHECKING ACHIEVEMENT WITH TYPE {questType} and conditions {questConditions}");
-                    foreach (var condition in questConditions)
-                    {
-                        Logging.Debug($"CONDITION TYPE: {condition.Key}, CONDITION VALUE: {condition.Value}");
-                    }
-                }
-            });
         }
 
         public bool IsConditionMinimum(EQuestCondition condition)

@@ -1,4 +1,5 @@
-﻿using Steamworks;
+﻿using Rocket.Core.Utils;
+using Steamworks;
 using System.Collections.Generic;
 using System.Threading;
 using UnturnedBlackout.Database.Base;
@@ -53,7 +54,7 @@ namespace UnturnedBlackout.Managers
                 {
                     if (achievement.Amount == nextTier.TargetAmount)
                     {
-                        Plugin.Instance.UIManager.SendAnimation(player, new Models.Animation.AnimationInfo(EAnimationType.AchievementCompletion, nextTier));
+                        TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.SendAnimation(player, new Models.Animation.AnimationInfo(EAnimationType.AchievementCompletion, nextTier)));
                     }
                 }
 

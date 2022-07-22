@@ -3873,7 +3873,6 @@ namespace UnturnedBlackout.Instances
             foreach (var r in rarities)
             {
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"{objectName} {r} {selected}", rarity == r);
-                Logging.Debug($"SETTING {objectName} {r} {selected} TO {rarity == r}");
             }
         }
 
