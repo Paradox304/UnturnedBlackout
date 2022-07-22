@@ -244,7 +244,7 @@ namespace UnturnedBlackout.Managers
                 await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{QuestsTableName}` ( `QuestID` INT NOT NULL AUTO_INCREMENT , `QuestTitle` TEXT NOT NULL , `QuestDesc` TEXT NOT NULL , QuestType ENUM('Kill', 'Death', 'Win', 'MultiKill', 'Killstreak', 'Headshots', 'GadgetsUsed', 'FlagsCaptured', 'FlagsSaved', 'Dogtags', 'Shutdown', 'Domination', 'FlagKiller', 'FlagDenied', 'Revenge', 'FirstKill', 'Longshot', 'Survivor', 'Collector') NOT NULL , `QuestTier` ENUM('Easy1', 'Easy2', 'Easy3', 'Medium1', 'Medium2', 'Hard1') NOT NULL , `QuestConditions` TEXT NOT NULL , `TargetAmount` INT NOT NULL , `XP` INT NOT NULL , PRIMARY KEY (`QuestID`));", Conn).ExecuteScalarAsync();
                 await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{AchievementsTableName}` ( `AchievementID` INT NOT NULL AUTO_INCREMENT , `AchievementType` ENUM('Kill', 'Death', 'Win', 'MultiKill', 'Killstreak', 'Headshots', 'GadgetsUsed', 'FlagsCaptured', 'FlagsSaved', 'Dogtags', 'Shutdown', 'Domination', 'FlagKiller', 'FlagDenied', 'Revenge', 'FirstKill', 'Longshot', 'Survivor', 'Collector') NOT NULL , `AchievementConditions` TEXT NOT NULL , `PageID` INT NOT NULL , PRIMARY KEY (`AchievementID`));", Conn).ExecuteScalarAsync();
                 await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{AchievementsTiersTableName}` ( `AchievementID` INT NOT NULL , `TierID` INT NOT NULL , `TierTitle` TEXT NOT NULL , `TierDesc` TEXT NOT NULL , `TierPrevSmall` TEXT NOT NULL , `TierPrevLarge` TEXT NOT NULL , `TargetAmount` INT NOT NULL , `Rewards` TEXT NOT NULL , `RemoveRewards` TEXT NOT NULL , CONSTRAINT `ub_achievement_id` FOREIGN KEY (`AchievementID`) REFERENCES `{AchievementsTableName}` (`AchievementID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`AchievementID`, `TierID`));", Conn).ExecuteScalarAsync();
-                await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{BattlepassTableName}` ( `TierID` INT NOT NULL , `FreeReward` TEXT NOT NULL , `FreeRewardIcon` TEXT NOT NULL , `PremiumReward` TEXT NOT NULL , `PremiumRewardIcon` TEXT NOT NULL , `XP` INT NOT NULL , PRIMARY KEY (`TierID`));", Conn).ExecuteScalarAsync();
+                await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{BattlepassTableName}` ( `TierID` INT NOT NULL , `FreeReward` TEXT NOT NULL , `PremiumReward` TEXT NOT NULL , `XP` INT NOT NULL , PRIMARY KEY (`TierID`));", Conn).ExecuteScalarAsync();
 
                 // PLAYERS DATA
                 await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PlayersTableName}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `SteamName` TEXT NOT NULL , `AvatarLink` VARCHAR(200) NOT NULL , `XP` INT NOT NULL DEFAULT '0' , `Level` INT NOT NULL DEFAULT '1' , `Credits` INT NOT NULL DEFAULT '0' , `Scrap` INT NOT NULL DEFAULT '0' , `Coins` INT NOT NULL DEFAULT '0' , `Kills` INT NOT NULL DEFAULT '0' , `HeadshotKills` INT NOT NULL DEFAULT '0' , `HighestKillstreak` INT NOT NULL DEFAULT '0' , `HighestMultiKills` INT NOT NULL DEFAULT '0' , `KillsConfirmed` INT NOT NULL DEFAULT '0' , `KillsDenied` INT NOT NULL DEFAULT '0' , `FlagsCaptured` INT NOT NULL DEFAULT '0' , `FlagsSaved` INT NOT NULL DEFAULT '0' , `AreasTaken` INT NOT NULL DEFAULT '0' , `Deaths` INT NOT NULL DEFAULT '0' , `Music` BOOLEAN NOT NULL DEFAULT TRUE , `IsMuted` BOOLEAN NOT NULL DEFAULT FALSE , `MuteExpiry` BIGINT NOT NULL , `HasBattlepass` BOOLEAN NOT NULL DEFAULT FALSE , `XPBooster` DECIMAL(6,3) NOT NULL DEFAULT '0' , `BPBooster` DECIMAL(6,3) NOT NULL DEFAULT '0' , `GunXPBooster` DECIMAL(6,3) NOT NULL DEFAULT '0' , PRIMARY KEY (`SteamID`));", Conn).ExecuteScalarAsync();
@@ -1363,16 +1363,14 @@ namespace UnturnedBlackout.Managers
                         }
 
                         var freeReward = Utility.GetRewardFromString(rdr[1].ToString());
-                        var freeRewardIcon = rdr[2].ToString();
-                        var premiumReward = Utility.GetRewardFromString(rdr[3].ToString());
-                        var premiumRewardIcon = rdr[4].ToString();
+                        var premiumReward = Utility.GetRewardFromString(rdr[2].ToString());
 
-                        if (!int.TryParse(rdr[5].ToString(), out int xp))
+                        if (!int.TryParse(rdr[3].ToString(), out int xp))
                         {
                             continue;
                         }
 
-                        var battlepass = new BattlepassTier(tierID, freeReward, freeRewardIcon, premiumReward, premiumRewardIcon, xp);
+                        var battlepass = new BattlepassTier(tierID, freeReward, premiumReward, xp);
 
                         if (battlepassTiersSearchByID.ContainsKey(tierID))
                         {
@@ -5515,6 +5513,7 @@ namespace UnturnedBlackout.Managers
         }
 
         // Player Battlepass
+
         public async Task IncreasePlayerBPXPAsync(CSteamID steamID, int xp)
         {
             using MySqlConnection Conn = new(ConnectionString);
@@ -5559,6 +5558,25 @@ namespace UnturnedBlackout.Managers
             catch (Exception ex)
             {
                 Logger.Log($"Error adding {xp} battlepass xp for player with steam id {steamID}");
+                Logger.Log(ex);
+            }
+            finally
+            {
+                await Conn.CloseAsync();
+            }
+        }
+
+        public async Task UpdateBPTierAsync(CSteamID steamID, int tierID)
+        {
+            using MySqlConnection Conn = new(ConnectionString);
+            try
+            {
+                await Conn.OpenAsync();
+                await new MySqlCommand($"UPDATE `{PlayersBattlepassTableName}` SET `CurrentTier` = {tierID} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"Error updating player battlepass tier of {steamID} for battlepass to {tierID}");
                 Logger.Log(ex);
             }
             finally

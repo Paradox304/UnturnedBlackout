@@ -4237,9 +4237,10 @@ namespace UnturnedBlackout.Instances
 
                         ThreadPool.QueueUserWorkItem(async (o) =>
                         {
-                            if (PlayerData.Coins >= gun.Gun.GetCoins(PlayerData.Level) && !gun.IsBought && gun.Gun.LevelRequirement > PlayerData.Level)
+                            var cost = gun.Gun.GetCoins(PlayerData.Level);
+                            if (PlayerData.Coins >= cost && !gun.IsBought && gun.Gun.LevelRequirement > PlayerData.Level)
                             {
-                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, gun.Gun.GetCoins(PlayerData.Level));
+                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, cost);
                                 await DB.UpdatePlayerGunBoughtAsync(Player.CSteamID, gun.Gun.GunID, true);
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
@@ -4271,9 +4272,10 @@ namespace UnturnedBlackout.Instances
 
                         ThreadPool.QueueUserWorkItem(async (o) =>
                         {
-                            if (PlayerData.Coins >= attachment.GetCoins(gun.Level) && !attachment.IsBought && attachment.LevelRequirement > gun.Level)
+                            var cost = attachment.GetCoins(gun.Level);
+                            if (PlayerData.Coins >= cost && !attachment.IsBought && attachment.LevelRequirement > gun.Level)
                             {
-                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, attachment.GetCoins(gun.Level));
+                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, cost);
                                 await DB.UpdatePlayerGunAttachmentBoughtAsync(Player.CSteamID, gun.Gun.GunID, attachment.Attachment.AttachmentID, true);
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
@@ -4296,9 +4298,10 @@ namespace UnturnedBlackout.Instances
 
                         ThreadPool.QueueUserWorkItem(async (o) =>
                         {
-                            if (PlayerData.Coins >= gun.Gun.GetCoins(PlayerData.Level) && !gun.IsBought && gun.Gun.LevelRequirement > PlayerData.Level)
+                            var cost = gun.Gun.GetCoins(PlayerData.Level);
+                            if (PlayerData.Coins >= cost && !gun.IsBought && gun.Gun.LevelRequirement > PlayerData.Level)
                             {
-                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, gun.Gun.GetCoins(PlayerData.Level));
+                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, cost);
                                 await DB.UpdatePlayerGunBoughtAsync(Player.CSteamID, gun.Gun.GunID, true);
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
@@ -4329,9 +4332,10 @@ namespace UnturnedBlackout.Instances
 
                         ThreadPool.QueueUserWorkItem(async (o) =>
                         {
-                            if (PlayerData.Coins >= attachment.GetCoins(gun.Level) && !attachment.IsBought && attachment.LevelRequirement > gun.Level)
+                            var cost = attachment.GetCoins(gun.Level);
+                            if (PlayerData.Coins >= cost && !attachment.IsBought && attachment.LevelRequirement > gun.Level)
                             {
-                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, attachment.GetCoins(gun.Level));
+                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, cost);
                                 await DB.UpdatePlayerGunAttachmentBoughtAsync(Player.CSteamID, gun.Gun.GunID, attachment.Attachment.AttachmentID, true);
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
@@ -4355,9 +4359,10 @@ namespace UnturnedBlackout.Instances
 
                         ThreadPool.QueueUserWorkItem(async (o) =>
                         {
-                            if (PlayerData.Coins >= gunCharm.GunCharm.GetCoins(PlayerData.Level) && !gunCharm.IsBought && gunCharm.GunCharm.LevelRequirement > PlayerData.Level)
+                            var cost = gunCharm.GunCharm.GetCoins(PlayerData.Level);
+                            if (PlayerData.Coins >= cost && !gunCharm.IsBought && gunCharm.GunCharm.LevelRequirement > PlayerData.Level)
                             {
-                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, gunCharm.GunCharm.GetCoins(PlayerData.Level));
+                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, cost);
                                 await DB.UpdatePlayerGunCharmBoughtAsync(Player.CSteamID, gunCharm.GunCharm.CharmID, true);
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
@@ -4380,9 +4385,10 @@ namespace UnturnedBlackout.Instances
 
                         ThreadPool.QueueUserWorkItem(async (o) =>
                         {
-                            if (PlayerData.Coins >= knife.Knife.GetCoins(PlayerData.Level) && !knife.IsBought && knife.Knife.LevelRequirement > PlayerData.Level)
+                            var cost = knife.Knife.GetCoins(PlayerData.Level);
+                            if (PlayerData.Coins >= cost && !knife.IsBought && knife.Knife.LevelRequirement > PlayerData.Level)
                             {
-                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, knife.Knife.GetCoins(PlayerData.Level));
+                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, cost);
                                 await DB.UpdatePlayerKnifeBoughtAsync(Player.CSteamID, knife.Knife.KnifeID, true);
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
@@ -4405,9 +4411,10 @@ namespace UnturnedBlackout.Instances
 
                         ThreadPool.QueueUserWorkItem(async (o) =>
                         {
-                            if (PlayerData.Coins >= gadget.Gadget.GetCoins(PlayerData.Level) && !gadget.IsBought && gadget.Gadget.LevelRequirement > PlayerData.Level)
+                            var cost = gadget.Gadget.GetCoins(PlayerData.Level);
+                            if (PlayerData.Coins >= cost && !gadget.IsBought && gadget.Gadget.LevelRequirement > PlayerData.Level)
                             {
-                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, gadget.Gadget.GetCoins(PlayerData.Level));
+                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, cost);
                                 await DB.UpdatePlayerGadgetBoughtAsync(Player.CSteamID, gadget.Gadget.GadgetID, true);
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
@@ -4430,9 +4437,10 @@ namespace UnturnedBlackout.Instances
 
                         ThreadPool.QueueUserWorkItem(async (o) =>
                         {
-                            if (PlayerData.Coins >= gadget.Gadget.GetCoins(PlayerData.Level) && !gadget.IsBought && gadget.Gadget.LevelRequirement > PlayerData.Level)
+                            var cost = gadget.Gadget.GetCoins(PlayerData.Level);
+                            if (PlayerData.Coins >= cost && !gadget.IsBought && gadget.Gadget.LevelRequirement > PlayerData.Level)
                             {
-                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, gadget.Gadget.GetCoins(PlayerData.Level));
+                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, cost);
                                 await DB.UpdatePlayerGadgetBoughtAsync(Player.CSteamID, gadget.Gadget.GadgetID, true);
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
@@ -4457,7 +4465,8 @@ namespace UnturnedBlackout.Instances
 
                         ThreadPool.QueueUserWorkItem(async (o) =>
                         {
-                            if (PlayerData.Coins >= perk.Perk.GetCoins(PlayerData.Level) && !perk.IsBought && perk.Perk.LevelRequirement > PlayerData.Level)
+                            var cost = perk.Perk.GetCoins(PlayerData.Level);
+                            if (PlayerData.Coins >= cost && !perk.IsBought && perk.Perk.LevelRequirement > PlayerData.Level)
                             {
                                 await DB.DecreasePlayerCoinsAsync(Player.CSteamID, perk.Perk.GetCoins(PlayerData.Level));
                                 await DB.UpdatePlayerPerkBoughtAsync(Player.CSteamID, perk.Perk.PerkID, true);
@@ -4482,9 +4491,10 @@ namespace UnturnedBlackout.Instances
 
                         ThreadPool.QueueUserWorkItem(async (o) =>
                         {
-                            if (PlayerData.Coins >= killstreak.Killstreak.GetCoins(PlayerData.Level) && !killstreak.IsBought && killstreak.Killstreak.LevelRequirement > PlayerData.Level)
+                            var cost = killstreak.Killstreak.GetCoins(PlayerData.Level);
+                            if (PlayerData.Coins >= cost && !killstreak.IsBought && killstreak.Killstreak.LevelRequirement > PlayerData.Level)
                             {
-                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, killstreak.Killstreak.GetCoins(PlayerData.Level));
+                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, cost);
                                 await DB.UpdatePlayerKillstreakBoughtAsync(Player.CSteamID, killstreak.Killstreak.KillstreakID, true);
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
@@ -4507,9 +4517,10 @@ namespace UnturnedBlackout.Instances
 
                         ThreadPool.QueueUserWorkItem(async (o) =>
                         {
-                            if (PlayerData.Coins >= card.Card.GetCoins(PlayerData.Level) && !card.IsBought && card.Card.LevelRequirement > PlayerData.Level)
+                            var cost = card.Card.GetCoins(PlayerData.Level);
+                            if (PlayerData.Coins >= cost && !card.IsBought && card.Card.LevelRequirement > PlayerData.Level)
                             {
-                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, card.Card.GetCoins(PlayerData.Level));
+                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, cost);
                                 await DB.UpdatePlayerCardBoughtAsync(Player.CSteamID, card.Card.CardID, true);
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
@@ -4532,9 +4543,10 @@ namespace UnturnedBlackout.Instances
 
                         ThreadPool.QueueUserWorkItem(async (o) =>
                         {
-                            if (PlayerData.Coins >= glove.Glove.GetCoins(PlayerData.Level) && !glove.IsBought && glove.Glove.LevelRequirement > PlayerData.Level)
+                            var cost = glove.Glove.GetCoins(PlayerData.Level);
+                            if (PlayerData.Coins >= cost && !glove.IsBought && glove.Glove.LevelRequirement > PlayerData.Level)
                             {
-                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, glove.Glove.GetCoins(PlayerData.Level));
+                                await DB.DecreasePlayerCoinsAsync(Player.CSteamID, cost);
                                 await DB.UpdatePlayerGloveBoughtAsync(Player.CSteamID, glove.Glove.GloveID, true);
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
@@ -5452,12 +5464,22 @@ namespace UnturnedBlackout.Instances
         }
 
         // Battlepass
+        
+        public void SetupBattlepass()
+        {
+            MainPage = EMainPage.Battlepass;
+            ShowBattlepass();
+            // Setup all 50 objects
+            for (int i = 1; i <= 50; i++)
+            {
+                ShowBattlepassTier(i);
+            }
+        }
 
         public void ShowBattlepass()
         {
-            MainPage = EMainPage.Battlepass;
             var bp = PlayerData.Battlepass;
-            
+
             if (!DB.BattlepassTiersSearchByID.TryGetValue(bp.CurrentTier, out BattlepassTier currentTier))
             {
                 Logging.Debug($"Error finding current battlepass tier for {Player.CharacterName}, returning");
@@ -5478,61 +5500,55 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Battlepass Expire TEXT", "365 Days");
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Battlepass Buy Pass BUTTON", !PlayerData.HasBattlepass);
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Battlepass Tier Skip", !isBattlePassCompleted);
-            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Battlepass Tier Skip TEXT", "100");
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Battlepass Tier Skip TEXT", $"{Config.Base.FileData.BattlepassTierSkipCost}");
             EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Battlepass Tier Skip IMAGE", "");
-
-            // Setup all 50 objects
-            for (int i = 1; i <= 50; i++)
-            {
-                ShowBattlepassTier(i);
-            }
         }
-        
-        public void ShowBattlepassTier(int selected)
+
+        public void ShowBattlepassTier(int tierID)
         {
             var bp = PlayerData.Battlepass;
-            if (!DB.BattlepassTiersSearchByID.TryGetValue(selected, out BattlepassTier tier))
+            if (!DB.BattlepassTiersSearchByID.TryGetValue(tierID, out BattlepassTier tier))
             {
                 return;
             }
 
-            var isTierUnlocked = bp.CurrentTier >= selected;
-            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Battlepass Tier Completed Toggler {selected}", isTierUnlocked);
+            var isTierUnlocked = bp.CurrentTier >= tierID;
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Battlepass Tier Completed Toggler {tierID}", isTierUnlocked);
             if (!isTierUnlocked)
             {
-                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Battlepass Tier Fill {selected}", (selected - bp.CurrentTier) >= 2 ? " " : new string(' ', Math.Min(70, bp.XP * 70 / tier.XP)));
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Battlepass Tier Fill {tierID}", (tierID - bp.CurrentTier) >= 2 ? " " : new string(' ', Math.Min(70, bp.XP * 70 / tier.XP)));
             }
 
             // Setup top reward (free reward)
-            var isRewardClaimed = bp.ClaimedFreeRewards.Contains(selected);
+            var isRewardClaimed = bp.ClaimedFreeRewards.Contains(tierID);
             if (TryGetRewardInfo(tier.FreeReward, out string topRewardName, out string topRewardImage, out string topRewardRarity))
             {
-                EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Battlepass T IMAGE {selected}", topRewardImage);
-                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Battlepass T TEXT {selected}", topRewardName);
-                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Battlepass T Locked {selected}", !isTierUnlocked && !isRewardClaimed);
-                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Battlepass T Claimed {selected}", isRewardClaimed);
-                SendRarity("SERVER Battlepass T", topRewardRarity, selected);
+                EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Battlepass T IMAGE {tierID}", topRewardImage);
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Battlepass T TEXT {tierID}", topRewardName);
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Battlepass T Locked {tierID}", !isTierUnlocked && !isRewardClaimed);
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Battlepass T Claimed {tierID}", isRewardClaimed);
+                SendRarity("SERVER Battlepass T", topRewardRarity, tierID);
             }
 
             // Setup bottom reward (premium reward)
-            isRewardClaimed = bp.ClaimedPremiumRewards.Contains(selected);
+            isRewardClaimed = bp.ClaimedPremiumRewards.Contains(tierID);
             if (TryGetRewardInfo(tier.PremiumReward, out string bottomRewardName, out string bottomRewardImage, out string bottomRewardRarity))
             {
-                EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Battlepass B IMAGE {selected}", bottomRewardImage);
-                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Battlepass B TEXT {selected}", bottomRewardName);
-                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Battlepass B Locked {selected}", !isTierUnlocked || isRewardClaimed);
-                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Battlepass B Claimed {selected}", isRewardClaimed);
-                SendRarity("SERVER Battlepass B", bottomRewardRarity, selected);
+                EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Battlepass B IMAGE {tierID}", bottomRewardImage);
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Battlepass B TEXT {tierID}", bottomRewardName);
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Battlepass B Locked {tierID}", !isTierUnlocked || isRewardClaimed);
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Battlepass B Claimed {tierID}", isRewardClaimed);
+                SendRarity("SERVER Battlepass B", bottomRewardRarity, tierID);
             }
         }
         
-        public void SelectedBattlepassTier(bool isTop, int selected)
+        public void SelectedBattlepassTier(bool isTop, int tierID)
         {
-            SelectedBattlepassTierID = (isTop, selected);
+            SelectedBattlepassTierID = (isTop, tierID);
 
-            if (!DB.BattlepassTiersSearchByID.TryGetValue(selected, out BattlepassTier tier))
+            if (!DB.BattlepassTiersSearchByID.TryGetValue(tierID, out BattlepassTier tier))
             {
-                Logging.Debug($"Error finding selected battlepass tier for {Player.CharacterName} with selected {selected}");
+                Logging.Debug($"Error finding selected battlepass tier for {Player.CharacterName} with selected {tierID}");
                 return;
             }
 

@@ -1,4 +1,6 @@
-﻿using Steamworks;
+﻿using Rocket.Core.Logging;
+using Steamworks;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -47,6 +49,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 quest.Amount += 1;
+                Logging.Debug($"QUEST AMOUNT: {quest.Amount}, QUEST TARGET AMOUNT: {quest.Quest.TargetAmount}, PERCENT COMPLETION MODULUS: {quest.Amount * 100 / quest.Quest.TargetAmount % 10}");
                 if (quest.Amount >= quest.Quest.TargetAmount)
                 {
                     Plugin.Instance.UIManager.SendAnimation(player, new Models.Animation.AnimationInfo(EAnimationType.QuestCompletion, quest.Quest));
@@ -56,6 +59,7 @@ namespace UnturnedBlackout.Managers
                     });
                 } else if (quest.Amount * 100 / quest.Quest.TargetAmount % 10 == 0)
                 {
+                    Logging.Debug("Modulus is 0, meaning 10% of quest is completed, sending quest progression");
                     pendingQuestsProgression.Add(quest);
                 }
 
@@ -65,7 +69,25 @@ namespace UnturnedBlackout.Managers
                 });
             }
 
-            ThreadPool.QueueUserWorkItem((o) => Plugin.Instance.AchievementManager.CheckAchievement(player, questType, questConditions));
+            if (pendingQuestsProgression.Count > 0)
+            {
+                Plugin.Instance.UIManager.SendQuestProgression(player, pendingQuestsProgression);
+            }
+
+            ThreadPool.QueueUserWorkItem((o) =>
+            {
+                try
+                {
+                    Plugin.Instance.AchievementManager.CheckAchievement(player, questType, questConditions);
+                } catch (Exception ex)
+                {
+                    Logger.LogException(ex, $"ERROR CHECKING ACHIEVEMENT WITH TYPE {questType} and conditions {questConditions}");
+                    foreach (var condition in questConditions)
+                    {
+                        Logging.Debug($"CONDITION TYPE: {condition.Key}, CONDITION VALUE: {condition.Value}");
+                    }
+                }
+            });
         }
 
         public bool IsConditionMinimum(EQuestCondition condition)

@@ -29,6 +29,8 @@ namespace UnturnedBlackout.Models.Configuration
         public int SpawnSwitchTimeFrame { get; set; }
         public int SpawnSwitchSeconds { get; set; }
 
+        public int BattlepassTierSkipCost { get; set; }
+
         public BaseValuesConfig()
         {
             MaxPlayerNameCharacters = 20;
@@ -63,6 +65,8 @@ namespace UnturnedBlackout.Models.Configuration
             SpawnSwitchCountSeconds = 11;
             SpawnSwitchTimeFrame = 27;
             SpawnSwitchSeconds = 120;
+
+            BattlepassTierSkipCost = 100;
         }
     }
 }

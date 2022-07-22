@@ -156,6 +156,8 @@ namespace UnturnedBlackout.Managers
 
 
         // ALL GAMES RELATED UI
+
+        // WAITING FOR PLAYERS
         public void SendWaitingForPlayersUI(GamePlayer player, int playerCount, int waitingPlayers)
         {
             EffectManager.sendUIEffect(WaitingForPlayersID, WaitingForPlayersKey, player.TransportConnection, true, Plugin.Instance.Translate("Waiting_For_Players_Show", playerCount, waitingPlayers).ToRich());
@@ -170,6 +172,8 @@ namespace UnturnedBlackout.Managers
         {
             EffectManager.askEffectClearByID(WaitingForPlayersID, player.TransportConnection);
         }
+
+        // GAME START COUNTDOWN
 
         public void ShowCountdownUI(GamePlayer player)
         {
@@ -187,10 +191,14 @@ namespace UnturnedBlackout.Managers
             EffectManager.askEffectClearByID(27633, player.TransportConnection);
         }
 
+        // XP UI
+
         public void ShowXPUI(GamePlayer player, int xp, string xpGained)
         {
             EffectManager.sendUIEffect(27630, 27630, player.TransportConnection, true, $"+{xp} XP", xpGained);
         }
+
+        // MULTIKILL SOUND
 
         public void SendMultiKillSound(GamePlayer player, int multiKill)
         {
@@ -230,6 +238,8 @@ namespace UnturnedBlackout.Managers
                     return;
             };
         }
+
+        // ANIMATION
 
         public void SendAnimation(GamePlayer player, AnimationInfo animationInfo)
         {
@@ -303,6 +313,8 @@ namespace UnturnedBlackout.Managers
                     break;
             }
         }
+        
+        // KILLFEED
 
         public void SendKillfeed(List<GamePlayer> players, EGameType type, List<Feed> killfeed)
         {
@@ -341,6 +353,8 @@ namespace UnturnedBlackout.Managers
                 EffectManager.sendUIEffectText(key, player.TransportConnection, true, "Killfeed", updatedText);
             }
         }
+        
+        // VOICE CHAT
 
         public void SendVoiceChatUI(GamePlayer player)
         {
@@ -369,6 +383,8 @@ namespace UnturnedBlackout.Managers
             EffectManager.askEffectClearByID(VoiceChatID, player.TransportConnection);
         }
 
+        // DEATH UI
+
         public void SendDeathUI(GamePlayer victim, GamePlayer killer, PlayerData killerData)
         {
             victim.Player.Player.enablePluginWidgetFlag(EPluginWidgetFlags.Modal);
@@ -393,6 +409,8 @@ namespace UnturnedBlackout.Managers
             EffectManager.askEffectClearByID(DeathID, player.TransportConnection);
         }
 
+        // KILL CARD UI
+
         public void SendKillCard(GamePlayer killer, GamePlayer victim, PlayerData victimData)
         {
             EffectManager.sendUIEffect(KillCardID, KillCardKey, killer.TransportConnection, true);
@@ -407,6 +425,8 @@ namespace UnturnedBlackout.Managers
         {
             EffectManager.askEffectClearByID(KillCardID, player.TransportConnection);
         }
+
+        // LOADING UI
 
         public void SendLoadingUI(UnturnedPlayer player, bool isMatch, EGameType gameMode, ArenaLocation location, string loadingText = "LOADING...")
         {
@@ -473,6 +493,7 @@ namespace UnturnedBlackout.Managers
             EffectManager.askEffectClearByID(LoadingUIID, player.Player.channel.owner.transportConnection);
         }
 
+
         public IEnumerator SendTip(UnturnedPlayer player)
         {
             var db = Plugin.Instance.DBManager;
@@ -482,6 +503,8 @@ namespace UnturnedBlackout.Managers
                 yield return new WaitForSeconds(10);
             }
         }
+
+        // PRE ENDING UI
 
         public void SendPreEndingUI(GamePlayer player)
         {
@@ -507,6 +530,8 @@ namespace UnturnedBlackout.Managers
         {
             EffectManager.askEffectClearByID(PreEndingUIID, player.TransportConnection);
         }
+        
+        // MIDGAME LOADOUT UI
 
         public void ShowMidgameLoadoutUI(GamePlayer player)
         {
@@ -523,6 +548,8 @@ namespace UnturnedBlackout.Managers
             EffectManager.askEffectClearByID(27643, player.TransportConnection);
         }
 
+        // GAMEMODE POPUP
+
         public void SendGamemodePopup(GamePlayer player, EGameType gameMode)
         {
             var option = Config.Gamemode.FileData.GamemodeOptions.FirstOrDefault(k => k.GameType == gameMode);
@@ -536,6 +563,8 @@ namespace UnturnedBlackout.Managers
             EffectManager.sendUIEffectText(GamemodePopupKey, player.TransportConnection, true, "GAMEMODE Title TEXT", Plugin.Instance.Translate($"{gameMode}_Name").ToRich());
             EffectManager.sendUIEffectText(GamemodePopupKey, player.TransportConnection, true, "GAMEMODE Description TEXT", Plugin.Instance.Translate($"{gameMode}_Desc").ToRich());
         }
+
+        // QUEST PROGRESSION
 
         public void SendQuestProgression(GamePlayer player, List<PlayerQuest> questsUpdate)
         {
@@ -1165,10 +1194,37 @@ namespace UnturnedBlackout.Managers
             }
         }
 
+        public void OnBattlepassTierUpdated(CSteamID steamID, int tierID)
+        {
+            if (UIHandlersLookup.TryGetValue(steamID, out UIHandler handler))
+            {
+                if (handler.MainPage == EMainPage.Battlepass)
+                {
+                    handler.ShowBattlepassTier(tierID);
+                }
+            }
+        }
+
+        public void OnBattlepassUpdated(CSteamID steamID)
+        {
+            if (UIHandlersLookup.TryGetValue(steamID, out UIHandler handler))
+            {
+                if (handler.MainPage == EMainPage.Battlepass)
+                {
+                    handler.ShowBattlepass();
+                }
+            }
+        }
         private void OnButtonClicked(Player player, string buttonName)
         {
             var ply = UnturnedPlayer.FromPlayer(player);
             bool isGame = Plugin.Instance.GameManager.TryGetCurrentGame(ply.CSteamID, out _);
+            var gPly = Plugin.Instance.GameManager.GetGamePlayer(ply);
+            if (gPly == null)
+            {
+                Logging.Debug($"Error finding game player for {ply.CharacterName}");
+                return;
+            }
 
             if (!UIHandlersLookup.TryGetValue(ply.CSteamID, out UIHandler handler))
             {
@@ -1194,6 +1250,12 @@ namespace UnturnedBlackout.Managers
                 case "SERVER Quest BUTTON":
                     handler.ShowQuests();
                     return;
+                case "SERVER Achievements BUTTON":
+                    handler.ShowAchievements();
+                    return;
+                case "SERVER Battlepass BUTTON":
+                    handler.SetupBattlepass();
+                    return;
                 case "SERVER Exit BUTTON":
                     Provider.kick(player.channel.owner.playerID.steamID, "You exited");
                     return;
@@ -1202,9 +1264,6 @@ namespace UnturnedBlackout.Managers
                     return;
                 case "SERVER Play Servers BUTTON":
                     handler.ShowPlayPage(EPlayPage.Servers);
-                    return;
-                case "SERVER Play Refresh BUTTON":
-                    // Stuff here
                     return;
                 case "SERVER Play Join BUTTON":
                     handler.ClickedJoinButton();
@@ -1221,7 +1280,6 @@ namespace UnturnedBlackout.Managers
                     {
                         handler.ForwardMidgameLoadoutPage();
                     }
-
                     return;
                 case "SERVER Loadout Previous BUTTON":
                     if (!isGame)
@@ -1232,7 +1290,6 @@ namespace UnturnedBlackout.Managers
                     {
                         handler.BackwardMidgameLoadoutPage();
                     }
-
                     return;
                 case "SERVER Loadout Back BUTTON":
                     handler.SetupMainMenu();
@@ -1246,7 +1303,6 @@ namespace UnturnedBlackout.Managers
                     {
                         handler.EquipMidgameLoadout();
                     }
-
                     return;
                 case "SERVER Loadout Rename Confirm BUTTON":
                     handler.RenameLoadout();
@@ -1392,9 +1448,6 @@ namespace UnturnedBlackout.Managers
                 case "SERVER Leaderboards Back BUTTON":
                     handler.SetupMainMenu();
                     return;
-                case "SERVER Achievements BUTTON":
-                    handler.ShowAchievements();
-                    return;
                 case "SERVER Achievements Next BUTTON":
                     handler.ForwardAchievementSubPage();
                     return;
@@ -1405,6 +1458,15 @@ namespace UnturnedBlackout.Managers
                     if (handler.MainPage == EMainPage.Achievements)
                     {
                         Plugin.Instance.AchievementManager.ClaimAchievementTier(ply.CSteamID, handler.SelectedAchievementID);
+                    }
+                    return;
+                case "SERVER Battlepass Confirm BUTTON":
+                    Plugin.Instance.BPManager.SkipTier(gPly);
+                    return;
+                case "SERVER Battlepass Claim BUTTON":
+                    if (handler.MainPage == EMainPage.Battlepass)
+                    {
+                        Plugin.Instance.BPManager.ClaimReward(gPly, handler.SelectedBattlepassTierID.Item1, handler.SelectedBattlepassTierID.Item2);
                     }
                     return;
                 case "KnobOff":
@@ -1426,7 +1488,6 @@ namespace UnturnedBlackout.Managers
 
             if (buttonName.EndsWith("JoinButton"))
             {
-
                 Plugin.Instance.GameManager.AddPlayerToGame(ply, selected);
             }
             else if (buttonName.StartsWith("SERVER Item BUTTON") || buttonName.StartsWith("SERVER Item Grid BUTTON"))

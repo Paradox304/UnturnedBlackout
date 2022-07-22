@@ -184,10 +184,12 @@ namespace UnturnedBlackout
             Logging.Debug("Init UI");
             DBManager = new DatabaseManager();
             Logging.Debug("Init Database");
+            BPManager = new BPManager();
+            Logging.Debug("Init BP");
             LoadoutManager = new LoadoutManager();
-            Logging.Debug("Init loadout");
+            Logging.Debug("Init Loadout");
             ServerManager = new ServerManager();
-            Logging.Debug("Init server");
+            Logging.Debug("Init Server");
             DataManager = new DataManager();
             Logging.Debug("Init Data");
             RewardManager = new RewardManager();
@@ -316,6 +318,7 @@ namespace UnturnedBlackout
         public LoadoutManager LoadoutManager { get; set; }
         public RewardManager RewardManager { get; set; }
         public ServerManager ServerManager { get; set; }
+        public BPManager BPManager { get; set; }
         public static Plugin Instance { get; set; }
     }
 }

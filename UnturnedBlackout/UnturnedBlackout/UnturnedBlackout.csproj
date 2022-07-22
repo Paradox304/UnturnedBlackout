@@ -241,6 +241,7 @@
     <Compile Include="Helpers\Logging.cs" />
     <Compile Include="Instances\UIHandler.cs" />
     <Compile Include="Managers\AchievementManager.cs" />
+    <Compile Include="Managers\BPManager.cs" />
     <Compile Include="Managers\ConfigManager.cs" />
     <Compile Include="Managers\DatabaseManager.cs" />
     <Compile Include="Managers\DataManager.cs" />
