@@ -37,8 +37,6 @@ namespace UnturnedBlackout.GameTypes
             PlayersLookup = new Dictionary<CSteamID, FFAPlayer>();
             UnavailableSpawnPoints = new List<FFASpawnPoint>();
             Frequency = Utility.GetFreeFrequency();
-
-            GameStarter = Plugin.Instance.StartCoroutine(StartGame());
         }
 
         public IEnumerator StartGame()

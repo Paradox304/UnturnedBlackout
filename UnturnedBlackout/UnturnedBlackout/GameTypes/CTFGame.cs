@@ -74,8 +74,6 @@ namespace UnturnedBlackout.GameTypes
             BlueTeam = new CTFTeam((byte)ETeam.Blue, false, blueTeamInfo, Config.CTF.FileData.BlueFlagID, blueFlag);
             RedTeam = new CTFTeam((byte)ETeam.Red, false, redTeamInfo, Config.CTF.FileData.RedFlagID, redFlag);
             Frequency = Utility.GetFreeFrequency();
-
-            GameStarter = Plugin.Instance.StartCoroutine(StartGame());
         }
 
         public IEnumerator StartGame()

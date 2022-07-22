@@ -71,7 +71,7 @@ namespace UnturnedBlackout.Managers
 
             if (pendingQuestsProgression.Count > 0)
             {
-                Plugin.Instance.UIManager.SendQuestProgression(player, pendingQuestsProgression);
+                //Plugin.Instance.UIManager.SendQuestProgression(player, pendingQuestsProgression);
             }
 
             ThreadPool.QueueUserWorkItem((o) =>

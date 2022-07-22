@@ -60,8 +60,6 @@ namespace UnturnedBlackout.GameTypes
 
             m_SpawnSwitcher = new Timer(Config.Base.FileData.SpawnSwitchSeconds * 1000);
             m_SpawnSwitcher.Elapsed += SpawnSwitch;
-
-            GameStarter = Plugin.Instance.StartCoroutine(StartGame());
         }
 
         public IEnumerator StartGame()
