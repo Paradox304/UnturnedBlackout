@@ -270,7 +270,6 @@ namespace UnturnedBlackout
                 numberRegexMatch = numberRegexMatch.Remove(0, 1);
             }
 
-            Logging.Debug($"Reward Type: {rewardType}, Reward Value: {numberRegexMatch}");
             return new Reward(rewardType, numberRegexMatch);
         }
 
