@@ -3869,11 +3869,13 @@ namespace UnturnedBlackout.Instances
 
         public void SendRarity(string objectName, string rarity, int selected)
         {
-            var rarities = new string[] { "COMMON", "UNCOMMON", "RARE", "EPIC", "LEGENDARY", "MYTHICAL", "YELLOW", "ORANGE", "CYAN", "GREEN" };
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"{objectName} {rarity} {selected}", true);
+
+            /*var rarities = new string[] { "COMMON", "UNCOMMON", "RARE", "EPIC", "LEGENDARY", "MYTHICAL", "YELLOW", "ORANGE", "CYAN", "GREEN" };
             foreach (var r in rarities)
             {
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"{objectName} {r} {selected}", rarity == r);
-            }
+            }*/
         }
 
         public void SendRarityName(string rarity)
