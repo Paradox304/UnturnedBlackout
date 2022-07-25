@@ -644,12 +644,14 @@ namespace UnturnedBlackout.GameTypes
             parameters.applyGlobalArmorMultiplier = IsHardcore;
             if (GamePhase != EGamePhase.Started)
             {
+                Logging.Debug($"{player.GamePlayer.Player.CharacterName} got damaged but damage got ignored due to game not started yet");
                 shouldAllow = false;
                 return;
             }
 
             if (player.GamePlayer.HasSpawnProtection)
             {
+                Logging.Debug($"{player.GamePlayer.Player.CharacterName} got damaged but damage got ignored due to spawn protection");
                 shouldAllow = false;
                 return;
             }
@@ -685,6 +687,7 @@ namespace UnturnedBlackout.GameTypes
 
             if (kPlayer.Team == player.Team && kPlayer != player)
             {
+                Logging.Debug($"{player.GamePlayer.Player.CharacterName} got damaged by {kPlayer.GamePlayer.Player.CharacterName} but damage got ignored due to being of the same team");
                 shouldAllow = false;
                 return;
             }
@@ -693,6 +696,7 @@ namespace UnturnedBlackout.GameTypes
 
             if (kPlayer.GamePlayer.HasSpawnProtection)
             {
+                Logging.Debug($"{kPlayer.GamePlayer.Player.CharacterName} damaged someone but had spawn protection, removing spawn protection");
                 kPlayer.GamePlayer.m_RemoveSpawnProtection.Stop();
                 kPlayer.GamePlayer.HasSpawnProtection = false;
             }

@@ -1560,7 +1560,6 @@ namespace UnturnedBlackout.Managers
                         continue;
                     }
 
-                    Logging.Debug($"Adding gun with id {gun.GunID}");
                     await new MySqlCommand($"INSERT IGNORE INTO `{PlayersGunsTableName}` (`SteamID` , `GunID` , `Level` , `XP` , `GunKills` , `IsBought` , `Attachments`) VALUES ({player.CSteamID} , {gun.GunID} , 1 , 0 , 0 , {gun.LevelRequirement == 0} , '{Utility.CreateStringFromDefaultAttachments(gun.DefaultAttachments) + Utility.CreateStringFromRewardAttachments(gun.RewardAttachments.Values.ToList())}');", Conn).ExecuteScalarAsync();
                 }
                 await new MySqlCommand($"INSERT IGNORE INTO `{PlayersGunsSkinsTableName}` (`SteamID` , `SkinIDs`) VALUES ({player.CSteamID}, '');", Conn).ExecuteScalarAsync();
@@ -1573,7 +1572,6 @@ namespace UnturnedBlackout.Managers
                         continue;
                     }
 
-                    Logging.Debug($"Adding gun charm with id {gunCharm.CharmID}");
                     await new MySqlCommand($"INSERT IGNORE INTO `{PlayersGunsCharmsTableName}` (`SteamID` , `CharmID` , `IsBought`) VALUES ({player.CSteamID} , {gunCharm.CharmID} , {gunCharm.LevelRequirement == 0});", Conn).ExecuteScalarAsync();
                 }
 
@@ -1586,7 +1584,6 @@ namespace UnturnedBlackout.Managers
                         continue;
                     }
 
-                    Logging.Debug($"Adding knife with id {knife.KnifeID}");
                     await new MySqlCommand($"INSERT IGNORE INTO `{PlayersKnivesTableName}` (`SteamID` , `KnifeID` , `KnifeKills` , `IsBought`) VALUES ({player.CSteamID} , {knife.KnifeID} , 0 , {knife.LevelRequirement == 0});", Conn).ExecuteScalarAsync();
                 }
 
@@ -1599,7 +1596,6 @@ namespace UnturnedBlackout.Managers
                         continue;
                     }
 
-                    Logging.Debug($"Adding gadget with id {gadget.GadgetID}");
                     await new MySqlCommand($"INSERT IGNORE INTO  `{PlayersGadgetsTableName}` (`SteamID` , `GadgetID` , `GadgetKills` , `IsBought`) VALUES ({player.CSteamID} , {gadget.GadgetID} , 0 , {gadget.LevelRequirement == 0});", Conn).ExecuteScalarAsync();
                 }
 
@@ -1612,7 +1608,6 @@ namespace UnturnedBlackout.Managers
                         continue;
                     }
 
-                    Logging.Debug($"Adding killstreak with id {killstreak.KillstreakID}");
                     await new MySqlCommand($"INSERT IGNORE INTO `{PlayersKillstreaksTableName}` (`SteamID` , `KillstreakID` , `KillstreakKills` , `IsBought`) VALUES ({player.CSteamID} , {killstreak.KillstreakID} , 0 ,  {killstreak.LevelRequirement == 0});", Conn).ExecuteScalarAsync();
                 }
 
@@ -1625,7 +1620,6 @@ namespace UnturnedBlackout.Managers
                         continue;
                     }
 
-                    Logging.Debug($"Adding perk with id {perk.PerkID}");
                     await new MySqlCommand($"INSERT IGNORE INTO `{PlayersPerksTableName}` (`SteamID` , `PerkID` , `IsBought`) VALUES ({player.CSteamID} , {perk.PerkID} , {perk.LevelRequirement == 0});", Conn).ExecuteScalarAsync();
                 }
 
@@ -1638,7 +1632,6 @@ namespace UnturnedBlackout.Managers
                         continue;
                     }
 
-                    Logging.Debug($"Adding glove with id {glove.GloveID}");
                     await new MySqlCommand($"INSERT IGNORE INTO `{PlayersGlovesTableName}` (`SteamID` , `GloveID` , `IsBought`) VALUES ({player.CSteamID} , {glove.GloveID} , {glove.LevelRequirement == 0});", Conn).ExecuteScalarAsync();
                 }
 
@@ -1651,7 +1644,6 @@ namespace UnturnedBlackout.Managers
                         continue;
                     }
 
-                    Logging.Debug($"Adding card with id {card.CardID}");
                     await new MySqlCommand($"INSERT IGNORE INTO `{PlayersCardsTableName}` (`SteamID` , `CardID` , `IsBought`) VALUES ({player.CSteamID} , {card.CardID} ,  {card.LevelRequirement == 0});", Conn).ExecuteScalarAsync();
                 }
 
@@ -1663,7 +1655,6 @@ namespace UnturnedBlackout.Managers
                 TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.5f)), loadingText: "LOADING ACHIEVEMENTS..."));
                 foreach (var achievement in Achievements)
                 {
-                    Logging.Debug($"Adding achievement with id {achievement.AchievementID}");
                     await new MySqlCommand($"INSERT IGNORE INTO `{PlayersAchievementsTableName}` (`SteamID`, `AchievementID`) VALUES ({player.CSteamID}, {achievement.AchievementID});", Conn).ExecuteScalarAsync();
                 }
 
@@ -1673,7 +1664,6 @@ namespace UnturnedBlackout.Managers
                 var data = Plugin.Instance.DataManager.ConvertLoadoutToJson(DefaultLoadout);
                 for (int i = 1; i <= loadoutAmount; i++)
                 {
-                    Logging.Debug($"Adding loadout with id {i} for {steamName}");
                     await new MySqlCommand($"INSERT IGNORE INTO `{PlayersLoadoutsTableName}` (`SteamID` , `LoadoutID` , `IsActive` , `Loadout`) VALUES ({player.CSteamID}, {i}, {i == 1}, '{data}');", Conn).ExecuteScalarAsync();
                 }
             }

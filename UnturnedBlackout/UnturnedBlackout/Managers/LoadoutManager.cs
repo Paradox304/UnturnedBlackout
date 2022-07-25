@@ -360,18 +360,18 @@ namespace UnturnedBlackout.Managers
             });
         }
 
-        public void EquipPerk(UnturnedPlayer player, int loadoutID, int newPerk)
+        public void EquipPerk(UnturnedPlayer player, int loadoutID, int newPerkID)
         {
-            Logging.Debug($"{player.CharacterName} is trying to equip perk with id {newPerk} for loadout with id {loadoutID}");
+            Logging.Debug($"{player.CharacterName} is trying to equip perk with id {newPerkID} for loadout with id {loadoutID}");
             if (!DB.PlayerLoadouts.TryGetValue(player.CSteamID, out PlayerLoadout loadout))
             {
                 Logging.Debug($"Error finding loadout for {player.CharacterName}");
                 return;
             }
 
-            if (!loadout.Perks.TryGetValue(newPerk, out LoadoutPerk perk))
+            if (!loadout.Perks.TryGetValue(newPerkID, out LoadoutPerk newPerk))
             {
-                Logging.Debug($"Error finding loadout perk with id {newPerk} for {player.CharacterName}");
+                Logging.Debug($"Error finding loadout perk with id {newPerkID} for {player.CharacterName}");
                 return;
             }
 
@@ -381,17 +381,17 @@ namespace UnturnedBlackout.Managers
                 return;
             }
 
-            if (playerLoadout.Perks.TryGetValue(perk.Perk.PerkType, out LoadoutPerk currentPerk))
+            if (playerLoadout.Perks.TryGetValue(newPerk.Perk.PerkType, out LoadoutPerk currentPerk))
             {
                 playerLoadout.PerksSearchByType.Remove(currentPerk.Perk.SkillType);
-                playerLoadout.Perks[perk.Perk.PerkType] = perk;
+                playerLoadout.Perks[newPerk.Perk.PerkType] = newPerk;
             }
             else
             {
-                playerLoadout.Perks.Add(perk.Perk.PerkType, perk);
+                playerLoadout.Perks.Add(newPerk.Perk.PerkType, newPerk);
             }
 
-            playerLoadout.PerksSearchByType.Add(perk.Perk.SkillType, perk);
+            playerLoadout.PerksSearchByType.Add(newPerk.Perk.SkillType, newPerk);
             ThreadPool.QueueUserWorkItem(async (o) =>
             {
                 await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);

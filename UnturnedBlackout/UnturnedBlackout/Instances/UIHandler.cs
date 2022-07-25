@@ -748,7 +748,6 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Player Name", PlayerData.SteamName);
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Unbox BUTTON", false);
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Store BUTTON", false);
-            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Battlepass BUTTON", false);
 
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Version TEXT", Plugin.Instance.Translate("Version").ToRich());
             ClearChat();
@@ -3870,12 +3869,13 @@ namespace UnturnedBlackout.Instances
 
         public void SendRarity(string objectName, string rarity, int selected)
         {
-            var rarities = new string[] { "COMMON", "UNCOMMON", "RARE", "EPIC", "LEGENDARY", "MYTHICAL", "YELLOW", "ORANGE", "CYAN", "GREEN" };
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"{objectName} {rarity} {selected}", true);
+
+            /*var rarities = new string[] { "COMMON", "UNCOMMON", "RARE", "EPIC", "LEGENDARY", "MYTHICAL", "YELLOW", "ORANGE", "CYAN", "GREEN" };
             foreach (var r in rarities)
             {
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"{objectName} {r} {selected}", rarity == r);
-                Logging.Debug($"SETTING {objectName} {r} {selected} TO {rarity == r}");
-            }
+            }*/
         }
 
         public void SendRarityName(string rarity)
