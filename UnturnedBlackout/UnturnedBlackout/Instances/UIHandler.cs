@@ -5352,7 +5352,7 @@ namespace UnturnedBlackout.Instances
                 if (achievement.TryGetNextTier(out AchievementTier nextTier))
                 {
                     targetAmount = nextTier.TargetAmount;
-                    if (nextTier.Rewards.Count >= 1 && TryGetRewardInfo(nextTier.Rewards[0], out string rewardName, out _, out _))
+                    if (nextTier.Rewards.Count >= 1 && TryGetAchievementRewardInfo(nextTier.Rewards[0], out string rewardName, out _, out _))
                     {
                         EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Achievements Item TEXT", rewardName);
                     }
@@ -5377,7 +5377,7 @@ namespace UnturnedBlackout.Instances
             {
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Achievements Reward Claimed {i}", achievement.CurrentTier >= i);
 
-                if (!achievement.Achievement.TiersLookup.TryGetValue(i, out AchievementTier rewardTier) || rewardTier.Rewards.Count == 0 || !TryGetRewardInfo(rewardTier.Rewards[0], out _, out string rewardImage, out _))
+                if (!achievement.Achievement.TiersLookup.TryGetValue(i, out AchievementTier rewardTier) || rewardTier.Rewards.Count == 0 || !TryGetAchievementRewardInfo(rewardTier.Rewards[0], out _, out string rewardImage, out _))
                 {
                     EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Achievements Reward IMAGE {i}", "");
                     continue;
@@ -5398,7 +5398,7 @@ namespace UnturnedBlackout.Instances
             ShowAchievement(achievement);
         }
 
-        public bool TryGetRewardInfo(Reward reward, out string rewardName, out string rewardImage, out string rewardRarity)
+        public bool TryGetAchievementRewardInfo(Reward reward, out string rewardName, out string rewardImage, out string rewardRarity)
         {
             rewardName = "";
             rewardImage = "";
@@ -5479,6 +5479,7 @@ namespace UnturnedBlackout.Instances
 
         public void ShowBattlepass()
         {
+            Logging.Debug($"Showing bp for {Player.CharacterName}");
             var bp = PlayerData.Battlepass;
 
             if (!DB.BattlepassTiersSearchByID.TryGetValue(bp.CurrentTier, out BattlepassTier currentTier))
@@ -5487,12 +5488,13 @@ namespace UnturnedBlackout.Instances
                 return;
             }
 
-            var isBattlePassCompleted = !DB.BattlepassTiersSearchByID.TryGetValue(bp.CurrentTier, out BattlepassTier nextTier);
+            var isBattlePassCompleted = !DB.BattlepassTiersSearchByID.TryGetValue(bp.CurrentTier + 1, out BattlepassTier nextTier);
+            Logging.Debug($"Is Battlepass Completed: {isBattlePassCompleted}, next tier null: {nextTier == null}, current xp: {bp.XP}, current tier xp: {currentTier.XP}, next tier xp: {nextTier?.XP ?? 0}");
 
             // Setup the XP bar
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Battlepass Tier Target TEXT", $"{bp.XP}/{(isBattlePassCompleted ? currentTier.XP : nextTier.XP)}");
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Battlepass Tier TEXT", $"{bp.CurrentTier}");
-            var fill = new string(' ', Math.Min(72, bp.XP * 72 / (isBattlePassCompleted ? currentTier.XP : nextTier.XP)));
+            var fill = new string(' ', Math.Min(72, bp.XP == 0 ? 1 : bp.XP * 72 / (isBattlePassCompleted ? currentTier.XP : nextTier.XP)));
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Battlepass Tier XP Fill", fill);
             EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Battlepass IMAGE", "");
 
@@ -5517,23 +5519,23 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Battlepass Tier Completed Toggler {tierID}", isTierUnlocked);
             if (!isTierUnlocked)
             {
-                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Battlepass Tier Fill {tierID}", (tierID - bp.CurrentTier) >= 2 ? " " : new string(' ', Math.Min(70, bp.XP * 70 / tier.XP)));
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Battlepass Tier Fill {tierID}", (tierID - bp.CurrentTier) >= 2 ? " " : new string(' ', Math.Min(70, bp.XP == 0 ? 1 : bp.XP * 70 / tier.XP)));
             }
 
             // Setup top reward (free reward)
             var isRewardClaimed = bp.ClaimedFreeRewards.Contains(tierID);
-            if (TryGetRewardInfo(tier.FreeReward, out string topRewardName, out string topRewardImage, out string topRewardRarity))
+            if (tier.FreeReward != null && TryGetBattlepassRewardInfo(tier.FreeReward, out string topRewardName, out string topRewardImage, out string topRewardRarity))
             {
                 EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Battlepass T IMAGE {tierID}", topRewardImage);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Battlepass T TEXT {tierID}", topRewardName);
-                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Battlepass T Locked {tierID}", !isTierUnlocked && !isRewardClaimed);
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Battlepass T Locked {tierID}", !isTierUnlocked || isRewardClaimed);
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Battlepass T Claimed {tierID}", isRewardClaimed);
                 SendRarity("SERVER Battlepass T", topRewardRarity, tierID);
             }
 
             // Setup bottom reward (premium reward)
             isRewardClaimed = bp.ClaimedPremiumRewards.Contains(tierID);
-            if (TryGetRewardInfo(tier.PremiumReward, out string bottomRewardName, out string bottomRewardImage, out string bottomRewardRarity))
+            if (tier.PremiumReward != null && TryGetBattlepassRewardInfo(tier.PremiumReward, out string bottomRewardName, out string bottomRewardImage, out string bottomRewardRarity))
             {
                 EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Battlepass B IMAGE {tierID}", bottomRewardImage);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Battlepass B TEXT {tierID}", bottomRewardName);
@@ -5545,6 +5547,7 @@ namespace UnturnedBlackout.Instances
         
         public void SelectedBattlepassTier(bool isTop, int tierID)
         {
+            Logging.Debug($"{Player.CharacterName} clicked top button: {isTop}, id: {tierID}");
             SelectedBattlepassTierID = (isTop, tierID);
 
             if (!DB.BattlepassTiersSearchByID.TryGetValue(tierID, out BattlepassTier tier))
@@ -5553,9 +5556,88 @@ namespace UnturnedBlackout.Instances
                 return;
             }
 
-            if (TryGetRewardInfo(isTop ? tier.FreeReward : tier.PremiumReward, out _, out string rewardImage, out _))
+            if (((isTop && tier.FreeReward != null) || (!isTop && tier.PremiumReward != null)) && TryGetAchievementRewardInfo(isTop ? tier.FreeReward : tier.PremiumReward, out _, out string rewardImage, out _))
             {
                 EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Battlepass IMAGE", rewardImage);
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Battlepass Claim BUTTON", true);
+            }
+        }
+
+        public bool TryGetBattlepassRewardInfo(Reward reward, out string rewardName, out string rewardImage, out string rewardRarity)
+        {
+            rewardName = " ";
+            rewardImage = "";
+            rewardRarity = "";
+            switch (reward.RewardType)
+            {
+                case ERewardType.Card:
+                    if (!DB.Cards.TryGetValue(Convert.ToInt32(reward.RewardValue), out Card card))
+                    {
+                        return false;
+                    }
+                    rewardImage = card.IconLink;
+                    rewardRarity = card.CardRarity;
+                    return true;
+                case ERewardType.GunSkin:
+                    if (!DB.GunSkinsSearchByID.TryGetValue(Convert.ToInt32(reward.RewardValue), out GunSkin skin))
+                    {
+                        return false;
+                    }
+                    rewardImage = skin.IconLink;
+                    rewardRarity = skin.SkinRarity;
+                    return true;
+                case ERewardType.Glove:
+                    if (!DB.Gloves.TryGetValue(Convert.ToUInt16(reward.RewardValue), out Glove glove))
+                    {
+                        return false;
+                    }
+                    rewardImage = glove.IconLink;
+                    rewardRarity = glove.GloveRarity;
+                    return true;
+                case ERewardType.Gun:
+                    if (!DB.Guns.TryGetValue(Convert.ToUInt16(reward.RewardValue), out Gun gun))
+                    {
+                        return false;
+                    }
+                    rewardImage = gun.IconLink;
+                    rewardRarity = gun.GunRarity;
+                    return true;
+                case ERewardType.GunCharm:
+                    if (!DB.GunCharms.TryGetValue(Convert.ToUInt16(reward.RewardValue), out GunCharm gunCharm))
+                    {
+                        return false;
+                    }
+                    rewardImage = gunCharm.IconLink;
+                    rewardRarity = gunCharm.CharmRarity;
+                    return true;
+                case ERewardType.Knife:
+                    if (!DB.Knives.TryGetValue(Convert.ToUInt16(reward.RewardValue), out Knife knife))
+                    {
+                        return false;
+                    }
+                    rewardImage = knife.IconLink;
+                    rewardRarity = knife.KnifeRarity;
+                    return true;
+                case ERewardType.BPBooster:
+                    rewardName = $"<color=white>{Convert.ToInt32(reward.RewardValue) * 100}%</color>";
+                    return true;
+                case ERewardType.XPBooster:
+                    rewardName = $"<color=white>{(Convert.ToInt32(reward.RewardValue) * 100)}%</color>";
+                    return true;
+                case ERewardType.GunXPBooster:
+                    rewardName = $"<color=white>{(Convert.ToInt32(reward.RewardValue) * 100)}%</color>";
+                    return true;
+                case ERewardType.Coin:
+                    rewardName = $"<color=white>{reward.RewardValue}</color>";
+                    return true;
+                case ERewardType.Credit:
+                    rewardName = $"<color=white>{reward.RewardValue}</color>";
+                    return true;
+                case ERewardType.LevelXP:
+                    rewardName = $"<color=white>{reward.RewardValue}</color>";
+                    return true;
+                default:
+                    return false;
             }
         }
 

@@ -1217,6 +1217,7 @@ namespace UnturnedBlackout.Managers
                 }
             }
         }
+
         private void OnButtonClicked(Player player, string buttonName)
         {
             var ply = UnturnedPlayer.FromPlayer(player);
@@ -1462,14 +1463,13 @@ namespace UnturnedBlackout.Managers
                         Plugin.Instance.AchievementManager.ClaimAchievementTier(ply.CSteamID, handler.SelectedAchievementID);
                     }
                     return;
-                case "SERVER Battlepass Confirm BUTTON":
-                    Plugin.Instance.BPManager.SkipTier(gPly);
+                case "SERVER Battlepass Tier Skip BUTTON":
+                    if (handler.MainPage == EMainPage.Battlepass)
+                        Plugin.Instance.BPManager.SkipTier(gPly);
                     return;
                 case "SERVER Battlepass Claim BUTTON":
                     if (handler.MainPage == EMainPage.Battlepass)
-                    {
                         Plugin.Instance.BPManager.ClaimReward(gPly, handler.SelectedBattlepassTierID.Item1, handler.SelectedBattlepassTierID.Item2);
-                    }
                     return;
                 case "KnobOff":
                     handler.OnMusicChanged(true);

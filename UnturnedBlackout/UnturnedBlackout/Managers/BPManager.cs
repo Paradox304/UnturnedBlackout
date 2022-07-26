@@ -116,6 +116,7 @@ namespace UnturnedBlackout.Managers
                     {
                         Plugin.Instance.UIManager.OnBattlepassUpdated(player.SteamID);
                         Plugin.Instance.UIManager.OnBattlepassTierUpdated(player.SteamID, oldTier);
+                        Plugin.Instance.UIManager.OnBattlepassTierUpdated(player.SteamID, bp.CurrentTier);
                     });
                 }
             });
