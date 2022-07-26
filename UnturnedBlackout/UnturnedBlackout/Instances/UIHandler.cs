@@ -5517,7 +5517,7 @@ namespace UnturnedBlackout.Instances
 
             var isTierUnlocked = bp.CurrentTier >= tierID;
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Battlepass Tier Completed Toggler {tierID}", isTierUnlocked);
-            EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Battlepass Tier Fill {tierID}", new string(' ', isTierUnlocked ? 70 : (tierID - bp.CurrentTier) >= 2 ? 1 : Math.Min(70, bp.XP == 0 ? 1 : bp.XP * 70 / tier.XP)));
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Battlepass Tier Fill {tierID}", new string(' ', bp.CurrentTier > tierID ? 70 : (bp.CurrentTier == tierID ? Math.Min(70, bp.XP == 0 ? 1 : bp.XP * 70 / tier.XP) : 1)));
 
             // Setup top reward (free reward)
             var isRewardClaimed = bp.ClaimedFreeRewards.Contains(tierID);
