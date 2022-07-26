@@ -5525,7 +5525,7 @@ namespace UnturnedBlackout.Instances
             {
                 EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Battlepass T IMAGE {tierID}", topRewardImage);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Battlepass T TEXT {tierID}", topRewardName);
-                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Battlepass T Locked {tierID}", PlayerData.HasBattlepass && (!isTierUnlocked || isRewardClaimed));
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Battlepass T Locked {tierID}", !isTierUnlocked || isRewardClaimed);
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Battlepass T Claimed {tierID}", isRewardClaimed);
                 SendRarity("SERVER Battlepass T", topRewardRarity, tierID);
             }
@@ -5546,7 +5546,7 @@ namespace UnturnedBlackout.Instances
             {
                 EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Battlepass B IMAGE {tierID}", bottomRewardImage);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Battlepass B TEXT {tierID}", bottomRewardName);
-                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Battlepass B Locked {tierID}", !isTierUnlocked || isRewardClaimed);
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Battlepass B Locked {tierID}", !PlayerData.HasBattlepass || !isTierUnlocked || isRewardClaimed);
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Battlepass B Claimed {tierID}", isRewardClaimed);
                 SendRarity("SERVER Battlepass B", bottomRewardRarity, tierID);
             }
