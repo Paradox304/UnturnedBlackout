@@ -5475,6 +5475,8 @@ namespace UnturnedBlackout.Instances
             {
                 ShowBattlepassTier(i);
             }
+
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Battlepass Claim BUTTON", false);
         }
 
         public void ShowBattlepass()
@@ -5647,9 +5649,11 @@ namespace UnturnedBlackout.Instances
                     return true;
                 case ERewardType.Coin:
                     rewardName = $"<color=white>{reward.RewardValue}</color>";
+                    rewardImage = "https://cdn.discordapp.com/attachments/458038940847439903/1000193091459891239/BlackoutTags.png";
                     return true;
                 case ERewardType.Credit:
                     rewardName = $"<color=white>{reward.RewardValue}</color>";
+                    rewardImage = "https://cdn.discordapp.com/attachments/458038940847439903/1000193090906226708/BlackoutPoints.png";
                     return true;
                 case ERewardType.LevelXP:
                     rewardName = $"<color=white>{reward.RewardValue}</color>";
