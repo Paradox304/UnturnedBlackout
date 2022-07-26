@@ -5517,10 +5517,7 @@ namespace UnturnedBlackout.Instances
 
             var isTierUnlocked = bp.CurrentTier >= tierID;
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Battlepass Tier Completed Toggler {tierID}", isTierUnlocked);
-            if (!isTierUnlocked)
-            {
-                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Battlepass Tier Fill {tierID}", (tierID - bp.CurrentTier) >= 2 ? " " : new string(' ', Math.Min(70, bp.XP == 0 ? 1 : bp.XP * 70 / tier.XP)));
-            }
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Battlepass Tier Fill {tierID}", new string(' ', isTierUnlocked ? 70 : (tierID - bp.CurrentTier) >= 2 ? 1 : Math.Min(70, bp.XP == 0 ? 1 : bp.XP * 70 / tier.XP)));
 
             // Setup top reward (free reward)
             var isRewardClaimed = bp.ClaimedFreeRewards.Contains(tierID);
@@ -5528,7 +5525,7 @@ namespace UnturnedBlackout.Instances
             {
                 EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Battlepass T IMAGE {tierID}", topRewardImage);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Battlepass T TEXT {tierID}", topRewardName);
-                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Battlepass T Locked {tierID}", !isTierUnlocked || isRewardClaimed);
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Battlepass T Locked {tierID}", PlayerData.HasBattlepass && (!isTierUnlocked || isRewardClaimed));
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Battlepass T Claimed {tierID}", isRewardClaimed);
                 SendRarity("SERVER Battlepass T", topRewardRarity, tierID);
             }
@@ -5640,13 +5637,13 @@ namespace UnturnedBlackout.Instances
                     rewardRarity = knife.KnifeRarity;
                     return true;
                 case ERewardType.BPBooster:
-                    rewardName = $"<color=white>{Convert.ToInt32(reward.RewardValue) * 100}%</color>";
+                    rewardName = $"<color=white>{Convert.ToDecimal(reward.RewardValue) * 100}%</color>";
                     return true;
                 case ERewardType.XPBooster:
-                    rewardName = $"<color=white>{(Convert.ToInt32(reward.RewardValue) * 100)}%</color>";
+                    rewardName = $"<color=white>{Convert.ToDecimal(reward.RewardValue) * 100}%</color>";
                     return true;
                 case ERewardType.GunXPBooster:
-                    rewardName = $"<color=white>{(Convert.ToInt32(reward.RewardValue) * 100)}%</color>";
+                    rewardName = $"<color=white>{Convert.ToDecimal(reward.RewardValue) * 100}%</color>";
                     return true;
                 case ERewardType.Coin:
                     rewardName = $"<color=white>{reward.RewardValue}</color>";
