@@ -5494,7 +5494,7 @@ namespace UnturnedBlackout.Instances
             // Setup the XP bar
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Battlepass Tier Target TEXT", $"{bp.XP}/{(isBattlePassCompleted ? currentTier.XP : nextTier.XP)}");
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Battlepass Tier TEXT", $"{bp.CurrentTier}");
-            var fill = new string(' ', Math.Min(72, bp.XP == 0 ? 1 : bp.XP * 72 / (isBattlePassCompleted ? currentTier.XP : nextTier.XP)));
+            var fill = new string(' ', Math.Min(72, bp.XP == 0 ? 1 : bp.XP * 72 / (isBattlePassCompleted ? currentTier.XP : nextTier.XP)));
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Battlepass Tier XP Fill", fill);
             EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER Battlepass IMAGE", "");
 
@@ -5532,6 +5532,16 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Battlepass T Claimed {tierID}", isRewardClaimed);
                 SendRarity("SERVER Battlepass T", topRewardRarity, tierID);
             }
+            else
+            {
+                EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Battlepass T IMAGE {tierID}", "");
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Battlepass T TEXT {tierID}", " ");
+                if (isTierUnlocked)
+                {
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Battlepass T Locked {tierID}", true);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Battlepass T Claimed {tierID}", true);
+                }
+            }
 
             // Setup bottom reward (premium reward)
             isRewardClaimed = bp.ClaimedPremiumRewards.Contains(tierID);
@@ -5542,6 +5552,17 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Battlepass B Locked {tierID}", !isTierUnlocked || isRewardClaimed);
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Battlepass B Claimed {tierID}", isRewardClaimed);
                 SendRarity("SERVER Battlepass B", bottomRewardRarity, tierID);
+            }
+            else
+            {
+                EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Battlepass B IMAGE {tierID}", "");
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Battlepass B TEXT {tierID}", " ");
+
+                if (isTierUnlocked)
+                {
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Battlepass B Locked {tierID}", true);
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"SERVER Battlepass B Claimed {tierID}", true);
+                }
             }
         }
         
