@@ -306,7 +306,9 @@ namespace UnturnedBlackout.Managers
                     {
                         var achievement = animationInfo.Info as AchievementTier;
                         EffectManager.sendUIEffect(AchievementCompletionID, AchievementCompletionKey, player.TransportConnection, true);
-                        EffectManager.sendUIEffectImageURL(AchievementCompletionKey, player.TransportConnection, true, "LevelUpDesc", achievement.TierDesc);
+                        EffectManager.sendUIEffectImageURL(ItemUnlockKey, player.TransportConnection, true, "LevelUpIcon", achievement.TierPrevLarge);
+                        EffectManager.sendUIEffectText(ItemUnlockKey, player.TransportConnection, true, "LevelUpTxt", achievement.TierTitle);
+                        EffectManager.sendUIEffectText(ItemUnlockKey, player.TransportConnection, true, "LevelUpDesc", achievement.TierDesc);
                         break;
                     }
                 default:
