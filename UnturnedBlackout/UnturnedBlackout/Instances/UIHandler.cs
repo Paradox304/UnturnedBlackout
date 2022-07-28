@@ -5634,7 +5634,7 @@ namespace UnturnedBlackout.Instances
                     if (!DB.Knives.TryGetValue(Convert.ToUInt16(reward.RewardValue), out Knife knife))
                     {
                         return false;
-                    };
+                    }
                     rewardImage = knife.IconLink;
                     rewardRarity = knife.KnifeRarity;
                     return true;
