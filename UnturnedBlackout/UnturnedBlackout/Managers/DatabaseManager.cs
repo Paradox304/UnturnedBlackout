@@ -1464,7 +1464,7 @@ namespace UnturnedBlackout.Managers
                             continue;
                         }
 
-                        cases.Add(caseID, new Case(caseID, caseName, iconLink, caseRarities, availableSkins);
+                        cases.Add(caseID, new Case(caseID, caseName, iconLink, caseRarities, availableSkins));
                     }
 
                     Logging.Debug($"Successfully read {cases.Count} cases from base data");
