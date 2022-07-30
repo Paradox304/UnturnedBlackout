@@ -15,7 +15,7 @@
         Coin,
         LevelXP,
         BattlepassXP,
-        Crate,
+        Case,
         XPBooster,
         BPBooster,
         GunXPBooster

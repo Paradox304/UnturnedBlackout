@@ -183,6 +183,7 @@
     <Compile Include="Database\Base\AchievementTier.cs" />
     <Compile Include="Database\Base\BattlepassTier.cs" />
     <Compile Include="Database\Base\Card.cs" />
+    <Compile Include="Database\Base\Case.cs" />
     <Compile Include="Database\Base\Gadget.cs" />
     <Compile Include="Database\Base\Glove.cs" />
     <Compile Include="Database\Base\Gun.cs" />
@@ -215,6 +216,7 @@
     <Compile Include="Database\Data\PlayerLoadout.cs" />
     <Compile Include="Database\Data\PlayerQuest.cs" />
     <Compile Include="Enums\EAttachment.cs" />
+    <Compile Include="Enums\ECaseRarity.cs" />
     <Compile Include="Enums\EFlagState.cs" />
     <Compile Include="Enums\EGamePhase.cs" />
     <Compile Include="Enums\EGameType.cs" />

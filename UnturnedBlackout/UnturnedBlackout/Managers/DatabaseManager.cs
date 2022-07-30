@@ -87,6 +87,8 @@ namespace UnturnedBlackout.Managers
         public Dictionary<int, BattlepassTier> BattlepassTiersSearchByID { get; set; }
         public List<BattlepassTier> BattlepassTiers { get; set; }
 
+        public Dictionary<int, Case> Cases { get; set; }
+
         public Dictionary<int, List<AnimationItemUnlock>> ItemsSearchByLevel { get; set; }
 
         public List<Server> Servers { get; set; }
@@ -270,7 +272,8 @@ namespace UnturnedBlackout.Managers
                 await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PlayersLoadoutsTableName}` (`SteamID` BIGINT UNSIGNED NOT NULL , `LoadoutID` INT NOT NULL , `IsActive` BOOLEAN NOT NULL , `Loadout` TEXT NOT NULL , CONSTRAINT `ub_steam_id_9` FOREIGN KEY (`SteamID`) REFERENCES `{PlayersTableName}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID`, `LoadoutID`));", Conn).ExecuteScalarAsync();
                 await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PlayersQuestsTableName}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `QuestID` INT NOT NULL , `Amount` INT NOT NULL , `QuestEnd` BIGINT NOT NULL , CONSTRAINT `ub_steam_id_14` FOREIGN KEY (`SteamID`) REFERENCES `{PlayersTableName}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_quest_id` FOREIGN KEY (`QuestID`) REFERENCES `{QuestsTableName}` (`QuestID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `QuestID`));", Conn).ExecuteScalarAsync();
                 await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PlayersAchievementsTableName}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `AchievementID` INT NOT NULL , `CurrentTier` INT NOT NULL DEFAULT '0' , `Amount` INT NOT NULL DEFAULT '0' , CONSTRAINT `ub_steam_id_15` FOREIGN KEY (`SteamID`) REFERENCES `{PlayersTableName}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_achievement_id_2` FOREIGN KEY (`AchievementID`) REFERENCES `{AchievementsTableName}` (`AchievementID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID`, `AchievementID`));", Conn).ExecuteScalarAsync();
-                await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PlayersBattlepassTableName}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `CurrentTier` INT NOT NULL DEFAULT '1' , `XP` INT NOT NULL DEFAULT '0', `ClaimedFreeRewards` TEXT NOT NULL , `ClaimedPremiumRewards` TEXT NOT NULL , CONSTRAINT `ub_steam_16` FOREIGN KEY (`SteamID`) REFERENCES `{PlayersTableName}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID`));", Conn).ExecuteScalarAsync();
+                await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PlayersBattlepassTableName}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `CurrentTier` INT NOT NULL DEFAULT '1' , `XP` INT NOT NULL DEFAULT '0', `ClaimedFreeRewards` TEXT NOT NULL , `ClaimedPremiumRewards` TEXT NOT NULL , CONSTRAINT `ub_steam_id_16` FOREIGN KEY (`SteamID`) REFERENCES `{PlayersTableName}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID`));", Conn).ExecuteScalarAsync();
+                await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PlayersCasesTableName}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `Cases` TEXT NOT NULL , CONSTRAINT `ub_steam_id_17` FOREIGN KEY (`SteamID`) REFERENCES `{PlayersTableName}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID`));", Conn).ExecuteScalarAsync();
             }
             catch (Exception ex)
             {
@@ -1399,6 +1402,78 @@ namespace UnturnedBlackout.Managers
                     Logger.Log(ex);
                 }
                 finally
+                {
+                    rdr.Close();
+                }
+
+                Logging.Debug("Reading cases for base data");
+                rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{CasesTableName}`;", Conn).ExecuteReaderAsync();
+                try
+                {
+                    var cases = new Dictionary<int, Case>();
+                    while (await rdr.ReadAsync())
+                    {
+                        if (!int.TryParse(rdr[0].ToString(), out int caseID))
+                        {
+                            continue;
+                        }
+
+                        var caseName = rdr[1].ToString();
+                        var iconLink = rdr[2].ToString();
+                        var caseRarities = new List<(ECaseRarity, int)>();
+
+                        var shouldContinue = true;
+                        for (int i = 3; i <= 10; i++)
+                        {
+                            var caseRarity = (ECaseRarity)(i - 3);
+                            if (!int.TryParse(rdr[i].ToString(), out int weight))
+                            {
+                                shouldContinue = false;
+                                break;
+                            }
+                            caseRarities.Add((caseRarity, weight));
+                        }
+                        if (!shouldContinue)
+                        {
+                            continue;
+                        }
+
+                        var availableSkinIDs = rdr[11].GetIntListFromReaderResult();
+                        var availableSkins = new List<GunSkin>();
+
+                        foreach (var skinID in availableSkinIDs)
+                        {
+                            if (!GunSkinsSearchByID.TryGetValue(skinID, out GunSkin skin))
+                            {
+                                Logging.Debug($"Case with id {caseID} has a skin with id {skinID} which is not a valid skin registered in the database");
+                                continue;
+                            }
+
+                            if (availableSkins.Contains(skin))
+                            {
+                                Logging.Debug($"Case with id {caseID} has a skin with id {skinID} which is a duplicate, the same skin is already added to the case");
+                                continue;
+                            }
+
+                            availableSkins.Add(skin);
+                        }
+
+                        if (cases.ContainsKey(caseID))
+                        {
+                            Logging.Debug($"Found a case with id {caseID} already registered, ignoring");
+                            continue;
+                        }
+
+                        cases.Add(caseID, new Case(caseID, caseName, iconLink, caseRarities, availableSkins);
+                    }
+
+                    Logging.Debug($"Successfully read {cases.Count} cases from base data");
+                    Cases = cases;
+                } catch (Exception ex)
+                {
+                    Logger.Log($"Error reading cases from cases table");
+                    Logger.Log(ex);
+                } finally
                 {
                     rdr.Close();
                 }
@@ -5632,5 +5707,25 @@ namespace UnturnedBlackout.Managers
                 await Conn.CloseAsync();
             }
         }
+
+        // Player Cases
+
+        public async Task UpdatePlayerCaseAsync(CSteamID steamID, int caseID, int amount)
+        {
+            using MySqlConnection Conn = new(ConnectionString);
+            try
+            {
+                await Conn.OpenAsync();
+
+            } catch (Exception ex)
+            {
+                Logger.Log($"Error updating player case with amount {amount} with case ID {caseID}");
+                Logger.Log(ex);
+            } finally
+            {
+                await Conn.CloseAsync();
+            }
+        }
+        
     }
 }
