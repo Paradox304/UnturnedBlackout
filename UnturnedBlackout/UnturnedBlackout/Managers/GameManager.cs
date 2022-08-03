@@ -154,12 +154,12 @@ namespace UnturnedBlackout.Managers
             }
 
             game.RemovePlayerFromGame(gPlayer);
-            SendPlayerToLobby(player);
+            SendPlayerToLobby(player, null);
         }
 
         private void OnPlayerJoined(UnturnedPlayer player)
         {
-            SendPlayerToLobby(player);
+            SendPlayerToLobby(player, null);
 
             var db = Plugin.Instance.DBManager;
             Plugin.Instance.UIManager.SendLoadingUI(player, false, EGameType.None, null, "LOADING...");
@@ -214,7 +214,7 @@ namespace UnturnedBlackout.Managers
         {
             if (!TryGetCurrentGame(sender.player.channel.owner.playerID.steamID, out _))
             {
-                SendPlayerToLobby(UnturnedPlayer.FromPlayer(sender.player));
+                SendPlayerToLobby(UnturnedPlayer.FromPlayer(sender.player), null);
             }
         }
 
@@ -226,7 +226,7 @@ namespace UnturnedBlackout.Managers
             }
         }
 
-        public void SendPlayerToLobby(UnturnedPlayer player)
+        public void SendPlayerToLobby(UnturnedPlayer player, MatchEndSummary summary)
         {
             player.Player.inventory.ClearInventory();
             player.Player.life.serverModifyHealth(100);
@@ -234,7 +234,7 @@ namespace UnturnedBlackout.Managers
             {
                 player.Player.life.ServerRespawn(false);
                 player.Player.teleportToLocationUnsafe(Config.Base.FileData.LobbySpawn, Config.Base.FileData.LobbyYaw);
-                Plugin.Instance.UIManager.ShowMenuUI(player);
+                Plugin.Instance.UIManager.ShowMenuUI(player, summary);
             });
         }
 

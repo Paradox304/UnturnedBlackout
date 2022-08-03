@@ -14,6 +14,7 @@ using UnturnedBlackout.Database.Data;
 using UnturnedBlackout.Enums;
 using UnturnedBlackout.GameTypes;
 using UnturnedBlackout.Managers;
+using UnturnedBlackout.Models.Global;
 using UnturnedBlackout.Models.UI;
 
 namespace UnturnedBlackout.Instances
@@ -723,11 +724,15 @@ namespace UnturnedBlackout.Instances
 
         // Main Page
 
-        public void ShowUI()
+        public void ShowUI(MatchEndSummary summary = null)
         {
             EffectManager.sendUIEffect(ID, Key, TransportConnection, true);
             Player.Player.enablePluginWidgetFlag(EPluginWidgetFlags.Modal);
             SetupMainMenu();
+            if (summary != null)
+            {
+                ShowMatchEndSummary(summary);
+            }
         }
 
         public void HideUI()
@@ -5661,6 +5666,13 @@ namespace UnturnedBlackout.Instances
                 default:
                     return false;
             }
+        }
+
+        // Match End Summary
+
+        public void ShowMatchEndSummary(MatchEndSummary summary)
+        {
+
         }
 
         // Events

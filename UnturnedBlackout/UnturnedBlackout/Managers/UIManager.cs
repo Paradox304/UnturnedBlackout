@@ -138,11 +138,11 @@ namespace UnturnedBlackout.Managers
             }
         }
 
-        public void ShowMenuUI(UnturnedPlayer player)
+        public void ShowMenuUI(UnturnedPlayer player, MatchEndSummary summary = null)
         {
             if (UIHandlersLookup.TryGetValue(player.CSteamID, out UIHandler handler))
             {
-                handler.ShowUI();
+                handler.ShowUI(summary);
             }
         }
 
