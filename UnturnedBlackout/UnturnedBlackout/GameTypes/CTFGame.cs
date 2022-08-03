@@ -99,7 +99,7 @@ namespace UnturnedBlackout.GameTypes
             foreach (var player in Players)
             {
                 player.GamePlayer.GiveMovement(player.GamePlayer.Player.Player.equipment.useable is UseableGun gun && gun.isAiming, false, false);
-
+                player.StartTime = DateTime.UtcNow;
                 Plugin.Instance.UIManager.ClearCountdownUI(player.GamePlayer);
             }
             Plugin.Instance.UIManager.SendCTFHUD(BlueTeam, RedTeam, Players);
@@ -153,6 +153,7 @@ namespace UnturnedBlackout.GameTypes
             GamePhase = EGamePhase.Ending;
             Plugin.Instance.UIManager.OnGameUpdated();
 
+            var summaries = new Dictionary<GamePlayer, MatchEndSummary>();
             foreach (var player in Players)
             {
                 Plugin.Instance.UIManager.ClearCTFHUD(player.GamePlayer);
@@ -163,11 +164,12 @@ namespace UnturnedBlackout.GameTypes
                     player.GamePlayer.HasScoreboard = false;
                     Plugin.Instance.UIManager.HideCTFLeaderboard(player.GamePlayer);
                 }
+                var summary = new MatchEndSummary(player.GamePlayer, player.XP, player.StartingLevel, player.StartingXP, player.Kills, player.Deaths, player.Assists, player.HighestKillstreak, player.HighestMK, player.StartTime, GameMode, player.Team == wonTeam);
+                summaries.Add(player.GamePlayer, summary);
+                ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DBManager.IncreasePlayerXPAsync(player.GamePlayer.SteamID, summary.PendingXP));
                 if (player.Team == wonTeam)
                 {
-                    var xp = player.XP * Config.CTF.FileData.WinMultiplier;
-                    TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.QuestManager.CheckQuest(player.GamePlayer, EQuestType.Win, new Dictionary<EQuestCondition, int> { { EQuestCondition.Map, Location.LocationID }, { EQuestCondition.Gamemode, (int)GameMode }, { EQuestCondition.WinFlagsCaptured, player.FlagsCaptured }, { EQuestCondition.WinFlagsSaved, player.FlagsSaved }, { EQuestCondition.WinKills, player.Kills } }));
-                    ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DBManager.IncreasePlayerXPAsync(player.GamePlayer.SteamID, (int)xp));
+                    TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.QuestManager.CheckQuest(player.GamePlayer, EQuestType.Win, new Dictionary<EQuestCondition, int> { { EQuestCondition.Map, Location.LocationID }, { EQuestCondition.Gamemode, (int)GameMode }, { EQuestCondition.WinFlagsCaptured, player.FlagsCaptured }, { EQuestCondition.WinFlagsSaved, player.FlagsSaved }, { EQuestCondition.WinKills, player.Kills } })); 
                 }
                 Plugin.Instance.UIManager.SetupPreEndingUI(player.GamePlayer, EGameType.CTF, player.Team.TeamID == wonTeam.TeamID, BlueTeam.Score, RedTeam.Score, BlueTeam.Info.TeamName, RedTeam.Info.TeamName);
                 player.GamePlayer.Player.Player.quests.askSetRadioFrequency(CSteamID.Nil, Frequency);
@@ -186,7 +188,7 @@ namespace UnturnedBlackout.GameTypes
             foreach (var player in Players.ToList())
             {
                 RemovePlayerFromGame(player.GamePlayer);
-                Plugin.Instance.GameManager.SendPlayerToLobby(player.GamePlayer.Player);
+                Plugin.Instance.GameManager.SendPlayerToLobby(player.GamePlayer.Player, summaries.TryGetValue(player.GamePlayer, out MatchEndSummary pendingSummary) ? pendingSummary : null);
             }
 
             Players = new List<CTFPlayer>();

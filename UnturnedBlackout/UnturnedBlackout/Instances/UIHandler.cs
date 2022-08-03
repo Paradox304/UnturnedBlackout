@@ -36,6 +36,7 @@ namespace UnturnedBlackout.Instances
 
         public Coroutine TimerRefresher { get; set; }
         public Coroutine AchievementPageShower { get; set; }
+        public Coroutine MatchEndSummaryShower { get; set; }
 
         public ITransportConnection TransportConnection { get; set; }
         public ConfigManager Config
@@ -130,6 +131,16 @@ namespace UnturnedBlackout.Instances
             if (TimerRefresher != null)
             {
                 Plugin.Instance.StopCoroutine(TimerRefresher);
+            }
+
+            if (AchievementPageShower != null)
+            {
+                Plugin.Instance.StopCoroutine(AchievementPageShower);
+            }
+
+            if (MatchEndSummaryShower != null)
+            {
+                Plugin.Instance.StopCoroutine(MatchEndSummaryShower);
             }
         }
 
@@ -731,7 +742,7 @@ namespace UnturnedBlackout.Instances
             SetupMainMenu();
             if (summary != null)
             {
-                ShowMatchEndSummary(summary);
+                MatchEndSummaryShower = Plugin.Instance.StartCoroutine(ShowMatchEndSummary(summary));
             }
         }
 
@@ -5670,9 +5681,196 @@ namespace UnturnedBlackout.Instances
 
         // Match End Summary
 
-        public void ShowMatchEndSummary(MatchEndSummary summary)
+        public IEnumerator ShowMatchEndSummary(MatchEndSummary summary)
         {
+            Logging.Debug($"Showing match end summary for {Player.CharacterName}");
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "Scene Summary", true);
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "Scene Summary XP Toggle", true);
 
+            // Set the current level, xp and next level xp to animate the bar
+            var currentLevel = summary.StartingLevel;
+            var currentXP = summary.StartingXP;
+            var nextLevelXP = DB.Levels.TryGetValue(currentLevel + 1, out XPLevel level) ? level.XPNeeded : 0;
+
+            Logging.Debug($"Current Level: {currentLevel}, current xp: {currentXP}, next level xp: {nextLevelXP}");
+            // Send the filled amount of bar and set the toggle to true and animate the text
+
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP 1 TEXT", $"Match <color=#AD6816>{summary.MatchXP}</color> XP");
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP 2 TEXT", $"Match <color=#AD6816>{summary.MatchXPBonus}</color> Bonus XP");
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP 3 TEXT", $"Achievement <color=#AD6816>{summary.AchievementXPBonus}</color> Bonus XP");
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP 4 TEXT", $"Other <color=#AD6816>{summary.OtherXPBonus}</color> Bonus XP");
+
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Level 0 TEXT", currentLevel.ToString("D3"));
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Level 1 TEXT", nextLevelXP == 0 ? "MAX" : (currentLevel + 1).ToString("D3"));
+
+            // Animate Match XP
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 0", new string(' ', currentXP == 0 ? 1 : Math.Min(113, currentXP * 113 / (nextLevelXP == 0 ? 1 : nextLevelXP))));
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "Scene Summary XP 0 Toggle", true);
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Type TEXT", "Match XP");
+
+            Logging.Debug("Animating match XP");
+            var b = 0;
+            for (int i = 1; i <= summary.MatchXP; i++)
+            {
+                yield return new WaitForSeconds(0.01f);
+                Logging.Debug($"i: {i}, b: {b}");
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP 0 TEXT", $"+{i} XP");
+                Logging.Debug($"Checking if {currentXP + b} is equal to {nextLevelXP}");
+                if (nextLevelXP != 0 && (currentXP + b) == nextLevelXP)
+                {
+                    Logging.Debug($"Level changed");
+                    // Level has changed
+                    b = 0;
+                    currentLevel += 1;
+                    currentXP = 0;
+                    nextLevelXP = DB.Levels.TryGetValue(currentLevel + 1, out level) ? level.XPNeeded : 0;
+                    Logging.Debug($"Current Level: {currentLevel}, current xp: {currentXP}, next level xp: {nextLevelXP}");
+                    EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Level 0 TEXT", currentLevel.ToString("D3"));
+                    EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Level 1 TEXT", nextLevelXP == 0 ? "MAX" : (currentLevel + 1).ToString("D3"));
+
+                    EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 0", " ");
+                    EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 1", " ");
+                }
+                else
+                {
+                    b += 1;
+                }
+
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 1", new string(' ', Math.Min(113, b * 113 / (nextLevelXP - currentXP))));
+                if (i == summary.MatchXP)
+                {
+                    currentXP += b;
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "Scene Summary XP 0 Toggle", false);
+                }
+            }
+
+            // Animate Match Bonus XP
+            yield return new WaitForSeconds(0.18f);
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "Scene Summary XP 1 Toggle", true);
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 1", " ");
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 0", new string(' ', currentXP == 0 ? 1 : Math.Min(113, currentXP * 113 / (nextLevelXP == 0 ? 1 : nextLevelXP))));
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Type TEXT", "Match Bonus XP");
+
+            yield return new WaitForSeconds(0.05f);
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "Scene Summary XP 0 Toggle", true);
+
+            b = 0;
+            for (int i = 1; i <= summary.MatchXPBonus; i++)
+            {
+                yield return new WaitForSeconds(0.010f);
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP 0 TEXT", $"+{i} XP");
+                if (nextLevelXP != 0 && (currentXP + b) == nextLevelXP)
+                {
+                    // Level has changed
+                    b = 0;
+                    currentLevel += 1;
+                    currentXP = 0;
+                    nextLevelXP = DB.Levels.TryGetValue(currentLevel + 1, out level) ? level.XPNeeded : 0;
+                    EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Level 0 TEXT", currentLevel.ToString("D3"));
+                    EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Level 1 TEXT", nextLevelXP == 0 ? "MAX" : (currentLevel + 1).ToString("D3"));
+
+                    EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 0", " ");
+                    EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 1", " ");
+                }
+                else
+                {
+                    b += 1;
+                }
+
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 1", new string(' ', Math.Min(113, b * 113 / (nextLevelXP - currentXP))));
+                if (i == summary.MatchXPBonus)
+                {
+                    currentXP += b;
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "Scene Summary XP 0 Toggle", false);
+                }
+            }
+
+            // Animate Achievement Bonus XP
+            yield return new WaitForSeconds(0.18f);
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "Scene Summary XP 2 Toggle", true);
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 1", " ");
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 0", new string(' ', currentXP == 0 ? 1 : Math.Min(113, currentXP * 113 / (nextLevelXP == 0 ? 1 : nextLevelXP))));
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Type TEXT", "Achievement Bonus XP");
+
+            yield return new WaitForSeconds(0.05f);
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "Scene Summary XP 0 Toggle", true);
+
+            b = 0;
+            for (int i = 1; i <= summary.AchievementXPBonus; i++)
+            {
+                yield return new WaitForSeconds(0.01f);
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP 0 TEXT", $"+{i} XP");
+                if (nextLevelXP != 0 && (currentXP + b) == nextLevelXP)
+                {
+                    // Level has changed
+                    b = 0;
+                    currentLevel += 1;
+                    currentXP = 0;
+                    nextLevelXP = DB.Levels.TryGetValue(currentLevel + 1, out level) ? level.XPNeeded : 0;
+                    EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Level 0 TEXT", currentLevel.ToString("D3"));
+                    EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Level 1 TEXT", nextLevelXP == 0 ? "MAX" : (currentLevel + 1).ToString("D3"));
+
+                    EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 0", " ");
+                    EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 1", " ");
+                }
+                else
+                {
+                    b += 1;
+                }
+
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 1", new string(' ', Math.Min(113, b * 113 / (nextLevelXP - currentXP))));
+                if (i == summary.AchievementXPBonus)
+                {
+                    currentXP += b;
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "Scene Summary XP 0 Toggle", false);
+                }
+            }
+
+            // Animate Other Bonus XP
+            yield return new WaitForSeconds(0.18f);
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "Scene Summary XP 3 Toggle", true);
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 1", " ");
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 0", new string(' ', currentXP == 0 ? 1 : Math.Min(113, currentXP * 113 / (nextLevelXP == 0 ? 1 : nextLevelXP))));
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Type TEXT", "Other Bonus XP");
+
+            yield return new WaitForSeconds(0.05f);
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "Scene Summary XP 0 Toggle", true);
+
+            b = 0;
+            for (int i = 1; i <= summary.OtherXPBonus; i++)
+            {
+                yield return new WaitForSeconds(0.01f);
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP 0 TEXT", $"+{i} XP");
+                if (nextLevelXP != 0 && (currentXP + b) == nextLevelXP)
+                {
+                    // Level has changed
+                    b = 0;
+                    currentLevel += 1;
+                    currentXP = 0;
+                    nextLevelXP = DB.Levels.TryGetValue(currentLevel + 1, out level) ? level.XPNeeded : 0;
+                    EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Level 0 TEXT", currentLevel.ToString("D3"));
+                    EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Level 1 TEXT", nextLevelXP == 0 ? "MAX" : (currentLevel + 1).ToString("D3"));
+
+                    EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 0", " ");
+                    EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 1", " ");
+                }
+                else
+                {
+                    b += 1;
+                }
+
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 1", new string(' ', Math.Min(113, b * 113 / (nextLevelXP - currentXP))));
+                if (i == summary.OtherXPBonus)
+                {
+                    currentXP += b;
+                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "Scene Summary XP 0 Toggle", false);
+                }
+            }
+
+            yield return new WaitForSeconds(0.18f);
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "Scene Summary XP 4 Toggle", true);
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 1", " ");
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 0", new string(' ', currentXP == 0 ? 1 : Math.Min(113, currentXP * 113 / (nextLevelXP == 0 ? 1 : nextLevelXP))));
         }
 
         // Events

@@ -11,6 +11,7 @@ namespace UnturnedBlackout.Models.TDM
 
         public TDMTeam Team { get; set; }
 
+        public DateTime StartTime { get; set; }
         public int StartingLevel { get; set; }
         public int StartingXP { get; set; }
         public int XP { get; set; }
@@ -31,6 +32,7 @@ namespace UnturnedBlackout.Models.TDM
             GamePlayer = gamePlayer;
             Team = team;
 
+            StartTime = DateTime.UtcNow;
             StartingLevel = gamePlayer.Data.Level;
             StartingXP = gamePlayer.Data.XP;
             XP = 0;

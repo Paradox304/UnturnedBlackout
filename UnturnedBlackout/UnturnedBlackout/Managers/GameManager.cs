@@ -154,12 +154,12 @@ namespace UnturnedBlackout.Managers
             }
 
             game.RemovePlayerFromGame(gPlayer);
-            SendPlayerToLobby(player, null);
+            SendPlayerToLobby(player);
         }
 
         private void OnPlayerJoined(UnturnedPlayer player)
         {
-            SendPlayerToLobby(player, null);
+            SendPlayerToLobby(player);
 
             var db = Plugin.Instance.DBManager;
             Plugin.Instance.UIManager.SendLoadingUI(player, false, EGameType.None, null, "LOADING...");
@@ -213,8 +213,8 @@ namespace UnturnedBlackout.Managers
         private void OnPlayerDeath(PlayerLife sender, EDeathCause cause, ELimb limb, CSteamID instigator)
         {
             if (!TryGetCurrentGame(sender.player.channel.owner.playerID.steamID, out _))
-            {
-                SendPlayerToLobby(UnturnedPlayer.FromPlayer(sender.player), null);
+            { 
+                SendPlayerToLobby(UnturnedPlayer.FromPlayer(sender.player));
             }
         }
 
@@ -226,7 +226,7 @@ namespace UnturnedBlackout.Managers
             }
         }
 
-        public void SendPlayerToLobby(UnturnedPlayer player, MatchEndSummary summary)
+        public void SendPlayerToLobby(UnturnedPlayer player, MatchEndSummary summary = null)
         {
             player.Player.inventory.ClearInventory();
             player.Player.life.serverModifyHealth(100);

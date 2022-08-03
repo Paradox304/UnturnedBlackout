@@ -11,6 +11,7 @@ namespace UnturnedBlackout.Models.KC
 
         public KCTeam Team { get; set; }
 
+        public DateTime StartTime { get; set; }
         public int StartingLevel { get; set; }
         public int StartingXP { get; set; }
         public int XP { get; set; }
@@ -34,6 +35,7 @@ namespace UnturnedBlackout.Models.KC
             GamePlayer = gamePlayer;
             Team = team;
 
+            StartTime = DateTime.UtcNow;
             StartingLevel = gamePlayer.Data.Level;
             StartingXP = gamePlayer.Data.XP;
             XP = 0;

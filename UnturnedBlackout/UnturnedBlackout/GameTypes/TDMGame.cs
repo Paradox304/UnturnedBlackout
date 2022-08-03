@@ -87,7 +87,7 @@ namespace UnturnedBlackout.GameTypes
             foreach (var player in Players)
             {
                 player.GamePlayer.GiveMovement(player.GamePlayer.Player.Player.equipment.useable is UseableGun gun && gun.isAiming, false, false);
-
+                player.StartTime = DateTime.UtcNow;
                 Plugin.Instance.UIManager.SendTDMHUD(player, BlueTeam, RedTeam);
                 Plugin.Instance.UIManager.ClearCountdownUI(player.GamePlayer);
             }
@@ -133,6 +133,8 @@ namespace UnturnedBlackout.GameTypes
 
             GamePhase = EGamePhase.Ending;
             Plugin.Instance.UIManager.OnGameUpdated();
+
+            var summaries = new Dictionary<GamePlayer, MatchEndSummary>();
             foreach (var player in Players)
             {
                 Plugin.Instance.UIManager.ClearTDMHUD(player.GamePlayer);
@@ -143,6 +145,8 @@ namespace UnturnedBlackout.GameTypes
                     player.GamePlayer.HasScoreboard = false;
                     Plugin.Instance.UIManager.HideTDMLeaderboard(player.GamePlayer);
                 }
+                var summary = new MatchEndSummary(player.GamePlayer, player.XP, player.StartingLevel, player.StartingXP, player.Kills, player.Deaths, player.Assists, player.HighestKillstreak, player.HighestMK, player.StartTime, GameMode, player.Team == wonTeam);
+                summaries.Add(player.GamePlayer, summary);
                 if (player.Team == wonTeam)
                 {
                     var xp = player.XP * Config.TDM.FileData.WinMultiplier;
@@ -166,7 +170,7 @@ namespace UnturnedBlackout.GameTypes
             foreach (var player in Players.ToList())
             {
                 RemovePlayerFromGame(player.GamePlayer);
-                Plugin.Instance.GameManager.SendPlayerToLobby(player.GamePlayer.Player);
+                Plugin.Instance.GameManager.SendPlayerToLobby(player.GamePlayer.Player, summaries.TryGetValue(player.GamePlayer, out MatchEndSummary pendingSummary) ? pendingSummary : null);
             }
 
             Players = new List<TDMPlayer>();

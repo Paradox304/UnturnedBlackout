@@ -69,6 +69,7 @@ namespace UnturnedBlackout.GameTypes
                 Plugin.Instance.UIManager.SendFFAHUD(player.GamePlayer);
                 Plugin.Instance.UIManager.ClearCountdownUI(player.GamePlayer);
                 Plugin.Instance.UIManager.UpdateFFATopUI(player, Players);
+                player.StartTime = DateTime.UtcNow;
             }
 
             GameEnder = Plugin.Instance.StartCoroutine(EndGame());
@@ -98,6 +99,8 @@ namespace UnturnedBlackout.GameTypes
 
             GamePhase = EGamePhase.Ending;
             Plugin.Instance.UIManager.OnGameUpdated();
+            var summaries = new Dictionary<GamePlayer, MatchEndSummary>();
+
             for (int index = 0; index < Players.Count; index++)
             {
                 var player = Players[index];
@@ -109,11 +112,12 @@ namespace UnturnedBlackout.GameTypes
                     Plugin.Instance.UIManager.HideFFALeaderboard(player.GamePlayer);
                 }
                 Plugin.Instance.UIManager.SetupPreEndingUI(player.GamePlayer, EGameType.FFA, index == 0, 0, 0, "", "");
+                var summary = new MatchEndSummary(player.GamePlayer, player.XP, player.StartingLevel, player.StartingXP, player.Kills, player.Deaths, player.Assists, player.HighestKillstreak, player.HighestMK, player.StartTime, GameMode, index == 0);
+                summaries.Add(player.GamePlayer, summary);
+                ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DBManager.IncreasePlayerXPAsync(player.GamePlayer.SteamID, summary.PendingXP));
                 if (index == 0)
                 {
-                    var xp = player.XP * Config.FFA.FileData.WinMultiplier;
                     TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.QuestManager.CheckQuest(player.GamePlayer, EQuestType.Win, new Dictionary<EQuestCondition, int> { { EQuestCondition.Map, Location.LocationID }, { EQuestCondition.Gamemode, (int)GameMode }, { EQuestCondition.WinKills, player.Kills } }));
-                    ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DBManager.IncreasePlayerXPAsync(player.GamePlayer.SteamID, (int)xp));
                 }
             }
             TaskDispatcher.QueueOnMainThread(() =>
@@ -130,7 +134,7 @@ namespace UnturnedBlackout.GameTypes
             foreach (var player in Players.ToList())
             {
                 RemovePlayerFromGame(player.GamePlayer);
-                Plugin.Instance.GameManager.SendPlayerToLobby(player.GamePlayer.Player);
+                Plugin.Instance.GameManager.SendPlayerToLobby(player.GamePlayer.Player, summaries.TryGetValue(player.GamePlayer, out MatchEndSummary pendingSummary) ? pendingSummary : null);
             }
 
             Players = new List<FFAPlayer>();
