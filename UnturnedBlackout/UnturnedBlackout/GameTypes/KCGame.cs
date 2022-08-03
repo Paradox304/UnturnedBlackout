@@ -331,7 +331,7 @@ namespace UnturnedBlackout.GameTypes
                 Plugin.Instance.UIManager.HideKCLeaderboard(vPlayer.GamePlayer);
             }
 
-            var victimKS = vPlayer.KillStreak;
+            var victimKS = vPlayer.Killstreak;
             var updatedKiller = cause == EDeathCause.WATER ? vPlayer.GamePlayer.SteamID : (cause == EDeathCause.LANDMINE || cause == EDeathCause.SHRED ? (vPlayer.GamePlayer.LastDamager.Count > 0 ? vPlayer.GamePlayer.LastDamager.Pop() : killer) : killer);
 
             Logging.Debug($"Game player died, player name: {vPlayer.GamePlayer.Player.CharacterName}, cause: {cause}");
@@ -448,21 +448,22 @@ namespace UnturnedBlackout.GameTypes
                 }
                 xpText += "\n";
 
-                kPlayer.KillStreak++;
-                questConditions.Add(EQuestCondition.TargetKS, kPlayer.KillStreak);
+                kPlayer.SetKillstreak(kPlayer.Killstreak + 1);
+                questConditions.Add(EQuestCondition.TargetKS, kPlayer.Killstreak);
                 if (kPlayer.MultipleKills == 0)
                 {
-                    kPlayer.MultipleKills++;
+                    kPlayer.SetMultipleKills(kPlayer.MultipleKills + 1);
                 }
                 else if ((DateTime.UtcNow - kPlayer.LastKill).TotalSeconds <= 10)
                 {
-                    xpGained += Config.Medals.FileData.BaseXPMK + (++kPlayer.MultipleKills * Config.Medals.FileData.IncreaseXPPerMK);
+                    kPlayer.SetMultipleKills(kPlayer.MultipleKills + 1);
+                    xpGained += Config.Medals.FileData.BaseXPMK + (kPlayer.MultipleKills * Config.Medals.FileData.IncreaseXPPerMK);
                     var multiKillText = Plugin.Instance.Translate($"Multiple_Kills_Show_{kPlayer.MultipleKills}").ToRich();
                     xpText += (multiKillText == $"Multiple_Kills_Show_{kPlayer.MultipleKills}" ? Plugin.Instance.Translate("Multiple_Kills_Show", kPlayer.MultipleKills).ToRich() : multiKillText) + "\n";
                 }
                 else
                 {
-                    kPlayer.MultipleKills = 1;
+                    kPlayer.SetMultipleKills(1);
                 }
                 questConditions.Add(EQuestCondition.TargetMK, kPlayer.MultipleKills);
 

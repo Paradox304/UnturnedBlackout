@@ -84,7 +84,8 @@ namespace UnturnedBlackout.Managers
             if (!AvailableLocations.Contains(location.LocationID))
             {
                 Logging.Debug($"LOCATION {location.LocationName} IS NOT FOUND IN THE AVAILABLE LOCATIONS, WHAT TO REMOVE????");
-            } else
+            }
+            else
             {
                 AvailableLocations.Remove(location.LocationID);
             }
@@ -100,7 +101,8 @@ namespace UnturnedBlackout.Managers
             if (AvailableLocations.Contains(game.Location.LocationID))
             {
                 Logging.Debug($"LOCATION {game.Location.LocationName} IS ALREADY AVAILABLE IN THE AVAILABLELOCATIONS LIST, ERRORRRRR");
-            } else
+            }
+            else
             {
                 AvailableLocations.Add(game.Location.LocationID);
             }

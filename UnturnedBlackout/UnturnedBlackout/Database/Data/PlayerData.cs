@@ -1,6 +1,7 @@
 ﻿using Steamworks;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using UnturnedBlackout.Database.Base;
 using UnturnedBlackout.Enums;
@@ -34,6 +35,7 @@ namespace UnturnedBlackout.Database.Data
         public float XPBooster { get; set; }
         public float BPBooster { get; set; }
         public float GunXPBooster { get; set; }
+        public float AchievementXPBooster { get; set; }
 
         public List<PlayerQuest> Quests { get; set; }
         public Dictionary<EQuestType, List<PlayerQuest>> QuestsSearchByType { get; set; }
@@ -108,6 +110,20 @@ namespace UnturnedBlackout.Database.Data
                     await Plugin.Instance.DBManager.UpdatePlayerHighestKillStreakAsync(SteamID, killStreak);
                 });
             }
+        }
+
+        public void SetAchievementXPBooster()
+        {
+            var totalTiers = 0f;
+            var completedTiers = 0f;
+
+            foreach (var achievement in Achievements)
+            {
+                completedTiers += achievement.CurrentTier;
+                totalTiers += achievement.Achievement.Tiers.Max(k => k.TierID);
+            }
+
+            AchievementXPBooster = completedTiers * 100f / totalTiers;
         }
     }
 }

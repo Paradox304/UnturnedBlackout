@@ -1,6 +1,4 @@
-﻿using Rocket.Core.Logging;
-using Rocket.Core.Utils;
-using SDG.Unturned;
+﻿using Rocket.Core.Utils;
 using SteamServerQuery;
 using System;
 using System.Threading;

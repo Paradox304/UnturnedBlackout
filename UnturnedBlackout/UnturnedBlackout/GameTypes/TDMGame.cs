@@ -331,7 +331,7 @@ namespace UnturnedBlackout.GameTypes
                 Plugin.Instance.UIManager.HideTDMLeaderboard(tPlayer.GamePlayer);
             }
 
-            var victimKS = tPlayer.KillStreak;
+            var victimKS = tPlayer.Killstreak;
             var updatedKiller = cause == EDeathCause.WATER ? tPlayer.GamePlayer.SteamID : (cause == EDeathCause.LANDMINE || cause == EDeathCause.SHRED ? (tPlayer.GamePlayer.LastDamager.Count > 0 ? tPlayer.GamePlayer.LastDamager.Pop() : killer) : killer);
 
             Logging.Debug($"Game player died, player name: {tPlayer.GamePlayer.Player.CharacterName}, cause: {cause}");
@@ -448,21 +448,22 @@ namespace UnturnedBlackout.GameTypes
                 }
                 xpText += "\n";
 
-                kPlayer.KillStreak++;
-                questConditions.Add(EQuestCondition.TargetKS, kPlayer.KillStreak);
+                kPlayer.SetKillstreak(kPlayer.Killstreak + 1);
+                questConditions.Add(EQuestCondition.TargetKS, kPlayer.Killstreak);
                 if (kPlayer.MultipleKills == 0)
                 {
-                    kPlayer.MultipleKills++;
+                    kPlayer.SetMultipleKills(kPlayer.MultipleKills + 1);
                 }
                 else if ((DateTime.UtcNow - kPlayer.LastKill).TotalSeconds <= 10)
                 {
-                    xpGained += Config.Medals.FileData.BaseXPMK + (++kPlayer.MultipleKills * Config.Medals.FileData.IncreaseXPPerMK);
+                    kPlayer.SetMultipleKills(kPlayer.MultipleKills + 1);
+                    xpGained += Config.Medals.FileData.BaseXPMK + (kPlayer.MultipleKills * Config.Medals.FileData.IncreaseXPPerMK);
                     var multiKillText = Plugin.Instance.Translate($"Multiple_Kills_Show_{kPlayer.MultipleKills}").ToRich();
                     xpText += (multiKillText == $"Multiple_Kills_Show_{kPlayer.MultipleKills}" ? Plugin.Instance.Translate("Multiple_Kills_Show", kPlayer.MultipleKills).ToRich() : multiKillText) + "\n";
                 }
                 else
                 {
-                    kPlayer.MultipleKills = 1;
+                    kPlayer.SetMultipleKills(1);
                 }
                 questConditions.Add(EQuestCondition.TargetMK, kPlayer.MultipleKills);
 
@@ -621,7 +622,7 @@ namespace UnturnedBlackout.GameTypes
                     damageIncreasePerkName = "lethaldamage";
                     break;
             }
-            
+
             parameters.damage -= (player.GamePlayer.ActiveLoadout.PerksSearchByType.TryGetValue(damageReducePerkName, out LoadoutPerk damageReducerPerk) ? ((float)damageReducerPerk.Perk.SkillLevel / 100) : 0f) * parameters.damage;
 
             player.GamePlayer.OnDamaged(parameters.killer);

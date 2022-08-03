@@ -15,7 +15,6 @@ using UnturnedBlackout.Database.Data;
 using UnturnedBlackout.Enums;
 using UnturnedBlackout.Models.Animation;
 using UnturnedBlackout.Models.Data;
-using UnturnedBlackout.Models.Global;
 using UnturnedBlackout.Models.Webhook;
 using Achievement = UnturnedBlackout.Database.Base.Achievement;
 using Logger = Rocket.Core.Logging.Logger;
@@ -502,7 +501,8 @@ namespace UnturnedBlackout.Managers
                         if (levelRequirement == 0)
                         {
                             defaultGuns.Add(gun);
-                        } else if (levelRequirement > 0)
+                        }
+                        else if (levelRequirement > 0)
                         {
                             if (!itemsSearchByLevel.ContainsKey(levelRequirement))
                             {
@@ -807,7 +807,8 @@ namespace UnturnedBlackout.Managers
                         if (levelRequirement == 0)
                         {
                             defaultGadgets.Add(gadget);
-                        } else if (levelRequirement > 0)
+                        }
+                        else if (levelRequirement > 0)
                         {
                             if (!itemsSearchByLevel.ContainsKey(levelRequirement))
                             {
@@ -1469,11 +1470,13 @@ namespace UnturnedBlackout.Managers
 
                     Logging.Debug($"Successfully read {cases.Count} cases from base data");
                     Cases = cases;
-                } catch (Exception ex)
+                }
+                catch (Exception ex)
                 {
                     Logger.Log($"Error reading cases from cases table");
                     Logger.Log(ex);
-                } finally
+                }
+                finally
                 {
                     rdr.Close();
                 }
@@ -1876,7 +1879,7 @@ namespace UnturnedBlackout.Managers
                         {
                             continue;
                         }
-                        
+
                         if (!float.TryParse(rdr[24].ToString(), out float gunXPBooster))
                         {
                             continue;
@@ -2816,7 +2819,8 @@ namespace UnturnedBlackout.Managers
                             if (perksSearchByType.ContainsKey(perk.Perk.SkillType))
                             {
                                 Logging.Debug($"There is perk with type {perk.Perk.SkillType} already in the loadout, ignoring");
-                            } else
+                            }
+                            else
                             {
                                 perksSearchByType.Add(perk.Perk.SkillType, perk);
                             }
@@ -2935,7 +2939,7 @@ namespace UnturnedBlackout.Managers
                                                 Plugin.Instance.UIManager.SendAnimation(player, new AnimationInfo(EAnimationType.ItemUnlock, unlock));
                                             }
                                         }
-                                        
+
                                     }
                                 });
                             }
@@ -3745,7 +3749,8 @@ namespace UnturnedBlackout.Managers
                                     if ((player.ActiveLoadout?.Primary?.Gun?.GunID ?? 0) == gun.Gun.GunID && (player.ActiveLoadout?.PrimarySkin?.Gun?.GunID ?? 0) == gun.Gun.GunID)
                                     {
                                         icon = player.ActiveLoadout.PrimarySkin.IconLink;
-                                    } else if ((player.ActiveLoadout?.Secondary?.Gun?.GunID ?? 0) == gun.Gun.GunID && (player.ActiveLoadout?.SecondarySkin?.Gun?.GunID ?? 0) == gun.Gun.GunID)
+                                    }
+                                    else if ((player.ActiveLoadout?.Secondary?.Gun?.GunID ?? 0) == gun.Gun.GunID && (player.ActiveLoadout?.SecondarySkin?.Gun?.GunID ?? 0) == gun.Gun.GunID)
                                     {
                                         icon = player.ActiveLoadout.SecondarySkin.IconLink;
                                     }
@@ -4772,24 +4777,24 @@ namespace UnturnedBlackout.Managers
                 {
                     while (rdr.Read())
                     {
-            
+
                         if (!long.TryParse(rdr[0].ToString(), out long dailyLeaderboardWipeUnix))
                         {
                             continue;
                         }
- 
+
                         var dailyLeaderboardWipe = DateTimeOffset.FromUnixTimeSeconds(dailyLeaderboardWipeUnix);
-     
+
                         if (!long.TryParse(rdr[1].ToString(), out long weeklyLeaderboardWipeUnix))
                         {
                             continue;
                         }
-             
+
                         var weeklyLeaderboardWipe = DateTimeOffset.FromUnixTimeSeconds(weeklyLeaderboardWipeUnix);
-                
+
                         var dailyRanked = Utility.GetRankedRewardsFromString(rdr[2].ToString());
                         var dailyPercentile = Utility.GetPercentileRewardsFromString(rdr[3].ToString());
-            
+
                         var weeklyRanked = Utility.GetRankedRewardsFromString(rdr[4].ToString());
                         var weeklyPercentile = Utility.GetPercentileRewardsFromString(rdr[5].ToString());
 
@@ -5717,15 +5722,17 @@ namespace UnturnedBlackout.Managers
             {
                 await Conn.OpenAsync();
 
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 Logger.Log($"Error updating player case with amount {amount} with case ID {caseID}");
                 Logger.Log(ex);
-            } finally
+            }
+            finally
             {
                 await Conn.CloseAsync();
             }
         }
-        
+
     }
 }

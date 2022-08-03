@@ -279,6 +279,7 @@
     <Compile Include="Models\Global\GamemodeOption.cs" />
     <Compile Include="Models\Global\LoadoutAmount.cs" />
     <Compile Include="Models\Global\Kit.cs" />
+    <Compile Include="Models\Global\MatchEndSummary.cs" />
     <Compile Include="Models\Global\TeamGlove.cs" />
     <Compile Include="Models\KC\KCConfig.cs" />
     <Compile Include="Models\KC\KCPlayer.cs" />

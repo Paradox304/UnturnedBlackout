@@ -5235,7 +5235,7 @@ namespace UnturnedBlackout.Instances
 
                 if (achievement.TryGetNextTier(out AchievementTier nextTier))
                 {
-                    
+
                     var fillTxt = achievement.Amount == 0 ? " " : new string(' ', Math.Min(68, achievement.Amount * 68 / nextTier.TargetAmount));
 
                     switch (achievement.CurrentTier)
@@ -5461,11 +5461,11 @@ namespace UnturnedBlackout.Instances
                     return true;
                 default:
                     return false;
-            }   
+            }
         }
 
         // Battlepass
-        
+
         public void SetupBattlepass()
         {
             MainPage = EMainPage.Battlepass;
@@ -5564,7 +5564,7 @@ namespace UnturnedBlackout.Instances
                 }
             }
         }
-        
+
         public void SelectedBattlepassTier(bool isTop, int tierID)
         {
             Logging.Debug($"{Player.CharacterName} clicked top button: {isTop}, id: {tierID}");

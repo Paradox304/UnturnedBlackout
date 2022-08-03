@@ -1,5 +1,4 @@
 ﻿using Rocket.Core.Logging;
-using Steamworks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -73,7 +72,8 @@ namespace UnturnedBlackout.Managers
                     {
                         await db.IncreasePlayerBPXPAsync(steamID, quest.Quest.XP);
                     });
-                } else if (quest.Amount * 100 / quest.Quest.TargetAmount % 10 == 0)
+                }
+                else if (quest.Amount * 100 / quest.Quest.TargetAmount % 10 == 0)
                 {
                     Logging.Debug("Modulus is 0, meaning 10% of quest is completed, sending quest progression");
                     pendingQuestsProgression.Add(quest);

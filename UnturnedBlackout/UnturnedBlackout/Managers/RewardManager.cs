@@ -150,7 +150,7 @@ namespace UnturnedBlackout.Managers
                             case ERewardType.BattlepassXP:
                                 await db.IncreasePlayerBPXPAsync(bulkReward.Item1, Convert.ToInt32(reward.RewardValue));
                                 break;
-                            case ERewardType.Crate:
+                            case ERewardType.Case:
                                 break;
                             case ERewardType.BPBooster:
                                 if (float.TryParse(reward.RewardValue.ToString(), out float booster))

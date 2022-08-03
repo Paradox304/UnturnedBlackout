@@ -315,7 +315,7 @@ namespace UnturnedBlackout.Managers
                     break;
             }
         }
-        
+
         // KILLFEED
 
         public void SendKillfeed(List<GamePlayer> players, EGameType type, List<Feed> killfeed)
@@ -355,7 +355,7 @@ namespace UnturnedBlackout.Managers
                 EffectManager.sendUIEffectText(key, player.TransportConnection, true, "Killfeed", updatedText);
             }
         }
-        
+
         // VOICE CHAT
 
         public void SendVoiceChatUI(GamePlayer player)
@@ -532,7 +532,7 @@ namespace UnturnedBlackout.Managers
         {
             EffectManager.askEffectClearByID(PreEndingUIID, player.TransportConnection);
         }
-        
+
         // MIDGAME LOADOUT UI
 
         public void ShowMidgameLoadoutUI(GamePlayer player)
@@ -1499,7 +1499,8 @@ namespace UnturnedBlackout.Managers
             else if (buttonName.StartsWith("SERVER Achievements Page"))
             {
                 handler.SelectedAchievementMainPage(selected);
-            } else if (buttonName.StartsWith("SERVER Achievements BUTTON"))
+            }
+            else if (buttonName.StartsWith("SERVER Achievements BUTTON"))
             {
                 handler.SelectedAchievement(selected);
             }

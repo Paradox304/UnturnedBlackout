@@ -275,7 +275,7 @@ namespace UnturnedBlackout.GameTypes
                 Plugin.Instance.UIManager.HideFFALeaderboard(fPlayer.GamePlayer);
             }
 
-            var victimKS = fPlayer.KillStreak;
+            var victimKS = fPlayer.Killstreak;
             var updatedKiller = cause == EDeathCause.WATER ? fPlayer.GamePlayer.SteamID : (cause == EDeathCause.LANDMINE || cause == EDeathCause.SHRED ? (fPlayer.GamePlayer.LastDamager.Count > 0 ? fPlayer.GamePlayer.LastDamager.Pop() : killer) : killer);
 
             Logging.Debug($"Game player died, player name: {fPlayer.GamePlayer.Player.CharacterName}, cause: {cause}");
@@ -390,21 +390,22 @@ namespace UnturnedBlackout.GameTypes
                 }
                 xpText += "\n";
 
-                kPlayer.KillStreak++;
-                questConditions.Add(EQuestCondition.TargetKS, kPlayer.KillStreak);
+                kPlayer.SetKillstreak(kPlayer.Killstreak + 1);
+                questConditions.Add(EQuestCondition.TargetKS, kPlayer.Killstreak);
                 if (kPlayer.MultipleKills == 0)
                 {
-                    kPlayer.MultipleKills++;
+                    kPlayer.SetMultipleKills(kPlayer.MultipleKills + 1);
                 }
                 else if ((DateTime.UtcNow - kPlayer.LastKill).TotalSeconds <= 10)
                 {
-                    xpGained += Config.Medals.FileData.BaseXPMK + (++kPlayer.MultipleKills * Config.Medals.FileData.IncreaseXPPerMK);
+                    kPlayer.SetMultipleKills(kPlayer.MultipleKills + 1);
+                    xpGained += Config.Medals.FileData.BaseXPMK + (kPlayer.MultipleKills * Config.Medals.FileData.IncreaseXPPerMK);
                     var multiKillText = Plugin.Instance.Translate($"Multiple_Kills_Show_{kPlayer.MultipleKills}").ToRich();
                     xpText += (multiKillText == $"Multiple_Kills_Show_{kPlayer.MultipleKills}" ? Plugin.Instance.Translate("Multiple_Kills_Show", kPlayer.MultipleKills).ToRich() : multiKillText) + "\n";
                 }
                 else
                 {
-                    kPlayer.MultipleKills = 1;
+                    kPlayer.SetMultipleKills(1);
                 }
                 questConditions.Add(EQuestCondition.TargetMK, kPlayer.MultipleKills);
 
@@ -802,7 +803,6 @@ namespace UnturnedBlackout.GameTypes
         {
             return Players.Exists(k => (k.GamePlayer.Player.Position - position).sqrMagnitude < radius);
         }
-
 
         public override bool IsPlayerIngame(CSteamID steamID)
         {

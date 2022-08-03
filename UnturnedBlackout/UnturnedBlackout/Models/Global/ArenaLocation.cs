@@ -20,7 +20,7 @@ namespace UnturnedBlackout.Models.Global
         public int TDMMinCount { get; set; }
         public int KCMinCount { get; set; }
         public int CTFMinCount { get; set; }
-       
+
         public float PositionCheck { get; set; }
 
         public ArenaLocation()

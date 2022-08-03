@@ -1,11 +1,7 @@
 ﻿using Rocket.Core.Utils;
 using Steamworks;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using UnturnedBlackout.Database.Base;
 using UnturnedBlackout.Models.Global;
 
@@ -29,7 +25,7 @@ namespace UnturnedBlackout.Managers
             {
                 return Plugin.Instance.ConfigManager;
             }
-        
+
         }
         public BPManager()
         {
@@ -64,7 +60,8 @@ namespace UnturnedBlackout.Managers
             {
                 reward = tier.FreeReward;
                 bp.ClaimedFreeRewards.Add(tierID);
-            } else
+            }
+            else
             {
                 reward = tier.PremiumReward;
                 bp.ClaimedPremiumRewards.Add(tierID);

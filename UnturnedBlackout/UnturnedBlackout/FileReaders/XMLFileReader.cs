@@ -43,7 +43,8 @@ namespace UnturnedBlackout.FileReaders
                     var deserializedData = Serializer.Deserialize(reader);
                     if (deserializedData is T t)
                         FileData = t;
-                } else
+                }
+                else
                 {
                     using var reader = new StringReader(file);
                     var deserializedData = Serializer.Deserialize(reader);
@@ -63,8 +64,9 @@ namespace UnturnedBlackout.FileReaders
             try
             {
                 using var wc = new HttpClient();
-                return Task.Run(async Task<string>() => await wc.GetStringAsync(URLPath)).Result;
-            } catch (Exception ex)
+                return Task.Run(async Task<string> () => await wc.GetStringAsync(URLPath)).Result;
+            }
+            catch (Exception ex)
             {
                 Logger.LogException(ex, $"Failed to load file from URL: {URLPath}");
                 return "";
