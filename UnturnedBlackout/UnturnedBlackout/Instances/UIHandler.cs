@@ -5711,12 +5711,12 @@ namespace UnturnedBlackout.Instances
             var b = 0;
             for (int i = 1; i <= summary.MatchXP; i++)
             {
-                yield return new WaitForSeconds(0.01f);
+                yield return new WaitForSeconds(0.003f);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP 0 TEXT", $"+{i} XP");
                 if (nextLevelXP != 0 && (currentXP + b) >= nextLevelXP)
                 {
                     // Level has changed
-                    b = 0;
+                    b = (currentXP + b) - nextLevelXP;
                     currentLevel += 1;
                     currentXP = 0;
                     nextLevelXP = DB.Levels.TryGetValue(currentLevel + 1, out level) ? level.XPNeeded : 0;
@@ -5756,14 +5756,14 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "Scene Summary XP 0 Toggle", true);
 
             b = 0;
-            for (int i = 1; i <= summary.MatchXPBonus; i++)
+            for (int i = 1; i <= summary.MatchXPBonus; i+=9)
             {
-                yield return new WaitForSeconds(0.010f);
+                yield return new WaitForSeconds(0.003f);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP 0 TEXT", $"+{i} XP");
                 if (nextLevelXP != 0 && (currentXP + b) >= nextLevelXP)
                 {
                     // Level has changed
-                    b = 0;
+                    b = (currentXP + b) - nextLevelXP;
                     currentLevel += 1;
                     currentXP = 0;
                     nextLevelXP = DB.Levels.TryGetValue(currentLevel + 1, out level) ? level.XPNeeded : 0;
@@ -5778,17 +5778,15 @@ namespace UnturnedBlackout.Instances
                 }
                 else
                 {
-                    b += 1;
+                    b += 9;
                 }
 
                 var highlightedSpaces = Math.Max(1, Math.Min(113 - boldSpaces, b * (113 - boldSpaces) / (nextLevelXP - currentXP)));
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 1", new string(' ', highlightedSpaces));
-                if (i == summary.MatchXPBonus)
-                {
-                    currentXP += b;
-                    EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "Scene Summary XP 0 Toggle", false);
-                }
             }
+
+            currentXP += b;
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "Scene Summary XP 0 Toggle", false);
 
             // Animate Achievement Bonus XP
             yield return new WaitForSeconds(0.18f);
@@ -5805,12 +5803,12 @@ namespace UnturnedBlackout.Instances
             b = 0;
             for (int i = 1; i <= summary.AchievementXPBonus; i++)
             {
-                yield return new WaitForSeconds(0.01f);
+                yield return new WaitForSeconds(0.003f);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP 0 TEXT", $"+{i} XP");
                 if (nextLevelXP != 0 && (currentXP + b) >= nextLevelXP)
                 {
                     // Level has changed
-                    b = 0;
+                    b = (currentXP + b) - nextLevelXP;
                     currentLevel += 1;
                     currentXP = 0;
                     nextLevelXP = DB.Levels.TryGetValue(currentLevel + 1, out level) ? level.XPNeeded : 0;
@@ -5852,12 +5850,12 @@ namespace UnturnedBlackout.Instances
             b = 0;
             for (int i = 1; i <= summary.OtherXPBonus; i++)
             {
-                yield return new WaitForSeconds(0.01f);
+                yield return new WaitForSeconds(0.003f);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP 0 TEXT", $"+{i} XP");
                 if (nextLevelXP != 0 && (currentXP + b) >= nextLevelXP)
                 {
                     // Level has changed
-                    b = 0;
+                    b = (currentXP + b) - nextLevelXP; ;
                     currentLevel += 1;
                     currentXP = 0;
                     nextLevelXP = DB.Levels.TryGetValue(currentLevel + 1, out level) ? level.XPNeeded : 0;
@@ -5874,7 +5872,6 @@ namespace UnturnedBlackout.Instances
                 {
                     b += 1;
                 }
-
 
                 var highlightedSpaces = Math.Max(1, Math.Min(113 - boldSpaces, b * (113 - boldSpaces) / (nextLevelXP - currentXP)));
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 1", new string(' ', highlightedSpaces));
