@@ -64,13 +64,19 @@ namespace UnturnedBlackout.Models.Global
             EndTime = DateTime.UtcNow;
 
             // Calculated Values
-            MatchXPBonus = (int)Math.Ceiling(MatchXP * player.Data.XPBooster);
+            /*MatchXPBonus = (int)Math.Ceiling(MatchXP * player.Data.XPBooster);
             AchievementXPBonus = (int)Math.Ceiling(MatchXP * player.Data.AchievementXPBooster);
             OtherXPBonus = (int)Math.Ceiling(MatchXP * (HasWon ? GetWinMultiplier() : 0.2f));
             BattlepassXP = 0; // Left for later on when I get the formula
             BattlepassBonusXP = (int)Math.Ceiling(BattlepassXP * player.Data.BPBooster);
+            PendingCredits = 0; // Left for later on when I get the formula*/
+            MatchXPBonus = (int)Math.Ceiling(MatchXP * 0.5);
+            AchievementXPBonus = (int)Math.Ceiling(MatchXP * 0.2);
+            OtherXPBonus = (int)Math.Ceiling(MatchXP * (HasWon ? GetWinMultiplier() : 0.2f));
+            BattlepassXP = 100; 
+            BattlepassBonusXP = (int)Math.Ceiling(BattlepassXP * 0.5);
+            PendingCredits = MatchXP / 10;
             KD = Kills / (float)Deaths;
-            PendingCredits = 0; // Left for later on when I get the formula
 
             // Final Values
             TotalXP = MatchXP + MatchXPBonus + AchievementXPBonus + OtherXPBonus;

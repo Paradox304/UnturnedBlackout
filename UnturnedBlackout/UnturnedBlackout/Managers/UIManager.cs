@@ -1463,6 +1463,8 @@ namespace UnturnedBlackout.Managers
                         Plugin.Instance.AchievementManager.ClaimAchievementTier(ply.CSteamID, handler.SelectedAchievementID);
                     }
                     return;
+                case "SERVER Battlepass Tier Skip BUTTON":
+                    return;
                 case "SERVER Battlepass Confirm BUTTON":
                     if (handler.MainPage == EMainPage.Battlepass)
                         Plugin.Instance.BPManager.SkipTier(gPly);

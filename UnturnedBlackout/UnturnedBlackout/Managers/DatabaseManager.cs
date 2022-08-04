@@ -145,6 +145,9 @@ namespace UnturnedBlackout.Managers
         // CASES
         public const string PlayersCasesTableName = "UB_Players_Cases";
 
+        // BOOSTERS
+        public const string PlayersBoostersTableName = "UB_Players_Boosters";
+
         // Base Data
         // GUNS
         public const string GunsTableName = "UB_Guns";
@@ -189,7 +192,6 @@ namespace UnturnedBlackout.Managers
 
         // CASES
         public const string CasesTableName = "UB_Cases";
-
         public DatabaseManager()
         {
             Config = Plugin.Instance.Configuration.Instance;
@@ -273,6 +275,7 @@ namespace UnturnedBlackout.Managers
                 await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PlayersAchievementsTableName}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `AchievementID` INT NOT NULL , `CurrentTier` INT NOT NULL DEFAULT '0' , `Amount` INT NOT NULL DEFAULT '0' , CONSTRAINT `ub_steam_id_15` FOREIGN KEY (`SteamID`) REFERENCES `{PlayersTableName}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_achievement_id_2` FOREIGN KEY (`AchievementID`) REFERENCES `{AchievementsTableName}` (`AchievementID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID`, `AchievementID`));", Conn).ExecuteScalarAsync();
                 await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PlayersBattlepassTableName}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `CurrentTier` INT NOT NULL DEFAULT '1' , `XP` INT NOT NULL DEFAULT '0', `ClaimedFreeRewards` TEXT NOT NULL , `ClaimedPremiumRewards` TEXT NOT NULL , CONSTRAINT `ub_steam_id_16` FOREIGN KEY (`SteamID`) REFERENCES `{PlayersTableName}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID`));", Conn).ExecuteScalarAsync();
                 await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PlayersCasesTableName}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `Cases` TEXT NOT NULL , CONSTRAINT `ub_steam_id_17` FOREIGN KEY (`SteamID`) REFERENCES `{PlayersTableName}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID`));", Conn).ExecuteScalarAsync();
+                await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PlayersBoostersTableName}` (`SteamID` BIGINT UNSIGNED NOT NULL , `BoosterType` ENUM('XP','BPXP','GUNXP') NOT NULL , `BoosterValue` DECIMAL(6,3) NOT NULL , `BoosterExpiration` BIGINT NOT NULL , CONSTRAINT `ub_steam_id_18` FOREIGN KEY (`SteamID`) REFERENCES `{PlayersTableName}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `BoosterType` , `BoosterValue`));", Conn).ExecuteScalarAsync();
             }
             catch (Exception ex)
             {
@@ -1890,7 +1893,7 @@ namespace UnturnedBlackout.Managers
                             PlayerData.Remove(player.CSteamID);
                         }
 
-                        PlayerData.Add(player.CSteamID, new PlayerData(player.CSteamID, steamName, avatarLink, xp, level, credits, scrap, coins, kills, headshotKills, highestKillstreak, highestMultiKills, killsConfirmed, killsDenied, flagsCaptured, flagsSaved, areasTaken, deaths, music, isMuted, muteExpiry, hasBattlepass, xpBooster, bpBooster, gunXPBooster, new(), new(), new(), new(), new(), new()));
+                        PlayerData.Add(player.CSteamID, new PlayerData(player.CSteamID, steamName, avatarLink, xp, level, credits, scrap, coins, kills, headshotKills, highestKillstreak, highestMultiKills, killsConfirmed, killsDenied, flagsCaptured, flagsSaved, areasTaken, deaths, music, isMuted, muteExpiry, hasBattlepass, xpBooster, bpBooster, gunXPBooster));
                     }
                 }
                 catch (Exception ex)
@@ -2202,6 +2205,7 @@ namespace UnturnedBlackout.Managers
                     rdr.Close();
                 }
 
+                playerData.SetAchievementXPBooster();
                 Logging.Debug($"Getting battlepass for {player.CharacterName}");
                 TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.8f)), loadingText: "PREPARING BATTLEPASS..."));
                 rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PlayersBattlepassTableName}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
@@ -2851,6 +2855,56 @@ namespace UnturnedBlackout.Managers
                 finally
                 {
                     rdr.Close();
+                }
+
+                Logging.Debug($"Getting boosters for {player.CharacterName}");
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.99f)), loadingText: "PREPARING BOOSTERS..."));
+                rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PlayersBoostersTableName}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
+                var pendingBoostersDeletion = new List<PlayerBooster>();
+                try
+                {
+                    var boosters = new List<PlayerBooster>();
+                    while (await rdr.ReadAsync())
+                    {
+                        if (!Enum.TryParse(rdr[1].ToString(), true, out EBoosterType boosterType))
+                        {
+                            return;
+                        }
+
+                        if (!float.TryParse(rdr[2].ToString(), out float boosterValue))
+                        {
+                            return;
+                        }
+
+                        if (!long.TryParse(rdr[3].ToString(), out long boosterExpirationUnix))
+                        {
+                            return;
+                        }
+
+                        var boosterExpiration = DateTimeOffset.FromUnixTimeSeconds(boosterExpirationUnix);
+                        var booster = new PlayerBooster(player.CSteamID, boosterType, boosterValue, boosterExpiration);
+                        if (DateTimeOffset.UtcNow > boosterExpiration)
+                        {
+                            pendingBoostersDeletion.Add(booster);
+                        } else
+                        {
+                            boosters.Add(booster);
+                        }
+                    }
+                } catch (Exception ex)
+                {
+                    Logger.Log($"Error reading player boosters for {player.CharacterName}");
+                    Logger.Log(ex);
+                } finally
+                {
+                    rdr.Close();
+                }
+
+                Logging.Debug($"Deleting expired boosters for {player.CharacterName}");
+                foreach (var pendingBoosterDeletion in pendingBoostersDeletion)
+                {
+                    Logging.Debug($"Deleting booster with type {pendingBoosterDeletion.BoosterType}, value {pendingBoosterDeletion.BoosterValue}");
+                    await new MySqlCommand($"DELETE FROM `{PlayersBoostersTableName}` WHERE `SteamID` = {player.CSteamID} AND `BoosterType` = '{pendingBoosterDeletion.BoosterType}' AND `BoosterValue` = {pendingBoosterDeletion.BoosterValue};", Conn).ExecuteScalarAsync();
                 }
 
                 TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', 96), loadingText: "FINALISING..."));
@@ -5180,6 +5234,7 @@ namespace UnturnedBlackout.Managers
                         var leaderboardData = new LeaderboardData(data.SteamID, data.SteamName, data.Level, 0, 0, 0);
                         PlayerDailyLeaderboard.Add(leaderboardData);
                         PlayerDailyLeaderboardLookup.Add(data.SteamID, leaderboardData);
+                        await new MySqlCommand($"INSERT INTO `{PlayersLeaderboardDailyTableName}` ( `SteamID` ) VALUES ( {data.SteamID} );", Conn).ExecuteScalarAsync();
                     }
 
                     // Change the wipe date
@@ -5276,6 +5331,7 @@ namespace UnturnedBlackout.Managers
                         var leaderboardData = new LeaderboardData(data.SteamID, data.SteamName, data.Level, 0, 0, 0);
                         PlayerWeeklyLeaderboard.Add(leaderboardData);
                         PlayerWeeklyLeaderboardLookup.Add(data.SteamID, leaderboardData);
+                        await new MySqlCommand($"INSERT INTO `{PlayersLeaderboardWeeklyTableName}` ( `SteamID` ) VALUES ( {data.SteamID} );", Conn).ExecuteScalarAsync();
                     }
 
                     // Change the wipe date
@@ -5725,5 +5781,22 @@ namespace UnturnedBlackout.Managers
             }
         }
 
+        // Player Boosters
+        
+        public async Task AddPlayerBoosterAsync(CSteamID steamID, EBoosterType boosterType, float boosterValue, int days)
+        {
+            using MySqlConnection Conn = new MySqlConnection(ConnectionString);
+            try
+            {
+                await Conn.OpenAsync();
+            } catch (Exception ex)
+            {
+                Logger.Log($"Error adding booster with type {boosterType}, value {boosterValue}, days {days}");
+                Logger.Log(ex);
+            } finally
+            {
+                await Conn.CloseAsync();
+            }
+        }
     }
 }
