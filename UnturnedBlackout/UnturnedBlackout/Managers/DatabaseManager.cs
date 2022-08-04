@@ -2916,35 +2916,32 @@ namespace UnturnedBlackout.Managers
                         data.XP = newXp;
                     }
 
-                    if (data.TryGetNeededXP(out int neededXP))
+                    while (data.TryGetNeededXP(out int neededXP) && data.XP >= neededXP)
                     {
-                        if (data.XP >= neededXP)
+                        var newXP = data.XP - neededXP;
+                        await new MySqlCommand($"UPDATE `{PlayersTableName}` SET `XP` = {newXP}, `Level` = `Level` + 1 WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                        obj = await new MySqlCommand($"Select `Level` FROM `{PlayersTableName}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                        if (obj is int level)
                         {
-                            var newXP = data.XP - neededXP;
-                            await new MySqlCommand($"UPDATE `{PlayersTableName}` SET `XP` = {newXP}, `Level` = `Level` + 1 WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-                            obj = await new MySqlCommand($"Select `Level` FROM `{PlayersTableName}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-                            if (obj is int level)
+                            data.Level = level;
+                            TaskDispatcher.QueueOnMainThread(() =>
                             {
-                                data.Level = level;
-                                TaskDispatcher.QueueOnMainThread(() =>
+                                var player = Plugin.Instance.GameManager.GetGamePlayer(data.SteamID);
+                                if (player != null)
                                 {
-                                    var player = Plugin.Instance.GameManager.GetGamePlayer(data.SteamID);
-                                    if (player != null)
+                                    Plugin.Instance.UIManager.SendAnimation(player, new AnimationInfo(EAnimationType.LevelUp, level));
+                                    if (ItemsSearchByLevel.TryGetValue(level, out List<AnimationItemUnlock> unlocks))
                                     {
-                                        Plugin.Instance.UIManager.SendAnimation(player, new AnimationInfo(EAnimationType.LevelUp, level));
-                                        if (ItemsSearchByLevel.TryGetValue(level, out List<AnimationItemUnlock> unlocks))
+                                        foreach (var unlock in unlocks)
                                         {
-                                            foreach (var unlock in unlocks)
-                                            {
-                                                Plugin.Instance.UIManager.SendAnimation(player, new AnimationInfo(EAnimationType.ItemUnlock, unlock));
-                                            }
+                                            Plugin.Instance.UIManager.SendAnimation(player, new AnimationInfo(EAnimationType.ItemUnlock, unlock));
                                         }
-
                                     }
-                                });
-                            }
-                            data.XP = newXP;
+
+                                }
+                            });
                         }
+                        data.XP = newXP;
                     }
                 }
             }
@@ -3727,42 +3724,39 @@ namespace UnturnedBlackout.Managers
                     }
 
                     gun.XP = newXP;
-                    if (gun.TryGetNeededXP(out int neededXP))
+                    while (gun.TryGetNeededXP(out int neededXP) && gun.XP >= neededXP)
                     {
-                        if (gun.XP >= neededXP)
+                        var updatedXP = gun.XP - neededXP;
+                        await new MySqlCommand($"UPDATE `{PlayersGunsTableName}` SET `XP` = {updatedXP}, `Level` = `Level` + 1 WHERE `SteamID` = {steamID} AND `GunID` = {gunID};", Conn).ExecuteScalarAsync();
+                        obj = await new MySqlCommand($"SELECT `Level` FROM `{PlayersGunsTableName}` WHERE `SteamID` = {steamID} AND `GunID` = {gunID};", Conn).ExecuteScalarAsync();
+                        if (obj is int newLevel)
                         {
-                            var updatedXP = gun.XP - neededXP;
-                            await new MySqlCommand($"UPDATE `{PlayersGunsTableName}` SET `XP` = {updatedXP}, `Level` = `Level` + 1 WHERE `SteamID` = {steamID} AND `GunID` = {gunID};", Conn).ExecuteScalarAsync();
-                            obj = await new MySqlCommand($"SELECT `Level` FROM `{PlayersGunsTableName}` WHERE `SteamID` = {steamID} AND `GunID` = {gunID};", Conn).ExecuteScalarAsync();
-                            if (obj is int newLevel)
-                            {
-                                gun.Level = newLevel;
-                            }
-                            gun.XP = updatedXP;
-
-                            TaskDispatcher.QueueOnMainThread(() =>
-                            {
-                                var player = Plugin.Instance.GameManager.GetGamePlayer(steamID);
-                                if (player != null)
-                                {
-                                    var icon = gun.Gun.IconLink;
-                                    if ((player.ActiveLoadout?.Primary?.Gun?.GunID ?? 0) == gun.Gun.GunID && (player.ActiveLoadout?.PrimarySkin?.Gun?.GunID ?? 0) == gun.Gun.GunID)
-                                    {
-                                        icon = player.ActiveLoadout.PrimarySkin.IconLink;
-                                    }
-                                    else if ((player.ActiveLoadout?.Secondary?.Gun?.GunID ?? 0) == gun.Gun.GunID && (player.ActiveLoadout?.SecondarySkin?.Gun?.GunID ?? 0) == gun.Gun.GunID)
-                                    {
-                                        icon = player.ActiveLoadout.SecondarySkin.IconLink;
-                                    }
-
-                                    Plugin.Instance.UIManager.SendAnimation(player, new AnimationInfo(EAnimationType.GunLevelUp, new AnimationItemUnlock(icon, gun.Level.ToString(), gun.Gun.GunName)));
-                                    if (gun.Gun.RewardAttachments.TryGetValue(gun.Level, out GunAttachment attachment))
-                                    {
-                                        Plugin.Instance.UIManager.SendAnimation(player, new AnimationInfo(EAnimationType.ItemUnlock, new AnimationItemUnlock(attachment.IconLink, "", $"{attachment.AttachmentName} [{gun.Gun.GunName}]")));
-                                    }
-                                }
-                            });
+                            gun.Level = newLevel;
                         }
+                        gun.XP = updatedXP;
+
+                        TaskDispatcher.QueueOnMainThread(() =>
+                        {
+                            var player = Plugin.Instance.GameManager.GetGamePlayer(steamID);
+                            if (player != null)
+                            {
+                                var icon = gun.Gun.IconLink;
+                                if ((player.ActiveLoadout?.Primary?.Gun?.GunID ?? 0) == gun.Gun.GunID && (player.ActiveLoadout?.PrimarySkin?.Gun?.GunID ?? 0) == gun.Gun.GunID)
+                                {
+                                    icon = player.ActiveLoadout.PrimarySkin.IconLink;
+                                }
+                                else if ((player.ActiveLoadout?.Secondary?.Gun?.GunID ?? 0) == gun.Gun.GunID && (player.ActiveLoadout?.SecondarySkin?.Gun?.GunID ?? 0) == gun.Gun.GunID)
+                                {
+                                    icon = player.ActiveLoadout.SecondarySkin.IconLink;
+                                }
+
+                                Plugin.Instance.UIManager.SendAnimation(player, new AnimationInfo(EAnimationType.GunLevelUp, new AnimationItemUnlock(icon, gun.Level.ToString(), gun.Gun.GunName)));
+                                if (gun.Gun.RewardAttachments.TryGetValue(gun.Level, out GunAttachment attachment))
+                                {
+                                    Plugin.Instance.UIManager.SendAnimation(player, new AnimationInfo(EAnimationType.ItemUnlock, new AnimationItemUnlock(attachment.IconLink, "", $"{attachment.AttachmentName} [{gun.Gun.GunName}]")));
+                                }
+                            }
+                        });
                     }
                 }
             }
@@ -5608,27 +5602,24 @@ namespace UnturnedBlackout.Managers
                         data.Battlepass.XP = newXp;
                     }
 
-                    if (data.Battlepass.TryGetNeededXP(out int neededXP))
+                    while (data.Battlepass.TryGetNeededXP(out int neededXP) && data.Battlepass.XP >= neededXP)
                     {
-                        if (data.Battlepass.XP >= neededXP)
+                        var newXP = data.Battlepass.XP - neededXP;
+                        await new MySqlCommand($"UPDATE `{PlayersBattlepassTableName}` SET `XP` = {newXP}, `CurrentTier` = `CurrentTier` + 1 WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                        obj = await new MySqlCommand($"Select `CurrentTier` FROM `{PlayersBattlepassTableName}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                        if (obj is int tier)
                         {
-                            var newXP = data.Battlepass.XP - neededXP;
-                            await new MySqlCommand($"UPDATE `{PlayersBattlepassTableName}` SET `XP` = {newXP}, `CurrentTier` = `CurrentTier` + 1 WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-                            obj = await new MySqlCommand($"Select `CurrentTier` FROM `{PlayersBattlepassTableName}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-                            if (obj is int tier)
+                            data.Battlepass.CurrentTier = tier;
+                            TaskDispatcher.QueueOnMainThread(() =>
                             {
-                                data.Battlepass.CurrentTier = tier;
-                                TaskDispatcher.QueueOnMainThread(() =>
+                                var player = Plugin.Instance.GameManager.GetGamePlayer(data.SteamID);
+                                if (player != null)
                                 {
-                                    var player = Plugin.Instance.GameManager.GetGamePlayer(data.SteamID);
-                                    if (player != null)
-                                    {
-                                        // Code to send battlepass level up
-                                    }
-                                });
-                            }
-                            data.Battlepass.XP = newXP;
+                                    // Code to send battlepass level up
+                                }
+                            });
                         }
+                        data.Battlepass.XP = newXP;
                     }
                 }
             }

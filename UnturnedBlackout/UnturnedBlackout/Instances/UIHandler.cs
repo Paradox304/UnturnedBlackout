@@ -5683,7 +5683,6 @@ namespace UnturnedBlackout.Instances
 
         public IEnumerator ShowMatchEndSummary(MatchEndSummary summary)
         {
-            Logging.Debug($"Showing match end summary for {Player.CharacterName}");
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "Scene Summary", true);
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "Scene Summary XP Toggle", true);
 
@@ -5692,7 +5691,6 @@ namespace UnturnedBlackout.Instances
             var currentXP = summary.StartingXP;
             var nextLevelXP = DB.Levels.TryGetValue(currentLevel + 1, out XPLevel level) ? level.XPNeeded : 0;
 
-            Logging.Debug($"Current Level: {currentLevel}, current xp: {currentXP}, next level xp: {nextLevelXP}");
             // Send the filled amount of bar and set the toggle to true and animate the text
 
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP 1 TEXT", $"Match <color=#AD6816>{summary.MatchXP}</color> XP");
@@ -5704,39 +5702,40 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Level 1 TEXT", nextLevelXP == 0 ? "MAX" : (currentLevel + 1).ToString("D3"));
 
             // Animate Match XP
-            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 0", new string(' ', currentXP == 0 ? 1 : Math.Min(113, currentXP * 113 / (nextLevelXP == 0 ? 1 : nextLevelXP))));
+            yield return new WaitForSeconds(1f);
+            var boldSpaces = currentXP == 0 ? 1 : Math.Max(1, Math.Min(113, currentXP * 113 / (nextLevelXP == 0 ? 1 : nextLevelXP)));
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 0", new string(' ', boldSpaces));
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "Scene Summary XP 0 Toggle", true);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Type TEXT", "Match XP");
 
-            Logging.Debug("Animating match XP");
             var b = 0;
             for (int i = 1; i <= summary.MatchXP; i++)
             {
                 yield return new WaitForSeconds(0.01f);
-                Logging.Debug($"i: {i}, b: {b}");
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP 0 TEXT", $"+{i} XP");
-                Logging.Debug($"Checking if {currentXP + b} is equal to {nextLevelXP}");
-                if (nextLevelXP != 0 && (currentXP + b) == nextLevelXP)
+                if (nextLevelXP != 0 && (currentXP + b) >= nextLevelXP)
                 {
-                    Logging.Debug($"Level changed");
                     // Level has changed
                     b = 0;
                     currentLevel += 1;
                     currentXP = 0;
                     nextLevelXP = DB.Levels.TryGetValue(currentLevel + 1, out level) ? level.XPNeeded : 0;
-                    Logging.Debug($"Current Level: {currentLevel}, current xp: {currentXP}, next level xp: {nextLevelXP}");
                     EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Level 0 TEXT", currentLevel.ToString("D3"));
                     EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Level 1 TEXT", nextLevelXP == 0 ? "MAX" : (currentLevel + 1).ToString("D3"));
 
+                    boldSpaces = 0;
                     EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 0", " ");
                     EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 1", " ");
+
+                    continue;
                 }
                 else
                 {
                     b += 1;
                 }
 
-                EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 1", new string(' ', Math.Min(113, b * 113 / (nextLevelXP - currentXP))));
+                var highlightedSpaces = Math.Max(1, Math.Min(113 - boldSpaces, b * (113 - boldSpaces) / (nextLevelXP - currentXP)));
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 1", new string(' ', highlightedSpaces));
                 if (i == summary.MatchXP)
                 {
                     currentXP += b;
@@ -5746,9 +5745,11 @@ namespace UnturnedBlackout.Instances
 
             // Animate Match Bonus XP
             yield return new WaitForSeconds(0.18f);
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP 0 TEXT", $"+0 XP");
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "Scene Summary XP 1 Toggle", true);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 1", " ");
-            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 0", new string(' ', currentXP == 0 ? 1 : Math.Min(113, currentXP * 113 / (nextLevelXP == 0 ? 1 : nextLevelXP))));
+            boldSpaces = currentXP == 0 ? 1 : Math.Max(1, Math.Min(113, currentXP * 113 / (nextLevelXP == 0 ? 1 : nextLevelXP)));
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 0", new string(' ', boldSpaces));
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Type TEXT", "Match Bonus XP");
 
             yield return new WaitForSeconds(0.05f);
@@ -5759,7 +5760,7 @@ namespace UnturnedBlackout.Instances
             {
                 yield return new WaitForSeconds(0.010f);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP 0 TEXT", $"+{i} XP");
-                if (nextLevelXP != 0 && (currentXP + b) == nextLevelXP)
+                if (nextLevelXP != 0 && (currentXP + b) >= nextLevelXP)
                 {
                     // Level has changed
                     b = 0;
@@ -5769,15 +5770,19 @@ namespace UnturnedBlackout.Instances
                     EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Level 0 TEXT", currentLevel.ToString("D3"));
                     EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Level 1 TEXT", nextLevelXP == 0 ? "MAX" : (currentLevel + 1).ToString("D3"));
 
+                    boldSpaces = 0;
                     EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 0", " ");
                     EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 1", " ");
+
+                    continue;
                 }
                 else
                 {
                     b += 1;
                 }
 
-                EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 1", new string(' ', Math.Min(113, b * 113 / (nextLevelXP - currentXP))));
+                var highlightedSpaces = Math.Max(1, Math.Min(113 - boldSpaces, b * (113 - boldSpaces) / (nextLevelXP - currentXP)));
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 1", new string(' ', highlightedSpaces));
                 if (i == summary.MatchXPBonus)
                 {
                     currentXP += b;
@@ -5787,9 +5792,11 @@ namespace UnturnedBlackout.Instances
 
             // Animate Achievement Bonus XP
             yield return new WaitForSeconds(0.18f);
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP 0 TEXT", $"+0 XP");
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "Scene Summary XP 2 Toggle", true);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 1", " ");
-            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 0", new string(' ', currentXP == 0 ? 1 : Math.Min(113, currentXP * 113 / (nextLevelXP == 0 ? 1 : nextLevelXP))));
+            boldSpaces = currentXP == 0 ? 1 : Math.Max(1, Math.Min(113, currentXP * 113 / (nextLevelXP == 0 ? 1 : nextLevelXP)));
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 0", new string(' ', boldSpaces));
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Type TEXT", "Achievement Bonus XP");
 
             yield return new WaitForSeconds(0.05f);
@@ -5800,7 +5807,7 @@ namespace UnturnedBlackout.Instances
             {
                 yield return new WaitForSeconds(0.01f);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP 0 TEXT", $"+{i} XP");
-                if (nextLevelXP != 0 && (currentXP + b) == nextLevelXP)
+                if (nextLevelXP != 0 && (currentXP + b) >= nextLevelXP)
                 {
                     // Level has changed
                     b = 0;
@@ -5810,15 +5817,19 @@ namespace UnturnedBlackout.Instances
                     EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Level 0 TEXT", currentLevel.ToString("D3"));
                     EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Level 1 TEXT", nextLevelXP == 0 ? "MAX" : (currentLevel + 1).ToString("D3"));
 
+                    boldSpaces = 0;
                     EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 0", " ");
                     EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 1", " ");
+
+                    continue;
                 }
                 else
                 {
                     b += 1;
                 }
 
-                EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 1", new string(' ', Math.Min(113, b * 113 / (nextLevelXP - currentXP))));
+                var highlightedSpaces = Math.Max(1, Math.Min(113 - boldSpaces, b * (113 - boldSpaces) / (nextLevelXP - currentXP)));
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 1", new string(' ', highlightedSpaces));
                 if (i == summary.AchievementXPBonus)
                 {
                     currentXP += b;
@@ -5828,9 +5839,11 @@ namespace UnturnedBlackout.Instances
 
             // Animate Other Bonus XP
             yield return new WaitForSeconds(0.18f);
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP 0 TEXT", $"+0 XP");
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "Scene Summary XP 3 Toggle", true);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 1", " ");
-            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 0", new string(' ', currentXP == 0 ? 1 : Math.Min(113, currentXP * 113 / (nextLevelXP == 0 ? 1 : nextLevelXP))));
+            boldSpaces = currentXP == 0 ? 1 : Math.Max(1, Math.Min(113, currentXP * 113 / (nextLevelXP == 0 ? 1 : nextLevelXP)));
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 0", new string(' ', boldSpaces));
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Type TEXT", "Other Bonus XP");
 
             yield return new WaitForSeconds(0.05f);
@@ -5841,7 +5854,7 @@ namespace UnturnedBlackout.Instances
             {
                 yield return new WaitForSeconds(0.01f);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP 0 TEXT", $"+{i} XP");
-                if (nextLevelXP != 0 && (currentXP + b) == nextLevelXP)
+                if (nextLevelXP != 0 && (currentXP + b) >= nextLevelXP)
                 {
                     // Level has changed
                     b = 0;
@@ -5851,15 +5864,20 @@ namespace UnturnedBlackout.Instances
                     EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Level 0 TEXT", currentLevel.ToString("D3"));
                     EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Level 1 TEXT", nextLevelXP == 0 ? "MAX" : (currentLevel + 1).ToString("D3"));
 
+                    boldSpaces = 0;
                     EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 0", " ");
                     EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 1", " ");
+
+                    continue;
                 }
                 else
                 {
                     b += 1;
                 }
 
-                EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 1", new string(' ', Math.Min(113, b * 113 / (nextLevelXP - currentXP))));
+
+                var highlightedSpaces = Math.Max(1, Math.Min(113 - boldSpaces, b * (113 - boldSpaces) / (nextLevelXP - currentXP)));
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 1", new string(' ', highlightedSpaces));
                 if (i == summary.OtherXPBonus)
                 {
                     currentXP += b;
@@ -5870,7 +5888,8 @@ namespace UnturnedBlackout.Instances
             yield return new WaitForSeconds(0.18f);
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "Scene Summary XP 4 Toggle", true);
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 1", " ");
-            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 0", new string(' ', currentXP == 0 ? 1 : Math.Min(113, currentXP * 113 / (nextLevelXP == 0 ? 1 : nextLevelXP))));
+            boldSpaces = currentXP == 0 ? 1 : Math.Max(1, Math.Min(113, currentXP * 113 / (nextLevelXP == 0 ? 1 : nextLevelXP)));
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 0", new string(' ', boldSpaces));
         }
 
         // Events
