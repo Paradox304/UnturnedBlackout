@@ -16,6 +16,8 @@ namespace UnturnedBlackout.Models.Global
 
         public GamePlayer Player { get; set; }
 
+        public int PendingCredits { get; set; }
+
         public int TotalXP { get; set; }
         public int PendingXP { get; set; }
         public int MatchXP { get; set; }
@@ -68,6 +70,7 @@ namespace UnturnedBlackout.Models.Global
             BattlepassXP = 0; // Left for later on when I get the formula
             BattlepassBonusXP = (int)Math.Ceiling(BattlepassXP * player.Data.BPBooster);
             KD = Kills / (float)Deaths;
+            PendingCredits = 0; // Left for later on when I get the formula
 
             // Final Values
             TotalXP = MatchXP + MatchXPBonus + AchievementXPBonus + OtherXPBonus;

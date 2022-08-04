@@ -1471,6 +1471,12 @@ namespace UnturnedBlackout.Managers
                     if (handler.MainPage == EMainPage.Battlepass)
                         Plugin.Instance.BPManager.ClaimReward(gPly, handler.SelectedBattlepassTierID.Item1, handler.SelectedBattlepassTierID.Item2);
                     return;
+                case "SERVER Summary Close BUTTON":
+                    if (handler.MatchEndSummaryShower != null)
+                    {
+                        Plugin.Instance.StopCoroutine(handler.MatchEndSummaryShower);
+                    }
+                    return;
                 case "KnobOff":
                     handler.OnMusicChanged(true);
                     return;

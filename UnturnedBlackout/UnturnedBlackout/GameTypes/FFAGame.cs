@@ -114,7 +114,12 @@ namespace UnturnedBlackout.GameTypes
                 Plugin.Instance.UIManager.SetupPreEndingUI(player.GamePlayer, EGameType.FFA, index == 0, 0, 0, "", "");
                 var summary = new MatchEndSummary(player.GamePlayer, player.XP, player.StartingLevel, player.StartingXP, player.Kills, player.Deaths, player.Assists, player.HighestKillstreak, player.HighestMK, player.StartTime, GameMode, index == 0);
                 summaries.Add(player.GamePlayer, summary);
-                ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DBManager.IncreasePlayerXPAsync(player.GamePlayer.SteamID, summary.PendingXP));
+                ThreadPool.QueueUserWorkItem(async (o) =>
+                {
+                    await Plugin.Instance.DBManager.IncreasePlayerXPAsync(player.GamePlayer.SteamID, summary.PendingXP);
+                    await Plugin.Instance.DBManager.IncreasePlayerCreditsAsync(player.GamePlayer.SteamID, summary.PendingCredits);
+                    await Plugin.Instance.DBManager.IncreasePlayerBPXPAsync(player.GamePlayer.SteamID, summary.BattlepassXP + summary.BattlepassBonusXP);
+                });
                 if (index == 0)
                 {
                     TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.QuestManager.CheckQuest(player.GamePlayer, EQuestType.Win, new Dictionary<EQuestCondition, int> { { EQuestCondition.Map, Location.LocationID }, { EQuestCondition.Gamemode, (int)GameMode }, { EQuestCondition.WinKills, player.Kills } }));
