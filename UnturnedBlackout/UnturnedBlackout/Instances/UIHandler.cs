@@ -5654,21 +5654,17 @@ namespace UnturnedBlackout.Instances
                     rewardRarity = knife.KnifeRarity;
                     return true;
                 case ERewardType.BPBooster:
-                    rewardName = $"<color=white>{Convert.ToDecimal(reward.RewardValue) * 100}%</color>";
-                    return true;
                 case ERewardType.XPBooster:
-                    rewardName = $"<color=white>{Convert.ToDecimal(reward.RewardValue) * 100}%</color>";
-                    return true;
                 case ERewardType.GunXPBooster:
-                    rewardName = $"<color=white>{Convert.ToDecimal(reward.RewardValue) * 100}%</color>";
+                    rewardName = $"<color=white>{String.Format("{0:0.##}", Convert.ToDecimal(reward.RewardValue) * 100)}%</color>";
                     return true;
                 case ERewardType.Coin:
                     rewardName = $"<color=white>{reward.RewardValue}</color>";
-                    rewardImage = "https://cdn.discordapp.com/attachments/458038940847439903/1000193091459891239/BlackoutTags.png";
+                    rewardImage = Config.Base.FileData.BlacktagsIconLink;
                     return true;
                 case ERewardType.Credit:
                     rewardName = $"<color=white>{reward.RewardValue}</color>";
-                    rewardImage = "https://cdn.discordapp.com/attachments/458038940847439903/1000193090906226708/BlackoutPoints.png";
+                    rewardImage = Config.Base.FileData.PointsIconLink;
                     return true;
                 case ERewardType.LevelXP:
                     rewardName = $"<color=white>{reward.RewardValue}</color>";
@@ -5979,7 +5975,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP 3 TEXT", $"Achievement <color=#AD6816>{summary.AchievementXPBonus}</color> Bonus XP");
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP 4 TEXT", $"Other <color=#AD6816>{summary.OtherXPBonus}</color> Bonus XP");
 
-            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Level 0 TEXT", currentLevel.ToString("D3"));
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Level 0 TEXT", $"<color=#AD6816>{currentLevel:D3}</color>");
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Level 1 TEXT", nextLevelXP == 0 ? "MAX" : (currentLevel + 1).ToString("D3"));
             // Animate Match XP
 
@@ -6005,11 +6001,14 @@ namespace UnturnedBlackout.Instances
                 nextLevelXP = DB.Levels.TryGetValue(currentLevel + 1, out level) ? level.XPNeeded : 0;
                 Logging.Debug($"b: {b}, current level: {currentLevel}, next level xp: {nextLevelXP}");
 
+                EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "Scene Summary LevelUp Toggle", DB.Levels.TryGetValue(currentLevel, out level) ? level.IconLinkLarge : "");
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "Scene Summary LevelUp Toggle", true);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 1", new string(' ', 113 - boldSpaces));
                 yield return new WaitForSeconds(0.5f);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 0", " ");
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 1", " ");
-                EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Level 0 TEXT", currentLevel.ToString("D3"));
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "Scene Summary LevelUp Toggle", false);
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Level 0 TEXT", $"<color=#AD6816>{currentLevel:D3}</color>");
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Level 1 TEXT", nextLevelXP == 0 ? "MAX" : (currentLevel + 1).ToString("D3"));
 
                 boldSpaces = 0;
@@ -6051,11 +6050,14 @@ namespace UnturnedBlackout.Instances
                 nextLevelXP = DB.Levels.TryGetValue(currentLevel + 1, out level) ? level.XPNeeded : 0;
                 Logging.Debug($"b: {b}, current level: {currentLevel}, next level xp: {nextLevelXP}");
 
+                EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "Scene Summary LevelUp Toggle", DB.Levels.TryGetValue(currentLevel, out level) ? level.IconLinkLarge : "");
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "Scene Summary LevelUp Toggle", true);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 1", new string(' ', 113 - boldSpaces));
                 yield return new WaitForSeconds(0.5f);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 0", " ");
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 1", " ");
-                EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Level 0 TEXT", currentLevel.ToString("D3"));
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "Scene Summary LevelUp Toggle", false);
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Level 0 TEXT", $"<color=#AD6816>{currentLevel:D3}</color>");
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Level 1 TEXT", nextLevelXP == 0 ? "MAX" : (currentLevel + 1).ToString("D3"));
 
                 boldSpaces = 0;
@@ -6097,11 +6099,14 @@ namespace UnturnedBlackout.Instances
                 nextLevelXP = DB.Levels.TryGetValue(currentLevel + 1, out level) ? level.XPNeeded : 0;
                 Logging.Debug($"b: {b}, current level: {currentLevel}, next level xp: {nextLevelXP}");
 
+                EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "Scene Summary LevelUp Toggle", DB.Levels.TryGetValue(currentLevel, out level) ? level.IconLinkLarge : "");
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "Scene Summary LevelUp Toggle", true);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 1", new string(' ', 113 - boldSpaces));
                 yield return new WaitForSeconds(0.5f);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 0", " ");
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 1", " ");
-                EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Level 0 TEXT", currentLevel.ToString("D3"));
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "Scene Summary LevelUp Toggle", false);
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Level 0 TEXT", $"<color=#AD6816>{currentLevel:D3}</color>");
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Level 1 TEXT", nextLevelXP == 0 ? "MAX" : (currentLevel + 1).ToString("D3"));
 
                 boldSpaces = 0;
@@ -6143,11 +6148,14 @@ namespace UnturnedBlackout.Instances
                 nextLevelXP = DB.Levels.TryGetValue(currentLevel + 1, out level) ? level.XPNeeded : 0;
                 Logging.Debug($"b: {b}, current level: {currentLevel}, next level xp: {nextLevelXP}");
 
+                EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "Scene Summary LevelUp Toggle", DB.Levels.TryGetValue(currentLevel, out level) ? level.IconLinkLarge : "");
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "Scene Summary LevelUp Toggle", true);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 1", new string(' ', 113 - boldSpaces));
                 yield return new WaitForSeconds(0.5f);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 0", " ");
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 1", " ");
-                EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Level 0 TEXT", currentLevel.ToString("D3"));
+                EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "Scene Summary LevelUp Toggle", false);
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Level 0 TEXT", $"<color=#AD6816>{currentLevel:D3}</color>");
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Level 1 TEXT", nextLevelXP == 0 ? "MAX" : (currentLevel + 1).ToString("D3"));
 
                 boldSpaces = 0;
@@ -6191,6 +6199,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Total XP TEXT", $"+{summary.TotalXP}");
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Match XP TEXT", $"+{summary.MatchXP}");
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Match Bonus TEXT", $"+{summary.MatchXPBonus}");
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Achievements XP", $"ACHIEVEMENTS XP BONUS ({String.Format("{0:0.##}", summary.Player.Data.AchievementXPBooster * 100)}%)");
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Achievements XP TEXT", $"+{summary.AchievementXPBonus}");
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Other XP TEXT", $"+{summary.OtherXPBonus}");
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Battlepass XP TEXT", $"+{summary.BattlepassXP}");

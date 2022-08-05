@@ -125,7 +125,13 @@ namespace UnturnedBlackout.Database.Data
                 totalTiers += achievement.Achievement.Tiers.Max(k => k.TierID);
             }
 
-            AchievementXPBooster = completedTiers * 100f / totalTiers;
+            var xpBooster = completedTiers * 100f / totalTiers;
+            if (xpBooster != 0f)
+            {
+                xpBooster /= 2f;
+            }
+
+            AchievementXPBooster = xpBooster;
         }
     }
 }

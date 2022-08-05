@@ -63,34 +63,26 @@ namespace UnturnedBlackout.Models.Global
             HasWon = hasWon;
             EndTime = DateTime.UtcNow;
 
-            // Calculated Values
-            /*MatchXPBonus = (int)Math.Ceiling(MatchXP * player.Data.XPBooster);
+            var minutesPlayed = (int)Math.Ceiling((EndTime - StartTime).TotalMinutes);
+            var data = Config.WinningValues.FileData;
+
+            PendingCredits = (MatchXP == 0 ? 0 : MatchXP / data.PointsDivisible) + (minutesPlayed * data.PointsPerMinutePlayed);
+            MatchXPBonus = (int)((Kills > 1 ? (MatchXP / (HasWon ? data.BonusXPVictoryDivisible : data.BonusXPDefeatDivisible)) : 0) * (1f + player.Data.XPBooster + Plugin.Instance.DBManager.ServerOptions.XPBooster)); // Add prime booster later on here
+            if (MatchXPBonus != 0)
+            {
+                MatchXPBonus += minutesPlayed * data.BonusXPPerMinutePlayed;
+            }
             AchievementXPBonus = (int)Math.Ceiling(MatchXP * player.Data.AchievementXPBooster);
-            OtherXPBonus = (int)Math.Ceiling(MatchXP * (HasWon ? GetWinMultiplier() : 0.2f));
+            OtherXPBonus = 0; // Havent got formula for this
+
             BattlepassXP = 0; // Left for later on when I get the formula
             BattlepassBonusXP = (int)Math.Ceiling(BattlepassXP * player.Data.BPBooster);
-            PendingCredits = 0; // Left for later on when I get the formula*/
-            MatchXPBonus = (int)Math.Ceiling(MatchXP * 0.5);
-            AchievementXPBonus = (int)Math.Ceiling(MatchXP * 0.2);
-            OtherXPBonus = (int)Math.Ceiling(MatchXP * (HasWon ? GetWinMultiplier() : 0.2f));
-            BattlepassXP = 100; 
-            BattlepassBonusXP = (int)Math.Ceiling(BattlepassXP * 0.5);
-            PendingCredits = MatchXP / 10;
+
             KD = Kills / (float)Deaths;
 
             // Final Values
             TotalXP = MatchXP + MatchXPBonus + AchievementXPBonus + OtherXPBonus;
             PendingXP = MatchXPBonus + AchievementXPBonus + OtherXPBonus;
         }
-
-        public float GetWinMultiplier() =>
-             GameType switch
-             {
-                 EGameType.FFA => Config.FFA.FileData.WinMultiplier,
-                 EGameType.CTF => Config.CTF.FileData.WinMultiplier,
-                 EGameType.TDM => Config.TDM.FileData.WinMultiplier,
-                 EGameType.KC => Config.KC.FileData.WinMultiplier,
-                 _ => throw new ArgumentOutOfRangeException("GameType is not as expected")
-             };
     }
 }

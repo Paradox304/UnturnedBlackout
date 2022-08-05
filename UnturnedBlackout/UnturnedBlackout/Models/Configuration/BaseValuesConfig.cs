@@ -31,6 +31,10 @@ namespace UnturnedBlackout.Models.Configuration
 
         public int BattlepassTierSkipCost { get; set; }
 
+        public string BlacktagsIconLink { get; set; }
+        public string PointsIconLink { get; set; }
+        public string ScrapIconLink { get; set; }
+
         public BaseValuesConfig()
         {
             MaxPlayerNameCharacters = 20;
@@ -67,6 +71,10 @@ namespace UnturnedBlackout.Models.Configuration
             SpawnSwitchSeconds = 120;
 
             BattlepassTierSkipCost = 100;
+
+            BlacktagsIconLink = "";
+            PointsIconLink = "";
+            ScrapIconLink = "";
         }
     }
 }

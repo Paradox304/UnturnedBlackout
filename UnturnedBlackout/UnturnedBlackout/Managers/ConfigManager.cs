@@ -22,6 +22,7 @@ namespace UnturnedBlackout.Managers
         public XmlFileReader<LocationsConfig> Locations { get; set; }
         public XmlFileReader<KillFeedConfig> Killfeed { get; set; }
         public XmlFileReader<GamemodeConfig> Gamemode { get; set; }
+        public XmlFileReader<WinningValuesConfig> WinningValues { get; set; }
 
         public ConfigManager()
         {
@@ -40,6 +41,7 @@ namespace UnturnedBlackout.Managers
             Locations = new(Plugin.Instance.Directory + "/LocalStorage/Configuration.Locations.xml", configInstance.URL + "Configuration.Locations.xml");
             Killfeed = new(Plugin.Instance.Directory + "/LocalStorage/Configuration.Killfeed.xml", configInstance.URL + "Configuration.Killfeed.xml");
             Gamemode = new(Plugin.Instance.Directory + "/LocalStorage/Configuration.Gamemode.xml", configInstance.URL + "Configuration.Gamemode.xml");
+            WinningValues = new(Plugin.Instance.Directory + "/LocalStorage/Configuration.WinningValues.xml", configInstance.URL + "Configuration.WinningValues.xml");
         }
     }
 }

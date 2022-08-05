@@ -267,6 +267,7 @@
     <Compile Include="Models\Configuration\MedalsConfig.cs" />
     <Compile Include="Models\Configuration\PointsConfig.cs" />
     <Compile Include="Models\Configuration\TeamsConfig.cs" />
+    <Compile Include="Models\Configuration\WinningValuesConfig.cs" />
     <Compile Include="Models\Data\LoadoutData.cs" />
     <Compile Include="Models\Animation\AnimationInfo.cs" />
     <Compile Include="Models\Global\ArenaLocation.cs" />
