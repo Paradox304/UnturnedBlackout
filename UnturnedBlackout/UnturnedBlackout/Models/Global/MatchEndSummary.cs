@@ -67,7 +67,7 @@ namespace UnturnedBlackout.Models.Global
             var data = Config.WinningValues.FileData;
 
             PendingCredits = (MatchXP == 0 ? 0 : MatchXP / data.PointsDivisible) + (minutesPlayed * data.PointsPerMinutePlayed);
-            MatchXPBonus = (int)((Kills > 1 ? (MatchXP / (HasWon ? data.BonusXPVictoryDivisible : data.BonusXPDefeatDivisible)) : 0) * (1f + player.Data.XPBooster + Plugin.Instance.DBManager.ServerOptions.XPBooster)); // Add prime booster later on here
+            MatchXPBonus = (int)((Kills > 1 ? (MatchXP / (HasWon ? data.BonusXPVictoryDivisible : data.BonusXPDefeatDivisible)) : 0) * (1f + player.Data.XPBooster + Plugin.Instance.DBManager.ServerOptions.XPBooster + (player.Data.HasPrime ? data.PrimeBooster : 0f)));
             if (MatchXPBonus != 0)
             {
                 MatchXPBonus += minutesPlayed * data.BonusXPPerMinutePlayed;

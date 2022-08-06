@@ -36,6 +36,8 @@ namespace UnturnedBlackout.Database.Data
         public float BPBooster { get; private set; }
         public float GunXPBooster { get; private set; }
         public float AchievementXPBooster { get; private set; }
+        public bool HasPrime { get; set; }
+        public DateTimeOffset PrimeExpiry { get; set; }
 
         public List<PlayerQuest> Quests { get; set; }
         public Dictionary<EQuestType, List<PlayerQuest>> QuestsSearchByType { get; set; }
@@ -45,7 +47,7 @@ namespace UnturnedBlackout.Database.Data
         public PlayerBattlepass Battlepass { get; set; }
         public List<PlayerBooster> ActiveBoosters { get; set; }
 
-        public PlayerData(CSteamID steamID, string steamName, string avatarLink, int xP, int level, int credits, int scrap, int coins, int kills, int headshotKills, int highestKillstreak, int highestMultiKills, int killsConfirmed, int killsDenied, int flagsCaptured, int flagsSaved, int areasTaken, int deaths, bool music, bool isMuted, DateTimeOffset muteExpiry, bool hasBattlepass, float xPBooster, float bPBooster, float gunXPBooster)
+        public PlayerData(CSteamID steamID, string steamName, string avatarLink, int xP, int level, int credits, int scrap, int coins, int kills, int headshotKills, int highestKillstreak, int highestMultiKills, int killsConfirmed, int killsDenied, int flagsCaptured, int flagsSaved, int areasTaken, int deaths, bool music, bool isMuted, DateTimeOffset muteExpiry, bool hasBattlepass, float xPBooster, float bPBooster, float gunXPBooster, bool hasPrime, DateTimeOffset primeExpiry)
         {
             SteamID = steamID;
             SteamName = steamName;
@@ -72,6 +74,8 @@ namespace UnturnedBlackout.Database.Data
             XPBooster = xPBooster;
             BPBooster = bPBooster;
             GunXPBooster = gunXPBooster;
+            HasPrime = hasPrime;
+            PrimeExpiry = primeExpiry;
             Quests = new();
             QuestsSearchByType = new();
             Achievements = new();
