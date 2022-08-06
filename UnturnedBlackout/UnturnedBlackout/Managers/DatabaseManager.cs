@@ -2859,8 +2859,8 @@ namespace UnturnedBlackout.Managers
 
                 Logging.Debug($"Getting boosters for {player.CharacterName}");
                 TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.99f)), loadingText: "PREPARING BOOSTERS..."));
+                await new MySqlCommand($"DELETE FROM `{PlayersBoostersTableName}` WHERE `SteamID` = {player.CSteamID} AND `BoosterExpiration` > {DateTimeOffset.UtcNow.ToUnixTimeSeconds()};", Conn).ExecuteScalarAsync();
                 rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PlayersBoostersTableName}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
-                var pendingBoostersDeletion = new List<PlayerBooster>();
                 try
                 {
                     var boosters = new List<PlayerBooster>();
@@ -2883,14 +2883,11 @@ namespace UnturnedBlackout.Managers
 
                         var boosterExpiration = DateTimeOffset.FromUnixTimeSeconds(boosterExpirationUnix);
                         var booster = new PlayerBooster(player.CSteamID, boosterType, boosterValue, boosterExpiration);
-                        if (DateTimeOffset.UtcNow > boosterExpiration)
-                        {
-                            pendingBoostersDeletion.Add(booster);
-                        } else
-                        {
-                            boosters.Add(booster);
-                        }
+
+                        boosters.Add(booster);
                     }
+
+                    playerData.ActiveBoosters = boosters;
                 } catch (Exception ex)
                 {
                     Logger.Log($"Error reading player boosters for {player.CharacterName}");
@@ -2899,13 +2896,9 @@ namespace UnturnedBlackout.Managers
                 {
                     rdr.Close();
                 }
-
-                Logging.Debug($"Deleting expired boosters for {player.CharacterName}");
-                foreach (var pendingBoosterDeletion in pendingBoostersDeletion)
-                {
-                    Logging.Debug($"Deleting booster with type {pendingBoosterDeletion.BoosterType}, value {pendingBoosterDeletion.BoosterValue}");
-                    await new MySqlCommand($"DELETE FROM `{PlayersBoostersTableName}` WHERE `SteamID` = {player.CSteamID} AND `BoosterType` = '{pendingBoosterDeletion.BoosterType}' AND `BoosterValue` = {pendingBoosterDeletion.BoosterValue};", Conn).ExecuteScalarAsync();
-                }
+                playerData.SetPersonalBooster(EBoosterType.XP, playerData.XPBooster);
+                playerData.SetPersonalBooster(EBoosterType.BPXP, playerData.BPBooster);
+                playerData.SetPersonalBooster(EBoosterType.GUNXP, playerData.GunXPBooster);
 
                 TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', 96), loadingText: "FINALISING..."));
                 Logging.Debug($"Checking if player has more loadouts for {player.CharacterName}");
@@ -3616,7 +3609,7 @@ namespace UnturnedBlackout.Managers
             }
         }
 
-        public async Task IncreasePlayerXPBoosterAsync(CSteamID steamID, float increaseXPBooster)
+        public async Task IncreasePlayerBoosterAsync(CSteamID steamID, EBoosterType boosterType, float increaseBooster)
         {
             using MySqlConnection Conn = new(ConnectionString);
 
@@ -3624,66 +3617,31 @@ namespace UnturnedBlackout.Managers
             {
                 await Conn.OpenAsync();
 
-                await new MySqlCommand($"UPDATE `{PlayersTableName}` SET `XPBooster` = `XPBooster` + {increaseXPBooster} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-
-                if (PlayerData.TryGetValue(steamID, out PlayerData data))
+                var coloumnName = "None";
+                switch (boosterType)
                 {
-                    data.XPBooster += increaseXPBooster;
+                    case EBoosterType.XP:
+                        coloumnName = "XPBooster";
+                        break;
+                    case EBoosterType.BPXP:
+                        coloumnName = "BPBooster";
+                        break;
+                    case EBoosterType.GUNXP:
+                        coloumnName = "GunXPBooster";
+                        break;
+                }
+
+                await new MySqlCommand($"UPDATE `{PlayersTableName}` SET `{coloumnName}` = `{coloumnName}` + {increaseBooster} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                var obj = await new MySqlCommand($"SELECT `{coloumnName}` FROM `{PlayersTableName}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+
+                if (PlayerData.TryGetValue(steamID, out PlayerData data) && float.TryParse(obj.ToString(), out float updatedBooster))
+                {
+                    data.SetPersonalBooster(boosterType, updatedBooster);
                 }
             }
             catch (Exception ex)
             {
-                Logger.Log($"Error increasing the xp booster for player with steam id {steamID} by {increaseXPBooster}");
-                Logger.Log(ex);
-            }
-            finally
-            {
-                await Conn.CloseAsync();
-            }
-        }
-
-        public async Task IncreasePlayerBPBoosterAsync(CSteamID steamID, float increaseBPBooster)
-        {
-            using MySqlConnection Conn = new(ConnectionString);
-
-            try
-            {
-                await Conn.OpenAsync();
-
-                await new MySqlCommand($"UPDATE `{PlayersTableName}` SET `BPBooster` = `BPBooster` + {increaseBPBooster} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-                if (PlayerData.TryGetValue(steamID, out PlayerData data))
-                {
-                    data.BPBooster += increaseBPBooster;
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.Log($"Error increasing bp booster for player with steam id {steamID} by {increaseBPBooster}");
-                Logger.Log(ex);
-            }
-            finally
-            {
-                await Conn.CloseAsync();
-            }
-        }
-
-        public async Task IncreasePlayerGunXPBoosterAsync(CSteamID steamID, float increaseGunXPBooster)
-        {
-            using MySqlConnection Conn = new(ConnectionString);
-
-            try
-            {
-                await Conn.OpenAsync();
-
-                await new MySqlCommand($"UPDATE `{PlayersTableName}` SET `GunXPBooster` = `GunXPBooster` + {increaseGunXPBooster} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-                if (PlayerData.TryGetValue(steamID, out PlayerData data))
-                {
-                    data.GunXPBooster += increaseGunXPBooster;
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.Log($"Error increasing gun xp booster for player with steam id {steamID} by {increaseGunXPBooster}");
+                Logger.Log($"Error increasing the persoanl booster for player with steam id {steamID} for type {boosterType} by {increaseBooster}");
                 Logger.Log(ex);
             }
             finally
@@ -4812,7 +4770,7 @@ namespace UnturnedBlackout.Managers
 
         // Player Leaderboard
 
-        private async void RefreshLeaderboardData(object sender, System.Timers.ElapsedEventArgs e)
+        private void RefreshLeaderboardData(object sender, System.Timers.ElapsedEventArgs e)
         {
             using MySqlConnection Conn = new(ConnectionString);
             try
@@ -5018,7 +4976,7 @@ namespace UnturnedBlackout.Managers
                         var dailyLeaderboardData = new LeaderboardData(data.SteamID, data.SteamName, data.Level, 0, 0, 0);
                         PlayerDailyLeaderboard.Add(dailyLeaderboardData);
                         PlayerDailyLeaderboardLookup.Add(data.SteamID, dailyLeaderboardData);
-                        await new MySqlCommand($"INSERT INTO `{PlayersLeaderboardDailyTableName}` ( `SteamID` ) VALUES ( {data.SteamID} );", Conn).ExecuteScalarAsync();
+                        new MySqlCommand($"INSERT INTO `{PlayersLeaderboardDailyTableName}` ( `SteamID` ) VALUES ( {data.SteamID} );", Conn).ExecuteScalar();
                     }
 
                     if (!PlayerWeeklyLeaderboardLookup.ContainsKey(data.SteamID))
@@ -5026,7 +4984,7 @@ namespace UnturnedBlackout.Managers
                         var weeklyLeaderboardData = new LeaderboardData(data.SteamID, data.SteamName, data.Level, 0, 0, 0);
                         PlayerWeeklyLeaderboard.Add(weeklyLeaderboardData);
                         PlayerWeeklyLeaderboardLookup.Add(data.SteamID, weeklyLeaderboardData);
-                        await new MySqlCommand($"INSERT INTO `{PlayersLeaderboardWeeklyTableName}` ( `SteamID` ) VALUES ( {data.SteamID} );", Conn).ExecuteScalarAsync();
+                        new MySqlCommand($"INSERT INTO `{PlayersLeaderboardWeeklyTableName}` ( `SteamID` ) VALUES ( {data.SteamID} );", Conn).ExecuteScalar();
                     }
                 }
 
@@ -5234,7 +5192,7 @@ namespace UnturnedBlackout.Managers
                         var leaderboardData = new LeaderboardData(data.SteamID, data.SteamName, data.Level, 0, 0, 0);
                         PlayerDailyLeaderboard.Add(leaderboardData);
                         PlayerDailyLeaderboardLookup.Add(data.SteamID, leaderboardData);
-                        await new MySqlCommand($"INSERT INTO `{PlayersLeaderboardDailyTableName}` ( `SteamID` ) VALUES ( {data.SteamID} );", Conn).ExecuteScalarAsync();
+                        new MySqlCommand($"INSERT INTO `{PlayersLeaderboardDailyTableName}` ( `SteamID` ) VALUES ( {data.SteamID} );", Conn).ExecuteScalar();
                     }
 
                     // Change the wipe date
@@ -5331,7 +5289,7 @@ namespace UnturnedBlackout.Managers
                         var leaderboardData = new LeaderboardData(data.SteamID, data.SteamName, data.Level, 0, 0, 0);
                         PlayerWeeklyLeaderboard.Add(leaderboardData);
                         PlayerWeeklyLeaderboardLookup.Add(data.SteamID, leaderboardData);
-                        await new MySqlCommand($"INSERT INTO `{PlayersLeaderboardWeeklyTableName}` ( `SteamID` ) VALUES ( {data.SteamID} );", Conn).ExecuteScalarAsync();
+                        new MySqlCommand($"INSERT INTO `{PlayersLeaderboardWeeklyTableName}` ( `SteamID` ) VALUES ( {data.SteamID} );", Conn).ExecuteScalar();
                     }
 
                     // Change the wipe date
@@ -5435,7 +5393,7 @@ namespace UnturnedBlackout.Managers
                     var playerQuests = new List<PlayerQuest>();
                     var playerQuestsSearchByType = new Dictionary<EQuestType, List<PlayerQuest>>();
 
-                    await new MySqlCommand($"DELETE FROM `{PlayersQuestsTableName}` WHERE `SteamID` = {data.SteamID};", Conn).ExecuteScalarAsync();
+                    new MySqlCommand($"DELETE FROM `{PlayersQuestsTableName}` WHERE `SteamID` = {data.SteamID};", Conn).ExecuteScalar();
                     var expiryDate = ServerOptions.DailyLeaderboardWipe;
                     var questsToAdd = new List<Quest>();
                     for (var i = 0; i < 6; i++)
@@ -5454,7 +5412,7 @@ namespace UnturnedBlackout.Managers
                             playerQuestsSearchByType.Add(quest.QuestType, new List<PlayerQuest>());
                         }
                         playerQuestsSearchByType[quest.QuestType].Add(playerQuest);
-                        await new MySqlCommand($"INSERT INTO `{PlayersQuestsTableName}` (`SteamID` , `QuestID`, `Amount`, `QuestEnd`) VALUES ({data.SteamID}, {quest.QuestID}, 0, {expiryDate.ToUnixTimeSeconds()});", Conn).ExecuteScalarAsync();
+                        new MySqlCommand($"INSERT INTO `{PlayersQuestsTableName}` (`SteamID` , `QuestID`, `Amount`, `QuestEnd`) VALUES ({data.SteamID}, {quest.QuestID}, 0, {expiryDate.ToUnixTimeSeconds()});", Conn).ExecuteScalar();
                     }
 
                     data.Quests = playerQuests;
@@ -5467,21 +5425,70 @@ namespace UnturnedBlackout.Managers
                 if (ServerOptions.XPBoosterWipe < DateTimeOffset.UtcNow && ServerOptions.XPBooster != 0f)
                 {
                     ServerOptions.XPBooster = 0f;
-                    await new MySqlCommand($"UPDATE `{OptionsTableName}` SET `XPBooster` = 0;", Conn).ExecuteScalarAsync();
+                    new MySqlCommand($"UPDATE `{OptionsTableName}` SET `XPBooster` = 0;", Conn).ExecuteScalar();
                 }
 
                 Logging.Debug("Checking if bp booster needs to be wiped");
                 if (ServerOptions.BPBoosterWipe < DateTimeOffset.UtcNow && ServerOptions.BPBooster != 0f)
                 {
                     ServerOptions.BPBooster = 0f;
-                    await new MySqlCommand($"UPDATE `{OptionsTableName}` SET `BPBooster` = 0;", Conn).ExecuteScalarAsync();
+                    new MySqlCommand($"UPDATE `{OptionsTableName}` SET `BPBooster` = 0;", Conn).ExecuteScalar();
                 }
 
                 Logging.Debug("Checking if gun xp booster needs to be wiped");
                 if (ServerOptions.GunXPBoosterWipe < DateTimeOffset.UtcNow && ServerOptions.GunXPBooster != 0f)
                 {
                     ServerOptions.GunXPBooster = 0f;
-                    await new MySqlCommand($"UPDATE `{OptionsTableName} SET `GunXPBooster` = 0;", Conn).ExecuteScalarAsync();
+                    new MySqlCommand($"UPDATE `{OptionsTableName} SET `GunXPBooster` = 0;", Conn).ExecuteScalar();
+                }
+
+                Logging.Debug("Checking boosters of all players");
+                foreach (var data in PlayerData.Values)
+                {
+                    Logging.Debug($"Getting boosters for {data.SteamName}");
+                    new MySqlCommand($"DELETE FROM `{PlayersBoostersTableName}` WHERE `SteamID` = {data.SteamID} AND `BoosterExpiration` > {DateTimeOffset.UtcNow.ToUnixTimeSeconds()};", Conn).ExecuteScalar();
+                    rdr = new MySqlCommand($"SELECT * FROM `{PlayersBoostersTableName}` WHERE `SteamID` = {data.SteamID};", Conn).ExecuteReader();
+                    try
+                    {
+                        var boosters = new List<PlayerBooster>();
+                        while (rdr.Read())
+                        {
+                            if (!Enum.TryParse(rdr[1].ToString(), true, out EBoosterType boosterType))
+                            {
+                                return;
+                            }
+
+                            if (!float.TryParse(rdr[2].ToString(), out float boosterValue))
+                            {
+                                return;
+                            }
+
+                            if (!long.TryParse(rdr[3].ToString(), out long boosterExpirationUnix))
+                            {
+                                return;
+                            }
+
+                            var boosterExpiration = DateTimeOffset.FromUnixTimeSeconds(boosterExpirationUnix);
+                            var booster = new PlayerBooster(data.SteamID, boosterType, boosterValue, boosterExpiration);
+
+                            boosters.Add(booster);
+                        }
+
+                        data.ActiveBoosters = boosters;
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Log($"Error reading player boosters for {data.SteamName}");
+                        Logger.Log(ex);
+                    }
+                    finally
+                    {
+                        rdr.Close();
+                    }
+
+                    data.SetPersonalBooster(EBoosterType.XP, data.XPBooster);
+                    data.SetPersonalBooster(EBoosterType.BPXP, data.BPBooster);
+                    data.SetPersonalBooster(EBoosterType.GUNXP, data.GunXPBooster);
                 }
             }
             catch (Exception ex)
@@ -5785,10 +5792,26 @@ namespace UnturnedBlackout.Managers
         
         public async Task AddPlayerBoosterAsync(CSteamID steamID, EBoosterType boosterType, float boosterValue, int days)
         {
-            using MySqlConnection Conn = new MySqlConnection(ConnectionString);
+            using MySqlConnection Conn = new(ConnectionString);
             try
             {
                 await Conn.OpenAsync();
+                await new MySqlCommand($"INSERT INTO `{PlayersBoostersTableName}` (`SteamID` , `BoosterType` , `BoosterValue` , `BoosterExpiration`) VALUES ({steamID} , '{boosterType}' , {boosterValue} , {DateTimeOffset.UtcNow.AddDays(days).ToUnixTimeSeconds()}) ON DUPLICATE KEY UPDATE `BoosterExpiration` = `BoosterExpiration` + {(days * 24 * 60 * 60)};", Conn).ExecuteScalarAsync();
+
+                if (!PlayerData.TryGetValue(steamID, out PlayerData data))
+                {
+                    Logging.Debug($"Could'nt find player data for player with steam id {steamID}, probably player is offline");
+                    return;
+                }
+
+                var booster = data.ActiveBoosters.FirstOrDefault(k => k.BoosterType == boosterType && k.BoosterValue == boosterValue);
+                if (booster != null)
+                {
+                    booster.BoosterExpiration = booster.BoosterExpiration.AddDays(days);
+                } else
+                {
+                    data.ActiveBoosters.Add(new PlayerBooster(steamID, boosterType, boosterValue, DateTimeOffset.UtcNow.AddDays(days)));
+                }
             } catch (Exception ex)
             {
                 Logger.Log($"Error adding booster with type {boosterType}, value {boosterValue}, days {days}");

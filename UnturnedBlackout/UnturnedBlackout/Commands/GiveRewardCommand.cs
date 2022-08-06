@@ -5,15 +5,15 @@ using System.Threading;
 
 namespace UnturnedBlackout.Commands
 {
-    class AddCardCommand : IRocketCommand
+    class GiveRewardCommand : IRocketCommand
     {
         public AllowedCaller AllowedCaller => AllowedCaller.Both;
 
-        public string Name => "addcard";
+        public string Name => "givereward";
 
-        public string Help => "Add a card to a player";
+        public string Help => "Give rewards to a player";
 
-        public string Syntax => "/addcard (SteamID) (CardID)";
+        public string Syntax => "/givereward (SteamID) (RewardString)";
 
         public List<string> Aliases => new();
 
@@ -34,19 +34,8 @@ namespace UnturnedBlackout.Commands
             }
 
             var steamID = new CSteamID(steamid);
-
-            if (!int.TryParse(command[1], out int cardID))
-            {
-                Utility.Say(caller, $"<color=red>CardID is not in the correct format</color>");
-                return;
-            }
-
-            ThreadPool.QueueUserWorkItem(async (o) =>
-            {
-                await Plugin.Instance.DBManager.AddPlayerCardAsync(steamID, cardID, true);
-            });
-
-            Utility.Say(caller, $"<color=green>Added card with id {cardID} to {steamID}</color>");
+            var rewards = Utility.GetRewardsFromString(command[1]);
+            Plugin.Instance.RewardManager.GiveReward(steamID, rewards);
         }
     }
 }

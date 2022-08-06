@@ -32,10 +32,10 @@ namespace UnturnedBlackout.Database.Data
         public bool IsMuted { get; set; }
         public DateTimeOffset MuteExpiry { get; set; }
         public bool HasBattlepass { get; set; }
-        public float XPBooster { get; set; }
-        public float BPBooster { get; set; }
-        public float GunXPBooster { get; set; }
-        public float AchievementXPBooster { get; set; }
+        public float XPBooster { get; private set; }
+        public float BPBooster { get; private set; }
+        public float GunXPBooster { get; private set; }
+        public float AchievementXPBooster { get; private set; }
 
         public List<PlayerQuest> Quests { get; set; }
         public Dictionary<EQuestType, List<PlayerQuest>> QuestsSearchByType { get; set; }
@@ -116,22 +116,34 @@ namespace UnturnedBlackout.Database.Data
 
         public void SetAchievementXPBooster()
         {
-            var totalTiers = 0f;
-            var completedTiers = 0f;
+            Logging.Debug($"Setting achievement xp booster for {SteamName}");
+            var totalTiers = Achievements.Sum(k => k.CurrentTier);
+            var completedTiers = Achievements.Sum(k => k.Achievement.Tiers.Max(k => k.TierID));
 
-            foreach (var achievement in Achievements)
-            {
-                completedTiers += achievement.CurrentTier;
-                totalTiers += achievement.Achievement.Tiers.Max(k => k.TierID);
-            }
-
-            var xpBooster = completedTiers * 100f / totalTiers;
-            if (xpBooster != 0f)
-            {
-                xpBooster /= 2f;
-            }
+            var xpBooster = completedTiers * 100f / totalTiers / 2f;
+            Logging.Debug($"Total Tiers: {totalTiers}, Completed Tiers: {completedTiers}, Calculated Booster: {xpBooster}");
 
             AchievementXPBooster = xpBooster;
+        }
+
+        public void SetPersonalBooster(EBoosterType type, float value)
+        {
+            Logging.Debug($"Setting XP booster with type {type} of {value} to {SteamName}");
+            var max = ActiveBoosters.Where(k => k.BoosterType == type).Max(k => k.BoosterValue);
+            var updatedValue = value + max;
+            Logging.Debug($"Player's own personal booster is {max}, total value is {updatedValue}");
+            switch (type)
+            {
+                case EBoosterType.XP:
+                    XPBooster = updatedValue;
+                    return;
+                case EBoosterType.BPXP:
+                    BPBooster = updatedValue;
+                    return;
+                case EBoosterType.GUNXP:
+                    GunXPBooster = updatedValue;
+                    return;
+            }
         }
     }
 }
