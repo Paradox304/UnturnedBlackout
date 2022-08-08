@@ -764,6 +764,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Player Name", PlayerData.SteamName);
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Unbox BUTTON", false);
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Store BUTTON", false);
+            EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "SERVER Battlepass BUTTON", false);
 
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Version TEXT", Plugin.Instance.Translate("Version").ToRich());
             ClearChat();
