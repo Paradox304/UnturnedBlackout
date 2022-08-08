@@ -124,7 +124,7 @@ namespace UnturnedBlackout.Database.Data
             var completedTiers = Achievements.Sum(k => k.CurrentTier);
             var totalTiers = Achievements.Sum(k => k.Achievement.Tiers.Max(k => k.TierID));
 
-            var xpBooster = completedTiers * 100f / totalTiers / 2f;
+            var xpBooster = completedTiers / (totalTiers * 2f);
             Logging.Debug($"Total Tiers: {totalTiers}, Completed Tiers: {completedTiers}, Calculated Booster: {xpBooster}");
 
             AchievementXPBooster = xpBooster;
