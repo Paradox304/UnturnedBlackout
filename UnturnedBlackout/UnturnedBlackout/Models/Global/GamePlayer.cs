@@ -79,7 +79,7 @@ namespace UnturnedBlackout.Models.Global
             Player = player;
             if (!Plugin.Instance.DBManager.PlayerData.TryGetValue(SteamID, out PlayerData data))
             {
-                Provider.kick(SteamID, "Your data was not found, please contact any admin");
+                Provider.kick(SteamID, "Your data was not found, please contact an admin on unturnedblackout.com");
                 throw new Exception($"PLAYER DATA FOR PLAYER WITH {SteamID} NOT FOUND, KICKING THE PLAYER");
             }
             Data = data;

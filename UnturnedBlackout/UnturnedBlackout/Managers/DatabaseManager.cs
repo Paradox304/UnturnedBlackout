@@ -2910,6 +2910,7 @@ namespace UnturnedBlackout.Managers
                 {
                     rdr.Close();
                 }
+
                 playerData.SetPersonalBooster(EBoosterType.XP, playerData.XPBooster);
                 playerData.SetPersonalBooster(EBoosterType.BPXP, playerData.BPBooster);
                 playerData.SetPersonalBooster(EBoosterType.GUNXP, playerData.GunXPBooster);

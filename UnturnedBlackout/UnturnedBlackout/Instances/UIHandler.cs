@@ -5164,7 +5164,7 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Quest Description TEXT {i}", quest.Quest.QuestDesc);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Quest Title TEXT {i}", quest.Quest.QuestTitle);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Quest Target TEXT {i}", $"{quest.Amount}/{quest.Quest.TargetAmount}");
-                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Quest Reward TEXT {i}", $"+{quest.Quest.XP}XP");
+                EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Quest Reward TEXT {i}", $"+{quest.Quest.XP}★");
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Quest Bar Fill {i}", quest.Amount == 0 ? " " : new string(' ', Math.Min(256, quest.Amount * 256 / quest.Quest.TargetAmount)));
             }
         }
@@ -5511,7 +5511,7 @@ namespace UnturnedBlackout.Instances
             Logging.Debug($"Is Battlepass Completed: {isBattlePassCompleted}, next tier null: {nextTier == null}, current xp: {bp.XP}, current tier xp: {currentTier.XP}, next tier xp: {nextTier?.XP ?? 0}");
 
             // Setup the XP bar
-            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Battlepass Tier Target TEXT", $"{bp.XP}/{(isBattlePassCompleted ? currentTier.XP : nextTier.XP)}");
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Battlepass Tier Target TEXT", $"{bp.XP}/{(isBattlePassCompleted ? currentTier.XP : nextTier.XP)}★");
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Battlepass Tier TEXT", $"{bp.CurrentTier}");
             var fill = new string(' ', Math.Min(72, bp.XP == 0 ? 1 : bp.XP * 72 / (isBattlePassCompleted ? currentTier.XP : nextTier.XP)));
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Battlepass Tier XP Fill", fill);
@@ -6203,8 +6203,8 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Achievements XP", $"ACHIEVEMENTS XP BONUS ({String.Format("{0:0.##}", summary.Player.Data.AchievementXPBooster * 100)}%)");
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Achievements XP TEXT", $"+{summary.AchievementXPBonus}");
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Other XP TEXT", $"+{summary.OtherXPBonus}");
-            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Battlepass XP TEXT", $"+{summary.BattlepassXP}");
-            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Battlepass Bonus TEXT", $"+{summary.BattlepassBonusXP}");
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Battlepass XP TEXT", $"+{summary.BattlepassXP}★");
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Battlepass Bonus TEXT", $"+{summary.BattlepassBonusXP}★");
         }
 
         // Events
