@@ -205,6 +205,7 @@ namespace UnturnedBlackout.Managers
                 Password = Config.DatabasePassword,
                 MaximumPoolSize = 500
             };
+
             m_MuteChecker = new Timer(10 * 1000);
             m_MuteChecker.Elapsed += CheckMutedPlayers;
 
@@ -1770,7 +1771,6 @@ namespace UnturnedBlackout.Managers
                 Logging.Debug($"Getting data for {player.CharacterName} from the main table");
                 TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.6f)), loadingText: "PREPARING PLAYER DATA..."));
                 await Conn.OpenAsync();
-                await new MySqlCommand($"UPDATE `{PlayersTableName}` SET `HasPrime` = false WHERE `HasPrime` = true AND `PrimeExpiry` < {DateTimeOffset.UtcNow.ToUnixTimeSeconds()} AND `SteamID` = {player.CSteamID};", Conn).ExecuteScalarAsync();
                 var rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PlayersTableName}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
                 try
                 {
@@ -1920,6 +1920,18 @@ namespace UnturnedBlackout.Managers
                     rdr.Close();
                 }
 
+                Logging.Debug($"Getting all time data for {player.CharacterName} from the all time table");
+                if (PlayerData.TryGetValue(player.CSteamID, out PlayerData playerData))
+                {
+                    var leaderboardData = new LeaderboardData(player.CSteamID, playerData.SteamName, playerData.Level, playerData.Kills, playerData.HeadshotKills, playerData.Deaths);
+                    if (!PlayerAllTimeLeaderboardLookup.ContainsKey(player.CSteamID))
+                    {
+                        PlayerAllTimeLeaderboardLookup.Add(player.CSteamID, leaderboardData);
+                        PlayerAllTimeKill.Add(leaderboardData);
+                        PlayerAllTimeLevel.Add(leaderboardData);
+                    }
+                }
+                
                 Logging.Debug($"Getting leaderboard daily data for {player.CharacterName} from the daily table");
                 TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.65f)), loadingText: "PREPARING LEADERBOARD DATA..."));
                 rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PlayersLeaderboardDailyTableName}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
@@ -2051,18 +2063,6 @@ namespace UnturnedBlackout.Managers
                 finally
                 {
                     rdr.Close();
-                }
-
-                Logging.Debug($"Getting all time data for {player.CharacterName} from the all time table");
-                if (PlayerData.TryGetValue(player.CSteamID, out PlayerData playerData))
-                {
-                    var leaderboardData = new LeaderboardData(player.CSteamID, playerData.SteamName, playerData.Level, playerData.Kills, playerData.HeadshotKills, playerData.Deaths);
-                    if (!PlayerAllTimeLeaderboardLookup.ContainsKey(player.CSteamID))
-                    {
-                        PlayerAllTimeLeaderboardLookup.Add(player.CSteamID, leaderboardData);
-                        PlayerAllTimeKill.Add(leaderboardData);
-                        PlayerAllTimeLevel.Add(leaderboardData);
-                    }
                 }
 
                 Logging.Debug($"Getting quests for {player.CharacterName}");
@@ -2272,7 +2272,6 @@ namespace UnturnedBlackout.Managers
                 Dictionary<int, LoadoutCard> cards = new();
                 Dictionary<int, LoadoutGlove> gloves = new();
                 Dictionary<int, Loadout> loadouts = new();
-
 
                 Logging.Debug($"Getting guns for {player.CharacterName}");
                 TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.82f)), loadingText: "PREPARING GUNS..."));
@@ -2949,6 +2948,14 @@ namespace UnturnedBlackout.Managers
                     PlayerLoadouts.Remove(player.CSteamID);
                 }
                 PlayerLoadouts.Add(player.CSteamID, new PlayerLoadout(guns, gunCharms, knives, gunSkinsSearchByID, gunSkinsSearchByGunID, gunSkinsSearchBySkinID, perks, gadgets, killstreaks, cards, gloves, loadouts));
+            
+                if (playerData.HasPrime)
+                {
+                    if (playerData.PrimeExpiry < DateTimeOffset.UtcNow)
+                    {
+                        // Prime expired, remove rewards and stuff
+                    }
+                }
             }
             catch (Exception ex)
             {

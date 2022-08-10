@@ -6197,14 +6197,19 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Killstreak TEXT", summary.HighestKillstreak.ToString());
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Multikill TEXT", summary.HighestMK.ToString());
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Points TEXT", $"+{summary.PendingCredits}");
-            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Total XP TEXT", $"+{summary.TotalXP}");
-            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Match XP TEXT", $"+{summary.MatchXP}");
-            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Match Bonus TEXT", $"+{summary.MatchXPBonus}");
-            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Achievements XP", $"ACHIEVEMENTS XP BONUS ({String.Format("{0:0.##}", summary.Player.Data.AchievementXPBooster * 100)}%)");
-            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Achievements XP TEXT", $"+{summary.AchievementXPBonus}");
-            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Other XP TEXT", $"+{summary.OtherXPBonus}");
-            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Battlepass XP TEXT", $"+{summary.BattlepassXP}★");
-            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Battlepass Bonus TEXT", $"+{summary.BattlepassBonusXP}★");
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Total XP TEXT", $"<color=#fcee6a>+{summary.TotalXP}</color>");
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Match XP", $"MATCH <color=#fcee6a>XP</color>");
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Match XP TEXT", $"<color=#fcee6a>+{summary.MatchXP}</color>");
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Match Bonus", $"MATCH <color=#fcee6a>XP</color> BONUS");
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Match Bonus TEXT", $"<color=#fcee6a>+{summary.MatchXPBonus}</color>");
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Achievements XP", $"ACHIEVEMENTS XP BONUS <color=#ffb566>({String.Format("{0:0.##}", summary.Player.Data.AchievementXPBooster * 100)}%)</color>");
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Achievements XP TEXT", $"<color=#ffb566>+{summary.AchievementXPBonus}</color>");
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Other XP", $"OTHER <color=#fcee6a>XP</color> BONUSES");
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Other XP TEXT", $"<color=#fcee6a>+{summary.OtherXPBonus}</color>");
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Battlepass XP", $"BATTLEPASS ★");
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Battlepass XP TEXT", $"<color=#be69ff>+{summary.BattlepassXP}</color>");
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Battlepass Bonus", $"BATTLEPASS ★ BONUS");
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary Battlepass Bonus TEXT", $"<color=#be69ff>+{summary.BattlepassBonusXP}</color>");
         }
 
         // Events
