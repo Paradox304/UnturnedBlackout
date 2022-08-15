@@ -5965,7 +5965,7 @@ namespace UnturnedBlackout.Managers
 
         // Player Cases
 
-        public async Task UpdatePlayerCaseAsync(CSteamID steamID, int caseID, int amount)
+        public async Task IncreasePlayerCaseAsync(CSteamID steamID, int caseID, int amount)
         {
             using MySqlConnection Conn = new(ConnectionString);
             try
@@ -5982,6 +5982,11 @@ namespace UnturnedBlackout.Managers
             {
                 await Conn.CloseAsync();
             }
+        }
+
+        public async Task DecreasePlayerCaseAsync(CSteamID steamID, int caseID, int amount)
+        {
+
         }
 
         // Player Boosters

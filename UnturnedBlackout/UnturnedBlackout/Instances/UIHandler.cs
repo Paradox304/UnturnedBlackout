@@ -5991,7 +5991,7 @@ namespace UnturnedBlackout.Instances
                 nextLevelXP = DB.Levels.TryGetValue(currentLevel + 1, out level) ? level.XPNeeded : 0;
                 Logging.Debug($"b: {b}, current level: {currentLevel}, next level xp: {nextLevelXP}");
 
-                EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "Scene Summary LevelUp Toggle", DB.Levels.TryGetValue(currentLevel, out level) ? level.IconLinkLarge : "");
+                EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "Scene Summary LevelUp IMAGE", DB.Levels.TryGetValue(currentLevel, out level) ? level.IconLinkLarge : "");
                 EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, "Scene Summary LevelUp Toggle", true);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Summary XP Bar Fill 1", new string(' ', 113 - boldSpaces));
                 yield return new WaitForSeconds(0.5f);
