@@ -1,19 +1,24 @@
-﻿namespace UnturnedBlackout.Database.Base
+﻿using UnturnedBlackout.Enums;
+
+namespace UnturnedBlackout.Database.Base
 {
     public class Knife
     {
         public ushort KnifeID { get; set; }
         public string KnifeName { get; set; }
         public string KnifeDesc { get; set; }
-        public string KnifeRarity { get; set; }
+        public ERarity KnifeRarity { get; set; }
         public float MovementChange { get; set; }
         public string IconLink { get; set; }
         public int ScrapAmount { get; set; }
         public int Coins { get; set; }
         public int BuyPrice { get; set; }
         public int LevelRequirement { get; set; }
+        public int KnifeWeight { get; set; }
+        public int MaxAmount { get; set; }
+        public int UnboxedAmount { get; set; }
 
-        public Knife(ushort knifeID, string knifeName, string knifeDesc, string knifeRarity, float movementChange, string iconLink, int scrapAmount, int coins, int buyPrice, int levelRequirement)
+        public Knife(ushort knifeID, string knifeName, string knifeDesc, ERarity knifeRarity, float movementChange, string iconLink, int scrapAmount, int coins, int buyPrice, int levelRequirement, int knifeWeight, int maxAmount, int unboxedAmount)
         {
             KnifeID = knifeID;
             KnifeName = knifeName;
@@ -25,6 +30,9 @@
             Coins = coins;
             BuyPrice = buyPrice;
             LevelRequirement = levelRequirement;
+            KnifeWeight = knifeWeight;
+            MaxAmount = maxAmount;
+            UnboxedAmount = unboxedAmount;
         }
 
         public int GetCoins(int currentLevel)

@@ -46,6 +46,8 @@ namespace UnturnedBlackout.Database.Data
         public Dictionary<int, PlayerAchievement> AchievementsSearchByID { get; set; }
         public PlayerBattlepass Battlepass { get; set; }
         public List<PlayerBooster> ActiveBoosters { get; set; }
+        public List<PlayerCase> Cases { get; set; }
+        public Dictionary<int, PlayerCase> CasesSearchByID { get; set; }
 
         public PlayerData(CSteamID steamID, string steamName, string avatarLink, int xP, int level, int credits, int scrap, int coins, int kills, int headshotKills, int highestKillstreak, int highestMultiKills, int killsConfirmed, int killsDenied, int flagsCaptured, int flagsSaved, int areasTaken, int deaths, bool music, bool isMuted, DateTimeOffset muteExpiry, bool hasBattlepass, float xPBooster, float bPBooster, float gunXPBooster, bool hasPrime, DateTimeOffset primeExpiry)
         {
@@ -83,6 +85,8 @@ namespace UnturnedBlackout.Database.Data
             AchievementsSearchByID = new();
             Battlepass = new();
             ActiveBoosters = new();
+            Cases = new();
+            CasesSearchByID = new();
         }
 
         public bool TryGetNeededXP(out int xp)

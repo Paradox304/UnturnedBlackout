@@ -215,6 +215,7 @@
     <Compile Include="Database\Data\PlayerAchievement.cs" />
     <Compile Include="Database\Data\PlayerBattlepass.cs" />
     <Compile Include="Database\Data\PlayerBooster.cs" />
+    <Compile Include="Database\Data\PlayerCase.cs" />
     <Compile Include="Database\Data\PlayerData.cs" />
     <Compile Include="Database\Data\PlayerLoadout.cs" />
     <Compile Include="Database\Data\PlayerQuest.cs" />
@@ -235,6 +236,7 @@
     <Compile Include="Enums\EQuestCondition.cs" />
     <Compile Include="Enums\EQuestTier.cs" />
     <Compile Include="Enums\EQuestType.cs" />
+    <Compile Include="Enums\ERarity.cs" />
     <Compile Include="Enums\ERewardType.cs" />
     <Compile Include="Enums\ETeam.cs" />
     <Compile Include="FileReaders\IFileReader.cs" />

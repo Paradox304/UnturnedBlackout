@@ -9,7 +9,7 @@ namespace UnturnedBlackout.Database.Base
         public string GunName { get; set; }
         public string GunDesc { get; set; }
         public EGun GunType { get; set; }
-        public string GunRarity { get; set; }
+        public ERarity GunRarity { get; set; }
         public float MovementChange { get; set; }
         public float MovementChangeADS { get; set; }
         public string IconLink { get; set; }
@@ -27,7 +27,7 @@ namespace UnturnedBlackout.Database.Base
         // VANILLA STATS
         public float LongshotRange { get; set; }
 
-        public Gun(ushort gunID, string gunName, string gunDesc, EGun gunType, string gunRarity, float movementChange, float movementChangeADS, string iconLink, int magAmount, int coins, int buyPrice, int scrapAmount, int levelRequirement, bool isPrimary, List<GunAttachment> defaultAttachments, Dictionary<int, GunAttachment> rewardAttachments, Dictionary<GunAttachment, int> rewardAttachmentsInverse, List<int> levelXPNeeded, float longshotRange)
+        public Gun(ushort gunID, string gunName, string gunDesc, EGun gunType, ERarity gunRarity, float movementChange, float movementChangeADS, string iconLink, int magAmount, int coins, int buyPrice, int scrapAmount, int levelRequirement, bool isPrimary, List<GunAttachment> defaultAttachments, Dictionary<int, GunAttachment> rewardAttachments, Dictionary<GunAttachment, int> rewardAttachmentsInverse, List<int> levelXPNeeded, float longshotRange)
         {
             GunID = gunID;
             GunName = gunName;

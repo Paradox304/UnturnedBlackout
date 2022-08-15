@@ -780,7 +780,6 @@ namespace UnturnedBlackout.Instances
 
         public void ShowXP()
         {
-            var ui = Plugin.Instance.UIManager;
             EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER XP Num", Plugin.Instance.Translate("Level_Show", PlayerData.Level).ToRich());
             EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, "SERVER XP Icon", Plugin.Instance.DBManager.Levels.TryGetValue(PlayerData.Level, out XPLevel level) ? level.IconLinkMedium : "");
             int spaces = 0;
@@ -3049,12 +3048,6 @@ namespace UnturnedBlackout.Instances
                 case ELoadoutPage.AttachmentPrimaryMagazine:
                 case ELoadoutPage.AttachmentPrimarySights:
                     {
-                        if (!Enum.TryParse(LoadoutPage.ToString().Replace("AttachmentPrimary", ""), false, out EAttachment attachmentType))
-                        {
-                            Logging.Debug($"Error finding attachment type that {Player.CharacterName} has selected");
-                            return;
-                        }
-
                         if (!PlayerLoadout.Guns.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out LoadoutGun gun))
                         {
                             Logging.Debug($"Error finding primary that has been selected with id {loadout.Primary?.Gun?.GunID ?? 0} for {Player.CharacterName}");
@@ -3075,12 +3068,6 @@ namespace UnturnedBlackout.Instances
                 case ELoadoutPage.AttachmentSecondaryMagazine:
                 case ELoadoutPage.AttachmentSecondarySights:
                     {
-                        if (!Enum.TryParse(LoadoutPage.ToString().Replace("AttachmentSecondary", ""), false, out EAttachment attachmentType))
-                        {
-                            Logging.Debug($"Error finding attachment type that {Player.CharacterName} has selected");
-                            return;
-                        }
-
                         if (!PlayerLoadout.Guns.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out LoadoutGun gun))
                         {
                             Logging.Debug($"Error finding secondary that has been selected with id {loadout.Secondary?.Gun?.GunID ?? 0} for {Player.CharacterName}");
@@ -3884,7 +3871,7 @@ namespace UnturnedBlackout.Instances
             SendRarityName(killstreak.Killstreak.KillstreakRarity);
         }
 
-        public void SendRarity(string objectName, string rarity, int selected)
+        public void SendRarity(string objectName, ERarity rarity, int selected)
         {
             EffectManager.sendUIEffectVisibility(Key, TransportConnection, true, $"{objectName} {rarity} {selected}", true);
 
@@ -3895,12 +3882,12 @@ namespace UnturnedBlackout.Instances
             }*/
         }
 
-        public void SendRarityName(string rarity)
+        public void SendRarityName(ERarity rarity)
         {
             var rarities = new List<string> { "COMMON", "UNCOMMON", "RARE", "EPIC", "LEGENDARY", "MYTHICAL" };
             var colors = new List<string> { "#FFFFFF", "#1F871F", "#4B64FA", "#964BFA", "#C832FA", "#FA3219" };
 
-            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Rarity TEXT", rarities.Contains(rarity) ? $"<color={colors[rarities.IndexOf(rarity)]}>{rarity}</color>" : "");
+            EffectManager.sendUIEffectText(Key, TransportConnection, true, "SERVER Item Rarity TEXT", rarities.Contains(rarity.ToString()) ? $"<color={colors[rarities.IndexOf(rarity.ToString())]}>{rarity}</color>" : "");
         }
 
         public void BuySelectedItem()
@@ -5285,7 +5272,7 @@ namespace UnturnedBlackout.Instances
                 return;
             }
 
-            if (!achievementPages.TryGetValue(AchievementSubPage + 1, out PageAchievement nextPage) || !achievementPages.TryGetValue(1, out nextPage))
+            if (!achievementPages.TryGetValue(AchievementSubPage + 1, out PageAchievement nextPage) && !achievementPages.TryGetValue(1, out nextPage))
             {
                 Logging.Debug($"Error finding next achievement page");
                 SelectedAchievementMainPage(AchievementMainPage);
@@ -5308,7 +5295,7 @@ namespace UnturnedBlackout.Instances
                 return;
             }
 
-            if (!achievementPages.TryGetValue(AchievementSubPage - 1, out PageAchievement nextPage) || !achievementPages.TryGetValue(achievementPages.Keys.Max(), out nextPage))
+            if (!achievementPages.TryGetValue(AchievementSubPage - 1, out PageAchievement nextPage) && !achievementPages.TryGetValue(achievementPages.Keys.Max(), out nextPage))
             {
                 Logging.Debug("Error finding next achievement page");
                 SelectedAchievementMainPage(AchievementMainPage);
@@ -5415,11 +5402,12 @@ namespace UnturnedBlackout.Instances
             ShowAchievement(achievement);
         }
 
-        public bool TryGetAchievementRewardInfo(Reward reward, out string rewardName, out string rewardImage, out string rewardRarity)
+        public bool TryGetAchievementRewardInfo(Reward reward, out string rewardName, out string rewardImage, out ERarity rewardRarity)
         {
             rewardName = "";
             rewardImage = "";
-            rewardRarity = "";
+            rewardRarity = ERarity.NONE;
+
             switch (reward.RewardType)
             {
                 case ERewardType.Card:
@@ -5539,7 +5527,7 @@ namespace UnturnedBlackout.Instances
 
             // Setup top reward (free reward)
             var isRewardClaimed = bp.ClaimedFreeRewards.Contains(tierID);
-            if (tier.FreeReward != null && TryGetBattlepassRewardInfo(tier.FreeReward, out string topRewardName, out string topRewardImage, out string topRewardRarity))
+            if (tier.FreeReward != null && TryGetBattlepassRewardInfo(tier.FreeReward, out string topRewardName, out string topRewardImage, out ERarity topRewardRarity))
             {
                 EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Battlepass T IMAGE {tierID}", topRewardImage);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Battlepass T TEXT {tierID}", topRewardName);
@@ -5560,7 +5548,7 @@ namespace UnturnedBlackout.Instances
 
             // Setup bottom reward (premium reward)
             isRewardClaimed = bp.ClaimedPremiumRewards.Contains(tierID);
-            if (tier.PremiumReward != null && TryGetBattlepassRewardInfo(tier.PremiumReward, out string bottomRewardName, out string bottomRewardImage, out string bottomRewardRarity))
+            if (tier.PremiumReward != null && TryGetBattlepassRewardInfo(tier.PremiumReward, out string bottomRewardName, out string bottomRewardImage, out ERarity bottomRewardRarity))
             {
                 EffectManager.sendUIEffectImageURL(Key, TransportConnection, true, $"SERVER Battlepass B IMAGE {tierID}", bottomRewardImage);
                 EffectManager.sendUIEffectText(Key, TransportConnection, true, $"SERVER Battlepass B TEXT {tierID}", bottomRewardName);
@@ -5599,11 +5587,12 @@ namespace UnturnedBlackout.Instances
             }
         }
 
-        public bool TryGetBattlepassRewardInfo(Reward reward, out string rewardName, out string rewardImage, out string rewardRarity)
+        public bool TryGetBattlepassRewardInfo(Reward reward, out string rewardName, out string rewardImage, out ERarity rewardRarity)
         {
             rewardName = " ";
             rewardImage = "";
-            rewardRarity = "";
+            rewardRarity = ERarity.NONE;
+
             switch (reward.RewardType)
             {
                 case ERewardType.Card:

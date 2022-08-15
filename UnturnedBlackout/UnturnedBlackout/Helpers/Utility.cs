@@ -425,19 +425,19 @@ namespace UnturnedBlackout
             return isPlayer ? $"<color={Plugin.Instance.ConfigManager.Base.FileData.PlayerColorHexCode}>{value}</color>" : value.ToString();
         }
 
-        public static string GetRarityColor(string rarity) =>
-            rarity.ToLower() switch
+        public static string GetRarityColor(ERarity rarity) =>
+            rarity switch
             {
-                "common" => "#FFFFFF",
-                "uncommon" => "#1F871F",
-                "rare" => "#4B64C8",
-                "epic" => "#964BFA",
-                "legendary" => "#C832FA",
-                "mythical" => "#FA3219",
-                "yellow" => "yellow",
-                "orange" => "orange",
-                "cyan" => "#31FFF9",
-                "green" => "green",
+                ERarity.COMMON => "#FFFFFF",
+                ERarity.UNCOMMON => "#1F871F",
+                ERarity.RARE => "#4B64C8",
+                ERarity.EPIC => "#964BFA",
+                ERarity.LEGENDARY => "#C832FA",
+                ERarity.MYTHICAL => "#FA3219",
+                ERarity.YELLOW => "yellow",
+                ERarity.ORANGE => "orange",
+                ERarity.CYAN => "#31FFF9",
+                ERarity.GREEN => "green",
                 _ => throw new ArgumentOutOfRangeException("rarity", "Rarity is not as expected")
             };
 
