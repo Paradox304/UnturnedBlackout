@@ -222,6 +222,7 @@
     <Compile Include="Enums\EAttachment.cs" />
     <Compile Include="Enums\EBoosterType.cs" />
     <Compile Include="Enums\ECaseRarity.cs" />
+    <Compile Include="Enums\ECurrency.cs" />
     <Compile Include="Enums\EFlagState.cs" />
     <Compile Include="Enums\EGamePhase.cs" />
     <Compile Include="Enums\EGameType.cs" />

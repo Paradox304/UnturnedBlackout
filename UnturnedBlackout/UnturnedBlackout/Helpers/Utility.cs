@@ -441,6 +441,15 @@ namespace UnturnedBlackout
                 _ => throw new ArgumentOutOfRangeException("rarity", "Rarity is not as expected")
             };
 
+        public static string GetCurrencySymbol(ECurrency currency) =>
+            currency switch
+            {
+                ECurrency.Coin => "",
+                ECurrency.Scrap => "",
+                ECurrency.Credit => "",
+                _ => throw new ArgumentOutOfRangeException("currency", "Currency is not as expected")
+            }
+
         public static List<uint> UsedFrequencies = new();
     }
 }

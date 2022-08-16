@@ -3710,7 +3710,7 @@ namespace UnturnedBlackout.Instances
             gun.TryGetNeededXP(out int neededXP);
             var spaces = neededXP != 0 ? (gun.XP * 188 / neededXP) : 0;
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item XP Bar Fill", spaces == 0 ? " " : new string(' ', spaces));
-            SendRarityName(gun.Gun.GunRarity);
+            SendRarityName("SERVER Item Rarity TEXT", gun.Gun.GunRarity);
         }
 
         public void ShowAttachment(LoadoutAttachment attachment, LoadoutGun gun)
@@ -3739,7 +3739,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Description TEXT", false);
             EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item IMAGE", attachment.Attachment.IconLink);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item TEXT", attachment.Attachment.AttachmentName);
-            SendRarityName(attachment.Attachment.AttachmentRarity);
+            SendRarityName("SERVER Item Rarity TEXT", attachment.Attachment.AttachmentRarity);
 
             Logging.Debug($"Pros: {attachment.Attachment.AttachmentPros.Count}, Cons: {attachment.Attachment.AttachmentCons.Count}");
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item ProsCons", !(attachment.Attachment.AttachmentPros.Count == 0 && attachment.Attachment.AttachmentCons.Count == 0));
@@ -3775,7 +3775,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item TEXT", gunCharm.GunCharm.CharmName);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item ProsCons", false);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Description TEXT", true);
-            SendRarityName(gunCharm.GunCharm.CharmRarity);
+            SendRarityName("SERVER Item Rarity TEXT", gunCharm.GunCharm.CharmRarity);
         }
 
         public void ShowGunSkin(GunSkin skin)
@@ -3796,7 +3796,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item TEXT", skin.SkinName);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item ProsCons", false);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Description TEXT", true);
-            SendRarityName(skin.SkinRarity);
+            SendRarityName("SERVER Item Rarity TEXT", skin.SkinRarity);
         }
 
         public void ShowKnife(LoadoutKnife knife)
@@ -3819,7 +3819,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item TEXT", knife.Knife.KnifeName);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item ProsCons", false);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Description TEXT", true);
-            SendRarityName(knife.Knife.KnifeRarity);
+            SendRarityName("SERVER Item Rarity TEXT", knife.Knife.KnifeRarity);
         }
 
         public void ShowPerk(LoadoutPerk perk)
@@ -3842,7 +3842,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item TEXT", perk.Perk.PerkName);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item ProsCons", false);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Description TEXT", true);
-            SendRarityName(perk.Perk.PerkRarity);
+            SendRarityName("SERVER Item Rarity TEXT", perk.Perk.PerkRarity);
         }
 
         public void ShowGadget(LoadoutGadget gadget)
@@ -3865,7 +3865,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item TEXT", gadget.Gadget.GadgetName);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item ProsCons", false);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Description TEXT", true);
-            SendRarityName(gadget.Gadget.GadgetRarity);
+            SendRarityName("SERVER Item Rarity TEXT", gadget.Gadget.GadgetRarity);
         }
 
         public void ShowCard(LoadoutCard card)
@@ -3888,7 +3888,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item TEXT", card.Card.CardName);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item ProsCons", false);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Description TEXT", true);
-            SendRarityName(card.Card.CardRarity);
+            SendRarityName("SERVER Item Rarity TEXT", card.Card.CardRarity);
         }
 
         public void ShowGlove(LoadoutGlove glove)
@@ -3911,7 +3911,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item TEXT", glove.Glove.GloveName);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item ProsCons", false);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Description TEXT", true);
-            SendRarityName(glove.Glove.GloveRarity);
+            SendRarityName("SERVER Item Rarity TEXT", glove.Glove.GloveRarity);
         }
 
         public void ShowKillstreak(LoadoutKillstreak killstreak)
@@ -3934,7 +3934,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item TEXT", killstreak.Killstreak.KillstreakName);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item ProsCons", false);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Description TEXT", true);
-            SendRarityName(killstreak.Killstreak.KillstreakRarity);
+            SendRarityName("SERVER Item Rarity TEXT", killstreak.Killstreak.KillstreakRarity);
         }
 
         public void SendRarity(string objectName, ERarity rarity, int selected)
@@ -3943,12 +3943,13 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{objectName} {rarity} {selected}", true);
         }
 
-        public void SendRarityName(ERarity rarity)
+        public void SendRarityName(string objectName, ERarity rarity)
         {
             var rarities = new List<string> { "COMMON", "UNCOMMON", "RARE", "EPIC", "LEGENDARY", "MYTHICAL" };
             var colors = new List<string> { "#FFFFFF", "#1F871F", "#4B64FA", "#964BFA", "#C832FA", "#FA3219" };
 
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Rarity TEXT", rarities.Contains(rarity.ToString()) ? $"<color={colors[rarities.IndexOf(rarity.ToString())]}>{rarity}</color>" : "");
+            // SERVER Item Rarity TEXT
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, objectName.ToString(), rarities.Contains(rarity.ToString()) ? $"<color={colors[rarities.IndexOf(rarity.ToString())]}>{rarity}</color>" : "");
         }
 
         public void BuySelectedItem()
@@ -5737,6 +5738,7 @@ namespace UnturnedBlackout.Instances
                     ShowUnboxingInventoryPage();
                     break;
                 case EUnboxingPage.Buy:
+                    ShowUnboxingStorePage();
                     break;
                 case EUnboxingPage.Open:
                     break;
@@ -5750,6 +5752,7 @@ namespace UnturnedBlackout.Instances
             
             if (!UnboxInventoryPages.TryGetValue(1, out var firstPage))
             {
+                Logging.Debug($"Unable to find first page of unboxing inventory for {Player.CharacterName}");
                 for (int i = 0; i <= MAX_CASES_PER_INVENTORY_PAGE; i++)
                 {
                     EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Crate BUTTON {i}", false);
@@ -5786,6 +5789,7 @@ namespace UnturnedBlackout.Instances
         {
             if (!UnboxInventoryPages.TryGetValue(UnboxingPageID + 1, out var nextPage) && !UnboxInventoryPages.TryGetValue(1, out nextPage))
             {
+                Logging.Debug($"Unable to find the next or first unboxing inventory page for {Player.CharacterName}");
                 ShowUnboxingInventoryPage();
                 return;
             }
@@ -5797,6 +5801,7 @@ namespace UnturnedBlackout.Instances
         {
             if (!UnboxInventoryPages.TryGetValue(UnboxingPageID - 1, out var nextPage) && !UnboxInventoryPages.TryGetValue(UnboxInventoryPages.Keys.Max(), out nextPage))
             {
+                Logging.Debug($"Unable to find the previous or max unboxing inventory page for {Player.CharacterName}");
                 ShowUnboxingInventoryPage();
                 return;
             }
@@ -5811,6 +5816,7 @@ namespace UnturnedBlackout.Instances
 
             if (!UnboxStorePages.TryGetValue(1, out var firstPage))
             {
+                Logging.Debug($"Unable to find the first unboxing store page for {Player.CharacterName}");
                 for (int i = 0; i <= MAX_CASES_PER_STORE_PAGE; i++)
                 {
                     EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Buy BUTTON {i}", false);
@@ -5848,6 +5854,7 @@ namespace UnturnedBlackout.Instances
         {
             if (!UnboxStorePages.TryGetValue(UnboxingPageID + 1, out var nextPage) && !UnboxStorePages.TryGetValue(1, out nextPage))
             {
+                Logging.Debug($"Unable to find the next or first page for unboxing store for {Player.CharacterName}");
                 ShowUnboxingStorePage();
                 return;
             }
@@ -5859,6 +5866,7 @@ namespace UnturnedBlackout.Instances
         {
             if (!UnboxStorePages.TryGetValue(UnboxingPageID - 1, out var nextPage) && !UnboxStorePages.TryGetValue(UnboxStorePages.Keys.Max(), out nextPage))
             {
+                Logging.Debug($"Unable to find previous or max page for unboxing store for {Player.CharacterName}");
                 ShowUnboxingStorePage();
                 return;
             }
@@ -5868,6 +5876,37 @@ namespace UnturnedBlackout.Instances
 
         public void SelectedUnboxingStoreCase(int selected)
         {
+            if (!UnboxStorePages.TryGetValue(UnboxingPageID, out var page))
+            {
+                Logging.Debug($"Unable to find the selected page with id {UnboxingPageID} for {Player.CharacterName}");
+                return;
+            }
+
+            if (!page.Cases.TryGetValue(selected, out Case @case))
+            {
+                Logging.Debug($"Unable to find the case at the selected position {selected} for page with id {UnboxingPageID} for {Player.CharacterName}");
+                return;
+            }
+
+            SelectedCaseID = @case.CaseID;
+
+            EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Unbox Buy IMAGE", @case.IconLink);
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Unbox Buy TEXT", @case.CaseName);
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Unbox Buy Credits BUTTON", false);
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Preview Coins TEXT", $"{Utility.GetCurrencySymbol(ECurrency.Coin)} {@case.CoinPrice}");
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Preview Scrap TEXT", $"{Utility.GetCurrencySymbol(ECurrency.Scrap)} {@case.ScrapPrice}");
+
+            SendRarityName("SERVER Unbox Buy RarityType TEXT", @case.CaseRarity);
+        }
+
+        public void PreviewUnboxingStoreCase()
+        {
+            if (!DB.Cases.TryGetValue(SelectedCaseID, out Case @case))
+            {
+                Logging.Debug($"Could'nt find selected case id with id {SelectedCaseID} for preview for {Player.CharacterName}");
+                return;
+            }
+
 
         }
 
