@@ -308,6 +308,8 @@
     <Compile Include="Models\UI\PageKnife.cs" />
     <Compile Include="Models\UI\PageLoadout.cs" />
     <Compile Include="Models\UI\PagePerk.cs" />
+    <Compile Include="Models\UI\PageUnboxInventory.cs" />
+    <Compile Include="Models\UI\PageUnboxStore.cs" />
     <Compile Include="Models\Webhook\Author.cs" />
     <Compile Include="Models\Webhook\Embed.cs" />
     <Compile Include="Models\Webhook\Field.cs" />
