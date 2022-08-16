@@ -3004,7 +3004,7 @@ namespace UnturnedBlackout.Managers
 
                 Logging.Debug($"Getting cases for {player.CharacterName}");
                 TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string(' ', (int)(96 * 0.99f)), loadingText: "PREPARING CASES..."));
-                rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PlayersCasesTableName}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
+                rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PlayersCasesTableName}` WHERE `SteamID` = {player.CSteamID} ORDER BY `CaseID` ASC;", Conn).ExecuteReaderAsync();
                 try
                 {
                     var playerCases = new List<PlayerCase>();
@@ -3039,7 +3039,6 @@ namespace UnturnedBlackout.Managers
                     }
                     Logging.Debug($"Successfully got {playerCases.Count} cases registered for {player.CharacterName}");
 
-                    playerCases.Sort((x, y) => x.Case.CaseID.CompareTo(y.Case.CaseID));
                     playerData.Cases = playerCases;
                     playerData.CasesSearchByID = playerCasesSearchByID;
                 } catch (Exception ex)
@@ -5971,7 +5970,39 @@ namespace UnturnedBlackout.Managers
             try
             {
                 await Conn.OpenAsync();
+                await new MySqlCommand($"INSERT INTO `{PlayersCasesTableName}` ( `SteamID` , `CaseID` , `Amount` ) VALUES ({steamID}, {caseID}, {amount}) ON DUPLICATE KEY UPDATE `Amount` = `Amount` + {amount};", Conn).ExecuteScalarAsync();
+                var obj = await new MySqlCommand($"SELECT `Amount` FROM `{PlayersCasesTableName}` WHERE `SteamID` = {steamID} AND `CaseID` = {caseID};", Conn).ExecuteScalarAsync();
+                
+                if (obj is not int updatedAmount)
+                {
+                    Logging.Debug($"Error getting updated amount for player with steam id {steamID}");
+                    return;
+                }
 
+                if (!PlayerData.TryGetValue(steamID, out PlayerData data))
+                {
+                    Logging.Debug($"Error getting data for player with steam id {steamID}, maybe the player is offline");
+                    return;
+                }
+
+                if (!Cases.TryGetValue(caseID, out Case @case))
+                {
+                    Logging.Debug($"Error finding case with id {caseID} for player with steam id {steamID}");
+                    return;
+                }
+
+                if (data.CasesSearchByID.TryGetValue(caseID, out PlayerCase playerCase))
+                {
+                    playerCase.Amount = updatedAmount;
+                    return;
+                }
+
+                playerCase = new PlayerCase(steamID, @case, updatedAmount);
+
+                data.Cases.Add(playerCase);
+                data.CasesSearchByID.Add(caseID, playerCase);
+
+                // Code to update case pages
             }
             catch (Exception ex)
             {
@@ -5986,7 +6017,56 @@ namespace UnturnedBlackout.Managers
 
         public async Task DecreasePlayerCaseAsync(CSteamID steamID, int caseID, int amount)
         {
+            using MySqlConnection Conn = new(ConnectionString);
+            try
+            {
+                await Conn.OpenAsync();
+                await new MySqlCommand($"UPDATE `{PlayersCasesTableName}` SET `Amount` = `Amount` - {amount} WHERE `SteamID` = {steamID} AND `CaseID` = {caseID};", Conn).ExecuteScalarAsync();
+                var obj = await new MySqlCommand($"SELECT `Amount` FROM `{PlayersCasesTableName}` WHERE `SteamID` = {steamID} AND `CaseID` = {caseID};", Conn).ExecuteScalarAsync();
 
+                if (obj is not int updatedAmount)
+                {
+                    Logging.Debug($"Error getting updated amount for player with steam id {steamID}");
+                    return;
+                }
+
+                if (updatedAmount <= 0)
+                {
+                    await new MySqlCommand($"DELETE FROM `{PlayersCasesTableName}` WHERE `SteamID` = {steamID} AND `CaseID` = {caseID};", Conn).ExecuteScalarAsync();
+                }
+
+                if (!PlayerData.TryGetValue(steamID, out PlayerData data))
+                {
+                    Logging.Debug($"Error getting data for player with steam id {steamID}, maybe the player is offline");
+                    return;
+                }
+
+                if (!data.CasesSearchByID.TryGetValue(caseID, out PlayerCase playerCase))
+                {
+                    Logging.Debug($"Error finding case with id {caseID} to decrease amount of for player with steam id {steamID}");
+                    return;
+                }
+
+                if (updatedAmount <= 0)
+                {
+                    data.CasesSearchByID.Remove(caseID);
+                    data.Cases.RemoveAll(k => k.Case.CaseID == caseID);
+
+                    // Code to update case pages
+                } else
+                {
+                    playerCase.Amount = updatedAmount;
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"Error updating player case with amount {amount} with case ID {caseID}");
+                Logger.Log(ex);
+            }
+            finally
+            {
+                await Conn.CloseAsync();
+            }
         }
 
         // Player Boosters
