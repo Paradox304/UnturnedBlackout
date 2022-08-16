@@ -27,8 +27,9 @@ namespace UnturnedBlackout.Instances
         public const short MIDGAME_LOADOUT_KEY = 27643;
         public const int MAX_ITEMS_PER_PAGE = 19;
         public const int MAX_ITEMS_PER_GRID = 15;
-        public const int MAX_CASES_PER_INVENTORY_PAGE = 10;
+        public const int MAX_CASES_PER_INVENTORY_PAGE = 11;
         public const int MAX_CASES_PER_STORE_PAGE = 5;
+        public const int MAX_ACHIEVEMENTS_PER_PAGE = 48;
 
         public DatabaseManager DB { get; set; }
         public CSteamID SteamID { get; set; }
@@ -79,6 +80,7 @@ namespace UnturnedBlackout.Instances
 
         // Unboxing
         public EUnboxingPage UnboxingPage { get; set; }
+        public int UnboxingPageID { get; set; }
         public int SelectedCaseID { get; set; }
 
         // Battlepass
@@ -173,6 +175,8 @@ namespace UnturnedBlackout.Instances
             BuildGlovePages();
             BuildKillstreakPages();
             BuildAchievementPages();
+            BuildUnboxingInventoryPages();
+            BuildUnboxingStorePages();
         }
 
         public void BuildLoadoutPages()
@@ -723,7 +727,7 @@ namespace UnturnedBlackout.Instances
                 foreach (var achievement in PlayerData.Achievements.Where(k => k.Achievement.PageID == i).OrderByDescending(k => k.CurrentTier).ThenByDescending(k => k.TryGetNextTier(out AchievementTier nextTier) ? (k.Amount * 100 / nextTier.TargetAmount) : 100))
                 {
                     achievements.Add(index, achievement);
-                    if (index == 48)
+                    if (index == MAX_ACHIEVEMENTS_PER_PAGE)
                     {
                         AchievementPages[i].Add(page, new PageAchievement(page, achievements));
                         achievements = new Dictionary<int, PlayerAchievement>();
@@ -743,12 +747,56 @@ namespace UnturnedBlackout.Instances
 
         public void BuildUnboxingInventoryPages()
         {
-
+            UnboxInventoryPages = new Dictionary<int, PageUnboxInventory>();
+            Logging.Debug($"Creating unbox inventory pages for {Player.CharacterName}, found {PlayerData.Cases.Count} cases");
+            int index = 0;
+            int page = 1;
+            var cases = new Dictionary<int, PlayerCase>();
+            foreach (var @case in PlayerData.Cases)
+            {
+                cases.Add(index, @case);
+                if (index == MAX_CASES_PER_INVENTORY_PAGE)
+                {
+                    UnboxInventoryPages.Add(page, new PageUnboxInventory(page, cases));
+                    cases = new Dictionary<int, PlayerCase>();
+                    index = 0;
+                    page++;
+                    continue;
+                }
+                index++;
+            }
+            if (cases.Count != 0)
+            {
+                UnboxInventoryPages.Add(page, new PageUnboxInventory(page, cases));
+            }
+            Logging.Debug($"Created {UnboxInventoryPages.Count} unbox inventory pages for {Player.CharacterName}");
         }
 
-        public void BuildUnboxStorePages()
+        public void BuildUnboxingStorePages()
         {
-
+            UnboxStorePages = new Dictionary<int, PageUnboxStore>();
+            Logging.Debug($"Creating unbox store pages for {Player.CharacterName}, found {DB.Cases.Count} cases");
+            int index = 0;
+            int page = 1;
+            var cases = new Dictionary<int, Case>();
+            foreach (var @case in DB.Cases)
+            {
+                cases.Add(index, @case.Value);
+                if (index == MAX_CASES_PER_STORE_PAGE)
+                {
+                    UnboxStorePages.Add(page, new PageUnboxStore(page, cases));
+                    cases = new Dictionary<int, Case>();
+                    index = 0;
+                    page++;
+                    continue;
+                }
+                index++;
+            }
+            if (cases.Count != 0)
+            {
+                UnboxStorePages.Add(page, new PageUnboxStore(page, cases));
+            }
+            Logging.Debug($"Created {UnboxStorePages.Count} unbox store pages for {Player.CharacterName}");
         }
 
         // Main Page
@@ -3891,13 +3939,8 @@ namespace UnturnedBlackout.Instances
 
         public void SendRarity(string objectName, ERarity rarity, int selected)
         {
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{objectName} {rarity} {selected}", false);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{objectName} {rarity} {selected}", true);
-
-            /*var rarities = new string[] { "COMMON", "UNCOMMON", "RARE", "EPIC", "LEGENDARY", "MYTHICAL", "YELLOW", "ORANGE", "CYAN", "GREEN" };
-            foreach (var r in rarities)
-            {
-                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{objectName} {r} {selected}", rarity == r);
-            }*/
         }
 
         public void SendRarityName(ERarity rarity)
@@ -5683,7 +5726,151 @@ namespace UnturnedBlackout.Instances
         }
 
         // Unboxing
- 
+
+        public void ShowUnboxingPage(EUnboxingPage unboxingPage, int selectedCase = -1)
+        {
+            UnboxingPage = unboxingPage;
+
+            switch (unboxingPage)
+            {
+                case EUnboxingPage.Inventory:
+                    ShowUnboxingInventoryPage();
+                    break;
+                case EUnboxingPage.Buy:
+                    break;
+                case EUnboxingPage.Open:
+                    break;
+            }
+        }
+
+        public void ShowUnboxingInventoryPage()
+        {
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Inventory Next BUTTON", UnboxInventoryPages.Count > 1);
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Inventory Previous BUTTON", UnboxInventoryPages.Count > 1);
+            
+            if (!UnboxInventoryPages.TryGetValue(1, out var firstPage))
+            {
+                for (int i = 0; i <= MAX_CASES_PER_INVENTORY_PAGE; i++)
+                {
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Crate BUTTON {i}", false);
+                }
+
+                return;
+            }
+
+            ShowUnboxingInventoryPage(firstPage);
+        }
+
+        public void ShowUnboxingInventoryPage(PageUnboxInventory page)
+        {
+            UnboxingPageID = page.PageID;
+
+            for (int i = 0; i <= MAX_CASES_PER_INVENTORY_PAGE; i++)
+            {
+                if (!page.Cases.TryGetValue(i, out PlayerCase @case))
+                {
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Crate BUTTON {i}", false);
+                    continue;
+                }
+
+                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Crate BUTTON {i}", true);
+                EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Crate IMAGE {i}", @case.Case.IconLink);
+                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Crate Count TEXT {i}", $"x{@case.Amount}");
+                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Crate TEXT {i}", @case.Case.CaseName);
+
+                SendRarity("SERVER Unbox Crate", @case.Case.CaseRarity, i);
+            }
+        }
+
+        public void ForwardUnboxingInventoryPage()
+        {
+            if (!UnboxInventoryPages.TryGetValue(UnboxingPageID + 1, out var nextPage) && !UnboxInventoryPages.TryGetValue(1, out nextPage))
+            {
+                ShowUnboxingInventoryPage();
+                return;
+            }
+
+            ShowUnboxingInventoryPage(nextPage);
+        }
+
+        public void BackwardUnboxingInventoryPage()
+        {
+            if (!UnboxInventoryPages.TryGetValue(UnboxingPageID - 1, out var nextPage) && !UnboxInventoryPages.TryGetValue(UnboxInventoryPages.Keys.Max(), out nextPage))
+            {
+                ShowUnboxingInventoryPage();
+                return;
+            }
+
+            ShowUnboxingInventoryPage(nextPage);
+        }
+
+        public void ShowUnboxingStorePage()
+        {
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Buy Next BUTTON", UnboxStorePages.Count > 1);
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Buy Previous BUTTON", UnboxStorePages.Count > 1);
+
+            if (!UnboxStorePages.TryGetValue(1, out var firstPage))
+            {
+                for (int i = 0; i <= MAX_CASES_PER_STORE_PAGE; i++)
+                {
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Buy BUTTON {i}", false);
+                }
+
+                // Code to default the preview
+
+                return;
+            }
+
+            ShowUnboxingStorePage(firstPage);
+        }
+
+        public void ShowUnboxingStorePage(PageUnboxStore page)
+        {
+            UnboxingPageID = page.PageID;
+
+            for (int i = 0; i <= MAX_CASES_PER_STORE_PAGE; i++)
+            {
+                if (!page.Cases.TryGetValue(i, out Case @case))
+                {
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Buy BUTTON {i}", false);
+                    continue;
+                }
+
+                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Buy BUTTON {i}", true);
+                EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Buy IMAGE {i}", @case.IconLink);
+                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Buy TEXT {i}", @case.CaseName);
+
+                SendRarity("SERVER Unbox Buy", @case.CaseRarity, i);
+            }
+        }
+
+        public void ForwardUnboxingStorePage()
+        {
+            if (!UnboxStorePages.TryGetValue(UnboxingPageID + 1, out var nextPage) && !UnboxStorePages.TryGetValue(1, out nextPage))
+            {
+                ShowUnboxingStorePage();
+                return;
+            }
+
+            ShowUnboxingStorePage(nextPage);
+        }
+
+        public void BackwardUnboxingStorePage()
+        {
+            if (!UnboxStorePages.TryGetValue(UnboxingPageID - 1, out var nextPage) && !UnboxStorePages.TryGetValue(UnboxStorePages.Keys.Max(), out nextPage))
+            {
+                ShowUnboxingStorePage();
+                return;
+            }
+
+            ShowUnboxingStorePage(nextPage);
+        }
+
+        public void SelectedUnboxingStoreCase(int selected)
+        {
+
+        }
+
         // Match End Summary
 
         public IEnumerator ShowMatchEndSummary(MatchEndSummary summary)
@@ -5937,7 +6124,6 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Battlepass Bonus", $"BATTLEPASS ★ BONUS");
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Battlepass Bonus TEXT", $"<color=#be69ff>+{summary.BattlepassBonusXP}</color>");
         }
-
 
         // Events
 
