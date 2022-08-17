@@ -30,6 +30,8 @@ namespace UnturnedBlackout.Instances
         public const int MAX_CASES_PER_INVENTORY_PAGE = 11;
         public const int MAX_CASES_PER_STORE_PAGE = 5;
         public const int MAX_ACHIEVEMENTS_PER_PAGE = 48;
+        public const int MAX_PREVIEW_CONTENT_PER_CASE = 19;
+        public const int MAX_ROLLING_CONTENT_PER_CASE = 23;
 
         public DatabaseManager DB { get; set; }
         public CSteamID SteamID { get; set; }
@@ -3946,10 +3948,9 @@ namespace UnturnedBlackout.Instances
         public void SendRarityName(string objectName, ERarity rarity)
         {
             var rarities = new List<string> { "COMMON", "UNCOMMON", "RARE", "EPIC", "LEGENDARY", "MYTHICAL" };
-            var colors = new List<string> { "#FFFFFF", "#1F871F", "#4B64FA", "#964BFA", "#C832FA", "#FA3219" };
 
             // SERVER Item Rarity TEXT
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, objectName.ToString(), rarities.Contains(rarity.ToString()) ? $"<color={colors[rarities.IndexOf(rarity.ToString())]}>{rarity}</color>" : "");
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, objectName, rarities.Contains(rarity.ToString()) ? $"<color={Utility.GetRarityColor(rarity)}>{rarity}</color>" : " ");
         }
 
         public void BuySelectedItem()
@@ -5741,9 +5742,11 @@ namespace UnturnedBlackout.Instances
                     ShowUnboxingStorePage();
                     break;
                 case EUnboxingPage.Open:
+                    UnboxInventoryCase(selectedCase);
                     break;
             }
         }
+
 
         public void ShowUnboxingInventoryPage()
         {
@@ -5809,6 +5812,45 @@ namespace UnturnedBlackout.Instances
             ShowUnboxingInventoryPage(nextPage);
         }
 
+        public void UnboxInventoryCase(int selected)
+        {
+            if (!UnboxInventoryPages.TryGetValue(UnboxingPageID, out var page))
+            {
+                Logging.Debug($"Error finding the unbox inventory page with id {UnboxingPageID} for {Player.CharacterName}");
+                return;
+            }
+
+            if (!page.Cases.TryGetValue(selected, out PlayerCase @case))
+            {
+                Logging.Debug($"Error finding the selected case at id {selected} for page with id {UnboxingPage} for {Player.CharacterName}");
+                return;
+            }
+
+            SelectedCaseID = @case.Case.CaseID;
+            PreviewUnboxingStoreCase();
+
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Unbox Button Toggler", @case.Amount > 0);
+
+            var availableSkins = @case.Case.AvailableSkins.Where(k => k.MaxAmount == 0 || (k.UnboxedAmount < k.MaxAmount)).ToList();
+            if (availableSkins.Count == 0)
+            {
+                Logging.Debug($"Case with ID {@case.Case.CaseID} has no skins available to unbox o_o");
+                return;
+            }
+
+            for (int i = 0; i <= MAX_ROLLING_CONTENT_PER_CASE; i++)
+            {
+                var randomSkin = availableSkins[UnityEngine.Random.Range(0, availableSkins.Count)];
+
+                EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Rolling IMAGE {i}", randomSkin.IconLink);
+                SendRarity("SERVER Unbox Content Rolling", @case.Case.CaseRarity, i);
+            }
+        }
+        public IEnumerator UnboxCase()
+        {
+
+        }
+
         public void ShowUnboxingStorePage()
         {
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Buy Next BUTTON", UnboxStorePages.Count > 1);
@@ -5822,11 +5864,18 @@ namespace UnturnedBlackout.Instances
                     EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Buy BUTTON {i}", false);
                 }
 
-                // Code to default the preview
+                EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Unbox Buy IMAGE", "");
+                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Unbox Buy TEXT", " ");
+                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Unbox Buy Credits BUTTON", false);
+                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Unbox Buy Coins BUTTON", false);
+                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Unbox Buy Scrap BUTTON", false);
+                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Unbox Buy Preview BUTTON", false);
+                SendRarityName("SERVER Unbox Buy RarityType TEXT", ERarity.NONE);
 
                 return;
             }
 
+            SelectedUnboxingStoreCase(0);
             ShowUnboxingStorePage(firstPage);
         }
 
@@ -5893,6 +5942,9 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Unbox Buy IMAGE", @case.IconLink);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Unbox Buy TEXT", @case.CaseName);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Unbox Buy Credits BUTTON", false);
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Unbox Buy Coins BUTTON", true);
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Unbox Buy Scrap BUTTON", true);
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Unbox Buy Preview BUTTON", true);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Preview Coins TEXT", $"{Utility.GetCurrencySymbol(ECurrency.Coin)} {@case.CoinPrice}");
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Preview Scrap TEXT", $"{Utility.GetCurrencySymbol(ECurrency.Scrap)} {@case.ScrapPrice}");
 
@@ -5907,7 +5959,26 @@ namespace UnturnedBlackout.Instances
                 return;
             }
 
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Unbox Button Toggler", false);
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Crate EXAMPLE Drop ANIM", true);
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Description TEXT", @case.CaseName);
 
+            var skins = @case.AvailableSkins.Where(k => k.MaxAmount == 0).ToList();
+            for (int i = 0; i <= MAX_PREVIEW_CONTENT_PER_CASE; i++)
+            {
+                if (skins.Count < i)
+                {
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content BUTTON {i}", false);
+                    continue;
+                }
+
+                var skin = skins[i];
+                EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content IMAGE {i}", skin.IconLink);
+                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Name TEXT {i}", skin.SkinName);
+                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Extra TEXT {i}", " ");
+
+                SendRarity("SERVER Unbox Content", skin.SkinRarity, i);
+            }
         }
 
         // Match End Summary

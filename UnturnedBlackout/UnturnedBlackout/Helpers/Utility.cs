@@ -448,7 +448,7 @@ namespace UnturnedBlackout
                 ECurrency.Scrap => "",
                 ECurrency.Credit => "",
                 _ => throw new ArgumentOutOfRangeException("currency", "Currency is not as expected")
-            }
+            };
 
         public static List<uint> UsedFrequencies = new();
     }

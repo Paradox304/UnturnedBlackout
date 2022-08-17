@@ -1537,7 +1537,10 @@ namespace UnturnedBlackout.Managers
                                 shouldContinue = false;
                                 break;
                             }
-                            caseRarities.Add((rarity, weight));
+                            if (weight > 0)
+                            {
+                                caseRarities.Add((rarity, weight));
+                            }
                         }
                         if (!shouldContinue)
                         {

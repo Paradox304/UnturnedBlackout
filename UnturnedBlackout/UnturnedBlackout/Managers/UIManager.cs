@@ -1256,6 +1256,9 @@ namespace UnturnedBlackout.Managers
                 case "SERVER Achievements BUTTON":
                     handler.ShowAchievements();
                     return;
+                case "SERVER Unbox BUTTON":
+                    handler.ShowUnboxingPage(EUnboxingPage.Inventory);
+                    return;
                 case "SERVER Battlepass BUTTON":
                     handler.SetupBattlepass();
                     return;
@@ -1473,6 +1476,33 @@ namespace UnturnedBlackout.Managers
                     if (handler.MainPage == EMainPage.Battlepass)
                         Plugin.Instance.BPManager.ClaimReward(gPly, handler.SelectedBattlepassTierID.Item1, handler.SelectedBattlepassTierID.Item2);
                     return;
+                case "SERVER Unbox Inventory BUTTON":
+                    handler.ShowUnboxingPage(EUnboxingPage.Inventory);
+                    return;
+                case "SERVER Unbox Inventory Previous BUTTON":
+                    handler.BackwardUnboxingInventoryPage();
+                    return;
+                case "SERVER Unbox Inventory Next BUTTON":
+                    handler.ForwardUnboxingInventoryPage();
+                    return;
+                case "SERVER Unbox BuyCrate BUTTON":
+                    handler.ShowUnboxingPage(EUnboxingPage.Buy);
+                    return;
+                case "SERVER Unbox Buy Previous BUTTON":
+                    handler.BackwardUnboxingStorePage();
+                    return;
+                case "SERVER Unbox Buy Next BUTTON":
+                    handler.ForwardUnboxingStorePage();
+                    return;
+                case "SERVER Unbox Buy Preview BUTTON":
+                    handler.PreviewUnboxingStoreCase();
+                    return;
+                case "SERVER Unbox Content Back BUTTON":
+                    if (handler.UnboxingPage == EUnboxingPage.Open)
+                    {
+                        handler.ShowUnboxingPage(EUnboxingPage.Inventory);
+                    }
+                    return;
                 case "SERVER Summary Close BUTTON":
                     if (handler.MatchEndSummaryShower != null)
                     {
@@ -1530,6 +1560,14 @@ namespace UnturnedBlackout.Managers
             else if (buttonName.StartsWith("SERVER Battlepass"))
             {
                 handler.SelectedBattlepassTier(buttonName.Split(' ')[2] == "T", selected);
+            }
+            else if (buttonName.StartsWith("SERVER Unbox Crate BUTTON"))
+            {
+                handler.ShowUnboxingPage(EUnboxingPage.Open, selected);
+            }
+            else if (buttonName.StartsWith("SERVER Unbox Buy BUTTON"))
+            {
+                handler.SelectedUnboxingStoreCase(selected);
             }
         }
 
