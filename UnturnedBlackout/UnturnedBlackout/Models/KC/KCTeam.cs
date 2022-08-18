@@ -15,7 +15,7 @@ namespace UnturnedBlackout.Models.KC
         {
             get
             {
-                return Plugin.Instance.ConfigManager;
+                return Plugin.Instance.Config;
             }
         }
 

@@ -42,18 +42,18 @@ namespace UnturnedBlackout.Commands
             switch (gameMode)
             {
                 case EGameType.FFA:
-                    Plugin.Instance.DataManager.Data.FFASpawnPoints.RemoveAll(k => k.LocationID == mapID);
+                    Plugin.Instance.Data.Data.FFASpawnPoints.RemoveAll(k => k.LocationID == mapID);
                     break;
                 case EGameType.KC:
                 case EGameType.TDM:
-                    Plugin.Instance.DataManager.Data.TDMSpawnPoints.RemoveAll(k => k.LocationID == mapID);
+                    Plugin.Instance.Data.Data.TDMSpawnPoints.RemoveAll(k => k.LocationID == mapID);
                     break;
                 case EGameType.CTF:
-                    Plugin.Instance.DataManager.Data.CTFSpawnPoints.RemoveAll(k => k.LocationID == mapID);
+                    Plugin.Instance.Data.Data.CTFSpawnPoints.RemoveAll(k => k.LocationID == mapID);
                     break;
             }
 
-            Plugin.Instance.DataManager.SaveJson();
+            Plugin.Instance.Data.SaveJson();
             Utility.Say(caller, $"<color=green>Wiped spawnpoints for map {mapID} for gamemode {gameMode}</color>");
         }
     }

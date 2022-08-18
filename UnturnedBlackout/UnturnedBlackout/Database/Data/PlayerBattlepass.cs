@@ -28,7 +28,7 @@ namespace UnturnedBlackout.Database.Data
 
         public bool TryGetNeededXP(out int xp)
         {
-            if (Plugin.Instance.DBManager.BattlepassTiersSearchByID.TryGetValue(CurrentTier + 1, out BattlepassTier battlepassTier))
+            if (Plugin.Instance.DB.BattlepassTiersSearchByID.TryGetValue(CurrentTier + 1, out BattlepassTier battlepassTier))
             {
                 xp = battlepassTier.XP;
                 return true;

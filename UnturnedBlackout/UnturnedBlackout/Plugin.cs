@@ -45,10 +45,10 @@ namespace UnturnedBlackout
 
         protected override void Unload()
         {
-            GameManager.Destroy();
-            HUDManager.Destroy();
-            UIManager.Destroy();
-            ServerManager.Destroy();
+            Game.Destroy();
+            HUD.Destroy();
+            UI.Destroy();
+            Server.Destroy();
 
             Level.onLevelLoaded -= OnLevelLoaded;
             PlayerVoice.onRelayVoice -= OnVoice;
@@ -78,9 +78,9 @@ namespace UnturnedBlackout
 
             var newName = ply.playerID.characterName.ToUnrich();
             var chars = newName.Count();
-            if (chars > ConfigManager.Base.FileData.MaxPlayerNameCharacters)
+            if (chars > Config.Base.FileData.MaxPlayerNameCharacters)
             {
-                newName = newName.Remove(ConfigManager.Base.FileData.MaxPlayerNameCharacters, chars - ConfigManager.Base.FileData.MaxPlayerNameCharacters);
+                newName = newName.Remove(Config.Base.FileData.MaxPlayerNameCharacters, chars - Config.Base.FileData.MaxPlayerNameCharacters);
                 newName += "...";
             }
 
@@ -109,13 +109,13 @@ namespace UnturnedBlackout
                 return;
             }
 
-            var gPlayer = GameManager.GetGamePlayer(player);
+            var gPlayer = Game.GetGamePlayer(player);
             if (gPlayer == null)
             {
                 return;
             }
 
-            if (!GameManager.TryGetCurrentGame(gPlayer.SteamID, out Game game))
+            if (!Game.TryGetCurrentGame(gPlayer.SteamID, out Game game))
             {
                 return;
             }
@@ -132,7 +132,7 @@ namespace UnturnedBlackout
                     if (game.GamePhase != Enums.EGamePhase.Ending && !gPlayer.HasMidgameLoadout)
                     {
                         gPlayer.HasMidgameLoadout = true;
-                        UIManager.ShowMidgameLoadoutUI(gPlayer);
+                        UI.ShowMidgameLoadoutUI(gPlayer);
                     }
                     break;
                 default:
@@ -166,41 +166,43 @@ namespace UnturnedBlackout
 
         private void OnVoice(PlayerVoice speaker, bool wantsToUseWalkieTalkie, ref bool shouldAllow, ref bool shouldBroadcastOverRadio, ref PlayerVoice.RelayVoiceCullingHandler cullingHandler)
         {
-            if (!DBManager.PlayerData.TryGetValue(speaker.channel.owner.playerID.steamID, out PlayerData data) || data.IsMuted)
+            if (!DB.PlayerData.TryGetValue(speaker.channel.owner.playerID.steamID, out PlayerData data) || data.IsMuted)
             {
                 shouldAllow = false;
                 return;
             }
 
             shouldBroadcastOverRadio = true;
-            GameManager.GetGamePlayer(speaker.player).OnTalking();
+            Game.GetGamePlayer(speaker.player).OnTalking();
         }
 
         private void OnLevelLoaded(int level)
         {
-            ConfigManager = new ConfigManager();
+            Config = new();
             Logging.Debug("Init Config");
-            UIManager = new UIManager();
+            UI = new();
             Logging.Debug("Init UI");
-            DBManager = new DatabaseManager();
+            DB = new();
             Logging.Debug("Init Database");
-            BPManager = new BPManager();
+            BP = new();
             Logging.Debug("Init BP");
-            LoadoutManager = new LoadoutManager();
+            Loadout = new();
             Logging.Debug("Init Loadout");
-            ServerManager = new ServerManager();
+            Server = new();
             Logging.Debug("Init Server");
-            DataManager = new DataManager();
+            Data = new();
             Logging.Debug("Init Data");
-            RewardManager = new RewardManager();
+            Reward = new();
             Logging.Debug("Init Reward");
-            QuestManager = new QuestManager();
+            Quest = new();
             Logging.Debug("Init Quest");
-            AchievementManager = new AchievementManager();
+            Achievement = new();
             Logging.Debug("Init Achievement");
-            GameManager = new GameManager();
+            Unbox = new();
+            Logging.Debug("Init Unbox");
+            Game = new();
             Logging.Debug("Init Game");
-            HUDManager = new HUDManager();
+            HUD = new();
             Logging.Debug("Init HUD");
 
             var shouldFillAfterDetach = typeof(ItemMagazineAsset).GetProperty("shouldFillAfterDetach", BindingFlags.Public | BindingFlags.Instance);
@@ -306,19 +308,20 @@ namespace UnturnedBlackout
             { "Version", "VERSION: 1.0.1" }
         };
 
+        public ConfigManager Config { get; set; }
+        public QuestManager Quest { get; set; }
+        public AchievementManager Achievement { get; set; }
+        public UIManager UI { get; set; }
+        public HUDManager HUD { get; set; }
+        public GameManager Game { get; set; }
+        public DataManager Data { get; set; }
+        public DatabaseManager DB { get; set; }
+        public LoadoutManager Loadout { get; set; }
+        public RewardManager Reward { get; set; }
+        public ServerManager Server { get; set; }
+        public UnboxManager Unbox { get; set; }
+        public BPManager BP { get; set; }
         public static Harmony Harmony { get; set; }
-        public ConfigManager ConfigManager { get; set; }
-        public QuestManager QuestManager { get; set; }
-        public AchievementManager AchievementManager { get; set; }
-        public UIManager UIManager { get; set; }
-        public HUDManager HUDManager { get; set; }
-        public GameManager GameManager { get; set; }
-        public DataManager DataManager { get; set; }
-        public DatabaseManager DBManager { get; set; }
-        public LoadoutManager LoadoutManager { get; set; }
-        public RewardManager RewardManager { get; set; }
-        public ServerManager ServerManager { get; set; }
-        public BPManager BPManager { get; set; }
         public static Plugin Instance { get; set; }
     }
 }

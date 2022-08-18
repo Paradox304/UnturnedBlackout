@@ -12,7 +12,7 @@ namespace UnturnedBlackout.Managers
         public void GiveReward(CSteamID steamID, List<Reward> rewards)
         {
             Logging.Debug($"Giving rewards to {steamID}, rewards: {rewards.Count}");
-            var db = Plugin.Instance.DBManager;
+            var db = Plugin.Instance.DB;
             ThreadPool.QueueUserWorkItem(async (o) =>
             {
                 Logging.Debug("Sending rewards");
@@ -80,7 +80,7 @@ namespace UnturnedBlackout.Managers
 
         public void RemoveReward(CSteamID steamID, List<Reward> removeRewards)
         {
-            var db = Plugin.Instance.DBManager;
+            var db = Plugin.Instance.DB;
             ThreadPool.QueueUserWorkItem(async (o) =>
             {
                 foreach (var reward in removeRewards)
@@ -102,7 +102,7 @@ namespace UnturnedBlackout.Managers
 
         public void GiveBulkRewards(List<(CSteamID, List<Reward>)> bulkRewards)
         {
-            var db = Plugin.Instance.DBManager;
+            var db = Plugin.Instance.DB;
             ThreadPool.QueueUserWorkItem(async (o) =>
             {
                 foreach (var bulkReward in bulkRewards)

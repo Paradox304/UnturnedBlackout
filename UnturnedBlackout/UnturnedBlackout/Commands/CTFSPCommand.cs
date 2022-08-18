@@ -51,7 +51,7 @@ namespace UnturnedBlackout.Commands
                 }
             }
 
-            var location = Plugin.Instance.ConfigManager.Locations.FileData.ArenaLocations.FirstOrDefault(k => k.LocationID == locationID);
+            var location = Plugin.Instance.Config.Locations.FileData.ArenaLocations.FirstOrDefault(k => k.LocationID == locationID);
             if (location == null)
             {
                 Utility.Say(caller, Plugin.Instance.Translate("Location_Not_Found").ToRich());
@@ -59,8 +59,8 @@ namespace UnturnedBlackout.Commands
             }
 
             Utility.Say(caller, isFlag == true ? Plugin.Instance.Translate("CTF_Flag_SpawnPoint_Set", location.LocationName, groupID).ToRich() : Plugin.Instance.Translate("CTF_SpawnPoint_Set", location.LocationName, groupID).ToRich());
-            Plugin.Instance.DataManager.Data.CTFSpawnPoints.Add(new CTFSpawnPoint(locationID, groupID, player.Player.transform.position.x, player.Player.transform.position.y, player.Player.transform.position.z, player.Player.transform.eulerAngles.y, isFlag));
-            Plugin.Instance.DataManager.SaveJson();
+            Plugin.Instance.Data.Data.CTFSpawnPoints.Add(new CTFSpawnPoint(locationID, groupID, player.Player.transform.position.x, player.Player.transform.position.y, player.Player.transform.position.z, player.Player.transform.eulerAngles.y, isFlag));
+            Plugin.Instance.Data.SaveJson();
         }
     }
 }

@@ -14,14 +14,14 @@ namespace UnturnedBlackout.Managers
         public void CheckQuest(GamePlayer player, EQuestType questType, Dictionary<EQuestCondition, int> questConditions)
         {
             var steamID = player.Player.CSteamID;
-            var db = Plugin.Instance.DBManager;
+            var db = Plugin.Instance.DB;
             var data = player.Data;
 
             ThreadPool.QueueUserWorkItem((o) =>
             {
                 try
                 {
-                    Plugin.Instance.AchievementManager.CheckAchievement(player, questType, questConditions);
+                    Plugin.Instance.Achievement.CheckAchievement(player, questType, questConditions);
                 }
                 catch (Exception ex)
                 {
@@ -67,7 +67,7 @@ namespace UnturnedBlackout.Managers
                 Logging.Debug($"QUEST AMOUNT: {quest.Amount}, QUEST TARGET AMOUNT: {quest.Quest.TargetAmount}, PERCENT COMPLETION MODULUS: {quest.Amount * 100 / quest.Quest.TargetAmount % 10}");
                 if (quest.Amount >= quest.Quest.TargetAmount)
                 {
-                    Plugin.Instance.UIManager.SendAnimation(player, new Models.Animation.AnimationInfo(EAnimationType.QuestCompletion, quest.Quest));
+                    Plugin.Instance.UI.SendAnimation(player, new Models.Animation.AnimationInfo(EAnimationType.QuestCompletion, quest.Quest));
                     ThreadPool.QueueUserWorkItem(async (o) =>
                     {
                         await db.IncreasePlayerBPXPAsync(steamID, quest.Quest.XP);
@@ -87,7 +87,7 @@ namespace UnturnedBlackout.Managers
 
             if (pendingQuestsProgression.Count > 0)
             {
-                Plugin.Instance.UIManager.SendQuestProgression(player, pendingQuestsProgression);
+                Plugin.Instance.UI.SendQuestProgression(player, pendingQuestsProgression);
             }
         }
 

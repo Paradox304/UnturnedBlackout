@@ -21,7 +21,7 @@ namespace UnturnedBlackout.GameTypes
         {
             get
             {
-                return Plugin.Instance.ConfigManager;
+                return Plugin.Instance.Config;
             }
         }
 
@@ -65,7 +65,7 @@ namespace UnturnedBlackout.GameTypes
 
         private void OnAimingChanged(UseableGun obj)
         {
-            var gPlayer = Plugin.Instance.GameManager.GetGamePlayer(obj.player);
+            var gPlayer = Plugin.Instance.Game.GetGamePlayer(obj.player);
             if (gPlayer == null)
             {
                 return;
@@ -76,7 +76,7 @@ namespace UnturnedBlackout.GameTypes
 
         private void OnConsumed(Player instigatingPlayer, ItemConsumeableAsset consumeableAsset)
         {
-            var gPlayer = Plugin.Instance.GameManager.GetGamePlayer(instigatingPlayer);
+            var gPlayer = Plugin.Instance.Game.GetGamePlayer(instigatingPlayer);
             if (gPlayer == null)
             {
                 return;
@@ -88,7 +88,7 @@ namespace UnturnedBlackout.GameTypes
         private void OnBarricadeSpawned(BarricadeRegion region, BarricadeDrop drop)
         {
             var steamID = new CSteamID(drop.GetServersideData()?.owner ?? 0UL);
-            var gPlayer = Plugin.Instance.GameManager.GetGamePlayer(steamID);
+            var gPlayer = Plugin.Instance.Game.GetGamePlayer(steamID);
             if (gPlayer == null)
             {
                 return;
@@ -99,7 +99,7 @@ namespace UnturnedBlackout.GameTypes
 
         private void OnThrowableSpawned(UseableThrowable useable, GameObject throwable)
         {
-            var gPlayer = Plugin.Instance.GameManager.GetGamePlayer(useable.player);
+            var gPlayer = Plugin.Instance.Game.GetGamePlayer(useable.player);
             if (gPlayer == null)
             {
                 return;
@@ -110,7 +110,7 @@ namespace UnturnedBlackout.GameTypes
 
         public void OnTrapTriggered(GamePlayer player, BarricadeDrop drop)
         {
-            var trapOwner = Plugin.Instance.GameManager.GetGamePlayer(new CSteamID(drop.GetServersideData().owner));
+            var trapOwner = Plugin.Instance.Game.GetGamePlayer(new CSteamID(drop.GetServersideData().owner));
             Logging.Debug($"Trap triggered by {player.Player.CharacterName}, owner is {(trapOwner?.Player?.CharacterName ?? "None")}");
             if (trapOwner != null)
             {
@@ -125,7 +125,7 @@ namespace UnturnedBlackout.GameTypes
 
         private void OnPlayerRespawning(PlayerLife sender, bool wantsToSpawnAtHome, ref Vector3 position, ref float yaw)
         {
-            var gPlayer = Plugin.Instance.GameManager.GetGamePlayer(sender.player);
+            var gPlayer = Plugin.Instance.Game.GetGamePlayer(sender.player);
             if (gPlayer == null)
             {
                 return;
@@ -136,7 +136,7 @@ namespace UnturnedBlackout.GameTypes
 
         private void OnTakeItem(Player player, byte x, byte y, uint instanceID, byte to_x, byte to_y, byte to_rot, byte to_page, ItemData itemData, ref bool shouldAllow)
         {
-            var gPlayer = Plugin.Instance.GameManager.GetGamePlayer(player);
+            var gPlayer = Plugin.Instance.Game.GetGamePlayer(player);
             if (gPlayer == null)
             {
                 shouldAllow = false;
@@ -148,7 +148,7 @@ namespace UnturnedBlackout.GameTypes
 
         private void OnChatted(SteamPlayer player, EChatMode mode, ref Color chatted, ref bool isRich, string text, ref bool isVisible)
         {
-            var gPlayer = Plugin.Instance.GameManager.GetGamePlayer(player.player);
+            var gPlayer = Plugin.Instance.Game.GetGamePlayer(player.player);
             if (gPlayer == null)
             {
                 isVisible = false;
@@ -183,7 +183,7 @@ namespace UnturnedBlackout.GameTypes
             {
                 talkingPlayers = PlayersTalking.Where(k => players.Contains(k)).ToList();
             }
-            Plugin.Instance.UIManager.UpdateVoiceChatUI(players, talkingPlayers);
+            Plugin.Instance.UI.UpdateVoiceChatUI(players, talkingPlayers);
         }
 
         public void OnStanceChanged(PlayerStance obj)
@@ -203,7 +203,7 @@ namespace UnturnedBlackout.GameTypes
 
         public void OnKill(GamePlayer killer, GamePlayer victim, ushort weaponID, string killerColor, string victimColor)
         {
-            if (!Plugin.Instance.UIManager.KillFeedIcons.TryGetValue(weaponID, out FeedIcon icon))
+            if (!Plugin.Instance.UI.KillFeedIcons.TryGetValue(weaponID, out FeedIcon icon))
             {
                 return;
             }
@@ -225,7 +225,7 @@ namespace UnturnedBlackout.GameTypes
 
         public void OnKillfeedUpdated()
         {
-            Plugin.Instance.UIManager.SendKillfeed(GetPlayers(), GameMode, Killfeed);
+            Plugin.Instance.UI.SendKillfeed(GetPlayers(), GameMode, Killfeed);
         }
 
         public IEnumerator UpdateKillfeed()

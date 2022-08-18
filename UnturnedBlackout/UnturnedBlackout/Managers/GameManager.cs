@@ -20,7 +20,7 @@ namespace UnturnedBlackout.Managers
         {
             get
             {
-                return Plugin.Instance.ConfigManager;
+                return Plugin.Instance.Config;
             }
         }
 
@@ -89,7 +89,7 @@ namespace UnturnedBlackout.Managers
             {
                 AvailableLocations.Remove(location.LocationID);
             }
-            Plugin.Instance.UIManager.OnGameUpdated();
+            Plugin.Instance.UI.OnGameUpdated();
         }
 
         public void EndGame(Game game)
@@ -135,7 +135,7 @@ namespace UnturnedBlackout.Managers
                 return;
             }
 
-            Plugin.Instance.UIManager.HideMenuUI(gPlayer.Player);
+            Plugin.Instance.UI.HideMenuUI(gPlayer.Player);
             Plugin.Instance.StartCoroutine(game.AddPlayerToGame(gPlayer));
         }
 
@@ -161,8 +161,8 @@ namespace UnturnedBlackout.Managers
         {
             SendPlayerToLobby(player);
 
-            var db = Plugin.Instance.DBManager;
-            Plugin.Instance.UIManager.SendLoadingUI(player, false, EGameType.None, null, "LOADING...");
+            var db = Plugin.Instance.DB;
+            Plugin.Instance.UI.SendLoadingUI(player, false, EGameType.None, null, "LOADING...");
             ThreadPool.QueueUserWorkItem(async (o) =>
             {
                 var avatarURL = "";
@@ -183,7 +183,7 @@ namespace UnturnedBlackout.Managers
 
                 TaskDispatcher.QueueOnMainThread(() =>
                 {
-                    Plugin.Instance.UIManager.ClearLoadingUI(player);
+                    Plugin.Instance.UI.ClearLoadingUI(player);
                     player.Player.quests.leaveGroup(true);
                     if (Players.ContainsKey(player.CSteamID))
                     {
@@ -191,14 +191,14 @@ namespace UnturnedBlackout.Managers
                     }
 
                     Players.Add(player.CSteamID, new GamePlayer(player, player.Player.channel.GetOwnerTransportConnection()));
-                    Plugin.Instance.UIManager.RegisterUIHandler(player);
+                    Plugin.Instance.UI.RegisterUIHandler(player);
                 });
             });
         }
 
         private void OnPlayerLeft(UnturnedPlayer player)
         {
-            Plugin.Instance.UIManager.UnregisterUIHandler(player);
+            Plugin.Instance.UI.UnregisterUIHandler(player);
             if (Players.TryGetValue(player.CSteamID, out GamePlayer gPlayer))
             {
                 if (TryGetCurrentGame(player.CSteamID, out Game game))
@@ -220,7 +220,7 @@ namespace UnturnedBlackout.Managers
 
         private void OnMessageSent(SteamPlayer player, EChatMode mode, ref UnityEngine.Color chatted, ref bool isRich, string text, ref bool isVisible)
         {
-            if (!Plugin.Instance.GameManager.TryGetCurrentGame(player.playerID.steamID, out _))
+            if (!Plugin.Instance.Game.TryGetCurrentGame(player.playerID.steamID, out _))
             {
                 isVisible = false;
             }
@@ -234,7 +234,7 @@ namespace UnturnedBlackout.Managers
             {
                 player.Player.life.ServerRespawn(false);
                 player.Player.teleportToLocationUnsafe(Config.Base.FileData.LobbySpawn, Config.Base.FileData.LobbyYaw);
-                Plugin.Instance.UIManager.ShowMenuUI(player, summary);
+                Plugin.Instance.UI.ShowMenuUI(player, summary);
             });
         }
 

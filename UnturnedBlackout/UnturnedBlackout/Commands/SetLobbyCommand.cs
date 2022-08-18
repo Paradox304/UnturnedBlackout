@@ -22,9 +22,9 @@ namespace UnturnedBlackout.Commands
         {
             UnturnedPlayer player = caller as UnturnedPlayer;
 
-            Plugin.Instance.ConfigManager.Base.FileData.LobbySpawn = player.Player.transform.position;
-            Plugin.Instance.ConfigManager.Base.FileData.LobbyYaw = player.Player.transform.eulerAngles.y;
-            Plugin.Instance.ConfigManager.Base.Save();
+            Plugin.Instance.Config.Base.FileData.LobbySpawn = player.Player.transform.position;
+            Plugin.Instance.Config.Base.FileData.LobbyYaw = player.Player.transform.eulerAngles.y;
+            Plugin.Instance.Config.Base.Save();
         }
     }
 }

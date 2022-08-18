@@ -10,7 +10,7 @@ namespace UnturnedBlackout.Models.Global
         {
             get
             {
-                return Plugin.Instance.ConfigManager;
+                return Plugin.Instance.Config;
             }
         }
 
@@ -65,7 +65,7 @@ namespace UnturnedBlackout.Models.Global
 
             var minutesPlayed = (int)Math.Ceiling((EndTime - StartTime).TotalMinutes);
             var data = Config.WinningValues.FileData;
-            var global = Plugin.Instance.DBManager.ServerOptions;
+            var global = Plugin.Instance.DB.ServerOptions;
 
             PendingCredits = (MatchXP == 0 ? 0 : MatchXP / data.PointsDivisible) + (minutesPlayed * data.PointsPerMinutePlayed);
             MatchXPBonus = (int)((Kills > 1 ? (MatchXP / (HasWon ? data.BonusXPVictoryDivisible : data.BonusXPDefeatDivisible)) : 0) * (1f + player.Data.XPBooster + global.XPBooster + (player.Data.HasPrime ? data.PrimeXPBooster : 0f)));

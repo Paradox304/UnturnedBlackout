@@ -60,7 +60,7 @@ namespace UnturnedBlackout.Commands
 
             ThreadPool.QueueUserWorkItem(async (o) =>
             {
-                await Plugin.Instance.DBManager.AddPlayerBoosterAsync(steamID, boosterType, boosterValue, expirationDays);
+                await Plugin.Instance.DB.AddPlayerBoosterAsync(steamID, boosterType, boosterValue, expirationDays);
             });
 
             Utility.Say(caller, $"<color=green>Added booster with type {boosterType}, value {boosterValue}, days {expirationDays} to {steamID}</color>");

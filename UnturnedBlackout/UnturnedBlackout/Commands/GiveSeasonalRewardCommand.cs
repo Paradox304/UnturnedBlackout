@@ -21,7 +21,7 @@ namespace UnturnedBlackout.Commands
         public void Execute(IRocketPlayer caller, string[] command)
         {
             var player = caller as UnturnedPlayer;
-            Plugin.Instance.DBManager.IsPendingSeasonalWipe = true;
+            Plugin.Instance.DB.IsPendingSeasonalWipe = true;
         }
     }
 }

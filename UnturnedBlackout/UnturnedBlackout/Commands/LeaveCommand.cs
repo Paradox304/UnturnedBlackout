@@ -21,7 +21,7 @@ namespace UnturnedBlackout.Commands
         public void Execute(IRocketPlayer caller, string[] command)
         {
             UnturnedPlayer player = caller as UnturnedPlayer;
-            Plugin.Instance.GameManager.RemovePlayerFromGame(player);
+            Plugin.Instance.Game.RemovePlayerFromGame(player);
         }
     }
 }

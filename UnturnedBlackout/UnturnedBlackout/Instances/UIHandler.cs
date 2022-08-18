@@ -48,7 +48,7 @@ namespace UnturnedBlackout.Instances
         {
             get
             {
-                return Plugin.Instance.ConfigManager;
+                return Plugin.Instance.Config;
             }
         }
 
@@ -116,7 +116,7 @@ namespace UnturnedBlackout.Instances
             SteamID = player.CSteamID;
             Player = player;
             TransportConnection = player.Player.channel.GetOwnerTransportConnection();
-            DB = Plugin.Instance.DBManager;
+            DB = Plugin.Instance.DB;
             if (!DB.PlayerLoadouts.TryGetValue(player.CSteamID, out PlayerLoadout loadout))
             {
                 Logging.Debug($"Error finding player loadout for {player.CharacterName}, failed to initialize UIHandler for player");
@@ -849,7 +849,7 @@ namespace UnturnedBlackout.Instances
         public void ShowXP()
         {
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER XP Num", Plugin.Instance.Translate("Level_Show", PlayerData.Level).ToRich());
-            EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER XP Icon", Plugin.Instance.DBManager.Levels.TryGetValue(PlayerData.Level, out XPLevel level) ? level.IconLinkMedium : "");
+            EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER XP Icon", Plugin.Instance.DB.Levels.TryGetValue(PlayerData.Level, out XPLevel level) ? level.IconLinkMedium : "");
             int spaces = 0;
             if (PlayerData.TryGetNeededXP(out int neededXP))
             {
@@ -890,8 +890,8 @@ namespace UnturnedBlackout.Instances
 
         public void SelectedPlayButton(int selected)
         {
-            var games = Plugin.Instance.GameManager.Games;
-            var servers = Plugin.Instance.DBManager.Servers;
+            var games = Plugin.Instance.Game.Games;
+            var servers = Plugin.Instance.DB.Servers;
             Logging.Debug($"{Player.CharacterName} selected play button with id {selected}");
             if (PlayPage == EPlayPage.Games)
             {
@@ -917,11 +917,11 @@ namespace UnturnedBlackout.Instances
         {
             if (PlayPage == EPlayPage.Games)
             {
-                Plugin.Instance.GameManager.AddPlayerToGame(Player, SelectedGameID);
+                Plugin.Instance.Game.AddPlayerToGame(Player, SelectedGameID);
             }
             else if (PlayPage == EPlayPage.Servers)
             {
-                var server = Plugin.Instance.DBManager.Servers[SelectedGameID];
+                var server = Plugin.Instance.DB.Servers[SelectedGameID];
                 if (server.IsOnline)
                 {
                     Player.Player.sendRelayToServer(server.IPNo, server.PortNo, "", false);
@@ -933,7 +933,7 @@ namespace UnturnedBlackout.Instances
 
         public void ShowGames()
         {
-            var games = Plugin.Instance.GameManager.Games;
+            var games = Plugin.Instance.Game.Games;
             PlayPage = EPlayPage.Games;
             Logging.Debug($"Showing games to {Player.CharacterName}, with SelectedGameID {SelectedGameID}");
 
@@ -982,7 +982,7 @@ namespace UnturnedBlackout.Instances
 
         public void UpdateGamePlayerCount(Game game)
         {
-            int index = Plugin.Instance.GameManager.Games.IndexOf(game);
+            int index = Plugin.Instance.Game.Games.IndexOf(game);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Play Players TEXT {index}", $"{game.GetPlayerCount()}/{game.Location.GetMaxPlayers(game.GameMode)}");
         }
 
@@ -1435,7 +1435,7 @@ namespace UnturnedBlackout.Instances
                 TaskDispatcher.QueueOnMainThread(() =>
                 {
                     ClearMidgameLoadouts();
-                    var gPlayer = Plugin.Instance.GameManager.GetGamePlayer(Player);
+                    var gPlayer = Plugin.Instance.Game.GetGamePlayer(Player);
                     if (gPlayer != null)
                     {
                         gPlayer.IsPendingLoadoutChange = true;
@@ -1446,7 +1446,7 @@ namespace UnturnedBlackout.Instances
 
         public void ClearMidgameLoadouts()
         {
-            var gPlayer = Plugin.Instance.GameManager.GetGamePlayer(Player);
+            var gPlayer = Plugin.Instance.Game.GetGamePlayer(Player);
             if (gPlayer != null)
             {
                 gPlayer.HasMidgameLoadout = false;
@@ -4631,7 +4631,7 @@ namespace UnturnedBlackout.Instances
 
         public void EquipSelectedItem()
         {
-            var loadoutManager = Plugin.Instance.LoadoutManager;
+            var loadoutManager = Plugin.Instance.Loadout;
             if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
             {
                 Logging.Debug($"Error finding selected loadout with id {LoadoutID} for {Player.CharacterName}");
@@ -4880,7 +4880,7 @@ namespace UnturnedBlackout.Instances
 
         public void DequipSelectedItem()
         {
-            var loadoutManager = Plugin.Instance.LoadoutManager;
+            var loadoutManager = Plugin.Instance.Loadout;
             if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
             {
                 Logging.Debug($"Error finding selected loadout with id {LoadoutID} for {Player.CharacterName}");
@@ -5066,7 +5066,7 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards BUTTON 10", true);
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Leaderboards Rank TEXT 10", (data.IndexOf(playerData) + 1).ToString());
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Leaderboards Level TEXT 10", playerData.Level.ToString());
-                EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Leaderboards Level IMAGE 10", Plugin.Instance.DBManager.Levels.TryGetValue(playerData.Level, out XPLevel level) ? level.IconLinkMedium : "");
+                EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Leaderboards Level IMAGE 10", Plugin.Instance.DB.Levels.TryGetValue(playerData.Level, out XPLevel level) ? level.IconLinkMedium : "");
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Leaderboards Name TEXT 10", playerData.SteamName);
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Leaderboards Kills TEXT 10", (playerData.Kills + playerData.HeadshotKills).ToString());
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Leaderboards Deaths TEXT 10", playerData.Deaths.ToString());
@@ -5104,7 +5104,7 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards BUTTON {index}", true);
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Rank TEXT {index}", (i + 1).ToString());
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Level TEXT {index}", playerData.Level.ToString());
-                EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Level IMAGE {index}", Plugin.Instance.DBManager.Levels.TryGetValue(playerData.Level, out XPLevel level) ? level.IconLinkMedium : "");
+                EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Level IMAGE {index}", Plugin.Instance.DB.Levels.TryGetValue(playerData.Level, out XPLevel level) ? level.IconLinkMedium : "");
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Name TEXT {index}", playerData.SteamName);
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Kills TEXT {index}", (playerData.Kills + playerData.HeadshotKills).ToString());
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Deaths TEXT {index}", playerData.Deaths.ToString());
@@ -5163,7 +5163,7 @@ namespace UnturnedBlackout.Instances
                         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards BUTTON {i}", true);
                         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Rank TEXT {i}", (data.IndexOf(playerData) + 1).ToString());
                         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Level TEXT {i}", playerData.Level.ToString());
-                        EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Level IMAGE {i}", Plugin.Instance.DBManager.Levels.TryGetValue(playerData.Level, out XPLevel level) ? level.IconLinkMedium : "");
+                        EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Level IMAGE {i}", Plugin.Instance.DB.Levels.TryGetValue(playerData.Level, out XPLevel level) ? level.IconLinkMedium : "");
                         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Name TEXT {i}", playerData.SteamName);
                         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Kills TEXT {i}", (playerData.Kills + playerData.HeadshotKills).ToString());
                         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Deaths TEXT {i}", playerData.Deaths.ToString());
@@ -5849,8 +5849,23 @@ namespace UnturnedBlackout.Instances
 
         public IEnumerator UnboxCase()
         {
+            if (!PlayerData.CasesSearchByID.TryGetValue(SelectedCaseID, out PlayerCase @case))
+            {
+                Logging.Debug($"Error finding selected case with id {SelectedCaseID} for unboxing for {Player.CharacterName}");
+                yield break;
+            }
+
+            if (!Plugin.Instance.Unbox.TryCalculateReward(@case.Case, Player, out Reward reward, out string rewardImage, out string rewardName, out string rewardDesc, out ERarity rewardRarity, out bool isDuplicate, out int duplicateScrapAmount))
+            {
+                Logging.Debug($"Unable to calculate reward for unboxing case {SelectedCaseID} for {Player.CharacterName}");
+                yield break;
+            }
+
+            EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Unbox Content Rolling IMAGE 20", rewardImage);
+            SendRarity("SERVER Unbox Content Rolling", rewardRarity, 20);
 
         }
+
 
         public void ShowUnboxingStorePage()
         {
@@ -5979,6 +5994,73 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Extra TEXT {i}", " ");
 
                 SendRarity("SERVER Unbox Content", skin.SkinRarity, i);
+            }
+        }
+
+        public bool TryGetUnboxRewardInfo(Reward reward, out string rewardName, out string rewardImage, out ERarity rewardRarity)
+        {
+            rewardName = "";
+            rewardImage = "";
+            rewardRarity = ERarity.NONE;
+
+            switch (reward.RewardType)
+            {
+                case ERewardType.Card:
+                    if (!DB.Cards.TryGetValue(Convert.ToInt32(reward.RewardValue), out Card card))
+                    {
+                        return false;
+                    }
+                    rewardName = $"<color={Utility.GetRarityColor(card.CardRarity)}>{card.CardName}</color>";
+                    rewardImage = card.IconLink;
+                    rewardRarity = card.CardRarity;
+                    return true;
+                case ERewardType.GunSkin:
+                    if (!DB.GunSkinsSearchByID.TryGetValue(Convert.ToInt32(reward.RewardValue), out GunSkin skin))
+                    {
+                        return false;
+                    }
+                    rewardName = $"<color={Utility.GetRarityColor(skin.SkinRarity)}>{skin.SkinName}</color>";
+                    rewardImage = skin.IconLink;
+                    rewardRarity = skin.SkinRarity;
+                    return true;
+                case ERewardType.Glove:
+                    if (!DB.Gloves.TryGetValue(Convert.ToUInt16(reward.RewardValue), out Glove glove))
+                    {
+                        return false;
+                    }
+                    rewardName = $"<color={Utility.GetRarityColor(glove.GloveRarity)}>{glove.GloveName}</color>";
+                    rewardImage = glove.IconLink;
+                    rewardRarity = glove.GloveRarity;
+                    return true;
+                case ERewardType.Gun:
+                    if (!DB.Guns.TryGetValue(Convert.ToUInt16(reward.RewardValue), out Gun gun))
+                    {
+                        return false;
+                    }
+                    rewardName = $"<color={Utility.GetRarityColor(gun.GunRarity)}>{gun.GunName}</color>";
+                    rewardImage = gun.IconLink;
+                    rewardRarity = gun.GunRarity;
+                    return true;
+                case ERewardType.GunCharm:
+                    if (!DB.GunCharms.TryGetValue(Convert.ToUInt16(reward.RewardValue), out GunCharm gunCharm))
+                    {
+                        return false;
+                    }
+                    rewardName = $"<color={Utility.GetRarityColor(gunCharm.CharmRarity)}>{gunCharm.CharmName}</color>";
+                    rewardImage = gunCharm.IconLink;
+                    rewardRarity = gunCharm.CharmRarity;
+                    return true;
+                case ERewardType.Coin:
+                    rewardName = $"<color=white>{reward.RewardValue} Coins</color>";
+                    return true;
+                case ERewardType.Credit:
+                    rewardName = $"<color=white>{reward.RewardValue} Credits</color>";
+                    return true;
+                case ERewardType.LevelXP:
+                    rewardName = $"<color=white>{reward.RewardValue} XP</color>";
+                    return true;
+                default:
+                    return false;
             }
         }
 
@@ -6247,7 +6329,7 @@ namespace UnturnedBlackout.Instances
 
             ThreadPool.QueueUserWorkItem(async (o) =>
             {
-                await Plugin.Instance.DBManager.ChangePlayerMusicAsync(SteamID, isMusic);
+                await Plugin.Instance.DB.ChangePlayerMusicAsync(SteamID, isMusic);
             });
         }
 

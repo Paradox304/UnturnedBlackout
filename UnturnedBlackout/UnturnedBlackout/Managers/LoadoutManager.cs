@@ -17,7 +17,7 @@ namespace UnturnedBlackout.Managers
 
         public LoadoutManager()
         {
-            DB = Plugin.Instance.DBManager;
+            DB = Plugin.Instance.DB;
         }
 
         public void EquipGun(UnturnedPlayer player, int loadoutID, ushort newGun, bool isPrimary)
@@ -705,7 +705,7 @@ namespace UnturnedBlackout.Managers
             // Giving perks to player
             var skill = player.Player.Player.skills;
             var skills = new Dictionary<(int, int), int>();
-            foreach (var defaultSkill in Plugin.Instance.ConfigManager.DefaultSkills.FileData.DefaultSkills)
+            foreach (var defaultSkill in Plugin.Instance.Config.DefaultSkills.FileData.DefaultSkills)
             {
                 if (PlayerSkills.TryParseIndices(defaultSkill.SkillName, out int specialtyIndex, out int skillIndex))
                 {

@@ -48,7 +48,7 @@ namespace UnturnedBlackout.Managers
 
         private void OnStanceUpdated(Player player)
         {
-            if (Plugin.Instance.GameManager.TryGetCurrentGame(player.channel.owner.playerID.steamID, out Game game))
+            if (Plugin.Instance.Game.TryGetCurrentGame(player.channel.owner.playerID.steamID, out Game game))
             {
                 game.OnStanceChanged(player.stance);
             }
@@ -80,8 +80,8 @@ namespace UnturnedBlackout.Managers
 
         protected void OnEquip(PlayerEquipment equipment, ItemJar jar, ItemAsset asset, ref bool shouldAllow)
         {
-            var player = Plugin.Instance.GameManager.GetGamePlayer(equipment.player);
-            if (Plugin.Instance.GameManager.TryGetCurrentGame(player.SteamID, out Game game) && game.GameMode == Enums.EGameType.CTF)
+            var player = Plugin.Instance.Game.GetGamePlayer(equipment.player);
+            if (Plugin.Instance.Game.TryGetCurrentGame(player.SteamID, out Game game) && game.GameMode == Enums.EGameType.CTF)
             {
                 if (game.IsPlayerCarryingFlag(player))
                 {
@@ -158,10 +158,10 @@ namespace UnturnedBlackout.Managers
 
         public void OnDequip(PlayerEquipment obj)
         {
-            var player = Plugin.Instance.GameManager.GetGamePlayer(obj.player);
+            var player = Plugin.Instance.Game.GetGamePlayer(obj.player);
             if (player != null)
             {
-                if (!Plugin.Instance.GameManager.TryGetCurrentGame(player.SteamID, out _))
+                if (!Plugin.Instance.Game.TryGetCurrentGame(player.SteamID, out _))
                 {
                     return;
                 }

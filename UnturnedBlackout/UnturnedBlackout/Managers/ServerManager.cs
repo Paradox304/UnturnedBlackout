@@ -30,7 +30,7 @@ namespace UnturnedBlackout.Managers
             {
                 await Task.Delay(10 * 1000);
 
-                foreach (var server in Plugin.Instance.DBManager.Servers)
+                foreach (var server in Plugin.Instance.DB.Servers)
                 {
                     try
                     {
@@ -50,7 +50,7 @@ namespace UnturnedBlackout.Managers
                     }
                 }
 
-                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.OnServersUpdated());
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.OnServersUpdated());
             }
         }
     }

@@ -36,7 +36,7 @@ namespace UnturnedBlackout.Commands
 
             ThreadPool.QueueUserWorkItem(async (o) =>
             {
-                await Plugin.Instance.DBManager.GenerateAchievementTiersAsync(achievementID, command[1]);
+                await Plugin.Instance.DB.GenerateAchievementTiersAsync(achievementID, command[1]);
 
                 TaskDispatcher.QueueOnMainThread(() => UnturnedChat.Say(caller, $"Tiers generated for {achievementID} with title {command[1]}"));
             });

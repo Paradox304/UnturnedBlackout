@@ -33,12 +33,12 @@ namespace UnturnedBlackout.Patches
                 return;
             }
 
-            var gPlayer = Plugin.Instance.GameManager.GetGamePlayer(player);
+            var gPlayer = Plugin.Instance.Game.GetGamePlayer(player);
             if (gPlayer == null)
             {
                 return;
             }
-            if (!Plugin.Instance.GameManager.TryGetCurrentGame(gPlayer.SteamID, out Game game))
+            if (!Plugin.Instance.Game.TryGetCurrentGame(gPlayer.SteamID, out Game game))
             {
                 return;
             }

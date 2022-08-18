@@ -37,7 +37,7 @@ namespace UnturnedBlackout.GameTypes
         public TDMGame(ArenaLocation location, bool isHardcore) : base(EGameType.TDM, location, isHardcore)
         {
             SpawnPoints = new Dictionary<int, List<TDMSpawnPoint>>();
-            foreach (var spawnPoint in Plugin.Instance.DataManager.Data.TDMSpawnPoints.Where(k => k.LocationID == location.LocationID))
+            foreach (var spawnPoint in Plugin.Instance.Data.Data.TDMSpawnPoints.Where(k => k.LocationID == location.LocationID))
             {
                 if (SpawnPoints.TryGetValue(spawnPoint.GroupID, out List<TDMSpawnPoint> spawnPoints))
                 {
@@ -68,9 +68,9 @@ namespace UnturnedBlackout.GameTypes
             GamePhase = EGamePhase.Starting;
             foreach (var player in Players)
             {
-                Plugin.Instance.UIManager.ClearWaitingForPlayersUI(player.GamePlayer);
+                Plugin.Instance.UI.ClearWaitingForPlayersUI(player.GamePlayer);
                 player.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(0);
-                Plugin.Instance.UIManager.ShowCountdownUI(player.GamePlayer);
+                Plugin.Instance.UI.ShowCountdownUI(player.GamePlayer);
                 SpawnPlayer(player);
             }
 
@@ -79,7 +79,7 @@ namespace UnturnedBlackout.GameTypes
                 yield return new WaitForSeconds(1);
                 foreach (var player in Players)
                 {
-                    Plugin.Instance.UIManager.SendCountdownSeconds(player.GamePlayer, seconds);
+                    Plugin.Instance.UI.SendCountdownSeconds(player.GamePlayer, seconds);
                 }
             }
             GamePhase = EGamePhase.Started;
@@ -88,8 +88,8 @@ namespace UnturnedBlackout.GameTypes
             {
                 player.GamePlayer.GiveMovement(player.GamePlayer.Player.Player.equipment.useable is UseableGun gun && gun.isAiming, false, false);
                 player.StartTime = DateTime.UtcNow;
-                Plugin.Instance.UIManager.SendTDMHUD(player, BlueTeam, RedTeam);
-                Plugin.Instance.UIManager.ClearCountdownUI(player.GamePlayer);
+                Plugin.Instance.UI.SendTDMHUD(player, BlueTeam, RedTeam);
+                Plugin.Instance.UI.ClearCountdownUI(player.GamePlayer);
             }
 
             m_SpawnSwitcher.Start();
@@ -104,7 +104,7 @@ namespace UnturnedBlackout.GameTypes
                 TimeSpan timeSpan = TimeSpan.FromSeconds(seconds);
                 foreach (var player in Players)
                 {
-                    Plugin.Instance.UIManager.UpdateTDMTimer(player.GamePlayer, timeSpan.ToString(@"m\:ss"));
+                    Plugin.Instance.UI.UpdateTDMTimer(player.GamePlayer, timeSpan.ToString(@"m\:ss"));
                 }
             }
 
@@ -132,49 +132,49 @@ namespace UnturnedBlackout.GameTypes
             }
 
             GamePhase = EGamePhase.Ending;
-            Plugin.Instance.UIManager.OnGameUpdated();
+            Plugin.Instance.UI.OnGameUpdated();
 
             var summaries = new Dictionary<GamePlayer, MatchEndSummary>();
             foreach (var player in Players)
             {
-                Plugin.Instance.UIManager.ClearTDMHUD(player.GamePlayer);
-                Plugin.Instance.UIManager.ClearMidgameLoadoutUI(player.GamePlayer);
+                Plugin.Instance.UI.ClearTDMHUD(player.GamePlayer);
+                Plugin.Instance.UI.ClearMidgameLoadoutUI(player.GamePlayer);
 
                 if (player.GamePlayer.HasScoreboard)
                 {
                     player.GamePlayer.HasScoreboard = false;
-                    Plugin.Instance.UIManager.HideTDMLeaderboard(player.GamePlayer);
+                    Plugin.Instance.UI.HideTDMLeaderboard(player.GamePlayer);
                 }
                 var summary = new MatchEndSummary(player.GamePlayer, player.XP, player.StartingLevel, player.StartingXP, player.Kills, player.Deaths, player.Assists, player.HighestKillstreak, player.HighestMK, player.StartTime, GameMode, player.Team == wonTeam);
                 summaries.Add(player.GamePlayer, summary);
                 ThreadPool.QueueUserWorkItem(async (o) =>
                 {
-                    await Plugin.Instance.DBManager.IncreasePlayerXPAsync(player.GamePlayer.SteamID, summary.PendingXP);
-                    await Plugin.Instance.DBManager.IncreasePlayerCreditsAsync(player.GamePlayer.SteamID, summary.PendingCredits);
-                    await Plugin.Instance.DBManager.IncreasePlayerBPXPAsync(player.GamePlayer.SteamID, summary.BattlepassXP + summary.BattlepassBonusXP);
+                    await Plugin.Instance.DB.IncreasePlayerXPAsync(player.GamePlayer.SteamID, summary.PendingXP);
+                    await Plugin.Instance.DB.IncreasePlayerCreditsAsync(player.GamePlayer.SteamID, summary.PendingCredits);
+                    await Plugin.Instance.DB.IncreasePlayerBPXPAsync(player.GamePlayer.SteamID, summary.BattlepassXP + summary.BattlepassBonusXP);
                 });
                 if (player.Team == wonTeam)
                 {
-                    TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.QuestManager.CheckQuest(player.GamePlayer, EQuestType.Win, new Dictionary<EQuestCondition, int> { { EQuestCondition.Map, Location.LocationID }, { EQuestCondition.Gamemode, (int)GameMode }, { EQuestCondition.WinKills, player.Kills } }));
+                    TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.Quest.CheckQuest(player.GamePlayer, EQuestType.Win, new Dictionary<EQuestCondition, int> { { EQuestCondition.Map, Location.LocationID }, { EQuestCondition.Gamemode, (int)GameMode }, { EQuestCondition.WinKills, player.Kills } }));
                 }
-                Plugin.Instance.UIManager.SetupPreEndingUI(player.GamePlayer, EGameType.TDM, player.Team.TeamID == wonTeam.TeamID, BlueTeam.Score, RedTeam.Score, BlueTeam.Info.TeamName, RedTeam.Info.TeamName);
+                Plugin.Instance.UI.SetupPreEndingUI(player.GamePlayer, EGameType.TDM, player.Team.TeamID == wonTeam.TeamID, BlueTeam.Score, RedTeam.Score, BlueTeam.Info.TeamName, RedTeam.Info.TeamName);
                 player.GamePlayer.Player.Player.quests.askSetRadioFrequency(CSteamID.Nil, Frequency);
             }
             TaskDispatcher.QueueOnMainThread(() =>
             {
-                Plugin.Instance.UIManager.SetupTDMLeaderboard(Players, Location, wonTeam, BlueTeam, RedTeam, false, IsHardcore);
+                Plugin.Instance.UI.SetupTDMLeaderboard(Players, Location, wonTeam, BlueTeam, RedTeam, false, IsHardcore);
                 WipeItems();
             });
             yield return new WaitForSeconds(5);
             foreach (var player in Players)
             {
-                Plugin.Instance.UIManager.ShowTDMLeaderboard(player.GamePlayer);
+                Plugin.Instance.UI.ShowTDMLeaderboard(player.GamePlayer);
             }
             yield return new WaitForSeconds(Config.Base.FileData.EndingLeaderboardSeconds);
             foreach (var player in Players.ToList())
             {
                 RemovePlayerFromGame(player.GamePlayer);
-                Plugin.Instance.GameManager.SendPlayerToLobby(player.GamePlayer.Player, summaries.TryGetValue(player.GamePlayer, out MatchEndSummary pendingSummary) ? pendingSummary : null);
+                Plugin.Instance.Game.SendPlayerToLobby(player.GamePlayer.Player, summaries.TryGetValue(player.GamePlayer, out MatchEndSummary pendingSummary) ? pendingSummary : null);
             }
 
             Players = new List<TDMPlayer>();
@@ -185,7 +185,7 @@ namespace UnturnedBlackout.GameTypes
                 m_SpawnSwitcher.Stop();
             }
 
-            var locations = Plugin.Instance.GameManager.AvailableLocations;
+            var locations = Plugin.Instance.Game.AvailableLocations;
             lock (locations)
             {
                 var locString = "";
@@ -197,10 +197,10 @@ namespace UnturnedBlackout.GameTypes
                 Logging.Debug($"Game ending, locations available: {locString}");
                 var randomLocation = locations.Count > 0 ? locations[UnityEngine.Random.Range(0, locations.Count)] : Location.LocationID;
                 var location = Config.Locations.FileData.ArenaLocations.FirstOrDefault(k => k.LocationID == randomLocation);
-                var gameMode = Plugin.Instance.GameManager.GetRandomGameMode(location.LocationID);
+                var gameMode = Plugin.Instance.Game.GetRandomGameMode(location.LocationID);
                 GamePhase = EGamePhase.Ended;
-                Plugin.Instance.GameManager.EndGame(this);
-                Plugin.Instance.GameManager.StartGame(location, gameMode.Item1, gameMode.Item2);
+                Plugin.Instance.Game.EndGame(this);
+                Plugin.Instance.Game.StartGame(location, gameMode.Item1, gameMode.Item2);
             }
         }
 
@@ -221,20 +221,20 @@ namespace UnturnedBlackout.GameTypes
             }
             PlayersLookup.Add(player.SteamID, tPlayer);
 
-            Plugin.Instance.UIManager.OnGameCountUpdated(this);
-            Plugin.Instance.UIManager.SendLoadingUI(player.Player, true, GameMode, Location);
+            Plugin.Instance.UI.OnGameCountUpdated(this);
+            Plugin.Instance.UI.SendLoadingUI(player.Player, true, GameMode, Location);
             for (int seconds = 1; seconds <= 5; seconds++)
             {
                 yield return new WaitForSeconds(1);
-                Plugin.Instance.UIManager.UpdateLoadingBar(player.Player, new string('　', Math.Min(96, seconds * 96 / 5)));
+                Plugin.Instance.UI.UpdateLoadingBar(player.Player, new string('　', Math.Min(96, seconds * 96 / 5)));
             }
             var currentPos = player.Player.Position;
             player.Player.Player.teleportToLocationUnsafe(new Vector3(currentPos.x, currentPos.y + 100, currentPos.z), 0);
             GiveLoadout(tPlayer);
-            Plugin.Instance.UIManager.SendPreEndingUI(tPlayer.GamePlayer);
+            Plugin.Instance.UI.SendPreEndingUI(tPlayer.GamePlayer);
             SpawnPlayer(tPlayer);
-            Plugin.Instance.UIManager.ClearLoadingUI(player.Player);
-            Plugin.Instance.UIManager.SendVoiceChatUI(player);
+            Plugin.Instance.UI.ClearLoadingUI(player.Player);
+            Plugin.Instance.UI.SendVoiceChatUI(player);
 
             switch (GamePhase)
             {
@@ -246,7 +246,7 @@ namespace UnturnedBlackout.GameTypes
                     }
                     else
                     {
-                        Plugin.Instance.UIManager.SendWaitingForPlayersUI(player, Players.Count, minPlayers);
+                        Plugin.Instance.UI.SendWaitingForPlayersUI(player, Players.Count, minPlayers);
                         foreach (var ply in Players)
                         {
                             if (ply == tPlayer)
@@ -254,13 +254,13 @@ namespace UnturnedBlackout.GameTypes
                                 continue;
                             }
 
-                            Plugin.Instance.UIManager.UpdateWaitingForPlayersUI(ply.GamePlayer, Players.Count, minPlayers);
+                            Plugin.Instance.UI.UpdateWaitingForPlayersUI(ply.GamePlayer, Players.Count, minPlayers);
                         }
                     }
                     break;
                 case EGamePhase.Starting:
                     player.Player.Player.movement.sendPluginSpeedMultiplier(0);
-                    Plugin.Instance.UIManager.ShowCountdownUI(player);
+                    Plugin.Instance.UI.ShowCountdownUI(player);
                     break;
                 case EGamePhase.Ending:
                     TDMTeam wonTeam;
@@ -276,11 +276,11 @@ namespace UnturnedBlackout.GameTypes
                     {
                         wonTeam = new TDMTeam(this, -1, true, new TeamInfo());
                     }
-                    Plugin.Instance.UIManager.SetupTDMLeaderboard(tPlayer, Players, Location, wonTeam, BlueTeam, RedTeam, true, IsHardcore);
-                    Plugin.Instance.UIManager.ShowTDMLeaderboard(tPlayer.GamePlayer);
+                    Plugin.Instance.UI.SetupTDMLeaderboard(tPlayer, Players, Location, wonTeam, BlueTeam, RedTeam, true, IsHardcore);
+                    Plugin.Instance.UI.ShowTDMLeaderboard(tPlayer.GamePlayer);
                     break;
                 default:
-                    Plugin.Instance.UIManager.SendTDMHUD(tPlayer, BlueTeam, RedTeam);
+                    Plugin.Instance.UI.SendTDMHUD(tPlayer, BlueTeam, RedTeam);
                     break;
             }
         }
@@ -294,18 +294,18 @@ namespace UnturnedBlackout.GameTypes
 
             var tPlayer = GetTDMPlayer(player.Player);
 
-            Plugin.Instance.UIManager.ClearTDMHUD(player);
-            Plugin.Instance.UIManager.ClearPreEndingUI(player);
-            Plugin.Instance.UIManager.ClearVoiceChatUI(player);
+            Plugin.Instance.UI.ClearTDMHUD(player);
+            Plugin.Instance.UI.ClearPreEndingUI(player);
+            Plugin.Instance.UI.ClearVoiceChatUI(player);
 
             if (GamePhase == EGamePhase.Starting)
             {
-                Plugin.Instance.UIManager.ClearCountdownUI(player);
+                Plugin.Instance.UI.ClearCountdownUI(player);
                 tPlayer.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1);
             }
             else if (GamePhase == EGamePhase.WaitingForPlayers)
             {
-                Plugin.Instance.UIManager.ClearWaitingForPlayersUI(player);
+                Plugin.Instance.UI.ClearWaitingForPlayersUI(player);
                 foreach (var ply in Players)
                 {
                     if (ply == tPlayer)
@@ -313,7 +313,7 @@ namespace UnturnedBlackout.GameTypes
                         continue;
                     }
 
-                    Plugin.Instance.UIManager.UpdateWaitingForPlayersUI(ply.GamePlayer, Players.Count - 1, Location.GetMinPlayers(GameMode));
+                    Plugin.Instance.UI.UpdateWaitingForPlayersUI(ply.GamePlayer, Players.Count - 1, Location.GetMinPlayers(GameMode));
                 }
             }
 
@@ -322,7 +322,7 @@ namespace UnturnedBlackout.GameTypes
             Players.Remove(tPlayer);
             PlayersLookup.Remove(tPlayer.GamePlayer.SteamID);
 
-            Plugin.Instance.UIManager.OnGameCountUpdated(this);
+            Plugin.Instance.UI.OnGameCountUpdated(this);
         }
 
         public override void OnPlayerDead(Player player, CSteamID killer, ELimb limb, EDeathCause cause)
@@ -336,7 +336,7 @@ namespace UnturnedBlackout.GameTypes
             if (tPlayer.GamePlayer.HasScoreboard)
             {
                 tPlayer.GamePlayer.HasScoreboard = false;
-                Plugin.Instance.UIManager.HideTDMLeaderboard(tPlayer.GamePlayer);
+                Plugin.Instance.UI.HideTDMLeaderboard(tPlayer.GamePlayer);
             }
 
             var victimKS = tPlayer.Killstreak;
@@ -347,7 +347,7 @@ namespace UnturnedBlackout.GameTypes
             tPlayer.GamePlayer.OnDeath(updatedKiller, Config.TDM.FileData.RespawnSeconds);
             tPlayer.Team.OnDeath(tPlayer.GamePlayer.SteamID);
 
-            ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DBManager.IncreasePlayerDeathsAsync(tPlayer.GamePlayer.SteamID, 1));
+            ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DB.IncreasePlayerDeathsAsync(tPlayer.GamePlayer.SteamID, 1));
 
             TaskDispatcher.QueueOnMainThread(() =>
             {
@@ -386,9 +386,9 @@ namespace UnturnedBlackout.GameTypes
                         assister.Score += Config.Points.FileData.AssistPoints;
                         if (!assister.GamePlayer.Player.Player.life.isDead)
                         {
-                            Plugin.Instance.UIManager.ShowXPUI(assister.GamePlayer, Config.Medals.FileData.AssistKillXP, Plugin.Instance.Translate("Assist_Kill", tPlayer.GamePlayer.Player.CharacterName.ToUnrich()));
+                            Plugin.Instance.UI.ShowXPUI(assister.GamePlayer, Config.Medals.FileData.AssistKillXP, Plugin.Instance.Translate("Assist_Kill", tPlayer.GamePlayer.Player.CharacterName.ToUnrich()));
                         }
-                        ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DBManager.IncreasePlayerXPAsync(assister.GamePlayer.SteamID, Config.Medals.FileData.AssistKillXP));
+                        ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DB.IncreasePlayerXPAsync(assister.GamePlayer.SteamID, Config.Medals.FileData.AssistKillXP));
                     }
                     tPlayer.GamePlayer.LastDamager.Clear();
                 }
@@ -479,7 +479,7 @@ namespace UnturnedBlackout.GameTypes
                 {
                     xpGained += Config.Medals.FileData.ShutdownXP;
                     xpText += Plugin.Instance.Translate("Shutdown_Kill").ToRich() + "\n";
-                    Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer, EQuestType.Shutdown, questConditions);
+                    Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.Shutdown, questConditions);
                 }
 
                 if (kPlayer.PlayersKilled.ContainsKey(tPlayer.GamePlayer.SteamID))
@@ -489,7 +489,7 @@ namespace UnturnedBlackout.GameTypes
                     {
                         xpGained += Config.Medals.FileData.DominationXP;
                         xpText += Plugin.Instance.Translate("Domination_Kill").ToRich() + "\n";
-                        Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer, EQuestType.Domination, questConditions);
+                        Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.Domination, questConditions);
                     }
                 }
                 else
@@ -501,28 +501,28 @@ namespace UnturnedBlackout.GameTypes
                 {
                     xpGained += Config.Medals.FileData.RevengeXP;
                     xpText += Plugin.Instance.Translate("Revenge_Kill").ToRich() + "\n";
-                    Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer, EQuestType.Revenge, questConditions);
+                    Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.Revenge, questConditions);
                 }
 
                 if (isFirstKill)
                 {
                     xpGained += Config.Medals.FileData.FirstKillXP;
                     xpText += Plugin.Instance.Translate("First_Kill").ToRich() + "\n";
-                    Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer, EQuestType.FirstKill, questConditions);
+                    Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.FirstKill, questConditions);
                 }
 
                 if (cause == EDeathCause.GUN && (tPlayer.GamePlayer.Player.Position - kPlayer.GamePlayer.Player.Position).sqrMagnitude > longshotRange)
                 {
                     xpGained += Config.Medals.FileData.LongshotXP;
                     xpText += Plugin.Instance.Translate("Longshot_Kill").ToRich() + "\n";
-                    Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer, EQuestType.Longshot, questConditions);
+                    Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.Longshot, questConditions);
                 }
 
                 if (kPlayer.GamePlayer.Player.Player.life.health < Config.Medals.FileData.HealthSurvivorKill)
                 {
                     xpGained += Config.Medals.FileData.SurvivorXP;
                     xpText += Plugin.Instance.Translate("Survivor_Kill").ToRich() + "\n";
-                    Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer, EQuestType.Survivor, questConditions);
+                    Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.Survivor, questConditions);
                 }
 
                 kPlayer.GamePlayer.LastKiller = CSteamID.Nil;
@@ -530,14 +530,14 @@ namespace UnturnedBlackout.GameTypes
                 kPlayer.XP += xpGained;
                 Players.Sort((x, y) => y.Kills.CompareTo(x.Kills));
 
-                Plugin.Instance.UIManager.ShowXPUI(kPlayer.GamePlayer, xpGained, xpText);
-                Plugin.Instance.UIManager.SendMultiKillSound(kPlayer.GamePlayer, kPlayer.MultipleKills);
+                Plugin.Instance.UI.ShowXPUI(kPlayer.GamePlayer, xpGained, xpText);
+                Plugin.Instance.UI.SendMultiKillSound(kPlayer.GamePlayer, kPlayer.MultipleKills);
                 kPlayer.CheckKills();
                 kPlayer.GamePlayer.OnKilled(tPlayer.GamePlayer);
 
                 foreach (var ply in Players)
                 {
-                    Plugin.Instance.UIManager.UpdateTDMScore(ply, kPlayer.Team);
+                    Plugin.Instance.UI.UpdateTDMScore(ply, kPlayer.Team);
                 }
                 if (kPlayer.Team.Score == Config.TDM.FileData.ScoreLimit)
                 {
@@ -548,42 +548,42 @@ namespace UnturnedBlackout.GameTypes
                     OnKill(kPlayer.GamePlayer, tPlayer.GamePlayer, kPlayer.GamePlayer.Player.Player.equipment.itemID, kPlayer.Team.Info.KillFeedHexCode, tPlayer.Team.Info.KillFeedHexCode);
                 }
 
-                Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer, EQuestType.Kill, questConditions);
-                Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer, EQuestType.MultiKill, questConditions);
-                Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer, EQuestType.Killstreak, questConditions);
+                Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.Kill, questConditions);
+                Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.MultiKill, questConditions);
+                Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.Killstreak, questConditions);
                 if (limb == ELimb.SKULL && cause == EDeathCause.GUN)
                 {
-                    Plugin.Instance.QuestManager.CheckQuest(kPlayer.GamePlayer, EQuestType.Headshots, questConditions);
+                    Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.Headshots, questConditions);
                 }
-                Plugin.Instance.QuestManager.CheckQuest(tPlayer.GamePlayer, EQuestType.Death, questConditions);
+                Plugin.Instance.Quest.CheckQuest(tPlayer.GamePlayer, EQuestType.Death, questConditions);
 
                 ThreadPool.QueueUserWorkItem(async (o) =>
                 {
                     if (cause == EDeathCause.GUN && limb == ELimb.SKULL)
                     {
-                        await Plugin.Instance.DBManager.IncreasePlayerHeadshotKillsAsync(kPlayer.GamePlayer.SteamID, 1);
+                        await Plugin.Instance.DB.IncreasePlayerHeadshotKillsAsync(kPlayer.GamePlayer.SteamID, 1);
                     }
                     else
                     {
-                        await Plugin.Instance.DBManager.IncreasePlayerKillsAsync(kPlayer.GamePlayer.SteamID, 1);
+                        await Plugin.Instance.DB.IncreasePlayerKillsAsync(kPlayer.GamePlayer.SteamID, 1);
                     }
-                    await Plugin.Instance.DBManager.IncreasePlayerXPAsync(kPlayer.GamePlayer.SteamID, xpGained);
+                    await Plugin.Instance.DB.IncreasePlayerXPAsync(kPlayer.GamePlayer.SteamID, xpGained);
                     if ((kPlayer.GamePlayer.ActiveLoadout.Primary != null && kPlayer.GamePlayer.ActiveLoadout.Primary.Gun.GunID == equipmentUsed) || (kPlayer.GamePlayer.ActiveLoadout.Secondary != null && kPlayer.GamePlayer.ActiveLoadout.Secondary.Gun.GunID == equipmentUsed))
                     {
-                        await Plugin.Instance.DBManager.IncreasePlayerGunXPAsync(kPlayer.GamePlayer.SteamID, equipmentUsed, xpGained);
-                        await Plugin.Instance.DBManager.IncreasePlayerGunKillsAsync(kPlayer.GamePlayer.SteamID, equipmentUsed, 1);
+                        await Plugin.Instance.DB.IncreasePlayerGunXPAsync(kPlayer.GamePlayer.SteamID, equipmentUsed, xpGained);
+                        await Plugin.Instance.DB.IncreasePlayerGunKillsAsync(kPlayer.GamePlayer.SteamID, equipmentUsed, 1);
                     }
                     else if (kPlayer.GamePlayer.ActiveLoadout.Lethal != null && kPlayer.GamePlayer.ActiveLoadout.Lethal.Gadget.GadgetID == equipmentUsed)
                     {
-                        await Plugin.Instance.DBManager.IncreasePlayerGadgetKillsAsync(kPlayer.GamePlayer.SteamID, equipmentUsed, 1);
+                        await Plugin.Instance.DB.IncreasePlayerGadgetKillsAsync(kPlayer.GamePlayer.SteamID, equipmentUsed, 1);
                     }
                     else if (kPlayer.GamePlayer.ActiveLoadout.Killstreaks.Select(k => k.Killstreak.KillstreakID).Contains(equipmentUsed))
                     {
-                        await Plugin.Instance.DBManager.IncreasePlayerKillstreakKillsAsync(kPlayer.GamePlayer.SteamID, equipmentUsed, 1);
+                        await Plugin.Instance.DB.IncreasePlayerKillstreakKillsAsync(kPlayer.GamePlayer.SteamID, equipmentUsed, 1);
                     }
                     else if (kPlayer.GamePlayer.ActiveLoadout.Knife != null && kPlayer.GamePlayer.ActiveLoadout.Knife.Knife.KnifeID == equipmentUsed)
                     {
-                        await Plugin.Instance.DBManager.IncreasePlayerKnifeKillsAsync(kPlayer.GamePlayer.SteamID, equipmentUsed, 1);
+                        await Plugin.Instance.DB.IncreasePlayerKnifeKillsAsync(kPlayer.GamePlayer.SteamID, equipmentUsed, 1);
                     }
                 });
             });
@@ -718,7 +718,7 @@ namespace UnturnedBlackout.GameTypes
                     return;
                 }
 
-                var iconLink = Plugin.Instance.DBManager.Levels.TryGetValue(data.Level, out XPLevel level) ? level.IconLinkSmall : "";
+                var iconLink = Plugin.Instance.DB.Levels.TryGetValue(data.Level, out XPLevel level) ? level.IconLinkSmall : "";
                 var updatedText = $"<color={tPlayer.Team.Info.ChatPlayerHexCode}>{player.Player.CharacterName.ToUnrich()}</color>: <color={tPlayer.Team.Info.ChatMessageHexCode}>{text.ToUnrich()}</color>";
 
                 if (chatMode == EChatMode.GLOBAL)
@@ -753,7 +753,7 @@ namespace UnturnedBlackout.GameTypes
         public void GiveLoadout(TDMPlayer player)
         {
             player.GamePlayer.Player.Player.inventory.ClearInventory();
-            Plugin.Instance.LoadoutManager.GiveLoadout(player.GamePlayer, player.Team.Info.TeamKits[UnityEngine.Random.Range(0, player.Team.Info.TeamKits.Count)], player.Team.Info.TeamGloves);
+            Plugin.Instance.Loadout.GiveLoadout(player.GamePlayer, player.Team.Info.TeamKits[UnityEngine.Random.Range(0, player.Team.Info.TeamKits.Count)], player.Team.Info.TeamGloves);
         }
 
         public void SpawnPlayer(TDMPlayer player)
@@ -839,7 +839,7 @@ namespace UnturnedBlackout.GameTypes
             if (tPlayer.GamePlayer.HasScoreboard)
             {
                 tPlayer.GamePlayer.HasScoreboard = false;
-                Plugin.Instance.UIManager.HideTDMLeaderboard(tPlayer.GamePlayer);
+                Plugin.Instance.UI.HideTDMLeaderboard(tPlayer.GamePlayer);
             }
             else
             {
@@ -857,8 +857,8 @@ namespace UnturnedBlackout.GameTypes
                 {
                     wonTeam = new TDMTeam(this, -1, true, new TeamInfo());
                 }
-                Plugin.Instance.UIManager.SetupTDMLeaderboard(tPlayer, Players, Location, wonTeam, BlueTeam, RedTeam, true, IsHardcore);
-                Plugin.Instance.UIManager.ShowTDMLeaderboard(tPlayer.GamePlayer);
+                Plugin.Instance.UI.SetupTDMLeaderboard(tPlayer, Players, Location, wonTeam, BlueTeam, RedTeam, true, IsHardcore);
+                Plugin.Instance.UI.ShowTDMLeaderboard(tPlayer.GamePlayer);
             }
         }
 

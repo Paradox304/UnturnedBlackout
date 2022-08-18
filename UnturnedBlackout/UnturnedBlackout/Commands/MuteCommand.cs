@@ -70,8 +70,8 @@ namespace UnturnedBlackout.Commands
                 }
 
                 var expiry = DateTimeOffset.UtcNow.AddSeconds(seconds);
-                await Plugin.Instance.DBManager.ChangePlayerMutedAsync(steamID, true);
-                await Plugin.Instance.DBManager.ChangePlayerMuteExpiryAsync(steamID, expiry);
+                await Plugin.Instance.DB.ChangePlayerMutedAsync(steamID, true);
+                await Plugin.Instance.DB.ChangePlayerMuteExpiryAsync(steamID, expiry);
 
                 if (Provider.clients.Exists(k => k.playerID.steamID == steamID))
                 {

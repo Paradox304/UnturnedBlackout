@@ -56,7 +56,7 @@ namespace UnturnedBlackout
             inv.player.equipment.sendSlot(0);
             inv.player.equipment.sendSlot(1);
 
-            Plugin.Instance.HUDManager.RemoveGunUI(inv.player.channel.GetOwnerTransportConnection());
+            Plugin.Instance.HUD.RemoveGunUI(inv.player.channel.GetOwnerTransportConnection());
         }
 
         public static string GetOrdinal(int index) =>
@@ -162,7 +162,7 @@ namespace UnturnedBlackout
                     }
                 }
 
-                if (!Plugin.Instance.DBManager.GunAttachments.TryGetValue(attachmentID, out GunAttachment gunAttachment))
+                if (!Plugin.Instance.DB.GunAttachments.TryGetValue(attachmentID, out GunAttachment gunAttachment))
                 {
                     Logging.Debug($"Gun with name {gun.GunName} has an attachment with id {attachmentID} which is not registered in attachments table for {player.CharacterName}");
                     continue;
@@ -368,7 +368,7 @@ namespace UnturnedBlackout
 
         public static int GetLoadoutAmount(UnturnedPlayer player)
         {
-            var Config = Plugin.Instance.ConfigManager.Loadout.FileData;
+            var Config = Plugin.Instance.Config.Loadout.FileData;
             var amount = Config.DefaultLoadoutAmount;
             foreach (var loadoutAmount in Config.LoadoutAmounts.OrderByDescending(k => k.Amount))
             {
@@ -422,7 +422,7 @@ namespace UnturnedBlackout
 
         public static string ToColor(this object value, bool isPlayer)
         {
-            return isPlayer ? $"<color={Plugin.Instance.ConfigManager.Base.FileData.PlayerColorHexCode}>{value}</color>" : value.ToString();
+            return isPlayer ? $"<color={Plugin.Instance.Config.Base.FileData.PlayerColorHexCode}>{value}</color>" : value.ToString();
         }
 
         public static string GetRarityColor(ERarity rarity) =>

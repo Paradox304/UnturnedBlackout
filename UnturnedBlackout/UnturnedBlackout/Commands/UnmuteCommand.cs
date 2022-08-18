@@ -63,7 +63,7 @@ namespace UnturnedBlackout.Commands
                     return;
                 }
 
-                await Plugin.Instance.DBManager.ChangePlayerMutedAsync(steamID, false);
+                await Plugin.Instance.DB.ChangePlayerMutedAsync(steamID, false);
 
                 if (Provider.clients.Exists(k => k.playerID.steamID == steamID))
                 {

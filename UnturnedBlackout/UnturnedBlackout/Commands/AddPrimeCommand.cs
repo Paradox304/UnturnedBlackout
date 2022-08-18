@@ -47,7 +47,7 @@ namespace UnturnedBlackout.Commands
 
             ThreadPool.QueueUserWorkItem(async (o) =>
             {
-                await Plugin.Instance.DBManager.AddPlayerPrimeAsync(steamID, days);
+                await Plugin.Instance.DB.AddPlayerPrimeAsync(steamID, days);
             });
 
             Utility.Say(caller, $"<color=green>Added prime with days {days} to {steamID}</color>");

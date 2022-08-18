@@ -91,7 +91,7 @@ namespace UnturnedBlackout.Database.Data
 
         public bool TryGetNeededXP(out int xp)
         {
-            if (Plugin.Instance.DBManager.Levels.TryGetValue(Level + 1, out XPLevel level))
+            if (Plugin.Instance.DB.Levels.TryGetValue(Level + 1, out XPLevel level))
             {
                 xp = level.XPNeeded;
                 return true;
@@ -106,7 +106,7 @@ namespace UnturnedBlackout.Database.Data
             {
                 ThreadPool.QueueUserWorkItem(async (o) =>
                 {
-                    await Plugin.Instance.DBManager.UpdatePlayerHighestMultiKillsAsync(SteamID, multiKills);
+                    await Plugin.Instance.DB.UpdatePlayerHighestMultiKillsAsync(SteamID, multiKills);
                 });
             }
         }
@@ -117,7 +117,7 @@ namespace UnturnedBlackout.Database.Data
             {
                 ThreadPool.QueueUserWorkItem(async (o) =>
                 {
-                    await Plugin.Instance.DBManager.UpdatePlayerHighestKillStreakAsync(SteamID, killStreak);
+                    await Plugin.Instance.DB.UpdatePlayerHighestKillStreakAsync(SteamID, killStreak);
                 });
             }
         }

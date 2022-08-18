@@ -15,7 +15,7 @@ namespace UnturnedBlackout.Managers
         {
             get
             {
-                return Plugin.Instance.DBManager;
+                return Plugin.Instance.DB;
             }
         }
 
@@ -23,7 +23,7 @@ namespace UnturnedBlackout.Managers
         {
             get
             {
-                return Plugin.Instance.ConfigManager;
+                return Plugin.Instance.Config;
             }
 
         }
@@ -67,8 +67,8 @@ namespace UnturnedBlackout.Managers
                 bp.ClaimedPremiumRewards.Add(tierID);
             }
 
-            Plugin.Instance.RewardManager.GiveReward(player.SteamID, new List<Reward> { reward });
-            Plugin.Instance.UIManager.OnBattlepassTierUpdated(player.SteamID, tierID);
+            Plugin.Instance.Reward.GiveReward(player.SteamID, new List<Reward> { reward });
+            Plugin.Instance.UI.OnBattlepassTierUpdated(player.SteamID, tierID);
 
             PendingWork.Remove(player.SteamID);
             ThreadPool.QueueUserWorkItem(async (o) =>
@@ -111,9 +111,9 @@ namespace UnturnedBlackout.Managers
                     PendingWork.Remove(player.SteamID);
                     TaskDispatcher.QueueOnMainThread(() =>
                     {
-                        Plugin.Instance.UIManager.OnBattlepassUpdated(player.SteamID);
-                        Plugin.Instance.UIManager.OnBattlepassTierUpdated(player.SteamID, oldTier);
-                        Plugin.Instance.UIManager.OnBattlepassTierUpdated(player.SteamID, bp.CurrentTier);
+                        Plugin.Instance.UI.OnBattlepassUpdated(player.SteamID);
+                        Plugin.Instance.UI.OnBattlepassTierUpdated(player.SteamID, oldTier);
+                        Plugin.Instance.UI.OnBattlepassTierUpdated(player.SteamID, bp.CurrentTier);
                     });
                 }
             });

@@ -15,7 +15,7 @@ namespace UnturnedBlackout.Models.TDM
         {
             get
             {
-                return Plugin.Instance.ConfigManager;
+                return Plugin.Instance.Config;
             }
         }
 

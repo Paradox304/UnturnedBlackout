@@ -1727,7 +1727,7 @@ namespace UnturnedBlackout.Managers
             try
             {
                 Logging.Debug($"Adding {steamName} to the DB");
-                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.1f)), loadingText: "LOADING PLAYER DATA..."));
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.1f)), loadingText: "LOADING PLAYER DATA..."));
                 await Conn.OpenAsync();
                 var cmd = new MySqlCommand($"INSERT INTO `{PLAYERS}` ( `SteamID` , `SteamName` , `AvatarLink` , `MuteExpiry`, `Coins` ) VALUES ({player.CSteamID}, @name, '{avatarLink}' , {DateTimeOffset.UtcNow.ToUnixTimeSeconds()} , {(Plugin.Instance.Configuration.Instance.UnlockAllItems ? 10000000 : 0)}) ON DUPLICATE KEY UPDATE `AvatarLink` = '{avatarLink}', `SteamName` = @name;", Conn);
                 cmd.Parameters.AddWithValue("@name", steamName.ToUnrich());
@@ -1738,7 +1738,7 @@ namespace UnturnedBlackout.Managers
                 await new MySqlCommand($"INSERT IGNORE INTO `{PLAYERS_LEADERBOARD_SEASONAL}` ( `SteamID` ) VALUES ({player.CSteamID});", Conn).ExecuteScalarAsync();
 
                 Logging.Debug($"Giving {steamName} the guns");
-                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.15f)), loadingText: "LOADING GUNS..."));
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.15f)), loadingText: "LOADING GUNS..."));
                 foreach (var gun in Guns.Values)
                 {
                     if (gun.LevelRequirement < 0)
@@ -1762,7 +1762,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 Logging.Debug($"Giving {steamName} the knives");
-                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.2f)), loadingText: "LOADING KNIVES..."));
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.2f)), loadingText: "LOADING KNIVES..."));
                 foreach (var knife in Knives.Values)
                 {
                     if (knife.LevelRequirement < 0)
@@ -1774,7 +1774,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 Logging.Debug($"Giving {steamName} the gadgets");
-                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.25f)), loadingText: "LOADING GADGETS..."));
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.25f)), loadingText: "LOADING GADGETS..."));
                 foreach (var gadget in Gadgets.Values)
                 {
                     if (gadget.LevelRequirement < 0)
@@ -1786,7 +1786,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 Logging.Debug($"Giving {steamName} the killstreaks");
-                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.3f)), loadingText: "LOADING KILLSTREAKS..."));
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.3f)), loadingText: "LOADING KILLSTREAKS..."));
                 foreach (var killstreak in Killstreaks.Values)
                 {
                     if (killstreak.LevelRequirement < 0)
@@ -1798,7 +1798,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 Logging.Debug($"Giving {steamName} the perks");
-                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.35f)), loadingText: "LOADING PERKS..."));
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.35f)), loadingText: "LOADING PERKS..."));
                 foreach (var perk in Perks.Values)
                 {
                     if (perk.LevelRequirement < 0)
@@ -1810,7 +1810,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 Logging.Debug($"Giving {steamName} the gloves");
-                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.4f)), loadingText: "LOADING GLOVES..."));
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.4f)), loadingText: "LOADING GLOVES..."));
                 foreach (var glove in Gloves.Values)
                 {
                     if (glove.LevelRequirement < 0)
@@ -1822,7 +1822,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 Logging.Debug($"Giving {steamName} the cards");
-                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.45f)), loadingText: "LOADING CARDS..."));
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.45f)), loadingText: "LOADING CARDS..."));
                 foreach (var card in Cards.Values)
                 {
                     if (card.LevelRequirement < 0)
@@ -1834,20 +1834,20 @@ namespace UnturnedBlackout.Managers
                 }
 
                 Logging.Debug($"Giving {steamName} the battlepass");
-                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.47f)), loadingText: "LOADING BATTLEPASS..."));
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.47f)), loadingText: "LOADING BATTLEPASS..."));
                 await new MySqlCommand($"INSERT IGNORE INTO `{PLAYERS_BATTLEPASS}` (`SteamID` , `ClaimedFreeRewards` , `ClaimedPremiumRewards`) VALUES ({player.CSteamID} , '' , '');", Conn).ExecuteScalarAsync();
 
                 Logging.Debug($"Giving {steamName} the achievements");
-                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.5f)), loadingText: "LOADING ACHIEVEMENTS..."));
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.5f)), loadingText: "LOADING ACHIEVEMENTS..."));
                 foreach (var achievement in Achievements)
                 {
                     await new MySqlCommand($"INSERT IGNORE INTO `{PLAYERS_ACHIEVEMENTS}` (`SteamID`, `AchievementID`) VALUES ({player.CSteamID}, {achievement.AchievementID});", Conn).ExecuteScalarAsync();
                 }
 
                 var loadoutAmount = Utility.GetLoadoutAmount(player);
-                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.51f)), loadingText: "LOADING LOADOUTS..."));
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.51f)), loadingText: "LOADING LOADOUTS..."));
                 Logging.Debug($"{steamName} should have {loadoutAmount} loadouts, adding them");
-                var data = Plugin.Instance.DataManager.ConvertLoadoutToJson(DefaultLoadout);
+                var data = Plugin.Instance.Data.ConvertLoadoutToJson(DefaultLoadout);
                 for (int i = 1; i <= loadoutAmount; i++)
                 {
                     await new MySqlCommand($"INSERT IGNORE INTO `{PLAYERS_LOADOUTS}` (`SteamID` , `LoadoutID` , `IsActive` , `Loadout`) VALUES ({player.CSteamID}, {i}, {i == 1}, '{data}');", Conn).ExecuteScalarAsync();
@@ -1872,7 +1872,7 @@ namespace UnturnedBlackout.Managers
             try
             {
                 Logging.Debug($"Getting data for {player.CharacterName} from the main table");
-                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.6f)), loadingText: "PREPARING PLAYER DATA..."));
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.6f)), loadingText: "PREPARING PLAYER DATA..."));
                 await Conn.OpenAsync();
                 var rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
                 try
@@ -2036,7 +2036,7 @@ namespace UnturnedBlackout.Managers
                 }
                 
                 Logging.Debug($"Getting leaderboard daily data for {player.CharacterName} from the daily table");
-                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.65f)), loadingText: "PREPARING LEADERBOARD DATA..."));
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.65f)), loadingText: "PREPARING LEADERBOARD DATA..."));
                 rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS_LEADERBOARD_DAILY}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
                 try
                 {
@@ -2169,7 +2169,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 Logging.Debug($"Getting quests for {player.CharacterName}");
-                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.7f)), loadingText: "PREPARING QUESTS..."));
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.7f)), loadingText: "PREPARING QUESTS..."));
                 rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS_QUESTS}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
                 try
                 {
@@ -2258,7 +2258,7 @@ namespace UnturnedBlackout.Managers
                     rdr.Close();
                 }
 
-                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.73f)), loadingText: "PREPARING ACHIEVEMENTS..."));
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.73f)), loadingText: "PREPARING ACHIEVEMENTS..."));
                 Logging.Debug($"Getting achievements for {player.CharacterName}");
                 rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS_ACHIEVEMENTS}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
                 try
@@ -2324,7 +2324,7 @@ namespace UnturnedBlackout.Managers
 
                 playerData.SetAchievementXPBooster();
                 Logging.Debug($"Getting battlepass for {player.CharacterName}");
-                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.8f)), loadingText: "PREPARING BATTLEPASS..."));
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.8f)), loadingText: "PREPARING BATTLEPASS..."));
                 rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS_BATTLEPASS}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
                 try
                 {
@@ -2377,7 +2377,7 @@ namespace UnturnedBlackout.Managers
                 Dictionary<int, Loadout> loadouts = new();
 
                 Logging.Debug($"Getting guns for {player.CharacterName}");
-                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.82f)), loadingText: "PREPARING GUNS..."));
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.82f)), loadingText: "PREPARING GUNS..."));
                 rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS_GUNS}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
                 try
                 {
@@ -2437,7 +2437,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 Logging.Debug($"Checking gun attachments for {player.CharacterName}");
-                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.84f)), loadingText: "PREPARING ATTACHMENTS..."));
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.84f)), loadingText: "PREPARING ATTACHMENTS..."));
                 try
                 {
                     foreach (var gun in guns.Values)
@@ -2460,7 +2460,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 Logging.Debug($"Getting gun skins for {player.CharacterName}");
-                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.86f)), loadingText: "PREPARING SKINS..."));
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.86f)), loadingText: "PREPARING SKINS..."));
                 var gunSkinsTxt = await new MySqlCommand($"SELECT `SkinIDs` FROM `{PLAYERS_GUNS_SKINS}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteScalarAsync();
                 if (gunSkinsTxt is string gunSkinsText)
                 {
@@ -2493,7 +2493,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 Logging.Debug($"Getting gun charms for {player.CharacterName}");
-                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.88f)), loadingText: "PREPARING CHARMS..."));
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.88f)), loadingText: "PREPARING CHARMS..."));
                 rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS_GUNS_CHARMS}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
                 try
                 {
@@ -2537,7 +2537,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 Logging.Debug($"Getting knives for {player.CharacterName}");
-                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.9f)), loadingText: "PREPARING KNIVES..."));
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.9f)), loadingText: "PREPARING KNIVES..."));
                 rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS_KNIVES}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
                 try
                 {
@@ -2585,7 +2585,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 Logging.Debug($"Getting perks for {player.CharacterName}");
-                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.91f)), loadingText: "PREPARING PERKS..."));
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.91f)), loadingText: "PREPARING PERKS..."));
                 rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS_PERKS}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
                 try
                 {
@@ -2628,7 +2628,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 Logging.Debug($"Getting gadgets for {player.CharacterName}");
-                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.93f)), loadingText: "PREPARING GADGETS..."));
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.93f)), loadingText: "PREPARING GADGETS..."));
                 rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS_GADGETS}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
                 try
                 {
@@ -2676,7 +2676,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 Logging.Debug($"Getting killstreaks for {player.CharacterName}");
-                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.94f)), loadingText: "PREPARING KILLSTREAKS..."));
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.94f)), loadingText: "PREPARING KILLSTREAKS..."));
                 rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS_KILLSTREAKS}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
                 try
                 {
@@ -2724,7 +2724,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 Logging.Debug($"Getting cards for {player.CharacterName}");
-                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.97f)), loadingText: "PREPARING CARDS..."));
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.97f)), loadingText: "PREPARING CARDS..."));
                 rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS_CARDS}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
                 try
                 {
@@ -2768,7 +2768,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 Logging.Debug($"Getting gloves for {player.CharacterName}");
-                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.98f)), loadingText: "PREPARING GLOVES..."));
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.98f)), loadingText: "PREPARING GLOVES..."));
                 rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS_GLOVES}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
                 try
                 {
@@ -2811,7 +2811,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 Logging.Debug($"Getting loadouts for {player.CharacterName}");
-                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.99f)), loadingText: "PREPARING LOADOUTS..."));
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.99f)), loadingText: "PREPARING LOADOUTS..."));
                 rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS_LOADOUTS}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
                 try
                 {
@@ -2831,7 +2831,7 @@ namespace UnturnedBlackout.Managers
                             Logging.Debug($"Found a duplicate loadout with id {loadoutID} for {player.CharacterName}, ignoring it");
                             continue;
                         }
-                        var loadoutData = Plugin.Instance.DataManager.ConvertLoadoutFromJson(rdr[3].ToString());
+                        var loadoutData = Plugin.Instance.Data.ConvertLoadoutFromJson(rdr[3].ToString());
                         if (!guns.TryGetValue(loadoutData.Primary, out LoadoutGun primary) && loadoutData.Primary != 0)
                         {
                             Logging.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a primary with id {loadoutData.Primary} which is not owned by the player, not counting this loadout");
@@ -2974,7 +2974,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 Logging.Debug($"Getting boosters for {player.CharacterName}");
-                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', (int)(96 * 0.99f)), loadingText: "PREPARING BOOSTERS..."));
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.99f)), loadingText: "PREPARING BOOSTERS..."));
                 await new MySqlCommand($"DELETE FROM `{PLAYERS_BOOSTERS}` WHERE `SteamID` = {player.CSteamID} AND `BoosterExpiration` < {DateTimeOffset.UtcNow.ToUnixTimeSeconds()};", Conn).ExecuteScalarAsync();
                 rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS_BOOSTERS}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
                 try
@@ -3016,7 +3016,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 Logging.Debug($"Getting cases for {player.CharacterName}");
-                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string(' ', (int)(96 * 0.99f)), loadingText: "PREPARING CASES..."));
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string(' ', (int)(96 * 0.99f)), loadingText: "PREPARING CASES..."));
                 rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS_CASES}` WHERE `SteamID` = {player.CSteamID} ORDER BY `CaseID` ASC;", Conn).ExecuteReaderAsync();
                 try
                 {
@@ -3064,13 +3064,13 @@ namespace UnturnedBlackout.Managers
                 playerData.SetPersonalBooster(EBoosterType.BPXP, playerData.BPBooster);
                 playerData.SetPersonalBooster(EBoosterType.GUNXP, playerData.GunXPBooster);
 
-                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.UpdateLoadingBar(player, new string('　', 96), loadingText: "FINALISING..."));
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', 96), loadingText: "FINALISING..."));
                 Logging.Debug($"Checking if player has more loadouts for {player.CharacterName}");
                 try
                 {
                     var loadoutAmount = Utility.GetLoadoutAmount(player);
                     Logging.Debug($"{player.CharacterName} should have {loadoutAmount} loadouts, he has {loadouts.Count} registered");
-                    var data = Plugin.Instance.DataManager.ConvertLoadoutToJson(DefaultLoadout);
+                    var data = Plugin.Instance.Data.ConvertLoadoutToJson(DefaultLoadout);
                     if (loadoutAmount < loadouts.Count)
                     {
                         Logging.Debug($"{player.CharacterName} has more loadouts than he should have, deleting the last ones");
@@ -3145,15 +3145,15 @@ namespace UnturnedBlackout.Managers
                             data.Level = level;
                             TaskDispatcher.QueueOnMainThread(() =>
                             {
-                                var player = Plugin.Instance.GameManager.GetGamePlayer(data.SteamID);
+                                var player = Plugin.Instance.Game.GetGamePlayer(data.SteamID);
                                 if (player != null)
                                 {
-                                    Plugin.Instance.UIManager.SendAnimation(player, new AnimationInfo(EAnimationType.LevelUp, level));
+                                    Plugin.Instance.UI.SendAnimation(player, new AnimationInfo(EAnimationType.LevelUp, level));
                                     if (ItemsSearchByLevel.TryGetValue(level, out List<AnimationItemUnlock> unlocks))
                                     {
                                         foreach (var unlock in unlocks)
                                         {
-                                            Plugin.Instance.UIManager.SendAnimation(player, new AnimationInfo(EAnimationType.ItemUnlock, unlock));
+                                            Plugin.Instance.UI.SendAnimation(player, new AnimationInfo(EAnimationType.ItemUnlock, unlock));
                                         }
                                     }
 
@@ -3957,7 +3957,7 @@ namespace UnturnedBlackout.Managers
 
                         TaskDispatcher.QueueOnMainThread(() =>
                         {
-                            var player = Plugin.Instance.GameManager.GetGamePlayer(steamID);
+                            var player = Plugin.Instance.Game.GetGamePlayer(steamID);
                             if (player != null)
                             {
                                 var icon = gun.Gun.IconLink;
@@ -3970,10 +3970,10 @@ namespace UnturnedBlackout.Managers
                                     icon = player.ActiveLoadout.SecondarySkin.IconLink;
                                 }
 
-                                Plugin.Instance.UIManager.SendAnimation(player, new AnimationInfo(EAnimationType.GunLevelUp, new AnimationItemUnlock(icon, gun.Level.ToString(), gun.Gun.GunName)));
+                                Plugin.Instance.UI.SendAnimation(player, new AnimationInfo(EAnimationType.GunLevelUp, new AnimationItemUnlock(icon, gun.Level.ToString(), gun.Gun.GunName)));
                                 if (gun.Gun.RewardAttachments.TryGetValue(gun.Level, out GunAttachment attachment))
                                 {
-                                    Plugin.Instance.UIManager.SendAnimation(player, new AnimationInfo(EAnimationType.ItemUnlock, new AnimationItemUnlock(attachment.IconLink, "", $"{attachment.AttachmentName} [{gun.Gun.GunName}]")));
+                                    Plugin.Instance.UI.SendAnimation(player, new AnimationInfo(EAnimationType.ItemUnlock, new AnimationItemUnlock(attachment.IconLink, "", $"{attachment.AttachmentName} [{gun.Gun.GunName}]")));
                                 }
                             }
                         });
@@ -4886,7 +4886,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 var loadoutData = new LoadoutData(playerLoadout);
-                await new MySqlCommand($"UPDATE `{PLAYERS_LOADOUTS}` SET `Loadout` = '{Plugin.Instance.DataManager.ConvertLoadoutToJson(loadoutData)}' WHERE `SteamID` = {steamID} AND `LoadoutID` = {loadoutID};", Conn).ExecuteScalarAsync();
+                await new MySqlCommand($"UPDATE `{PLAYERS_LOADOUTS}` SET `Loadout` = '{Plugin.Instance.Data.ConvertLoadoutToJson(loadoutData)}' WHERE `SteamID` = {steamID} AND `LoadoutID` = {loadoutID};", Conn).ExecuteScalarAsync();
             }
             catch (Exception ex)
             {
@@ -5586,7 +5586,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 Logging.Debug($"Sending {bulkRewards.Count} bulk rewards");
-                Plugin.Instance.RewardManager.GiveBulkRewards(bulkRewards);
+                Plugin.Instance.Reward.GiveBulkRewards(bulkRewards);
 
                 Logging.Debug("Checking if quests are to be wiped");
                 foreach (var data in PlayerData.Values)
@@ -5883,7 +5883,7 @@ namespace UnturnedBlackout.Managers
                             data.Battlepass.CurrentTier = tier;
                             TaskDispatcher.QueueOnMainThread(() =>
                             {
-                                var player = Plugin.Instance.GameManager.GetGamePlayer(data.SteamID);
+                                var player = Plugin.Instance.Game.GetGamePlayer(data.SteamID);
                                 if (player != null)
                                 {
                                     // Code to send battlepass level up

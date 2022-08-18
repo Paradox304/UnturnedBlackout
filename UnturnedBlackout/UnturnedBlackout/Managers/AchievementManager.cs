@@ -15,7 +15,7 @@ namespace UnturnedBlackout.Managers
         {
             var steamID = player.Player.CSteamID;
 
-            var db = Plugin.Instance.DBManager;
+            var db = Plugin.Instance.DB;
             var data = player.Data;
 
             if (!data.AchievementsSearchByType.TryGetValue(achievementType, out List<PlayerAchievement> achievements))
@@ -54,7 +54,7 @@ namespace UnturnedBlackout.Managers
                 {
                     if (achievement.Amount == nextTier.TargetAmount)
                     {
-                        TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UIManager.SendAnimation(player, new Models.Animation.AnimationInfo(EAnimationType.AchievementCompletion, nextTier)));
+                        TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.SendAnimation(player, new Models.Animation.AnimationInfo(EAnimationType.AchievementCompletion, nextTier)));
                     }
                 }
 
@@ -67,7 +67,7 @@ namespace UnturnedBlackout.Managers
 
         public void ClaimAchievementTier(CSteamID steamID, int achievementID)
         {
-            var db = Plugin.Instance.DBManager;
+            var db = Plugin.Instance.DB;
             if (!db.PlayerData.TryGetValue(steamID, out PlayerData data))
             {
                 Logging.Debug($"Error finding player data for player with steamID {steamID}");
@@ -93,14 +93,14 @@ namespace UnturnedBlackout.Managers
             }
 
             achievement.CurrentTier = nextTier.TierID;
-            Plugin.Instance.RewardManager.GiveReward(steamID, nextTier.Rewards);
-            Plugin.Instance.RewardManager.RemoveReward(steamID, nextTier.RemoveRewards);
-            Plugin.Instance.UIManager.OnAchievementsUpdated(steamID);
+            Plugin.Instance.Reward.GiveReward(steamID, nextTier.Rewards);
+            Plugin.Instance.Reward.RemoveReward(steamID, nextTier.RemoveRewards);
+            Plugin.Instance.UI.OnAchievementsUpdated(steamID);
 
             data.SetAchievementXPBooster();
             ThreadPool.QueueUserWorkItem(async (o) =>
             {
-                await Plugin.Instance.DBManager.UpdatePlayerAchievementTierAsync(steamID, achievementID, nextTier.TierID);
+                await Plugin.Instance.DB.UpdatePlayerAchievementTierAsync(steamID, achievementID, nextTier.TierID);
             });
         }
 

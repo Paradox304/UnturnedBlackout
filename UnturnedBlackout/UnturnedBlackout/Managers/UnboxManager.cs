@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Rocket.Unturned.Player;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,27 +17,27 @@ namespace UnturnedBlackout.Managers
         {
             get
             {
-                return Plugin.Instance.DBManager;
+                return Plugin.Instance.DB;
             }
         }
 
-        public Reward CalculateReward(Case @case, GamePlayer player)
+        public bool TryCalculateReward(Case @case, UnturnedPlayer player, out Reward reward, out string rewardImage, out string rewardName, out string rewardDesc, out ERarity rewardRarity, out bool isDuplicate, out int duplicateScrapAmount)
         {
-            Logging.Debug($"Calculating reward for case with id {@case.CaseID} for {player.Player.CharacterName}");
+            Logging.Debug($"Calculating reward for case with id {@case.CaseID} for {player.CharacterName}");
             var rewardRarity = CalculateRewardRarity(@case.Weights);
             Logging.Debug($"Rarity found: {rewardRarity}");
 
-            if (!DB.PlayerLoadouts.TryGetValue(player.SteamID, out PlayerLoadout loadout))
+            if (!DB.PlayerLoadouts.TryGetValue(player.CSteamID, out PlayerLoadout loadout))
             {
-                Logging.Debug($"Error getting loadout for player with steam id {player.SteamID}");
-                return null;
+                Logging.Debug($"Error getting loadout for player with steam id {player.CSteamID}");
+                return false;
             }
 
             switch (rewardRarity)
             {
                 case ECaseRarity.KNIFE:
                     {
-                        Logging.Debug($"{player.Player.CharacterName} reward rarity is KNIFE");
+                        Logging.Debug($"{player.CharacterName} reward rarity is KNIFE");
                         var knivesAvailable = DB.Knives.Values.Where(k => k.KnifeWeight > 0 && (k.MaxAmount == 0 || k.MaxAmount > k.UnboxedAmount) && (!loadout.Knives.TryGetValue(k.KnifeID, out LoadoutKnife knife) || !knife.IsBought)).ToList();
                         Logging.Debug($"Found {knivesAvailable.Count} knives available to be unboxed by the player");
                         Knife knife = null;
@@ -53,12 +54,12 @@ namespace UnturnedBlackout.Managers
                     }
                 case ECaseRarity.GLOVE:
                     {
-                        Logging.Debug($"{player.Player.CharacterName} reward rarity is GLOVE");
+                        Logging.Debug($"{player.CharacterName} reward rarity is GLOVE");
                         break;
                     }
                 default:
                     {
-                        Logging.Debug($"{player.Player.CharacterName} reward rarity is GUN SKIN with rarity {rewardRarity}");
+                        Logging.Debug($"{player.CharacterName} reward rarity is GUN SKIN with rarity {rewardRarity}");
                         break;
                     }
             }
