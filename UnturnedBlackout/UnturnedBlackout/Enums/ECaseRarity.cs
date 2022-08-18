@@ -2,13 +2,13 @@
 {
     public enum ECaseRarity
     {
-        Common,
-        Uncommon,
-        Rare,
-        Epic,
-        Legendary,
-        Mythical,
-        Knife,
-        Glove
+        COMMON,
+        UNCOMMON,
+        RARE,
+        EPIC,
+        LEGENDARY,
+        MYTHICAL,
+        KNIFE,
+        GLOVE
     }
 }

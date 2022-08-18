@@ -5846,6 +5846,7 @@ namespace UnturnedBlackout.Instances
                 SendRarity("SERVER Unbox Content Rolling", @case.Case.CaseRarity, i);
             }
         }
+
         public IEnumerator UnboxCase()
         {
 

@@ -263,6 +263,7 @@
     <Compile Include="Managers\RewardManager.cs" />
     <Compile Include="Managers\ServerManager.cs" />
     <Compile Include="Managers\UIManager.cs" />
+    <Compile Include="Managers\UnboxManager.cs" />
     <Compile Include="Models\Animation\AnimationItemUnlock.cs" />
     <Compile Include="Models\Configuration\BaseValuesConfig.cs" />
     <Compile Include="Models\Configuration\DefaultSkillsConfig.cs" />
