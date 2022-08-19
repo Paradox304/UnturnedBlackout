@@ -84,6 +84,7 @@ namespace UnturnedBlackout.Instances
         public EUnboxingPage UnboxingPage { get; set; }
         public int UnboxingPageID { get; set; }
         public int SelectedCaseID { get; set; }
+        public bool IsUnboxingAgain { get; set; }
 
         // Battlepass
         public (bool, int) SelectedBattlepassTierID { get; set; }
@@ -5864,6 +5865,38 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Unbox Content Rolling IMAGE 20", rewardImage);
             SendRarity("SERVER Unbox Content Rolling", rewardRarity, 20);
 
+            @case.Amount--;
+            ThreadPool.QueueUserWorkItem(async (o) =>
+            {
+                await DB.DecreasePlayerCaseAsync(SteamID, @case.Case.CaseID, 1);
+            });
+
+            if (isDuplicate)
+            {
+                ThreadPool.QueueUserWorkItem(async (o) =>
+                {
+                    await DB.IncreasePlayerScrapAsync(SteamID, duplicateScrapAmount);
+                });
+            } else
+            {
+                Plugin.Instance.Reward.GiveReward(SteamID, new List<Reward> { reward });
+            }
+
+            EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Unbox Content Result IMAGE", rewardImage);
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Unbox Content Result TEXT", rewardName);
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Unbox Content Description TEXT", rewardDesc);
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Duplicate", isDuplicate);
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Duplicate TEXT", $"+{duplicateScrapAmount}");
+
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Result {rewardRarity}", false);
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Result {rewardRarity}", true);
+
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"Crate Rolling ANIM {UnityEngine.Random.Range(1, 6)}", true);
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Crate EXAMPLE Open ANIM", true);
+
+            yield return new WaitForSeconds(6.4f);
+
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Unbox Button Toggler", @case.Amount > 0);
         }
 
 
