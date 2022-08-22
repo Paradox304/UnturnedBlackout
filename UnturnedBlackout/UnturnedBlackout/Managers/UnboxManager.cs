@@ -23,6 +23,17 @@ namespace UnturnedBlackout.Managers
 
         public bool TryCalculateReward(Case @case, UnturnedPlayer player, out Reward reward, out string rewardImage, out string rewardName, out string rewardDesc, out ERarity rewardRarity, out bool isDuplicate, out int duplicateScrapAmount)
         {
+            reward = null;
+            rewardImage = "";
+            rewardName = "";
+            rewardDesc = "";
+            rewardRarity = ERarity.NONE;
+            isDuplicate = false;
+            duplicateScrapAmount = 0;
+
+            return false;
+
+            /*
             Logging.Debug($"Calculating reward for case with id {@case.CaseID} for {player.CharacterName}");
             var rewardRarity = CalculateRewardRarity(@case.Weights);
             Logging.Debug($"Rarity found: {rewardRarity}");
@@ -65,6 +76,7 @@ namespace UnturnedBlackout.Managers
             }
 
             return null;
+            */
         }
 
         private Knife CalculateKnife(List<Knife> knives)
