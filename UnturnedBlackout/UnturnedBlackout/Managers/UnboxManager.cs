@@ -21,19 +21,8 @@ namespace UnturnedBlackout.Managers
             }
         }
 
-        public bool TryCalculateReward(Case @case, UnturnedPlayer player, out Reward reward, out string rewardImage, out string rewardName, out string rewardDesc, out ERarity rewardRarity, out bool isDuplicate, out int duplicateScrapAmount)
+        public void TryCalculateReward(Case @case, UnturnedPlayer player)
         {
-            reward = null;
-            rewardImage = "";
-            rewardName = "";
-            rewardDesc = "";
-            rewardRarity = ERarity.NONE;
-            isDuplicate = false;
-            duplicateScrapAmount = 0;
-
-            return false;
-
-            /*
             Logging.Debug($"Calculating reward for case with id {@case.CaseID} for {player.CharacterName}");
             var rewardRarity = CalculateRewardRarity(@case.Weights);
             Logging.Debug($"Rarity found: {rewardRarity}");
@@ -41,7 +30,7 @@ namespace UnturnedBlackout.Managers
             if (!DB.PlayerLoadouts.TryGetValue(player.CSteamID, out PlayerLoadout loadout))
             {
                 Logging.Debug($"Error getting loadout for player with steam id {player.CSteamID}");
-                return false;
+                return;
             }
 
             switch (rewardRarity)
@@ -49,14 +38,15 @@ namespace UnturnedBlackout.Managers
                 case ECaseRarity.KNIFE:
                     {
                         Logging.Debug($"{player.CharacterName} reward rarity is KNIFE");
-                        var knivesAvailable = DB.Knives.Values.Where(k => k.KnifeWeight > 0 && (k.MaxAmount == 0 || k.MaxAmount > k.UnboxedAmount) && (!loadout.Knives.TryGetValue(k.KnifeID, out LoadoutKnife knife) || !knife.IsBought)).ToList();
+                        var knivesAvailable = DB.Knives.Values.Where(k => k.KnifeWeight > 0 && k.MaxAmount == 0 && (!loadout.Knives.TryGetValue(k.KnifeID, out LoadoutKnife knife) || !knife.IsBought)).ToList();
                         Logging.Debug($"Found {knivesAvailable.Count} knives available to be unboxed by the player");
                         Knife knife = null;
                         if (knivesAvailable.Count > 0)
                         {
                             var newKnives = DB.Knives.Values.Where(k => k.KnifeWeight > 0 && k.MaxAmount == 0).ToList();
                             knife = newKnives[UnityEngine.Random.Range(0, newKnives.Count)];
-                        } else
+                        }
+                        else
                         {
                             knife = CalculateKnife(knivesAvailable);
                         }
@@ -75,8 +65,20 @@ namespace UnturnedBlackout.Managers
                     }
             }
 
-            return null;
-            */
+            return;
+        }
+
+        public bool TryCalculateReward(Case @case, UnturnedPlayer player, out Reward reward, out string rewardImage, out string rewardName, out string rewardDesc, out ERarity rewardRarity, out bool isDuplicate, out int duplicateScrapAmount)
+        {
+            reward = null;
+            rewardImage = "";
+            rewardName = "";
+            rewardDesc = "";
+            rewardRarity = ERarity.NONE;
+            isDuplicate = false;
+            duplicateScrapAmount = 0;
+
+            return false;
         }
 
         private Knife CalculateKnife(List<Knife> knives)

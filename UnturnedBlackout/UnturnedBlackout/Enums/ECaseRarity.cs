@@ -9,6 +9,8 @@
         LEGENDARY,
         MYTHICAL,
         KNIFE,
-        GLOVE
+        GLOVE,
+        LIMITED_KNIFE_WEIGHT,
+        LIMITED_GLOVE_WEIGHT
     }
 }

@@ -203,12 +203,20 @@ namespace UnturnedBlackout.GameTypes
 
         public void OnKill(GamePlayer killer, GamePlayer victim, ushort weaponID, string killerColor, string victimColor)
         {
-            if (!Plugin.Instance.UI.KillFeedIcons.TryGetValue(weaponID, out FeedIcon icon))
+            if (!Plugin.Instance.UI.KillFeedIcons.TryGetValue(weaponID, out FeedIcon icon) && weaponID != 0 && weaponID != 1)
             {
                 return;
             }
 
-            var feed = new Feed($"<color={killerColor}>{killer.Player.CharacterName.ToUnrich()}</color> {icon.Symbol} <color={victimColor}>{victim.Player.CharacterName.ToUnrich()}</color>", DateTime.UtcNow);
+            Feed feed;
+            if (weaponID == 0 || weaponID == 1)
+            {
+                feed = new Feed($"<color={victimColor}>{victim.Player.CharacterName.ToUnrich()}</color> {(weaponID == 0 ? "" : "")} ", DateTime.UtcNow);
+            } else
+            {
+                feed = new Feed($"<color={killerColor}>{killer.Player.CharacterName.ToUnrich()}</color> {icon.Symbol} <color={victimColor}>{victim.Player.CharacterName.ToUnrich()}</color>", DateTime.UtcNow);
+            }
+
             if (Killfeed.Count < Config.Base.FileData.MaxKillFeed)
             {
                 Killfeed.Add(feed);

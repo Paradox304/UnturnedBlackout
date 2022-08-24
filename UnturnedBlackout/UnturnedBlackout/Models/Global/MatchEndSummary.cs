@@ -79,7 +79,7 @@ namespace UnturnedBlackout.Models.Global
             BattlepassXP = (int)(Kills > 1 ? (data.BPXPPerMinutePlayed * minutesPlayed * (1f + (HasWon ? data.BPXPVictoryBonus : data.BPXPDefeatBonus))) : 0); // Left for later on when I get the formula
             BattlepassBonusXP = (int)Math.Ceiling(BattlepassXP * (player.Data.BPBooster + global.BPBooster + (player.Data.HasPrime ? data.PrimeBPXPBooster : 0f)));
 
-            KD = Kills / (float)Deaths;
+            KD = Deaths == 0 ? 0f : Kills / (float)Deaths;
 
             // Final Values
             TotalXP = MatchXP + MatchXPBonus + AchievementXPBonus + OtherXPBonus;

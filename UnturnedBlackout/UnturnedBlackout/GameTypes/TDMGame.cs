@@ -360,6 +360,15 @@ namespace UnturnedBlackout.GameTypes
 
                 if (kPlayer.GamePlayer.SteamID == tPlayer.GamePlayer.SteamID)
                 {
+                    if (cause == EDeathCause.WATER)
+                    {
+                        OnKill(kPlayer.GamePlayer, tPlayer.GamePlayer, 0, kPlayer.Team.Info.KillFeedHexCode, tPlayer.Team.Info.KillFeedHexCode);
+                    }
+                    else if (cause == EDeathCause.LANDMINE || cause == EDeathCause.SHRED || cause == EDeathCause.GRENADE)
+                    {
+                        OnKill(kPlayer.GamePlayer, tPlayer.GamePlayer, 1, kPlayer.Team.Info.KillFeedHexCode, tPlayer.Team.Info.KillFeedHexCode);
+                    }
+
                     Logging.Debug("Player killed themselves, returning");
                     return;
                 }
