@@ -3058,6 +3058,9 @@ namespace UnturnedBlackout.Managers
                 {
                     Logger.Log($"Error reading player cases for {player.CharacterName}");
                     Logger.Log(ex);
+                } finally
+                {
+                    rdr.Close();
                 }
 
                 playerData.SetPersonalBooster(EBoosterType.XP, playerData.XPBooster);

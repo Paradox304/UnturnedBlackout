@@ -6101,7 +6101,6 @@ namespace UnturnedBlackout.Instances
 
         public IEnumerator ShowMatchEndSummary(MatchEndSummary summary)
         {
-            Logging.Debug($"Starting match end summary for {Player.CharacterName}");
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary", true);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary XP Toggle", true);
             // Set the current level, xp and next level xp to animate the bar
@@ -6119,8 +6118,6 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Level 1 TEXT", nextLevelXP == 0 ? "MAX" : (currentLevel + 1).ToString("D3"));
             // Animate Match XP
 
-            Logging.Debug($"Current Level: {currentLevel}, current xp: {currentXP}, next level xp: {nextLevelXP} ({Player.CharacterName})");
-            Logging.Debug($"Animating match xp");
             var boldSpaces = currentXP == 0 ? 1 : Math.Max(1, Math.Min(113, currentXP * 113 / (nextLevelXP == 0 ? 1 : nextLevelXP)));
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", " ");
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 0", new string(' ', boldSpaces));
@@ -6130,16 +6127,13 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary XP 0 Toggle", true);
 
             var b = summary.MatchXP;
-            Logging.Debug($"Sent bold spaces {boldSpaces}, checking if {currentXP + b} is greater than {nextLevelXP} ({Player.CharacterName})");
             while (nextLevelXP != 0 && (currentXP + b) >= nextLevelXP)
             {
-                Logging.Debug($"{currentXP + b} is greater than {nextLevelXP}, current level is {currentLevel}, changing level ({Player.CharacterName})");
                 // Level has changed
                 b = currentXP + b - nextLevelXP;
                 currentLevel += 1;
                 currentXP = 0;
                 nextLevelXP = DB.Levels.TryGetValue(currentLevel + 1, out level) ? level.XPNeeded : 0;
-                Logging.Debug($"b: {b}, current level: {currentLevel}, next level xp: {nextLevelXP}");
 
                 EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary LevelUp IMAGE", DB.Levels.TryGetValue(currentLevel, out level) ? level.IconLinkLarge : "");
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary LevelUp Toggle", true);
@@ -6157,7 +6151,6 @@ namespace UnturnedBlackout.Instances
             var highlightedSpaces = Math.Max(1, Math.Min(113 - boldSpaces, b * (113 - boldSpaces) / (nextLevelXP - currentXP)));
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", new string(' ', highlightedSpaces));
             currentXP += b;
-            Logging.Debug($"Sending highlighted spaces: {highlightedSpaces}, Current XP: {currentXP} ({Player.CharacterName})");
             yield return new WaitForSeconds(0.7f);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary XP 0 Toggle", false);
             yield return new WaitForSeconds(0.18f);
@@ -6168,8 +6161,6 @@ namespace UnturnedBlackout.Instances
 
             // Animate Match Bonus XP
 
-            Logging.Debug($"Current Level: {currentLevel}, current xp: {currentXP}, next level xp: {nextLevelXP} ({Player.CharacterName})");
-            Logging.Debug($"Animating match bonus xp");
             boldSpaces = currentXP == 0 ? 1 : Math.Max(1, Math.Min(113, currentXP * 113 / (nextLevelXP == 0 ? 1 : nextLevelXP)));
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", " ");
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 0", new string(' ', boldSpaces));
@@ -6179,16 +6170,13 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary XP 0 Toggle", true);
 
             b = summary.MatchXPBonus;
-            Logging.Debug($"Sent bold spaces {boldSpaces}, checking if {currentXP + b} is greater than {nextLevelXP} ({Player.CharacterName})");
             while (nextLevelXP != 0 && (currentXP + b) >= nextLevelXP)
             {
-                Logging.Debug($"{currentXP + b} is greater than {nextLevelXP}, current level is {currentLevel}, changing level ({Player.CharacterName})");
                 // Level has changed
                 b = currentXP + b - nextLevelXP;
                 currentLevel += 1;
                 currentXP = 0;
                 nextLevelXP = DB.Levels.TryGetValue(currentLevel + 1, out level) ? level.XPNeeded : 0;
-                Logging.Debug($"b: {b}, current level: {currentLevel}, next level xp: {nextLevelXP}");
 
                 EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary LevelUp Toggle", DB.Levels.TryGetValue(currentLevel, out level) ? level.IconLinkLarge : "");
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary LevelUp Toggle", true);
@@ -6206,7 +6194,6 @@ namespace UnturnedBlackout.Instances
             highlightedSpaces = Math.Max(1, Math.Min(113 - boldSpaces, b * (113 - boldSpaces) / (nextLevelXP - currentXP)));
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", new string(' ', highlightedSpaces));
             currentXP += b;
-            Logging.Debug($"Sending highlighted spaces: {highlightedSpaces}, Current XP: {currentXP} ({Player.CharacterName})");
             yield return new WaitForSeconds(0.7f);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary XP 0 Toggle", false);
             yield return new WaitForSeconds(0.18f);
@@ -6217,8 +6204,6 @@ namespace UnturnedBlackout.Instances
 
             // Animate Achievement Bonus XP
 
-            Logging.Debug($"Current Level: {currentLevel}, current xp: {currentXP}, next level xp: {nextLevelXP} ({Player.CharacterName})");
-            Logging.Debug($"Animating achievement bonus xp");
             boldSpaces = currentXP == 0 ? 1 : Math.Max(1, Math.Min(113, currentXP * 113 / (nextLevelXP == 0 ? 1 : nextLevelXP)));
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", " ");
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 0", new string(' ', boldSpaces));
@@ -6228,16 +6213,13 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary XP 0 Toggle", true);
 
             b = summary.AchievementXPBonus;
-            Logging.Debug($"Sent bold spaces {boldSpaces}, checking if {currentXP + b} is greater than {nextLevelXP} ({Player.CharacterName})");
             while (nextLevelXP != 0 && (currentXP + b) >= nextLevelXP)
             {
-                Logging.Debug($"{currentXP + b} is greater than {nextLevelXP}, current level is {currentLevel}, changing level ({Player.CharacterName})");
                 // Level has changed
                 b = currentXP + b - nextLevelXP;
                 currentLevel += 1;
                 currentXP = 0;
                 nextLevelXP = DB.Levels.TryGetValue(currentLevel + 1, out level) ? level.XPNeeded : 0;
-                Logging.Debug($"b: {b}, current level: {currentLevel}, next level xp: {nextLevelXP}");
 
                 EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary LevelUp Toggle", DB.Levels.TryGetValue(currentLevel, out level) ? level.IconLinkLarge : "");
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary LevelUp Toggle", true);
@@ -6255,7 +6237,6 @@ namespace UnturnedBlackout.Instances
             highlightedSpaces = Math.Max(1, Math.Min(113 - boldSpaces, b * (113 - boldSpaces) / (nextLevelXP - currentXP)));
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", new string(' ', highlightedSpaces));
             currentXP += b;
-            Logging.Debug($"Sending highlighted spaces: {highlightedSpaces}, Current XP: {currentXP} ({Player.CharacterName})");
             yield return new WaitForSeconds(0.7f);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary XP 0 Toggle", false);
             yield return new WaitForSeconds(0.18f);
@@ -6266,8 +6247,6 @@ namespace UnturnedBlackout.Instances
 
             // Animate Other Bonus XP
 
-            Logging.Debug($"Current Level: {currentLevel}, current xp: {currentXP}, next level xp: {nextLevelXP} ({Player.CharacterName})");
-            Logging.Debug($"Animating other bonus xp");
             boldSpaces = currentXP == 0 ? 1 : Math.Max(1, Math.Min(113, currentXP * 113 / (nextLevelXP == 0 ? 1 : nextLevelXP)));
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", " ");
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 0", new string(' ', boldSpaces));
@@ -6277,16 +6256,13 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary XP 0 Toggle", true);
 
             b = summary.OtherXPBonus;
-            Logging.Debug($"Sent bold spaces {boldSpaces}, checking if {currentXP + b} is greater than {nextLevelXP} ({Player.CharacterName})");
             while (nextLevelXP != 0 && (currentXP + b) >= nextLevelXP)
             {
-                Logging.Debug($"{currentXP + b} is greater than {nextLevelXP}, current level is {currentLevel}, changing level ({Player.CharacterName})");
                 // Level has changed
                 b = currentXP + b - nextLevelXP;
                 currentLevel += 1;
                 currentXP = 0;
                 nextLevelXP = DB.Levels.TryGetValue(currentLevel + 1, out level) ? level.XPNeeded : 0;
-                Logging.Debug($"b: {b}, current level: {currentLevel}, next level xp: {nextLevelXP}");
 
                 EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary LevelUp Toggle", DB.Levels.TryGetValue(currentLevel, out level) ? level.IconLinkLarge : "");
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary LevelUp Toggle", true);
@@ -6304,7 +6280,6 @@ namespace UnturnedBlackout.Instances
             highlightedSpaces = Math.Max(1, Math.Min(113 - boldSpaces, b * (113 - boldSpaces) / (nextLevelXP - currentXP)));
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", new string(' ', highlightedSpaces));
             currentXP += b;
-            Logging.Debug($"Sending highlighted spaces: {highlightedSpaces}, Current XP: {currentXP} ({Player.CharacterName})");
             yield return new WaitForSeconds(0.7f);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary XP 0 Toggle", false);
             yield return new WaitForSeconds(0.18f);

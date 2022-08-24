@@ -120,15 +120,12 @@ namespace UnturnedBlackout
                 return;
             }
 
-            Logging.Debug($"HOTKEY PRESSED: {player.channel.owner.playerID.characterName}, KEY: {key}, STATE: {state}");
             switch (key)
             {
                 case 0:
-                    Logging.Debug("Sending scoreboard");
                     game.OnChangeFiremode(gPlayer);
                     break;
                 case 1:
-                    Logging.Debug("Sending loadout change");
                     if (game.GamePhase != Enums.EGamePhase.Ending && !gPlayer.HasMidgameLoadout)
                     {
                         gPlayer.HasMidgameLoadout = true;

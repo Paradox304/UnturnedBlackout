@@ -667,7 +667,7 @@ namespace UnturnedBlackout.GameTypes
 
             if (player.GamePlayer.HasSpawnProtection)
             {
-                Logging.Debug($"{player.GamePlayer.Player.CharacterName} got damaged but damage got ignored due to spawn protection");
+                Logging.Debug($"{player.GamePlayer.Player.CharacterName} got damaged but damage got ignored due to spawn protection, Is Timer Enabled: {player.GamePlayer.m_RemoveSpawnProtection.Enabled}");
                 shouldAllow = false;
                 return;
             }

@@ -105,17 +105,23 @@ namespace UnturnedBlackout.Models.Global
         // Spawn Protection Seconds
         public void GiveSpawnProtection(int seconds)
         {
-            HasSpawnProtection = true;
+            Logging.Debug($"Giving {Player.CharacterName} spawn protection for {seconds} seconds");
             if (m_RemoveSpawnProtection.Enabled)
             {
+                Logging.Debug($"Timer to remove spawn protection is already enabled");
                 m_RemoveSpawnProtection.Stop();
             }
+            HasSpawnProtection = true;
+            Logging.Debug($"Setting HasSpawnProtection to {HasSpawnProtection}");
             m_RemoveSpawnProtection.Interval = seconds * 1000;
+            Logging.Debug($"Setting timer removal interval to {m_RemoveSpawnProtection.Interval}");
             m_RemoveSpawnProtection.Start();
+            Logging.Debug($"Starting timer to remove spawn protection at {DateTime.UtcNow}");
         }
 
         private void RemoveSpawnProtection(object sender, ElapsedEventArgs e)
         {
+            Logging.Debug($"Timer to remove spawn protection for {Player.CharacterName} has passed at {DateTime.UtcNow} removing spawn protection");
             HasSpawnProtection = false;
             m_RemoveSpawnProtection.Stop();
         }
