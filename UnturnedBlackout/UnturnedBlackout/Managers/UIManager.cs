@@ -1501,6 +1501,16 @@ namespace UnturnedBlackout.Managers
                     if (handler.UnboxingPage == EUnboxingPage.Open)
                     {
                         handler.ShowUnboxingPage(EUnboxingPage.Inventory);
+                        if (handler.CrateUnboxer != null)
+                        {
+                            Plugin.Instance.StopCoroutine(handler.CrateUnboxer);
+                        }
+                    }
+                    return;
+                case "SERVER Unbox Content Unbox BUTTON":
+                    if (handler.UnboxingPage == EUnboxingPage.Open)
+                    {
+                        handler.CrateUnboxer = Plugin.Instance.StartCoroutine(handler.UnboxCase());
                     }
                     return;
                 case "SERVER Summary Close BUTTON":

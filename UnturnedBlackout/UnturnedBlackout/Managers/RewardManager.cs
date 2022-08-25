@@ -60,6 +60,7 @@ namespace UnturnedBlackout.Managers
                             await db.IncreasePlayerBPXPAsync(steamID, Convert.ToInt32(reward.RewardValue));
                             break;
                         case ERewardType.Case:
+                            await db.IncreasePlayerCaseAsync(steamID, Convert.ToInt32(reward.RewardValue), 1);
                             break;
                         case ERewardType.BPBooster:
                             if (float.TryParse(reward.RewardValue.ToString(), out float booster))
@@ -151,6 +152,7 @@ namespace UnturnedBlackout.Managers
                                 await db.IncreasePlayerBPXPAsync(bulkReward.Item1, Convert.ToInt32(reward.RewardValue));
                                 break;
                             case ERewardType.Case:
+                                await db.IncreasePlayerCaseAsync(bulkReward.Item1, Convert.ToInt32(reward.RewardValue), 1);
                                 break;
                             case ERewardType.BPBooster:
                                 if (float.TryParse(reward.RewardValue.ToString(), out float booster))

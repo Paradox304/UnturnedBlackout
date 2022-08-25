@@ -10,7 +10,7 @@
         MYTHICAL,
         KNIFE,
         GLOVE,
-        LIMITED_KNIFE_WEIGHT,
-        LIMITED_GLOVE_WEIGHT
+        LIMITED_KNIFE,
+        LIMITED_GLOVE
     }
 }

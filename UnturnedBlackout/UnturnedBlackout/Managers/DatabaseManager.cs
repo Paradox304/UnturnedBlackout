@@ -1547,7 +1547,7 @@ namespace UnturnedBlackout.Managers
                             continue;
                         }
 
-                        var availableSkinIDs = rdr[14].GetIntListFromReaderResult();
+                        var availableSkinIDs = rdr[17].GetIntListFromReaderResult();
                         var availableSkins = new List<GunSkin>();
 
                         foreach (var skinID in availableSkinIDs)

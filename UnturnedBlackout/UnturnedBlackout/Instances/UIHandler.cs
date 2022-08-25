@@ -42,6 +42,7 @@ namespace UnturnedBlackout.Instances
         public Coroutine TimerRefresher { get; set; }
         public Coroutine AchievementPageShower { get; set; }
         public Coroutine MatchEndSummaryShower { get; set; }
+        public Coroutine CrateUnboxer { get; set; }
 
         public ITransportConnection TransportConnection { get; set; }
         public ConfigManager Config
@@ -154,6 +155,11 @@ namespace UnturnedBlackout.Instances
             if (MatchEndSummaryShower != null)
             {
                 Plugin.Instance.StopCoroutine(MatchEndSummaryShower);
+            }
+
+            if (CrateUnboxer != null)
+            {
+                Plugin.Instance.StopCoroutine(CrateUnboxer);
             }
         }
 
@@ -831,9 +837,9 @@ namespace UnturnedBlackout.Instances
         {
             EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Player Icon", PlayerData.AvatarLink);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Player Name", PlayerData.SteamName);
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Unbox BUTTON", false);
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Unbox BUTTON", Plugin.Instance.Configuration.Instance.UnlockAllItems);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Store BUTTON", false);
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass BUTTON", false);
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass BUTTON", Plugin.Instance.Configuration.Instance.UnlockAllItems);
 
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Version TEXT", Plugin.Instance.Translate("Version").ToRich());
             ClearChat();
@@ -3942,7 +3948,6 @@ namespace UnturnedBlackout.Instances
 
         public void SendRarity(string objectName, ERarity rarity, int selected)
         {
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{objectName} {rarity} {selected}", false);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{objectName} {rarity} {selected}", true);
         }
 
@@ -5841,10 +5846,17 @@ namespace UnturnedBlackout.Instances
 
             for (int i = 0; i <= MAX_ROLLING_CONTENT_PER_CASE; i++)
             {
-                var randomSkin = availableSkins[UnityEngine.Random.Range(0, availableSkins.Count)];
+                if (UnityEngine.Random.Range(1, 101) < 30)
+                {
+                    EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Rolling IMAGE {i}", UnityEngine.Random.Range(1, 101) < 50 ? "https://cdn.discordapp.com/attachments/458038940847439903/1012395492589715517/knife.png" : "https://cdn.discordapp.com/attachments/458038940847439903/1012396521066602536/glove.png");
+                    SendRarity("SERVER Unbox Content Rolling", ERarity.MYTHICAL, i);
+                } else
+                {
+                    var randomSkin = availableSkins[UnityEngine.Random.Range(0, availableSkins.Count)];
 
-                EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Rolling IMAGE {i}", randomSkin.IconLink);
-                SendRarity("SERVER Unbox Content Rolling", @case.Case.CaseRarity, i);
+                    EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Rolling IMAGE {i}", randomSkin.IconLink);
+                    SendRarity("SERVER Unbox Content Rolling", randomSkin.SkinRarity, i);
+                }
             }
         }
 
@@ -5882,11 +5894,12 @@ namespace UnturnedBlackout.Instances
                 Plugin.Instance.Reward.GiveReward(SteamID, new List<Reward> { reward });
             }
 
-            EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Unbox Content Result IMAGE", rewardImage);
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Unbox Content Result TEXT", rewardName);
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Unbox Content Description TEXT", rewardDesc);
+            EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Result IMAGE", rewardImage);
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Result TEXT", rewardName);
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Description TEXT", rewardDesc);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Duplicate", isDuplicate);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Duplicate TEXT", $"+{duplicateScrapAmount}");
+            EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Duplicate IMAGE", Config.Base.FileData.ScrapIconLink);
 
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Result {rewardRarity}", false);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Result {rewardRarity}", true);
@@ -5894,7 +5907,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"Crate Rolling ANIM {UnityEngine.Random.Range(1, 6)}", true);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Crate EXAMPLE Open ANIM", true);
 
-            yield return new WaitForSeconds(6.4f);
+            yield return new WaitForSeconds(7f);
 
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Unbox Button Toggler", @case.Amount > 0);
         }
@@ -6015,7 +6028,7 @@ namespace UnturnedBlackout.Instances
             var skins = @case.AvailableSkins.Where(k => k.MaxAmount == 0).ToList();
             for (int i = 0; i <= MAX_PREVIEW_CONTENT_PER_CASE; i++)
             {
-                if (skins.Count < i)
+                if (skins.Count < (i + 1))
                 {
                     EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content BUTTON {i}", false);
                     continue;
