@@ -13,9 +13,10 @@ namespace UnturnedBlackout.Database.Base
         public int ScrapPrice { get; set; }
         public int CoinPrice { get; set; }
         public List<(ECaseRarity, int)> Weights { get; set; }
-        public Dictionary<ERarity, List<GunSkin>> AvailableSkins { get; set; }
+        public List<GunSkin> AvailableSkins { get; set; }
+        public Dictionary<ERarity, List<GunSkin>> AvailableSkinsSearchByRarity { get; set; }
 
-        public Case(int caseID, string caseName, string iconLink, ERarity caseRarity, bool isBuyable, int scrapPrice, int coinPrice, List<(ECaseRarity, int)> weights, Dictionary<ERarity, List<GunSkin>> availableSkins)
+        public Case(int caseID, string caseName, string iconLink, ERarity caseRarity, bool isBuyable, int scrapPrice, int coinPrice, List<(ECaseRarity, int)> weights, List<GunSkin> availableSkins, Dictionary<ERarity, List<GunSkin>> availableSkinsSearchByRarity)
         {
             CaseID = caseID;
             CaseName = caseName;
@@ -26,6 +27,7 @@ namespace UnturnedBlackout.Database.Base
             CoinPrice = coinPrice;
             Weights = weights;
             AvailableSkins = availableSkins;
+            AvailableSkinsSearchByRarity = availableSkinsSearchByRarity;
         }
     }
 }

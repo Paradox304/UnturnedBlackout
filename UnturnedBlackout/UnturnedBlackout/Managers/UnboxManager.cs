@@ -143,7 +143,7 @@ namespace UnturnedBlackout.Managers
                             return false;
                         }
 
-                        var skinsAvailable = @case.AvailableSkins[skinRarity].Where(k => k.MaxAmount == 0 || k.MaxAmount > k.UnboxedAmount).ToList();
+                        var skinsAvailable = @case.AvailableSkinsSearchByRarity[skinRarity].Where(k => k.MaxAmount == 0 || k.MaxAmount > k.UnboxedAmount).ToList();
                         Logging.Debug($"Found {skinsAvailable.Count} skins available to got by {player.CharacterName} for rarity {skinRarity}");
                         if (skinsAvailable.Count == 0)
                         {

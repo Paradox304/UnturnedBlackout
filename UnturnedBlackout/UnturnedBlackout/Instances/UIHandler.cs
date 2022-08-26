@@ -1010,7 +1010,12 @@ namespace UnturnedBlackout.Instances
             {
                 var server = servers[index];
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Play BUTTON {index}", true);
-                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Play Server TEXT {index}", string.IsNullOrEmpty(server.Name) ? server.ServerName : server.Name);
+                var name = string.IsNullOrEmpty(server.Name) ? server.ServerName : server.Name;
+                if (server.IsCurrentServer)
+                {
+                    name = $"<color=#FFFF00>{name}</color>";
+                }
+                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Play Server TEXT {index}", name);
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Play Status TEXT {index}", server.IsOnline ? "<color=#36ff3c>Online</color>" : ((DateTime.UtcNow - server.LastOnline).TotalSeconds < 120 ? "<color=#f5fa73>Restarting</color>" : "<color=#ed2626>Offline</color>"));
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Play Players TEXT {index}", server.IsOnline ? $"{server.Players}/{server.MaxPlayers}" : "0/0");
             }
@@ -1025,7 +1030,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Play IMAGE", server.ServerBanner);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Play Map TEXT", " ");
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Play Description TEXT", server.ServerDesc);
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Play Join BUTTON", server.IsOnline);
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Play Join BUTTON", server.IsOnline && !server.IsCurrentServer);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Play Ping TEXT", " ");
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Play IP TEXT", $"{server.FriendlyIP}:{server.Port}");
         }
@@ -5836,43 +5841,6 @@ namespace UnturnedBlackout.Instances
             PreviewUnboxingStoreCase();
 
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Unbox Button Toggler", @case.Amount > 0);
-
-            int poolSize = 0;
-            foreach (var weight in @case.Case.Weights) poolSize += weight.Item2;
-
-            for (int i = 0; i <= MAX_ROLLING_CONTENT_PER_CASE; i++)
-            {
-                var caseRarity = CalculateCaseRarity(@case.Case.Weights, poolSize);
-
-                switch (caseRarity)
-                {
-                    case ECaseRarity.KNIFE or ECaseRarity.LIMITED_KNIFE:
-                        EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Rolling IMAGE {i}", "https://cdn.discordapp.com/attachments/458038940847439903/1012395492589715517/knife.png");
-                        break;
-                    case ECaseRarity.GLOVE or ECaseRarity.LIMITED_GLOVE:
-                        EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Rolling IMAGE {i}", "https://cdn.discordapp.com/attachments/458038940847439903/1012396521066602536/glove.png");
-                        break;
-                    default:
-                        if (!Enum.TryParse(caseRarity.ToString(), true, out ERarity skinRarity))
-                        {
-                            Logging.Debug($"Error parsing {caseRarity} to a specified skin rarity");
-                            return;
-                        }
-                        break;
-                }
-
-                if (UnityEngine.Random.Range(1, 101) < 30)
-                {
-                    EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Rolling IMAGE {i}", UnityEngine.Random.Range(1, 101) < 50 ? "https://cdn.discordapp.com/attachments/458038940847439903/1012395492589715517/knife.png" : "https://cdn.discordapp.com/attachments/458038940847439903/1012396521066602536/glove.png");
-                    SendRarity("SERVER Unbox Content Rolling", ERarity.MYTHICAL, i);
-                } else
-                {
-                    var randomSkin = availableSkins[UnityEngine.Random.Range(0, availableSkins.Count)];
-
-                    EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Rolling IMAGE {i}", randomSkin.IconLink);
-                    SendRarity("SERVER Unbox Content Rolling", randomSkin.SkinRarity, i);
-                }
-            }
         }
         private ECaseRarity CalculateCaseRarity(List<(ECaseRarity, int)> weights, int poolSize)
         {
@@ -5908,8 +5876,52 @@ namespace UnturnedBlackout.Instances
                 yield break;
             }
 
-            EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Unbox Content Rolling IMAGE 20", rewardImage);
-            SendRarity("SERVER Unbox Content Rolling", rewardRarity, 20);
+            int poolSize = 0;
+            foreach (var weight in @case.Case.Weights) poolSize += weight.Item2;
+
+            for (int i = 0; i <= MAX_ROLLING_CONTENT_PER_CASE; i++)
+            {
+                if (i == 20)
+                {
+                    EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Rolling IMAGE {i}", rewardImage);
+                    SendRarity("SERVER Unbox Content Rolling", rewardRarity, i);
+                }
+
+                var caseRarity = CalculateCaseRarity(@case.Case.Weights, poolSize);
+
+                switch (caseRarity)
+                {
+                    case ECaseRarity.KNIFE or ECaseRarity.LIMITED_KNIFE:
+                        EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Rolling IMAGE {i}", "https://cdn.discordapp.com/attachments/458038940847439903/1012395492589715517/knife.png");
+                        continue;
+                    case ECaseRarity.GLOVE or ECaseRarity.LIMITED_GLOVE:
+                        EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Rolling IMAGE {i}", "https://cdn.discordapp.com/attachments/458038940847439903/1012396521066602536/glove.png");
+                        continue;
+                    default:
+                        if (!Enum.TryParse(caseRarity.ToString(), true, out ERarity skinRarity))
+                        {
+                            Logging.Debug($"Error parsing {caseRarity} to a specified skin rarity for rolling for case with id {SelectedCaseID}");
+                            break;
+                        }
+
+                        if (!@case.Case.AvailableSkinsSearchByRarity.TryGetValue(skinRarity, out List<GunSkin> raritySkins))
+                        {
+                            Logging.Debug($"Error getting skins with {skinRarity} for rolling for case with id {SelectedCaseID}");
+                            break;
+                        }
+
+                        var randomSkin = raritySkins[UnityEngine.Random.Range(0, raritySkins.Count)];
+
+                        EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Rolling IMAGE {i}", randomSkin.IconLink);
+                        SendRarity("SERVER Unbox Content Rolling", randomSkin.SkinRarity, i);
+                        continue;
+                }
+
+                var randomS = @case.Case.AvailableSkins[UnityEngine.Random.Range(0, @case.Case.AvailableSkins.Count)];
+
+                EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Rolling IMAGE {i}", randomS.IconLink);
+                SendRarity("SERVER Unbox Content Rolling", randomS.SkinRarity, i);
+            }
 
             @case.Amount--;
             ThreadPool.QueueUserWorkItem(async (o) =>

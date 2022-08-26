@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SDG.Unturned;
+using System;
 using System.Net;
 
 namespace UnturnedBlackout.Database.Base
@@ -16,6 +17,8 @@ namespace UnturnedBlackout.Database.Base
         public string ServerBanner { get; set; }
         public string ServerDesc { get; set; }
 
+        public bool IsCurrentServer { get; set; }
+
         // Details got from the timer
         public string Name { get; set; }
         public int Players { get; set; }
@@ -31,6 +34,7 @@ namespace UnturnedBlackout.Database.Base
             FriendlyIP = friendlyIP;
             ServerBanner = serverBanner;
             ServerDesc = serverDesc;
+            IsCurrentServer = friendlyIP == Plugin.Instance.Configuration.Instance.IP && PortNo == Provider.port;
 
             if (!IPAddress.TryParse(IP, out IPAddress ipAddress))
             {

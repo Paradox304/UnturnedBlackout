@@ -1548,7 +1548,8 @@ namespace UnturnedBlackout.Managers
                         }
 
                         var availableSkinIDs = rdr[17].GetIntListFromReaderResult();
-                        var availableSkins = new Dictionary<ERarity, List<GunSkin>>();
+                        var availableSkins = new List<GunSkin>();
+                        var availableSkinsSearchByRarity = new Dictionary<ERarity, List<GunSkin>>();
 
                         foreach (var skinID in availableSkinIDs)
                         {
@@ -1558,18 +1559,19 @@ namespace UnturnedBlackout.Managers
                                 continue;
                             }
 
-                            if (!availableSkins.ContainsKey(skin.SkinRarity))
-                            {
-                                availableSkins.Add(skin.SkinRarity, new());
-                            }
-
-                            if (availableSkins[skin.SkinRarity].Contains(skin))
+                            if (availableSkins.Contains(skin))
                             {
                                 Logging.Debug($"Case with id {caseID} has a skin with id {skinID} which is a duplicate, the same skin is already added to the case");
                                 continue;
                             }
 
-                            availableSkins[skin.SkinRarity].Add(skin);
+                            if (!availableSkinsSearchByRarity.ContainsKey(skin.SkinRarity))
+                            {
+                                availableSkinsSearchByRarity.Add(skin.SkinRarity, new());
+                            }
+
+                            availableSkinsSearchByRarity[skin.SkinRarity].Add(skin);
+                            availableSkins.Add(skin);
                         }
 
                         if (cases.ContainsKey(caseID))
@@ -1578,7 +1580,7 @@ namespace UnturnedBlackout.Managers
                             continue;
                         }
 
-                        cases.Add(caseID, new Case(caseID, caseName, iconLink, caseRarity, isBuyable, scrapPrice, coinPrice, caseRarities, availableSkins));
+                        cases.Add(caseID, new Case(caseID, caseName, iconLink, caseRarity, isBuyable, scrapPrice, coinPrice, caseRarities, availableSkins, availableSkinsSearchByRarity));
                     }
 
                     Logging.Debug($"Successfully read {cases.Count} cases from base data");
@@ -1609,11 +1611,6 @@ namespace UnturnedBlackout.Managers
                         var serverDesc = rdr[5].ToString();
 
                         var server = new Server(ip, port, serverName, friendlyIP, serverBanner, serverDesc);
-                        if (friendlyIP == Plugin.Instance.Configuration.Instance.IP && server.PortNo == Provider.port)
-                        {
-                            Logging.Debug($"Server registered with ip {server.IP} and port {server.Port} is the current server, not adding this");
-                            continue;
-                        }
 
                         servers.Add(server);
                     }
