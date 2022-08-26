@@ -5885,6 +5885,7 @@ namespace UnturnedBlackout.Instances
                 {
                     EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Rolling IMAGE {i}", rewardImage);
                     SendRarity("SERVER Unbox Content Rolling", rewardRarity, i);
+                    continue;
                 }
 
                 var caseRarity = CalculateCaseRarity(@case.Case.Weights, poolSize);

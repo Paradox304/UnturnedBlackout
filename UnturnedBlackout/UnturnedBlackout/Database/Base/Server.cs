@@ -34,7 +34,6 @@ namespace UnturnedBlackout.Database.Base
             FriendlyIP = friendlyIP;
             ServerBanner = serverBanner;
             ServerDesc = serverDesc;
-            IsCurrentServer = friendlyIP == Plugin.Instance.Configuration.Instance.IP && PortNo == Provider.port;
 
             if (!IPAddress.TryParse(IP, out IPAddress ipAddress))
             {
@@ -54,6 +53,7 @@ namespace UnturnedBlackout.Database.Base
             }
             PortNo = portNo;
 
+            IsCurrentServer = friendlyIP == Plugin.Instance.Configuration.Instance.IP && PortNo == Provider.port;
             LastOnline = DateTime.UtcNow;
         }
     }
