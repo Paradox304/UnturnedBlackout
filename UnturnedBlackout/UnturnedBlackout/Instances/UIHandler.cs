@@ -5837,15 +5837,30 @@ namespace UnturnedBlackout.Instances
 
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Unbox Button Toggler", @case.Amount > 0);
 
-            var availableSkins = @case.Case.AvailableSkins.Where(k => k.MaxAmount == 0 || (k.UnboxedAmount < k.MaxAmount)).ToList();
-            if (availableSkins.Count == 0)
-            {
-                Logging.Debug($"Case with ID {@case.Case.CaseID} has no skins available to unbox o_o");
-                return;
-            }
+            int poolSize = 0;
+            foreach (var weight in @case.Case.Weights) poolSize += weight.Item2;
 
             for (int i = 0; i <= MAX_ROLLING_CONTENT_PER_CASE; i++)
             {
+                var caseRarity = CalculateCaseRarity(@case.Case.Weights, poolSize);
+
+                switch (caseRarity)
+                {
+                    case ECaseRarity.KNIFE or ECaseRarity.LIMITED_KNIFE:
+                        EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Rolling IMAGE {i}", "https://cdn.discordapp.com/attachments/458038940847439903/1012395492589715517/knife.png");
+                        break;
+                    case ECaseRarity.GLOVE or ECaseRarity.LIMITED_GLOVE:
+                        EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Rolling IMAGE {i}", "https://cdn.discordapp.com/attachments/458038940847439903/1012396521066602536/glove.png");
+                        break;
+                    default:
+                        if (!Enum.TryParse(caseRarity.ToString(), true, out ERarity skinRarity))
+                        {
+                            Logging.Debug($"Error parsing {caseRarity} to a specified skin rarity");
+                            return;
+                        }
+                        break;
+                }
+
                 if (UnityEngine.Random.Range(1, 101) < 30)
                 {
                     EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Rolling IMAGE {i}", UnityEngine.Random.Range(1, 101) < 50 ? "https://cdn.discordapp.com/attachments/458038940847439903/1012395492589715517/knife.png" : "https://cdn.discordapp.com/attachments/458038940847439903/1012396521066602536/glove.png");
@@ -5858,6 +5873,25 @@ namespace UnturnedBlackout.Instances
                     SendRarity("SERVER Unbox Content Rolling", randomSkin.SkinRarity, i);
                 }
             }
+        }
+        private ECaseRarity CalculateCaseRarity(List<(ECaseRarity, int)> weights, int poolSize)
+        {
+            Logging.Debug($"Calculating reward rarities, found {weights.Count} weights to look from");
+            int randInt = UnityEngine.Random.Range(0, poolSize) + 1;
+
+            Logging.Debug($"Total Poolsize: {poolSize}, random int: {randInt}");
+            int accumulatedProbability = 0;
+            for (int i = 0; i < weights.Count; i++)
+            {
+                var weight = weights[i];
+                Logging.Debug($"i: {i}, rarity: {weight.Item1}, weight: {weight.Item2}");
+                accumulatedProbability += weight.Item2;
+                Logging.Debug($"accumulated probability: {accumulatedProbability}, rand int: {randInt}");
+                if (randInt <= accumulatedProbability)
+                    return weight.Item1;
+            }
+            Logging.Debug($"Random rarity not found, sending a random rarity");
+            return weights[UnityEngine.Random.Range(0, weights.Count)].Item1;
         }
 
         public IEnumerator UnboxCase()

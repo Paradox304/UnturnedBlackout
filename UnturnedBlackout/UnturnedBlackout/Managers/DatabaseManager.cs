@@ -1548,7 +1548,7 @@ namespace UnturnedBlackout.Managers
                         }
 
                         var availableSkinIDs = rdr[17].GetIntListFromReaderResult();
-                        var availableSkins = new List<GunSkin>();
+                        var availableSkins = new Dictionary<ERarity, List<GunSkin>>();
 
                         foreach (var skinID in availableSkinIDs)
                         {
@@ -1558,13 +1558,18 @@ namespace UnturnedBlackout.Managers
                                 continue;
                             }
 
-                            if (availableSkins.Contains(skin))
+                            if (!availableSkins.ContainsKey(skin.SkinRarity))
+                            {
+                                availableSkins.Add(skin.SkinRarity, new());
+                            }
+
+                            if (availableSkins[skin.SkinRarity].Contains(skin))
                             {
                                 Logging.Debug($"Case with id {caseID} has a skin with id {skinID} which is a duplicate, the same skin is already added to the case");
                                 continue;
                             }
 
-                            availableSkins.Add(skin);
+                            availableSkins[skin.SkinRarity].Add(skin);
                         }
 
                         if (cases.ContainsKey(caseID))
