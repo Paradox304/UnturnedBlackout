@@ -240,6 +240,7 @@
     <Compile Include="Enums\ERarity.cs" />
     <Compile Include="Enums\ERewardType.cs" />
     <Compile Include="Enums\ETeam.cs" />
+    <Compile Include="Enums\EUIPage.cs" />
     <Compile Include="Enums\EUnboxingPage.cs" />
     <Compile Include="FileReaders\IFileReader.cs" />
     <Compile Include="FileReaders\XMLFileReader.cs" />

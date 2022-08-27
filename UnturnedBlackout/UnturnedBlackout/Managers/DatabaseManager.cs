@@ -3915,6 +3915,8 @@ namespace UnturnedBlackout.Managers
                     return;
                 }
                 loadout.Guns.Add(loadoutGun.Gun.GunID, loadoutGun);
+
+                Plugin.Instance.UI.OnUIUpdated(steamID, (EUIPage)(byte)loadoutGun.Gun.GunType);
             }
             catch (Exception ex)
             {
@@ -4114,56 +4116,43 @@ namespace UnturnedBlackout.Managers
             try
             {
                 await Conn.OpenAsync();
-                Logging.Debug("1");
                 if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
                 {
-                    Logging.Debug($"Couldnt finding loadout for player with steam id {steamID}");
                     var skins = await new MySqlCommand($"SELECT `SkinIDs` FROM `{PLAYERS_GUNS_SKINS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-                    Logging.Debug("2");
                     var ids = skins.GetIntListFromReaderResult();
-                    Logging.Debug($"3, {ids.Count}");
                     if (!ids.Contains(id))
                     {
-                        Logging.Debug("4");
                         ids.Add(id);
                         var newSkins = ids.GetStringFromIntList();
-                        Logging.Debug($"5, {newSkins}");
                         await new MySqlCommand($"UPDATE `{PLAYERS_GUNS_SKINS}` SET `SkinIDs` = '{newSkins}' WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
                     }
                     return;
                 }
 
-                Logging.Debug("2");
                 if (!GunSkinsSearchByID.TryGetValue(id, out GunSkin skin))
                 {
                     Logging.Debug($"Error finding gun skin with id {id}");
                     return;
                 }
 
-                Logging.Debug("3");
                 if (loadout.GunSkinsSearchByID.ContainsKey(id))
                 {
                     Logging.Debug($"Found gun skin with id {id} already registered to player with steam id {steamID}");
                     return;
                 }
 
-                Logging.Debug("4");
                 loadout.GunSkinsSearchByID.Add(id, skin);
                 if (!loadout.GunSkinsSearchByGunID.TryGetValue(skin.Gun.GunID, out List<GunSkin> gunSkins))
                 {
-                    Logging.Debug("5");
                     loadout.GunSkinsSearchByGunID.Add(skin.Gun.GunID, new());
                 }
-                Logging.Debug("6");
                 loadout.GunSkinsSearchByGunID[skin.Gun.GunID].Add(skin);
-
-                Logging.Debug("7");
                 loadout.GunSkinsSearchBySkinID.Add(skin.SkinID, skin);
 
-                Logging.Debug("8");
                 var skinsString = loadout.GunSkinsSearchByID.Keys.ToList().GetStringFromIntList();
-                Logging.Debug($"{skinsString}");
                 await new MySqlCommand($"UPDATE `{PLAYERS_GUNS_SKINS}` SET `SkinIDs` = '{skinsString}' WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+
+                Plugin.Instance.UI.OnUIUpdated(steamID, EUIPage.GunSkin);
             }
             catch (Exception ex)
             {
@@ -4171,6 +4160,23 @@ namespace UnturnedBlackout.Managers
                 Logger.Log(ex);
             }
             finally
+            {
+                await Conn.CloseAsync();
+            }
+        }
+
+        public async Task UpdatePlayerGunSkinUnboxedAmountAsync(CSteamID steamID, int id, int amount)
+        {
+            using MySqlConnection Conn = new(ConnectionString);
+
+            try
+            {
+
+            } catch (Exception ex)
+            {
+                Logger.Log($"Error updating skin unboxed amount with id {id} by amount {amount}");
+                Logger.Log(ex);
+            } finally
             {
                 await Conn.CloseAsync();
             }
@@ -4207,6 +4213,8 @@ namespace UnturnedBlackout.Managers
 
                 var loadoutGunCharm = new LoadoutGunCharm(gunCharm, isBought);
                 loadout.GunCharms.Add(gunCharmID, loadoutGunCharm);
+
+                Plugin.Instance.UI.OnUIUpdated(steamID, EUIPage.GunCharm);
             }
             catch (Exception ex)
             {
@@ -4315,6 +4323,8 @@ namespace UnturnedBlackout.Managers
                 }
 
                 loadout.Knives.Add(knifeID, loadoutKnife);
+
+                Plugin.Instance.UI.OnUIUpdated(steamID, EUIPage.Knife);
             }
             catch (Exception ex)
             {
@@ -4426,6 +4436,8 @@ namespace UnturnedBlackout.Managers
                 var loadoutPerk = new LoadoutPerk(perk, isBought);
                 loadout.Perks.Add(perkID, loadoutPerk);
 
+                Plugin.Instance.UI.OnUIUpdated(steamID, EUIPage.Perk);
+
             }
             catch (Exception ex)
             {
@@ -4500,6 +4512,8 @@ namespace UnturnedBlackout.Managers
 
                 var loadoutGadget = new LoadoutGadget(gadget, 0, isBought);
                 loadout.Gadgets.Add(gadgetID, loadoutGadget);
+
+                Plugin.Instance.UI.OnUIUpdated(steamID, gadget.IsTactical ? EUIPage.Tactical : EUIPage.Lethal);
             }
             catch (Exception ex)
             {
@@ -4610,6 +4624,8 @@ namespace UnturnedBlackout.Managers
 
                 var loadoutKillstreak = new LoadoutKillstreak(killstreak, 0, isBought);
                 loadout.Killstreaks.Add(killstreakID, loadoutKillstreak);
+
+                Plugin.Instance.UI.OnUIUpdated(steamID, EUIPage.Killstreak);
             }
             catch (Exception ex)
             {
@@ -4720,6 +4736,8 @@ namespace UnturnedBlackout.Managers
 
                 var loadoutCard = new LoadoutCard(card, isBought);
                 loadout.Cards.Add(cardID, loadoutCard);
+
+                Plugin.Instance.UI.OnUIUpdated(steamID, EUIPage.Card);
             }
             catch (Exception ex)
             {
@@ -4826,6 +4844,8 @@ namespace UnturnedBlackout.Managers
 
                 var loadoutGlove = new LoadoutGlove(glove, isBought);
                 loadout.Gloves.Add(gloveID, loadoutGlove);
+
+                Plugin.Instance.UI.OnUIUpdated(steamID, EUIPage.Glove);
             }
             catch (Exception ex)
             {
@@ -6021,6 +6041,7 @@ namespace UnturnedBlackout.Managers
                 data.CasesSearchByID.Add(caseID, playerCase);
 
                 // Code to update case pages
+                Plugin.Instance.UI.OnUIUpdated(steamID, EUIPage.Case);
             }
             catch (Exception ex)
             {
@@ -6071,6 +6092,7 @@ namespace UnturnedBlackout.Managers
                     data.Cases.RemoveAll(k => k.Case.CaseID == caseID);
 
                     // Code to update case pages
+                    Plugin.Instance.UI.OnUIUpdated(steamID, EUIPage.Case);
                 } else
                 {
                     playerCase.Amount = updatedAmount;

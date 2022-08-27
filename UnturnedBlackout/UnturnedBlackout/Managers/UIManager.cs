@@ -1151,6 +1151,74 @@ namespace UnturnedBlackout.Managers
 
         // EVENTS
 
+        public void OnUIUpdated(CSteamID steamID, EUIPage page)
+        {
+            if (!UIHandlersLookup.TryGetValue(steamID, out UIHandler handler))
+            {
+                return;
+            }
+
+            switch (page)
+            {
+                case EUIPage.Pistol:
+                    handler.BuildPistolPages();
+                    return;
+                case EUIPage.SMG:
+                    handler.BuildSMGPages();
+                    return;
+                case EUIPage.LMG:
+                    handler.BuildLMGPages();
+                    return;
+                case EUIPage.Shotgun:
+                    handler.BuildShotgunPages();
+                    return;
+                case EUIPage.AR:
+                    handler.BuildARPages();
+                    return;
+                case EUIPage.Sniper:
+                    handler.BuildSniperPages();
+                    return;
+                case EUIPage.Carbine:
+                    handler.BuildCarbinePages();
+                    return;
+                case EUIPage.Attachment:
+                    handler.BuildAttachmentPages();
+                    return;
+                case EUIPage.GunCharm;
+                    handler.BuildGunCharmPages();
+                    return;
+                case EUIPage.GunSkin:
+                    handler.BuildGunSkinPages();
+                    return;
+                case EUIPage.Knife:
+                    handler.BuildKnifePages();
+                    return;
+                case EUIPage.Tactical:
+                    handler.BuildTacticalPages();
+                    return;
+                case EUIPage.Lethal:
+                    handler.BuildLethalPages();
+                    return;
+                case EUIPage.Card:
+                    handler.BuildCardPages();
+                    return;
+                case EUIPage.Glove:
+                    handler.BuildGlovePages();
+                    return;
+                case EUIPage.Killstreak:
+                    handler.BuildKillstreakPages();
+                    return;
+                case EUIPage.Achievement:
+                    handler.BuildAchievementPages();
+                    return;
+                case EUIPage.Case:
+                    handler.BuildUnboxingInventoryPages();
+                    return;
+                default:
+                    throw new ArgumentOutOfRangeException("page", "EUIPage is not as expected");
+            }
+        }
+
         public void OnGameUpdated()
         {
             foreach (var handler in UIHandlers)
