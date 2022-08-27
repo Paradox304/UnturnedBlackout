@@ -6127,7 +6127,21 @@ namespace UnturnedBlackout.Instances
                 return;
             }
 
+            switch (SelectedCaseBuyMethod)
+            {
+                case ECurrency.Coins:
+                    PlayerData.Coins -= buyPrice;
+                    ThreadPool.QueueUserWorkItem(async (o) => await DB.DecreasePlayerCoinsAsync(SteamID, buyPrice));
+                    break;
+                case ECurrency.Scrap:
+                    PlayerData.Scrap -= buyPrice;
+                    ThreadPool.QueueUserWorkItem(async (o) => await DB.DecreasePlayerScrapAsync(SteamID, buyPrice));
+                    break;
+                default:
+                    return;
+            }
 
+            ThreadPool.QueueUserWorkItem(async (o) => await DB.IncreasePlayerCaseAsync(SteamID, @case.CaseID, 1));
         }
 
         public bool TryGetUnboxRewardInfo(Reward reward, out string rewardName, out string rewardImage, out ERarity rewardRarity)

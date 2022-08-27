@@ -1574,7 +1574,7 @@ namespace UnturnedBlackout.Managers
                     handler.BuyUnboxingStoreCase(ECurrency.Scrap);
                     return;
                 case "SERVER Unbox Confirm BUTTON":
-
+                    handler.ConfirmUnboxingStoreCase();
                     return;
                 case "SERVER Unbox Content Back BUTTON":
                     if (handler.UnboxingPage == EUnboxingPage.Open)
