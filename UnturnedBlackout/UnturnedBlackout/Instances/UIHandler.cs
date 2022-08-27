@@ -6101,6 +6101,35 @@ namespace UnturnedBlackout.Instances
             }
         }
 
+        public void BuyUnboxingStoreCase(ECurrency currency)
+        {
+            if (!DB.Cases.TryGetValue(SelectedCaseID, out Case @case))
+            {
+                Logging.Debug($"Could'nt find selected case id with id {SelectedCaseID} for buying case for {Player.CharacterName}");
+                return;
+            }
+
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Unbox Buy Modal Description TEXT", @case.CaseName);
+            SelectedCaseBuyMethod = currency;
+        }
+
+        public void ConfirmUnboxingStoreCase()
+        {
+            if (!DB.Cases.TryGetValue(SelectedCaseID, out Case @case))
+            {
+                Logging.Debug($"Could'nt find selected case id with id {SelectedCaseID} for buying case for {Player.CharacterName}");
+                return;
+            }
+
+            var buyPrice = @case.GetBuyPrice(SelectedCaseBuyMethod);
+            if (buyPrice > PlayerData.GetCurrency(SelectedCaseBuyMethod))
+            {
+                return;
+            }
+
+
+        }
+
         public bool TryGetUnboxRewardInfo(Reward reward, out string rewardName, out string rewardImage, out ERarity rewardRarity)
         {
             rewardName = "";

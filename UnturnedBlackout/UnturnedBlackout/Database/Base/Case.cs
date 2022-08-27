@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnturnedBlackout.Enums;
 
 namespace UnturnedBlackout.Database.Base
@@ -29,5 +30,13 @@ namespace UnturnedBlackout.Database.Base
             AvailableSkins = availableSkins;
             AvailableSkinsSearchByRarity = availableSkinsSearchByRarity;
         }
+
+        public int GetBuyPrice(ECurrency currency) =>
+            currency switch
+            {
+                ECurrency.Coins => CoinPrice,
+                ECurrency.Scrap => ScrapPrice,
+                _ => throw new ArgumentOutOfRangeException("currency", "Currency is not as expected")
+            };
     }
 }
