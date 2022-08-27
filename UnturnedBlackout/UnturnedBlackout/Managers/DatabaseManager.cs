@@ -3196,6 +3196,8 @@ namespace UnturnedBlackout.Managers
                         data.Credits = newCredits;
                     }
                 }
+
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.OnCurrencyUpdated(steamID, ECurrency.Credits));
             }
             catch (Exception ex)
             {
@@ -3225,6 +3227,8 @@ namespace UnturnedBlackout.Managers
                         data.Credits = newCredits;
                     }
                 }
+
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.OnCurrencyUpdated(steamID, ECurrency.Credits));
             }
             catch (Exception ex)
             {
@@ -3253,6 +3257,8 @@ namespace UnturnedBlackout.Managers
                         data.Scrap = newScrap;
                     }
                 }
+
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.OnCurrencyUpdated(steamID, ECurrency.Scrap));
             }
             catch (Exception ex)
             {
@@ -3281,6 +3287,8 @@ namespace UnturnedBlackout.Managers
                         data.Scrap = newScrap;
                     }
                 }
+
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.OnCurrencyUpdated(steamID, ECurrency.Scrap));
             }
             catch (Exception ex)
             {
@@ -3309,6 +3317,8 @@ namespace UnturnedBlackout.Managers
                         data.Coins = newCoins;
                     }
                 }
+
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.OnCurrencyUpdated(steamID, ECurrency.Coins));
             }
             catch (Exception ex)
             {
@@ -3337,6 +3347,8 @@ namespace UnturnedBlackout.Managers
                         data.Coins = newCoins;
                     }
                 }
+
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.OnCurrencyUpdated(steamID, ECurrency.Coins));
             }
             catch (Exception ex)
             {

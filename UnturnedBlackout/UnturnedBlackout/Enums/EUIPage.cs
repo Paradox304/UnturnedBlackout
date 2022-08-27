@@ -24,6 +24,7 @@ namespace UnturnedBlackout.Enums
         Card,
         Glove,
         Killstreak,
-        Case
+        Case,
+        Achievement
     }
 }

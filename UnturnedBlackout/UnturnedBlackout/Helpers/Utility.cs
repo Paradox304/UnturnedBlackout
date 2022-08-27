@@ -444,9 +444,9 @@ namespace UnturnedBlackout
         public static string GetCurrencySymbol(ECurrency currency) =>
             currency switch
             {
-                ECurrency.Coin => "",
+                ECurrency.Coins => "",
                 ECurrency.Scrap => "",
-                ECurrency.Credit => "",
+                ECurrency.Credits => "",
                 _ => throw new ArgumentOutOfRangeException("currency", "Currency is not as expected")
             };
 

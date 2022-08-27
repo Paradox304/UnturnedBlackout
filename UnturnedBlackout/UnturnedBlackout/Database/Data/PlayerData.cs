@@ -154,5 +154,14 @@ namespace UnturnedBlackout.Database.Data
                     return;
             }
         }
+
+        public int GetCurrency(ECurrency currency) =>
+            currency switch
+            {
+                ECurrency.Coins => Coins,
+                ECurrency.Scrap => Scrap,
+                ECurrency.Credits => Credits,
+                _ => throw new ArgumentOutOfRangeException("currency", "Currency is not as expected")
+            };
     }
 }

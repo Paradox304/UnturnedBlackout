@@ -1181,10 +1181,7 @@ namespace UnturnedBlackout.Managers
                 case EUIPage.Carbine:
                     handler.BuildCarbinePages();
                     return;
-                case EUIPage.Attachment:
-                    handler.BuildAttachmentPages();
-                    return;
-                case EUIPage.GunCharm;
+                case EUIPage.GunCharm:
                     handler.BuildGunCharmPages();
                     return;
                 case EUIPage.GunSkin:
@@ -1216,6 +1213,14 @@ namespace UnturnedBlackout.Managers
                     return;
                 default:
                     throw new ArgumentOutOfRangeException("page", "EUIPage is not as expected");
+            }
+        }
+
+        public void OnCurrencyUpdated(CSteamID steamID, ECurrency currency)
+        {
+            if (UIHandlersLookup.TryGetValue(steamID, out UIHandler handler) && handler.MainPage != EMainPage.None)
+            {
+                handler.OnCurrencyUpdated(currency);
             }
         }
 
@@ -1343,7 +1348,6 @@ namespace UnturnedBlackout.Managers
                     handler.ClickedJoinButton();
                     return;
                 case "SERVER Play Back BUTTON":
-                    handler.SetupMainMenu();
                     return;
                 case "SERVER Loadout Next BUTTON":
                     if (!isGame)
@@ -1366,7 +1370,6 @@ namespace UnturnedBlackout.Managers
                     }
                     return;
                 case "SERVER Loadout Back BUTTON":
-                    handler.SetupMainMenu();
                     return;
                 case "SERVER Loadout Equip BUTTON":
                     if (!isGame)
@@ -1520,7 +1523,6 @@ namespace UnturnedBlackout.Managers
                     handler.BackwardLeaderboardPage();
                     return;
                 case "SERVER Leaderboards Back BUTTON":
-                    handler.SetupMainMenu();
                     return;
                 case "SERVER Achievements Next BUTTON":
                     handler.ForwardAchievementSubPage();

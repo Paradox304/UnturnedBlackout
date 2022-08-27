@@ -163,6 +163,7 @@ namespace UnturnedBlackout.Instances
             }
         }
 
+        #region BuildingPages
         public void BuildPages()
         {
             BuildLoadoutPages();
@@ -430,7 +431,7 @@ namespace UnturnedBlackout.Instances
                 int page = 1;
                 var gunSkins = new Dictionary<int, GunSkin>();
                 GunSkinPages.Add(gun.Key, new Dictionary<int, PageGunSkin>());
-                foreach (var gunSkin in gun.Value)
+                foreach (var gunSkin in gun.Value.OrderByDescending(k => (byte)k.SkinRarity))
                 {
                     gunSkins.Add(index, gunSkin);
                     if (index == MAX_ITEMS_PER_GRID)
@@ -506,7 +507,7 @@ namespace UnturnedBlackout.Instances
             int index = 0;
             int page = 1;
             var gunCharms = new Dictionary<int, LoadoutGunCharm>();
-            foreach (var gunCharm in PlayerLoadout.GunCharms.Values.OrderBy(k => k.GunCharm.LevelRequirement))
+            foreach (var gunCharm in PlayerLoadout.GunCharms.Values.OrderByDescending(k => (byte)k.GunCharm.CharmRarity))
             {
                 gunCharms.Add(index, gunCharm);
                 if (index == MAX_ITEMS_PER_GRID)
@@ -533,7 +534,7 @@ namespace UnturnedBlackout.Instances
             int index = 0;
             int page = 1;
             var knives = new Dictionary<int, LoadoutKnife>();
-            foreach (var knife in PlayerLoadout.Knives.Values.OrderBy(k => k.Knife.LevelRequirement))
+            foreach (var knife in PlayerLoadout.Knives.Values.OrderByDescending(k => (byte)k.Knife.KnifeRarity))
             {
                 knives.Add(index, knife);
                 if (index == MAX_ITEMS_PER_GRID)
@@ -648,7 +649,7 @@ namespace UnturnedBlackout.Instances
             int index = 0;
             int page = 1;
             var cards = new Dictionary<int, LoadoutCard>();
-            foreach (var card in PlayerLoadout.Cards.Values.OrderBy(k => k.Card.LevelRequirement))
+            foreach (var card in PlayerLoadout.Cards.Values.OrderByDescending(k => (byte)k.Card.CardRarity))
             {
                 cards.Add(index, card);
                 if (index == MAX_ITEMS_PER_GRID)
@@ -675,7 +676,7 @@ namespace UnturnedBlackout.Instances
             int index = 0;
             int page = 1;
             var gloves = new Dictionary<int, LoadoutGlove>();
-            foreach (var glove in PlayerLoadout.Gloves.Values.OrderBy(k => k.Glove.LevelRequirement))
+            foreach (var glove in PlayerLoadout.Gloves.Values.OrderByDescending(k => (byte)k.Glove.GloveRarity))
             {
                 gloves.Add(index, glove);
                 if (index == MAX_ITEMS_PER_GRID)
@@ -807,9 +808,9 @@ namespace UnturnedBlackout.Instances
             }
             Logging.Debug($"Created {UnboxStorePages.Count} unbox store pages for {Player.CharacterName}");
         }
+        #endregion
 
-        // Main Page
-
+        #region MainPage
         public void ShowUI(MatchEndSummary summary = null)
         {
             EffectManager.sendUIEffect(MAIN_MENU_ID, MAIN_MENU_KEY, TransportConnection, true);
@@ -842,10 +843,21 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass BUTTON", Plugin.Instance.Configuration.Instance.UnlockAllItems);
 
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Version TEXT", Plugin.Instance.Translate("Version").ToRich());
+
+            EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Currency Credits IMAGE", Config.Base.FileData.PointsIconLink);
+            EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Currency Coins IMAGE", Config.Base.FileData.BlacktagsIconLink);
+            EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Currency Scrap IMAGE", Config.Base.FileData.ScrapIconLink);
+
+            OnCurrencyUpdated(ECurrency.Coins);
+            OnCurrencyUpdated(ECurrency.Scrap);
+            OnCurrencyUpdated(ECurrency.Credits);
+
+            
             ClearChat();
             ShowXP();
             ShowQuestCompletion();
             OnMusicChanged(PlayerData.Music);
+            ThreadPool.QueueUserWorkItem((o) => BuildAchievementPages());
         }
 
         public void ReloadMainMenu()
@@ -873,9 +885,9 @@ namespace UnturnedBlackout.Instances
                 ChatManager.serverSendMessage("", Color.white, toPlayer: steamPlayer);
             }
         }
+        #endregion
 
-        // Play Page
-
+        #region PlayPage
         public void ShowPlayPage()
         {
             MainPage = EMainPage.Play;
@@ -935,9 +947,9 @@ namespace UnturnedBlackout.Instances
                 }
             }
         }
+        #endregion
 
-        // Play Games Page
-
+        #region PlayGamesPage
         public void ShowGames()
         {
             var games = Plugin.Instance.Game.Games;
@@ -992,9 +1004,9 @@ namespace UnturnedBlackout.Instances
             int index = Plugin.Instance.Game.Games.IndexOf(game);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Play Players TEXT {index}", $"{game.GetPlayerCount()}/{game.Location.GetMaxPlayers(game.GameMode)}");
         }
+        #endregion
 
-        // Play Servers Page
-
+        #region PlayServersPage
         public void ShowServers()
         {
             PlayPage = EPlayPage.Servers;
@@ -1034,9 +1046,9 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Play Ping TEXT", " ");
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Play IP TEXT", $"{server.FriendlyIP}:{server.Port}");
         }
+        #endregion
 
-        // Loadout Page
-
+        #region LoadoutPage
         public void ShowLoadouts()
         {
             MainPage = EMainPage.Loadout;
@@ -1269,9 +1281,9 @@ namespace UnturnedBlackout.Instances
         {
             LoadoutNameText = "";
         }
+        #endregion
 
-        // Midgame Loadout Selection
-
+        #region MidgameLoadoutPage
         public void ShowMidgameLoadouts()
         {
             MainPage = EMainPage.Loadout;
@@ -1466,9 +1478,9 @@ namespace UnturnedBlackout.Instances
             EffectManager.askEffectClearByID(MIDGAME_LOADOUT_ID, TransportConnection);
             Player.Player.disablePluginWidgetFlag(EPluginWidgetFlags.Modal);
         }
+        #endregion
 
-        // Loadout Sub Page
-
+        #region LoadoutSubPage
         public void ShowLoadoutSubPage(ELoadoutPage page)
         {
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Type TEXT", page.ToFriendlyName());
@@ -5030,9 +5042,9 @@ namespace UnturnedBlackout.Instances
             }
             ReloadLoadout();
         }
+        #endregion
 
-        // Leaderboard
-
+        #region LeaderboardPage
         public void ShowLeaderboards()
         {
             MainPage = EMainPage.Leaderboard;
@@ -5211,9 +5223,9 @@ namespace UnturnedBlackout.Instances
                 ELeaderboardPage.Weekly => (DB.ServerOptions.WeeklyLeaderboardWipe.UtcDateTime - DateTime.UtcNow).ToString(@"dd\:hh\:mm\:ss"),
                 _ => "00:00:00"
             };
+        #endregion
 
-        // Quest
-
+        #region QuestPage
         public void ShowQuests()
         {
             var quests = PlayerData.Quests.OrderBy(k => (int)k.Quest.QuestTier).ToList();
@@ -5238,9 +5250,9 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Quest Complete", completedQuests == totalQuests);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Quest Complete Count TEXT", $"{completedQuests}/{totalQuests}");
         }
+        #endregion
 
-        // Achievement
-
+        #region AchievementPage
         public void ShowAchievements()
         {
             MainPage = EMainPage.Achievements;
@@ -5542,9 +5554,9 @@ namespace UnturnedBlackout.Instances
                     return false;
             }
         }
+        #endregion
 
-        // Battlepass
-
+        #region BattlepassPage
         public void SetupBattlepass()
         {
             MainPage = EMainPage.Battlepass;
@@ -5737,9 +5749,9 @@ namespace UnturnedBlackout.Instances
                     return false;
             }
         }
+        #endregion
 
-        // Unboxing
-
+        #region UnboxingPage
         public void ShowUnboxingPage(EUnboxingPage unboxingPage, int selectedCase = -1)
         {
             UnboxingPage = unboxingPage;
@@ -5861,7 +5873,6 @@ namespace UnturnedBlackout.Instances
             Logging.Debug($"Random rarity not found, sending a random rarity");
             return weights[UnityEngine.Random.Range(0, weights.Count)].Item1;
         }
-
         public IEnumerator UnboxCase()
         {
             if (!PlayerData.CasesSearchByID.TryGetValue(SelectedCaseID, out PlayerCase @case))
@@ -5958,8 +5969,6 @@ namespace UnturnedBlackout.Instances
 
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Unbox Button Toggler", @case.Amount > 0);
         }
-
-
         public void ShowUnboxingStorePage()
         {
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Buy Next BUTTON", UnboxStorePages.Count > 1);
@@ -6054,7 +6063,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Unbox Buy Coins BUTTON", true);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Unbox Buy Scrap BUTTON", true);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Unbox Buy Preview BUTTON", true);
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Preview Coins TEXT", $"{Utility.GetCurrencySymbol(ECurrency.Coin)} {@case.CoinPrice}");
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Preview Coins TEXT", $"{Utility.GetCurrencySymbol(ECurrency.Coins)} {@case.CoinPrice}");
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Preview Scrap TEXT", $"{Utility.GetCurrencySymbol(ECurrency.Scrap)} {@case.ScrapPrice}");
 
             SendRarityName("SERVER Unbox Buy RarityType TEXT", @case.CaseRarity);
@@ -6156,9 +6165,9 @@ namespace UnturnedBlackout.Instances
                     return false;
             }
         }
+        #endregion
 
-        // Match End Summary
-
+        #region MatchEndSummary
         public IEnumerator ShowMatchEndSummary(MatchEndSummary summary)
         {
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary", true);
@@ -6385,8 +6394,13 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Battlepass Bonus", $"BATTLEPASS ★ BONUS");
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Battlepass Bonus TEXT", $"<color=#be69ff>+{summary.BattlepassBonusXP}</color>");
         }
+        #endregion
 
-        // Events
+        #region Events
+        public void OnCurrencyUpdated(ECurrency currency)
+        {
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Currency {currency} TEXT", PlayerData.GetCurrency(currency).ToString());
+        }
 
         public void OnMusicChanged(bool isMusic)
         {
@@ -6414,5 +6428,6 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Quest Expire TEXT", $"NEW QUESTS IN: {(DateTimeOffset.UtcNow > PlayerData.Quests[0].QuestEnd ? "00:00:00" : (DateTimeOffset.UtcNow - PlayerData.Quests[0].QuestEnd).ToString(@"hh\:mm\:ss"))}");
             }
         }
+        #endregion
     }
 }

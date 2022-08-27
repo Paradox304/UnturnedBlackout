@@ -8,8 +8,8 @@ namespace UnturnedBlackout.Enums
 {
     public enum ECurrency
     {
-        Credit,
-        Coin,
+        Credits,
+        Coins,
         Scrap
     }
 }
