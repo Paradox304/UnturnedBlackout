@@ -43,6 +43,10 @@
     <Reference Include="BouncyCastle.Crypto, Version=1.8.9.0, Culture=neutral, PublicKeyToken=0e99375e54769942">
       <HintPath>..\packages\BouncyCastle.1.8.9\lib\BouncyCastle.Crypto.dll</HintPath>
     </Reference>
+    <Reference Include="com.rlabrecque.steamworks.net, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Libraries\com.rlabrecque.steamworks.net.dll</HintPath>
+    </Reference>
     <Reference Include="Google.Protobuf, Version=3.21.1.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604, processorArchitecture=MSIL">
       <HintPath>..\packages\Google.Protobuf.3.21.1\lib\net45\Google.Protobuf.dll</HintPath>
     </Reference>
@@ -79,10 +83,6 @@
     </Reference>
     <Reference Include="SteamServerQuery.NET, Version=1.0.2.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\SteamServerQuery.NET.1.0.2\lib\netstandard2.0\SteamServerQuery.NET.dll</HintPath>
-    </Reference>
-    <Reference Include="Steamworks.NET, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>Libraries\Steamworks.NET.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
@@ -337,11 +337,11 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Libraries\Assembly-CSharp.dll" />
+    <Content Include="Libraries\com.rlabrecque.steamworks.net.dll" />
     <Content Include="Libraries\Rocket.API.dll" />
     <Content Include="Libraries\Rocket.Core.dll" />
     <Content Include="Libraries\Rocket.Unturned.dll" />
     <Content Include="Libraries\SDG.NetTransport.dll" />
-    <Content Include="Libraries\Steamworks.NET.dll" />
     <Content Include="Libraries\UnityEngine.CoreModule.dll" />
     <Content Include="Libraries\UnityEngine.dll" />
     <Content Include="Libraries\UnityEngine.PhysicsModule.dll" />

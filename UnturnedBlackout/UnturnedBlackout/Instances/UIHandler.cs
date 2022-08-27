@@ -85,7 +85,7 @@ namespace UnturnedBlackout.Instances
         public EUnboxingPage UnboxingPage { get; set; }
         public int UnboxingPageID { get; set; }
         public int SelectedCaseID { get; set; }
-        public bool IsUnboxingAgain { get; set; }
+        public ECurrency SelectedCaseBuyMethod { get; set; }
 
         // Battlepass
         public (bool, int) SelectedBattlepassTierID { get; set; }
@@ -943,7 +943,7 @@ namespace UnturnedBlackout.Instances
                 var server = Plugin.Instance.DB.Servers[SelectedGameID];
                 if (server.IsOnline)
                 {
-                    Player.Player.sendRelayToServer(server.IPNo, server.PortNo, "", false);
+                    Player.Player.sendRelayToServer(server.IPNo, server.PortNo, "", shouldShowMenu: false);
                 }
             }
         }
@@ -5770,7 +5770,6 @@ namespace UnturnedBlackout.Instances
             }
         }
 
-
         public void ShowUnboxingInventoryPage()
         {
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Inventory Next BUTTON", UnboxInventoryPages.Count > 1);
@@ -5854,6 +5853,7 @@ namespace UnturnedBlackout.Instances
 
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Unbox Button Toggler", @case.Amount > 0);
         }
+
         private ECaseRarity CalculateCaseRarity(List<(ECaseRarity, int)> weights, int poolSize)
         {
             Logging.Debug($"Calculating reward rarities, found {weights.Count} weights to look from");
@@ -5873,6 +5873,7 @@ namespace UnturnedBlackout.Instances
             Logging.Debug($"Random rarity not found, sending a random rarity");
             return weights[UnityEngine.Random.Range(0, weights.Count)].Item1;
         }
+
         public IEnumerator UnboxCase()
         {
             if (!PlayerData.CasesSearchByID.TryGetValue(SelectedCaseID, out PlayerCase @case))
@@ -5969,6 +5970,7 @@ namespace UnturnedBlackout.Instances
 
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Unbox Button Toggler", @case.Amount > 0);
         }
+
         public void ShowUnboxingStorePage()
         {
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Buy Next BUTTON", UnboxStorePages.Count > 1);
