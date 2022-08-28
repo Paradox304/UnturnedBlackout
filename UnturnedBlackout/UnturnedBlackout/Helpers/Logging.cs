@@ -1,5 +1,6 @@
 ﻿using Rocket.Core.Logging;
 using System;
+using System.Diagnostics;
 
 namespace UnturnedBlackout
 {
@@ -9,7 +10,8 @@ namespace UnturnedBlackout
         {
             if (Plugin.Instance.Config.Base.FileData.EnableDebugLogs == true)
             {
-                Logger.Log($"[DEBUG] {message}");
+                var method = new StackTrace().GetFrame(1).GetMethod();
+                Logger.Log($"[{method.ReflectedType}.{method.Name}]: {message}");
             }
         }
 
