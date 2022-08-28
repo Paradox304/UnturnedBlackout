@@ -35,7 +35,6 @@ namespace UnturnedBlackout.Managers
         }
         public Config Config { get; set; }
 
-        public Timer m_MuteChecker { get; set; }
         public Timer m_LeaderboardChecker { get; set; }
 
         // Server Data
@@ -206,10 +205,7 @@ namespace UnturnedBlackout.Managers
                 MaximumPoolSize = 500
             };
 
-            m_MuteChecker = new Timer(10 * 1000);
-            m_MuteChecker.Elapsed += CheckMutedPlayers;
-
-            m_LeaderboardChecker = new Timer(60 * 1000);
+            m_LeaderboardChecker = new Timer(120 * 1000);
             m_LeaderboardChecker.Elapsed += RefreshData;
 
             PlayerData = new Dictionary<CSteamID, PlayerData>();
@@ -223,7 +219,6 @@ namespace UnturnedBlackout.Managers
                 await GetBaseDataAsync();
             }).Wait();
 
-            m_MuteChecker.Start();
             ThreadPool.QueueUserWorkItem(async (o) =>
             {
                 RefreshData(null, null);
@@ -5040,51 +5035,6 @@ namespace UnturnedBlackout.Managers
             }
         }
 
-        // Player Mute
-
-        private void CheckMutedPlayers(object sender, System.Timers.ElapsedEventArgs e)
-        {
-            try
-            {
-                foreach (var data in PlayerData.Values.Where(k => k.IsMuted).ToList())
-                {
-                    if (DateTime.UtcNow > data.MuteExpiry.UtcDateTime)
-                    {
-                        ChangePlayerMutedAsync(data.SteamID, false);
-                        try
-                        {
-                            var profile = new Profile(data.SteamID.m_SteamID);
-
-                            Embed embed = new(null, $"**{profile.SteamID}** was unmuted", null, "15105570", DateTime.UtcNow.ToString("s"),
-                                                    new Footer(Provider.serverName, Provider.configData.Browser.Icon),
-                                                    new Author(profile.SteamID, $"https://steamcommunity.com/profiles/{profile.SteamID64}/", profile.AvatarIcon.ToString()),
-                                                    new Field[]
-                                                    {
-                                                            new Field("**Unmuter:**", $"**Mute Expired**", true),
-                                                            new Field("**Time:**", DateTime.UtcNow.ToString(), true)
-                                                    },
-                                                    null, null);
-                            if (!string.IsNullOrEmpty(Plugin.Instance.Configuration.Instance.WebhookURL))
-                            {
-                                DiscordManager.SendEmbed(embed, "Player Unmuted", Plugin.Instance.Configuration.Instance.WebhookURL);
-                            }
-
-                            TaskDispatcher.QueueOnMainThread(() => Utility.Say(UnturnedPlayer.FromCSteamID(data.SteamID), Plugin.Instance.Translate("Unmuted").ToRich()));
-                        }
-                        catch (Exception)
-                        {
-                            Logger.Log($"Error sending discord webhook for {data.SteamID}");
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.Log("Error checking the muted players");
-                Logger.Log(ex);
-            }
-        }
-
         // Player Leaderboard
 
         private void RefreshData(object sender, System.Timers.ElapsedEventArgs e)
@@ -5763,7 +5713,7 @@ namespace UnturnedBlackout.Managers
                     new MySqlCommand($"UPDATE `{OPTIONS} SET `GunXPBooster` = 0;", Conn).ExecuteScalar();
                 }
 
-                Logging.Debug("Checking boosters and prime of all players");
+                Logging.Debug("Refreshing player data");
                 foreach (var data in PlayerData.Values)
                 {
                     Logging.Debug($"Getting boosters for {data.SteamName}");
@@ -5846,6 +5796,34 @@ namespace UnturnedBlackout.Managers
                         new MySqlCommand($"UPDATE `{PLAYERS}` SET `PrimeLastDailyReward` = {lastDailyRewardDate.ToUnixTimeSeconds()} WHERE `SteamID` = {data.SteamID};", Conn).ExecuteScalar();
                     }
 
+                    if (data.IsMuted && DateTime.UtcNow > data.MuteExpiry.UtcDateTime)
+                    {
+                        ChangePlayerMutedAsync(data.SteamID, false);
+                        try
+                        {
+                            var profile = new Profile(data.SteamID.m_SteamID);
+
+                            Embed embed = new(null, $"**{profile.SteamID}** was unmuted", null, "15105570", DateTime.UtcNow.ToString("s"),
+                                                    new Footer(Provider.serverName, Provider.configData.Browser.Icon),
+                                                    new Author(profile.SteamID, $"https://steamcommunity.com/profiles/{profile.SteamID64}/", profile.AvatarIcon.ToString()),
+                                                    new Field[]
+                                                    {
+                                                            new Field("**Unmuter:**", $"**Mute Expired**", true),
+                                                            new Field("**Time:**", DateTime.UtcNow.ToString(), true)
+                                                    },
+                                                    null, null);
+                            if (!string.IsNullOrEmpty(Plugin.Instance.Configuration.Instance.WebhookURL))
+                            {
+                                DiscordManager.SendEmbed(embed, "Player Unmuted", Plugin.Instance.Configuration.Instance.WebhookURL);
+                            }
+
+                            TaskDispatcher.QueueOnMainThread(() => Utility.Say(UnturnedPlayer.FromCSteamID(data.SteamID), Plugin.Instance.Translate("Unmuted").ToRich()));
+                        }
+                        catch (Exception)
+                        {
+                            Logger.Log($"Error sending discord webhook for {data.SteamID}");
+                        }
+                    }
                 }
 
                 Logging.Debug("Getting skins, gloves, knives unboxed amounts again");
