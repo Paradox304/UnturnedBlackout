@@ -11,7 +11,10 @@ namespace UnturnedBlackout
             if (Plugin.Instance.Config.Base.FileData.EnableDebugLogs == true)
             {
                 var method = new StackTrace().GetFrame(1).GetMethod();
-                Logger.Log($"[{method.ReflectedType}.{method.Name}]: {message}");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine($"[{method.ReflectedType}.{method.Name}]: {message}");
+                Console.ResetColor();
+                Logger.ExternalLog(message, ConsoleColor.Green);
             }
         }
 
