@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using UnturnedBlackout.Database.Base;
 using UnturnedBlackout.Database.Data;
@@ -78,6 +79,7 @@ namespace UnturnedBlackout.Managers
                             knife = CalculateKnife(knivesAvailable);
 
                             // Send unboxed amount +1
+                            ThreadPool.QueueUserWorkItem(async (o) => await DB.UpdatePlayerKnifeUnboxedAmountAsync(player.CSteamID, knife.KnifeID, 1));
                         }
 
                         rewardName = knife.KnifeName;
@@ -124,6 +126,7 @@ namespace UnturnedBlackout.Managers
                             glove = CalculateGlove(glovesAvailable);
 
                             // Send updated unbox amount +1
+                            ThreadPool.QueueUserWorkItem(async (o) => await DB.UpdatePlayerGloveUnboxedAmountAsync(player.CSteamID, glove.GloveID, 1));
                         }
 
                         rewardName = glove.GloveName;
@@ -159,6 +162,7 @@ namespace UnturnedBlackout.Managers
                         } else
                         {
                             // Send unboxed amount by +1
+                            ThreadPool.QueueUserWorkItem(async (o) => await DB.UpdatePlayerGunSkinUnboxedAmountAsync(player.CSteamID, skin.ID, 1));
                         }
 
                         rewardName = skin.SkinName;

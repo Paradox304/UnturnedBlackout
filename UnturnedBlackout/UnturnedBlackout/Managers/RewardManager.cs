@@ -9,7 +9,7 @@ namespace UnturnedBlackout.Managers
 {
     public class RewardManager
     {
-        public void GiveReward(CSteamID steamID, List<Reward> rewards)
+        public void GiveRewards(CSteamID steamID, List<Reward> rewards)
         {
             Logging.Debug($"Giving rewards to {steamID}, rewards: {rewards.Count}");
             var db = Plugin.Instance.DB;
@@ -79,7 +79,7 @@ namespace UnturnedBlackout.Managers
             });
         }
 
-        public void RemoveReward(CSteamID steamID, List<Reward> removeRewards)
+        public void RemoveRewards(CSteamID steamID, List<Reward> removeRewards)
         {
             var db = Plugin.Instance.DB;
             ThreadPool.QueueUserWorkItem(async (o) =>
@@ -170,6 +170,27 @@ namespace UnturnedBlackout.Managers
                     }
                 }
             });
+        }
+
+        public void MultiplyRewards(List<Reward> rewards, int multiply)
+        {
+            Logging.Debug($"Multiplying rewards by {multiply}");
+            foreach (var reward in rewards)
+            {
+                if (reward.RewardType != ERewardType.Coin && reward.RewardType != ERewardType.Credit)
+                {
+                    continue;
+                }
+
+                if (reward.RewardValue is not int rewardValue)
+                {
+                    continue;
+                }
+
+                Logging.Debug($"Reward value is {rewardValue}, reward type: {reward.RewardType}");
+                reward.RewardValue = rewardValue * multiply;
+                Logging.Debug($"Updated reward value is {rewardValue}");
+            }
         }
     }
 }

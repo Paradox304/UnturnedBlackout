@@ -93,8 +93,8 @@ namespace UnturnedBlackout.Managers
             }
 
             achievement.CurrentTier = nextTier.TierID;
-            Plugin.Instance.Reward.GiveReward(steamID, nextTier.Rewards);
-            Plugin.Instance.Reward.RemoveReward(steamID, nextTier.RemoveRewards);
+            Plugin.Instance.Reward.GiveRewards(steamID, nextTier.Rewards);
+            Plugin.Instance.Reward.RemoveRewards(steamID, nextTier.RemoveRewards);
             Plugin.Instance.UI.OnAchievementsUpdated(steamID);
 
             data.SetAchievementXPBooster();

@@ -20,8 +20,10 @@ namespace UnturnedBlackout.Database.Base
         public DateTimeOffset BPBoosterWipe { get; set; }
         public DateTimeOffset GunXPBoosterWipe { get; set; }
         public List<string> GameTips { get; set; }
+        public List<Reward> PrimeRewards { get; set; }
+        public List<Reward> PrimeDailyRewards { get; set; }
 
-        public Options(DateTimeOffset dailyLeaderboardWipe, DateTimeOffset weeklyLeaderboardWipe, Dictionary<int, List<Reward>> dailyRankedRewards, List<PercentileReward> dailyPercentileRewards, Dictionary<int, List<Reward>> weeklyRankedRewards, List<PercentileReward> weeklyPercentileRewards, Dictionary<int, List<Reward>> seasonalRankedRewards, List<PercentileReward> seasonalPercentileRewards, float xPBooster, float bPBooster, float gunXPBooster, DateTimeOffset xPBoosterWipe, DateTimeOffset bPBoosterWipe, DateTimeOffset gunXPBoosterWipe, List<string> gameTips)
+        public Options(DateTimeOffset dailyLeaderboardWipe, DateTimeOffset weeklyLeaderboardWipe, Dictionary<int, List<Reward>> dailyRankedRewards, List<PercentileReward> dailyPercentileRewards, Dictionary<int, List<Reward>> weeklyRankedRewards, List<PercentileReward> weeklyPercentileRewards, Dictionary<int, List<Reward>> seasonalRankedRewards, List<PercentileReward> seasonalPercentileRewards, float xPBooster, float bPBooster, float gunXPBooster, DateTimeOffset xPBoosterWipe, DateTimeOffset bPBoosterWipe, DateTimeOffset gunXPBoosterWipe, List<string> gameTips, List<Reward> primeRewards, List<Reward> primeDailyRewards)
         {
             DailyLeaderboardWipe = dailyLeaderboardWipe;
             WeeklyLeaderboardWipe = weeklyLeaderboardWipe;
@@ -38,6 +40,8 @@ namespace UnturnedBlackout.Database.Base
             BPBoosterWipe = bPBoosterWipe;
             GunXPBoosterWipe = gunXPBoosterWipe;
             GameTips = gameTips;
+            PrimeRewards = primeRewards;
+            PrimeDailyRewards = primeDailyRewards;
         }
     }
 }

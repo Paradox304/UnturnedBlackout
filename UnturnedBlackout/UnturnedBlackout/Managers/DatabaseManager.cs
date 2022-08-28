@@ -210,7 +210,7 @@ namespace UnturnedBlackout.Managers
             m_MuteChecker.Elapsed += CheckMutedPlayers;
 
             m_LeaderboardChecker = new Timer(60 * 1000);
-            m_LeaderboardChecker.Elapsed += RefreshLeaderboardData;
+            m_LeaderboardChecker.Elapsed += RefreshData;
 
             PlayerData = new Dictionary<CSteamID, PlayerData>();
             PlayerLoadouts = new Dictionary<CSteamID, PlayerLoadout>();
@@ -226,7 +226,7 @@ namespace UnturnedBlackout.Managers
             m_MuteChecker.Start();
             ThreadPool.QueueUserWorkItem(async (o) =>
             {
-                RefreshLeaderboardData(null, null);
+                RefreshData(null, null);
                 m_LeaderboardChecker.Start();
             });
         }
@@ -250,7 +250,7 @@ namespace UnturnedBlackout.Managers
                 await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{CARDS}` ( `CardID` INT NOT NULL , `CardName` VARCHAR(255) NOT NULL , `CardDesc` TEXT NOT NULL , `CardRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `IconLink` TEXT NOT NULL , `CardLink` TEXT NOT NULL , `ScrapAmount` INT NOT NULL , `BuyPrice` INT NOT NULL , `Coins` INT NOT NULL , `LevelRequirement` INT NOT NULL , PRIMARY KEY (`CardID`));", Conn).ExecuteScalarAsync();
                 await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{GLOVES}` ( `GloveID` INT NOT NULL , `GloveName` VARCHAR(255) NOT NULL , `GloveDesc` TEXT NOT NULL , `GloveRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `IconLink` TEXT NOT NULL , `ScrapAmount` INT NOT NULL , `BuyPrice` INT NOT NULL , `Coins` INT NOT NULL , `LevelRequirement` INT NOT NULL , `GloveWeight` INT NOT NULL , `MaxAmount` INT NOT NULL , `UnboxedAmount` INT NOT NULL , PRIMARY KEY (`GloveID`));", Conn).ExecuteScalarAsync();
                 await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{LEVELS}` ( `Level` INT NOT NULL , `XPNeeded` INT NOT NULL , `IconLinkLarge` TEXT NOT NULL , `IconLinkMedium` TEXT NOT NULL , `IconLinkSmall` TEXT NOT NULL , PRIMARY KEY (`Level`));", Conn).ExecuteScalarAsync();
-                await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{OPTIONS}` ( `DailyLeaderboardWipe` BIGINT NOT NULL , `WeeklyLeaderboardWipe` BIGINT NOT NULL , `DailyLeaderboardRankedRewards` TEXT NOT NULL , `DailyLeaderboardPercentileRewards` TEXT NOT NULL , `WeeklyLeaderboardRankedRewards` TEXT NOT NULL , `WeeklyLeaderboardPercentileRewards` TEXT NOT NULL, `SeasonalLeaderboardRankedRewards` TEXT NOT NULL , `SeasonalLeaderboardPercentileRewards` TEXT NOT NULL , `XPBooster` DECIMAL(6,3) NOT NULL , `BPBooster` DECIMAL(6,3) NOT NULL , `GunXPBooster` DECIMAL(6,3) NOT NULL , `XPBoosterWipe` BIGINT NOT NULL , `BPBoosterWipe` BIGINT NOT NULL , `GunXPBoosterWipe` BIGINT NOT NULL , `GameTips` TEXT NOT NULL);", Conn).ExecuteScalarAsync();
+                await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{OPTIONS}` ( `DailyLeaderboardWipe` BIGINT NOT NULL , `WeeklyLeaderboardWipe` BIGINT NOT NULL , `DailyLeaderboardRankedRewards` TEXT NOT NULL , `DailyLeaderboardPercentileRewards` TEXT NOT NULL , `WeeklyLeaderboardRankedRewards` TEXT NOT NULL , `WeeklyLeaderboardPercentileRewards` TEXT NOT NULL, `SeasonalLeaderboardRankedRewards` TEXT NOT NULL , `SeasonalLeaderboardPercentileRewards` TEXT NOT NULL , `XPBooster` DECIMAL(6,3) NOT NULL , `BPBooster` DECIMAL(6,3) NOT NULL , `GunXPBooster` DECIMAL(6,3) NOT NULL , `XPBoosterWipe` BIGINT NOT NULL , `BPBoosterWipe` BIGINT NOT NULL , `GunXPBoosterWipe` BIGINT NOT NULL , `GameTips` TEXT NOT NULL , `PrimeRewards` TEXT NOT NULL , `PrimeDailyRewards` TEXT NOT NULL);", Conn).ExecuteScalarAsync();
                 await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{SERVERS}`  ( `IP` TEXT NOT NULL , `Port` TEXT NOT NULL , `ServerName` TEXT NOT NULL , `FriendlyIP` TEXT NOT NULL , `ServerBanner` TEXT NOT NULL , `ServerDesc` TEXT NOT NULL );", Conn).ExecuteScalarAsync(); ;
                 await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{QUESTS}` ( `QuestID` INT NOT NULL AUTO_INCREMENT , `QuestTitle` TEXT NOT NULL , `QuestDesc` TEXT NOT NULL , QuestType ENUM('Kill', 'Death', 'Win', 'MultiKill', 'Killstreak', 'Headshots', 'GadgetsUsed', 'FlagsCaptured', 'FlagsSaved', 'Dogtags', 'Shutdown', 'Domination', 'FlagKiller', 'FlagDenied', 'Revenge', 'FirstKill', 'Longshot', 'Survivor', 'Collector') NOT NULL , `QuestTier` ENUM('Easy1', 'Easy2', 'Easy3', 'Medium1', 'Medium2', 'Hard1') NOT NULL , `QuestConditions` TEXT NOT NULL , `TargetAmount` INT NOT NULL , `XP` INT NOT NULL , PRIMARY KEY (`QuestID`));", Conn).ExecuteScalarAsync();
                 await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{ACHIEVEMENTS}` ( `AchievementID` INT NOT NULL AUTO_INCREMENT , `AchievementType` ENUM('Kill', 'Death', 'Win', 'MultiKill', 'Killstreak', 'Headshots', 'GadgetsUsed', 'FlagsCaptured', 'FlagsSaved', 'Dogtags', 'Shutdown', 'Domination', 'FlagKiller', 'FlagDenied', 'Revenge', 'FirstKill', 'Longshot', 'Survivor', 'Collector') NOT NULL , `AchievementConditions` TEXT NOT NULL , `PageID` INT NOT NULL , PRIMARY KEY (`AchievementID`));", Conn).ExecuteScalarAsync();
@@ -259,7 +259,7 @@ namespace UnturnedBlackout.Managers
                 await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{CASES}` ( `CaseID` INT NOT NULL , `CaseName` TEXT NOT NULL , `IconLink` TEXT NOT NULL , `CaseRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `IsBuyable` BOOLEAN NOT NULL , `ScrapPrice` INT NOT NULL , `CoinPrice` INT NOT NULL , `CommonWeight` INT NOT NULL , `UncommonWeight` INT NOT NULL , `RareWeight` INT NOT NULL , `EpicWeight` INT NOT NULL , `LegendaryWeight` INT NOT NULL , `MythicalWeight` INT NOT NULL , `KnifeWeight` INT NOT NULL , `GloveWeight` INT NOT NULL , `LimitedKnifeWeight` INT NOT NULL , `LimitedGloveWeight` INT NOT NULL , `AvailableSkins` TEXT NOT NULL, PRIMARY KEY (`CaseID`))", Conn).ExecuteScalarAsync();
 
                 // PLAYERS DATA
-                await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `SteamName` TEXT NOT NULL , `AvatarLink` VARCHAR(200) NOT NULL , `XP` INT NOT NULL DEFAULT '0' , `Level` INT NOT NULL DEFAULT '1' , `Credits` INT NOT NULL DEFAULT '0' , `Scrap` INT NOT NULL DEFAULT '0' , `Coins` INT NOT NULL DEFAULT '0' , `Kills` INT NOT NULL DEFAULT '0' , `HeadshotKills` INT NOT NULL DEFAULT '0' , `HighestKillstreak` INT NOT NULL DEFAULT '0' , `HighestMultiKills` INT NOT NULL DEFAULT '0' , `KillsConfirmed` INT NOT NULL DEFAULT '0' , `KillsDenied` INT NOT NULL DEFAULT '0' , `FlagsCaptured` INT NOT NULL DEFAULT '0' , `FlagsSaved` INT NOT NULL DEFAULT '0' , `AreasTaken` INT NOT NULL DEFAULT '0' , `Deaths` INT NOT NULL DEFAULT '0' , `Music` BOOLEAN NOT NULL DEFAULT TRUE , `IsMuted` BOOLEAN NOT NULL DEFAULT FALSE , `MuteExpiry` BIGINT NOT NULL DEFAULT '1' , `HasBattlepass` BOOLEAN NOT NULL DEFAULT FALSE , `XPBooster` DECIMAL(6,3) NOT NULL DEFAULT '0' , `BPBooster` DECIMAL(6,3) NOT NULL DEFAULT '0' , `GunXPBooster` DECIMAL(6,3) NOT NULL DEFAULT '0' , `HasPrime` BOOLEAN NOT NULL DEFAULT FALSE , `PrimeExpiry` BIGINT NOT NULL DEFAULT '1' ,  PRIMARY KEY (`SteamID`));", Conn).ExecuteScalarAsync();
+                await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `SteamName` TEXT NOT NULL , `AvatarLink` VARCHAR(200) NOT NULL , `XP` INT NOT NULL DEFAULT '0' , `Level` INT NOT NULL DEFAULT '1' , `Credits` INT NOT NULL DEFAULT '0' , `Scrap` INT NOT NULL DEFAULT '0' , `Coins` INT NOT NULL DEFAULT '0' , `Kills` INT NOT NULL DEFAULT '0' , `HeadshotKills` INT NOT NULL DEFAULT '0' , `HighestKillstreak` INT NOT NULL DEFAULT '0' , `HighestMultiKills` INT NOT NULL DEFAULT '0' , `KillsConfirmed` INT NOT NULL DEFAULT '0' , `KillsDenied` INT NOT NULL DEFAULT '0' , `FlagsCaptured` INT NOT NULL DEFAULT '0' , `FlagsSaved` INT NOT NULL DEFAULT '0' , `AreasTaken` INT NOT NULL DEFAULT '0' , `Deaths` INT NOT NULL DEFAULT '0' , `Music` BOOLEAN NOT NULL DEFAULT TRUE , `IsMuted` BOOLEAN NOT NULL DEFAULT FALSE , `MuteExpiry` BIGINT NOT NULL DEFAULT '1' , `HasBattlepass` BOOLEAN NOT NULL DEFAULT FALSE , `XPBooster` DECIMAL(6,3) NOT NULL DEFAULT '0' , `BPBooster` DECIMAL(6,3) NOT NULL DEFAULT '0' , `GunXPBooster` DECIMAL(6,3) NOT NULL DEFAULT '0' , `HasPrime` BOOLEAN NOT NULL DEFAULT FALSE , `PrimeExpiry` BIGINT NOT NULL DEFAULT '1' , `PrimeLastDailyReward` BIGINT NOT NULL DEFAULT '1' ,  PRIMARY KEY (`SteamID`));", Conn).ExecuteScalarAsync();
                 await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_LEADERBOARD_DAILY}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `Kills` INT NOT NULL DEFAULT '0' , `HeadshotKills` INT NOT NULL DEFAULT '0' , `Deaths` INT NOT NULL DEFAULT '0' , CONSTRAINT `ub_steam_id_11` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID`));", Conn).ExecuteScalarAsync();
                 await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_LEADERBOARD_WEEKLY}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `Kills` INT NOT NULL DEFAULT '0' , `HeadshotKills` INT NOT NULL DEFAULT '0' , `Deaths` INT NOT NULL DEFAULT '0' , CONSTRAINT `ub_steam_id_12` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID`));", Conn).ExecuteScalarAsync();
                 await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_LEADERBOARD_SEASONAL}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `Kills` INT NOT NULL DEFAULT '0' , `HeadshotKills` INT NOT NULL DEFAULT '0' , `Deaths` INT NOT NULL DEFAULT '0' , CONSTRAINT `ub_steam_id_13` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID`));", Conn).ExecuteScalarAsync();
@@ -2007,12 +2007,18 @@ namespace UnturnedBlackout.Managers
 
                         var primeExpiry = DateTimeOffset.FromUnixTimeSeconds(primeExpiryUnixSeconds);
 
+                        if (!long.TryParse(rdr[27].ToString(), out long primeLastDailyRewardUnixSeconds))
+                        {
+                            continue;
+                        }
+
+                        var primeLastDailyReward = DateTimeOffset.FromUnixTimeSeconds(primeLastDailyRewardUnixSeconds);
                         if (PlayerData.ContainsKey(player.CSteamID))
                         {
                             PlayerData.Remove(player.CSteamID);
                         }
 
-                        PlayerData.Add(player.CSteamID, new PlayerData(player.CSteamID, steamName, avatarLink, xp, level, credits, scrap, coins, kills, headshotKills, highestKillstreak, highestMultiKills, killsConfirmed, killsDenied, flagsCaptured, flagsSaved, areasTaken, deaths, music, isMuted, muteExpiry, hasBattlepass, xpBooster, bpBooster, gunXPBooster, hasPrime, primeExpiry));
+                        PlayerData.Add(player.CSteamID, new PlayerData(player.CSteamID, steamName, avatarLink, xp, level, credits, scrap, coins, kills, headshotKills, highestKillstreak, highestMultiKills, killsConfirmed, killsDenied, flagsCaptured, flagsSaved, areasTaken, deaths, music, isMuted, muteExpiry, hasBattlepass, xpBooster, bpBooster, gunXPBooster, hasPrime, primeExpiry, primeLastDailyReward));
                     }
                 }
                 catch (Exception ex)
@@ -3103,14 +3109,6 @@ namespace UnturnedBlackout.Managers
                     PlayerLoadouts.Remove(player.CSteamID);
                 }
                 PlayerLoadouts.Add(player.CSteamID, new PlayerLoadout(guns, gunCharms, knives, gunSkinsSearchByID, gunSkinsSearchByGunID, gunSkinsSearchBySkinID, perks, gadgets, killstreaks, cards, gloves, loadouts));
-            
-                if (playerData.HasPrime)
-                {
-                    if (playerData.PrimeExpiry < DateTimeOffset.UtcNow)
-                    {
-                        // Prime expired, remove rewards and stuff
-                    }
-                }
             }
             catch (Exception ex)
             {
@@ -3846,8 +3844,9 @@ namespace UnturnedBlackout.Managers
             {
                 await Conn.OpenAsync();
                 var expiryDate = DateTimeOffset.UtcNow.AddDays(days);
+                var primeLastDailyReward = DateTimeOffset.UtcNow;
                 await new MySqlCommand($"UPDATE `{PLAYERS}` SET `PrimeExpiry` = `PrimeExpiry` + {days * 24 * 60 * 60} WHERE `HasPrime` = true AND `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-                await new MySqlCommand($"UPDATE `{PLAYERS}` SET `HasPrime` = true, `PrimeExpiry` = {expiryDate.ToUnixTimeSeconds()} WHERE `HasPrime` = false AND `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                await new MySqlCommand($"UPDATE `{PLAYERS}` SET `HasPrime` = true, `PrimeExpiry` = {expiryDate.ToUnixTimeSeconds()} , `PrimeLastDailyReward` = {primeLastDailyReward.ToUnixTimeSeconds()} WHERE `HasPrime` = false AND `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
 
                 if (!PlayerData.TryGetValue(steamID, out PlayerData data))
                 {
@@ -3862,6 +3861,8 @@ namespace UnturnedBlackout.Managers
                 {
                     data.HasPrime = true;
                     data.PrimeExpiry = expiryDate;
+                    data.PrimeLastDailyReward = primeLastDailyReward;
+                    Plugin.Instance.Reward.GiveRewards(steamID, ServerOptions.PrimeRewards);
                 }
             }
             catch (Exception ex)
@@ -4183,7 +4184,18 @@ namespace UnturnedBlackout.Managers
 
             try
             {
+                if (!GunSkinsSearchByID.TryGetValue(id, out GunSkin skin))
+                {
+                    Logging.Debug($"Error finding gun skin with id {id}");
+                    return;
+                }
 
+                await new MySqlCommand($"UPDATE `{GUNS_SKINS}` SET `UnboxedAmount` = `UnboxedAmount` + {amount} WHERE `ID` = {id};", Conn).ExecuteScalarAsync();
+                var obj = await new MySqlCommand($"SELECT `UnboxedAmount` FROM `{GUNS_SKINS}` WHERE `ID` = {id};", Conn).ExecuteScalarAsync();
+                if (obj is int unboxedAmount)
+                {
+                    skin.UnboxedAmount = unboxedAmount;
+                }
             } catch (Exception ex)
             {
                 Logger.Log($"Error updating skin unboxed amount with id {id} by amount {amount}");
@@ -4409,6 +4421,36 @@ namespace UnturnedBlackout.Managers
             catch (Exception ex)
             {
                 Logger.Log($"Error changing is bought to {isBought} for knife with id {knifeID} for player with steam id {steamID}");
+                Logger.Log(ex);
+            }
+            finally
+            {
+                await Conn.CloseAsync();
+            }
+        }
+
+        public async Task UpdatePlayerKnifeUnboxedAmountAsync(CSteamID steamID, ushort knifeID, int amount)
+        {
+            using MySqlConnection Conn = new(ConnectionString);
+
+            try
+            {
+                if (!Knives.TryGetValue(knifeID, out Knife knife))
+                {
+                    Logging.Debug($"Error finding knife with id {knifeID}");
+                    return;
+                }
+
+                await new MySqlCommand($"UPDATE `{KNIVES}` SET `UnboxedAmount` = `UnboxedAmount` + {amount} WHERE `KnifeID` = {knifeID};", Conn).ExecuteScalarAsync();
+                var obj = await new MySqlCommand($"SELECT `UnboxedAmount` FROM `{KNIVES}` WHERE `KnifeID` = {knifeID};", Conn).ExecuteScalarAsync();
+                if (obj is int unboxedAmount)
+                {
+                    knife.UnboxedAmount = unboxedAmount;
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"Error updating knife unboxed amount with id {knifeID} by amount {amount}");
                 Logger.Log(ex);
             }
             finally
@@ -4902,6 +4944,36 @@ namespace UnturnedBlackout.Managers
             }
         }
 
+        public async Task UpdatePlayerGloveUnboxedAmountAsync(CSteamID steamID, int gloveID, int amount)
+        {
+            using MySqlConnection Conn = new(ConnectionString);
+
+            try
+            {
+                if (!Gloves.TryGetValue(gloveID, out Glove glove))
+                {
+                    Logging.Debug($"Error finding glove with id {gloveID}");
+                    return;
+                }
+
+                await new MySqlCommand($"UPDATE `{GLOVES}` SET `UnboxedAmount` = `UnboxedAmount` + {amount} WHERE `GloveID` = {gloveID};", Conn).ExecuteScalarAsync();
+                var obj = await new MySqlCommand($"SELECT `UnboxedAmount` FROM `{GLOVES}` WHERE `GloveID` = {gloveID};", Conn).ExecuteScalarAsync();
+                if (obj is int unboxedAmount)
+                {
+                    glove.UnboxedAmount = unboxedAmount;
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"Error updating glove unboxed amount with id {gloveID} by amount {amount}");
+                Logger.Log(ex);
+            }
+            finally
+            {
+                await Conn.CloseAsync();
+            }
+        }
+
         // Player Loadouts
 
         public async Task UpdatePlayerLoadoutAsync(CSteamID steamID, int loadoutID)
@@ -5015,13 +5087,13 @@ namespace UnturnedBlackout.Managers
 
         // Player Leaderboard
 
-        private void RefreshLeaderboardData(object sender, System.Timers.ElapsedEventArgs e)
+        private void RefreshData(object sender, System.Timers.ElapsedEventArgs e)
         {
             using MySqlConnection Conn = new(ConnectionString);
             try
             {
                 Conn.Open();
-                Logging.Debug("Refreshing leaderboard data");
+                Logging.Debug("Refreshing data");
                 Logging.Debug("Getting server options");
                 var rdr = new MySqlCommand($"SELECT * FROM `{OPTIONS}`;", Conn).ExecuteReader();
                 try
@@ -5084,9 +5156,13 @@ namespace UnturnedBlackout.Managers
                             continue;
                         }
 
-                        var gameTips = rdr[14].ToString().Split(',').ToList();
                         var gunXPBoosterWipe = DateTimeOffset.FromUnixTimeSeconds(gunXPBoosterWipeUnix);
-                        ServerOptions = new Options(dailyLeaderboardWipe, weeklyLeaderboardWipe, dailyRanked, dailyPercentile, weeklyRanked, weeklyPercentile, seasonalRanked, seasonalPercentile, xpBooster, bpBooster, gunXPBooster, xpBoosterWipe, bpBoosterWipe, gunXPBoosterWipe, gameTips);
+
+                        var gameTips = rdr[14].ToString().Split(',').ToList();
+                        var primeRewards = Utility.GetRewardsFromString(rdr[15].ToString());
+                        var primeDailyRewards = Utility.GetRewardsFromString(rdr[16].ToString());
+
+                        ServerOptions = new Options(dailyLeaderboardWipe, weeklyLeaderboardWipe, dailyRanked, dailyPercentile, weeklyRanked, weeklyPercentile, seasonalRanked, seasonalPercentile, xpBooster, bpBooster, gunXPBooster, xpBoosterWipe, bpBoosterWipe, gunXPBoosterWipe, gameTips, primeRewards, primeDailyRewards);
                     }
                 }
                 catch (Exception ex)
@@ -5666,32 +5742,32 @@ namespace UnturnedBlackout.Managers
                     Logging.Debug($"Generated {playerQuests.Count} quests for player");
                 }
 
-                Logging.Debug("Checking if xp booster needs to be wiped");
+                Logging.Debug("Checking if global xp booster needs to be wiped");
                 if (ServerOptions.XPBoosterWipe < DateTimeOffset.UtcNow && ServerOptions.XPBooster != 0f)
                 {
                     ServerOptions.XPBooster = 0f;
                     new MySqlCommand($"UPDATE `{OPTIONS}` SET `XPBooster` = 0;", Conn).ExecuteScalar();
                 }
 
-                Logging.Debug("Checking if bp booster needs to be wiped");
+                Logging.Debug("Checking if global bp booster needs to be wiped");
                 if (ServerOptions.BPBoosterWipe < DateTimeOffset.UtcNow && ServerOptions.BPBooster != 0f)
                 {
                     ServerOptions.BPBooster = 0f;
                     new MySqlCommand($"UPDATE `{OPTIONS}` SET `BPBooster` = 0;", Conn).ExecuteScalar();
                 }
 
-                Logging.Debug("Checking if gun xp booster needs to be wiped");
+                Logging.Debug("Checking if global gun xp booster needs to be wiped");
                 if (ServerOptions.GunXPBoosterWipe < DateTimeOffset.UtcNow && ServerOptions.GunXPBooster != 0f)
                 {
                     ServerOptions.GunXPBooster = 0f;
                     new MySqlCommand($"UPDATE `{OPTIONS} SET `GunXPBooster` = 0;", Conn).ExecuteScalar();
                 }
 
-                Logging.Debug("Checking boosters of all players");
+                Logging.Debug("Checking boosters and prime of all players");
                 foreach (var data in PlayerData.Values)
                 {
                     Logging.Debug($"Getting boosters for {data.SteamName}");
-                    new MySqlCommand($"DELETE FROM `{PLAYERS_BOOSTERS}` WHERE `SteamID` = {data.SteamID} AND `BoosterExpiration` > {DateTimeOffset.UtcNow.ToUnixTimeSeconds()};", Conn).ExecuteScalar();
+                    new MySqlCommand($"DELETE FROM `{PLAYERS_BOOSTERS}` WHERE `SteamID` = {data.SteamID} AND `BoosterExpiration` < {DateTimeOffset.UtcNow.ToUnixTimeSeconds()};", Conn).ExecuteScalar();
                     rdr = new MySqlCommand($"SELECT * FROM `{PLAYERS_BOOSTERS}` WHERE `SteamID` = {data.SteamID};", Conn).ExecuteReader();
                     try
                     {
@@ -5734,6 +5810,143 @@ namespace UnturnedBlackout.Managers
                     data.SetPersonalBooster(EBoosterType.XP, data.XPBooster);
                     data.SetPersonalBooster(EBoosterType.BPXP, data.BPBooster);
                     data.SetPersonalBooster(EBoosterType.GUNXP, data.GunXPBooster);
+
+                    if (data.HasPrime)
+                    {
+                        Logging.Debug($"Checking if prime expired for {data.SteamName}, PrimeExpiry = {data.PrimeExpiry.UtcDateTime}");
+                        var maxRewardDate = DateTime.UtcNow;
+                        if (DateTime.UtcNow > data.PrimeExpiry.UtcDateTime)
+                        {
+                            Logging.Debug($"Prime has expired for {data.SteamName}");
+                            maxRewardDate = data.PrimeExpiry.UtcDateTime;
+                            data.HasPrime = false;
+                            Plugin.Instance.Reward.RemoveRewards(data.SteamID, ServerOptions.PrimeRewards);
+                            new MySqlCommand($"UPDATE `{PLAYERS}` SET `HasPrime` = false WHERE `SteamID` = {data.SteamID};", Conn).ExecuteScalar();
+                        }
+
+                        Logging.Debug($"Checking if daily rewards need to be given, last daily reward = {data.PrimeLastDailyReward.UtcDateTime}, max reward date: {maxRewardDate}");
+                        var daysWorthReward = (int)(maxRewardDate - data.PrimeLastDailyReward.UtcDateTime).TotalDays;
+                        Logging.Debug($"Days worth of reward: {daysWorthReward}");
+                        if (daysWorthReward == 0)
+                        {
+                            continue;
+                        }
+
+                        var dailyRewards = ServerOptions.PrimeDailyRewards.ToList();
+                        if (daysWorthReward > 1)
+                        {
+                            Logging.Debug("Days worth reward greater than 1, multiplying the rewards");
+                            Plugin.Instance.Reward.MultiplyRewards(dailyRewards, daysWorthReward);
+                        }
+
+                        Plugin.Instance.Reward.GiveRewards(data.SteamID, dailyRewards);
+                        var lastDailyRewardDate = data.PrimeLastDailyReward.AddDays(daysWorthReward);
+                        Logging.Debug($"Updated last daily reward = {lastDailyRewardDate.UtcDateTime}");
+                        data.PrimeLastDailyReward = lastDailyRewardDate;
+                        new MySqlCommand($"UPDATE `{PLAYERS}` SET `PrimeLastDailyReward` = {lastDailyRewardDate.ToUnixTimeSeconds()} WHERE `SteamID` = {data.SteamID};", Conn).ExecuteScalar();
+                    }
+
+                }
+
+                Logging.Debug("Getting skins, gloves, knives unboxed amounts again");
+                rdr = new MySqlCommand($"SELECT `ID`,`UnboxedAmount` FROM `{GUNS_SKINS};", Conn).ExecuteReader();
+                try
+                {
+                    while (rdr.Read())
+                    {
+                        if (!int.TryParse(rdr[0].ToString(), out int id))
+                        {
+                            continue;
+                        }
+
+                        if (!int.TryParse(rdr[1].ToString(), out int unboxedAmount))
+                        {
+                            continue;
+                        }
+
+                        if (!GunSkinsSearchByID.TryGetValue(id, out GunSkin skin))
+                        {
+                            Logging.Debug($"Error finding skin with id {id} for refreshing unboxed amounts");
+                            continue;
+                        }
+
+                        skin.UnboxedAmount = unboxedAmount;
+                    }
+                } catch (Exception ex)
+                {
+                    Logger.Log($"Error reading unboxed amounts for skins");
+                    Logger.Log(ex);
+                } finally
+                {
+                    rdr.Close();
+                }
+
+                rdr = new MySqlCommand($"SELECT `KnifeID`,`UnboxedAmount` FROM `{KNIVES};", Conn).ExecuteReader();
+                try
+                {
+                    while (rdr.Read())
+                    {
+                        if (!ushort.TryParse(rdr[0].ToString(), out ushort knifeID))
+                        {
+                            continue;
+                        }
+
+                        if (!int.TryParse(rdr[1].ToString(), out int unboxedAmount))
+                        {
+                            continue;
+                        }
+
+                        if (!Knives.TryGetValue(knifeID, out Knife knife))
+                        {
+                            Logging.Debug($"Error finding knife with id {knifeID} for refreshing unboxed amounts");
+                            continue;
+                        }
+
+                        knife.UnboxedAmount = unboxedAmount;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log($"Error reading unboxed amounts for knives");
+                    Logger.Log(ex);
+                }
+                finally
+                {
+                    rdr.Close();
+                }
+
+                rdr = new MySqlCommand($"SELECT `GloveID`,`UnboxedAmount` FROM `{GLOVES};", Conn).ExecuteReader();
+                try
+                {
+                    while (rdr.Read())
+                    {
+                        if (!int.TryParse(rdr[0].ToString(), out int gloveID))
+                        {
+                            continue;
+                        }
+
+                        if (!int.TryParse(rdr[1].ToString(), out int unboxedAmount))
+                        {
+                            continue;
+                        }
+
+                        if (!Gloves.TryGetValue(gloveID, out Glove glove))
+                        {
+                            Logging.Debug($"Error finding glove with id {gloveID} for refreshing unboxed amounts");
+                            continue;
+                        }
+
+                        glove.UnboxedAmount = unboxedAmount;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log($"Error reading unboxed amounts for gloves");
+                    Logger.Log(ex);
+                }
+                finally
+                {
+                    rdr.Close();
                 }
             }
             catch (Exception ex)

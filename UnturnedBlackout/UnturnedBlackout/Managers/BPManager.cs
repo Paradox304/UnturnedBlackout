@@ -67,7 +67,7 @@ namespace UnturnedBlackout.Managers
                 bp.ClaimedPremiumRewards.Add(tierID);
             }
 
-            Plugin.Instance.Reward.GiveReward(player.SteamID, new List<Reward> { reward });
+            Plugin.Instance.Reward.GiveRewards(player.SteamID, new List<Reward> { reward });
             Plugin.Instance.UI.OnBattlepassTierUpdated(player.SteamID, tierID);
 
             PendingWork.Remove(player.SteamID);

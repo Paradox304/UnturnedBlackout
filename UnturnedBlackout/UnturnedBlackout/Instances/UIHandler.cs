@@ -5950,7 +5950,7 @@ namespace UnturnedBlackout.Instances
                 });
             } else
             {
-                Plugin.Instance.Reward.GiveReward(SteamID, new List<Reward> { reward });
+                Plugin.Instance.Reward.GiveRewards(SteamID, new List<Reward> { reward });
             }
 
             EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Result IMAGE", rewardImage);
