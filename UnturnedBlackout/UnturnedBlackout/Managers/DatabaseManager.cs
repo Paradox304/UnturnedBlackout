@@ -5827,7 +5827,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 Logging.Debug("Getting skins, gloves, knives unboxed amounts again");
-                rdr = new MySqlCommand($"SELECT `ID`,`UnboxedAmount` FROM `{GUNS_SKINS};", Conn).ExecuteReader();
+                rdr = new MySqlCommand($"SELECT `ID`,`UnboxedAmount` FROM `{GUNS_SKINS}`;", Conn).ExecuteReader();
                 try
                 {
                     while (rdr.Read())
@@ -5859,7 +5859,7 @@ namespace UnturnedBlackout.Managers
                     rdr.Close();
                 }
 
-                rdr = new MySqlCommand($"SELECT `KnifeID`,`UnboxedAmount` FROM `{KNIVES};", Conn).ExecuteReader();
+                rdr = new MySqlCommand($"SELECT `KnifeID`,`UnboxedAmount` FROM `{KNIVES}`;", Conn).ExecuteReader();
                 try
                 {
                     while (rdr.Read())
@@ -5893,7 +5893,7 @@ namespace UnturnedBlackout.Managers
                     rdr.Close();
                 }
 
-                rdr = new MySqlCommand($"SELECT `GloveID`,`UnboxedAmount` FROM `{GLOVES};", Conn).ExecuteReader();
+                rdr = new MySqlCommand($"SELECT `GloveID`,`UnboxedAmount` FROM `{GLOVES}`;", Conn).ExecuteReader();
                 try
                 {
                     while (rdr.Read())
