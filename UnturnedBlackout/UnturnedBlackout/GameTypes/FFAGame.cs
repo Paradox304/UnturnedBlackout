@@ -164,7 +164,7 @@ namespace UnturnedBlackout.GameTypes
 
             if (roundEndCases.Count > 0)
             {
-                Plugin.Instance.StartCoroutine(Plugin.Instance.UI.SetupRoundEndDrops(Players.Select(k => k.GamePlayer).ToList(), roundEndCases, 0));
+                Plugin.Instance.StartCoroutine(Plugin.Instance.UI.SetupRoundEndDrops(Players.Select(k => k.GamePlayer).ToList(), roundEndCases, 1));
             }
 
             yield return new WaitForSeconds(Config.Base.FileData.EndingLeaderboardSeconds);
