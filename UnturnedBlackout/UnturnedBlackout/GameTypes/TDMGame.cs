@@ -184,7 +184,7 @@ namespace UnturnedBlackout.GameTypes
             }
             TaskDispatcher.QueueOnMainThread(() =>
             {
-                Plugin.Instance.UI.SetupTDMLeaderboard(Players, Location, wonTeam, BlueTeam, RedTeam, false, IsHardcore, roundEndCases);
+                Plugin.Instance.UI.SetupTDMLeaderboard(Players, Location, wonTeam, BlueTeam, RedTeam, false, IsHardcore);
                 WipeItems();
             });
             yield return new WaitForSeconds(5);
@@ -192,6 +192,12 @@ namespace UnturnedBlackout.GameTypes
             {
                 Plugin.Instance.UI.ShowTDMLeaderboard(player.GamePlayer);
             }
+
+            if (roundEndCases.Count > 0)
+            {
+                Plugin.Instance.StartCoroutine(Plugin.Instance.UI.SetupRoundEndDrops(Players.Select(k => k.GamePlayer).ToList(), roundEndCases, 1));
+            }
+
             yield return new WaitForSeconds(Config.Base.FileData.EndingLeaderboardSeconds);
             foreach (var player in Players.ToList())
             {

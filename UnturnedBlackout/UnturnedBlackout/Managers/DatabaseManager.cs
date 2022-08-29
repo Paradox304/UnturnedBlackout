@@ -3205,7 +3205,6 @@ namespace UnturnedBlackout.Managers
 
         public async Task DecreasePlayerCreditsAsync(CSteamID steamID, int credits)
         {
-            if (Plugin.Instance.Configuration.Instance.UnlockAllItems) return;
             using MySqlConnection Conn = new(ConnectionString);
             try
             {

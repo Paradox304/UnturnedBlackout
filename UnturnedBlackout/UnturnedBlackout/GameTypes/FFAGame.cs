@@ -108,14 +108,18 @@ namespace UnturnedBlackout.GameTypes
                 roundEndCasesPlayers = roundEndCasesPlayers.Take(4).ToList();
             }
             var roundEndCases = new List<(GamePlayer, Case)>();
+            Logging.Debug($"Setting up round end cases for players {roundEndCasesPlayers.Count}");
             foreach (var roundEndCasePlayer in roundEndCasesPlayers)
             {
+                Logging.Debug($"Player: {roundEndCasePlayer.GamePlayer.Player.CharacterName}, Getting a random case");
                 var @case = GetRandomRoundEndCase();
                 if (@case == null)
                 {
+                    Logging.Debug($"Random case is null");
                     continue;
                 }
 
+                Logging.Debug($"Random case is not null, add the case and give it to player");
                 roundEndCases.Add((roundEndCasePlayer.GamePlayer, @case));
                 ThreadPool.QueueUserWorkItem(async (o) =>
                 {
@@ -149,7 +153,7 @@ namespace UnturnedBlackout.GameTypes
             }
             TaskDispatcher.QueueOnMainThread(() =>
             {
-                Plugin.Instance.UI.SetupFFALeaderboard(Players, Location, false, IsHardcore, roundEndCases);
+                Plugin.Instance.UI.SetupFFALeaderboard(Players, Location, false, IsHardcore);
                 WipeItems();
             });
             yield return new WaitForSeconds(5);
@@ -157,6 +161,12 @@ namespace UnturnedBlackout.GameTypes
             {
                 Plugin.Instance.UI.ShowFFALeaderboard(player.GamePlayer);
             }
+
+            if (roundEndCases.Count > 0)
+            {
+                Plugin.Instance.StartCoroutine(Plugin.Instance.UI.SetupRoundEndDrops(Players.Select(k => k.GamePlayer).ToList(), roundEndCases, 0));
+            }
+
             yield return new WaitForSeconds(Config.Base.FileData.EndingLeaderboardSeconds);
             foreach (var player in Players.ToList())
             {
