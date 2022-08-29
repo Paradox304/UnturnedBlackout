@@ -153,6 +153,28 @@ namespace UnturnedBlackout.GameTypes
             GamePhase = EGamePhase.Ending;
             Plugin.Instance.UI.OnGameUpdated();
 
+            var endTime = DateTime.UtcNow;
+            var roundEndCasesPlayers = Players.Where(k => (endTime - k.StartTime).TotalMinutes > Config.RoundEndCases.FileData.MinimumMinutesPlayed && UnityEngine.Random.Range(1, 101) < Config.RoundEndCases.FileData.Chance).OrderByDescending(k => (endTime - k.StartTime).TotalMinutes).ToList();
+            if (roundEndCasesPlayers.Count > 8)
+            {
+                roundEndCasesPlayers = roundEndCasesPlayers.Take(4).ToList();
+            }
+            var roundEndCases = new List<(GamePlayer, Case)>();
+            foreach (var roundEndCasePlayer in roundEndCasesPlayers)
+            {
+                var @case = GetRandomRoundEndCase();
+                if (@case == null)
+                {
+                    continue;
+                }
+
+                roundEndCases.Add((roundEndCasePlayer.GamePlayer, @case));
+                ThreadPool.QueueUserWorkItem(async (o) =>
+                {
+                    await Plugin.Instance.DB.IncreasePlayerCaseAsync(roundEndCasePlayer.GamePlayer.SteamID, @case.CaseID, 1);
+                });
+            }
+
             var summaries = new Dictionary<GamePlayer, MatchEndSummary>();
             foreach (var player in Players)
             {
@@ -181,7 +203,7 @@ namespace UnturnedBlackout.GameTypes
             }
             TaskDispatcher.QueueOnMainThread(() =>
             {
-                Plugin.Instance.UI.SetupCTFLeaderboard(Players, Location, wonTeam, BlueTeam, RedTeam, false, IsHardcore);
+                Plugin.Instance.UI.SetupCTFLeaderboard(Players, Location, wonTeam, BlueTeam, RedTeam, false, IsHardcore, roundEndCases);
                 WipeItems();
             });
             yield return new WaitForSeconds(5);

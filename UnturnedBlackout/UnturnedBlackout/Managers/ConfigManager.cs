@@ -23,7 +23,7 @@ namespace UnturnedBlackout.Managers
         public XmlFileReader<KillFeedConfig> Killfeed { get; set; }
         public XmlFileReader<GamemodeConfig> Gamemode { get; set; }
         public XmlFileReader<WinningValuesConfig> WinningValues { get; set; }
-
+        public XmlFileReader<RoundEndCasesConfig> RoundEndCases { get; set; }
         public ConfigManager()
         {
             var configInstance = Plugin.Instance.Configuration.Instance;
@@ -42,6 +42,7 @@ namespace UnturnedBlackout.Managers
             Killfeed = new(Plugin.Instance.Directory + "/LocalStorage/Configuration.Killfeed.xml", configInstance.URL + "Configuration.Killfeed.xml");
             Gamemode = new(Plugin.Instance.Directory + "/LocalStorage/Configuration.Gamemode.xml", configInstance.URL + "Configuration.Gamemode.xml");
             WinningValues = new(Plugin.Instance.Directory + "/LocalStorage/Configuration.WinningValues.xml", configInstance.URL + "Configuration.WinningValues.xml");
+            RoundEndCases = new(Plugin.Instance.Directory + "/LocalStorage/Configuration.RoundEndCases.xml", configInstance.URL + "Configuration.RoundEndCases.xml");
         }
     }
 }

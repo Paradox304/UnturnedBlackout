@@ -8,6 +8,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnturnedBlackout.Database.Base;
 using UnturnedBlackout.Enums;
 using UnturnedBlackout.Managers;
 using UnturnedBlackout.Models.Feed;
@@ -261,6 +262,36 @@ namespace UnturnedBlackout.GameTypes
         private void OnPlayerDeath(UnturnedPlayer player, EDeathCause cause, ELimb limb, CSteamID murderer)
         {
             OnPlayerDead(player.Player, murderer, limb, cause);
+        }
+
+        public Case GetRandomRoundEndCase()
+        {
+            var cases = Config.RoundEndCases.FileData.RoundEndCases;
+            if (cases.Count == 0)
+            {
+                return null;
+            }
+            int poolSize = 0;
+            foreach (var roundEndCase in cases) poolSize += roundEndCase.Weight;
+            int randInt = UnityEngine.Random.Range(0, poolSize) + 1;
+
+            int accumulatedProbability = 0;
+            Case @case = null;
+            for (int i = 0; i < cases.Count; i++)
+            {
+                var roundEndCase = cases[i];
+                accumulatedProbability += roundEndCase.Weight;
+                if (randInt <= accumulatedProbability)
+                {
+                    if (Plugin.Instance.DB.Cases.TryGetValue(roundEndCase.CaseID, out @case))
+                    {
+                        return @case;
+                    }
+                    Logging.Debug($"Case with id {roundEndCase.CaseID} not found for selecting round end case");
+                    break;
+                }
+            }
+            return Plugin.Instance.DB.Cases.TryGetValue(cases[UnityEngine.Random.Range(0, cases.Count)].CaseID, out @case) ? @case : null;
         }
 
         public void WipeItems()

@@ -274,6 +274,7 @@
     <Compile Include="Models\Configuration\LocationsConfig.cs" />
     <Compile Include="Models\Configuration\MedalsConfig.cs" />
     <Compile Include="Models\Configuration\PointsConfig.cs" />
+    <Compile Include="Models\Configuration\RoundEndCasesConfig.cs" />
     <Compile Include="Models\Configuration\TeamsConfig.cs" />
     <Compile Include="Models\Configuration\WinningValuesConfig.cs" />
     <Compile Include="Models\Data\LoadoutData.cs" />
@@ -291,6 +292,7 @@
     <Compile Include="Models\Global\LoadoutAmount.cs" />
     <Compile Include="Models\Global\Kit.cs" />
     <Compile Include="Models\Global\MatchEndSummary.cs" />
+    <Compile Include="Models\Global\RoundEndCase.cs" />
     <Compile Include="Models\Global\TeamGlove.cs" />
     <Compile Include="Models\KC\KCConfig.cs" />
     <Compile Include="Models\KC\KCPlayer.cs" />

@@ -628,11 +628,16 @@ namespace UnturnedBlackout.Managers
             EffectManager.sendUIEffectText(FFA_KEY, player.GamePlayer.TransportConnection, true, "2ndPlacementScore", secondPlayer != null ? secondPlayer.Kills.ToString() : "0");
         }
 
-        public void SetupFFALeaderboard(List<FFAPlayer> players, ArenaLocation location, bool isPlaying, bool isHardcore)
+        public void SetupFFALeaderboard(List<FFAPlayer> players, ArenaLocation location, bool isPlaying, bool isHardcore, List<(GamePlayer, Case)> roundEndCases)
         {
             foreach (var player in players)
             {
                 SetupFFALeaderboard(player, players, location, isPlaying, isHardcore);
+            }
+
+            if (roundEndCases.Count > 0)
+            {
+                Plugin.Instance.StartCoroutine(SetupRoundEndDrops(players.Select(k => k.GamePlayer).ToList(), roundEndCases, 0));
             }
         }
 
@@ -726,11 +731,16 @@ namespace UnturnedBlackout.Managers
             EffectManager.sendUIEffectText(TDM_KEY, player.GamePlayer.TransportConnection, true, $"{team}BarFill{index}", spaces == 0 ? " " : new string(' ', spaces));
         }
 
-        public void SetupTDMLeaderboard(List<TDMPlayer> players, ArenaLocation location, TDMTeam wonTeam, TDMTeam blueTeam, TDMTeam redTeam, bool isPlaying, bool isHardcore)
+        public void SetupTDMLeaderboard(List<TDMPlayer> players, ArenaLocation location, TDMTeam wonTeam, TDMTeam blueTeam, TDMTeam redTeam, bool isPlaying, bool isHardcore, List<(GamePlayer, Case)> roundEndCases)
         {
             foreach (var player in players)
             {
                 SetupTDMLeaderboard(player, players, location, wonTeam, blueTeam, redTeam, isPlaying, isHardcore);
+            }
+
+            if (roundEndCases.Count > 0)
+            {
+                Plugin.Instance.StartCoroutine(SetupRoundEndDrops(players.Select(k => k.GamePlayer).ToList(), roundEndCases, 1));
             }
         }
 
@@ -853,11 +863,16 @@ namespace UnturnedBlackout.Managers
             EffectManager.sendUIEffectText(KC_KEY, player.GamePlayer.TransportConnection, true, $"{team}BarFill{index}", spaces == 0 ? " " : new string(' ', spaces));
         }
 
-        public void SetupKCLeaderboard(List<KCPlayer> players, ArenaLocation location, KCTeam wonTeam, KCTeam blueTeam, KCTeam redTeam, bool isPlaying, bool isHardcore)
+        public void SetupKCLeaderboard(List<KCPlayer> players, ArenaLocation location, KCTeam wonTeam, KCTeam blueTeam, KCTeam redTeam, bool isPlaying, bool isHardcore, List<(GamePlayer, Case)> roundEndCases)
         {
             foreach (var player in players)
             {
                 SetupKCLeaderboard(player, players, location, wonTeam, blueTeam, redTeam, isPlaying, isHardcore);
+            }
+
+            if (roundEndCases.Count > 0)
+            {
+                Plugin.Instance.StartCoroutine(SetupRoundEndDrops(players.Select(k => k.GamePlayer).ToList(), roundEndCases, 2));
             }
         }
 
@@ -1033,11 +1048,16 @@ namespace UnturnedBlackout.Managers
             }
         }
 
-        public void SetupCTFLeaderboard(List<CTFPlayer> players, ArenaLocation location, CTFTeam wonTeam, CTFTeam blueTeam, CTFTeam redTeam, bool isPlaying, bool isHardcore)
+        public void SetupCTFLeaderboard(List<CTFPlayer> players, ArenaLocation location, CTFTeam wonTeam, CTFTeam blueTeam, CTFTeam redTeam, bool isPlaying, bool isHardcore, List<(GamePlayer, Case)> roundEndCases)
         {
             foreach (var player in players)
             {
                 SetupCTFLeaderboard(player, players, location, wonTeam, blueTeam, redTeam, isPlaying, isHardcore);
+            }
+
+            if (roundEndCases.Count > 0)
+            {
+                Plugin.Instance.StartCoroutine(SetupRoundEndDrops(players.Select(k => k.GamePlayer).ToList(), roundEndCases, 2));
             }
         }
 
@@ -1148,6 +1168,28 @@ namespace UnturnedBlackout.Managers
         public void ClearCTFHUD(GamePlayer player)
         {
             EffectManager.askEffectClearByID(CTF_ID, player.TransportConnection);
+        }
+
+        // ALL GAME RELATED UI
+
+        public IEnumerator SetupRoundEndDrops(List<GamePlayer> players, List<(GamePlayer, Case)> roundEndCases, int v)
+        {
+            foreach (var player in players)
+            {
+                EffectManager.sendUIEffectVisibility(PRE_ENDING_UI_KEY, player.TransportConnection, true, $"Drops{v}", true);
+            }
+
+            for (int i = 0; i < roundEndCases.Count; i++)
+            {
+                var roundEndCase = roundEndCases[i];
+                foreach (var player in players)
+                {
+                    EffectManager.sendUIEffectVisibility(PRE_ENDING_UI_KEY, player.TransportConnection, true, $"SERVER Scoreboard{v} Drop {i}", true);
+                    EffectManager.sendUIEffectImageURL(PRE_ENDING_UI_KEY, player.TransportConnection, true, $"SERVER Scoreboard{v} Drop IMAGE {i}", roundEndCase.Item2.IconLink);
+                    EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.TransportConnection, true, $"SERVER Scoreboard{v} Drop TEXT {i}", roundEndCase.Item1.Player.CharacterName);
+                }
+                yield return new WaitForSeconds(1f);
+            }
         }
 
         // EVENTS

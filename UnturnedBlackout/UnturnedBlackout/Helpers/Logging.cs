@@ -6,15 +6,15 @@ namespace UnturnedBlackout
 {
     public static class Logging
     {
-        public static void Debug(string message)
+        public static void Debug(string message, ConsoleColor color = ConsoleColor.Green)
         {
             if (Plugin.Instance.Config.Base.FileData.EnableDebugLogs == true)
             {
                 var method = new StackTrace().GetFrame(1).GetMethod();
-                Console.ForegroundColor = ConsoleColor.Green;
+                Console.ForegroundColor = color;
                 Console.WriteLine($"[{method.ReflectedType}.{method.Name}]: {message}");
+                Logger.ExternalLog(message, color);
                 Console.ResetColor();
-                Logger.ExternalLog(message, ConsoleColor.Green);
             }
         }
 
