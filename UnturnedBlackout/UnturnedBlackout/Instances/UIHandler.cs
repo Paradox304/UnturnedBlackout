@@ -87,6 +87,7 @@ namespace UnturnedBlackout.Instances
         public int UnboxingPageID { get; set; }
         public int SelectedCaseID { get; set; }
         public ECurrency SelectedCaseBuyMethod { get; set; }
+        public bool IsUnboxing { get; set; }
 
         // Battlepass
         public (bool, int) SelectedBattlepassTierID { get; set; }
@@ -5872,15 +5873,18 @@ namespace UnturnedBlackout.Instances
 
         public IEnumerator UnboxCase()
         {
+            IsUnboxing = true;
             if (!PlayerData.CasesSearchByID.TryGetValue(SelectedCaseID, out PlayerCase @case))
             {
                 Logging.Debug($"Error finding selected case with id {SelectedCaseID} for unboxing for {Player.CharacterName}");
+                IsUnboxing = false;
                 yield break;
             }
 
             if (!Plugin.Instance.Unbox.TryCalculateReward(@case.Case, Player, out Reward reward, out string rewardImage, out string rewardName, out string rewardDesc, out ERarity rewardRarity, out bool isDuplicate, out int duplicateScrapAmount))
             {
                 Logging.Debug($"Unable to calculate reward for unboxing case {SelectedCaseID} for {Player.CharacterName}");
+                IsUnboxing = false;
                 yield break;
             }
 
@@ -5891,7 +5895,7 @@ namespace UnturnedBlackout.Instances
             {
                 if (i == 20)
                 {
-                    EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Rolling IMAGE {i}", rewardImage);
+                    EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Rolling IMAGE {i}", reward.RewardType == ERewardType.Knife ? "https://cdn.discordapp.com/attachments/458038940847439903/101239549258971551l7/knife.png" : (reward.RewardType == ERewardType.Glove ? "https://cdn.discordapp.com/attachments/458038940847439903/1012396521066602536/glove.png" : rewardImage));
                     SendRarity("SERVER Unbox Content Rolling", rewardRarity, i);
                     continue;
                 }
@@ -5901,7 +5905,7 @@ namespace UnturnedBlackout.Instances
                 switch (caseRarity)
                 {
                     case ECaseRarity.KNIFE or ECaseRarity.LIMITED_KNIFE:
-                        EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Rolling IMAGE {i}", "https://cdn.discordapp.com/attachments/458038940847439903/1012395492589715517/knife.png");
+                        EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Rolling IMAGE {i}", "https://cdn.discordapp.com/attachments/458038940847439903/101239549258971551l7/knife.png");
                         continue;
                     case ECaseRarity.GLOVE or ECaseRarity.LIMITED_GLOVE:
                         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Rolling IMAGE {i}", "https://cdn.discordapp.com/attachments/458038940847439903/1012396521066602536/glove.png");
@@ -5965,6 +5969,7 @@ namespace UnturnedBlackout.Instances
             yield return new WaitForSeconds(7f);
 
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Unbox Button Toggler", @case.Amount > 0);
+            IsUnboxing = false;
         }
 
         public void ShowUnboxingStorePage()
