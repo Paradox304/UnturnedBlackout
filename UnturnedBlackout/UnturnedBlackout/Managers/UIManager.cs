@@ -99,6 +99,8 @@ namespace UnturnedBlackout.Managers
         public const ushort VOICE_CHAT_ID = 27622;
         public const short VOICE_CHAT_KEY = 27622;
 
+        private const int MAX_SPACES_TDM_SCORE = 150;
+
         public UIManager()
         {
             KillFeedIcons = Config.Killfeed.FileData.KillFeedIcons.ToDictionary(k => k.WeaponID);
@@ -702,8 +704,8 @@ namespace UnturnedBlackout.Managers
             EffectManager.sendUIEffectText(TDM_KEY, player.GamePlayer.TransportConnection, true, "TeamName", $"<color={player.Team.Info.TeamColorHexCode}>{player.Team.Info.TeamName}</color>");
 
             int index = player.Team.TeamID == (byte)ETeam.Blue ? 1 : 0;
-            int blueSpaces = blueTeam.Score * 96 / Config.TDM.FileData.ScoreLimit;
-            int redSpaces = redTeam.Score * 96 / Config.TDM.FileData.ScoreLimit;
+            int blueSpaces = blueTeam.Score * MAX_SPACES_TDM_SCORE / Config.TDM.FileData.ScoreLimit;
+            int redSpaces = redTeam.Score * MAX_SPACES_TDM_SCORE / Config.TDM.FileData.ScoreLimit;
             EffectManager.sendUIEffectText(TDM_KEY, player.GamePlayer.TransportConnection, true, $"RedNum{index}", redTeam.Score.ToString());
             EffectManager.sendUIEffectText(TDM_KEY, player.GamePlayer.TransportConnection, true, $"RedBarFill{index}", redSpaces == 0 ? " " : new string(' ', redSpaces));
 
@@ -720,7 +722,7 @@ namespace UnturnedBlackout.Managers
         {
             int index = player.Team.TeamID == (byte)ETeam.Blue ? 1 : 0;
             var team = (ETeam)changeTeam.TeamID;
-            int spaces = changeTeam.Score * 96 / Config.TDM.FileData.ScoreLimit;
+            int spaces = changeTeam.Score * MAX_SPACES_TDM_SCORE / Config.TDM.FileData.ScoreLimit;
 
             EffectManager.sendUIEffectText(TDM_KEY, player.GamePlayer.TransportConnection, true, $"{team}Num{index}", changeTeam.Score.ToString());
             EffectManager.sendUIEffectText(TDM_KEY, player.GamePlayer.TransportConnection, true, $"{team}BarFill{index}", spaces == 0 ? " " : new string(' ', spaces));
@@ -829,8 +831,8 @@ namespace UnturnedBlackout.Managers
             EffectManager.sendUIEffectText(KC_KEY, player.GamePlayer.TransportConnection, true, "TeamName", $"<color={player.Team.Info.TeamColorHexCode}>{player.Team.Info.TeamName}</color>");
 
             int index = player.Team.TeamID == (byte)ETeam.Blue ? 1 : 0;
-            int blueSpaces = blueTeam.Score * 96 / Config.TDM.FileData.ScoreLimit;
-            int redSpaces = redTeam.Score * 96 / Config.TDM.FileData.ScoreLimit;
+            int blueSpaces = blueTeam.Score * MAX_SPACES_TDM_SCORE / Config.TDM.FileData.ScoreLimit;
+            int redSpaces = redTeam.Score * MAX_SPACES_TDM_SCORE / Config.TDM.FileData.ScoreLimit;
             EffectManager.sendUIEffectText(KC_KEY, player.GamePlayer.TransportConnection, true, $"RedNum{index}", redTeam.Score.ToString());
             EffectManager.sendUIEffectText(KC_KEY, player.GamePlayer.TransportConnection, true, $"RedBarFill{index}", redSpaces == 0 ? " " : new string(' ', redSpaces));
 
@@ -847,7 +849,7 @@ namespace UnturnedBlackout.Managers
         {
             int index = player.Team.TeamID == (byte)ETeam.Blue ? 1 : 0;
             var team = (ETeam)changeTeam.TeamID;
-            int spaces = changeTeam.Score * 96 / Config.TDM.FileData.ScoreLimit;
+            int spaces = changeTeam.Score * MAX_SPACES_TDM_SCORE / Config.TDM.FileData.ScoreLimit;
 
             EffectManager.sendUIEffectText(KC_KEY, player.GamePlayer.TransportConnection, true, $"{team}Num{index}", changeTeam.Score.ToString());
             EffectManager.sendUIEffectText(KC_KEY, player.GamePlayer.TransportConnection, true, $"{team}BarFill{index}", spaces == 0 ? " " : new string(' ', spaces));
