@@ -137,24 +137,39 @@ namespace UnturnedBlackout.GameTypes
             Plugin.Instance.UI.OnGameUpdated();
 
             var endTime = DateTime.UtcNow;
-            var roundEndCasesPlayers = Players.Where(k => (endTime - k.StartTime).TotalMinutes > Config.RoundEndCases.FileData.MinimumMinutesPlayed && UnityEngine.Random.Range(1, 101) < Config.RoundEndCases.FileData.Chance).OrderByDescending(k => (endTime - k.StartTime).TotalMinutes).ToList();
-            if (roundEndCasesPlayers.Count > 8)
+            var roundEndCasesPlayers = new List<GamePlayer>();
+            foreach (var player in Players)
             {
-                roundEndCasesPlayers = roundEndCasesPlayers.Take(4).ToList();
+                var totalMinutesPlayed = (int)(endTime - player.StartTime).TotalMinutes;
+                if (totalMinutesPlayed < Config.RoundEndCases.FileData.MinimumMinutesPlayed)
+                {
+                    continue;
+                }
+
+                var chance = Config.RoundEndCases.FileData.Chance * totalMinutesPlayed;
+                if (UnityEngine.Random.Range(1, 101) > chance)
+                {
+                    continue;
+                }
+                roundEndCasesPlayers.Add(player.GamePlayer);
+                if (roundEndCasesPlayers.Count == 8) break;
             }
+
             var roundEndCases = new List<(GamePlayer, Case)>();
             foreach (var roundEndCasePlayer in roundEndCasesPlayers)
             {
                 var @case = GetRandomRoundEndCase();
                 if (@case == null)
                 {
+                    Logging.Debug($"Random case is null");
                     continue;
                 }
 
-                roundEndCases.Add((roundEndCasePlayer.GamePlayer, @case));
+                Logging.Debug($"Random case is not null, add the case and give it to player");
+                roundEndCases.Add((roundEndCasePlayer, @case));
                 ThreadPool.QueueUserWorkItem(async (o) =>
                 {
-                    await Plugin.Instance.DB.IncreasePlayerCaseAsync(roundEndCasePlayer.GamePlayer.SteamID, @case.CaseID, 1);
+                    await Plugin.Instance.DB.IncreasePlayerCaseAsync(roundEndCasePlayer.SteamID, @case.CaseID, 1);
                 });
             }
 

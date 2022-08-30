@@ -5726,6 +5726,14 @@ namespace UnturnedBlackout.Instances
                     rewardImage = knife.IconLink;
                     rewardRarity = knife.KnifeRarity;
                     return true;
+                case ERewardType.Case:
+                    if (!DB.Cases.TryGetValue(Convert.ToInt32(reward.RewardValue), out Case @case))
+                    {
+                        return false;
+                    }
+                    rewardImage = @case.IconLink;
+                    rewardRarity = @case.CaseRarity;
+                    return true;
                 case ERewardType.BPBooster:
                 case ERewardType.XPBooster:
                 case ERewardType.GunXPBooster:
