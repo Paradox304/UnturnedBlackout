@@ -5967,7 +5967,7 @@ namespace UnturnedBlackout.Instances
             }
 
             EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Result IMAGE", rewardImage);
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Result TEXT", rewardName);
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Result TEXT", $"<color={Utility.GetRarityColor(rewardRarity)}>{rewardName}</color>");
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Description TEXT", rewardDesc);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Duplicate", isDuplicate);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Duplicate TEXT", $"+{duplicateScrapAmount}");
@@ -6103,6 +6103,8 @@ namespace UnturnedBlackout.Instances
                     EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content BUTTON {i}", true);
                     EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content IMAGE {i}", Config.Base.FileData.GloveUnboxingIconLink);
                     EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Name TEXT {i}", "Glove");
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Extra TEXT {i}", " ");
+                    SendRarity("SERVER Unbox Content", ERarity.MYTHICAL, i);
                     continue;
                 }
 
@@ -6111,6 +6113,8 @@ namespace UnturnedBlackout.Instances
                     EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content BUTTON {i}", true);
                     EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content IMAGE {i}", Config.Base.FileData.KnifeUnboxingIconLink);
                     EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Name TEXT {i}", "Knife");
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Extra TEXT {i}", " ");
+                    SendRarity("SERVER Unbox Content", ERarity.MYTHICAL, i);
                     continue;
                 }
 
@@ -6120,12 +6124,11 @@ namespace UnturnedBlackout.Instances
                     continue;
                 }
 
-                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Extra TEXT {i}", " ");
-
                 var skin = skins[i];
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content BUTTON {i}", true);
                 EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content IMAGE {i}", skin.IconLink);
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Name TEXT {i}", skin.SkinName);
+                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Extra TEXT {i}", " ");
 
                 SendRarity("SERVER Unbox Content", skin.SkinRarity, i);
             }
