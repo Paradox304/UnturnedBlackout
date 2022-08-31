@@ -107,7 +107,7 @@ namespace UnturnedBlackout.GameTypes
             {
                 var totalMinutesPlayed = (int)(endTime - player.StartTime).TotalMinutes;
                 Logging.Debug($"{player.GamePlayer.Player.CharacterName} total minutes: {totalMinutesPlayed}");
-                if (totalMinutesPlayed < Config.RoundEndCases.FileData.MinimumMinutesPlayed)
+                if (totalMinutesPlayed < Config.RoundEndCases.FileData.MinimumMinutesPlayed || player.Kills == 0)
                 {
                     Logging.Debug($"Total minutes played less than min minutes, ignoring");
                     continue;

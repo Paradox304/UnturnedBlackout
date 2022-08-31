@@ -139,7 +139,7 @@ namespace UnturnedBlackout.GameTypes
             foreach (var player in Players)
             {
                 var totalMinutesPlayed = (int)(endTime - player.StartTime).TotalMinutes;
-                if (totalMinutesPlayed < Config.RoundEndCases.FileData.MinimumMinutesPlayed)
+                if (totalMinutesPlayed < Config.RoundEndCases.FileData.MinimumMinutesPlayed || player.Kills == 0)
                 {
                     continue;
                 }

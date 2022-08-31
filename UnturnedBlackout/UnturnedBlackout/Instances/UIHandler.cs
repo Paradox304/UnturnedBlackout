@@ -5900,6 +5900,7 @@ namespace UnturnedBlackout.Instances
                 yield break;
             }
 
+            
             int poolSize = 0;
             foreach (var weight in @case.Case.Weights) poolSize += weight.Item2;
 
@@ -5907,7 +5908,7 @@ namespace UnturnedBlackout.Instances
             {
                 if (i == 20)
                 {
-                    EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Rolling IMAGE {i}", reward.RewardType == ERewardType.Knife ? "https://cdn.discordapp.com/attachments/458038940847439903/101239549258971551l7/knife.png" : (reward.RewardType == ERewardType.Glove ? "https://cdn.discordapp.com/attachments/458038940847439903/1012396521066602536/glove.png" : rewardImage));
+                    EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Rolling IMAGE {i}", reward.RewardType == ERewardType.Knife ? Config.Base.FileData.KnifeUnboxingIconLink : (reward.RewardType == ERewardType.Glove ? Config.Base.FileData.GloveUnboxingIconLink : rewardImage));
                     SendRarity("SERVER Unbox Content Rolling", rewardRarity, i);
                     continue;
                 }
@@ -5917,10 +5918,10 @@ namespace UnturnedBlackout.Instances
                 switch (caseRarity)
                 {
                     case ECaseRarity.KNIFE or ECaseRarity.LIMITED_KNIFE:
-                        EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Rolling IMAGE {i}", "https://cdn.discordapp.com/attachments/458038940847439903/101239549258971551l7/knife.png");
+                        EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Rolling IMAGE {i}", Config.Base.FileData.KnifeUnboxingIconLink);
                         continue;
                     case ECaseRarity.GLOVE or ECaseRarity.LIMITED_GLOVE:
-                        EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Rolling IMAGE {i}", "https://cdn.discordapp.com/attachments/458038940847439903/1012396521066602536/glove.png");
+                        EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Rolling IMAGE {i}", Config.Base.FileData.GloveUnboxingIconLink);
                         continue;
                     default:
                         if (!Enum.TryParse(caseRarity.ToString(), true, out ERarity skinRarity))
@@ -6105,11 +6106,25 @@ namespace UnturnedBlackout.Instances
                     continue;
                 }
 
+                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Extra TEXT {i}", " ");
+                if (i == 18 && @case.Weights.Exists(k => k.Item1 == ECaseRarity.GLOVE || k.Item1 == ECaseRarity.LIMITED_GLOVE))
+                {
+                    EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content IMAGE {i}", Config.Base.FileData.GloveUnboxingIconLink);
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Name TEXT {i}", "Glove");
+                    continue;
+                }
+
+                if (i == 19 && @case.Weights.Exists(k => k.Item1 == ECaseRarity.KNIFE || k.Item1 == ECaseRarity.LIMITED_KNIFE))
+                {
+                    EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content IMAGE {i}", Config.Base.FileData.KnifeUnboxingIconLink);
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Name TEXT {i}", "Knife");
+                    continue;
+                }
+
                 var skin = skins[i];
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content BUTTON {i}", true);
                 EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content IMAGE {i}", skin.IconLink);
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Name TEXT {i}", skin.SkinName);
-                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Extra TEXT {i}", " ");
 
                 SendRarity("SERVER Unbox Content", skin.SkinRarity, i);
             }
