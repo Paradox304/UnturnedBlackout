@@ -35,6 +35,9 @@ namespace UnturnedBlackout.Models.Configuration
         public string PointsIconLink { get; set; }
         public string ScrapIconLink { get; set; }
 
+        public string KnifeUnboxingIconLink { get; set; }
+        public string GloveUnboxingIconLink { get; set; }
+
         public BaseValuesConfig()
         {
             MaxPlayerNameCharacters = 20;
@@ -75,6 +78,9 @@ namespace UnturnedBlackout.Models.Configuration
             BlacktagsIconLink = "";
             PointsIconLink = "";
             ScrapIconLink = "";
+
+            KnifeUnboxingIconLink = "https://cdn.discordapp.com/attachments/458038940847439903/101239549258971551l7/knife.png";
+            GloveUnboxingIconLink = "https://cdn.discordapp.com/attachments/458038940847439903/1012396521066602536/glove.png";
         }
     }
 }
