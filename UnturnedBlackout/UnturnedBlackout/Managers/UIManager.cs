@@ -1170,6 +1170,7 @@ namespace UnturnedBlackout.Managers
                 foreach (var player in players)
                 {
                     Logging.Debug($"Setting SERVER Scoreboard{v} Drop {i} to true for {player.Player.CharacterName}");
+                    EffectManager.sendUIEffectVisibility(PRE_ENDING_UI_KEY, player.TransportConnection, true, $"SERVER Scoreboard{v} {roundEndCase.Item2.CaseRarity} {i}", true);
                     EffectManager.sendUIEffectVisibility(PRE_ENDING_UI_KEY, player.TransportConnection, true, $"SERVER Scoreboard{v} Drop {i}", true);
                     Logging.Debug($"Setting SERVER Scoreboard{v} Drop IMAGE {i} to {roundEndCase.Item2.IconLink} for {player.Player.CharacterName}");
                     EffectManager.sendUIEffectImageURL(PRE_ENDING_UI_KEY, player.TransportConnection, true, $"SERVER Scoreboard{v} Drop IMAGE {i}", roundEndCase.Item2.IconLink);

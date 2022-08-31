@@ -5663,9 +5663,13 @@ namespace UnturnedBlackout.Instances
                 return;
             }
 
-            if (((isTop && tier.FreeReward != null) || (!isTop && tier.PremiumReward != null)) && TryGetBattlepassRewardInfo(isTop ? tier.FreeReward : tier.PremiumReward, out _, out string rewardImage, out _))
+            var reward = isTop ? tier.FreeReward : tier.PremiumReward;
+            if (reward != null && TryGetBattlepassRewardInfo(reward, out _, out string rewardImage, out _))
             {
+                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass IMAGE", reward.RewardType != ERewardType.Card);
+                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass Card IMAGE", reward.RewardType == ERewardType.Card);
                 EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass IMAGE", rewardImage);
+                EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass Card IMAGE", rewardImage);
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass Claim BUTTON", true);
             }
         }
@@ -6102,6 +6106,7 @@ namespace UnturnedBlackout.Instances
                 }
 
                 var skin = skins[i];
+                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content BUTTON {i}", true);
                 EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content IMAGE {i}", skin.IconLink);
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Name TEXT {i}", skin.SkinName);
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Extra TEXT {i}", " ");
