@@ -5466,7 +5466,16 @@ namespace UnturnedBlackout.Managers
                     }
 
                     // Change the wipe date
-                    var newWipeDate = DateTimeOffset.UtcNow.AddDays(1);
+                    var currentWipeDate = ServerOptions.DailyLeaderboardWipe;
+                    DateTimeOffset newWipeDate;
+                    if (DateTime.UtcNow.Hour > currentWipeDate.Hour)
+                    {
+                        var tomorrowDate = DateTime.UtcNow.AddDays(1);
+                        newWipeDate = new DateTimeOffset(new DateTime(tomorrowDate.Year, tomorrowDate.Month, tomorrowDate.Day, currentWipeDate.Hour, 0, 0));
+                    } else
+                    {
+                        newWipeDate = new DateTimeOffset(new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.UtcNow.Day, currentWipeDate.Hour, 0, 0));
+                    }
                     new MySqlCommand($"UPDATE `{OPTIONS}` SET `DailyLeaderboardWipe` = {newWipeDate.ToUnixTimeSeconds()};", Conn).ExecuteScalar();
                     ServerOptions.DailyLeaderboardWipe = newWipeDate;
                 }
@@ -5564,6 +5573,7 @@ namespace UnturnedBlackout.Managers
 
                     // Change the wipe date
                     var newWipeDate = DateTimeOffset.UtcNow.AddDays(7);
+                    newWipeDate = new DateTimeOffset(new DateTime(newWipeDate.Year, newWipeDate.Month, newWipeDate.Day, ServerOptions.WeeklyLeaderboardWipe.Hour, 0, 0));
                     new MySqlCommand($"UPDATE `{OPTIONS}` SET `WeeklyLeaderboardWipe` = {newWipeDate.ToUnixTimeSeconds()};", Conn).ExecuteScalar();
                     ServerOptions.WeeklyLeaderboardWipe = newWipeDate;
                 }
