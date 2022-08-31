@@ -433,10 +433,10 @@ namespace UnturnedBlackout
                 ERarity.EPIC => "#964BFA",
                 ERarity.LEGENDARY => "#C832FA",
                 ERarity.MYTHICAL => "#FA3219",
-                ERarity.YELLOW => "yellow",
+                ERarity.YELLOW => "#FFFF00",
                 ERarity.ORANGE => "orange",
                 ERarity.CYAN => "#31FFF9",
-                ERarity.GREEN => "green",
+                ERarity.GREEN => "#00FF00",
                 _ => throw new ArgumentOutOfRangeException("rarity", "Rarity is not as expected")
             };
 

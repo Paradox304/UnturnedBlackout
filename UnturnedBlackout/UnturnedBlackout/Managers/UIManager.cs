@@ -1619,7 +1619,7 @@ namespace UnturnedBlackout.Managers
                     }
                     return;
                 case "SERVER Unbox Content Unbox BUTTON":
-                    if (handler.UnboxingPage == EUnboxingPage.Open)
+                    if (handler.UnboxingPage == EUnboxingPage.Open && !handler.IsUnboxing)
                     {
                         handler.CrateUnboxer = Plugin.Instance.StartCoroutine(handler.UnboxCase());
                     }
