@@ -5978,12 +5978,14 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"Crate Rolling ANIM {UnityEngine.Random.Range(1, 6)}", true);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Crate EXAMPLE Open ANIM", true);
 
-            yield return new WaitForSeconds(7f);
-
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Result {rewardRarity}", true);
+            yield return new WaitForSeconds(8f);
 
             IsUnboxing = false;
-            TaskDispatcher.QueueOnMainThread(() => EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Unbox Button Toggler", @case.Amount > 0));
+            TaskDispatcher.QueueOnMainThread(() => 
+            {
+                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Unbox Button Toggler", @case.Amount > 0);
+                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Result {rewardRarity}", true);
+            });
         }
 
         public void ShowUnboxingStorePage()
@@ -6082,6 +6084,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Unbox Buy Preview BUTTON", true);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Preview Coins TEXT", $"{Utility.GetCurrencySymbol(ECurrency.Coins)} {@case.CoinPrice}");
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Preview Scrap TEXT", $"{Utility.GetCurrencySymbol(ECurrency.Scrap)} {@case.ScrapPrice}");
+            SendRarity("SERVER Unbox Buy", @case.CaseRarity, selected);
 
             SendRarityName("SERVER Unbox Buy RarityType TEXT", @case.CaseRarity);
         }
