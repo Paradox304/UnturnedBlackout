@@ -5973,12 +5973,13 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Duplicate TEXT", $"+{duplicateScrapAmount}");
             EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Duplicate IMAGE", Config.Base.FileData.ScrapIconLink);
 
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Result {rewardRarity}", true);
-
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"Crate Rolling ANIM {UnityEngine.Random.Range(1, 6)}", true);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Crate EXAMPLE Open ANIM", true);
 
             yield return new WaitForSeconds(7f);
+
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Result {rewardRarity}", true);
+
             IsUnboxing = false;
             TaskDispatcher.QueueOnMainThread(() => EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Unbox Button Toggler", @case.Amount > 0));
         }
