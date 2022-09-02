@@ -5919,9 +5919,11 @@ namespace UnturnedBlackout.Instances
                 {
                     case ECaseRarity.KNIFE or ECaseRarity.LIMITED_KNIFE:
                         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Rolling IMAGE {i}", Config.Base.FileData.KnifeUnboxingIconLink);
+                        SendRarity("SERVER Unbox Content Rolling", ERarity.YELLOW, i);
                         continue;
                     case ECaseRarity.GLOVE or ECaseRarity.LIMITED_GLOVE:
                         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Rolling IMAGE {i}", Config.Base.FileData.GloveUnboxingIconLink);
+                        SendRarity("SERVER Unbox Content Rolling", ERarity.YELLOW, i);
                         continue;
                     default:
                         if (!Enum.TryParse(caseRarity.ToString(), true, out ERarity skinRarity))
@@ -6105,7 +6107,7 @@ namespace UnturnedBlackout.Instances
                     EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content IMAGE {i}", Config.Base.FileData.GloveUnboxingIconLink);
                     EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Name TEXT {i}", "Glove");
                     EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Extra TEXT {i}", " ");
-                    SendRarity("SERVER Unbox Content", ERarity.MYTHICAL, i);
+                    SendRarity("SERVER Unbox Content", ERarity.YELLOW, i);
                     continue;
                 }
 
@@ -6115,7 +6117,7 @@ namespace UnturnedBlackout.Instances
                     EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content IMAGE {i}", Config.Base.FileData.KnifeUnboxingIconLink);
                     EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Name TEXT {i}", "Knife");
                     EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Extra TEXT {i}", " ");
-                    SendRarity("SERVER Unbox Content", ERarity.MYTHICAL, i);
+                    SendRarity("SERVER Unbox Content", ERarity.YELLOW, i);
                     continue;
                 }
 
