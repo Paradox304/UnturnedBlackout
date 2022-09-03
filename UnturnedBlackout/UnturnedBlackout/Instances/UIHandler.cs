@@ -6084,7 +6084,6 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Unbox Buy Preview BUTTON", true);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Preview Coins TEXT", $"{Utility.GetCurrencySymbol(ECurrency.Coins)} {@case.CoinPrice}");
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Preview Scrap TEXT", $"{Utility.GetCurrencySymbol(ECurrency.Scrap)} {@case.ScrapPrice}");
-            SendRarity("SERVER Unbox Buy", @case.CaseRarity, selected);
 
             SendRarityName("SERVER Unbox Buy RarityType TEXT", @case.CaseRarity);
         }
