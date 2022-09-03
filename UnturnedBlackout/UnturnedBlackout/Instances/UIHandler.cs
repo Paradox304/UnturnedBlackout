@@ -5909,7 +5909,7 @@ namespace UnturnedBlackout.Instances
                 if (i == 20)
                 {
                     EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Rolling IMAGE {i}", reward.RewardType == ERewardType.Knife ? Config.Base.FileData.KnifeUnboxingIconLink : (reward.RewardType == ERewardType.Glove ? Config.Base.FileData.GloveUnboxingIconLink : rewardImage));
-                    SendRarity("SERVER Unbox Content Rolling", rewardRarity, i);
+                    SendRarity("SERVER Unbox Content Rolling", reward.RewardType == ERewardType.Knife || reward.RewardType == ERewardType.Glove ? ERarity.YELLOW : rewardRarity, i);
                     continue;
                 }
 

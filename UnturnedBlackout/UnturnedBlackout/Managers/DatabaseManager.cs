@@ -5469,8 +5469,12 @@ namespace UnturnedBlackout.Managers
                     var hourTarget = ServerOptions.DailyLeaderboardWipe.Hour;
                     var now = DateTime.UtcNow;
                     var newWipeDate = new DateTimeOffset(now.Year, now.Month, now.Day, hourTarget, 0, 0, new TimeSpan(0));
+                    Logging.Debug($"Hour Target: {hourTarget}, now: {now}, new wipe date: {newWipeDate.UtcDateTime}");
                     if (now.Hour >= hourTarget)
-                        newWipeDate.AddDays(1);
+                    {
+                        newWipeDate = newWipeDate.AddDays(1);
+                        Logging.Debug($"{now.Hour} is greater or equals than {hourTarget}, change wipe date to {newWipeDate}");
+                    }
                     new MySqlCommand($"UPDATE `{OPTIONS}` SET `DailyLeaderboardWipe` = {newWipeDate.ToUnixTimeSeconds()};", Conn).ExecuteScalar();
                     ServerOptions.DailyLeaderboardWipe = newWipeDate;
                 }
