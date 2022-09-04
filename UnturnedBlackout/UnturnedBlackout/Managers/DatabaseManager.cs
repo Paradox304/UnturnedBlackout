@@ -4324,7 +4324,7 @@ namespace UnturnedBlackout.Managers
                     return;
                 }
 
-                await new MySqlCommand($"INSERT INTO `{PLAYERS_KNIVES}` (`SteamID` , `KnifeID` , `KnifeKills` , `IsBought`) VALUES ({steamID} , {knifeID} , {isBought}) ON DUPLICATE KEY UPDATE `IsBought` = {isBought};", Conn).ExecuteScalarAsync();
+                await new MySqlCommand($"INSERT INTO `{PLAYERS_KNIVES}` (`SteamID` , `KnifeID` , `KnifeKills` , `IsBought`) VALUES ({steamID} , {knifeID} , 0 , {isBought}) ON DUPLICATE KEY UPDATE `IsBought` = {isBought};", Conn).ExecuteScalarAsync();
 
                 var loadoutKnife = new LoadoutKnife(knife, 0, isBought);
                 if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
@@ -4429,6 +4429,8 @@ namespace UnturnedBlackout.Managers
 
             try
             {
+                await Conn.OpenAsync();
+
                 if (!Knives.TryGetValue(knifeID, out Knife knife))
                 {
                     Logging.Debug($"Error finding knife with id {knifeID}");
