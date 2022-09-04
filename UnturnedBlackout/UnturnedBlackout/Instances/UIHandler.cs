@@ -5978,7 +5978,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"Crate Rolling ANIM {UnityEngine.Random.Range(1, 6)}", true);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Crate EXAMPLE Open ANIM", true);
 
-            yield return new WaitForSeconds(8f);
+            yield return new WaitForSeconds(7f);
 
             IsUnboxing = false;
             TaskDispatcher.QueueOnMainThread(() => 

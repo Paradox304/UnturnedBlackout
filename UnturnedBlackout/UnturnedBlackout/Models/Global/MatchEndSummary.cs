@@ -63,7 +63,7 @@ namespace UnturnedBlackout.Models.Global
             HasWon = hasWon;
             EndTime = DateTime.UtcNow;
 
-            var minutesPlayed = (int)Math.Ceiling((EndTime - StartTime).TotalMinutes);
+            var minutesPlayed = (int)Math.Floor((EndTime - StartTime).TotalMinutes);
             var data = Config.WinningValues.FileData;
             var global = Plugin.Instance.DB.ServerOptions;
 
@@ -73,11 +73,11 @@ namespace UnturnedBlackout.Models.Global
             {
                 MatchXPBonus += minutesPlayed * data.BonusXPPerMinutePlayed;
             }
-            AchievementXPBonus = (int)Math.Ceiling(MatchXP * player.Data.AchievementXPBooster);
+            AchievementXPBonus = (int)Math.Floor(MatchXP * player.Data.AchievementXPBooster);
             OtherXPBonus = 0; // Havent got formula for this
 
             BattlepassXP = (int)(Kills > 1 ? (data.BPXPPerMinutePlayed * minutesPlayed * (1f + (HasWon ? data.BPXPVictoryBonus : data.BPXPDefeatBonus))) : 0); // Left for later on when I get the formula
-            BattlepassBonusXP = (int)Math.Ceiling(BattlepassXP * (player.Data.BPBooster + global.BPBooster + (player.Data.HasPrime ? data.PrimeBPXPBooster : 0f)));
+            BattlepassBonusXP = (int)Math.Floor(BattlepassXP * (player.Data.BPBooster + global.BPBooster + (player.Data.HasPrime ? data.PrimeBPXPBooster : 0f)));
 
             KD = Deaths == 0 ? 0f : Kills / (float)Deaths;
 
