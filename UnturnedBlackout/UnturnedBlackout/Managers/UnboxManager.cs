@@ -165,7 +165,7 @@ namespace UnturnedBlackout.Managers
                             ThreadPool.QueueUserWorkItem(async (o) => await DB.UpdatePlayerGunSkinUnboxedAmountAsync(player.CSteamID, skin.ID, 1));
                         }
 
-                        rewardName = skin.SkinName;
+                        rewardName = skin.Gun.GunName + " | " + skin.SkinName;
                         rewardImage = skin.IconLink;
                         rewardDesc = skin.SkinDesc;
                         rewardRarity = skin.SkinRarity;

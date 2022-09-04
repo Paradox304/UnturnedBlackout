@@ -5984,7 +5984,6 @@ namespace UnturnedBlackout.Instances
             TaskDispatcher.QueueOnMainThread(() => 
             {
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Unbox Button Toggler", @case.Amount > 0);
-                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Result {rewardRarity}", true);
             });
         }
 
