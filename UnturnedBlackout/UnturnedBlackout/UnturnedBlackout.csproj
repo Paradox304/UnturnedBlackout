@@ -269,6 +269,7 @@
     <Compile Include="Models\Configuration\BaseValuesConfig.cs" />
     <Compile Include="Models\Configuration\DefaultSkillsConfig.cs" />
     <Compile Include="Models\Configuration\GamemodeConfig.cs" />
+    <Compile Include="Models\Configuration\IconsConfig.cs" />
     <Compile Include="Models\Configuration\KillFeedConfig.cs" />
     <Compile Include="Models\Configuration\LoadoutConfig.cs" />
     <Compile Include="Models\Configuration\LocationsConfig.cs" />

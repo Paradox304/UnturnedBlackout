@@ -31,13 +31,6 @@ namespace UnturnedBlackout.Models.Configuration
 
         public int BattlepassTierSkipCost { get; set; }
 
-        public string BlacktagsIconLink { get; set; }
-        public string PointsIconLink { get; set; }
-        public string ScrapIconLink { get; set; }
-
-        public string KnifeUnboxingIconLink { get; set; }
-        public string GloveUnboxingIconLink { get; set; }
-
         public BaseValuesConfig()
         {
             MaxPlayerNameCharacters = 20;
@@ -74,13 +67,6 @@ namespace UnturnedBlackout.Models.Configuration
             SpawnSwitchSeconds = 120;
 
             BattlepassTierSkipCost = 100;
-
-            BlacktagsIconLink = "";
-            PointsIconLink = "";
-            ScrapIconLink = "";
-
-            KnifeUnboxingIconLink = "https://cdn.discordapp.com/attachments/458038940847439903/101239549258971551l7/knife.png";
-            GloveUnboxingIconLink = "https://cdn.discordapp.com/attachments/458038940847439903/1012396521066602536/glove.png";
         }
     }
 }

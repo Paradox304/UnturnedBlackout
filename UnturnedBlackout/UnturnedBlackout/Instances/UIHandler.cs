@@ -841,9 +841,9 @@ namespace UnturnedBlackout.Instances
 
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Version TEXT", Plugin.Instance.Translate("Version").ToRich());
 
-            EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Currency Credits IMAGE", Config.Base.FileData.PointsIconLink);
-            EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Currency Coins IMAGE", Config.Base.FileData.BlacktagsIconLink);
-            EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Currency Scrap IMAGE", Config.Base.FileData.ScrapIconLink);
+            EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Currency Credits IMAGE", Config.Icons.FileData.PointsSmallIconLink);
+            EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Currency Coins IMAGE", Config.Icons.FileData.BlacktagsSmallIconLink);
+            EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Currency Scrap IMAGE", Config.Icons.FileData.ScrapSmallIconLink);
 
             OnCurrencyUpdated(ECurrency.Coins);
             OnCurrencyUpdated(ECurrency.Scrap);
@@ -2846,8 +2846,8 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Equipped {i}", (LoadoutPage == ELoadoutPage.Primary && currentLoadout.Primary == gun) || (LoadoutPage == ELoadoutPage.Secondary && currentLoadout.Secondary == gun));
                 EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item IMAGE {i}", gun.Gun.IconLink);
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item TEXT {i}", gun.Gun.GunName);
-                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay {i}", !gun.IsBought && gun.Gun.LevelRequirement > PlayerData.Level);
-                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", !gun.IsBought && gun.Gun.LevelRequirement > PlayerData.Level ? Plugin.Instance.Translate("Unlock_Level", gun.Gun.LevelRequirement) : "");
+                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay {i}", !gun.IsBought);
+                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", gun.Gun.LevelRequirement > PlayerData.Level ? Plugin.Instance.Translate("Unlock_Level", gun.Gun.LevelRequirement) : $"{Utility.GetCurrencySymbol(ECurrency.Credits)} {gun.Gun.BuyPrice}");
                 SendRarity("SERVER Item", gun.Gun.GunRarity, i);
             }
         }
@@ -2875,8 +2875,8 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Equipped {i}", (LoadoutPage.ToString().StartsWith("AttachmentPrimary") && currentLoadout.PrimaryAttachments.ContainsValue(attachment)) || (LoadoutPage.ToString().StartsWith("AttachmentSecondary") && currentLoadout.SecondaryAttachments.ContainsValue(attachment)));
                 EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item IMAGE {i}", attachment.Attachment.IconLink);
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item TEXT {i}", attachment.Attachment.AttachmentName);
-                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay {i}", !attachment.IsBought && attachment.LevelRequirement > gun.Level);
-                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", !attachment.IsBought && attachment.LevelRequirement > gun.Level ? Plugin.Instance.Translate("Unlock_Gun_Level", attachment.LevelRequirement) : "");
+                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay {i}", !attachment.IsBought);
+                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", !attachment.IsBought && attachment.LevelRequirement > gun.Level ? Plugin.Instance.Translate("Unlock_Gun_Level", attachment.LevelRequirement) : $"{Utility.GetCurrencySymbol(ECurrency.Credits)} {attachment.Attachment.BuyPrice}");
                 SendRarity("SERVER Item", attachment.Attachment.AttachmentRarity, i);
             }
         }
@@ -2982,8 +2982,8 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Equipped {i}", currentLoadout.Perks.ContainsValue(perk));
                 EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item IMAGE {i}", perk.Perk.IconLink);
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item TEXT {i}", perk.Perk.PerkName);
-                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay {i}", !perk.IsBought && perk.Perk.LevelRequirement > PlayerData.Level);
-                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", !perk.IsBought && perk.Perk.LevelRequirement > PlayerData.Level ? Plugin.Instance.Translate("Unlock_Level", perk.Perk.LevelRequirement) : "");
+                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay {i}", !perk.IsBought);
+                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", perk.Perk.LevelRequirement > PlayerData.Level ? Plugin.Instance.Translate("Unlock_Level", perk.Perk.LevelRequirement) : $"{Utility.GetCurrencySymbol(ECurrency.Credits)} {perk.Perk.BuyPrice}");
                 SendRarity("SERVER Item", perk.Perk.PerkRarity, i);
             }
         }
@@ -3011,8 +3011,8 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Equipped {i}", (LoadoutPage == ELoadoutPage.Tactical && currentLoadout.Tactical == gadget) || (LoadoutPage == ELoadoutPage.Lethal && currentLoadout.Lethal == gadget));
                 EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item IMAGE {i}", gadget.Gadget.IconLink);
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item TEXT {i}", gadget.Gadget.GadgetName);
-                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay {i}", !gadget.IsBought && gadget.Gadget.LevelRequirement > PlayerData.Level);
-                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", !gadget.IsBought && gadget.Gadget.LevelRequirement > PlayerData.Level ? Plugin.Instance.Translate("Unlock_Level", gadget.Gadget.LevelRequirement) : "");
+                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay {i}", !gadget.IsBought);
+                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", gadget.Gadget.LevelRequirement > PlayerData.Level ? Plugin.Instance.Translate("Unlock_Level", gadget.Gadget.LevelRequirement) : $"{Utility.GetCurrencySymbol(ECurrency.Credits)} {gadget.Gadget.BuyPrice}");
                 SendRarity("SERVER Item", gadget.Gadget.GadgetRarity, i);
             }
         }
@@ -3092,8 +3092,8 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Equipped {i}", currentLoadout.Killstreaks.Contains(killstreak));
                 EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item IMAGE {i}", killstreak.Killstreak.IconLink);
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item TEXT {i}", killstreak.Killstreak.KillstreakName);
-                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay {i}", !killstreak.IsBought && killstreak.Killstreak.LevelRequirement > PlayerData.Level);
-                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", !killstreak.IsBought && killstreak.Killstreak.LevelRequirement > PlayerData.Level ? Plugin.Instance.Translate("Unlock_Level", killstreak.Killstreak.LevelRequirement) : "");
+                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay {i}", !killstreak.IsBought);
+                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", killstreak.Killstreak.LevelRequirement > PlayerData.Level ? Plugin.Instance.Translate("Unlock_Level", killstreak.Killstreak.LevelRequirement) : $"{Utility.GetCurrencySymbol(ECurrency.Credits)} {killstreak.Killstreak.BuyPrice}");
                 SendRarity("SERVER Item", killstreak.Killstreak.KillstreakRarity, i);
             }
         }
@@ -5556,14 +5556,29 @@ namespace UnturnedBlackout.Instances
                     rewardImage = gunCharm.IconLink;
                     rewardRarity = gunCharm.CharmRarity;
                     return true;
+                case ERewardType.BPBooster:
+                    rewardName = $"<color=white>{String.Format("{0:0.##}", Convert.ToDecimal(reward.RewardValue) * 100)}% Battlepass Stars Boost</color>";
+                    rewardImage = Config.Icons.FileData.BPXPBoostIconLink;
+                    return true;
+                case ERewardType.XPBooster:
+                    rewardName = $"<color=white>{String.Format("{0:0.##}", Convert.ToDecimal(reward.RewardValue) * 100)}% XP Boost</color>";
+                    rewardImage = Config.Icons.FileData.XPBoostIconLink;
+                    return true;
+                case ERewardType.GunXPBooster:
+                    rewardName = $"<color=white>{String.Format("{0:0.##}", Convert.ToDecimal(reward.RewardValue) * 100)}% Gun XP Boost</color>";
+                    rewardImage = Config.Icons.FileData.GunXPBoostIconLink;
+                    return true;
                 case ERewardType.Coin:
-                    rewardName = $"<color=white>{reward.RewardValue} Coins</color>";
+                    rewardName = $"<color=white>{reward.RewardValue} Blacktags</color>";
+                    rewardImage = Config.Icons.FileData.BlacktagsSmallIconLink;
                     return true;
                 case ERewardType.Credit:
-                    rewardName = $"<color=white>{reward.RewardValue} Credits</color>";
+                    rewardName = $"<color=white>{reward.RewardValue} Points</color>";
+                    rewardImage = Config.Icons.FileData.PointsSmallIconLink;
                     return true;
                 case ERewardType.LevelXP:
                     rewardName = $"<color=white>{reward.RewardValue} XP</color>";
+                    rewardImage = Config.Icons.FileData.XPIconLink;
                     return true;
                 default:
                     return false;
@@ -5757,20 +5772,28 @@ namespace UnturnedBlackout.Instances
                     rewardRarity = @case.CaseRarity;
                     return true;
                 case ERewardType.BPBooster:
+                    rewardName = $"<color=white>{String.Format("{0:0.##}", Convert.ToDecimal(reward.RewardValue) * 100)}%</color>";
+                    rewardImage = Config.Icons.FileData.BPXPBoostIconLink;
+                    return true;
                 case ERewardType.XPBooster:
+                    rewardName = $"<color=white>{String.Format("{0:0.##}", Convert.ToDecimal(reward.RewardValue) * 100)}%</color>";
+                    rewardImage = Config.Icons.FileData.XPBoostIconLink;
+                    return true;
                 case ERewardType.GunXPBooster:
                     rewardName = $"<color=white>{String.Format("{0:0.##}", Convert.ToDecimal(reward.RewardValue) * 100)}%</color>";
+                    rewardImage = Config.Icons.FileData.GunXPBoostIconLink;
                     return true;
                 case ERewardType.Coin:
                     rewardName = $"<color=white>{reward.RewardValue}</color>";
-                    rewardImage = Config.Base.FileData.BlacktagsIconLink;
+                    rewardImage = Config.Icons.FileData.BlacktagsLargeIconLink;
                     return true;
                 case ERewardType.Credit:
                     rewardName = $"<color=white>{reward.RewardValue}</color>";
-                    rewardImage = Config.Base.FileData.PointsIconLink;
+                    rewardImage = Config.Icons.FileData.PointsLargeIconLink;
                     return true;
                 case ERewardType.LevelXP:
                     rewardName = $"<color=white>{reward.RewardValue}</color>";
+                    rewardImage = Config.Icons.FileData.XPIconLink;
                     return true;
                 default:
                     return false;
@@ -5926,7 +5949,7 @@ namespace UnturnedBlackout.Instances
             {
                 if (i == 20)
                 {
-                    EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Rolling IMAGE {i}", reward.RewardType == ERewardType.Knife ? Config.Base.FileData.KnifeUnboxingIconLink : (reward.RewardType == ERewardType.Glove ? Config.Base.FileData.GloveUnboxingIconLink : rewardImage));
+                    EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Rolling IMAGE {i}", reward.RewardType == ERewardType.Knife ? Config.Icons.FileData.KnifeUnboxingIconLink : (reward.RewardType == ERewardType.Glove ? Config.Icons.FileData.GloveUnboxingIconLink : rewardImage));
                     SendRarity("SERVER Unbox Content Rolling", reward.RewardType == ERewardType.Knife || reward.RewardType == ERewardType.Glove ? ERarity.YELLOW : rewardRarity, i);
                     continue;
                 }
@@ -5936,11 +5959,11 @@ namespace UnturnedBlackout.Instances
                 switch (caseRarity)
                 {
                     case ECaseRarity.KNIFE or ECaseRarity.LIMITED_KNIFE:
-                        EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Rolling IMAGE {i}", Config.Base.FileData.KnifeUnboxingIconLink);
+                        EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Rolling IMAGE {i}", Config.Icons.FileData.KnifeUnboxingIconLink);
                         SendRarity("SERVER Unbox Content Rolling", ERarity.YELLOW, i);
                         continue;
                     case ECaseRarity.GLOVE or ECaseRarity.LIMITED_GLOVE:
-                        EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Rolling IMAGE {i}", Config.Base.FileData.GloveUnboxingIconLink);
+                        EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Rolling IMAGE {i}", Config.Icons.FileData.GloveUnboxingIconLink);
                         SendRarity("SERVER Unbox Content Rolling", ERarity.YELLOW, i);
                         continue;
                     default:
@@ -5991,7 +6014,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Description TEXT", rewardDesc);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Duplicate", isDuplicate);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Duplicate TEXT", $"+{duplicateScrapAmount}");
-            EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Duplicate IMAGE", Config.Base.FileData.ScrapIconLink);
+            EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Duplicate IMAGE", Config.Icons.FileData.ScrapSmallIconLink);
 
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"Crate Rolling ANIM {UnityEngine.Random.Range(1, 6)}", true);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Crate EXAMPLE Open ANIM", true);
@@ -6124,7 +6147,7 @@ namespace UnturnedBlackout.Instances
                 if (i == 18 && @case.Weights.Exists(k => k.Item1 == ECaseRarity.GLOVE || k.Item1 == ECaseRarity.LIMITED_GLOVE))
                 {
                     EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content BUTTON {i}", true);
-                    EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content IMAGE {i}", Config.Base.FileData.GloveUnboxingIconLink);
+                    EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content IMAGE {i}", Config.Icons.FileData.GloveUnboxingIconLink);
                     EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Name TEXT {i}", "Glove");
                     EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Extra TEXT {i}", " ");
                     SendRarity("SERVER Unbox Content", ERarity.YELLOW, i);
@@ -6134,7 +6157,7 @@ namespace UnturnedBlackout.Instances
                 if (i == 19 && @case.Weights.Exists(k => k.Item1 == ECaseRarity.KNIFE || k.Item1 == ECaseRarity.LIMITED_KNIFE))
                 {
                     EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content BUTTON {i}", true);
-                    EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content IMAGE {i}", Config.Base.FileData.KnifeUnboxingIconLink);
+                    EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content IMAGE {i}", Config.Icons.FileData.KnifeUnboxingIconLink);
                     EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Name TEXT {i}", "Knife");
                     EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Extra TEXT {i}", " ");
                     SendRarity("SERVER Unbox Content", ERarity.YELLOW, i);

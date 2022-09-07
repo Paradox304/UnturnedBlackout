@@ -24,6 +24,8 @@ namespace UnturnedBlackout.Managers
         public XmlFileReader<GamemodeConfig> Gamemode { get; set; }
         public XmlFileReader<WinningValuesConfig> WinningValues { get; set; }
         public XmlFileReader<RoundEndCasesConfig> RoundEndCases { get; set; }
+        public XmlFileReader<IconsConfig> Icons { get; set; }
+
         public ConfigManager()
         {
             var configInstance = Plugin.Instance.Configuration.Instance;
@@ -43,6 +45,7 @@ namespace UnturnedBlackout.Managers
             Gamemode = new(Plugin.Instance.Directory + "/LocalStorage/Configuration.Gamemode.xml", configInstance.URL + "Configuration.Gamemode.xml");
             WinningValues = new(Plugin.Instance.Directory + "/LocalStorage/Configuration.WinningValues.xml", configInstance.URL + "Configuration.WinningValues.xml");
             RoundEndCases = new(Plugin.Instance.Directory + "/LocalStorage/Configuration.RoundEndCases.xml", configInstance.URL + "Configuration.RoundEndCases.xml");
+            Icons = new(Plugin.Instance.Directory + "/LocalStorage/Configuration.Icons.xml", configInstance.URL + "Configuration.Icons.xml");
         }
     }
 }
