@@ -399,7 +399,7 @@ namespace UnturnedBlackout.Managers
             EffectManager.sendUIEffect(DEATH_ID, DEATH_KEY, victim.TransportConnection, true);
             EffectManager.sendUIEffectImageURL(DEATH_KEY, victim.TransportConnection, true, "EnemyIcon", killerData.AvatarLink);
             EffectManager.sendUIEffectImageURL(DEATH_KEY, victim.TransportConnection, true, "EnemyXPIcon", Plugin.Instance.DB.Levels.TryGetValue(killerData.Level, out XPLevel level) ? level.IconLinkMedium : "");
-            EffectManager.sendUIEffectText(DEATH_KEY, victim.TransportConnection, true, "EnemyName", killerData.SteamName.ToUpper());
+            EffectManager.sendUIEffectText(DEATH_KEY, victim.TransportConnection, true, "EnemyName", (killerData.HasPrime ? PRIME_SYMBOL : "") + killerData.SteamName.ToUpper());
             EffectManager.sendUIEffectText(DEATH_KEY, victim.TransportConnection, true, "EnemyXPNum", killerData.Level.ToString());
             EffectManager.sendUIEffectImageURL(DEATH_KEY, victim.TransportConnection, true, "DeathBanner", killer.ActiveLoadout?.Card?.Card?.CardLink ?? "https://cdn.discordapp.com/attachments/899796442649092119/927985217975758898/Senosan-85382-HG-Dark-grey-600x600.png");
         }
@@ -423,7 +423,7 @@ namespace UnturnedBlackout.Managers
             EffectManager.sendUIEffect(KILLCARD_ID, KILLCARD_KEY, killer.TransportConnection, true);
             EffectManager.sendUIEffectImageURL(KILLCARD_KEY, killer.TransportConnection, true, "EnemyIcon", victimData.AvatarLink);
             EffectManager.sendUIEffectImageURL(KILLCARD_KEY, killer.TransportConnection, true, "EnemyXPIcon", Plugin.Instance.DB.Levels.TryGetValue(victimData.Level, out XPLevel level) ? level.IconLinkMedium : "");
-            EffectManager.sendUIEffectText(KILLCARD_KEY, killer.TransportConnection, true, "EnemyName", victimData.SteamName.ToUpper());
+            EffectManager.sendUIEffectText(KILLCARD_KEY, killer.TransportConnection, true, "EnemyName", (victimData.HasPrime ? PRIME_SYMBOL : "") + victimData.SteamName.ToUpper());
             EffectManager.sendUIEffectText(KILLCARD_KEY, killer.TransportConnection, true, "EnemyXPNum", victimData.Level.ToString());
             EffectManager.sendUIEffectImageURL(KILLCARD_KEY, killer.TransportConnection, true, "DeathBanner", victim.ActiveLoadout?.Card?.Card?.CardLink ?? "https://cdn.discordapp.com/attachments/899796442649092119/927985217975758898/Senosan-85382-HG-Dark-grey-600x600.png");
         }
