@@ -136,13 +136,13 @@ namespace UnturnedBlackout.Database.Data
             AchievementXPBooster = xpBooster;
         }
 
-        public void SetPersonalBooster(EBoosterType type, float value)
+        public void SetPersonalBooster(EBoosterType type, float permanentBooster)
         {
-            Logging.Debug($"Setting XP booster with type {type} of {value} to {SteamName}");
+            Logging.Debug($"Setting XP booster with type {type} to {SteamName}");
             var boosters = ActiveBoosters.Where(k => k.BoosterType == type);
             var max = boosters.Count() > 0 ? boosters.Max(k => k.BoosterValue) : 0f;
-            var updatedValue = value + max;
-            Logging.Debug($"Player's own personal booster is {max}, total value is {updatedValue}");
+            var updatedValue = permanentBooster + max;
+            Logging.Debug($"Player's own permanent booster is {permanentBooster}, temporary booster is {max}, total value is {updatedValue}");
             switch (type)
             {
                 case EBoosterType.XP:
