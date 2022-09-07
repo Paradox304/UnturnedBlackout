@@ -212,10 +212,10 @@ namespace UnturnedBlackout.GameTypes
             Feed feed;
             if (weaponID == 0 || weaponID == 1)
             {
-                feed = new Feed($"<color={victimColor}>{victim.Player.CharacterName.ToUnrich()}</color> {(weaponID == 0 ? "" : "")} ", DateTime.UtcNow);
+                feed = new Feed($"{(victim.Data.HasPrime ? UIManager.PRIME_SYMBOL : "")} <color={victimColor}>{victim.Player.CharacterName.ToUnrich()}</color> {(weaponID == 0 ? "" : "")} ", DateTime.UtcNow);
             } else
             {
-                feed = new Feed($"<color={killerColor}>{killer.Player.CharacterName.ToUnrich()}</color> {icon.Symbol} <color={victimColor}>{victim.Player.CharacterName.ToUnrich()}</color>", DateTime.UtcNow);
+                feed = new Feed($"{(killer.Data.HasPrime ? UIManager.PRIME_SYMBOL : "")} <color={killerColor}>{killer.Player.CharacterName.ToUnrich()}</color> {icon.Symbol} {(victim.Data.HasPrime ? UIManager.PRIME_SYMBOL : "")} <color={victimColor}>{victim.Player.CharacterName.ToUnrich()}</color>", DateTime.UtcNow);
             }
 
             if (Killfeed.Count < Config.Base.FileData.MaxKillFeed)
