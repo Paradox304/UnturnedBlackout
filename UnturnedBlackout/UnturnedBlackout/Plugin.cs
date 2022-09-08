@@ -69,6 +69,8 @@ namespace UnturnedBlackout
         private void OnPerformingAid(Player instigator, Player target, ItemConsumeableAsset asset, ref bool shouldAllow)
         {
             shouldAllow = false;
+
+            
         }
 
         private void OnJoining(CSteamID player, ref ESteamRejection? rejectionReason)

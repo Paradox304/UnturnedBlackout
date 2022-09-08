@@ -7,15 +7,17 @@ namespace UnturnedBlackout.Database.Base
         public CSteamID SteamID { get; set; }
         public string SteamName { get; set; }
         public int Level { get; set; }
+        public bool HasPrime { get; set; }
         public int Kills { get; set; }
         public int HeadshotKills { get; set; }
         public int Deaths { get; set; }
 
-        public LeaderboardData(CSteamID steamID, string steamName, int level, int kills, int headshotKills, int deaths)
+        public LeaderboardData(CSteamID steamID, string steamName, int level, bool hasPrime, int kills, int headshotKills, int deaths)
         {
             SteamID = steamID;
             SteamName = steamName;
             Level = level;
+            HasPrime = hasPrime;
             Kills = kills;
             HeadshotKills = headshotKills;
             Deaths = deaths;

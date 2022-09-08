@@ -2029,7 +2029,7 @@ namespace UnturnedBlackout.Managers
                 Logging.Debug($"Getting all time data for {player.CharacterName} from the all time table");
                 if (PlayerData.TryGetValue(player.CSteamID, out PlayerData playerData))
                 {
-                    var leaderboardData = new LeaderboardData(player.CSteamID, playerData.SteamName, playerData.Level, playerData.Kills, playerData.HeadshotKills, playerData.Deaths);
+                    var leaderboardData = new LeaderboardData(player.CSteamID, playerData.SteamName, playerData.Level, playerData.HasPrime, playerData.Kills, playerData.HeadshotKills, playerData.Deaths);
                     if (!PlayerAllTimeLeaderboardLookup.ContainsKey(player.CSteamID))
                     {
                         PlayerAllTimeLeaderboardLookup.Add(player.CSteamID, leaderboardData);
@@ -2065,7 +2065,7 @@ namespace UnturnedBlackout.Managers
                             continue;
                         }
 
-                        var leaderboardData = new LeaderboardData(player.CSteamID, data.SteamName, data.Level, kills, headshotKills, deaths);
+                        var leaderboardData = new LeaderboardData(player.CSteamID, data.SteamName, data.Level, data.HasPrime, kills, headshotKills, deaths);
                         if (!PlayerDailyLeaderboardLookup.ContainsKey(player.CSteamID))
                         {
                             PlayerDailyLeaderboardLookup.Add(player.CSteamID, leaderboardData);
@@ -2109,7 +2109,7 @@ namespace UnturnedBlackout.Managers
                             continue;
                         }
 
-                        var leaderboardData = new LeaderboardData(player.CSteamID, data.SteamName, data.Level, kills, headshotKills, deaths);
+                        var leaderboardData = new LeaderboardData(player.CSteamID, data.SteamName, data.Level, data.HasPrime, kills, headshotKills, deaths);
                         if (!PlayerWeeklyLeaderboardLookup.ContainsKey(player.CSteamID))
                         {
                             PlayerWeeklyLeaderboardLookup.Add(player.CSteamID, leaderboardData);
@@ -2153,7 +2153,7 @@ namespace UnturnedBlackout.Managers
                             continue;
                         }
 
-                        var leaderboardData = new LeaderboardData(player.CSteamID, data.SteamName, data.Level, kills, headshotKills, deaths);
+                        var leaderboardData = new LeaderboardData(player.CSteamID, data.SteamName, data.Level, data.HasPrime, kills, headshotKills, deaths);
                         if (!PlayerSeasonalLeaderboardLookup.ContainsKey(player.CSteamID))
                         {
                             PlayerSeasonalLeaderboardLookup.Add(player.CSteamID, leaderboardData);
@@ -5127,7 +5127,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 Logging.Debug("Getting daily leaderboard data");
-                rdr = new MySqlCommand($"SELECT `{PLAYERS_LEADERBOARD_DAILY}`.`SteamID`, `{PLAYERS}`.`SteamName`, `{PLAYERS}`.`Level`, `{PLAYERS_LEADERBOARD_DAILY}`.`Kills`, `{PLAYERS_LEADERBOARD_DAILY}`.`HeadshotKills`, `{PLAYERS_LEADERBOARD_DAILY}`.`Deaths` FROM `{PLAYERS_LEADERBOARD_DAILY}` INNER JOIN `{PLAYERS}` ON `{PLAYERS_LEADERBOARD_DAILY}`.`SteamID` = `{PLAYERS}`.`SteamID` ORDER BY (`{PLAYERS_LEADERBOARD_DAILY}`.`Kills` + `{PLAYERS_LEADERBOARD_DAILY}`.`HeadshotKills`) DESC;", Conn).ExecuteReader();
+                rdr = new MySqlCommand($"SELECT `{PLAYERS_LEADERBOARD_DAILY}`.`SteamID`, `{PLAYERS}`.`SteamName`, `{PLAYERS}`.`Level`, `{PLAYERS}`.`HasPrime` , `{PLAYERS_LEADERBOARD_DAILY}`.`Kills`, `{PLAYERS_LEADERBOARD_DAILY}`.`HeadshotKills`, `{PLAYERS_LEADERBOARD_DAILY}`.`Deaths` FROM `{PLAYERS_LEADERBOARD_DAILY}` INNER JOIN `{PLAYERS}` ON `{PLAYERS_LEADERBOARD_DAILY}`.`SteamID` = `{PLAYERS}`.`SteamID` ORDER BY (`{PLAYERS_LEADERBOARD_DAILY}`.`Kills` + `{PLAYERS_LEADERBOARD_DAILY}`.`HeadshotKills`) DESC;", Conn).ExecuteReader();
                 try
                 {
                     var playerDailyLeaderboard = new List<LeaderboardData>();
@@ -5147,23 +5147,28 @@ namespace UnturnedBlackout.Managers
                             continue;
                         }
 
+                        if (!bool.TryParse(rdr[3].ToString(), out bool hasPrime))
+                        {
+                            continue;
+                        }
+
                         var steamID = new CSteamID(steamid);
-                        if (!int.TryParse(rdr[3].ToString(), out int kills))
+                        if (!int.TryParse(rdr[4].ToString(), out int kills))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[4].ToString(), out int headshotKills))
+                        if (!int.TryParse(rdr[5].ToString(), out int headshotKills))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[5].ToString(), out int deaths))
+                        if (!int.TryParse(rdr[6].ToString(), out int deaths))
                         {
                             continue;
                         }
 
-                        var leaderboardData = new LeaderboardData(steamID, steamName, level, kills, headshotKills, deaths);
+                        var leaderboardData = new LeaderboardData(steamID, steamName, level, hasPrime, kills, headshotKills, deaths);
 
                         playerDailyLeaderboard.Add(leaderboardData);
                         playerDailyLeaderboardLookup.Add(steamID, leaderboardData);
@@ -5184,7 +5189,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 Logging.Debug("Getting weekly leaderboard data");
-                rdr = new MySqlCommand($"SELECT `{PLAYERS_LEADERBOARD_WEEKLY}`.`SteamID`, `{PLAYERS}`.`SteamName`, `{PLAYERS}`.`Level`, `{PLAYERS_LEADERBOARD_WEEKLY}`.`Kills`, `{PLAYERS_LEADERBOARD_WEEKLY}`.`HeadshotKills`, `{PLAYERS_LEADERBOARD_WEEKLY}`.`Deaths` FROM `{PLAYERS_LEADERBOARD_WEEKLY}` INNER JOIN `{PLAYERS}` ON `{PLAYERS_LEADERBOARD_WEEKLY}`.`SteamID` = `{PLAYERS}`.`SteamID` ORDER BY (`{PLAYERS_LEADERBOARD_WEEKLY}`.`Kills` + `{PLAYERS_LEADERBOARD_WEEKLY}`.`HeadshotKills`) DESC;", Conn).ExecuteReader();
+                rdr = new MySqlCommand($"SELECT `{PLAYERS_LEADERBOARD_WEEKLY}`.`SteamID`, `{PLAYERS}`.`SteamName`, `{PLAYERS}`.`Level`, `{PLAYERS}`.`HasPrime` , `{PLAYERS_LEADERBOARD_WEEKLY}`.`Kills`, `{PLAYERS_LEADERBOARD_WEEKLY}`.`HeadshotKills`, `{PLAYERS_LEADERBOARD_WEEKLY}`.`Deaths` FROM `{PLAYERS_LEADERBOARD_WEEKLY}` INNER JOIN `{PLAYERS}` ON `{PLAYERS_LEADERBOARD_WEEKLY}`.`SteamID` = `{PLAYERS}`.`SteamID` ORDER BY (`{PLAYERS_LEADERBOARD_WEEKLY}`.`Kills` + `{PLAYERS_LEADERBOARD_WEEKLY}`.`HeadshotKills`) DESC;", Conn).ExecuteReader();
                 try
                 {
                     var playerWeeklyLeaderboard = new List<LeaderboardData>();
@@ -5204,23 +5209,28 @@ namespace UnturnedBlackout.Managers
                             continue;
                         }
 
+                        if (!bool.TryParse(rdr[3].ToString(), out bool hasPrime))
+                        {
+                            continue;
+                        }
+
                         var steamID = new CSteamID(steamid);
-                        if (!int.TryParse(rdr[3].ToString(), out int kills))
+                        if (!int.TryParse(rdr[4].ToString(), out int kills))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[4].ToString(), out int headshotKills))
+                        if (!int.TryParse(rdr[5].ToString(), out int headshotKills))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[5].ToString(), out int deaths))
+                        if (!int.TryParse(rdr[6].ToString(), out int deaths))
                         {
                             continue;
                         }
 
-                        var leaderboardData = new LeaderboardData(steamID, steamName, level, kills, headshotKills, deaths);
+                        var leaderboardData = new LeaderboardData(steamID, steamName, level, hasPrime, kills, headshotKills, deaths);
 
                         playerWeeklyLeaderboard.Add(leaderboardData);
                         playerWeeklyLeaderboardLookup.Add(steamID, leaderboardData);
@@ -5245,7 +5255,7 @@ namespace UnturnedBlackout.Managers
                 {
                     if (!PlayerDailyLeaderboardLookup.ContainsKey(data.SteamID))
                     {
-                        var dailyLeaderboardData = new LeaderboardData(data.SteamID, data.SteamName, data.Level, 0, 0, 0);
+                        var dailyLeaderboardData = new LeaderboardData(data.SteamID, data.SteamName, data.Level, data.HasPrime, 0, 0, 0);
                         PlayerDailyLeaderboard.Add(dailyLeaderboardData);
                         PlayerDailyLeaderboardLookup.Add(data.SteamID, dailyLeaderboardData);
                         new MySqlCommand($"INSERT INTO `{PLAYERS_LEADERBOARD_DAILY}` ( `SteamID` ) VALUES ( {data.SteamID} );", Conn).ExecuteScalar();
@@ -5253,7 +5263,7 @@ namespace UnturnedBlackout.Managers
 
                     if (!PlayerWeeklyLeaderboardLookup.ContainsKey(data.SteamID))
                     {
-                        var weeklyLeaderboardData = new LeaderboardData(data.SteamID, data.SteamName, data.Level, 0, 0, 0);
+                        var weeklyLeaderboardData = new LeaderboardData(data.SteamID, data.SteamName, data.Level, data.HasPrime, 0, 0, 0);
                         PlayerWeeklyLeaderboard.Add(weeklyLeaderboardData);
                         PlayerWeeklyLeaderboardLookup.Add(data.SteamID, weeklyLeaderboardData);
                         new MySqlCommand($"INSERT INTO `{PLAYERS_LEADERBOARD_WEEKLY}` ( `SteamID` ) VALUES ( {data.SteamID} );", Conn).ExecuteScalar();
@@ -5261,7 +5271,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 Logging.Debug("Getting seasonal leaderboard data");
-                rdr = new MySqlCommand($"SELECT `{PLAYERS_LEADERBOARD_SEASONAL}`.`SteamID`, `{PLAYERS}`.`SteamName`, `{PLAYERS}`.`Level`, `{PLAYERS_LEADERBOARD_SEASONAL}`.`Kills`, `{PLAYERS_LEADERBOARD_SEASONAL}`.`HeadshotKills`, `{PLAYERS_LEADERBOARD_SEASONAL}`.`Deaths` FROM `{PLAYERS_LEADERBOARD_SEASONAL}` INNER JOIN `{PLAYERS}` ON `{PLAYERS_LEADERBOARD_SEASONAL}`.`SteamID` = `{PLAYERS}`.`SteamID` ORDER BY (`{PLAYERS_LEADERBOARD_SEASONAL}`.`Kills` + `{PLAYERS_LEADERBOARD_SEASONAL}`.`HeadshotKills`) DESC;", Conn).ExecuteReader();
+                rdr = new MySqlCommand($"SELECT `{PLAYERS_LEADERBOARD_SEASONAL}`.`SteamID`, `{PLAYERS}`.`SteamName`, `{PLAYERS}`.`Level`, `{PLAYERS}`.`HasPrime` , `{PLAYERS_LEADERBOARD_SEASONAL}`.`Kills`, `{PLAYERS_LEADERBOARD_SEASONAL}`.`HeadshotKills`, `{PLAYERS_LEADERBOARD_SEASONAL}`.`Deaths` FROM `{PLAYERS_LEADERBOARD_SEASONAL}` INNER JOIN `{PLAYERS}` ON `{PLAYERS_LEADERBOARD_SEASONAL}`.`SteamID` = `{PLAYERS}`.`SteamID` ORDER BY (`{PLAYERS_LEADERBOARD_SEASONAL}`.`Kills` + `{PLAYERS_LEADERBOARD_SEASONAL}`.`HeadshotKills`) DESC;", Conn).ExecuteReader();
                 try
                 {
                     var playerSeasonalLeaderboard = new List<LeaderboardData>();
@@ -5281,23 +5291,28 @@ namespace UnturnedBlackout.Managers
                             continue;
                         }
 
+                        if (!bool.TryParse(rdr[3].ToString(), out bool hasPrime))
+                        {
+                            continue;
+                        }
+
                         var steamID = new CSteamID(steamid);
-                        if (!int.TryParse(rdr[3].ToString(), out int kills))
+                        if (!int.TryParse(rdr[4].ToString(), out int kills))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[4].ToString(), out int headshotKills))
+                        if (!int.TryParse(rdr[5].ToString(), out int headshotKills))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[5].ToString(), out int deaths))
+                        if (!int.TryParse(rdr[6].ToString(), out int deaths))
                         {
                             continue;
                         }
 
-                        var leaderboardData = new LeaderboardData(steamID, steamName, level, kills, headshotKills, deaths);
+                        var leaderboardData = new LeaderboardData(steamID, steamName, level, hasPrime, kills, headshotKills, deaths);
 
                         playerSeasonalLeaderboard.Add(leaderboardData);
                         playerSeasonalLeaderboardLookup.Add(steamID, leaderboardData);
@@ -5318,7 +5333,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 Logging.Debug("Getting all time leaderboard data");
-                rdr = new MySqlCommand($"SELECT `SteamID`, `SteamName`, `Level`, `Kills`, `HeadshotKills`, `Deaths` FROM `{PLAYERS}` ORDER BY (`Kills` + `HeadshotKills`) DESC;", Conn).ExecuteReader();
+                rdr = new MySqlCommand($"SELECT `SteamID`, `SteamName`, `Level`, `HasPrime`, `Kills`, `HeadshotKills`, `Deaths` FROM `{PLAYERS}` ORDER BY (`Kills` + `HeadshotKills`) DESC;", Conn).ExecuteReader();
                 try
                 {
                     var playerAllTimeLeaderboardLookup = new Dictionary<CSteamID, LeaderboardData>();
@@ -5339,22 +5354,27 @@ namespace UnturnedBlackout.Managers
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[3].ToString(), out int kills))
+                        if (!bool.TryParse(rdr[3].ToString(), out bool hasPrime))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[4].ToString(), out int headshotKills))
+                        if (!int.TryParse(rdr[4].ToString(), out int kills))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[5].ToString(), out int deaths))
+                        if (!int.TryParse(rdr[5].ToString(), out int headshotKills))
                         {
                             continue;
                         }
 
-                        var leaderboardData = new LeaderboardData(steamID, steamName, level, kills, headshotKills, deaths);
+                        if (!int.TryParse(rdr[6].ToString(), out int deaths))
+                        {
+                            continue;
+                        }
+
+                        var leaderboardData = new LeaderboardData(steamID, steamName, level, hasPrime, kills, headshotKills, deaths);
                         playerAllTimeLeaderboardLookup.Add(steamID, leaderboardData);
                         playerAllTimeKill.Add(leaderboardData);
                         playerAllTimeLevel.Add(leaderboardData);
@@ -5461,7 +5481,7 @@ namespace UnturnedBlackout.Managers
 
                     foreach (var data in PlayerData.Values)
                     {
-                        var leaderboardData = new LeaderboardData(data.SteamID, data.SteamName, data.Level, 0, 0, 0);
+                        var leaderboardData = new LeaderboardData(data.SteamID, data.SteamName, data.Level, data.HasPrime, 0, 0, 0);
                         PlayerDailyLeaderboard.Add(leaderboardData);
                         PlayerDailyLeaderboardLookup.Add(data.SteamID, leaderboardData);
                         new MySqlCommand($"INSERT INTO `{PLAYERS_LEADERBOARD_DAILY}` ( `SteamID` ) VALUES ( {data.SteamID} );", Conn).ExecuteScalar();
@@ -5566,7 +5586,7 @@ namespace UnturnedBlackout.Managers
 
                     foreach (var data in PlayerData.Values)
                     {
-                        var leaderboardData = new LeaderboardData(data.SteamID, data.SteamName, data.Level, 0, 0, 0);
+                        var leaderboardData = new LeaderboardData(data.SteamID, data.SteamName, data.Level, data.HasPrime, 0, 0, 0);
                         PlayerWeeklyLeaderboard.Add(leaderboardData);
                         PlayerWeeklyLeaderboardLookup.Add(data.SteamID, leaderboardData);
                         new MySqlCommand($"INSERT INTO `{PLAYERS_LEADERBOARD_WEEKLY}` ( `SteamID` ) VALUES ( {data.SteamID} );", Conn).ExecuteScalar();
