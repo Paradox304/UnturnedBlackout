@@ -128,9 +128,9 @@ namespace UnturnedBlackout.Database.Data
         {
             Logging.Debug($"Setting achievement xp booster for {SteamName}");
             var completedTiers = Achievements.Sum(k => k.CurrentTier);
-            var totalTiers = Achievements.Sum(k => k.Achievement.Tiers.Max(k => k.TierID));
+            var totalTiers = (float)Achievements.Sum(k => k.Achievement.Tiers.Max(k => k.TierID));
 
-            var xpBooster = completedTiers / (totalTiers * 2f);
+            var xpBooster = completedTiers / totalTiers;
             Logging.Debug($"Total Tiers: {totalTiers}, Completed Tiers: {completedTiers}, Calculated Booster: {xpBooster}");
 
             AchievementXPBooster = xpBooster;
