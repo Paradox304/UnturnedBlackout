@@ -624,11 +624,11 @@ namespace UnturnedBlackout.Managers
                 EffectManager.sendUIEffectVisibility(FFA_KEY, player.GamePlayer.TransportConnection, true, "CounterLosing", true);
             }
 
-            EffectManager.sendUIEffectText(FFA_KEY, player.GamePlayer.TransportConnection, true, "1stPlacementName", firstPlayer.GamePlayer.Player.CharacterName.ToUnrich());
+            EffectManager.sendUIEffectText(FFA_KEY, player.GamePlayer.TransportConnection, true, "1stPlacementName", (firstPlayer.GamePlayer.Data.HasPrime ? UIManager.PRIME_SYMBOL : "") + firstPlayer.GamePlayer.Player.CharacterName);
             EffectManager.sendUIEffectText(FFA_KEY, player.GamePlayer.TransportConnection, true, "1stPlacementScore", firstPlayer.Kills.ToString());
 
             EffectManager.sendUIEffectText(FFA_KEY, player.GamePlayer.TransportConnection, true, "2ndPlacementPlace", secondPlayer != null ? Utility.GetOrdinal(Players.IndexOf(secondPlayer) + 1) : "0");
-            EffectManager.sendUIEffectText(FFA_KEY, player.GamePlayer.TransportConnection, true, "2ndPlacementName", secondPlayer != null ? secondPlayer.GamePlayer.Player.CharacterName.ToUnrich() : "NONE");
+            EffectManager.sendUIEffectText(FFA_KEY, player.GamePlayer.TransportConnection, true, "2ndPlacementName", secondPlayer != null ? ((secondPlayer.GamePlayer.Data.HasPrime ? UIManager.PRIME_SYMBOL : "") + secondPlayer.GamePlayer.Player.CharacterName) : "NONE");
             EffectManager.sendUIEffectText(FFA_KEY, player.GamePlayer.TransportConnection, true, "2ndPlacementScore", secondPlayer != null ? secondPlayer.Kills.ToString() : "0");
         }
 
@@ -1178,7 +1178,7 @@ namespace UnturnedBlackout.Managers
                     Logging.Debug($"Setting SERVER Scoreboard{v} Drop IMAGE {i} to {roundEndCase.Item2.IconLink} for {player.Player.CharacterName}");
                     EffectManager.sendUIEffectImageURL(PRE_ENDING_UI_KEY, player.TransportConnection, true, $"SERVER Scoreboard{v} Drop IMAGE {i}", roundEndCase.Item2.IconLink);
                     Logging.Debug($"Setting SERVER Scoreboard{v} Drop TEXT {i} to {roundEndCase.Item1.Player.CharacterName} for {player.Player.CharacterName}");
-                    EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.TransportConnection, true, $"SERVER Scoreboard{v} Drop TEXT {i}", roundEndCase.Item1.Player.CharacterName);
+                    EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.TransportConnection, true, $"SERVER Scoreboard{v} Drop TEXT {i}", (roundEndCase.Item1.Data.HasPrime ? UIManager.PRIME_SYMBOL : "") + roundEndCase.Item1.Player.CharacterName);
                 }
                 yield return new WaitForSeconds(1f);
             }
