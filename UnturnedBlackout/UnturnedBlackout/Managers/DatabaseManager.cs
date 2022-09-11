@@ -4283,7 +4283,7 @@ namespace UnturnedBlackout.Managers
             }
         }
 
-        public async Task UpdatePlayerGunSkinUnboxedAmountAsync(CSteamID steamID, int id, int amount)
+        public async Task UpdatePlayerGunSkinUnboxedAmountAsync(int id, int amount)
         {
             using MySqlConnection Conn = new(ConnectionString);
 
@@ -5274,7 +5274,7 @@ namespace UnturnedBlackout.Managers
             }
         }
 
-        public async Task UpdatePlayerGloveUnboxedAmountAsync(CSteamID steamID, int gloveID, int amount)
+        public async Task UpdatePlayerGloveUnboxedAmountAsync(int gloveID, int amount)
         {
             using MySqlConnection Conn = new(ConnectionString);
 
