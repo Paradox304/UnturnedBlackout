@@ -99,7 +99,7 @@ namespace UnturnedBlackout.Managers
         public const ushort VOICE_CHAT_ID = 27622;
         public const short VOICE_CHAT_KEY = 27622;
 
-        public const int MAX_SPACES_TDM_SCORE = 100;
+        public const int MAX_SPACES_TDM_SCORE = 98;
 
         public const string PRIME_SYMBOL = " ";
 

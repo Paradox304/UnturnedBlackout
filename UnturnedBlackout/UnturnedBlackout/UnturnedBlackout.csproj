@@ -271,6 +271,7 @@
     <Compile Include="Models\Configuration\GamemodeConfig.cs" />
     <Compile Include="Models\Configuration\IconsConfig.cs" />
     <Compile Include="Models\Configuration\KillFeedConfig.cs" />
+    <Compile Include="Models\Configuration\KillstreakConfig.cs" />
     <Compile Include="Models\Configuration\LoadoutConfig.cs" />
     <Compile Include="Models\Configuration\LocationsConfig.cs" />
     <Compile Include="Models\Configuration\MedalsConfig.cs" />
