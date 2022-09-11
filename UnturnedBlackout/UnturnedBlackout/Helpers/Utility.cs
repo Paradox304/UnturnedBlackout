@@ -136,6 +136,8 @@ namespace UnturnedBlackout
         {
             var attachments = new Dictionary<ushort, LoadoutAttachment>();
             var attachmentsText = text.Split(',');
+            var numberRegex = new Regex("([0-9]+)");
+
             foreach (var attachmentText in attachmentsText)
             {
                 if (string.IsNullOrEmpty(attachmentText))
@@ -143,23 +145,14 @@ namespace UnturnedBlackout
                     continue;
                 }
 
-                var isBought = false;
-                ushort attachmentID = 0;
-                if (attachmentText.StartsWith("B."))
+                var isBought = attachmentText.Contains("B.");
+                var isUnlocked = attachmentText.Contains("UL.");
+                var numberRegexMatch = numberRegex.Match(attachmentText).Value;
+
+                if (!ushort.TryParse(numberRegexMatch, out ushort attachmentID))
                 {
-                    isBought = true;
-                    if (!ushort.TryParse(attachmentText.Replace("B.", ""), out attachmentID))
-                    {
-                        continue;
-                    }
-                }
-                else if (attachmentText.StartsWith("UB."))
-                {
-                    isBought = false;
-                    if (!ushort.TryParse(attachmentText.Replace("UB.", ""), out attachmentID))
-                    {
-                        continue;
-                    }
+                    Logging.Debug($"Attachment text match with {numberRegexMatch} not found ID");
+                    continue;
                 }
 
                 if (!Plugin.Instance.DB.GunAttachments.TryGetValue(attachmentID, out GunAttachment gunAttachment))
@@ -184,7 +177,7 @@ namespace UnturnedBlackout
                     Logging.Debug($"Gun with name {gun.GunName} has an attachment with name {gunAttachment.AttachmentName} which is not in the default attachments list for the gun or reward attachments list for {player.CharacterName}");
                     continue;
                 }
-                attachments.Add(gunAttachment.AttachmentID, new LoadoutAttachment(gunAttachment, levelRequired, isBought));
+                attachments.Add(gunAttachment.AttachmentID, new LoadoutAttachment(gunAttachment, levelRequired, isBought, isUnlocked));
             }
             return attachments;
         }
@@ -194,7 +187,7 @@ namespace UnturnedBlackout
             var text = "";
             foreach (var attachment in attachments)
             {
-                text += $"{(attachment.IsBought ? "B." : "UB.")}{attachment.Attachment.AttachmentID},";
+                text += $"{(attachment.IsBought ? "B." : "")}{(attachment.IsUnlocked ? "UL." : "")}{attachment.Attachment.AttachmentID},";
             }
             return text;
         }
@@ -214,7 +207,7 @@ namespace UnturnedBlackout
             var text = "";
             foreach (var attachment in gunAttachments)
             {
-                text += $"UB.{attachment.AttachmentID},";
+                text += $"{attachment.AttachmentID},";
             }
             return text;
         }

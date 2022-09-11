@@ -7,12 +7,14 @@ namespace UnturnedBlackout.Database.Data
         public Knife Knife { get; set; }
         public int KnifeKills { get; set; }
         public bool IsBought { get; set; }
+        public bool IsUnlocked { get; set; }
 
-        public LoadoutKnife(Knife knife, int knifeKills, bool isBought)
+        public LoadoutKnife(Knife knife, int knifeKills, bool isBought, bool isUnlocked)
         {
             Knife = knife;
             KnifeKills = knifeKills;
             IsBought = isBought;
+            IsUnlocked = isUnlocked;
         }
     }
 }

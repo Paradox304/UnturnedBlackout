@@ -10,15 +10,17 @@ namespace UnturnedBlackout.Database.Data
         public int XP { get; set; }
         public int GunKills { get; set; }
         public bool IsBought { get; set; }
+        public bool IsUnlocked { get; set; }
         public Dictionary<ushort, LoadoutAttachment> Attachments { get; set; }
 
-        public LoadoutGun(Gun gun, int level, int xP, int gunKills, bool isBought, Dictionary<ushort, LoadoutAttachment> attachments)
+        public LoadoutGun(Gun gun, int level, int xP, int gunKills, bool isBought, bool isUnlocked, Dictionary<ushort, LoadoutAttachment> attachments)
         {
             Gun = gun;
             Level = level;
             XP = xP;
             GunKills = gunKills;
             IsBought = isBought;
+            IsUnlocked = isUnlocked;
             Attachments = attachments;
         }
 

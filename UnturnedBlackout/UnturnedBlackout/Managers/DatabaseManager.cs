@@ -258,15 +258,15 @@ namespace UnturnedBlackout.Managers
                 await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_LEADERBOARD_DAILY}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `Kills` INT NOT NULL DEFAULT '0' , `HeadshotKills` INT NOT NULL DEFAULT '0' , `Deaths` INT NOT NULL DEFAULT '0' , CONSTRAINT `ub_steam_id_11` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID`));", Conn).ExecuteScalarAsync();
                 await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_LEADERBOARD_WEEKLY}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `Kills` INT NOT NULL DEFAULT '0' , `HeadshotKills` INT NOT NULL DEFAULT '0' , `Deaths` INT NOT NULL DEFAULT '0' , CONSTRAINT `ub_steam_id_12` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID`));", Conn).ExecuteScalarAsync();
                 await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_LEADERBOARD_SEASONAL}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `Kills` INT NOT NULL DEFAULT '0' , `HeadshotKills` INT NOT NULL DEFAULT '0' , `Deaths` INT NOT NULL DEFAULT '0' , CONSTRAINT `ub_steam_id_13` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID`));", Conn).ExecuteScalarAsync();
-                await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_GUNS}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `GunID` SMALLINT UNSIGNED NOT NULL , `Level` INT NOT NULL , `XP` INT NOT NULL , `GunKills` INT NOT NULL , `IsBought` BOOLEAN NOT NULL , `Attachments` TEXT NOT NULL , CONSTRAINT `ub_steam_id` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_gun_id_1` FOREIGN KEY (`GunID`) REFERENCES `{GUNS}` (`GunID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `GunID`));", Conn).ExecuteScalarAsync();
+                await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_GUNS}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `GunID` SMALLINT UNSIGNED NOT NULL , `Level` INT NOT NULL , `XP` INT NOT NULL , `GunKills` INT NOT NULL , `IsBought` BOOLEAN NOT NULL , `IsUnlocked` BOOLEAN NOT NULL DEFAULT 'FALSE' , `Attachments` TEXT NOT NULL , CONSTRAINT `ub_steam_id` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_gun_id_1` FOREIGN KEY (`GunID`) REFERENCES `{GUNS}` (`GunID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `GunID`));", Conn).ExecuteScalarAsync();
                 await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_GUNS_SKINS}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `SkinIDs` TEXT NOT NULL , CONSTRAINT `ub_steam_id_1` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID`));", Conn).ExecuteScalarAsync();
-                await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_GUNS_CHARMS}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `CharmID` SMALLINT UNSIGNED NOT NULL , `IsBought` BOOLEAN NOT NULL , CONSTRAINT `ub_steam_id_10` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_charm_id` FOREIGN KEY (`CharmID`) REFERENCES `{GUNS_CHARMS}` (`CharmID`) ON DELETE CASCADE ON UPDATE CASCADE , Primary Key (`SteamID`, `CharmID`));", Conn).ExecuteScalarAsync();
-                await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_KNIVES}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `KnifeID` SMALLINT UNSIGNED NOT NULL , `KnifeKills` INT NOT NULL , `IsBought` BOOLEAN NOT NULL , CONSTRAINT `ub_steam_id_2` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_knife_id` FOREIGN KEY (`KnifeID`) REFERENCES `{KNIVES}` (`KnifeID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `KnifeID`));", Conn).ExecuteScalarAsync();
-                await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_PERKS}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `PerkID` INT NOT NULL , `IsBought` BOOLEAN NOT NULL , CONSTRAINT `ub_steam_id_4` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_perk_id` FOREIGN KEY (`PerkID`) REFERENCES `{PERKS}` (`PerkID`) ON DELETE CASCADE ON UPDATE CASCADE, PRIMARY KEY (`SteamID` , `PerkID`));", Conn).ExecuteScalarAsync();
-                await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_GADGETS}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `GadgetID` SMALLINT UNSIGNED NOT NULL , `GadgetKills` INT NOT NULL , `IsBought` BOOLEAN NOT NULL , CONSTRAINT `ub_steam_id_5` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_gadget_id` FOREIGN KEY (`GadgetID`) REFERENCES `{GADGETS}` (`GadgetID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `GadgetID`));", Conn).ExecuteScalarAsync();
-                await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_KILLSTREAKS}` (`SteamID` BIGINT UNSIGNED NOT NULL , `KillstreakID` INT NOT NULl , `KillstreakKills` INT NOT NULL , `IsBought` BOOLEAN NOT NULL , CONSTRAINT `ub_steam_id_6` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_killstreak_id` FOREIGN KEY (`KillstreakID`) REFERENCES `{KILLSTREAKS}` (`KillstreakID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `KillstreakID`));", Conn).ExecuteScalarAsync();
-                await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_CARDS}` (`SteamID` BIGINT UNSIGNED NOT NULL , `CardID` INT NOT NULL , `IsBought` BOOLEAN NOT NULL , CONSTRAINT `ub_steam_id_7` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_card_id` FOREIGN KEY (`CardID`) REFERENCES `{CARDS}` (`CardID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `CardID`));", Conn).ExecuteScalarAsync();
-                await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_GLOVES}` (`SteamID` BIGINT UNSIGNED NOT NULL , `GloveID` INT NOT NULL , `IsBought` BOOLEAN NOT NULl , CONSTRAINT `ub_steam_id_8` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_glove_id` FOREIGN KEY (`GloveID`) REFERENCES `{GLOVES}` (`GloveID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `GloveID`));", Conn).ExecuteScalarAsync();
+                await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_GUNS_CHARMS}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `CharmID` SMALLINT UNSIGNED NOT NULL , `IsBought` BOOLEAN NOT NULL , `IsUnlocked` BOOLEAN NOT NULL DEFAULT 'FALSE' , CONSTRAINT `ub_steam_id_10` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_charm_id` FOREIGN KEY (`CharmID`) REFERENCES `{GUNS_CHARMS}` (`CharmID`) ON DELETE CASCADE ON UPDATE CASCADE , Primary Key (`SteamID`, `CharmID`));", Conn).ExecuteScalarAsync();
+                await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_KNIVES}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `KnifeID` SMALLINT UNSIGNED NOT NULL , `KnifeKills` INT NOT NULL , `IsBought` BOOLEAN NOT NULL , `IsUnlocked` BOOLEAN NOT NULL DEFAULT 'FALSE' , CONSTRAINT `ub_steam_id_2` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_knife_id` FOREIGN KEY (`KnifeID`) REFERENCES `{KNIVES}` (`KnifeID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `KnifeID`));", Conn).ExecuteScalarAsync();
+                await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_PERKS}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `PerkID` INT NOT NULL , `IsBought` BOOLEAN NOT NULL , `IsUnlocked` BOOLEAN NOT NULL DEFAULT 'FALSE' , CONSTRAINT `ub_steam_id_4` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_perk_id` FOREIGN KEY (`PerkID`) REFERENCES `{PERKS}` (`PerkID`) ON DELETE CASCADE ON UPDATE CASCADE, PRIMARY KEY (`SteamID` , `PerkID`));", Conn).ExecuteScalarAsync();
+                await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_GADGETS}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `GadgetID` SMALLINT UNSIGNED NOT NULL , `GadgetKills` INT NOT NULL , `IsBought` BOOLEAN NOT NULL , `IsUnlocked` BOOLEAN NOT NULL DEFAULT 'FALSE' , CONSTRAINT `ub_steam_id_5` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_gadget_id` FOREIGN KEY (`GadgetID`) REFERENCES `{GADGETS}` (`GadgetID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `GadgetID`));", Conn).ExecuteScalarAsync();
+                await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_KILLSTREAKS}` (`SteamID` BIGINT UNSIGNED NOT NULL , `KillstreakID` INT NOT NULl , `KillstreakKills` INT NOT NULL , `IsBought` BOOLEAN NOT NULL , `IsUnlocked` BOOLEAN NOT NULL DEFAULT 'FALSE' , CONSTRAINT `ub_steam_id_6` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_killstreak_id` FOREIGN KEY (`KillstreakID`) REFERENCES `{KILLSTREAKS}` (`KillstreakID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `KillstreakID`));", Conn).ExecuteScalarAsync();
+                await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_CARDS}` (`SteamID` BIGINT UNSIGNED NOT NULL , `CardID` INT NOT NULL , `IsBought` BOOLEAN NOT NULL , `IsUnlocked` BOOLEAN NOT NULL DEFAULT FALSE , CONSTRAINT `ub_steam_id_7` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_card_id` FOREIGN KEY (`CardID`) REFERENCES `{CARDS}` (`CardID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `CardID`));", Conn).ExecuteScalarAsync();
+                await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_GLOVES}` (`SteamID` BIGINT UNSIGNED NOT NULL , `GloveID` INT NOT NULL , `IsBought` BOOLEAN NOT NULl , `IsUnlocked` BOOLEAN NOT NULL DEFAULT FALSE , CONSTRAINT `ub_steam_id_8` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_glove_id` FOREIGN KEY (`GloveID`) REFERENCES `{GLOVES}` (`GloveID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `GloveID`));", Conn).ExecuteScalarAsync();
                 await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_LOADOUTS}` (`SteamID` BIGINT UNSIGNED NOT NULL , `LoadoutID` INT NOT NULL , `IsActive` BOOLEAN NOT NULL , `Loadout` TEXT NOT NULL , CONSTRAINT `ub_steam_id_9` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID`, `LoadoutID`));", Conn).ExecuteScalarAsync();
                 await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_QUESTS}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `QuestID` INT NOT NULL , `Amount` INT NOT NULL , `QuestEnd` BIGINT NOT NULL , CONSTRAINT `ub_steam_id_14` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_quest_id` FOREIGN KEY (`QuestID`) REFERENCES `{QUESTS}` (`QuestID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `QuestID`));", Conn).ExecuteScalarAsync();
                 await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_ACHIEVEMENTS}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `AchievementID` INT NOT NULL , `CurrentTier` INT NOT NULL DEFAULT '0' , `Amount` INT NOT NULL DEFAULT '0' , CONSTRAINT `ub_steam_id_15` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_achievement_id_2` FOREIGN KEY (`AchievementID`) REFERENCES `{ACHIEVEMENTS}` (`AchievementID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID`, `AchievementID`));", Conn).ExecuteScalarAsync();
@@ -2417,10 +2417,15 @@ namespace UnturnedBlackout.Managers
                             continue;
                         }
 
-                        var attachments = Utility.GetAttachmentsFromString(rdr[6].ToString(), gun, player);
+                        if (!bool.TryParse(rdr[6].ToString(), out bool isUnlocked))
+                        {
+                            continue;
+                        }
+
+                        var attachments = Utility.GetAttachmentsFromString(rdr[7].ToString(), gun, player);
                         if (!guns.ContainsKey(gunID))
                         {
-                            guns.Add(gunID, new LoadoutGun(gun, level, xp, gunKills, isBought, attachments));
+                            guns.Add(gunID, new LoadoutGun(gun, level, xp, gunKills, isBought, isUnlocked, attachments));
                         }
                         else
                         {
@@ -2449,7 +2454,7 @@ namespace UnturnedBlackout.Managers
                         {
                             if (!gun.Attachments.ContainsKey(rewardAttachment.Value.AttachmentID))
                             {
-                                gun.Attachments.Add(rewardAttachment.Value.AttachmentID, new LoadoutAttachment(rewardAttachment.Value, rewardAttachment.Key, false));
+                                gun.Attachments.Add(rewardAttachment.Value.AttachmentID, new LoadoutAttachment(rewardAttachment.Value, rewardAttachment.Key, false, false));
                                 Logging.Debug($"Gun with name {gun.Gun.GunName} doesn't have a reward attachment with id {rewardAttachment.Value.AttachmentID} that comes with the gun, adding it for {player.CharacterName}");
                             }
                         }
@@ -2518,9 +2523,14 @@ namespace UnturnedBlackout.Managers
                             continue;
                         }
 
+                        if (!bool.TryParse(rdr[3].ToString(), out bool isUnlocked))
+                        {
+                            continue;
+                        }
+
                         if (!gunCharms.ContainsKey(charmID))
                         {
-                            gunCharms.Add(charmID, new LoadoutGunCharm(gunCharm, isBought));
+                            gunCharms.Add(charmID, new LoadoutGunCharm(gunCharm, isBought, isUnlocked));
                         }
                         else
                         {
@@ -2566,9 +2576,14 @@ namespace UnturnedBlackout.Managers
                             continue;
                         }
 
+                        if (!bool.TryParse(rdr[4].ToString(), out bool isUnlocked))
+                        {
+                            continue;
+                        }
+
                         if (!knives.ContainsKey(knifeID))
                         {
-                            knives.Add(knifeID, new LoadoutKnife(knife, knifeKills, isBought));
+                            knives.Add(knifeID, new LoadoutKnife(knife, knifeKills, isBought, isUnlocked));
                         }
                         else
                         {
@@ -2609,9 +2624,14 @@ namespace UnturnedBlackout.Managers
                             continue;
                         }
 
+                        if (!bool.TryParse(rdr[3].ToString(), out bool isUnlocked))
+                        {
+                            continue;
+                        }
+
                         if (!perks.ContainsKey(perkID))
                         {
-                            perks.Add(perkID, new LoadoutPerk(perk, isBought));
+                            perks.Add(perkID, new LoadoutPerk(perk, isBought, isUnlocked));
                         }
                         else
                         {
@@ -2657,9 +2677,14 @@ namespace UnturnedBlackout.Managers
                             continue;
                         }
 
+                        if (!bool.TryParse(rdr[4].ToString(), out bool isUnlocked))
+                        {
+                            continue;
+                        }
+
                         if (!gadgets.ContainsKey(gadgetID))
                         {
-                            gadgets.Add(gadgetID, new LoadoutGadget(gadget, gadgetKills, isBought));
+                            gadgets.Add(gadgetID, new LoadoutGadget(gadget, gadgetKills, isBought, isUnlocked));
                         }
                         else
                         {
@@ -2705,9 +2730,14 @@ namespace UnturnedBlackout.Managers
                             continue;
                         }
 
+                        if (!bool.TryParse(rdr[4].ToString(), out bool isUnlocked))
+                        {
+                            continue;
+                        }
+
                         if (!killstreaks.ContainsKey(killstreakID))
                         {
-                            killstreaks.Add(killstreakID, new LoadoutKillstreak(killstreak, killstreakKills, isBought));
+                            killstreaks.Add(killstreakID, new LoadoutKillstreak(killstreak, killstreakKills, isBought, isUnlocked));
                         }
                         else
                         {
@@ -2749,9 +2779,14 @@ namespace UnturnedBlackout.Managers
                             continue;
                         }
 
+                        if (!bool.TryParse(rdr[3].ToString(), out bool isUnlocked))
+                        {
+                            continue;
+                        }
+
                         if (!cards.ContainsKey(cardID))
                         {
-                            cards.Add(cardID, new LoadoutCard(card, isBought));
+                            cards.Add(cardID, new LoadoutCard(card, isBought, isUnlocked));
                         }
                         else
                         {
@@ -2791,10 +2826,14 @@ namespace UnturnedBlackout.Managers
                         {
                             continue;
                         }
+                        if (!bool.TryParse(rdr[3].ToString(), out bool isUnlocked))
+                        {
+                            continue;
+                        }
 
                         if (!gloves.ContainsKey(gloveID))
                         {
-                            gloves.Add(gloveID, new LoadoutGlove(glove, isBought));
+                            gloves.Add(gloveID, new LoadoutGlove(glove, isBought, isUnlocked));
                         }
                         else
                         {
@@ -3900,7 +3939,7 @@ namespace UnturnedBlackout.Managers
                         Logging.Debug($"Duplicate default attachment found for gun {gunID} with id {attachment.AttachmentID}, ignoring it");
                         continue;
                     }
-                    loadoutAttachments.Add(attachment.AttachmentID, new LoadoutAttachment(attachment, 0, true));
+                    loadoutAttachments.Add(attachment.AttachmentID, new LoadoutAttachment(attachment, 0, true, false));
                 }
 
                 foreach (var attachment in gun.RewardAttachments)
@@ -3910,10 +3949,10 @@ namespace UnturnedBlackout.Managers
                         Logging.Debug($"Duplicate reward attachment found for gun {gunID} with id {attachment.Value.AttachmentID}, ignoring it");
                         continue;
                     }
-                    loadoutAttachments.Add(attachment.Value.AttachmentID, new LoadoutAttachment(attachment.Value, attachment.Key, true));
+                    loadoutAttachments.Add(attachment.Value.AttachmentID, new LoadoutAttachment(attachment.Value, attachment.Key, true, false));
                 }
 
-                var loadoutGun = new LoadoutGun(gun, 1, 0, 0, isBought, loadoutAttachments);
+                var loadoutGun = new LoadoutGun(gun, 1, 0, 0, isBought, false, loadoutAttachments);
 
                 if (loadout.Guns.ContainsKey(loadoutGun.Gun.GunID))
                 {
@@ -4074,6 +4113,39 @@ namespace UnturnedBlackout.Managers
             }
         }
 
+        public async Task UpdatePlayerGunUnlockedAsync(CSteamID steamID, ushort gunID, bool isUnlocked)
+        {
+            using MySqlConnection Conn = new(ConnectionString);
+            try
+            {
+                await Conn.OpenAsync();
+                await new MySqlCommand($"UPDATE `{PLAYERS_GUNS}` SET `IsUnlocked` = {isUnlocked} WHERE `SteamID` = {steamID} AND `GunID` = {gunID};", Conn).ExecuteScalarAsync();
+
+                if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                {
+                    Logging.Debug($"Error finding loadout for player with steam id {steamID}");
+                    return;
+                }
+
+                if (!loadout.Guns.TryGetValue(gunID, out LoadoutGun gun))
+                {
+                    Logging.Debug($"Error finding loadout gun with id {gunID} for player with steam id {steamID}");
+                    return;
+                }
+
+                gun.IsUnlocked = isUnlocked;
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"Error changing unlocked to {isUnlocked} for gun with id {gunID} for steam id {steamID}");
+                Logger.Log(ex);
+            }
+            finally
+            {
+                await Conn.CloseAsync();
+            }
+        }
+
         // Player Guns Attachments
 
         public async Task UpdatePlayerGunAttachmentBoughtAsync(CSteamID steamID, ushort gunID, ushort attachmentID, bool isBought)
@@ -4107,6 +4179,45 @@ namespace UnturnedBlackout.Managers
             catch (Exception ex)
             {
                 Logger.Log($"Error changing is bought to {isBought} for attachment with id {attachmentID} for gun with id {gunID} for player with steam id");
+                Logger.Log(ex);
+            }
+            finally
+            {
+                await Conn.CloseAsync();
+            }
+        }
+
+        public async Task UpdatePlayerGunAttachmentUnlockedAsync(CSteamID steamID, ushort gunID, ushort attachmentID, bool isUnlocked)
+        {
+            using MySqlConnection Conn = new(ConnectionString);
+            try
+            {
+                await Conn.OpenAsync();
+
+                if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                {
+                    Logging.Debug($"Error finding loadout for player with steam id {steamID}");
+                    return;
+                }
+
+                if (!loadout.Guns.TryGetValue(gunID, out LoadoutGun gun))
+                {
+                    Logging.Debug($"Error finding loadout gun with id {gunID} for player with steam id {steamID}");
+                    return;
+                }
+
+                if (!gun.Attachments.TryGetValue(attachmentID, out LoadoutAttachment attachment))
+                {
+                    Logging.Debug($"Error finding loadout attachment with id {attachmentID} for loadout gun with id {gunID} for player with steam id {steamID}");
+                    return;
+                }
+
+                attachment.IsUnlocked = isUnlocked;
+                await new MySqlCommand($"UPDATE `{PLAYERS_GUNS}` SET `Attachments` = '{Utility.GetStringFromAttachments(gun.Attachments.Values.ToList())}' WHERE `SteamID` = {steamID} AND `GunID` = {gunID};", Conn).ExecuteScalarAsync();
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"Error changing is unlocked to {isUnlocked} for attachment with id {attachmentID} for gun with id {gunID} for player with steam id");
                 Logger.Log(ex);
             }
             finally
@@ -4229,7 +4340,7 @@ namespace UnturnedBlackout.Managers
                     return;
                 }
 
-                var loadoutGunCharm = new LoadoutGunCharm(gunCharm, isBought);
+                var loadoutGunCharm = new LoadoutGunCharm(gunCharm, isBought, false);
                 loadout.GunCharms.Add(gunCharmID, loadoutGunCharm);
 
                 Plugin.Instance.UI.OnUIUpdated(steamID, EUIPage.GunCharm);
@@ -4310,6 +4421,38 @@ namespace UnturnedBlackout.Managers
             }
         }
 
+        public async Task UpdatePlayerGunCharmUnlockedAsync(CSteamID steamID, ushort gunCharmID, bool isUnlocked)
+        {
+            using MySqlConnection Conn = new(ConnectionString);
+            try
+            {
+                await Conn.OpenAsync();
+                if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                {
+                    Logging.Debug($"Error finding loadout for player with steam id {steamID}");
+                    return;
+                }
+
+                if (!loadout.GunCharms.TryGetValue(gunCharmID, out LoadoutGunCharm gunCharm))
+                {
+                    Logging.Debug($"Error finding loadout gun charm with id {gunCharmID} for player with steam id {steamID}");
+                    return;
+                }
+
+                gunCharm.IsUnlocked = isUnlocked;
+                await new MySqlCommand($"UPDATE `{PLAYERS_GUNS_CHARMS}` SET `IsUnlocked` = {isUnlocked} WHERE `SteamID` = {steamID} AND `CharmID` = {gunCharmID};", Conn).ExecuteScalarAsync();
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"Error changing is unlocked to {isUnlocked} for gun charm with id {gunCharmID} for player with steam id {steamID}");
+                Logger.Log(ex);
+            }
+            finally
+            {
+                await Conn.CloseAsync();
+            }
+        }
+
         // Player Knives
 
         public async Task AddPlayerKnifeAsync(CSteamID steamID, ushort knifeID, bool isBought)
@@ -4326,7 +4469,7 @@ namespace UnturnedBlackout.Managers
 
                 await new MySqlCommand($"INSERT INTO `{PLAYERS_KNIVES}` (`SteamID` , `KnifeID` , `KnifeKills` , `IsBought`) VALUES ({steamID} , {knifeID} , 0 , {isBought}) ON DUPLICATE KEY UPDATE `IsBought` = {isBought};", Conn).ExecuteScalarAsync();
 
-                var loadoutKnife = new LoadoutKnife(knife, 0, isBought);
+                var loadoutKnife = new LoadoutKnife(knife, 0, isBought, false);
                 if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
                 {
                     Logging.Debug($"Couldnt finding loadout for player with steam id {steamID}");
@@ -4423,7 +4566,39 @@ namespace UnturnedBlackout.Managers
             }
         }
 
-        public async Task UpdatePlayerKnifeUnboxedAmountAsync(CSteamID steamID, ushort knifeID, int amount)
+        public async Task UpdatePlayerKnifeUnlockedAsync(CSteamID steamID, ushort knifeID, bool isUnlocked)
+        {
+            using MySqlConnection Conn = new(ConnectionString);
+            try
+            {
+                await Conn.OpenAsync();
+                if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                {
+                    Logging.Debug($"Error finding loadout for player with steam id {steamID}");
+                    return;
+                }
+
+                if (!loadout.Knives.TryGetValue(knifeID, out LoadoutKnife knife))
+                {
+                    Logging.Debug($"Error finding loadout knife with id {knifeID} for player with steam id {steamID}");
+                    return;
+                }
+
+                knife.IsUnlocked = isUnlocked;
+                await new MySqlCommand($"UPDATE `{PLAYERS_KNIVES}` SET `IsUnlocked` = {isUnlocked} WHERE `SteamID` = {steamID} AND `KnifeID` = {knifeID};", Conn).ExecuteScalarAsync();
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"Error changing is unlocked to {isUnlocked} for knife with id {knifeID} for player with steam id {steamID}");
+                Logger.Log(ex);
+            }
+            finally
+            {
+                await Conn.CloseAsync();
+            }
+        }
+
+        public async Task UpdatePlayerKnifeUnboxedAmountAsync(ushort knifeID, int amount)
         {
             using MySqlConnection Conn = new(ConnectionString);
 
@@ -4483,7 +4658,7 @@ namespace UnturnedBlackout.Managers
                     return;
                 }
 
-                var loadoutPerk = new LoadoutPerk(perk, isBought);
+                var loadoutPerk = new LoadoutPerk(perk, isBought, false);
                 loadout.Perks.Add(perkID, loadoutPerk);
 
                 Plugin.Instance.UI.OnUIUpdated(steamID, EUIPage.Perk);
@@ -4532,6 +4707,38 @@ namespace UnturnedBlackout.Managers
             }
         }
 
+        public async Task UpdatePlayerPerkUnlockedAsync(CSteamID steamID, int perkID, bool isUnlocked)
+        {
+            using MySqlConnection Conn = new(ConnectionString);
+            try
+            {
+                await Conn.OpenAsync();
+                if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                {
+                    Logging.Debug($"Error finding loadout for player with steam id {steamID}");
+                    return;
+                }
+
+                if (!loadout.Perks.TryGetValue(perkID, out LoadoutPerk perk))
+                {
+                    Logging.Debug($"Error finding loadout perk with id {perkID} for player with steam id {steamID}");
+                    return;
+                }
+
+                perk.IsUnlocked = isUnlocked;
+                await new MySqlCommand($"UPDATE `{PLAYERS_PERKS}` SET `IsUnlocked` = {isUnlocked} WHERE `SteamID` = {steamID} AND `PerkID` = {perkID};", Conn).ExecuteScalarAsync();
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"Error changing is unlocked of perk to {isUnlocked} with id {perkID} of player with steam id {steamID}");
+                Logger.Log(ex);
+            }
+            finally
+            {
+                await Conn.CloseAsync();
+            }
+        }
+
         // Player Gadgets
 
         public async Task AddPlayerGadgetAsync(CSteamID steamID, ushort gadgetID, bool isBought)
@@ -4560,7 +4767,7 @@ namespace UnturnedBlackout.Managers
                     return;
                 }
 
-                var loadoutGadget = new LoadoutGadget(gadget, 0, isBought);
+                var loadoutGadget = new LoadoutGadget(gadget, 0, isBought, false);
                 loadout.Gadgets.Add(gadgetID, loadoutGadget);
 
                 Plugin.Instance.UI.OnUIUpdated(steamID, gadget.IsTactical ? EUIPage.Tactical : EUIPage.Lethal);
@@ -4644,6 +4851,38 @@ namespace UnturnedBlackout.Managers
             }
         }
 
+        public async Task UpdatePlayerGadgetUnlockedAsync(CSteamID steamID, ushort gadgetID, bool isUnlocked)
+        {
+            using MySqlConnection Conn = new(ConnectionString);
+            try
+            {
+                await Conn.OpenAsync();
+                if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                {
+                    Logging.Debug($"Error finding loadout for player with steam id {steamID}");
+                    return;
+                }
+
+                if (!loadout.Gadgets.TryGetValue(gadgetID, out LoadoutGadget gadget))
+                {
+                    Logging.Debug($"Error finding loadout gadget with id {gadgetID} for player with steam id {steamID}");
+                    return;
+                }
+
+                gadget.IsUnlocked = isUnlocked;
+                await new MySqlCommand($"UPDATE `{PLAYERS_GADGETS}` SET `IsUnlocked` = {isUnlocked} WHERE `SteamID` = {steamID} AND `GadgetID` = {gadgetID};", Conn).ExecuteScalarAsync();
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"Error changing is unlocked to {isUnlocked} for gadget with id {gadgetID} for player with steam id {steamID}");
+                Logger.Log(ex);
+            }
+            finally
+            {
+                await Conn.CloseAsync();
+            }
+        }
+
         // Player Killstreaks
 
         public async Task AddPlayerKillstreakAsync(CSteamID steamID, int killstreakID, bool isBought)
@@ -4672,7 +4911,7 @@ namespace UnturnedBlackout.Managers
                     return;
                 }
 
-                var loadoutKillstreak = new LoadoutKillstreak(killstreak, 0, isBought);
+                var loadoutKillstreak = new LoadoutKillstreak(killstreak, 0, isBought, false);
                 loadout.Killstreaks.Add(killstreakID, loadoutKillstreak);
 
                 Plugin.Instance.UI.OnUIUpdated(steamID, EUIPage.Killstreak);
@@ -4756,6 +4995,37 @@ namespace UnturnedBlackout.Managers
             }
         }
 
+        public async Task UpdatePlayerKillstreakUnlockedAsync(CSteamID steamID, int killstreakID, bool isUnlocked)
+        {
+            using MySqlConnection Conn = new(ConnectionString);
+            try
+            {
+                await Conn.OpenAsync();
+                if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                {
+                    Logging.Debug($"Error finding loadout for player with steam id {steamID}");
+                    return;
+                }
+
+                if (!loadout.Killstreaks.TryGetValue(killstreakID, out LoadoutKillstreak killstreak))
+                {
+                    Logging.Debug($"Error finding loadout killstreak with id {killstreakID} for player with steam id {steamID}");
+                    return;
+                }
+
+                killstreak.IsUnlocked = isUnlocked;
+                await new MySqlCommand($"UPDATE `{PLAYERS_KILLSTREAKS}` SET `IsUnlocked` = {isUnlocked} WHERE `SteamID` = {steamID} AND `KillstreakID` = {killstreakID};", Conn).ExecuteScalarAsync();
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"Error changing is unlocked to {isUnlocked} for killstreak with id {killstreakID} for player with steam id {steamID}");
+                Logger.Log(ex);
+            }
+            finally
+            {
+                await Conn.CloseAsync();
+            }
+        }
         // Player Cards
 
         public async Task AddPlayerCardAsync(CSteamID steamID, int cardID, bool isBought)
@@ -4784,7 +5054,7 @@ namespace UnturnedBlackout.Managers
                     return;
                 }
 
-                var loadoutCard = new LoadoutCard(card, isBought);
+                var loadoutCard = new LoadoutCard(card, isBought, false);
                 loadout.Cards.Add(cardID, loadoutCard);
 
                 Plugin.Instance.UI.OnUIUpdated(steamID, EUIPage.Card);
@@ -4824,6 +5094,38 @@ namespace UnturnedBlackout.Managers
             catch (Exception ex)
             {
                 Logger.Log($"Error changing is bought to {isBought} for card with id {cardID} for player with steam id {steamID}");
+                Logger.Log(ex);
+            }
+            finally
+            {
+                await Conn.CloseAsync();
+            }
+        }
+
+        public async Task UpdatePlayerCardUnlockedAsync(CSteamID steamID, int cardID, bool isUnlocked)
+        {
+            using MySqlConnection Conn = new(ConnectionString);
+            try
+            {
+                await Conn.OpenAsync();
+                if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                {
+                    Logging.Debug($"Error finding loadout for player with steam id {steamID}");
+                    return;
+                }
+
+                if (!loadout.Cards.TryGetValue(cardID, out LoadoutCard card))
+                {
+                    Logging.Debug($"Error finding loadout card with id {cardID} for player with steam id {steamID}");
+                    return;
+                }
+
+                card.IsUnlocked = isUnlocked;
+                await new MySqlCommand($"UPDATE `{PLAYERS_CARDS}` SET `IsUnlocked` = {isUnlocked} WHERE `SteamID` = {steamID} AND `CardID` = {cardID};", Conn).ExecuteScalarAsync();
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"Error changing is unlocked to {isUnlocked} for card with id {cardID} for player with steam id {steamID}");
                 Logger.Log(ex);
             }
             finally
@@ -4892,7 +5194,7 @@ namespace UnturnedBlackout.Managers
                     return;
                 }
 
-                var loadoutGlove = new LoadoutGlove(glove, isBought);
+                var loadoutGlove = new LoadoutGlove(glove, isBought, false);
                 loadout.Gloves.Add(gloveID, loadoutGlove);
 
                 Plugin.Instance.UI.OnUIUpdated(steamID, EUIPage.Glove);
@@ -4932,6 +5234,38 @@ namespace UnturnedBlackout.Managers
             catch (Exception ex)
             {
                 Logger.Log($"Error changing is bought to {isBought} for glove with id {gloveID} for player with steam id {steamID}");
+                Logger.Log(ex);
+            }
+            finally
+            {
+                await Conn.CloseAsync();
+            }
+        }
+
+        public async Task UpdatePlayerGloveUnlockedAsync(CSteamID steamID, int gloveID, bool isUnlocked)
+        {
+            using MySqlConnection Conn = new(ConnectionString);
+            try
+            {
+                await Conn.OpenAsync();
+                if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                {
+                    Logging.Debug($"Error finding loadout for player with steam id {steamID}");
+                    return;
+                }
+
+                if (!loadout.Gloves.TryGetValue(gloveID, out LoadoutGlove glove))
+                {
+                    Logging.Debug($"Error finding loadout glove with id {gloveID} for player with steam id {steamID}");
+                    return;
+                }
+
+                glove.IsUnlocked = isUnlocked;
+                await new MySqlCommand($"UPDATE `{PLAYERS_GLOVES}` SET `IsUnlocked` = {isUnlocked} WHERE `SteamID` = {steamID} AND `GloveID` = {gloveID};", Conn).ExecuteScalarAsync();
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"Error changing is unlocked to {isUnlocked} for glove with id {gloveID} for player with steam id {steamID}");
                 Logger.Log(ex);
             }
             finally

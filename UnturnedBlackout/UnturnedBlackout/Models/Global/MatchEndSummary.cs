@@ -76,7 +76,7 @@ namespace UnturnedBlackout.Models.Global
             AchievementXPBonus = (int)Math.Floor(MatchXP * player.Data.AchievementXPBooster);
             OtherXPBonus = 0; // Havent got formula for this
 
-            BattlepassXP = (int)(Kills > 0 ? (data.BPXPPerMinutePlayed * minutesPlayed * (1f + (HasWon ? data.BPXPVictoryBonus : data.BPXPDefeatBonus))) : 0); // Left for later on when I get the formula
+            BattlepassXP = (int)(Kills > 0 ? (data.BPXPPerMinutePlayed * minutesPlayed * (1f + (HasWon ? data.BPXPVictoryBonus : data.BPXPDefeatBonus))) : 0);
             BattlepassBonusXP = (int)Math.Floor(BattlepassXP * (player.Data.BPBooster + global.BPBooster + (player.Data.HasPrime ? data.PrimeBPXPBooster : 0f)));
 
             KD = Deaths == 0 ? 0f : Kills / (float)Deaths;

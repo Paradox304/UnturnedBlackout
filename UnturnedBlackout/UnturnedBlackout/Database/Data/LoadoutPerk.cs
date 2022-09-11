@@ -6,11 +6,13 @@ namespace UnturnedBlackout.Database.Data
     {
         public Perk Perk { get; set; }
         public bool IsBought { get; set; }
+        public bool IsUnlocked { get; set; }
 
-        public LoadoutPerk(Perk perk, bool isBought)
+        public LoadoutPerk(Perk perk, bool isBought, bool isUnlocked)
         {
             Perk = perk;
             IsBought = isBought;
+            IsUnlocked = isUnlocked;
         }
     }
 }
