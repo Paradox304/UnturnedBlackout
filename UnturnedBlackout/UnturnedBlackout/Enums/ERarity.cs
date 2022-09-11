@@ -8,16 +8,16 @@ namespace UnturnedBlackout.Enums
 {
     public enum ERarity
     {
-        NONE,
         COMMON,
+        GREEN,
         UNCOMMON,
         RARE,
         EPIC,
         LEGENDARY,
         MYTHICAL,
         YELLOW,
-        ORANGE,
         CYAN,
-        GREEN
+        NONE,
+        ORANGE,
     }
 }

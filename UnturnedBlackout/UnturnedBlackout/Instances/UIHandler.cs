@@ -2847,7 +2847,7 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item IMAGE {i}", gun.Gun.IconLink);
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item TEXT {i}", gun.Gun.GunName);
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay {i}", !gun.IsBought);
-                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", gun.Gun.LevelRequirement > PlayerData.Level && !gun.IsUnlocked ? Plugin.Instance.Translate("Unlock_Level", gun.Gun.LevelRequirement) : $"{Utility.GetCurrencySymbol(ECurrency.Credits)} {gun.Gun.BuyPrice}");
+                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", gun.Gun.LevelRequirement > PlayerData.Level && !gun.IsUnlocked ? Plugin.Instance.Translate("Unlock_Level", gun.Gun.LevelRequirement) : $"{Utility.GetCurrencySymbol(ECurrency.Credits)} <color={(PlayerData.Credits >= gun.Gun.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{gun.Gun.BuyPrice}</color>");
                 SendRarity("SERVER Item", gun.Gun.GunRarity, i);
             }
         }
@@ -2876,7 +2876,7 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item IMAGE {i}", attachment.Attachment.IconLink);
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item TEXT {i}", attachment.Attachment.AttachmentName);
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay {i}", !attachment.IsBought);
-                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", attachment.LevelRequirement > gun.Level && !attachment.IsUnlocked ? Plugin.Instance.Translate("Unlock_Gun_Level", attachment.LevelRequirement) : $"{Utility.GetCurrencySymbol(ECurrency.Credits)} {attachment.Attachment.BuyPrice}");
+                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", attachment.LevelRequirement > gun.Level && !attachment.IsUnlocked ? Plugin.Instance.Translate("Unlock_Gun_Level", attachment.LevelRequirement) : $"{Utility.GetCurrencySymbol(ECurrency.Credits)} <color={(PlayerData.Credits >= attachment.Attachment.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{attachment.Attachment.BuyPrice}</color>");
                 SendRarity("SERVER Item", attachment.Attachment.AttachmentRarity, i);
             }
         }
@@ -2983,8 +2983,19 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item IMAGE {i}", perk.Perk.IconLink);
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item TEXT {i}", perk.Perk.PerkName);
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay {i}", !perk.IsBought);
-                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", perk.Perk.LevelRequirement > PlayerData.Level && !perk.IsUnlocked ? Plugin.Instance.Translate("Unlock_Level", perk.Perk.LevelRequirement) : $"{Utility.GetCurrencySymbol(ECurrency.Credits)} {perk.Perk.BuyPrice}");
-                SendRarity("SERVER Item", perk.Perk.PerkRarity, i);
+                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", perk.Perk.LevelRequirement > PlayerData.Level && !perk.IsUnlocked ? Plugin.Instance.Translate("Unlock_Level", perk.Perk.LevelRequirement) : $"{Utility.GetCurrencySymbol(ECurrency.Credits)} <color={(PlayerData.Credits >= perk.Perk.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{perk.Perk.BuyPrice}</color>");
+                switch (perk.Perk.PerkType)
+                {
+                    case 1:
+                        SendRarity("SERVER Item", ERarity.CYAN, i);
+                        break;
+                    case 2:
+                        SendRarity("SERVER Item", ERarity.MYTHICAL, i);
+                        break;
+                    case 3:
+                        SendRarity("SERVER Item", ERarity.YELLOW, i);
+                        break;
+                }
             }
         }
 
@@ -3012,7 +3023,7 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item IMAGE {i}", gadget.Gadget.IconLink);
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item TEXT {i}", gadget.Gadget.GadgetName);
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay {i}", !gadget.IsBought);
-                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", gadget.Gadget.LevelRequirement > PlayerData.Level && !gadget.IsUnlocked ? Plugin.Instance.Translate("Unlock_Level", gadget.Gadget.LevelRequirement) : $"{Utility.GetCurrencySymbol(ECurrency.Credits)} {gadget.Gadget.BuyPrice}");
+                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", gadget.Gadget.LevelRequirement > PlayerData.Level && !gadget.IsUnlocked ? Plugin.Instance.Translate("Unlock_Level", gadget.Gadget.LevelRequirement) : $"{Utility.GetCurrencySymbol(ECurrency.Credits)} <color={(PlayerData.Credits >= gadget.Gadget.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{gadget.Gadget.BuyPrice}</color>");
                 SendRarity("SERVER Item", gadget.Gadget.GadgetRarity, i);
             }
         }
@@ -3093,7 +3104,7 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item IMAGE {i}", killstreak.Killstreak.IconLink);
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item TEXT {i}", killstreak.Killstreak.KillstreakName);
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay {i}", !killstreak.IsBought);
-                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", killstreak.Killstreak.LevelRequirement > PlayerData.Level && !killstreak.IsUnlocked ? Plugin.Instance.Translate("Unlock_Level", killstreak.Killstreak.LevelRequirement) : $"{Utility.GetCurrencySymbol(ECurrency.Credits)} {killstreak.Killstreak.BuyPrice}");
+                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", killstreak.Killstreak.LevelRequirement > PlayerData.Level && !killstreak.IsUnlocked ? Plugin.Instance.Translate("Unlock_Level", killstreak.Killstreak.LevelRequirement) : $"{Utility.GetCurrencySymbol(ECurrency.Credits)} <color={(PlayerData.Credits >= killstreak.Killstreak.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{killstreak.Killstreak.BuyPrice}</color>");
                 SendRarity("SERVER Item", killstreak.Killstreak.KillstreakRarity, i);
             }
         }
@@ -3720,10 +3731,10 @@ namespace UnturnedBlackout.Instances
 
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy BUTTON", !gun.IsBought);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy Locked", !gun.IsUnlocked && gun.Gun.LevelRequirement > PlayerData.Level);
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.Credits)} {gun.Gun.BuyPrice}");
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !gun.IsBought);
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock Locked", gun.IsUnlocked || PlayerData.Level >= gun.Gun.LevelRequirement);
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.Coins)} {gun.Gun.GetCoins(PlayerData.Level)}");
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.Credits)} <color={(PlayerData.Credits >= gun.Gun.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{gun.Gun.BuyPrice}</color>");
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !gun.IsBought && !gun.IsUnlocked);
+            var coins = gun.Gun.GetCoins(PlayerData.Level);
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.Coins)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Equip BUTTON", gun.IsBought && ((LoadoutPage == ELoadoutPage.Primary && loadout.Primary != gun) || (LoadoutPage == ELoadoutPage.Secondary && loadout.Secondary != gun)));
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Dequip BUTTON", gun.IsBought && ((LoadoutPage == ELoadoutPage.Primary && loadout.Primary == gun) || (LoadoutPage == ELoadoutPage.Secondary && loadout.Secondary == gun)));
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Description TEXT", gun.Gun.GunDesc);
@@ -3749,10 +3760,10 @@ namespace UnturnedBlackout.Instances
 
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy BUTTON", !attachment.IsBought);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy Locked", !attachment.IsUnlocked && attachment.LevelRequirement > gun.Level);
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.Credits)} {attachment.Attachment.BuyPrice}");
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !attachment.IsBought);
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock Locked", attachment.IsUnlocked || gun.Level >= attachment.LevelRequirement);
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.Coins)} {attachment.GetCoins(gun.Level)}");
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.Credits)} <color={(PlayerData.Credits >= attachment.Attachment.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{attachment.Attachment.BuyPrice}</color>");
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !attachment.IsBought && !attachment.IsUnlocked);
+            var coins = attachment.GetCoins(gun.Level);
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.Coins)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Equip BUTTON", attachment.IsBought && ((LoadoutPage.ToString().StartsWith("AttachmentPrimary") && !loadout.PrimaryAttachments.ContainsValue(attachment)) || (LoadoutPage.ToString().StartsWith("AttachmentSecondary") && !loadout.SecondaryAttachments.ContainsValue(attachment))));
             if (attachment.Attachment.AttachmentType != EAttachment.Magazine)
             {
@@ -3793,9 +3804,10 @@ namespace UnturnedBlackout.Instances
 
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy BUTTON", !gunCharm.IsBought);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy Locked", !gunCharm.IsUnlocked && gunCharm.GunCharm.LevelRequirement > PlayerData.Level);
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.Credits)} {gunCharm.GunCharm.BuyPrice}");
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !gunCharm.IsBought);
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock Locked", gunCharm.IsUnlocked || PlayerData.Level >= gunCharm.GunCharm.LevelRequirement);
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.Credits)} <color={(PlayerData.Credits >= gunCharm.GunCharm.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{gunCharm.GunCharm.BuyPrice}</color>");
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !gunCharm.IsBought && !gunCharm.IsUnlocked);
+            var coins = gunCharm.GunCharm.GetCoins(PlayerData.Level);
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.Coins)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.Coins)} {gunCharm.GunCharm.GetCoins(PlayerData.Level)}");
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Equip BUTTON", gunCharm.IsBought && ((LoadoutPage.ToString().StartsWith("AttachmentPrimary") && loadout.PrimaryGunCharm != gunCharm) || (LoadoutPage.ToString().StartsWith("AttachmentSecondary") && loadout.SecondaryGunCharm != gunCharm)));
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Dequip BUTTON", gunCharm.IsBought && ((LoadoutPage.ToString().StartsWith("AttachmentPrimary") && loadout.PrimaryGunCharm == gunCharm) || (LoadoutPage.ToString().StartsWith("AttachmentSecondary") && loadout.SecondaryGunCharm == gunCharm)));
@@ -3839,10 +3851,10 @@ namespace UnturnedBlackout.Instances
 
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy BUTTON", !knife.IsBought);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy Locked", !knife.IsUnlocked && knife.Knife.LevelRequirement > PlayerData.Level);
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.Credits)} {knife.Knife.BuyPrice}");
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !knife.IsBought);
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock Locked", knife.IsUnlocked || PlayerData.Level >= knife.Knife.LevelRequirement);
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.Coins)} {knife.Knife.GetCoins(PlayerData.Level)}");
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.Credits)} <color={(PlayerData.Credits >= knife.Knife.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{knife.Knife.BuyPrice}</color>");
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !knife.IsBought && !knife.IsUnlocked);
+            var coins = knife.Knife.GetCoins(PlayerData.Level);
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.Coins)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Equip BUTTON", knife.IsBought && loadout.Knife != knife);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Dequip BUTTON", false);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Description TEXT", knife.Knife.KnifeDesc);
@@ -3864,10 +3876,10 @@ namespace UnturnedBlackout.Instances
 
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy BUTTON", !perk.IsBought);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy Locked", !perk.IsUnlocked && perk.Perk.LevelRequirement > PlayerData.Level);
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.Credits)} {perk.Perk.BuyPrice}");
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !perk.IsBought);
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock Locked", perk.IsUnlocked || PlayerData.Level >= perk.Perk.LevelRequirement);
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.Coins)} {perk.Perk.GetCoins(PlayerData.Level)}");
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.Credits)} <color={(PlayerData.Credits >= perk.Perk.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{perk.Perk.BuyPrice}</color>");
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !perk.IsBought && !perk.IsUnlocked);
+            var coins = perk.Perk.GetCoins(PlayerData.Level);
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.Coins)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Equip BUTTON", perk.IsBought && !loadout.Perks.ContainsValue(perk));
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Dequip BUTTON", perk.IsBought && loadout.Perks.ContainsValue(perk));
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Description TEXT", perk.Perk.PerkDesc);
@@ -3875,7 +3887,18 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item TEXT", perk.Perk.PerkName);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item ProsCons", false);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Description TEXT", true);
-            SendRarityName("SERVER Item Rarity TEXT", perk.Perk.PerkRarity);
+            switch (perk.Perk.PerkType)
+            {
+                case 1:
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Rarity TEXT", $"<color={Utility.GetRarityColor(ERarity.CYAN)}>PERK 1</color>");
+                    break;
+                case 2:
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Rarity TEXT", $"<color={Utility.GetRarityColor(ERarity.MYTHICAL)}>PERK 2</color>");
+                    break;
+                case 3:
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Rarity TEXT", $"<color={Utility.GetRarityColor(ERarity.YELLOW)}>PERK 3</color>");
+                    break;
+            }
         }
 
         public void ShowGadget(LoadoutGadget gadget)
@@ -3889,10 +3912,10 @@ namespace UnturnedBlackout.Instances
 
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy BUTTON", !gadget.IsBought);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy Locked", !gadget.IsUnlocked && gadget.Gadget.LevelRequirement > PlayerData.Level);
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.Credits)} {gadget.Gadget.BuyPrice}");
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !gadget.IsBought);
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock Locked", gadget.IsUnlocked || PlayerData.Level >= gadget.Gadget.LevelRequirement);
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.Coins)} {gadget.Gadget.GetCoins(PlayerData.Level)}");
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.Credits)} <color={(PlayerData.Credits >= gadget.Gadget.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{gadget.Gadget.BuyPrice}</color>");
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !gadget.IsBought && !gadget.IsUnlocked);
+            var coins = gadget.Gadget.GetCoins(PlayerData.Level);
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.Coins)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Equip BUTTON", gadget.IsBought && ((LoadoutPage == ELoadoutPage.Tactical && loadout.Tactical != gadget) || (LoadoutPage == ELoadoutPage.Lethal && loadout.Lethal != gadget)));
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Dequip BUTTON", gadget.IsBought && ((LoadoutPage == ELoadoutPage.Tactical && loadout.Tactical == gadget) || (LoadoutPage == ELoadoutPage.Lethal && loadout.Lethal == gadget)));
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Description TEXT", gadget.Gadget.GadgetDesc);
@@ -3914,10 +3937,10 @@ namespace UnturnedBlackout.Instances
 
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy BUTTON", !card.IsBought);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy Locked", !card.IsUnlocked && card.Card.LevelRequirement > PlayerData.Level);
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.Credits)} {card.Card.BuyPrice}");
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !card.IsBought);
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock Locked", card.IsUnlocked || PlayerData.Level >= card.Card.LevelRequirement);
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.Coins)} {card.Card.GetCoins(PlayerData.Level)}");
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.Credits)} <color={(PlayerData.Credits >= card.Card.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{card.Card.BuyPrice}</color>");
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !card.IsBought && !card.IsUnlocked);
+            var coins = card.Card.GetCoins(PlayerData.Level);
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.Coins)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Equip BUTTON", card.IsBought && loadout.Card != card);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Dequip BUTTON", card.IsBought && loadout.Card == card);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Description TEXT", card.Card.CardDesc);
@@ -3939,10 +3962,10 @@ namespace UnturnedBlackout.Instances
 
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy BUTTON", !glove.IsBought);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy Locked", !glove.IsUnlocked && glove.Glove.LevelRequirement > PlayerData.Level);
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.Credits)} {glove.Glove.BuyPrice}");
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !glove.IsBought);
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock Locked", glove.IsUnlocked || PlayerData.Level >= glove.Glove.LevelRequirement);
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.Coins)} {glove.Glove.GetCoins(PlayerData.Level)}");
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.Credits)} <color={(PlayerData.Credits >= glove.Glove.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{glove.Glove.BuyPrice}</color>");
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !glove.IsBought && !glove.IsUnlocked);
+            var coins = glove.Glove.GetCoins(PlayerData.Level);
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.Coins)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Equip BUTTON", glove.IsBought && loadout.Glove != glove);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Dequip BUTTON", glove.IsBought && loadout.Glove == glove);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Description TEXT", glove.Glove.GloveDesc);
@@ -3964,10 +3987,10 @@ namespace UnturnedBlackout.Instances
 
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy BUTTON", !killstreak.IsBought);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy Locked", !killstreak.IsUnlocked && killstreak.Killstreak.LevelRequirement > PlayerData.Level);
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.Credits)} {killstreak.Killstreak.BuyPrice}");
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !killstreak.IsBought);
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock Locked", killstreak.IsUnlocked || PlayerData.Level >= killstreak.Killstreak.LevelRequirement);
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.Coins)} {killstreak.Killstreak.GetCoins(PlayerData.Level)}");
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.Credits)} <color={(PlayerData.Credits >= killstreak.Killstreak.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{killstreak.Killstreak.BuyPrice}</color>");
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !killstreak.IsBought && !killstreak.IsUnlocked);
+            var coins = killstreak.Killstreak.GetCoins(PlayerData.Level);
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.Coins)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Equip BUTTON", killstreak.IsBought && !loadout.Killstreaks.Contains(killstreak));
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Dequip BUTTON", killstreak.IsBought && loadout.Killstreaks.Contains(killstreak));
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Description TEXT", killstreak.Killstreak.KillstreakDesc);
@@ -3985,10 +4008,10 @@ namespace UnturnedBlackout.Instances
 
         public void SendRarityName(string objectName, ERarity rarity)
         {
-            var rarities = new List<string> { "COMMON", "UNCOMMON", "RARE", "EPIC", "LEGENDARY", "MYTHICAL" };
+            var rarities = new List<string> { "COMMON", "ACHIEVEMENT", "UNCOMMON", "RARE", "EPIC", "LEGENDARY", "MYTHICAL", "SPECIAL", "LIMITED" };
 
             // SERVER Item Rarity TEXT
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, objectName, rarities.Contains(rarity.ToString()) ? $"<color={Utility.GetRarityColor(rarity)}>{rarity}</color>" : " ");
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, objectName, $"<color={Utility.GetRarityColor(rarity)}>{rarities[(byte)rarity]}</color>");
         }
 
         public void BuySelectedItem()
@@ -5530,6 +5553,10 @@ namespace UnturnedBlackout.Instances
                     rewardName = $"<color=white>{reward.RewardValue} XP</color>";
                     rewardImage = Config.Icons.FileData.XPIconLink;
                     return true;
+                case ERewardType.Scrap:
+                    rewardName = $"<color=white>{reward.RewardValue} Scrap</color>";
+                    rewardImage = Config.Icons.FileData.ScrapSmallIconLink;
+                    return true;
                 default:
                     return false;
             }
@@ -5744,6 +5771,10 @@ namespace UnturnedBlackout.Instances
                 case ERewardType.LevelXP:
                     rewardName = $"<color=white>{reward.RewardValue}</color>";
                     rewardImage = Config.Icons.FileData.XPIconLink;
+                    return true;
+                case ERewardType.Scrap:
+                    rewardName = $"<color=white>{reward.RewardValue}</color>";
+                    rewardImage = Config.Icons.FileData.ScrapLargeIconLink;
                     return true;
                 default:
                     return false;
