@@ -13,6 +13,7 @@
         Card,
         Credit,
         Coin,
+        Scrap,
         LevelXP,
         BattlepassXP,
         Case,

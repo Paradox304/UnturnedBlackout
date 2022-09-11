@@ -53,6 +53,9 @@ namespace UnturnedBlackout.Managers
                         case ERewardType.Coin:
                             await db.IncreasePlayerCoinsAsync(steamID, Convert.ToInt32(reward.RewardValue));
                             break;
+                        case ERewardType.Scrap:
+                            await db.IncreasePlayerScrapAsync(steamID, Convert.ToInt32(reward.RewardValue));
+                            break;
                         case ERewardType.LevelXP:
                             await db.IncreasePlayerXPAsync(steamID, Convert.ToInt32(reward.RewardValue));
                             break;
@@ -144,6 +147,9 @@ namespace UnturnedBlackout.Managers
                                 break;
                             case ERewardType.Coin:
                                 await db.IncreasePlayerCoinsAsync(bulkReward.Item1, Convert.ToInt32(reward.RewardValue));
+                                break;
+                            case ERewardType.Scrap:
+                                await db.IncreasePlayerScrapAsync(bulkReward.Item1, Convert.ToInt32(reward.RewardValue));
                                 break;
                             case ERewardType.LevelXP:
                                 await db.IncreasePlayerXPAsync(bulkReward.Item1, Convert.ToInt32(reward.RewardValue));
