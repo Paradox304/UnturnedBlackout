@@ -1714,6 +1714,14 @@ namespace UnturnedBlackout.Managers
             }
         }
 
+        public void SendNotEnoughCurrencyModal(CSteamID steamID, ECurrency currency)
+        {
+            if (UIHandlersLookup.TryGetValue(steamID, out UIHandler handler))
+            {
+                handler.SendNotEnoughCurrencyModal(currency);
+            }
+        }
+
         public void Destroy()
         {
             EffectManager.onEffectButtonClicked -= OnButtonClicked;

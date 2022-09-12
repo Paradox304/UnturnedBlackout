@@ -3,6 +3,7 @@ using Steamworks;
 using System.Collections.Generic;
 using System.Threading;
 using UnturnedBlackout.Database.Base;
+using UnturnedBlackout.Enums;
 using UnturnedBlackout.Models.Global;
 
 namespace UnturnedBlackout.Managers
@@ -115,6 +116,10 @@ namespace UnturnedBlackout.Managers
                         Plugin.Instance.UI.OnBattlepassTierUpdated(player.SteamID, oldTier);
                         Plugin.Instance.UI.OnBattlepassTierUpdated(player.SteamID, bp.CurrentTier);
                     });
+                }
+                else
+                {
+                    Plugin.Instance.UI.SendNotEnoughCurrencyModal(player.SteamID, ECurrency.Coins);
                 }
 
                 PendingWork.Remove(player.SteamID);

@@ -450,6 +450,6 @@ namespace UnturnedBlackout
                 _ => throw new ArgumentOutOfRangeException("currency", "Currency is not as expected")
             };
 
-    public static List<uint> UsedFrequencies = new();
+        public static List<uint> UsedFrequencies = new();
     }
 }

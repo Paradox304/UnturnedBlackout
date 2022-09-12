@@ -4051,6 +4051,10 @@ namespace UnturnedBlackout.Instances
                                     ReloadSelectedItem();
                                 });
                             }
+                            else
+                            {
+                                SendNotEnoughCurrencyModal(ECurrency.Credits);
+                            }
                         });
                         break;
                     }
@@ -4085,6 +4089,10 @@ namespace UnturnedBlackout.Instances
                                     ReloadSelectedItem();
                                 });
                             }
+                            else
+                            {
+                                SendNotEnoughCurrencyModal(ECurrency.Credits);
+                            }
                         });
                         break;
                     }
@@ -4109,6 +4117,10 @@ namespace UnturnedBlackout.Instances
                                     ReloadLoadoutTab();
                                     ReloadSelectedItem();
                                 });
+                            }
+                            else
+                            {
+                                SendNotEnoughCurrencyModal(ECurrency.Credits);
                             }
                         });
                         break;
@@ -4143,6 +4155,10 @@ namespace UnturnedBlackout.Instances
                                     ReloadSelectedItem();
                                 });
                             }
+                            else
+                            {
+                                SendNotEnoughCurrencyModal(ECurrency.Credits);
+                            }
                         });
                         break;
                     }
@@ -4169,6 +4185,10 @@ namespace UnturnedBlackout.Instances
                                     ReloadSelectedItem();
                                 });
                             }
+                            else
+                            {
+                                SendNotEnoughCurrencyModal(ECurrency.Credits);
+                            }
                         });
                         break;
                     }
@@ -4193,6 +4213,10 @@ namespace UnturnedBlackout.Instances
                                     ReloadLoadoutTab();
                                     ReloadSelectedItem();
                                 });
+                            }
+                            else
+                            {
+                                SendNotEnoughCurrencyModal(ECurrency.Credits);
                             }
                         });
                         break;
@@ -4219,6 +4243,10 @@ namespace UnturnedBlackout.Instances
                                     ReloadSelectedItem();
                                 });
                             }
+                            else
+                            {
+                                SendNotEnoughCurrencyModal(ECurrency.Credits);
+                            }
                         });
                         break;
                     }
@@ -4243,6 +4271,10 @@ namespace UnturnedBlackout.Instances
                                     ReloadLoadoutTab();
                                     ReloadSelectedItem();
                                 });
+                            }
+                            else
+                            {
+                                SendNotEnoughCurrencyModal(ECurrency.Credits);
                             }
                         });
                         break;
@@ -4271,6 +4303,10 @@ namespace UnturnedBlackout.Instances
                                     ReloadSelectedItem();
                                 });
                             }
+                            else
+                            {
+                                SendNotEnoughCurrencyModal(ECurrency.Credits);
+                            }
                         });
                         break;
                     }
@@ -4295,6 +4331,10 @@ namespace UnturnedBlackout.Instances
                                     ReloadLoadoutTab();
                                     ReloadSelectedItem();
                                 });
+                            }
+                            else
+                            {
+                                SendNotEnoughCurrencyModal(ECurrency.Credits);
                             }
                         });
                         break;
@@ -4321,6 +4361,10 @@ namespace UnturnedBlackout.Instances
                                     ReloadSelectedItem();
                                 });
                             }
+                            else
+                            {
+                                SendNotEnoughCurrencyModal(ECurrency.Credits);
+                            }
                         });
                         break;
                     }
@@ -4345,6 +4389,10 @@ namespace UnturnedBlackout.Instances
                                     ReloadLoadoutTab();
                                     ReloadSelectedItem();
                                 });
+                            }
+                            else
+                            {
+                                SendNotEnoughCurrencyModal(ECurrency.Credits);
                             }
                         });
                         break;
@@ -4385,6 +4433,10 @@ namespace UnturnedBlackout.Instances
                                     ReloadLoadoutTab();
                                 });
                             }
+                            else
+                            {
+                                SendNotEnoughCurrencyModal(ECurrency.Coins);
+                            }
                         });
                         break;
                     }
@@ -4420,6 +4472,10 @@ namespace UnturnedBlackout.Instances
                                     ReloadLoadoutTab();
                                 });
                             }
+                            else
+                            {
+                                SendNotEnoughCurrencyModal(ECurrency.Coins);
+                            }
                         });
                         break;
                     }
@@ -4454,6 +4510,10 @@ namespace UnturnedBlackout.Instances
                                     ReloadLoadoutTab();
                                 });
                             }
+                            else
+                            {
+                                SendNotEnoughCurrencyModal(ECurrency.Coins);
+                            }
                         });
                         break;
                     }
@@ -4481,6 +4541,10 @@ namespace UnturnedBlackout.Instances
                                     ReloadLoadoutTab();
                                 });
                             }
+                            else
+                            {
+                                SendNotEnoughCurrencyModal(ECurrency.Coins);
+                            }
                         });
                         break;
                     }
@@ -4506,6 +4570,10 @@ namespace UnturnedBlackout.Instances
                                     ReloadSelectedItem();
                                     ReloadLoadoutTab();
                                 });
+                            }
+                            else
+                            {
+                                SendNotEnoughCurrencyModal(ECurrency.Credits);
                             }
                         });
                         break;
@@ -4533,6 +4601,10 @@ namespace UnturnedBlackout.Instances
                                     ReloadSelectedItem();
                                     ReloadLoadoutTab();
                                 });
+                            }
+                            else
+                            {
+                                SendNotEnoughCurrencyModal(ECurrency.Coins);
                             }
                         });
                         break;
@@ -4562,6 +4634,10 @@ namespace UnturnedBlackout.Instances
                                     ReloadLoadoutTab();
                                 });
                             }
+                            else
+                            {
+                                SendNotEnoughCurrencyModal(ECurrency.Coins);
+                            }
                         });
                         break;
                     }
@@ -4587,6 +4663,10 @@ namespace UnturnedBlackout.Instances
                                     ReloadSelectedItem();
                                     ReloadLoadoutTab();
                                 });
+                            }
+                            else
+                            {
+                                SendNotEnoughCurrencyModal(ECurrency.Coins);
                             }
                         });
                         break;
@@ -4614,6 +4694,10 @@ namespace UnturnedBlackout.Instances
                                     ReloadLoadoutTab();
                                 });
                             }
+                            else
+                            {
+                                SendNotEnoughCurrencyModal(ECurrency.Coins);
+                            }
                         });
                         break;
                     }
@@ -4639,6 +4723,10 @@ namespace UnturnedBlackout.Instances
                                     ReloadSelectedItem();
                                     ReloadLoadoutTab();
                                 });
+                            }
+                            else
+                            {
+                                SendNotEnoughCurrencyModal(ECurrency.Coins);
                             }
                         });
                         break;
@@ -6190,6 +6278,7 @@ namespace UnturnedBlackout.Instances
             var buyPrice = @case.GetBuyPrice(SelectedCaseBuyMethod);
             if (buyPrice > PlayerData.GetCurrency(SelectedCaseBuyMethod))
             {
+                SendNotEnoughCurrencyModal(SelectedCaseBuyMethod);
                 return;
             }
 
