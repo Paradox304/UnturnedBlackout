@@ -835,6 +835,7 @@ namespace UnturnedBlackout.Instances
         {
             EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Player Icon", PlayerData.AvatarLink);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Player Name", (PlayerData.HasPrime ? UIManager.PRIME_SYMBOL : "") + PlayerData.SteamName);
+
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Unbox BUTTON", Plugin.Instance.Configuration.Instance.UnlockAllItems);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Store BUTTON", false);
 
@@ -847,7 +848,6 @@ namespace UnturnedBlackout.Instances
             OnCurrencyUpdated(ECurrency.Coins);
             OnCurrencyUpdated(ECurrency.Scrap);
             OnCurrencyUpdated(ECurrency.Credits);
-
             
             ClearChat();
             ShowXP();
