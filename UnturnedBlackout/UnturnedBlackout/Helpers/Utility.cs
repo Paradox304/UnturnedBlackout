@@ -43,7 +43,6 @@ namespace UnturnedBlackout
             inv.player.equipment.sendSlot(0);
             inv.player.equipment.sendSlot(1);
 
-
             for (byte page = 0; page < PlayerInventory.PAGES - 1; page++)
             {
                 for (int index = inv.getItemCount(page) - 1; index >= 0; index--)

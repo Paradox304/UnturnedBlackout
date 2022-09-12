@@ -180,6 +180,7 @@ namespace UnturnedBlackout.Managers
                 {
                     Plugin.Instance.StartCoroutine(Equip(player.Player.Player.equipment, player.LastEquippedPage, player.LastEquippedX, player.LastEquippedY));
                 }
+
                 else if (obj.useable == null && !player.ForceEquip)
                 {
                     var inv = player.Player.Player.inventory;

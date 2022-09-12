@@ -328,6 +328,7 @@
     <Compile Include="Models\Data\PositionsData.cs" />
     <Compile Include="Models\TDM\TDMTeam.cs" />
     <Compile Include="Patches\GroupPatch.cs" />
+    <Compile Include="Patches\InventoryPatches.cs" />
     <Compile Include="Patches\TriggerTrapPatch.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
