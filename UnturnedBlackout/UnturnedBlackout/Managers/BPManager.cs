@@ -27,6 +27,7 @@ namespace UnturnedBlackout.Managers
             }
 
         }
+
         public BPManager()
         {
             PendingWork = new();
@@ -108,7 +109,6 @@ namespace UnturnedBlackout.Managers
                     await DB.DecreasePlayerCoinsAsync(player.SteamID, Config.Base.FileData.BattlepassTierSkipCost);
                     await DB.UpdateBPTierAsync(player.SteamID, bp.CurrentTier);
 
-                    PendingWork.Remove(player.SteamID);
                     TaskDispatcher.QueueOnMainThread(() =>
                     {
                         Plugin.Instance.UI.OnBattlepassUpdated(player.SteamID);
@@ -116,6 +116,8 @@ namespace UnturnedBlackout.Managers
                         Plugin.Instance.UI.OnBattlepassTierUpdated(player.SteamID, bp.CurrentTier);
                     });
                 }
+
+                PendingWork.Remove(player.SteamID);
             });
         }
     }

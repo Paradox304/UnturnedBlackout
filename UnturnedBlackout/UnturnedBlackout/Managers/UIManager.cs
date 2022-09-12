@@ -1366,6 +1366,9 @@ namespace UnturnedBlackout.Managers
                 case "SERVER Exit BUTTON":
                     Provider.kick(player.channel.owner.playerID.steamID, "You exited");
                     return;
+                case "SERVER Enough Currency Yes BUTTON":
+                    player.sendBrowserRequest("Buy currency here:", "https://store.unturnedblackout.com/category/currency");
+                    return;
                 case "SERVER Play Games BUTTON":
                     handler.ShowPlayPage(EPlayPage.Games);
                     return;
@@ -1573,6 +1576,9 @@ namespace UnturnedBlackout.Managers
                 case "SERVER Battlepass Claim BUTTON":
                     if (handler.MainPage == EMainPage.Battlepass)
                         Plugin.Instance.BP.ClaimReward(gPly, handler.SelectedBattlepassTierID.Item1, handler.SelectedBattlepassTierID.Item2);
+                    return;
+                case "SERVER Battlepass Buy Pass BUTTON":
+                    //player.sendBrowserRequest("Buy premium battlepass here:", "https://store.unturnedblackout.com/category/battlepass");
                     return;
                 case "SERVER Unbox Inventory BUTTON":
                     handler.ShowUnboxingPage(EUnboxingPage.Inventory);

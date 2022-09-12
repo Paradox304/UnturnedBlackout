@@ -304,6 +304,7 @@ namespace UnturnedBlackout
             { "Level_Up_Text", "LEVELLED UP!"},
             { "Gun_Level_Up_Desc", "{0} levelled up to level {1}" },
             { "Gun_Level_Up_Text", "WEAPON LEVEL UP!" },
+            { "Not_Enough_Currency", "You dont have enough {0} to make this purchase. Would you like to check out our Store?"},
             { "Version", "VERSION: 1.0.1" }
         };
 

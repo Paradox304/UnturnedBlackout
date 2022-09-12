@@ -399,6 +399,15 @@ namespace UnturnedBlackout
                  _ => gamePhase.ToString(),
              };
 
+        public static string ToFriendlyName(this ECurrency currency) =>
+             currency switch
+             {
+                 ECurrency.Scrap => "Scrap",
+                 ECurrency.Credits => "Blackout Points",
+                 ECurrency.Coins => "Goldtags",
+                 _ => throw new ArgumentOutOfRangeException("currency", "Currency is not as expected")
+             };
+
         public static string GetDefaultAttachmentImage(string attachmentType) =>
              attachmentType.ToLower() switch
              {
@@ -441,6 +450,6 @@ namespace UnturnedBlackout
                 _ => throw new ArgumentOutOfRangeException("currency", "Currency is not as expected")
             };
 
-        public static List<uint> UsedFrequencies = new();
+    public static List<uint> UsedFrequencies = new();
     }
 }

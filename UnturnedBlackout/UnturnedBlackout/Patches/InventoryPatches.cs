@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace UnturnedBlackout.Patches
 {
-    [HarmonyPatch(typeof(PlayerClothing))]
+    [HarmonyPatch(typeof(PlayerInventory))]
     public static class InventoryPatches
     {
         [HarmonyPatch("ReceiveDragItem")]
