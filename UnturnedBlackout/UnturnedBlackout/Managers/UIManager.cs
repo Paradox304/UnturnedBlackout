@@ -1367,7 +1367,7 @@ namespace UnturnedBlackout.Managers
                     Provider.kick(player.channel.owner.playerID.steamID, "You exited");
                     return;
                 case "SERVER Enough Currency Yes BUTTON":
-                    player.sendBrowserRequest("Buy currency here:", "https://store.unturnedblackout.com/category/currency");
+                    //player.sendBrowserRequest("Buy currency here:", "https://store.unturnedblackout.com/category/currency");
                     return;
                 case "SERVER Play Games BUTTON":
                     handler.ShowPlayPage(EPlayPage.Games);
