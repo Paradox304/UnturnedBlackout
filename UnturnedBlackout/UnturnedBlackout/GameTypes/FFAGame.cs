@@ -796,7 +796,7 @@ namespace UnturnedBlackout.GameTypes
             {
                 return;
             }
-            player.ScoreboardCooldown = DateTime.UtcNow.AddSeconds(1);
+            player.ScoreboardCooldown = DateTime.UtcNow.AddSeconds(0.5);
 
             if (fPlayer.GamePlayer.HasScoreboard)
             {
