@@ -382,6 +382,19 @@ namespace UnturnedBlackout
                  _ => -1,
              };
 
+        public static string GetLevelColor(int level) =>
+             (level / 18) switch
+             {
+                 0 => "#a87f49",
+                 1 => "#f7f7f7",
+                 2 => "#ffd32e",
+                 3 => "#41ffe8",
+                 4 => "#2cff35",
+                 5 => "#fd2d2d",
+                 6 => "#b04dff",
+                 _ => "white"
+             };
+
         public static string ToFriendlyName(this ELoadoutPage page) =>
              page switch
              {
@@ -406,6 +419,14 @@ namespace UnturnedBlackout
                  ECurrency.Credits => "Blackout Points",
                  ECurrency.Coins => "Goldtags",
                  _ => throw new ArgumentOutOfRangeException("currency", "Currency is not as expected")
+             };
+
+        public static string ToFriendlyName(this EChatMode chatMode) =>
+             chatMode switch
+             {
+                 EChatMode.LOCAL or EChatMode.GROUP => "Team",
+                 EChatMode.GLOBAL => "All",
+                 _ => throw new ArgumentOutOfRangeException("chatMode", "ChatMode is not as expected")
              };
 
         public static string GetDefaultAttachmentImage(string attachmentType) =>

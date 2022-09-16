@@ -837,7 +837,6 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Player Name", (PlayerData.HasPrime ? UIManager.PRIME_SYMBOL : "") + PlayerData.SteamName);
 
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Unbox BUTTON", Plugin.Instance.Configuration.Instance.UnlockAllItems);
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Store BUTTON", false);
 
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Version TEXT", Plugin.Instance.Translate("Version").ToRich());
 
@@ -884,6 +883,7 @@ namespace UnturnedBlackout.Instances
 
         public void SendNotEnoughCurrencyModal(ECurrency currency)
         {
+            Logging.Debug($"Sending not enough currency modal for {Player.CharacterName} for {currency}");
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Enough Currency Modal", true);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Enough Currency Modal TEXT", Plugin.Instance.Translate("Not_Enough_Currency", Utility.ToFriendlyName(currency)).ToRich());
         }
@@ -5658,13 +5658,17 @@ namespace UnturnedBlackout.Instances
         #endregion
 
         #region BattlepassPage
-        public void SetupBattlepass()
+        public IEnumerator SetupBattlepass()
         {
             MainPage = EMainPage.Battlepass;
             ShowBattlepass();
             // Setup all 50 objects
             for (int i = 1; i <= 50; i++)
             {
+                if (i > 12)
+                {
+                    yield return new WaitForSeconds(0.2f);
+                }
                 ShowBattlepassTier(i);
             }
 

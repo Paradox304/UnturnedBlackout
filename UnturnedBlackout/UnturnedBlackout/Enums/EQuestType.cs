@@ -5,6 +5,7 @@
         Kill, // Kill a certain amount of players
         Death, // Die a certain amount of times
         Win, // Win a certain amount of games
+        FinishMatch, // Finish a match
         MultiKill, // Kill a certain amount of players in a row
         Killstreak, // Kill a certain amount of players before dying
         Headshots, // Hit a player on the skull

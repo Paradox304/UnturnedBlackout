@@ -430,7 +430,7 @@ namespace UnturnedBlackout.Models.Global
 
         public IEnumerator CheckVoiceChat()
         {
-            yield return new WaitForSeconds(1f);
+            yield return new WaitForSeconds(0.5f);
             if (Plugin.Instance.Game.TryGetCurrentGame(SteamID, out Game game) && !Player.Player.voice.isTalking)
             {
                 game.OnStoppedTalking(this);
@@ -488,25 +488,12 @@ namespace UnturnedBlackout.Models.Global
                 return;
             }
 
-            if (doSteps)
+            if (MovementChanger != null)
             {
-                if (MovementChanger != null)
-                {
-                    Plugin.Instance.StopCoroutine(MovementChanger);
-                }
-
-                var changeMovement = (updatedMovement - Player.Player.movement.pluginSpeedMultiplier) / 2;
-                MovementChanger = Plugin.Instance.StartCoroutine(ChangeMovementSteps(changeMovement));
+                Plugin.Instance.StopCoroutine(MovementChanger);
             }
-            else
-            {
-                if (MovementChanger != null)
-                {
-                    Plugin.Instance.StopCoroutine(MovementChanger);
-                }
 
-                MovementChanger = Plugin.Instance.StartCoroutine(ChangeMovement(updatedMovement));
-            }
+            MovementChanger = Plugin.Instance.StartCoroutine(ChangeMovement(updatedMovement));
         }
 
         public IEnumerator ChangeMovement(float newMovement)
@@ -517,20 +504,6 @@ namespace UnturnedBlackout.Models.Global
             ((ClientInstanceMethod<float>)value).Invoke(Player.Player.movement.GetNetId(), ENetReliability.Reliable, Player.Player.channel.GetOwnerTransportConnection(), newMovement);
             yield return new WaitForSeconds(Player.Ping - 0.01f);
             Player.Player.movement.pluginSpeedMultiplier = newMovement;
-        }
-
-        public IEnumerator ChangeMovementSteps(float changeMovement)
-        {
-            for (int i = 1; i <= 2; i++)
-            {
-                var type = typeof(PlayerMovement);
-                var info = type.GetField("SendPluginSpeedMultiplier", BindingFlags.NonPublic | BindingFlags.Static);
-                var value = info.GetValue(null);
-                ((ClientInstanceMethod<float>)value).Invoke(Player.Player.movement.GetNetId(), ENetReliability.Reliable, Player.Player.channel.GetOwnerTransportConnection(), Player.Player.movement.pluginSpeedMultiplier + changeMovement);
-                yield return new WaitForSeconds(Player.Ping - 0.01f);
-                Player.Player.movement.pluginSpeedMultiplier += changeMovement;
-                yield return new WaitForSeconds(Config.Base.FileData.MovementStepsDelay);
-            }
         }
 
         public void OnGameLeft()

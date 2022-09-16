@@ -167,6 +167,7 @@
   <ItemGroup>
     <Compile Include="Commands\AddBoosterCommand.cs" />
     <Compile Include="Commands\AddPrimeCommand.cs" />
+    <Compile Include="Commands\RemoveRewardCommand.cs" />
     <Compile Include="Commands\GiveRewardCommand.cs" />
     <Compile Include="Commands\GenAchievementCommand.cs" />
     <Compile Include="Commands\CTFSPCommand.cs" />
