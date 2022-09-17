@@ -403,6 +403,13 @@ namespace UnturnedBlackout.GameTypes
             {
                 return;
             }
+
+            if (cause == EDeathCause.SUICIDE)
+            {
+                RemovePlayerFromGame(cPlayer.GamePlayer);
+                return;
+            }
+
             if (cPlayer.GamePlayer.HasScoreboard)
             {
                 cPlayer.GamePlayer.HasScoreboard = false;

@@ -374,6 +374,12 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
+            if (cause == EDeathCause.SUICIDE)
+            {
+                RemovePlayerFromGame(vPlayer.GamePlayer);
+                return;
+            }
+
             if (GamePhase != EGamePhase.Started)
             {
                 vPlayer.GamePlayer.OnDeath(CSteamID.Nil, 0);
