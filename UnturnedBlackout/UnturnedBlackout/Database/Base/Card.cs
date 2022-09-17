@@ -15,8 +15,9 @@ namespace UnturnedBlackout.Database.Base
         public int BuyPrice { get; set; }
         public int Coins { get; set; }
         public int LevelRequirement { get; set; }
+        public string AuthorCredits { get; set; }
 
-        public Card(int cardID, string cardName, string cardDesc, ERarity cardRarity, string iconLink, string cardLink, int scrapAmount, int buyPrice, int coins, int levelRequirement)
+        public Card(int cardID, string cardName, string cardDesc, ERarity cardRarity, string iconLink, string cardLink, int scrapAmount, int buyPrice, int coins, int levelRequirement, string authorCredits)
         {
             CardID = cardID;
             CardName = cardName;
@@ -28,6 +29,7 @@ namespace UnturnedBlackout.Database.Base
             BuyPrice = buyPrice;
             Coins = coins;
             LevelRequirement = levelRequirement;
+            AuthorCredits = authorCredits;
         }
 
         public int GetCoins(int currentLevel)
