@@ -852,6 +852,7 @@ namespace UnturnedBlackout.Instances
             ShowXP();
             ShowQuestCompletion();
             OnMusicChanged(PlayerData.Music);
+
             ThreadPool.QueueUserWorkItem((o) => BuildAchievementPages());
         }
 
@@ -4066,7 +4067,7 @@ namespace UnturnedBlackout.Instances
                             }
                             else
                             {
-                                SendNotEnoughCurrencyModal(ECurrency.Credits);
+                                TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.Credits));
                             }
                         });
                         break;
@@ -4104,7 +4105,7 @@ namespace UnturnedBlackout.Instances
                             }
                             else
                             {
-                                SendNotEnoughCurrencyModal(ECurrency.Credits);
+                                TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.Credits));
                             }
                         });
                         break;
@@ -4133,7 +4134,7 @@ namespace UnturnedBlackout.Instances
                             }
                             else
                             {
-                                SendNotEnoughCurrencyModal(ECurrency.Credits);
+                                TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.Credits));
                             }
                         });
                         break;
@@ -4170,7 +4171,7 @@ namespace UnturnedBlackout.Instances
                             }
                             else
                             {
-                                SendNotEnoughCurrencyModal(ECurrency.Credits);
+                                TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.Credits));
                             }
                         });
                         break;
@@ -4200,7 +4201,7 @@ namespace UnturnedBlackout.Instances
                             }
                             else
                             {
-                                SendNotEnoughCurrencyModal(ECurrency.Credits);
+                                TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.Credits));
                             }
                         });
                         break;
@@ -4229,7 +4230,7 @@ namespace UnturnedBlackout.Instances
                             }
                             else
                             {
-                                SendNotEnoughCurrencyModal(ECurrency.Credits);
+                                TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.Credits));
                             }
                         });
                         break;
@@ -4258,7 +4259,7 @@ namespace UnturnedBlackout.Instances
                             }
                             else
                             {
-                                SendNotEnoughCurrencyModal(ECurrency.Credits);
+                                TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.Credits));
                             }
                         });
                         break;
@@ -4287,7 +4288,7 @@ namespace UnturnedBlackout.Instances
                             }
                             else
                             {
-                                SendNotEnoughCurrencyModal(ECurrency.Credits);
+                                TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.Credits));
                             }
                         });
                         break;
@@ -4318,7 +4319,7 @@ namespace UnturnedBlackout.Instances
                             }
                             else
                             {
-                                SendNotEnoughCurrencyModal(ECurrency.Credits);
+                                TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.Credits));
                             }
                         });
                         break;
@@ -4347,7 +4348,7 @@ namespace UnturnedBlackout.Instances
                             }
                             else
                             {
-                                SendNotEnoughCurrencyModal(ECurrency.Credits);
+                                TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.Credits));
                             }
                         });
                         break;
@@ -4376,7 +4377,7 @@ namespace UnturnedBlackout.Instances
                             }
                             else
                             {
-                                SendNotEnoughCurrencyModal(ECurrency.Credits);
+                                TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.Credits));
                             }
                         });
                         break;
@@ -4405,7 +4406,7 @@ namespace UnturnedBlackout.Instances
                             }
                             else
                             {
-                                SendNotEnoughCurrencyModal(ECurrency.Credits);
+                                TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.Credits));
                             }
                         });
                         break;
@@ -4448,7 +4449,7 @@ namespace UnturnedBlackout.Instances
                             }
                             else
                             {
-                                SendNotEnoughCurrencyModal(ECurrency.Coins);
+                                TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.Coins));
                             }
                         });
                         break;
@@ -4487,7 +4488,7 @@ namespace UnturnedBlackout.Instances
                             }
                             else
                             {
-                                SendNotEnoughCurrencyModal(ECurrency.Coins);
+                                TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.Coins));
                             }
                         });
                         break;
@@ -4525,7 +4526,7 @@ namespace UnturnedBlackout.Instances
                             }
                             else
                             {
-                                SendNotEnoughCurrencyModal(ECurrency.Coins);
+                                TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.Coins));
                             }
                         });
                         break;
@@ -4556,7 +4557,7 @@ namespace UnturnedBlackout.Instances
                             }
                             else
                             {
-                                SendNotEnoughCurrencyModal(ECurrency.Coins);
+                                TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.Coins));
                             }
                         });
                         break;
@@ -4586,7 +4587,7 @@ namespace UnturnedBlackout.Instances
                             }
                             else
                             {
-                                SendNotEnoughCurrencyModal(ECurrency.Credits);
+                                TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.Coins));
                             }
                         });
                         break;
@@ -4617,7 +4618,7 @@ namespace UnturnedBlackout.Instances
                             }
                             else
                             {
-                                SendNotEnoughCurrencyModal(ECurrency.Coins);
+                                TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.Coins));
                             }
                         });
                         break;
@@ -4649,7 +4650,7 @@ namespace UnturnedBlackout.Instances
                             }
                             else
                             {
-                                SendNotEnoughCurrencyModal(ECurrency.Coins);
+                                TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.Coins));
                             }
                         });
                         break;
@@ -4679,7 +4680,7 @@ namespace UnturnedBlackout.Instances
                             }
                             else
                             {
-                                SendNotEnoughCurrencyModal(ECurrency.Coins);
+                                TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.Coins));
                             }
                         });
                         break;
@@ -4709,7 +4710,7 @@ namespace UnturnedBlackout.Instances
                             }
                             else
                             {
-                                SendNotEnoughCurrencyModal(ECurrency.Coins);
+                                TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.Coins));
                             }
                         });
                         break;
@@ -4739,7 +4740,7 @@ namespace UnturnedBlackout.Instances
                             }
                             else
                             {
-                                SendNotEnoughCurrencyModal(ECurrency.Coins);
+                                TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.Coins));
                             }
                         });
                         break;

@@ -119,7 +119,7 @@ namespace UnturnedBlackout.Managers
                 }
                 else
                 {
-                    Plugin.Instance.UI.SendNotEnoughCurrencyModal(player.SteamID, ECurrency.Coins);
+                    TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.SendNotEnoughCurrencyModal(player.SteamID, ECurrency.Coins));
                 }
 
                 PendingWork.Remove(player.SteamID);
