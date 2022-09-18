@@ -257,6 +257,8 @@ namespace UnturnedBlackout.GameTypes
             {
                 yield break;
             }
+            player.OnGameJoined(this);
+
             var team = BlueTeam.Players.Count > RedTeam.Players.Count ? RedTeam : BlueTeam;
             KCPlayer kPlayer = new(player, team);
             team.AddPlayer(player.SteamID);

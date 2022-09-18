@@ -218,6 +218,7 @@ namespace UnturnedBlackout.GameTypes
             {
                 yield break;
             }
+            player.OnGameJoined(this);
 
             FFAPlayer fPlayer = new(player);
 

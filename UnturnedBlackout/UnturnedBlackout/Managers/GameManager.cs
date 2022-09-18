@@ -115,23 +115,23 @@ namespace UnturnedBlackout.Managers
                 Utility.Say(player, Plugin.Instance.Translate("Game_Not_Found_With_ID").ToRich());
                 return;
             }
-            var game = Games[selectedID];
 
-            if (TryGetCurrentGame(player.CSteamID, out _))
+            var gPlayer = GetGamePlayer(player);
+            if (gPlayer == null)
+            {
+                return;
+            }
+
+            if (gPlayer.CurrentGame != null)
             {
                 Utility.Say(player, Plugin.Instance.Translate("Ingame").ToRich());
                 return;
             }
 
+            var game = Games[selectedID];
             if (game.GetPlayerCount() >= game.Location.GetMaxPlayers(game.GameMode))
             {
                 Utility.Say(player, Plugin.Instance.Translate("Game_Full").ToRich());
-                return;
-            }
-
-            var gPlayer = GetGamePlayer(player);
-            if (gPlayer == null)
-            {
                 return;
             }
 
@@ -141,19 +141,19 @@ namespace UnturnedBlackout.Managers
 
         public void RemovePlayerFromGame(UnturnedPlayer player)
         {
-            if (!TryGetCurrentGame(player.CSteamID, out Game game))
-            {
-                Utility.Say(player, Plugin.Instance.Translate("Not_Ingame").ToRich());
-                return;
-            }
-
             var gPlayer = GetGamePlayer(player);
             if (gPlayer == null)
             {
                 return;
             }
 
-            game.RemovePlayerFromGame(gPlayer);
+            if (gPlayer.CurrentGame == null)
+            {
+                Utility.Say(player, Plugin.Instance.Translate("Not_Ingame").ToRich());
+                return;
+            }
+
+            gPlayer.CurrentGame.RemovePlayerFromGame(gPlayer);
             SendPlayerToLobby(player);
         }
 
@@ -201,7 +201,8 @@ namespace UnturnedBlackout.Managers
             Plugin.Instance.UI.UnregisterUIHandler(player);
             if (Players.TryGetValue(player.CSteamID, out GamePlayer gPlayer))
             {
-                if (TryGetCurrentGame(player.CSteamID, out Game game))
+                var game = gPlayer.CurrentGame;
+                if (game != null)
                 {
                     game.RemovePlayerFromGame(gPlayer);
                 }
@@ -212,17 +213,31 @@ namespace UnturnedBlackout.Managers
 
         private void OnPlayerDeath(PlayerLife sender, EDeathCause cause, ELimb limb, CSteamID instigator)
         {
-            if (!TryGetCurrentGame(sender.player.channel.owner.playerID.steamID, out _))
-            { 
-                SendPlayerToLobby(UnturnedPlayer.FromPlayer(sender.player));
+            var ply = UnturnedPlayer.FromPlayer(sender.player);
+            if (ply == null)
+            {
+                return;
+            }
+
+            if (Players.TryGetValue(ply.CSteamID, out GamePlayer gPlayer))
+            {
+                var game = gPlayer.CurrentGame;
+                if (game == null)
+                {
+                    SendPlayerToLobby(ply);
+                }
             }
         }
 
         private void OnMessageSent(SteamPlayer player, EChatMode mode, ref UnityEngine.Color chatted, ref bool isRich, string text, ref bool isVisible)
         {
-            if (!Plugin.Instance.Game.TryGetCurrentGame(player.playerID.steamID, out _))
+            if (Players.TryGetValue(player.playerID.steamID, out GamePlayer gPlayer))
             {
-                isVisible = false;
+                var game = gPlayer.CurrentGame;
+                if (game == null)
+                {
+                    isVisible = false;
+                }
             }
         }
 
@@ -291,10 +306,12 @@ namespace UnturnedBlackout.Managers
             return Players.TryGetValue(player.channel.owner.playerID.steamID, out GamePlayer gPlayer) ? gPlayer : null;
         }
 
+        /*
         public bool TryGetCurrentGame(CSteamID steamID, out Game game)
         {
             game = Games.FirstOrDefault(k => k.IsPlayerIngame(steamID));
             return game != null;
         }
+        */
     }
 }

@@ -27,6 +27,8 @@ namespace UnturnedBlackout.Models.Global
             }
         }
 
+        public Game CurrentGame { get; set; }
+
         public CSteamID SteamID { get; set; }
         public UnturnedPlayer Player { get; set; }
         public PlayerData Data { get; set; }
@@ -49,6 +51,10 @@ namespace UnturnedBlackout.Models.Global
         public byte LastEquippedX { get; set; }
         public byte LastEquippedY { get; set; }
         public bool ForceEquip { get; set; }
+
+        public byte KnifePage { get; set; }
+        public byte KnifeX { get; set; }
+        public byte KnifeY { get; set; }
 
         public bool HasTactical { get; set; }
         public bool HasLethal { get; set; }
@@ -128,9 +134,13 @@ namespace UnturnedBlackout.Models.Global
 
         // Loadout
 
-        public void SetActiveLoadout(Loadout loadout)
+        public void SetActiveLoadout(Loadout loadout, byte knifePage, byte knifeX, byte knifeY)
         {
             ActiveLoadout = loadout;
+
+            KnifePage = knifePage;
+            KnifeX = knifeX;
+            KnifeY = knifeY;
 
             HasTactical = false;
             HasLethal = false;
@@ -163,7 +173,7 @@ namespace UnturnedBlackout.Models.Global
             var medic = loadout.PerksSearchByType.TryGetValue("medic", out LoadoutPerk medicPerk) ? medicPerk.Perk.SkillLevel : 0f;
             HealAmount = Config.Base.FileData.HealAmount * (1 + (medic / 100));
 
-            Plugin.Instance.HUD.UpdateGadgetUI(this);
+            Plugin.Instance.UI.SendGadgetIcons(this);
 
             if (loadout.Tactical != null)
             {
@@ -179,8 +189,8 @@ namespace UnturnedBlackout.Models.Global
                 m_LethalChecker.Interval = (float)loadout.Lethal.Gadget.GiveSeconds * 1000 * (1 - (grenadier / 100));
             }
 
-            Plugin.Instance.HUD.UpdateGadget(this, false, !HasLethal);
-            Plugin.Instance.HUD.UpdateGadget(this, true, !HasTactical);
+            Plugin.Instance.UI.UpdateGadgetUsed(this, false, !HasLethal);
+            Plugin.Instance.UI.UpdateGadgetUsed(this, true, !HasTactical);
         }
 
         // Tactical and Lethal
@@ -188,13 +198,13 @@ namespace UnturnedBlackout.Models.Global
         public void UsedTactical()
         {
             HasTactical = false;
-            Plugin.Instance.HUD.UpdateGadget(this, true, true);
-            if (Plugin.Instance.Game.TryGetCurrentGame(SteamID, out Game game))
+            Plugin.Instance.UI.UpdateGadgetUsed(this, true, true);
+            if (CurrentGame != null)
             {
                 var questConditions = new Dictionary<EQuestCondition, int>
                 {
-                    { EQuestCondition.Map, game.Location.LocationID },
-                    { EQuestCondition.Gamemode, (int)game.GameMode },
+                    { EQuestCondition.Map, CurrentGame.Location.LocationID },
+                    { EQuestCondition.Gamemode, (int)CurrentGame.GameMode },
                     { EQuestCondition.Gadget, ActiveLoadout.Tactical.Gadget.GadgetID }
                 };
                 TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.Quest.CheckQuest(this, EQuestType.GadgetsUsed, questConditions));
@@ -211,13 +221,13 @@ namespace UnturnedBlackout.Models.Global
         public void UsedLethal()
         {
             HasLethal = false;
-            Plugin.Instance.HUD.UpdateGadget(this, false, true);
-            if (Plugin.Instance.Game.TryGetCurrentGame(SteamID, out Game game))
+            Plugin.Instance.UI.UpdateGadgetUsed(this, false, true);
+            if (CurrentGame != null)
             {
                 var questConditions = new Dictionary<EQuestCondition, int>
                 {
-                    { EQuestCondition.Map, game.Location.LocationID },
-                    { EQuestCondition.Gamemode, (int)game.GameMode },
+                    { EQuestCondition.Map, CurrentGame.Location.LocationID },
+                    { EQuestCondition.Gamemode, (int)CurrentGame.GameMode },
                     { EQuestCondition.Gadget, ActiveLoadout.Lethal.Gadget.GadgetID }
                 };
                 TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.Quest.CheckQuest(this, EQuestType.GadgetsUsed, questConditions));
@@ -236,7 +246,7 @@ namespace UnturnedBlackout.Models.Global
             HasLethal = true;
             m_LethalChecker.Stop();
 
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.HUD.UpdateGadget(this, false, false));
+            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateGadgetUsed(this, false, false));
         }
 
         private void EnableTactical(object sender, ElapsedEventArgs e)
@@ -244,7 +254,7 @@ namespace UnturnedBlackout.Models.Global
             HasTactical = true;
             m_TacticalChecker.Stop();
 
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.HUD.UpdateGadget(this, true, false));
+            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateGadgetUsed(this, true, false));
         }
 
         public IEnumerator GiveGadget(ushort id)
@@ -263,6 +273,7 @@ namespace UnturnedBlackout.Models.Global
         }
 
         // Healing
+
         public void OnDamaged(CSteamID damager)
         {
             if (m_DamageChecker.Enabled)
@@ -315,6 +326,7 @@ namespace UnturnedBlackout.Models.Global
         }
 
         // Kill Card
+
         public void OnKilled(GamePlayer victim)
         {
             var victimData = victim.Data;
@@ -322,6 +334,7 @@ namespace UnturnedBlackout.Models.Global
         }
 
         // Death screen
+
         public void OnDeath(CSteamID killer, int respawnSeconds)
         {
             if (!Plugin.Instance.DB.PlayerData.TryGetValue(killer, out PlayerData killerData))
@@ -367,6 +380,7 @@ namespace UnturnedBlackout.Models.Global
         }
 
         // Equipping and refilling on guns on respawn
+
         public void OnRevived(Kit kit, List<TeamGlove> gloves)
         {
             if (IsPendingLoadoutChange)
@@ -390,10 +404,9 @@ namespace UnturnedBlackout.Models.Global
                 }
             }
 
-            Player.Player.equipment.tryEquip(LastEquippedPage, LastEquippedX, LastEquippedY);
+            Player.Player.equipment.ServerEquip(LastEquippedPage, LastEquippedX, LastEquippedY);
             Plugin.Instance.UI.ClearDeathUI(this);
         }
-
 
         // Stance changing
 
@@ -403,7 +416,7 @@ namespace UnturnedBlackout.Models.Global
             {
                 if (PreviousStance == EPlayerStance.CLIMB && newStance != EPlayerStance.CLIMB)
                 {
-                    Player.Player.equipment.tryEquip(LastEquippedPage, LastEquippedX, LastEquippedY);
+                    Player.Player.equipment.ServerEquip(LastEquippedPage, LastEquippedX, LastEquippedY);
                 }
                 PreviousStance = newStance;
             });
@@ -419,9 +432,9 @@ namespace UnturnedBlackout.Models.Global
             }
             else
             {
-                if (Plugin.Instance.Game.TryGetCurrentGame(SteamID, out Game game))
+                if (CurrentGame != null)
                 {
-                    game.OnStartedTalking(this);
+                    CurrentGame.OnStartedTalking(this);
                 }
             }
 
@@ -431,15 +444,16 @@ namespace UnturnedBlackout.Models.Global
         public IEnumerator CheckVoiceChat()
         {
             yield return new WaitForSeconds(0.5f);
-            if (Plugin.Instance.Game.TryGetCurrentGame(SteamID, out Game game) && !Player.Player.voice.isTalking)
+            if (CurrentGame != null && !Player.Player.voice.isTalking)
             {
-                game.OnStoppedTalking(this);
+                CurrentGame.OnStoppedTalking(this);
             }
 
             VoiceChatChecker = null;
         }
 
         // Animation
+
         public IEnumerator CheckAnimation()
         {
             HasAnimationGoingOn = true;
@@ -506,8 +520,17 @@ namespace UnturnedBlackout.Models.Global
             Player.Player.movement.pluginSpeedMultiplier = newMovement;
         }
 
+        // Events
+
+        public void OnGameJoined(Game game)
+        {
+            CurrentGame = game;
+        }
+
         public void OnGameLeft()
         {
+            CurrentGame = null;
+
             if (m_TacticalChecker.Enabled)
             {
                 m_TacticalChecker.Stop();

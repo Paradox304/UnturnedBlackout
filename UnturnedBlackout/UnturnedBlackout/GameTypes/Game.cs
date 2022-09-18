@@ -72,7 +72,7 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
-            PlayerAimingChanged(gPlayer, obj.isAiming);
+            // PlayerAimingChanged(gPlayer, obj.isAiming);
         }
 
         private void OnConsumed(Player instigatingPlayer, ItemConsumeableAsset consumeableAsset)

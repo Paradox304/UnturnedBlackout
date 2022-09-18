@@ -115,7 +115,8 @@ namespace UnturnedBlackout
                 return;
             }
 
-            if (!Game.TryGetCurrentGame(gPlayer.SteamID, out Game game))
+            var game = gPlayer.CurrentGame;
+            if (game == null)
             {
                 return;
             }
@@ -170,7 +171,7 @@ namespace UnturnedBlackout
             }
 
             shouldBroadcastOverRadio = true;
-            Game.GetGamePlayer(speaker.player).OnTalking();
+            Game.GetGamePlayer(speaker.player)?.OnTalking();
         }
 
         private void OnLevelLoaded(int level)

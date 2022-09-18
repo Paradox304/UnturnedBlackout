@@ -219,7 +219,7 @@ namespace UnturnedBlackout.Managers
                 await GetBaseDataAsync();
             }).Wait();
 
-            ThreadPool.QueueUserWorkItem(async (o) =>
+            ThreadPool.QueueUserWorkItem((o) =>
             {
                 RefreshData(null, null);
                 m_LeaderboardChecker.Start();

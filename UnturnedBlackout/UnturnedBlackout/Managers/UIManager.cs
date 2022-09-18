@@ -1,4 +1,7 @@
-﻿using Rocket.Unturned.Player;
+﻿using Rocket.Core.Utils;
+using Rocket.Unturned;
+using Rocket.Unturned.Player;
+using SDG.NetTransport;
 using SDG.Unturned;
 using Steamworks;
 using System;
@@ -43,6 +46,9 @@ namespace UnturnedBlackout.Managers
         public const ushort WAITING_FOR_PLAYERS_ID = 27641;
         public const short WAITING_FOR_PLAYERS_KEY = 27641;
 
+        public const ushort HUD_ID = 27631;
+        public const short HUD_KEY = 27631;
+
         public const ushort FFA_ID = 27620;
         public const short FFA_KEY = 27620;
 
@@ -55,6 +61,7 @@ namespace UnturnedBlackout.Managers
         public const ushort CTF_ID = 27623;
         public const short CTF_KEY = 27623;
 
+        public const ushort SOUNDS_ID = 27634;
         public const short SOUNDS_KEY = 27634;
 
         public const ushort DEATH_ID = 27635;
@@ -110,6 +117,15 @@ namespace UnturnedBlackout.Managers
             UIHandlers = new();
             UIHandlersLookup = new();
             TipSender = new();
+
+            UseableGun.onChangeMagazineRequested += OnMagazineChanged;
+            UseableGun.onBulletSpawned += OnBulletShot;
+
+            PlayerEquipment.OnUseableChanged_Global += OnUseableChanged;
+
+            U.Events.OnPlayerConnected += OnConnected;
+            U.Events.OnPlayerDisconnected += OnDisconnected;
+
             EffectManager.onEffectButtonClicked += OnButtonClicked;
             EffectManager.onEffectTextCommitted += OnTextCommitted;
         }
@@ -584,6 +600,256 @@ namespace UnturnedBlackout.Managers
                 EffectManager.sendUIEffectText(QUEST_PROGRESSION_KEY, player.TransportConnection, true, $"QUEST Target {i} TEXT", $"{quest.Amount} / {quest.Quest.TargetAmount}");
                 EffectManager.sendUIEffectText(QUEST_PROGRESSION_KEY, player.TransportConnection, true, $"QUEST Progress {i} Fill", quest.Amount == 0 ? " " : new string(' ', Math.Min(267, quest.Amount * 267 / quest.Quest.TargetAmount)));
             }
+        }
+
+        // ROUND END DROPS
+
+        public IEnumerator SetupRoundEndDrops(List<GamePlayer> players, List<(GamePlayer, Case)> roundEndCases, int v)
+        {
+            foreach (var player in players)
+            {
+                EffectManager.sendUIEffectVisibility(PRE_ENDING_UI_KEY, player.TransportConnection, true, $"Drops{v}", true);
+            }
+
+            for (int i = 0; i < roundEndCases.Count; i++)
+            {
+                yield return new WaitForSeconds(1f);
+                var roundEndCase = roundEndCases[i];
+                foreach (var player in players)
+                {
+                    EffectManager.sendUIEffectVisibility(PRE_ENDING_UI_KEY, player.TransportConnection, true, $"SERVER Scoreboard{v} Drop {i}", true);
+                    EffectManager.sendUIEffectVisibility(PRE_ENDING_UI_KEY, player.TransportConnection, true, $"SERVER Scoreboard{v} Drop {roundEndCase.Item2.CaseRarity} {i}", true);
+                    EffectManager.sendUIEffectImageURL(PRE_ENDING_UI_KEY, player.TransportConnection, true, $"SERVER Scoreboard{v} Drop IMAGE {i}", roundEndCase.Item2.IconLink);
+                    EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.TransportConnection, true, $"SERVER Scoreboard{v} Drop TEXT {i}", (roundEndCase.Item1.Data.HasPrime ? UIManager.PRIME_SYMBOL : "") + roundEndCase.Item1.Player.CharacterName);
+                }
+            }
+        }
+
+
+        // HUD RELATED UI
+
+        private void OnConnected(UnturnedPlayer player)
+        {
+            player.Player.disablePluginWidgetFlag(EPluginWidgetFlags.ShowLifeMeters);
+            player.Player.disablePluginWidgetFlag(EPluginWidgetFlags.ShowStatusIcons);
+            player.Player.disablePluginWidgetFlag(EPluginWidgetFlags.ShowUseableGunStatus);
+            player.Player.disablePluginWidgetFlag(EPluginWidgetFlags.ShowDeathMenu);
+
+            player.Player.equipment.onEquipRequested += OnEquipRequested;
+            player.Player.inventory.onDropItemRequested += OnDropItemRequested;
+            player.Player.stance.onStanceUpdated += () => OnStanceUpdated(player.Player);
+
+            var transportConnection = player.Player.channel.owner.transportConnection;
+
+            EffectManager.sendUIEffect(HUD_ID, HUD_KEY, transportConnection, true);
+            RemoveGunUI(transportConnection);
+
+            // SOUND UI
+            EffectManager.sendUIEffect(SOUNDS_ID, SOUNDS_KEY, transportConnection, true);
+        }
+
+        private void OnDisconnected(UnturnedPlayer player)
+        {
+            player.Player.equipment.onEquipRequested -= OnEquipRequested;
+            player.Player.inventory.onDropItemRequested -= OnDropItemRequested;
+            player.Player.stance.onStanceUpdated -= () => OnStanceUpdated(player.Player);
+        }
+
+        private void OnStanceUpdated(Player player)
+        {
+            var gPlayer = Plugin.Instance.Game.GetGamePlayer(player);
+            if (gPlayer.CurrentGame != null)
+            {
+                gPlayer.OnStanceChanged(player.stance.stance);
+            }
+            /*if (Plugin.Instance.Game.TryGetCurrentGame(player.channel.owner.playerID.steamID, out Game game))
+            {
+                game.OnStanceChanged(player.stance);
+            }*/
+        }
+
+        private void OnDropItemRequested(PlayerInventory inventory, Item item, ref bool shouldAllow)
+        {
+            shouldAllow = false;
+        }
+
+        public void SendGadgetIcons(GamePlayer player)
+        {
+            EffectManager.sendUIEffectImageURL(HUD_KEY, player.TransportConnection, true, "TacticalIcon", "https://cdn.discordapp.com/attachments/957636187114336257/958012815870930964/smoke_grenade.png");
+            EffectManager.sendUIEffectImageURL(HUD_KEY, player.TransportConnection, true, "LethalIcon", "https://cdn.discordapp.com/attachments/957636187114336257/958012816470708284/grenade.png");
+        }
+
+        public void UpdateGadgetUsed(GamePlayer player, bool isTactical, bool isUsed)
+        {
+            EffectManager.sendUIEffectVisibility(HUD_KEY, player.TransportConnection, true, $"{(isTactical ? "Tactical" : "Lethal")} Used Toggler", isUsed);
+        }
+
+        protected void OnEquipRequested(PlayerEquipment equipment, ItemJar jar, ItemAsset asset, ref bool shouldAllow)
+        {
+            var player = Plugin.Instance.Game.GetGamePlayer(equipment.player);
+            var game = player.CurrentGame;
+            if (game == null)
+            {
+                return;
+            }
+
+            Logging.Debug($"{player.Player.CharacterName}, Stance: {player.Player.Stance}, ID: {asset?.id ?? 0}");
+            if (game.GameMode == Enums.EGameType.CTF && game.IsPlayerCarryingFlag(player) && equipment.player.inventory.getItem(0, 0) == jar)
+            {
+                shouldAllow = false;
+                return;
+            }
+
+            if (player.ActiveLoadout == null)
+            {
+                return;
+            }
+
+            if ((jar.item.id == (player.ActiveLoadout.Tactical?.Gadget?.GadgetID ?? 0) && !player.HasTactical) || (jar.item.id == (player.ActiveLoadout.Tactical?.Gadget?.GadgetID ?? 0) && game.GamePhase != Enums.EGamePhase.Started))
+            {
+                shouldAllow = false;
+                return;
+            }
+            else if ((jar.item.id == (player.ActiveLoadout.Lethal?.Gadget?.GadgetID ?? 0) && !player.HasLethal) || (jar.item.id == (player.ActiveLoadout.Lethal?.Gadget?.GadgetID ?? 0) && game.GamePhase != Enums.EGamePhase.Started))
+            {
+                shouldAllow = false;
+                return;
+            }
+
+            TaskDispatcher.QueueOnMainThread(() =>
+            {
+                Logging.Debug($"Task Dispatcher: {player.Player.CharacterName}, Stance: {player.Player.Stance}, ID: {asset?.id ?? 0}");
+                var connection = player.TransportConnection;
+                if (asset == null)
+                {
+                    return;
+                }
+
+                EffectManager.sendUIEffectText(HUD_KEY, connection, true, "WeaponName", asset.itemName);
+                var isPrimarySecondaryMelee = (asset.id == (player.ActiveLoadout.PrimarySkin?.SkinID ?? 0)) || (asset.id == (player.ActiveLoadout.Primary?.Gun?.GunID ?? 0)) || (asset.id == (player.ActiveLoadout.SecondarySkin?.SkinID ?? 0)) || (asset.id == (player.ActiveLoadout.Secondary?.Gun?.GunID ?? 0)) || (asset.id == (player.ActiveLoadout.Knife?.Knife?.KnifeID ?? 0));
+                player.ForceEquip = !isPrimarySecondaryMelee;
+
+                if (!player.ForceEquip)
+                {
+                    player.LastEquippedPage = equipment.equippedPage;
+                    player.LastEquippedX = equipment.equipped_x;
+                    player.LastEquippedY = equipment.equipped_y;
+                }
+
+                if (asset.type == EItemType.GUN)
+                {
+                    int currentAmmo = equipment.state[10];
+                    var ammo = 0;
+
+                    if (Assets.find(EAssetType.ITEM, BitConverter.ToUInt16(equipment.state, 8)) is ItemMagazineAsset mAsset)
+                    {
+                        ammo = mAsset.amount;
+                    }
+
+                    EffectManager.sendUIEffectText(HUD_KEY, connection, true, "AmmoNum", currentAmmo.ToString());
+                    EffectManager.sendUIEffectText(HUD_KEY, connection, true, "ReserveNum", $" / {ammo}");
+                }
+                else
+                {
+                    EffectManager.sendUIEffectText(HUD_KEY, connection, true, "AmmoNum", " ");
+                    EffectManager.sendUIEffectText(HUD_KEY, connection, true, "ReserveNum", " ");
+                }
+
+                game.PlayerEquipmentChanged(player);
+            });
+        }
+
+        public void OnUseableChanged(PlayerEquipment obj)
+        {
+            var player = Plugin.Instance.Game.GetGamePlayer(obj.player);
+            if (player == null)
+            {
+                return;
+            }
+
+            Logging.Debug($"{player.Player.CharacterName}, Stance: {player.Player.Stance}, Obj Is Null: {obj == null}, Obj Useable Is Null: {obj.useable == null}");
+            if (player.CurrentGame == null)
+            {
+                return;
+            }
+
+            if (player.ActiveLoadout == null)
+            {
+                return;
+            }
+
+            if (obj == null)
+            {
+                ClearGunUI(player.TransportConnection);
+            }
+
+            if (obj.useable != null)
+            {
+                return;
+            }
+
+            if (player.ForceEquip)
+            {
+                Plugin.Instance.StartCoroutine(DelayedEquip(player.Player.Player.equipment, player.LastEquippedPage, player.LastEquippedX, player.LastEquippedY));
+            }
+            else
+            {
+                /*
+                var inv = player.Player.Player.inventory;
+                for (byte page = 0; page < PlayerInventory.PAGES - 2; page++)
+                {
+                    for (int index = inv.getItemCount(page) - 1; index >= 0; index--)
+                    {
+                        var item = inv.getItem(page, (byte)index);
+                        if (item != null && item.item.id == (player.ActiveLoadout.Knife?.Knife?.KnifeID ?? 0))
+                        {
+                            Plugin.Instance.StartCoroutine(Equip(player.Player.Player.equipment, page, item.x, item.y));
+                            break;
+                        }
+                    }
+                }*/
+
+                Plugin.Instance.StartCoroutine(DelayedEquip(player.Player.Player.equipment, player.KnifePage, player.KnifeX, player.KnifeY));
+            }
+        }
+
+        public IEnumerator DelayedEquip(PlayerEquipment equipment, byte page, byte x, byte y)
+        {
+            yield return new WaitForSeconds(0.2f);
+            if (equipment.useable == null && equipment.canEquip)
+            {
+                equipment.ServerEquip(page, x, y);
+            }
+        }
+
+        public void ClearGunUI(ITransportConnection transportConnection)
+        {
+            EffectManager.sendUIEffectText(HUD_KEY, transportConnection, true, "WeaponName", "");
+            EffectManager.sendUIEffectText(HUD_KEY, transportConnection, true, "AmmoNum", " ");
+            EffectManager.sendUIEffectText(HUD_KEY, transportConnection, true, "ReserveNum", " ");
+        }
+
+        public void RemoveGunUI(ITransportConnection transportConnection)
+        {
+            EffectManager.sendUIEffectText(HUD_KEY, transportConnection, true, "WeaponName", "");
+            EffectManager.sendUIEffectText(HUD_KEY, transportConnection, true, "AmmoNum", " ");
+            EffectManager.sendUIEffectText(HUD_KEY, transportConnection, true, "ReserveNum", " ");
+            EffectManager.sendUIEffectImageURL(HUD_KEY, transportConnection, true, "TacticalIcon", "");
+            EffectManager.sendUIEffectImageURL(HUD_KEY, transportConnection, true, "LethalIcon", "");
+        }
+
+        private void OnMagazineChanged(PlayerEquipment equipment, UseableGun gun, Item oldItem, ItemJar newItem, ref bool shouldAllow)
+        {
+            var amount = newItem == null ? 0 : newItem.item.amount;
+            var transportConnection = equipment.player.channel.GetOwnerTransportConnection();
+
+            EffectManager.sendUIEffectText(HUD_KEY, transportConnection, true, "AmmoNum", amount.ToString());
+            EffectManager.sendUIEffectText(HUD_KEY, transportConnection, true, "ReserveNum", $" / {amount}");
+        }
+
+        private void OnBulletShot(UseableGun gun, BulletInfo bullet)
+        {
+            EffectManager.sendUIEffectText(HUD_KEY, gun.player.channel.GetOwnerTransportConnection(), true, "AmmoNum", gun.player.equipment.state[10].ToString());
         }
 
         // FFA RELATED UI
@@ -1154,29 +1420,6 @@ namespace UnturnedBlackout.Managers
             EffectManager.askEffectClearByID(CTF_ID, player.TransportConnection);
         }
 
-        // ALL GAME RELATED UI
-
-        public IEnumerator SetupRoundEndDrops(List<GamePlayer> players, List<(GamePlayer, Case)> roundEndCases, int v)
-        {
-            foreach (var player in players)
-            {
-                EffectManager.sendUIEffectVisibility(PRE_ENDING_UI_KEY, player.TransportConnection, true, $"Drops{v}", true);
-            }
-
-            for (int i = 0; i < roundEndCases.Count; i++)
-            {
-                yield return new WaitForSeconds(1f);
-                var roundEndCase = roundEndCases[i];
-                foreach (var player in players)
-                {
-                    EffectManager.sendUIEffectVisibility(PRE_ENDING_UI_KEY, player.TransportConnection, true, $"SERVER Scoreboard{v} Drop {i}", true);
-                    EffectManager.sendUIEffectVisibility(PRE_ENDING_UI_KEY, player.TransportConnection, true, $"SERVER Scoreboard{v} Drop {roundEndCase.Item2.CaseRarity} {i}", true);
-                    EffectManager.sendUIEffectImageURL(PRE_ENDING_UI_KEY, player.TransportConnection, true, $"SERVER Scoreboard{v} Drop IMAGE {i}", roundEndCase.Item2.IconLink);
-                    EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.TransportConnection, true, $"SERVER Scoreboard{v} Drop TEXT {i}", (roundEndCase.Item1.Data.HasPrime ? UIManager.PRIME_SYMBOL : "") + roundEndCase.Item1.Player.CharacterName);
-                }
-            }
-        }
-
         // EVENTS
 
         public void OnUIUpdated(CSteamID steamID, EUIPage page)
@@ -1322,8 +1565,8 @@ namespace UnturnedBlackout.Managers
         private void OnButtonClicked(Player player, string buttonName)
         {
             var ply = UnturnedPlayer.FromPlayer(player);
-            bool isGame = Plugin.Instance.Game.TryGetCurrentGame(ply.CSteamID, out _);
             var gPly = Plugin.Instance.Game.GetGamePlayer(ply);
+            bool isGame = gPly.CurrentGame != null;
             if (gPly == null)
             {
                 Logging.Debug($"Error finding game player for {ply.CharacterName}");
@@ -1729,6 +1972,14 @@ namespace UnturnedBlackout.Managers
         {
             EffectManager.onEffectButtonClicked -= OnButtonClicked;
             EffectManager.onEffectTextCommitted -= OnTextCommitted;
+
+            UseableGun.onChangeMagazineRequested -= OnMagazineChanged;
+            UseableGun.onBulletSpawned -= OnBulletShot;
+
+            PlayerEquipment.OnUseableChanged_Global -= OnUseableChanged;
+
+            U.Events.OnPlayerConnected -= OnConnected;
+            U.Events.OnPlayerDisconnected -= OnDisconnected;
         }
     }
 }

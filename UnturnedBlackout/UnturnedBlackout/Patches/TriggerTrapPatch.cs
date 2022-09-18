@@ -38,7 +38,8 @@ namespace UnturnedBlackout.Patches
             {
                 return;
             }
-            if (!Plugin.Instance.Game.TryGetCurrentGame(gPlayer.SteamID, out Game game))
+            var game = gPlayer.CurrentGame;
+            if (game == null)
             {
                 return;
             }

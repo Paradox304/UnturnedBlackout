@@ -13,20 +13,23 @@ namespace UnturnedBlackout.Managers
 {
     public class HUDManager
     {
-        public const ushort ID = 27631;
-        public const short Key = 27631;
+        public const ushort HUD_ID = 27631;
+        public const short HUD_KEY = 27631;
 
         public HUDManager()
         {
+            /*
             UseableGun.onChangeMagazineRequested += OnMagazineChanged;
             UseableGun.onBulletSpawned += OnBulletShot;
 
-            PlayerEquipment.OnUseableChanged_Global += OnDequip;
+            PlayerEquipment.OnUseableChanged_Global += OnUseableChanged;
 
             U.Events.OnPlayerConnected += OnConnected;
             U.Events.OnPlayerDisconnected += OnDisconnected;
+            */
         }
 
+        /*
         private void OnConnected(UnturnedPlayer player)
         {
             player.Player.disablePluginWidgetFlag(EPluginWidgetFlags.ShowLifeMeters);
@@ -37,13 +40,13 @@ namespace UnturnedBlackout.Managers
             player.Player.equipment.onEquipRequested += OnEquip;
             player.Player.inventory.onDropItemRequested += OnDropItem;
             player.Player.stance.onStanceUpdated += () => OnStanceUpdated(player.Player);
-            var transportConnection = player.Player.channel.GetOwnerTransportConnection();
+            var transportConnection = player.Player.channel.owner.transportConnection;
 
-            EffectManager.sendUIEffect(ID, Key, transportConnection, true);
+            EffectManager.sendUIEffect(HUD_ID, HUD_KEY, transportConnection, true);
             RemoveGunUI(transportConnection);
 
             // SOUND UI
-            EffectManager.sendUIEffect(27634, 27634, transportConnection, true);
+            EffectManager.sendUIEffect(SOUNDS_ID, SOUNDS_KEY, transportConnection, true);
         }
 
         private void OnStanceUpdated(Player player)
@@ -68,14 +71,14 @@ namespace UnturnedBlackout.Managers
 
         public void UpdateGadgetUI(GamePlayer player)
         {
-            EffectManager.sendUIEffectImageURL(Key, player.TransportConnection, true, "TacticalIcon", "https://cdn.discordapp.com/attachments/957636187114336257/958012815870930964/smoke_grenade.png");
-            EffectManager.sendUIEffectImageURL(Key, player.TransportConnection, true, "LethalIcon", "https://cdn.discordapp.com/attachments/957636187114336257/958012816470708284/grenade.png");
+            EffectManager.sendUIEffectImageURL(HUD_KEY, player.TransportConnection, true, "TacticalIcon", "https://cdn.discordapp.com/attachments/957636187114336257/958012815870930964/smoke_grenade.png");
+            EffectManager.sendUIEffectImageURL(HUD_KEY, player.TransportConnection, true, "LethalIcon", "https://cdn.discordapp.com/attachments/957636187114336257/958012816470708284/grenade.png");
         }
 
         public void UpdateGadget(GamePlayer player, bool isTactical, bool isUsed)
         {
             Logging.Debug($"{player.Player.CharacterName}, is tactical {isTactical}, is used {isUsed}");
-            EffectManager.sendUIEffectVisibility(Key, player.TransportConnection, true, $"{(isTactical ? "Tactical" : "Lethal")} Used Toggler", isUsed);
+            EffectManager.sendUIEffectVisibility(HUD_KEY, player.TransportConnection, true, $"{(isTactical ? "Tactical" : "Lethal")} Used Toggler", isUsed);
         }
 
         protected void OnEquip(PlayerEquipment equipment, ItemJar jar, ItemAsset asset, ref bool shouldAllow)
@@ -127,23 +130,23 @@ namespace UnturnedBlackout.Managers
                         ammo = mAsset.amount;
                     }
 
-                    EffectManager.sendUIEffectText(Key, connection, true, "WeaponName", gAsset.itemName);
-                    EffectManager.sendUIEffectText(Key, connection, true, "AmmoNum", currentAmmo.ToString());
-                    EffectManager.sendUIEffectText(Key, connection, true, "ReserveNum", $" / {ammo}");
+                    EffectManager.sendUIEffectText(HUD_KEY, connection, true, "WeaponName", gAsset.itemName);
+                    EffectManager.sendUIEffectText(HUD_KEY, connection, true, "AmmoNum", currentAmmo.ToString());
+                    EffectManager.sendUIEffectText(HUD_KEY, connection, true, "ReserveNum", $" / {ammo}");
                     player.ForceEquip = false;
                 }
                 else if (asset.type == EItemType.MELEE)
                 {
-                    EffectManager.sendUIEffectText(Key, connection, true, "WeaponName", asset.itemName);
-                    EffectManager.sendUIEffectText(Key, connection, true, "AmmoNum", " ");
-                    EffectManager.sendUIEffectText(Key, connection, true, "ReserveNum", " ");
+                    EffectManager.sendUIEffectText(HUD_KEY, connection, true, "WeaponName", asset.itemName);
+                    EffectManager.sendUIEffectText(HUD_KEY, connection, true, "AmmoNum", " ");
+                    EffectManager.sendUIEffectText(HUD_KEY, connection, true, "ReserveNum", " ");
                     player.ForceEquip = false;
                 }
                 else
                 {
-                    EffectManager.sendUIEffectText(Key, connection, true, "WeaponName", asset.itemName);
-                    EffectManager.sendUIEffectText(Key, connection, true, "AmmoNum", " ");
-                    EffectManager.sendUIEffectText(Key, connection, true, "ReserveNum", " ");
+                    EffectManager.sendUIEffectText(HUD_KEY, connection, true, "WeaponName", asset.itemName);
+                    EffectManager.sendUIEffectText(HUD_KEY, connection, true, "AmmoNum", " ");
+                    EffectManager.sendUIEffectText(HUD_KEY, connection, true, "ReserveNum", " ");
                     player.ForceEquip = true;
                     return;
                 }
@@ -156,7 +159,7 @@ namespace UnturnedBlackout.Managers
             });
         }
 
-        public void OnDequip(PlayerEquipment obj)
+        public void OnUseableChanged(PlayerEquipment obj)
         {
             var player = Plugin.Instance.Game.GetGamePlayer(obj.player);
             if (player != null)
@@ -211,18 +214,18 @@ namespace UnturnedBlackout.Managers
 
         public void ClearGunUI(ITransportConnection transportConnection)
         {
-            EffectManager.sendUIEffectText(Key, transportConnection, true, "WeaponName", "");
-            EffectManager.sendUIEffectText(Key, transportConnection, true, "AmmoNum", " ");
-            EffectManager.sendUIEffectText(Key, transportConnection, true, "ReserveNum", " ");
+            EffectManager.sendUIEffectText(HUD_KEY, transportConnection, true, "WeaponName", "");
+            EffectManager.sendUIEffectText(HUD_KEY, transportConnection, true, "AmmoNum", " ");
+            EffectManager.sendUIEffectText(HUD_KEY, transportConnection, true, "ReserveNum", " ");
         }
 
         public void RemoveGunUI(ITransportConnection transportConnection)
         {
-            EffectManager.sendUIEffectText(Key, transportConnection, true, "WeaponName", "");
-            EffectManager.sendUIEffectText(Key, transportConnection, true, "AmmoNum", " ");
-            EffectManager.sendUIEffectText(Key, transportConnection, true, "ReserveNum", " ");
-            EffectManager.sendUIEffectImageURL(Key, transportConnection, true, "TacticalIcon", "");
-            EffectManager.sendUIEffectImageURL(Key, transportConnection, true, "LethalIcon", "");
+            EffectManager.sendUIEffectText(HUD_KEY, transportConnection, true, "WeaponName", "");
+            EffectManager.sendUIEffectText(HUD_KEY, transportConnection, true, "AmmoNum", " ");
+            EffectManager.sendUIEffectText(HUD_KEY, transportConnection, true, "ReserveNum", " ");
+            EffectManager.sendUIEffectImageURL(HUD_KEY, transportConnection, true, "TacticalIcon", "");
+            EffectManager.sendUIEffectImageURL(HUD_KEY, transportConnection, true, "LethalIcon", "");
         }
 
         private void OnMagazineChanged(PlayerEquipment equipment, UseableGun gun, Item oldItem, ItemJar newItem, ref bool shouldAllow)
@@ -230,24 +233,27 @@ namespace UnturnedBlackout.Managers
             var amount = newItem == null ? 0 : newItem.item.amount;
             var transportConnection = equipment.player.channel.GetOwnerTransportConnection();
 
-            EffectManager.sendUIEffectText(Key, transportConnection, true, "AmmoNum", amount.ToString());
-            EffectManager.sendUIEffectText(Key, transportConnection, true, "ReserveNum", $" / {amount}");
+            EffectManager.sendUIEffectText(HUD_KEY, transportConnection, true, "AmmoNum", amount.ToString());
+            EffectManager.sendUIEffectText(HUD_KEY, transportConnection, true, "ReserveNum", $" / {amount}");
         }
 
         private void OnBulletShot(UseableGun gun, BulletInfo bullet)
         {
-            EffectManager.sendUIEffectText(Key, gun.player.channel.GetOwnerTransportConnection(), true, "AmmoNum", gun.player.equipment.state[10].ToString());
+            EffectManager.sendUIEffectText(HUD_KEY, gun.player.channel.GetOwnerTransportConnection(), true, "AmmoNum", gun.player.equipment.state[10].ToString());
         }
+        */
 
         public void Destroy()
         {
+            /*
             UseableGun.onChangeMagazineRequested -= OnMagazineChanged;
             UseableGun.onBulletSpawned -= OnBulletShot;
 
             U.Events.OnPlayerConnected -= OnConnected;
             U.Events.OnPlayerDisconnected -= OnDisconnected;
 
-            PlayerEquipment.OnUseableChanged_Global -= OnDequip;
+            PlayerEquipment.OnUseableChanged_Global -= OnUseableChanged;
+            */
         }
     }
 }

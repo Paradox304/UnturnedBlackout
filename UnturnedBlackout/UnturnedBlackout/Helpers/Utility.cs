@@ -55,7 +55,7 @@ namespace UnturnedBlackout
             inv.player.equipment.sendSlot(0);
             inv.player.equipment.sendSlot(1);
 
-            Plugin.Instance.HUD.RemoveGunUI(inv.player.channel.GetOwnerTransportConnection());
+            Plugin.Instance.UI.RemoveGunUI(inv.player.channel.GetOwnerTransportConnection());
         }
 
         public static string GetOrdinal(int index) =>
@@ -166,7 +166,7 @@ namespace UnturnedBlackout
                     continue;
                 }
 
-                var levelRequired = -1;
+                int levelRequired;
                 if (gun.DefaultAttachments.Contains(gunAttachment))
                 {
                     levelRequired = 0;
@@ -383,15 +383,15 @@ namespace UnturnedBlackout
              };
 
         public static string GetLevelColor(int level) =>
-             (level / 18) switch
+             level switch
              {
-                 0 => "#a87f49",
-                 1 => "#f7f7f7",
-                 2 => "#ffd32e",
-                 3 => "#41ffe8",
-                 4 => "#2cff35",
-                 5 => "#fd2d2d",
-                 6 => "#b04dff",
+                 >= 1 and <= 18 => "#a87f49",
+                 >= 19 and <= 36 => "#f7f7f7",
+                 >= 37 and <= 54 => "#ffd32e",
+                 >= 55 and <= 72 => "#41ffe8",
+                 >= 73 and <= 90 => "#2cff35",
+                 >= 91 and <= 108 => "#fd2d2d",
+                 >= 109 and <= 126 => "#b04dff",
                  _ => "white"
              };
 
@@ -417,7 +417,7 @@ namespace UnturnedBlackout
              {
                  ECurrency.Scrap => "Scrap",
                  ECurrency.Credits => "Blackout Points",
-                 ECurrency.Coins => "Goldtags",
+                 ECurrency.Coins => "Blacktags",
                  _ => throw new ArgumentOutOfRangeException("currency", "Currency is not as expected")
              };
 

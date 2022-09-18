@@ -600,7 +600,7 @@ namespace UnturnedBlackout.Managers
             if (activeLoadout == null)
             {
                 Logging.Debug($"Error finding active loadout for {player.Player.CharacterName}");
-                player.SetActiveLoadout(null);
+                player.SetActiveLoadout(null, 0, 0, 0);
                 return;
             }
 
@@ -650,7 +650,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 inv.items[0].tryAddItem(item);
-                player.Player.Player.equipment.tryEquip(0, 0, 0);
+                player.Player.Player.equipment.ServerEquip(0, 0, 0);
             }
 
             // Giving secondary to player
@@ -692,14 +692,35 @@ namespace UnturnedBlackout.Managers
                 inv.items[1].tryAddItem(item);
                 if (activeLoadout.Primary == null)
                 {
-                    player.Player.Player.equipment.tryEquip(1, 0, 0);
+                    player.Player.Player.equipment.ServerEquip(1, 0, 0);
                 }
             }
 
             // Giving knife to player
+            byte knifePage = 0;
+            byte knifeX = 0;
+            byte knifeY = 0;
+
             if (activeLoadout.Knife != null)
             {
                 inv.forceAddItem(new Item(activeLoadout.Knife.Knife.KnifeID, true), activeLoadout.Primary == null && activeLoadout.Secondary == null);
+                for (byte page = 0; page < PlayerInventory.PAGES - 2; page++)
+                {
+                    var shouldBreak = false;
+                    for (int index = inv.getItemCount(page) - 1; index >= 0; index--)
+                    {
+                        var item = inv.getItem(page, (byte)index);
+                        if (item != null && item.item.id == activeLoadout.Knife.Knife.KnifeID)
+                        {
+                            knifePage = page;
+                            knifeX = item.x;
+                            knifeY = item.y;
+                            shouldBreak = true;
+                            break;
+                        }
+                    }
+                    if (shouldBreak) break;
+                }
             }
 
             // Giving perks to player
@@ -766,7 +787,7 @@ namespace UnturnedBlackout.Managers
                 }
             }
 
-            player.SetActiveLoadout(activeLoadout);
+            player.SetActiveLoadout(activeLoadout, knifePage, knifeX, knifeY);
         }
     }
 }
