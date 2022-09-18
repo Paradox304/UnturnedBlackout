@@ -636,6 +636,8 @@ namespace UnturnedBlackout.Managers
             player.Player.disablePluginWidgetFlag(EPluginWidgetFlags.ShowDeathMenu);
 
             player.Player.equipment.onEquipRequested += OnEquipRequested;
+            player.Player.equipment.onDequipRequested += OnDequipRequested;
+
             player.Player.inventory.onDropItemRequested += OnDropItemRequested;
             player.Player.stance.onStanceUpdated += () => OnStanceUpdated(player.Player);
 
@@ -652,12 +654,14 @@ namespace UnturnedBlackout.Managers
         {
             player.Player.equipment.onEquipRequested -= OnEquipRequested;
             player.Player.inventory.onDropItemRequested -= OnDropItemRequested;
+            player.Player.equipment.onDequipRequested -= OnDequipRequested;
             player.Player.stance.onStanceUpdated -= () => OnStanceUpdated(player.Player);
         }
 
         private void OnStanceUpdated(Player player)
         {
             var gPlayer = Plugin.Instance.Game.GetGamePlayer(player);
+            Logging.Debug($"{gPlayer.Player.CharacterName}, Stance: {gPlayer.Player.Stance}, Equipment: {gPlayer.Player.Player.equipment.itemID}");
             if (gPlayer.CurrentGame != null)
             {
                 gPlayer.OnStanceChanged(player.stance.stance);
@@ -718,7 +722,7 @@ namespace UnturnedBlackout.Managers
 
             TaskDispatcher.QueueOnMainThread(() =>
             {
-                Logging.Debug($"Task Dispatcher: {player.Player.CharacterName}, Stance: {player.Player.Stance}, ID: {asset?.id ?? 0}");
+                Logging.Debug($"Task Dispatcher: {player.Player.CharacterName}, Stance: {player.Player.Stance}");
                 var connection = player.TransportConnection;
                 if (asset == null)
                 {
@@ -759,6 +763,23 @@ namespace UnturnedBlackout.Managers
             });
         }
 
+        private void OnDequipRequested(PlayerEquipment equipment, ref bool shouldAllow)
+        {
+            var player = Plugin.Instance.Game.GetGamePlayer(equipment.player);
+            var game = player.CurrentGame;
+            if (game == null)
+            {
+                return;
+            }
+
+            Logging.Debug($"{player.Player.CharacterName}, Stance: {player.Player.Stance}, ID: {equipment.itemID}");
+
+            TaskDispatcher.QueueOnMainThread(() =>
+            {
+                Logging.Debug($"Task Dispatcher: {player.Player.CharacterName}, Stance: {player.Player.Stance}, ID: {equipment.itemID}");
+            });
+        }
+
         public void OnUseableChanged(PlayerEquipment obj)
         {
             var player = Plugin.Instance.Game.GetGamePlayer(obj.player);
@@ -767,7 +788,7 @@ namespace UnturnedBlackout.Managers
                 return;
             }
 
-            Logging.Debug($"{player.Player.CharacterName}, Stance: {player.Player.Stance}, Obj Is Null: {obj == null}, Obj Useable Is Null: {obj.useable == null}");
+            Logging.Debug($"{player.Player.CharacterName}, Stance: {player.Player.Stance}, Useable Is Null: {obj.useable == null}");
             if (player.CurrentGame == null)
             {
                 return;
@@ -776,11 +797,6 @@ namespace UnturnedBlackout.Managers
             if (player.ActiveLoadout == null)
             {
                 return;
-            }
-
-            if (obj == null)
-            {
-                ClearGunUI(player.TransportConnection);
             }
 
             if (obj.useable != null)

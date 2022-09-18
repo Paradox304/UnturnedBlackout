@@ -412,6 +412,13 @@ namespace UnturnedBlackout.Models.Global
 
         public void OnStanceChanged(EPlayerStance newStance)
         {
+            if (newStance == EPlayerStance.CLIMB)
+            {
+                LastEquippedPage = Player.Player.equipment.equippedPage;
+                LastEquippedX = Player.Player.equipment.equipped_x;
+                LastEquippedY = Player.Player.equipment.equipped_y;
+            }
+
             TaskDispatcher.QueueOnMainThread(() =>
             {
                 if (PreviousStance == EPlayerStance.CLIMB && newStance != EPlayerStance.CLIMB)
