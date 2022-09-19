@@ -226,6 +226,7 @@ namespace UnturnedBlackout.Models.Global
 
             KnifeMovementChange = primaryMovementChange + secondaryMovementChange + loadout.GetKnifeMovement();
 
+            Logging.Debug($"Setting movement for {Player.CharacterName} with PrimaryMovementChange {PrimaryMovementChange}, PrimaryMovementChangeADS {PrimaryMovementChangeADS}, SecondaryMovementChange {SecondaryMovementChange}, SecondaryMovementChangeADS {SecondaryMovementChangeADS}, KnifeMovementChange {KnifeMovementChange}");
             LethalChecker.Stop();
             TacticalChecker.Stop();
 
@@ -575,29 +576,36 @@ namespace UnturnedBlackout.Models.Global
                 return;
             }
 
+            Logging.Debug($"Sending movement for {Player.CharacterName} with isADS {isADS}, isCarryingFlag {isCarryingFlag}");
             var flagCarryingSpeed = isCarryingFlag ? Config.CTF.FileData.FlagCarryingSpeed : 0f;
             float updatedMovement;
             if (isCarryingFlag)
             {
+                Logging.Debug($"Sending movement is carrying flag");
                 updatedMovement = Config.CTF.FileData.FlagCarryingSpeed;
             }
             else if (Player.Player.equipment.itemID == (ActiveLoadout.Primary?.Gun?.GunID ?? 0) || Player.Player.equipment.itemID == (ActiveLoadout.PrimarySkin?.SkinID ?? 0))
             {
+                Logging.Debug($"Sending movement primary");
                 updatedMovement = PrimaryMovementChange + SecondaryMovementChange + (isADS ? PrimaryMovementChangeADS : 0) + flagCarryingSpeed;
             }
             else if (Player.Player.equipment.itemID == (ActiveLoadout.Secondary?.Gun?.GunID ?? 0) || Player.Player.equipment.itemID == (ActiveLoadout.SecondarySkin?.SkinID ?? 0))
             {
+                Logging.Debug($"Sending movement secondary");
                 updatedMovement = PrimaryMovementChange + SecondaryMovementChange + (isADS ? SecondaryMovementChangeADS : 0) + flagCarryingSpeed;
             }
             else if (Player.Player.equipment.itemID == (ActiveLoadout.Knife.Knife.KnifeID))
             {
+                Logging.Debug($"Sending movement knife");
                 updatedMovement = KnifeMovementChange + flagCarryingSpeed;
             }
             else
             {
+                Logging.Debug($"Other movement, returning");
                 return;
             }
 
+            Logging.Debug($"Updated Movement: {updatedMovement}");
             if (updatedMovement == Player.Player.movement.pluginSpeedMultiplier)
             {
                 return;
