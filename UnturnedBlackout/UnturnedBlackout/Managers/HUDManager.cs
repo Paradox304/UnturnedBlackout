@@ -1,15 +1,4 @@
-﻿using Rocket.Core.Utils;
-using Rocket.Unturned;
-using Rocket.Unturned.Player;
-using SDG.NetTransport;
-using SDG.Unturned;
-using System;
-using System.Collections;
-using UnityEngine;
-using UnturnedBlackout.GameTypes;
-using UnturnedBlackout.Models.Global;
-
-namespace UnturnedBlackout.Managers
+﻿namespace UnturnedBlackout.Managers
 {
     public class HUDManager
     {

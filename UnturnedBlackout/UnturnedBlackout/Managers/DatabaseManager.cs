@@ -751,7 +751,7 @@ namespace UnturnedBlackout.Managers
                         {
                             continue;
                         }
-                        
+
                         if (!int.TryParse(rdr[11].ToString(), out int maxAmount))
                         {
                             continue;
@@ -925,7 +925,14 @@ namespace UnturnedBlackout.Managers
                             continue;
                         }
 
-                        var killstreak = new Killstreak(killstreakID, killstreakName, killstreakDesc, rarity, iconLink, killstreakRequired, buyPrice, coins, scrapAmount, levelRequirement);
+                        var killstreakInfo = Plugin.Instance.Config.Killstreaks.FileData.KillstreaksData.FirstOrDefault(k => k.KillstreakID == killstreakID);
+                        if (killstreakInfo == null)
+                        {
+                            Logging.Debug($"Error finding killstreak info for killstreak with id {killstreakID}, ignoring");
+                            continue;
+                        }
+
+                        var killstreak = new Killstreak(killstreakID, killstreakName, killstreakDesc, rarity, iconLink, killstreakRequired, buyPrice, coins, scrapAmount, levelRequirement, killstreakInfo);
                         if (!killstreaks.ContainsKey(killstreakID))
                         {
                             killstreaks.Add(killstreakID, killstreak);
@@ -2039,7 +2046,7 @@ namespace UnturnedBlackout.Managers
                         PlayerAllTimeLevel.Add(leaderboardData);
                     }
                 }
-                
+
                 Logging.Debug($"Getting leaderboard daily data for {player.CharacterName} from the daily table");
                 TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.65f)), loadingText: "PREPARING LEADERBOARD DATA..."));
                 rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS_LEADERBOARD_DAILY}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
@@ -3093,11 +3100,13 @@ namespace UnturnedBlackout.Managers
                     playerData.ActiveBoosters = boosters;
 
                     Logging.Debug($"Successfully got {boosters.Count} active boosters registered for {player.CharacterName}");
-                } catch (Exception ex)
+                }
+                catch (Exception ex)
                 {
                     Logger.Log($"Error reading player boosters for {player.CharacterName}");
                     Logger.Log(ex);
-                } finally
+                }
+                finally
                 {
                     rdr.Close();
                 }
@@ -3141,11 +3150,13 @@ namespace UnturnedBlackout.Managers
 
                     playerData.Cases = playerCases;
                     playerData.CasesSearchByID = playerCasesSearchByID;
-                } catch (Exception ex)
+                }
+                catch (Exception ex)
                 {
                     Logger.Log($"Error reading player cases for {player.CharacterName}");
                     Logger.Log(ex);
-                } finally
+                }
+                finally
                 {
                     rdr.Close();
                 }
@@ -3167,7 +3178,7 @@ namespace UnturnedBlackout.Managers
                         for (int i = loadouts.Count; i > loadoutAmount; i--)
                         {
                             Logging.Debug($"Removing loadout with id {i} for {player.CharacterName}");
-                            
+
                             if (!loadouts.TryGetValue(i, out Loadout loadout))
                             {
                                 continue;
@@ -3942,7 +3953,8 @@ namespace UnturnedBlackout.Managers
                 if (data.HasPrime)
                 {
                     data.PrimeExpiry = data.PrimeExpiry.AddDays(days);
-                } else
+                }
+                else
                 {
                     data.HasPrime = true;
                     data.PrimeExpiry = expiryDate;
@@ -4353,11 +4365,13 @@ namespace UnturnedBlackout.Managers
                 {
                     skin.UnboxedAmount = unboxedAmount;
                 }
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 Logger.Log($"Error updating skin unboxed amount with id {id} by amount {amount}");
                 Logger.Log(ex);
-            } finally
+            }
+            finally
             {
                 await Conn.CloseAsync();
             }
@@ -6266,11 +6280,13 @@ namespace UnturnedBlackout.Managers
 
                         skin.UnboxedAmount = unboxedAmount;
                     }
-                } catch (Exception ex)
+                }
+                catch (Exception ex)
                 {
                     Logger.Log($"Error reading unboxed amounts for skins");
                     Logger.Log(ex);
-                } finally
+                }
+                finally
                 {
                     rdr.Close();
                 }
@@ -6629,7 +6645,7 @@ namespace UnturnedBlackout.Managers
                 await Conn.OpenAsync();
                 await new MySqlCommand($"INSERT INTO `{PLAYERS_CASES}` ( `SteamID` , `CaseID` , `Amount` ) VALUES ({steamID}, {caseID}, {amount}) ON DUPLICATE KEY UPDATE `Amount` = `Amount` + {amount};", Conn).ExecuteScalarAsync();
                 var obj = await new MySqlCommand($"SELECT `Amount` FROM `{PLAYERS_CASES}` WHERE `SteamID` = {steamID} AND `CaseID` = {caseID};", Conn).ExecuteScalarAsync();
-                
+
                 if (obj is not int updatedAmount)
                 {
                     Logging.Debug($"Error getting updated amount for player with steam id {steamID}");
@@ -6712,7 +6728,8 @@ namespace UnturnedBlackout.Managers
 
                     // Code to update case pages
                     Plugin.Instance.UI.OnUIUpdated(steamID, EUIPage.Case);
-                } else
+                }
+                else
                 {
                     playerCase.Amount = updatedAmount;
                 }
@@ -6729,7 +6746,7 @@ namespace UnturnedBlackout.Managers
         }
 
         // Player Boosters
-        
+
         public async Task AddPlayerBoosterAsync(CSteamID steamID, EBoosterType boosterType, float boosterValue, int days)
         {
             using MySqlConnection Conn = new(ConnectionString);
@@ -6749,15 +6766,18 @@ namespace UnturnedBlackout.Managers
                 if (booster != null)
                 {
                     booster.BoosterExpiration = booster.BoosterExpiration.AddDays(days);
-                } else
+                }
+                else
                 {
                     data.ActiveBoosters.Add(new PlayerBooster(steamID, boosterType, boosterValue, expiryDate));
                 }
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 Logger.Log($"Error adding booster with type {boosterType}, value {boosterValue}, days {days} to player with steam id {steamID}");
                 Logger.Log(ex);
-            } finally
+            }
+            finally
             {
                 await Conn.CloseAsync();
             }

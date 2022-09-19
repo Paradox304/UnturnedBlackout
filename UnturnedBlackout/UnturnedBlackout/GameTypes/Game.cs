@@ -213,7 +213,8 @@ namespace UnturnedBlackout.GameTypes
             if (weaponID == 0 || weaponID == 1)
             {
                 feed = new Feed($"{(victim.Data.HasPrime ? UIManager.PRIME_SYMBOL : "")} <color={victimColor}>{victim.Player.CharacterName.ToUnrich()}</color> {(weaponID == 0 ? "" : "")} ", DateTime.UtcNow);
-            } else
+            }
+            else
             {
                 feed = new Feed($"{(killer.Data.HasPrime ? UIManager.PRIME_SYMBOL : "")} <color={killerColor}>{killer.Player.CharacterName.ToUnrich()}</color> {icon.Symbol} {(victim.Data.HasPrime ? UIManager.PRIME_SYMBOL : "")} <color={victimColor}>{victim.Player.CharacterName.ToUnrich()}</color>", DateTime.UtcNow);
             }

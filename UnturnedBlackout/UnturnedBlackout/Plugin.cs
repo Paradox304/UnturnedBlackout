@@ -9,7 +9,6 @@ using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using UnturnedBlackout.Database.Data;
-using UnturnedBlackout.GameTypes;
 using UnturnedBlackout.Managers;
 using Logger = Rocket.Core.Logging.Logger;
 

@@ -1,7 +1,6 @@
 ﻿using HarmonyLib;
 using SDG.Unturned;
 using UnityEngine;
-using UnturnedBlackout.GameTypes;
 
 namespace UnturnedBlackout.Patches
 {

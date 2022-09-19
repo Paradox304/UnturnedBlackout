@@ -25,6 +25,7 @@ namespace UnturnedBlackout.Managers
         public XmlFileReader<WinningValuesConfig> WinningValues { get; set; }
         public XmlFileReader<RoundEndCasesConfig> RoundEndCases { get; set; }
         public XmlFileReader<IconsConfig> Icons { get; set; }
+        public XmlFileReader<KillstreakConfig> Killstreaks { get; set; }
 
         public ConfigManager()
         {
@@ -46,6 +47,7 @@ namespace UnturnedBlackout.Managers
             WinningValues = new(Plugin.Instance.Directory + "/LocalStorage/Configuration.WinningValues.xml", configInstance.URL + "Configuration.WinningValues.xml");
             RoundEndCases = new(Plugin.Instance.Directory + "/LocalStorage/Configuration.RoundEndCases.xml", configInstance.URL + "Configuration.RoundEndCases.xml");
             Icons = new(Plugin.Instance.Directory + "/LocalStorage/Configuration.Icons.xml", configInstance.URL + "Configuration.Icons.xml");
+            Killstreaks = new(Plugin.Instance.Directory + "/LocalStorage/Configuration.Killstreaks.xml", configInstance.URL + "Configuration.Killstreaks.xml");
         }
     }
 }

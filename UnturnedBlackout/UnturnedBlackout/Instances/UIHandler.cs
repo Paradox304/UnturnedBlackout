@@ -847,7 +847,7 @@ namespace UnturnedBlackout.Instances
             OnCurrencyUpdated(ECurrency.Coins);
             OnCurrencyUpdated(ECurrency.Scrap);
             OnCurrencyUpdated(ECurrency.Credits);
-            
+
             ClearChat();
             ShowXP();
             ShowQuestCompletion();
@@ -870,7 +870,7 @@ namespace UnturnedBlackout.Instances
             {
                 spaces = Math.Min(176, neededXP == 0 ? 0 : PlayerData.XP * 176 / neededXP);
             }
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER XP Bar Fill", spaces == 0 ? " " : new string(' ', spaces));
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER XP Bar Fill", spaces == 0 ? UIManager.HAIRSPACE_SYMBOL_STRING : new string(UIManager.HAIRSPACE_SYMBOL_CHAR, spaces));
         }
 
         public void ClearChat()
@@ -3753,7 +3753,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Credits", false);
             gun.TryGetNeededXP(out int neededXP);
             var spaces = neededXP != 0 ? (gun.XP * 188 / neededXP) : 0;
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item XP Bar Fill", spaces == 0 ? " " : new string(' ', spaces));
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item XP Bar Fill", spaces == 0 ? UIManager.HAIRSPACE_SYMBOL_STRING : new string(UIManager.HAIRSPACE_SYMBOL_CHAR, spaces));
             SendRarityName("SERVER Item Rarity TEXT", gun.Gun.GunRarity);
         }
 
@@ -5334,7 +5334,7 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Quest Title TEXT {i}", quest.Quest.QuestTitle);
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Quest Target TEXT {i}", $"{quest.Amount}/{quest.Quest.TargetAmount}");
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Quest Reward TEXT {i}", $"+{quest.Quest.XP}★");
-                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Quest Bar Fill {i}", quest.Amount == 0 ? " " : new string(' ', Math.Min(256, quest.Amount * 256 / quest.Quest.TargetAmount)));
+                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Quest Bar Fill {i}", quest.Amount == 0 ? UIManager.HAIRSPACE_SYMBOL_STRING : new string(UIManager.HAIRSPACE_SYMBOL_CHAR, Math.Min(256, quest.Amount * 256 / quest.Quest.TargetAmount)));
             }
         }
 
@@ -5422,7 +5422,7 @@ namespace UnturnedBlackout.Instances
                 if (achievement.TryGetNextTier(out AchievementTier nextTier))
                 {
 
-                    var fillTxt = achievement.Amount == 0 ? " " : new string(' ', Math.Min(68, achievement.Amount * 68 / nextTier.TargetAmount));
+                    var fillTxt = achievement.Amount == 0 ? UIManager.HAIRSPACE_SYMBOL_STRING : new string(UIManager.HAIRSPACE_SYMBOL_CHAR, Math.Min(68, achievement.Amount * 68 / nextTier.TargetAmount));
 
                     switch (achievement.CurrentTier)
                     {
@@ -5555,7 +5555,7 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements Claim BUTTON", nextTier != null && achievement.Amount >= targetAmount);
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements Target TEXT", $"{achievement.Amount}/{targetAmount}");
 
-                var fill = achievement.Amount == 0 ? " " : new string(' ', Math.Min(291, achievement.Amount * 291 / targetAmount));
+                var fill = achievement.Amount == 0 ? UIManager.HAIRSPACE_SYMBOL_STRING : new string(UIManager.HAIRSPACE_SYMBOL_CHAR, Math.Min(291, achievement.Amount * 291 / targetAmount));
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements Fill 0", fill);
             }
 
@@ -5728,7 +5728,7 @@ namespace UnturnedBlackout.Instances
             }
             var isTierUnlocked = bp.CurrentTier >= tierID;
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass Tier Completed Toggler {tierID}", isTierUnlocked);
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass Tier Fill {tierID}", new string(' ', bp.CurrentTier > tierID ? 70 : (bp.CurrentTier == tierID ? Math.Min(70, bp.XP == 0 ? 1 : bp.XP * 70 / (DB.BattlepassTiersSearchByID.TryGetValue(tierID + 1, out BattlepassTier nextTier) ? nextTier.XP : tier.XP)) : 1)));
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass Tier Fill {tierID}", new string(UIManager.HAIRSPACE_SYMBOL_CHAR, bp.CurrentTier > tierID ? 70 : (bp.CurrentTier == tierID ? Math.Min(70, bp.XP == 0 ? 1 : bp.XP * 70 / (DB.BattlepassTiersSearchByID.TryGetValue(tierID + 1, out BattlepassTier nextTier) ? nextTier.XP : tier.XP)) : 1)));
 
             // Setup top reward (free reward)
             var isRewardClaimed = bp.ClaimedFreeRewards.Contains(tierID);
@@ -5917,7 +5917,7 @@ namespace UnturnedBlackout.Instances
         {
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Inventory Next BUTTON", UnboxInventoryPages.Count > 1);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Inventory Previous BUTTON", UnboxInventoryPages.Count > 1);
-            
+
             if (!UnboxInventoryPages.TryGetValue(1, out var firstPage))
             {
                 Logging.Debug($"Unable to find first page of unboxing inventory for {Player.CharacterName}");
@@ -6034,7 +6034,7 @@ namespace UnturnedBlackout.Instances
                 yield break;
             }
 
-            
+
             int poolSize = 0;
             foreach (var weight in @case.Case.Weights) poolSize += weight.Item2;
 
@@ -6097,7 +6097,8 @@ namespace UnturnedBlackout.Instances
                 {
                     await DB.IncreasePlayerScrapAsync(SteamID, duplicateScrapAmount);
                 });
-            } else
+            }
+            else
             {
                 Plugin.Instance.Reward.GiveRewards(SteamID, new List<Reward> { reward });
             }
@@ -6115,7 +6116,7 @@ namespace UnturnedBlackout.Instances
             yield return new WaitForSeconds(7.5f);
 
             IsUnboxing = false;
-            TaskDispatcher.QueueOnMainThread(() => 
+            TaskDispatcher.QueueOnMainThread(() =>
             {
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Unbox Button Toggler", @case.Amount > 0);
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Result {rewardRarity}", true);
@@ -6406,7 +6407,7 @@ namespace UnturnedBlackout.Instances
             // Animate Match XP
 
             var boldSpaces = currentXP == 0 ? 1 : Math.Max(1, Math.Min(MAX_SPACES_MATCH_END_SUMMARY, currentXP * MAX_SPACES_MATCH_END_SUMMARY / (nextLevelXP == 0 ? 1 : nextLevelXP)));
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", " ");
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", UIManager.HAIRSPACE_SYMBOL_STRING);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 0", new string(' ', boldSpaces));
             yield return new WaitForSeconds(0.7f);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Type TEXT", "Match XP");
@@ -6426,8 +6427,8 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary LevelUp Toggle", true);
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", new string(' ', MAX_SPACES_MATCH_END_SUMMARY - boldSpaces));
                 yield return new WaitForSeconds(0.5f);
-                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 0", " ");
-                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", " ");
+                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 0", UIManager.HAIRSPACE_SYMBOL_STRING);
+                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", UIManager.HAIRSPACE_SYMBOL_STRING);
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary LevelUp Toggle", false);
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Level 0 TEXT", $"<color=#AD6816>{currentLevel:D3}</color>");
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Level 1 TEXT", nextLevelXP == 0 ? "MAX" : (currentLevel + 1).ToString("D3"));
@@ -6449,7 +6450,7 @@ namespace UnturnedBlackout.Instances
             // Animate Match Bonus XP
 
             boldSpaces = currentXP == 0 ? 1 : Math.Max(1, Math.Min(MAX_SPACES_MATCH_END_SUMMARY, currentXP * MAX_SPACES_MATCH_END_SUMMARY / (nextLevelXP == 0 ? 1 : nextLevelXP)));
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", " ");
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", UIManager.HAIRSPACE_SYMBOL_STRING);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 0", new string(' ', boldSpaces));
             yield return new WaitForSeconds(0.7f);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Type TEXT", "Match Bonus XP");
@@ -6469,8 +6470,8 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary LevelUp Toggle", true);
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", new string(' ', MAX_SPACES_MATCH_END_SUMMARY - boldSpaces));
                 yield return new WaitForSeconds(0.5f);
-                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 0", " ");
-                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", " ");
+                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 0", UIManager.HAIRSPACE_SYMBOL_STRING);
+                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", UIManager.HAIRSPACE_SYMBOL_STRING);
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary LevelUp Toggle", false);
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Level 0 TEXT", $"<color=#AD6816>{currentLevel:D3}</color>");
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Level 1 TEXT", nextLevelXP == 0 ? "MAX" : (currentLevel + 1).ToString("D3"));
@@ -6492,7 +6493,7 @@ namespace UnturnedBlackout.Instances
             // Animate Achievement Bonus XP
 
             boldSpaces = currentXP == 0 ? 1 : Math.Max(1, Math.Min(MAX_SPACES_MATCH_END_SUMMARY, currentXP * MAX_SPACES_MATCH_END_SUMMARY / (nextLevelXP == 0 ? 1 : nextLevelXP)));
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", " ");
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", UIManager.HAIRSPACE_SYMBOL_STRING);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 0", new string(' ', boldSpaces));
             yield return new WaitForSeconds(0.7f);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Type TEXT", "Achievement Bonus XP");
@@ -6512,8 +6513,8 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary LevelUp Toggle", true);
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", new string(' ', MAX_SPACES_MATCH_END_SUMMARY - boldSpaces));
                 yield return new WaitForSeconds(0.5f);
-                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 0", " ");
-                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", " ");
+                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 0", UIManager.HAIRSPACE_SYMBOL_STRING);
+                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", UIManager.HAIRSPACE_SYMBOL_STRING);
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary LevelUp Toggle", false);
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Level 0 TEXT", $"<color=#AD6816>{currentLevel:D3}</color>");
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Level 1 TEXT", nextLevelXP == 0 ? "MAX" : (currentLevel + 1).ToString("D3"));
@@ -6535,7 +6536,7 @@ namespace UnturnedBlackout.Instances
             // Animate Other Bonus XP
 
             boldSpaces = currentXP == 0 ? 1 : Math.Max(1, Math.Min(MAX_SPACES_MATCH_END_SUMMARY, currentXP * MAX_SPACES_MATCH_END_SUMMARY / (nextLevelXP == 0 ? 1 : nextLevelXP)));
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", " ");
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", UIManager.HAIRSPACE_SYMBOL_STRING);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 0", new string(' ', boldSpaces));
             yield return new WaitForSeconds(0.7f);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Type TEXT", "Other Bonus XP");
@@ -6555,8 +6556,8 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary LevelUp Toggle", true);
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", new string(' ', MAX_SPACES_MATCH_END_SUMMARY - boldSpaces));
                 yield return new WaitForSeconds(0.5f);
-                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 0", " ");
-                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", " ");
+                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 0", UIManager.HAIRSPACE_SYMBOL_STRING);
+                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", UIManager.HAIRSPACE_SYMBOL_STRING);
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary LevelUp Toggle", false);
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Level 0 TEXT", $"<color=#AD6816>{currentLevel:D3}</color>");
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Level 1 TEXT", nextLevelXP == 0 ? "MAX" : (currentLevel + 1).ToString("D3"));
@@ -6578,7 +6579,7 @@ namespace UnturnedBlackout.Instances
             // Finish up Animation
 
             boldSpaces = currentXP == 0 ? 1 : Math.Max(1, Math.Min(MAX_SPACES_MATCH_END_SUMMARY, currentXP * MAX_SPACES_MATCH_END_SUMMARY / (nextLevelXP == 0 ? 1 : nextLevelXP)));
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", " ");
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", UIManager.HAIRSPACE_SYMBOL_STRING);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 0", new string(' ', boldSpaces));
             yield return new WaitForSeconds(2f);
 

@@ -1,4 +1,5 @@
 ﻿using UnturnedBlackout.Enums;
+using UnturnedBlackout.Models.Data;
 
 namespace UnturnedBlackout.Database.Base
 {
@@ -14,8 +15,9 @@ namespace UnturnedBlackout.Database.Base
         public int Coins { get; set; }
         public int ScrapAmount { get; set; }
         public int LevelRequirement { get; set; }
+        public KillstreakData KillstreakInfo { get; set; }
 
-        public Killstreak(int killstreakID, string killstreakName, string killstreakDesc, ERarity killstreakRarity, string iconLink, int killstreakRequired, int buyPrice, int coins, int scrapAmount, int levelRequirement)
+        public Killstreak(int killstreakID, string killstreakName, string killstreakDesc, ERarity killstreakRarity, string iconLink, int killstreakRequired, int buyPrice, int coins, int scrapAmount, int levelRequirement, KillstreakData killstreakInfo)
         {
             KillstreakID = killstreakID;
             KillstreakName = killstreakName;
@@ -27,6 +29,7 @@ namespace UnturnedBlackout.Database.Base
             Coins = coins;
             ScrapAmount = scrapAmount;
             LevelRequirement = levelRequirement;
+            KillstreakInfo = killstreakInfo;
         }
 
         public int GetCoins(int currentLevel)

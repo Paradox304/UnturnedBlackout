@@ -6,6 +6,7 @@ using Steamworks;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Timers;
 using UnityEngine;
@@ -39,8 +40,11 @@ namespace UnturnedBlackout.Models.Global
 
         public bool HasScoreboard { get; set; }
         public DateTime ScoreboardCooldown { get; set; }
+
         public bool HasMidgameLoadout { get; set; }
+
         public bool HasSpawnProtection { get; set; }
+
         public Stack<CSteamID> LastDamager { get; set; }
         public CSteamID LastKiller { get; set; }
 
@@ -58,6 +62,12 @@ namespace UnturnedBlackout.Models.Global
 
         public bool HasTactical { get; set; }
         public bool HasLethal { get; set; }
+
+        public bool HasKillstreakActive { get; set; }
+        public LoadoutKillstreak ActiveKillstreak { get; set; }
+        public List<LoadoutKillstreak> OrderedKillstreaks { get; set; }
+        public Dictionary<LoadoutKillstreak, bool> AvailableKillstreaks { get; set; }
+        public Dictionary<ushort, LoadoutKillstreak> KillstreakTriggers { get; set; }
 
         public float PrimaryMovementChange { get; set; }
         public float PrimaryMovementChangeADS { get; set; }
@@ -78,6 +88,7 @@ namespace UnturnedBlackout.Models.Global
         public Timer m_DamageChecker { get; set; }
         public Timer m_TacticalChecker { get; set; }
         public Timer m_LethalChecker { get; set; }
+        public Timer m_KillstreakChecker { get; set; }
 
         public GamePlayer(UnturnedPlayer player, ITransportConnection transportConnection)
         {
@@ -95,6 +106,10 @@ namespace UnturnedBlackout.Models.Global
             PendingAnimations = new();
             ScoreboardCooldown = DateTime.UtcNow;
 
+            AvailableKillstreaks = new();
+            KillstreakTriggers = new();
+            OrderedKillstreaks = new();
+
             m_RemoveSpawnProtection = new Timer(1 * 1000);
             m_RemoveSpawnProtection.Elapsed += RemoveSpawnProtection;
 
@@ -106,6 +121,9 @@ namespace UnturnedBlackout.Models.Global
 
             m_LethalChecker = new Timer(1 * 1000);
             m_LethalChecker.Elapsed += EnableLethal;
+
+            m_KillstreakChecker = new Timer(1 * 1000);
+            m_KillstreakChecker.Elapsed += CheckKillstreak;
         }
 
         // Spawn Protection Seconds
@@ -525,6 +543,34 @@ namespace UnturnedBlackout.Models.Global
             ((ClientInstanceMethod<float>)value).Invoke(Player.Player.movement.GetNetId(), ENetReliability.Reliable, Player.Player.channel.GetOwnerTransportConnection(), newMovement);
             yield return new WaitForSeconds(Player.Ping - 0.01f);
             Player.Player.movement.pluginSpeedMultiplier = newMovement;
+        }
+
+        // Killstreak
+
+        public void SetupKillstreaks()
+        {
+            Logging.Debug($"Setting up killstreaks for {Player.CharacterName}");
+            HasKillstreakActive = false;
+            ActiveKillstreak = null;
+
+            AvailableKillstreaks = new();
+            KillstreakTriggers = new();
+            OrderedKillstreaks = new();
+
+            foreach (var killstreak in ActiveLoadout.Killstreaks.OrderBy(k => k.Killstreak.KillstreakRequired))
+            {
+                Logging.Debug($"Adding killstreak with id {killstreak.Killstreak.KillstreakID} and trigger item id {killstreak.Killstreak.KillstreakInfo.TriggerItemID} and killstreak required {killstreak.Killstreak.KillstreakRequired}");
+                OrderedKillstreaks.Add(killstreak);
+                AvailableKillstreaks.Add(killstreak, false);
+                KillstreakTriggers.Add(killstreak.Killstreak.KillstreakInfo.TriggerItemID, killstreak);
+            }
+
+
+        }
+
+        private void CheckKillstreak(object sender, ElapsedEventArgs e)
+        {
+            throw new NotImplementedException();
         }
 
         // Events

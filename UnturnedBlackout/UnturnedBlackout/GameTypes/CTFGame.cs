@@ -213,7 +213,7 @@ namespace UnturnedBlackout.GameTypes
                 TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.Quest.CheckQuest(player.GamePlayer, EQuestType.FinishMatch, new Dictionary<EQuestCondition, int> { { EQuestCondition.Map, Location.LocationID }, { EQuestCondition.Gamemode, (int)GameMode }, { EQuestCondition.WinFlagsCaptured, player.FlagsCaptured }, { EQuestCondition.WinFlagsSaved, player.FlagsSaved }, { EQuestCondition.WinKills, player.Kills } }));
                 if (player.Team == wonTeam)
                 {
-                    TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.Quest.CheckQuest(player.GamePlayer, EQuestType.Win, new Dictionary<EQuestCondition, int> { { EQuestCondition.Map, Location.LocationID }, { EQuestCondition.Gamemode, (int)GameMode }, { EQuestCondition.WinFlagsCaptured, player.FlagsCaptured }, { EQuestCondition.WinFlagsSaved, player.FlagsSaved }, { EQuestCondition.WinKills, player.Kills } })); 
+                    TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.Quest.CheckQuest(player.GamePlayer, EQuestType.Win, new Dictionary<EQuestCondition, int> { { EQuestCondition.Map, Location.LocationID }, { EQuestCondition.Gamemode, (int)GameMode }, { EQuestCondition.WinFlagsCaptured, player.FlagsCaptured }, { EQuestCondition.WinFlagsSaved, player.FlagsSaved }, { EQuestCondition.WinKills, player.Kills } }));
                 }
                 Plugin.Instance.UI.SetupPreEndingUI(player.GamePlayer, EGameType.CTF, player.Team.TeamID == wonTeam.TeamID, BlueTeam.Score, RedTeam.Score, BlueTeam.Info.TeamName, RedTeam.Info.TeamName);
                 player.GamePlayer.Player.Player.quests.askSetRadioFrequency(CSteamID.Nil, Frequency);
@@ -460,7 +460,8 @@ namespace UnturnedBlackout.GameTypes
                     if (cause == EDeathCause.WATER)
                     {
                         OnKill(kPlayer.GamePlayer, cPlayer.GamePlayer, 0, kPlayer.Team.Info.KillFeedHexCode, cPlayer.Team.Info.KillFeedHexCode);
-                    } else if (cause == EDeathCause.LANDMINE || cause == EDeathCause.SHRED || cause == EDeathCause.GRENADE)
+                    }
+                    else if (cause == EDeathCause.LANDMINE || cause == EDeathCause.SHRED || cause == EDeathCause.GRENADE)
                     {
                         OnKill(kPlayer.GamePlayer, cPlayer.GamePlayer, 1, kPlayer.Team.Info.KillFeedHexCode, cPlayer.Team.Info.KillFeedHexCode);
                     }

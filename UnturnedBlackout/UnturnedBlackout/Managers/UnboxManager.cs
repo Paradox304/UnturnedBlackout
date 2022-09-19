@@ -2,13 +2,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using UnturnedBlackout.Database.Base;
 using UnturnedBlackout.Database.Data;
 using UnturnedBlackout.Enums;
-using UnturnedBlackout.Models.Global;
 
 namespace UnturnedBlackout.Managers
 {
@@ -58,7 +55,8 @@ namespace UnturnedBlackout.Managers
                                 Logging.Debug("There are no limited knives available, getting knives that are not owned by the player");
                                 knivesAvailable = DB.Knives.Values.Where(k => k.KnifeWeight > 0 && k.MaxAmount == 0 && (!loadout.Knives.TryGetValue(k.KnifeID, out LoadoutKnife knife) || !knife.IsBought)).ToList();
                             }
-                        } else
+                        }
+                        else
                         {
                             knivesAvailable = DB.Knives.Values.Where(k => k.KnifeWeight > 0 && k.MaxAmount == 0 && (!loadout.Knives.TryGetValue(k.KnifeID, out LoadoutKnife knife) || !knife.IsBought)).ToList();
                         }
@@ -159,7 +157,8 @@ namespace UnturnedBlackout.Managers
                         {
                             isDuplicate = true;
                             duplicateScrapAmount = skin.ScrapAmount;
-                        } else
+                        }
+                        else
                         {
                             // Send unboxed amount by +1
                             ThreadPool.QueueUserWorkItem(async (o) => await DB.UpdatePlayerGunSkinUnboxedAmountAsync(skin.ID, 1));

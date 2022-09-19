@@ -8,7 +8,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Text.RegularExpressions;
 using UnityEngine;
 using UnturnedBlackout.Database.Base;
@@ -43,11 +42,8 @@ namespace UnturnedBlackout.Managers
 
         public Dictionary<CSteamID, Coroutine> TipSender { get; set; }
 
-        public const ushort WAITING_FOR_PLAYERS_ID = 27641;
-        public const short WAITING_FOR_PLAYERS_KEY = 27641;
-
-        public const ushort HUD_ID = 27631;
-        public const short HUD_KEY = 27631;
+        public const ushort GAMEMODE_POPUP_ID = 27610;
+        public const short GAMEMODE_POPUP_KEY = 27610;
 
         public const ushort FFA_ID = 27620;
         public const short FFA_KEY = 27620;
@@ -58,8 +54,17 @@ namespace UnturnedBlackout.Managers
         public const ushort KC_ID = 27621;
         public const short KC_KEY = 27621;
 
+        public const ushort VOICE_CHAT_ID = 27622;
+        public const short VOICE_CHAT_KEY = 27622;
+
         public const ushort CTF_ID = 27623;
         public const short CTF_KEY = 27623;
+
+        public const ushort HUD_ID = 27631;
+        public const short HUD_KEY = 27631;
+
+        public const ushort KILLSTREAK_ID = 27632;
+        public const short KILLSTREAK_KEY = 27632;
 
         public const ushort SOUNDS_ID = 27634;
         public const short SOUNDS_KEY = 27634;
@@ -67,23 +72,26 @@ namespace UnturnedBlackout.Managers
         public const ushort DEATH_ID = 27635;
         public const short DEATH_KEY = 27635;
 
-        public const ushort KILLCARD_ID = 27644;
-        public const short KILLCARD_KEY = 27644;
-
         public const ushort PRE_ENDING_UI_ID = 27636;
         public const short PRE_ENDING_UI_KEY = 27636;
 
         public const ushort LEVEL_UP_ID = 27638;
         public const short LEVEL_UP_KEY = 27638;
 
+        public const ushort QUEST_PROGRESSION_ID = 27639;
+        public const short QUEST_PROGRESSION_KEY = 27639;
+
+        public const ushort LOADING_UI_ID = 27640;
+        public const short LOADING_UI_KEY = 27640;
+
+        public const ushort WAITING_FOR_PLAYERS_ID = 27641;
+        public const short WAITING_FOR_PLAYERS_KEY = 27641;
+
         public const ushort GUN_LEVEL_UP_ID = 27642;
         public const short GUN_LEVEL_UP_KEY = 27642;
 
-        public const ushort ITEM_UNLOCK_ID = 27647;
-        public const short ITEM_UNLOCK_KEY = 27647;
-
-        public const ushort QUEST_COMPLETION_ID = 27648;
-        public const short QUEST_COMPLETION_KEY = 27648;
+        public const ushort KILLCARD_ID = 27644;
+        public const short KILLCARD_KEY = 27644;
 
         public const ushort BP_TIER_COMPLETION_ID = 27645;
         public const short BP_TIER_COMPLETION_KEY = 27645;
@@ -91,24 +99,22 @@ namespace UnturnedBlackout.Managers
         public const ushort ACHIEVEMENT_COMPLETION_ID = 27646;
         public const short ACHIEVEMENT_COMPLETION_KEY = 27646;
 
-        public const ushort LOADING_UI_ID = 27640;
-        public const short LOADING_UI_KEY = 27640;
+        public const ushort ITEM_UNLOCK_ID = 27647;
+        public const short ITEM_UNLOCK_KEY = 27647;
+
+        public const ushort QUEST_COMPLETION_ID = 27648;
+        public const short QUEST_COMPLETION_KEY = 27648;
 
         public const ushort FLAG_POPUP_UI = 27900;
         public const short FLAG_POPUP_KEY = 27900;
 
-        public const ushort GAMEMODE_POPUP_ID = 27610;
-        public const short GAMEMODE_POPUP_KEY = 27610;
-
-        public const ushort QUEST_PROGRESSION_ID = 27639;
-        public const short QUEST_PROGRESSION_KEY = 27639;
-
-        public const ushort VOICE_CHAT_ID = 27622;
-        public const short VOICE_CHAT_KEY = 27622;
-
         public const int MAX_SPACES_TDM_SCORE = 98;
+        public const int MAX_SPACES_KILLSTREAK = 19;
 
         public const string PRIME_SYMBOL = " ";
+
+        public const string HAIRSPACE_SYMBOL_STRING = " ";
+        public const char HAIRSPACE_SYMBOL_CHAR = ' ';
 
         public UIManager()
         {
@@ -598,7 +604,7 @@ namespace UnturnedBlackout.Managers
                 EffectManager.sendUIEffectVisibility(QUEST_PROGRESSION_KEY, player.TransportConnection, true, $"QUEST Item {i}", true);
                 EffectManager.sendUIEffectText(QUEST_PROGRESSION_KEY, player.TransportConnection, true, $"QUEST Description {i} TEXT", quest.Quest.QuestDesc);
                 EffectManager.sendUIEffectText(QUEST_PROGRESSION_KEY, player.TransportConnection, true, $"QUEST Target {i} TEXT", $"{quest.Amount} / {quest.Quest.TargetAmount}");
-                EffectManager.sendUIEffectText(QUEST_PROGRESSION_KEY, player.TransportConnection, true, $"QUEST Progress {i} Fill", quest.Amount == 0 ? " " : new string(' ', Math.Min(267, quest.Amount * 267 / quest.Quest.TargetAmount)));
+                EffectManager.sendUIEffectText(QUEST_PROGRESSION_KEY, player.TransportConnection, true, $"QUEST Progress {i} Fill", quest.Amount == 0 ? UIManager.HAIRSPACE_SYMBOL_STRING : new string(UIManager.HAIRSPACE_SYMBOL_CHAR, Math.Min(267, quest.Amount * 267 / quest.Quest.TargetAmount)));
             }
         }
 
@@ -625,6 +631,45 @@ namespace UnturnedBlackout.Managers
             }
         }
 
+        // KILLSTREAK 
+
+        public void SetupKillstreakUI(GamePlayer player, int currentKillstreak = 0)
+        {
+            EffectManager.sendUIEffect(KILLSTREAK_ID, KILLSTREAK_KEY, player.TransportConnection, true);
+            for (int i = 0; i <= 2; i++)
+            {
+                if (player.OrderedKillstreaks.Count < (i + 1))
+                {
+                    EffectManager.sendUIEffectVisibility(KILLSTREAK_KEY, player.TransportConnection, true, $"KillstreakIcon{i}", false);
+                    EffectManager.sendUIEffectVisibility(KILLSTREAK_KEY, player.TransportConnection, true, $"BarContainer{i}", false);
+                    continue;
+                }
+
+                var killstreak = player.OrderedKillstreaks[i];
+                EffectManager.sendUIEffectImageURL(KILLSTREAK_KEY, player.TransportConnection, true, $"KillstreakIcon{i}", killstreak.Killstreak.IconLink);
+            }
+        }
+
+        public void UpdateKillstreakBars(GamePlayer player, int currentKillstreak)
+        {
+            for (int i = 0; i < player.OrderedKillstreaks.Count; i++)
+            {
+                var killstreak = player.OrderedKillstreaks[i];
+                var spaces = Math.Min(MAX_SPACES_KILLSTREAK, Math.Max(1, currentKillstreak * MAX_SPACES_KILLSTREAK / killstreak.Killstreak.KillstreakRequired));
+                EffectManager.sendUIEffectText(KILLSTREAK_KEY, player.TransportConnection, true, $"BarFill{i}", new string(HAIRSPACE_SYMBOL_CHAR, spaces));
+            }
+        }
+
+        public void UpdateKillstreakReady(GamePlayer player, LoadoutKillstreak killstreak)
+        {
+            var i = player.OrderedKillstreaks.IndexOf(killstreak);
+            EffectManager.sendUIEffectVisibility(KILLSTREAK_KEY, player.TransportConnection, true, $"KillstreakReady{i}", player.AvailableKillstreaks[killstreak]);
+        }
+
+        public void ClearKillstreakUI(GamePlayer player)
+        {
+            EffectManager.askEffectClearByID(KILLSTREAK_ID, player.TransportConnection);
+        }
 
         // HUD RELATED UI
 
@@ -991,10 +1036,10 @@ namespace UnturnedBlackout.Managers
             int blueSpaces = blueTeam.Score * MAX_SPACES_TDM_SCORE / Config.TDM.FileData.ScoreLimit;
             int redSpaces = redTeam.Score * MAX_SPACES_TDM_SCORE / Config.TDM.FileData.ScoreLimit;
             EffectManager.sendUIEffectText(TDM_KEY, player.GamePlayer.TransportConnection, true, $"RedNum{index}", redTeam.Score.ToString());
-            EffectManager.sendUIEffectText(TDM_KEY, player.GamePlayer.TransportConnection, true, $"RedBarFill{index}", redSpaces == 0 ? " " : new string(' ', redSpaces));
+            EffectManager.sendUIEffectText(TDM_KEY, player.GamePlayer.TransportConnection, true, $"RedBarFill{index}", redSpaces == 0 ? UIManager.HAIRSPACE_SYMBOL_STRING : new string(UIManager.HAIRSPACE_SYMBOL_CHAR, redSpaces));
 
             EffectManager.sendUIEffectText(TDM_KEY, player.GamePlayer.TransportConnection, true, $"BlueNum{index}", blueTeam.Score.ToString());
-            EffectManager.sendUIEffectText(TDM_KEY, player.GamePlayer.TransportConnection, true, $"BlueBarFill{index}", blueSpaces == 0 ? " " : new string(' ', blueSpaces));
+            EffectManager.sendUIEffectText(TDM_KEY, player.GamePlayer.TransportConnection, true, $"BlueBarFill{index}", blueSpaces == 0 ? UIManager.HAIRSPACE_SYMBOL_STRING : new string(UIManager.HAIRSPACE_SYMBOL_CHAR, blueSpaces));
         }
 
         public void UpdateTDMTimer(GamePlayer player, string text)
@@ -1009,7 +1054,7 @@ namespace UnturnedBlackout.Managers
             int spaces = changeTeam.Score * MAX_SPACES_TDM_SCORE / Config.TDM.FileData.ScoreLimit;
 
             EffectManager.sendUIEffectText(TDM_KEY, player.GamePlayer.TransportConnection, true, $"{team}Num{index}", changeTeam.Score.ToString());
-            EffectManager.sendUIEffectText(TDM_KEY, player.GamePlayer.TransportConnection, true, $"{team}BarFill{index}", spaces == 0 ? " " : new string(' ', spaces));
+            EffectManager.sendUIEffectText(TDM_KEY, player.GamePlayer.TransportConnection, true, $"{team}BarFill{index}", spaces == 0 ? UIManager.HAIRSPACE_SYMBOL_STRING : new string(UIManager.HAIRSPACE_SYMBOL_CHAR, spaces));
         }
 
         public void SetupTDMLeaderboard(List<TDMPlayer> players, ArenaLocation location, TDMTeam wonTeam, TDMTeam blueTeam, TDMTeam redTeam, bool isPlaying, bool isHardcore)
@@ -1118,10 +1163,10 @@ namespace UnturnedBlackout.Managers
             int blueSpaces = blueTeam.Score * MAX_SPACES_TDM_SCORE / Config.TDM.FileData.ScoreLimit;
             int redSpaces = redTeam.Score * MAX_SPACES_TDM_SCORE / Config.TDM.FileData.ScoreLimit;
             EffectManager.sendUIEffectText(KC_KEY, player.GamePlayer.TransportConnection, true, $"RedNum{index}", redTeam.Score.ToString());
-            EffectManager.sendUIEffectText(KC_KEY, player.GamePlayer.TransportConnection, true, $"RedBarFill{index}", redSpaces == 0 ? " " : new string(' ', redSpaces));
+            EffectManager.sendUIEffectText(KC_KEY, player.GamePlayer.TransportConnection, true, $"RedBarFill{index}", redSpaces == 0 ? UIManager.HAIRSPACE_SYMBOL_STRING : new string(UIManager.HAIRSPACE_SYMBOL_CHAR, redSpaces));
 
             EffectManager.sendUIEffectText(KC_KEY, player.GamePlayer.TransportConnection, true, $"BlueNum{index}", blueTeam.Score.ToString());
-            EffectManager.sendUIEffectText(KC_KEY, player.GamePlayer.TransportConnection, true, $"BlueBarFill{index}", blueSpaces == 0 ? " " : new string(' ', blueSpaces));
+            EffectManager.sendUIEffectText(KC_KEY, player.GamePlayer.TransportConnection, true, $"BlueBarFill{index}", blueSpaces == 0 ? UIManager.HAIRSPACE_SYMBOL_STRING : new string(UIManager.HAIRSPACE_SYMBOL_CHAR, blueSpaces));
         }
 
         public void UpdateKCTimer(GamePlayer player, string text)
@@ -1136,7 +1181,7 @@ namespace UnturnedBlackout.Managers
             int spaces = changeTeam.Score * MAX_SPACES_TDM_SCORE / Config.KC.FileData.ScoreLimit;
 
             EffectManager.sendUIEffectText(KC_KEY, player.GamePlayer.TransportConnection, true, $"{team}Num{index}", changeTeam.Score.ToString());
-            EffectManager.sendUIEffectText(KC_KEY, player.GamePlayer.TransportConnection, true, $"{team}BarFill{index}", spaces == 0 ? " " : new string(' ', spaces));
+            EffectManager.sendUIEffectText(KC_KEY, player.GamePlayer.TransportConnection, true, $"{team}BarFill{index}", spaces == 0 ? UIManager.HAIRSPACE_SYMBOL_STRING : new string(UIManager.HAIRSPACE_SYMBOL_CHAR, spaces));
         }
 
         public void SetupKCLeaderboard(List<KCPlayer> players, ArenaLocation location, KCTeam wonTeam, KCTeam blueTeam, KCTeam redTeam, bool isPlaying, bool isHardcore)
