@@ -209,7 +209,7 @@ namespace UnturnedBlackout.GameTypes
             {
                 return;
             }
-            Logging.Debug("1");
+
             Feed feed;
             if (weaponID == 0 || weaponID == 1)
             {
