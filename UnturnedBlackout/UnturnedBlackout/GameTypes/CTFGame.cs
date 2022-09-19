@@ -939,7 +939,7 @@ namespace UnturnedBlackout.GameTypes
                         var secondary = ply.inventory.getItem(1, 0);
                         if (secondary != null)
                         {
-                            ply.equipment.tryEquip(1, secondary.x, secondary.y);
+                            ply.equipment.ServerEquip(1, secondary.x, secondary.y);
                         }
                         else
                         {
