@@ -236,7 +236,6 @@ namespace UnturnedBlackout.GameTypes
                     var locc = Config.Locations.FileData.ArenaLocations.FirstOrDefault(k => k.LocationID == loc);
                     locString += $"{locc.LocationName},";
                 }
-                Logging.Debug($"Game ending, locations available: {locString}");
                 var randomLocation = locations.Count > 0 ? locations[UnityEngine.Random.Range(0, locations.Count)] : Location.LocationID;
                 var location = Config.Locations.FileData.ArenaLocations.FirstOrDefault(k => k.LocationID == randomLocation);
                 var gameMode = Plugin.Instance.Game.GetRandomGameMode(location.LocationID);
@@ -651,14 +650,12 @@ namespace UnturnedBlackout.GameTypes
             parameters.applyGlobalArmorMultiplier = IsHardcore;
             if (GamePhase != EGamePhase.Started)
             {
-                Logging.Debug($"{player.GamePlayer.Player.CharacterName} got damaged but damage got ignored due to game not being started yet");
                 shouldAllow = false;
                 return;
             }
 
             if (player.GamePlayer.HasSpawnProtection)
             {
-                Logging.Debug($"{player.GamePlayer.Player.CharacterName} got damaged but damage got ignored due to spawn protection");
                 shouldAllow = false;
                 return;
             }
@@ -694,7 +691,6 @@ namespace UnturnedBlackout.GameTypes
 
             if (kPlayer.Team == player.Team && kPlayer != player)
             {
-                Logging.Debug($"{player.GamePlayer.Player.CharacterName} got damaged by {kPlayer.GamePlayer.Player.CharacterName} but damage got ignored due to being on the same team");
                 shouldAllow = false;
                 return;
             }
@@ -703,7 +699,6 @@ namespace UnturnedBlackout.GameTypes
 
             if (kPlayer.GamePlayer.HasSpawnProtection)
             {
-                Logging.Debug($"{kPlayer.GamePlayer.Player.CharacterName} damaged someone but had spawn protection, turning it off");
                 kPlayer.GamePlayer.SpawnProtectionRemover.Stop();
                 kPlayer.GamePlayer.HasSpawnProtection = false;
             }

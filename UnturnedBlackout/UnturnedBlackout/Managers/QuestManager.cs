@@ -19,18 +19,7 @@ namespace UnturnedBlackout.Managers
 
             ThreadPool.QueueUserWorkItem((o) =>
             {
-                try
-                {
-                    Plugin.Instance.Achievement.CheckAchievement(player, questType, questConditions);
-                }
-                catch (Exception ex)
-                {
-                    Logger.LogException(ex, $"ERROR CHECKING ACHIEVEMENT WITH TYPE {questType} and conditions {questConditions}");
-                    foreach (var condition in questConditions)
-                    {
-                        Logging.Debug($"CONDITION TYPE: {condition.Key}, CONDITION VALUE: {condition.Value}");
-                    }
-                }
+                Plugin.Instance.Achievement.CheckAchievement(player, questType, questConditions);
             });
 
             if (!data.QuestsSearchByType.TryGetValue(questType, out List<PlayerQuest> quests))
@@ -64,7 +53,6 @@ namespace UnturnedBlackout.Managers
                 }
 
                 quest.Amount += 1;
-                Logging.Debug($"QUEST AMOUNT: {quest.Amount}, QUEST TARGET AMOUNT: {quest.Quest.TargetAmount}, PERCENT COMPLETION MODULUS: {quest.Amount * 100 / quest.Quest.TargetAmount % 10}");
                 if (quest.Amount >= quest.Quest.TargetAmount)
                 {
                     Plugin.Instance.UI.SendAnimation(player, new Models.Animation.AnimationInfo(EAnimationType.QuestCompletion, quest.Quest));
@@ -75,7 +63,6 @@ namespace UnturnedBlackout.Managers
                 }
                 else if (quest.Amount * 100 / quest.Quest.TargetAmount % 10 == 0)
                 {
-                    Logging.Debug("Modulus is 0, meaning 10% of quest is completed, sending quest progression");
                     pendingQuestsProgression.Add(quest);
                 }
 

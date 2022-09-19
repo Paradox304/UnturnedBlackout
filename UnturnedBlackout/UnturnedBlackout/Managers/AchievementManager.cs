@@ -20,7 +20,6 @@ namespace UnturnedBlackout.Managers
 
             if (!data.AchievementsSearchByType.TryGetValue(achievementType, out List<PlayerAchievement> achievements))
             {
-                Logging.Debug($"Player has no achievement with type {achievementType}, returning");
                 return;
             }
 

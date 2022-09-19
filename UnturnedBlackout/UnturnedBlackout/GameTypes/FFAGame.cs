@@ -106,20 +106,16 @@ namespace UnturnedBlackout.GameTypes
             foreach (var player in Players)
             {
                 var totalMinutesPlayed = (int)(endTime - player.StartTime).TotalMinutes;
-                Logging.Debug($"{player.GamePlayer.Player.CharacterName} total minutes: {totalMinutesPlayed}");
                 if (totalMinutesPlayed < Config.RoundEndCases.FileData.MinimumMinutesPlayed || player.Kills == 0)
                 {
-                    Logging.Debug($"Total minutes played less than min minutes, ignoring");
                     continue;
                 }
 
                 var chance = Config.RoundEndCases.FileData.Chance * totalMinutesPlayed;
-                Logging.Debug($"Chance: {chance}");
                 if (UnityEngine.Random.Range(1, 101) > chance)
                 {
                     continue;
                 }
-                Logging.Debug("Chance passed, add to the roundEndCasesPlayers list");
                 roundEndCasesPlayers.Add(player.GamePlayer);
                 if (roundEndCasesPlayers.Count == 8) break;
             }
@@ -130,11 +126,9 @@ namespace UnturnedBlackout.GameTypes
                 var @case = GetRandomRoundEndCase();
                 if (@case == null)
                 {
-                    Logging.Debug($"Random case is null");
                     continue;
                 }
 
-                Logging.Debug($"Random case is not null, add the case and give it to player");
                 roundEndCases.Add((roundEndCasePlayer, @case));
                 ThreadPool.QueueUserWorkItem(async (o) =>
                 {
@@ -202,7 +196,6 @@ namespace UnturnedBlackout.GameTypes
                     var locc = Config.Locations.FileData.ArenaLocations.FirstOrDefault(k => k.LocationID == loc);
                     locString += $"{locc.LocationName},";
                 }
-                Logging.Debug($"Game ending, locations available: {locString}");
                 var randomLocation = locations.Count > 0 ? locations[UnityEngine.Random.Range(0, locations.Count)] : Location.LocationID;
                 var location = Config.Locations.FileData.ArenaLocations.FirstOrDefault(k => k.LocationID == randomLocation);
                 var gameMode = Plugin.Instance.Game.GetRandomGameMode(location.LocationID);
@@ -604,14 +597,12 @@ namespace UnturnedBlackout.GameTypes
             parameters.applyGlobalArmorMultiplier = IsHardcore;
             if (GamePhase != EGamePhase.Started)
             {
-                Logging.Debug($"{player.GamePlayer.Player.CharacterName} got damaged, but damage got ignored due to game not started yet");
                 shouldAllow = false;
                 return;
             }
 
             if (player.GamePlayer.HasSpawnProtection)
             {
-                Logging.Debug($"{player.GamePlayer.Player.CharacterName} got damaged but damage got ignored due to spawn protection");
                 shouldAllow = false;
                 return;
             }
@@ -651,7 +642,6 @@ namespace UnturnedBlackout.GameTypes
 
             if (kPlayer.GamePlayer.HasSpawnProtection)
             {
-                Logging.Debug($"{kPlayer.GamePlayer.Player.CharacterName} damaged someone but had spawn protection, removing spawn protection");
                 kPlayer.GamePlayer.SpawnProtectionRemover.Stop();
                 kPlayer.GamePlayer.HasSpawnProtection = false;
             }

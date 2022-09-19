@@ -109,7 +109,6 @@ namespace UnturnedBlackout.GameTypes
                 WipeItems();
                 ItemManager.dropItem(new Item(RedTeam.FlagID, true), RedTeam.FlagSP, true, true, true);
                 ItemManager.dropItem(new Item(BlueTeam.FlagID, true), BlueTeam.FlagSP, true, true, true);
-                Logging.Debug($"Dropping red flag at {RedTeam.FlagSP} and blue flag at {BlueTeam.FlagSP} for location {Location.LocationName}");
             });
 
             GameEnder = Plugin.Instance.StartCoroutine(EndGame());
@@ -178,11 +177,9 @@ namespace UnturnedBlackout.GameTypes
                 var @case = GetRandomRoundEndCase();
                 if (@case == null)
                 {
-                    Logging.Debug($"Random case is null");
                     continue;
                 }
 
-                Logging.Debug($"Random case is not null, add the case and give it to player");
                 roundEndCases.Add((roundEndCasePlayer, @case));
                 ThreadPool.QueueUserWorkItem(async (o) =>
                 {
@@ -254,7 +251,6 @@ namespace UnturnedBlackout.GameTypes
                     var locc = Config.Locations.FileData.ArenaLocations.FirstOrDefault(k => k.LocationID == loc);
                     locString += $"{locc.LocationName},";
                 }
-                Logging.Debug($"Game ending, locations available: {locString}");
                 var randomLocation = locations.Count > 0 ? locations[UnityEngine.Random.Range(0, locations.Count)] : Location.LocationID;
                 var location = Config.Locations.FileData.ArenaLocations.FirstOrDefault(k => k.LocationID == randomLocation);
                 var gameMode = Plugin.Instance.Game.GetRandomGameMode(location.LocationID);
@@ -652,7 +648,6 @@ namespace UnturnedBlackout.GameTypes
 
                 if (equipmentUsed != 0)
                 {
-                    Logging.Debug($"Sending killfeed with equipment {equipmentUsed}");
                     OnKill(kPlayer.GamePlayer, cPlayer.GamePlayer, equipmentUsed, kPlayer.Team.Info.KillFeedHexCode, cPlayer.Team.Info.KillFeedHexCode);
                 }
 
@@ -708,14 +703,12 @@ namespace UnturnedBlackout.GameTypes
             parameters.applyGlobalArmorMultiplier = IsHardcore;
             if (GamePhase != EGamePhase.Started)
             {
-                Logging.Debug($"{player.GamePlayer.Player.CharacterName} got damaged but damage got ignored due to game not started yet");
                 shouldAllow = false;
                 return;
             }
 
             if (player.GamePlayer.HasSpawnProtection)
             {
-                Logging.Debug($"{player.GamePlayer.Player.CharacterName} got damaged but damage got ignored due to spawn protection");
                 shouldAllow = false;
                 return;
             }
@@ -751,7 +744,6 @@ namespace UnturnedBlackout.GameTypes
 
             if (kPlayer.Team == player.Team && kPlayer != player)
             {
-                Logging.Debug($"{player.GamePlayer.Player.CharacterName} got damaged by {kPlayer.GamePlayer.Player.CharacterName} but damage got ignored due to being of the same team");
                 shouldAllow = false;
                 return;
             }
@@ -760,7 +752,6 @@ namespace UnturnedBlackout.GameTypes
 
             if (kPlayer.GamePlayer.HasSpawnProtection)
             {
-                Logging.Debug($"{kPlayer.GamePlayer.Player.CharacterName} damaged someone but had spawn protection, removing spawn protection");
                 kPlayer.GamePlayer.SpawnProtectionRemover.Stop();
                 kPlayer.GamePlayer.HasSpawnProtection = false;
             }
