@@ -409,14 +409,7 @@ namespace UnturnedBlackout.GameTypes
 
                 if (kPlayer.GamePlayer.SteamID == tPlayer.GamePlayer.SteamID)
                 {
-                    if (cause == EDeathCause.WATER)
-                    {
-                        OnKill(kPlayer.GamePlayer, tPlayer.GamePlayer, 0, kPlayer.Team.Info.KillFeedHexCode, tPlayer.Team.Info.KillFeedHexCode);
-                    }
-                    else if (cause == EDeathCause.LANDMINE || cause == EDeathCause.SHRED || cause == EDeathCause.GRENADE)
-                    {
-                        OnKill(kPlayer.GamePlayer, tPlayer.GamePlayer, 1, kPlayer.Team.Info.KillFeedHexCode, tPlayer.Team.Info.KillFeedHexCode);
-                    }
+                    OnKill(kPlayer.GamePlayer, tPlayer.GamePlayer, cause == EDeathCause.WATER ? (ushort)0 : (ushort)1, kPlayer.Team.Info.KillFeedHexCode, tPlayer.Team.Info.KillFeedHexCode);
 
                     Logging.Debug("Player killed themselves, returning");
                     return;
@@ -603,7 +596,7 @@ namespace UnturnedBlackout.GameTypes
                 }
                 if (equipmentUsed != 0)
                 {
-                    OnKill(kPlayer.GamePlayer, tPlayer.GamePlayer, kPlayer.GamePlayer.Player.Player.equipment.itemID, kPlayer.Team.Info.KillFeedHexCode, tPlayer.Team.Info.KillFeedHexCode);
+                    OnKill(kPlayer.GamePlayer, tPlayer.GamePlayer, equipmentUsed, kPlayer.Team.Info.KillFeedHexCode, tPlayer.Team.Info.KillFeedHexCode);
                 }
 
                 Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.Kill, questConditions);

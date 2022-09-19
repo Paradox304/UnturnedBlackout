@@ -164,7 +164,6 @@ namespace UnturnedBlackout.Models.Global
         public void GiveSpawnProtection(int seconds)
         {
             /*
-            Logging.Debug($"Giving {Player.CharacterName} spawn protection for {seconds} seconds");
             if (m_RemoveSpawnProtection.Enabled)
             {
                 Logging.Debug($"Timer to remove spawn protection is already enabled");
@@ -178,6 +177,7 @@ namespace UnturnedBlackout.Models.Global
             Logging.Debug($"Starting timer to remove spawn protection at {DateTime.UtcNow}");
             */
 
+            Logging.Debug($"Giving {Player.CharacterName} spawn protection for {seconds} seconds at {DateTime.UtcNow}");
             SpawnProtectionRemover.Stop();
             HasSpawnProtection = true;
             SpawnProtectionRemover = Plugin.Instance.StartCoroutine(RemoveSpawnProtection(seconds));
@@ -186,6 +186,7 @@ namespace UnturnedBlackout.Models.Global
         public IEnumerator RemoveSpawnProtection(int seconds)
         {
             yield return new WaitForSeconds(seconds);
+            Logging.Debug($"Timer to remove spawn protection for {Player.CharacterName} has passed at {DateTime.UtcNow} removing spawn protection");
             HasSpawnProtection = false;
         }
 
@@ -249,7 +250,7 @@ namespace UnturnedBlackout.Models.Global
             {
                 HasTactical = true;
                 var tactician = loadout.PerksSearchByType.TryGetValue("tactician", out LoadoutPerk tacticianPerk) ? tacticianPerk.Perk.SkillLevel : 0f;
-                TacticalIntervalSeconds = (float)loadout.Tactical.Gadget.GiveSeconds * 1000 * (1 - (tactician / 100));
+                TacticalIntervalSeconds = (float)loadout.Tactical.Gadget.GiveSeconds * (1 - (tactician / 100));
                 //m_TacticalChecker.Interval = (float)loadout.Tactical.Gadget.GiveSeconds * 1000 * (1 - (tactician / 100));
             }
 
@@ -257,7 +258,7 @@ namespace UnturnedBlackout.Models.Global
             {
                 HasLethal = true;
                 var grenadier = loadout.PerksSearchByType.TryGetValue("grenadier", out LoadoutPerk grenadierPerk) ? grenadierPerk.Perk.SkillLevel : 0f;
-                LethalIntervalSeconds = (float)loadout.Lethal.Gadget.GiveSeconds * 1000 * (1 - (grenadier / 100));
+                LethalIntervalSeconds = (float)loadout.Lethal.Gadget.GiveSeconds * (1 - (grenadier / 100));
                 //m_LethalChecker.Interval = (float)loadout.Lethal.Gadget.GiveSeconds * 1000 * (1 - (grenadier / 100));
             }
 
@@ -322,13 +323,19 @@ namespace UnturnedBlackout.Models.Global
 
         public IEnumerator EnableLethal()
         {
+            Logging.Debug($"Enabling lethal for {Player.CharacterName}, time to wait {LethalIntervalSeconds}");
             yield return new WaitForSeconds(LethalIntervalSeconds);
+            Logging.Debug($"Waited enough, giving lethal");
+            HasLethal = true;
             Plugin.Instance.UI.UpdateGadgetUsed(this, false, false);
         }
 
         public IEnumerator EnableTactical()
         {
-            yield return new WaitForSeconds(TacticalIntervalSeconds);
+            Logging.Debug($"Enabling tactical for {Player.CharacterName}, time to wait {LethalIntervalSeconds}");
+            yield return new WaitForSeconds(LethalIntervalSeconds);
+            Logging.Debug($"Waited enough, giving tactical");
+            HasTactical = true;
             Plugin.Instance.UI.UpdateGadgetUsed(this, true, false);
         }
 
@@ -565,23 +572,30 @@ namespace UnturnedBlackout.Models.Global
 
             if (Player.Player.equipment.itemID == 0)
             {
-                Player.Player.movement.sendPluginSpeedMultiplier(1f);
                 return;
             }
 
             var flagCarryingSpeed = isCarryingFlag ? Config.CTF.FileData.FlagCarryingSpeed : 0f;
-            var updatedMovement = 1f + flagCarryingSpeed;
-            if (Player.Player.equipment.itemID == (ActiveLoadout.Primary?.Gun?.GunID ?? 0) || Player.Player.equipment.itemID == (ActiveLoadout.PrimarySkin?.SkinID ?? 0))
+            float updatedMovement;
+            if (isCarryingFlag)
             {
-                updatedMovement = (PrimaryMovementChange + SecondaryMovementChange) + (isADS ? PrimaryMovementChangeADS : 0) + flagCarryingSpeed;
+                updatedMovement = Config.CTF.FileData.FlagCarryingSpeed;
             }
-            else if (Player.Player.equipment.itemID == (ActiveLoadout.Secondary?.Gun?.GunID ?? 0) || Player.Player.equipment.itemID == (ActiveLoadout.PrimarySkin?.SkinID ?? 0))
+            else if (Player.Player.equipment.itemID == (ActiveLoadout.Primary?.Gun?.GunID ?? 0) || Player.Player.equipment.itemID == (ActiveLoadout.PrimarySkin?.SkinID ?? 0))
             {
-                updatedMovement = (PrimaryMovementChange + SecondaryMovementChange) + (isADS ? SecondaryMovementChangeADS : 0) + flagCarryingSpeed;
+                updatedMovement = PrimaryMovementChange + SecondaryMovementChange + (isADS ? PrimaryMovementChangeADS : 0) + flagCarryingSpeed;
+            }
+            else if (Player.Player.equipment.itemID == (ActiveLoadout.Secondary?.Gun?.GunID ?? 0) || Player.Player.equipment.itemID == (ActiveLoadout.SecondarySkin?.SkinID ?? 0))
+            {
+                updatedMovement = PrimaryMovementChange + SecondaryMovementChange + (isADS ? SecondaryMovementChangeADS : 0) + flagCarryingSpeed;
             }
             else if (Player.Player.equipment.itemID == (ActiveLoadout.Knife.Knife.KnifeID))
             {
                 updatedMovement = KnifeMovementChange + flagCarryingSpeed;
+            }
+            else
+            {
+                return;
             }
 
             if (updatedMovement == Player.Player.movement.pluginSpeedMultiplier)
