@@ -618,7 +618,7 @@ namespace UnturnedBlackout.GameTypes
 
             if (player.GamePlayer.HasSpawnProtection)
             {
-                Logging.Debug($"{player.GamePlayer.Player.CharacterName} got damaged but damage got ignored due to spawn protection, Is Timer Enabled: {player.GamePlayer.m_RemoveSpawnProtection.Enabled}");
+                Logging.Debug($"{player.GamePlayer.Player.CharacterName} got damaged but damage got ignored due to spawn protection");
                 shouldAllow = false;
                 return;
             }
@@ -659,7 +659,7 @@ namespace UnturnedBlackout.GameTypes
             if (kPlayer.GamePlayer.HasSpawnProtection)
             {
                 Logging.Debug($"{kPlayer.GamePlayer.Player.CharacterName} damaged someone but had spawn protection, removing spawn protection");
-                kPlayer.GamePlayer.m_RemoveSpawnProtection.Stop();
+                kPlayer.GamePlayer.SpawnProtectionRemover.Stop();
                 kPlayer.GamePlayer.HasSpawnProtection = false;
             }
         }

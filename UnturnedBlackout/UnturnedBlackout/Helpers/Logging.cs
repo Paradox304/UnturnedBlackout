@@ -12,8 +12,9 @@ namespace UnturnedBlackout
             {
                 var method = new StackTrace().GetFrame(1).GetMethod();
                 Console.ForegroundColor = color;
-                Console.WriteLine($"[{method.ReflectedType}.{method.Name}]: {message}");
-                Logger.ExternalLog(message, color);
+                var m = $"[{DateTime.UtcNow:dd/MM/yyyy hh:mm:ss}] [{method.ReflectedType}.{method.Name}]: {message}";
+                Console.WriteLine(m);
+                Logger.ExternalLog(m, color);
                 Console.ResetColor();
             }
         }

@@ -14,6 +14,14 @@ namespace UnturnedBlackout
 {
     public static class Utility
     {
+        public static void Stop(this Coroutine cr)
+        {
+            if (cr != null)
+            {
+                Plugin.Instance.StopCoroutine(cr);
+            }
+        }
+
         public static string ToRich(this string value)
         {
             return value.Replace('[', '<').Replace(']', '>').Replace("osqb", "[").Replace("csqb", "]");

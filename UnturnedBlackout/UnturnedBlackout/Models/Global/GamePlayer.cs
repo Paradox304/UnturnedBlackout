@@ -60,8 +60,15 @@ namespace UnturnedBlackout.Models.Global
         public byte KnifeX { get; set; }
         public byte KnifeY { get; set; }
 
+        public byte KillstreakPage { get; set; }
+        public byte KillstreakX { get; set; }
+        public byte KillstreakY { get; set; }
+
         public bool HasTactical { get; set; }
         public bool HasLethal { get; set; }
+
+        public float TacticalIntervalSeconds { get; set; }
+        public float LethalIntervalSeconds { get; set; }
 
         public bool HasKillstreakActive { get; set; }
         public LoadoutKillstreak ActiveKillstreak { get; set; }
@@ -84,11 +91,19 @@ namespace UnturnedBlackout.Models.Global
         public Coroutine RespawnTimer { get; set; }
         public Coroutine VoiceChatChecker { get; set; }
         public Coroutine AnimationChecker { get; set; }
-        public Timer m_RemoveSpawnProtection { get; set; }
-        public Timer m_DamageChecker { get; set; }
-        public Timer m_TacticalChecker { get; set; }
-        public Timer m_LethalChecker { get; set; }
-        public Timer m_KillstreakChecker { get; set; }
+        public Coroutine KillstreakItemRemover { get; set; }
+        public Coroutine GadgetGiver { get; set; }
+        public Coroutine SpawnProtectionRemover { get; set; }
+        public Coroutine DamageChecker { get; set; }
+        public Coroutine TacticalChecker { get; set; }
+        public Coroutine LethalChecker { get; set; }
+        public Coroutine KillstreakChecker { get; set; }
+
+        //public Timer m_RemoveSpawnProtection { get; set; }
+        //public Timer m_DamageChecker { get; set; }
+        //public Timer m_TacticalChecker { get; set; }
+        //public Timer m_LethalChecker { get; set; }
+        //public Timer m_KillstreakChecker { get; set; }
 
         public GamePlayer(UnturnedPlayer player, ITransportConnection transportConnection)
         {
@@ -110,25 +125,45 @@ namespace UnturnedBlackout.Models.Global
             KillstreakTriggers = new();
             OrderedKillstreaks = new();
 
-            m_RemoveSpawnProtection = new Timer(1 * 1000);
+            /*
+            m_RemoveSpawnProtection = new Timer(1 * 1000)
+            {
+                AutoReset = false
+            };
             m_RemoveSpawnProtection.Elapsed += RemoveSpawnProtection;
 
-            m_DamageChecker = new Timer(Config.Base.FileData.LastDamageAfterHealSeconds * 1000);
+            m_DamageChecker = new Timer(Config.Base.FileData.LastDamageAfterHealSeconds * 1000)
+            {
+                AutoReset = false
+            };
             m_DamageChecker.Elapsed += CheckDamage;
 
-            m_TacticalChecker = new Timer(1 * 1000);
+            m_TacticalChecker = new Timer(1 * 1000)
+            {
+                AutoReset = false
+            };
             m_TacticalChecker.Elapsed += EnableTactical;
 
-            m_LethalChecker = new Timer(1 * 1000);
+            m_LethalChecker = new Timer(1 * 1000)
+            {
+                AutoReset = false
+            };
             m_LethalChecker.Elapsed += EnableLethal;
 
-            m_KillstreakChecker = new Timer(1 * 1000);
+            m_KillstreakChecker = new Timer(1 * 1000)
+            {
+                AutoReset = false
+            };
+
             m_KillstreakChecker.Elapsed += CheckKillstreak;
+            */
+
         }
 
         // Spawn Protection Seconds
         public void GiveSpawnProtection(int seconds)
         {
+            /*
             Logging.Debug($"Giving {Player.CharacterName} spawn protection for {seconds} seconds");
             if (m_RemoveSpawnProtection.Enabled)
             {
@@ -141,14 +176,26 @@ namespace UnturnedBlackout.Models.Global
             Logging.Debug($"Setting timer removal interval to {m_RemoveSpawnProtection.Interval}");
             m_RemoveSpawnProtection.Start();
             Logging.Debug($"Starting timer to remove spawn protection at {DateTime.UtcNow}");
+            */
+
+            SpawnProtectionRemover.Stop();
+            HasSpawnProtection = true;
+            SpawnProtectionRemover = Plugin.Instance.StartCoroutine(RemoveSpawnProtection(seconds));
         }
 
+        public IEnumerator RemoveSpawnProtection(int seconds)
+        {
+            yield return new WaitForSeconds(seconds);
+            HasSpawnProtection = false;
+        }
+
+        /*
         private void RemoveSpawnProtection(object sender, ElapsedEventArgs e)
         {
             Logging.Debug($"Timer to remove spawn protection for {Player.CharacterName} has passed at {DateTime.UtcNow} removing spawn protection");
             HasSpawnProtection = false;
-            m_RemoveSpawnProtection.Stop();
         }
+        */
 
         // Loadout
 
@@ -178,6 +225,10 @@ namespace UnturnedBlackout.Models.Global
 
             KnifeMovementChange = primaryMovementChange + secondaryMovementChange + loadout.GetKnifeMovement();
 
+            LethalChecker.Stop();
+            TacticalChecker.Stop();
+
+            /*
             if (m_LethalChecker.Enabled)
             {
                 m_LethalChecker.Stop();
@@ -187,6 +238,7 @@ namespace UnturnedBlackout.Models.Global
             {
                 m_TacticalChecker.Stop();
             }
+            */
 
             var medic = loadout.PerksSearchByType.TryGetValue("medic", out LoadoutPerk medicPerk) ? medicPerk.Perk.SkillLevel : 0f;
             HealAmount = Config.Base.FileData.HealAmount * (1 + (medic / 100));
@@ -197,14 +249,16 @@ namespace UnturnedBlackout.Models.Global
             {
                 HasTactical = true;
                 var tactician = loadout.PerksSearchByType.TryGetValue("tactician", out LoadoutPerk tacticianPerk) ? tacticianPerk.Perk.SkillLevel : 0f;
-                m_TacticalChecker.Interval = (float)loadout.Tactical.Gadget.GiveSeconds * 1000 * (1 - (tactician / 100));
+                TacticalIntervalSeconds = (float)loadout.Tactical.Gadget.GiveSeconds * 1000 * (1 - (tactician / 100));
+                //m_TacticalChecker.Interval = (float)loadout.Tactical.Gadget.GiveSeconds * 1000 * (1 - (tactician / 100));
             }
 
             if (loadout.Lethal != null)
             {
                 HasLethal = true;
                 var grenadier = loadout.PerksSearchByType.TryGetValue("grenadier", out LoadoutPerk grenadierPerk) ? grenadierPerk.Perk.SkillLevel : 0f;
-                m_LethalChecker.Interval = (float)loadout.Lethal.Gadget.GiveSeconds * 1000 * (1 - (grenadier / 100));
+                LethalIntervalSeconds = (float)loadout.Lethal.Gadget.GiveSeconds * 1000 * (1 - (grenadier / 100));
+                //m_LethalChecker.Interval = (float)loadout.Lethal.Gadget.GiveSeconds * 1000 * (1 - (grenadier / 100));
             }
 
             Plugin.Instance.UI.UpdateGadgetUsed(this, false, !HasLethal);
@@ -228,12 +282,19 @@ namespace UnturnedBlackout.Models.Global
                 TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.Quest.CheckQuest(this, EQuestType.GadgetsUsed, questConditions));
             }
 
+            /*
             if (m_TacticalChecker.Enabled)
             {
                 m_TacticalChecker.Stop();
             }
             m_TacticalChecker.Start();
-            Plugin.Instance.StartCoroutine(GiveGadget(ActiveLoadout.Tactical.Gadget.GadgetID));
+            */
+
+            TacticalChecker.Stop();
+            TacticalChecker = Plugin.Instance.StartCoroutine(EnableTactical());
+
+            GadgetGiver.Stop();
+            GadgetGiver = Plugin.Instance.StartCoroutine(GiveGadget(ActiveLoadout.Tactical.Gadget.GadgetID));
         }
 
         public void UsedLethal()
@@ -251,18 +312,30 @@ namespace UnturnedBlackout.Models.Global
                 TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.Quest.CheckQuest(this, EQuestType.GadgetsUsed, questConditions));
             }
 
-            if (m_LethalChecker.Enabled)
-            {
-                m_LethalChecker.Stop();
-            }
-            m_LethalChecker.Start();
-            Plugin.Instance.StartCoroutine(GiveGadget(ActiveLoadout.Lethal.Gadget.GadgetID));
+            LethalChecker.Stop();
+            LethalChecker = Plugin.Instance.StartCoroutine(EnableLethal());
+
+            //m_LethalChecker.Start();
+            GadgetGiver.Stop();
+            GadgetGiver = Plugin.Instance.StartCoroutine(GiveGadget(ActiveLoadout.Lethal.Gadget.GadgetID));
         }
 
+        public IEnumerator EnableLethal()
+        {
+            yield return new WaitForSeconds(LethalIntervalSeconds);
+            Plugin.Instance.UI.UpdateGadgetUsed(this, false, false);
+        }
+
+        public IEnumerator EnableTactical()
+        {
+            yield return new WaitForSeconds(TacticalIntervalSeconds);
+            Plugin.Instance.UI.UpdateGadgetUsed(this, true, false);
+        }
+
+        /*
         private void EnableLethal(object sender, ElapsedEventArgs e)
         {
             HasLethal = true;
-            m_LethalChecker.Stop();
 
             TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateGadgetUsed(this, false, false));
         }
@@ -270,10 +343,10 @@ namespace UnturnedBlackout.Models.Global
         private void EnableTactical(object sender, ElapsedEventArgs e)
         {
             HasTactical = true;
-            m_TacticalChecker.Stop();
 
             TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateGadgetUsed(this, true, false));
         }
+        */
 
         public IEnumerator GiveGadget(ushort id)
         {
@@ -294,15 +367,9 @@ namespace UnturnedBlackout.Models.Global
 
         public void OnDamaged(CSteamID damager)
         {
-            if (m_DamageChecker.Enabled)
-            {
-                m_DamageChecker.Stop();
-            }
-            if (Healer != null)
-            {
-                Plugin.Instance.StopCoroutine(Healer);
-            }
-            m_DamageChecker.Start();
+            DamageChecker.Stop();
+            Healer.Stop();
+            DamageChecker = Plugin.Instance.StartCoroutine(CheckDamage());
 
             var damagerPlayer = Plugin.Instance.Game.GetGamePlayer(damager);
             if (damagerPlayer == null)
@@ -318,14 +385,21 @@ namespace UnturnedBlackout.Models.Global
             LastDamager.Push(damager);
         }
 
+        public IEnumerator CheckDamage()
+        {
+            yield return new WaitForSeconds(Config.Base.FileData.LastDamageAfterHealSeconds);
+            Healer = Plugin.Instance.StartCoroutine(HealPlayer());
+        }
+
+        /*
         private void CheckDamage(object sender, ElapsedEventArgs e)
         {
             TaskDispatcher.QueueOnMainThread(() =>
             {
                 Healer = Plugin.Instance.StartCoroutine(HealPlayer());
             });
-            m_DamageChecker.Stop();
         }
+        */
 
         public IEnumerator HealPlayer()
         {
@@ -366,14 +440,9 @@ namespace UnturnedBlackout.Models.Global
                 LastKiller = killer;
             }
 
-            if (m_DamageChecker.Enabled)
-            {
-                m_DamageChecker.Stop();
-            }
-            if (Healer != null)
-            {
-                Plugin.Instance.StopCoroutine(Healer);
-            }
+            DamageChecker.Stop();
+            Healer.Stop();
+
             Plugin.Instance.UI.RemoveKillCard(this);
 
             var killerPlayer = Plugin.Instance.Game.GetGamePlayer(killer);
@@ -430,18 +499,14 @@ namespace UnturnedBlackout.Models.Global
 
         public void OnStanceChanged(EPlayerStance newStance)
         {
-            if (newStance == EPlayerStance.CLIMB)
-            {
-                LastEquippedPage = Player.Player.equipment.equippedPage;
-                LastEquippedX = Player.Player.equipment.equipped_x;
-                LastEquippedY = Player.Player.equipment.equipped_y;
-            }
-
             TaskDispatcher.QueueOnMainThread(() =>
             {
                 if (PreviousStance == EPlayerStance.CLIMB && newStance != EPlayerStance.CLIMB)
                 {
-                    Player.Player.equipment.ServerEquip(LastEquippedPage, LastEquippedX, LastEquippedY);
+                    if (!HasKillstreakActive)
+                        Player.Player.equipment.ServerEquip(LastEquippedPage, LastEquippedX, LastEquippedY);
+                    else
+                        Player.Player.equipment.ServerEquip(KillstreakPage, KillstreakX, KillstreakY);
                 }
                 PreviousStance = newStance;
             });
@@ -455,12 +520,9 @@ namespace UnturnedBlackout.Models.Global
             {
                 Plugin.Instance.StopCoroutine(VoiceChatChecker);
             }
-            else
+            else if (CurrentGame != null)
             {
-                if (CurrentGame != null)
-                {
-                    CurrentGame.OnStartedTalking(this);
-                }
+                CurrentGame.OnStartedTalking(this);
             }
 
             VoiceChatChecker = Plugin.Instance.StartCoroutine(CheckVoiceChat());
@@ -527,11 +589,7 @@ namespace UnturnedBlackout.Models.Global
                 return;
             }
 
-            if (MovementChanger != null)
-            {
-                Plugin.Instance.StopCoroutine(MovementChanger);
-            }
-
+            MovementChanger.Stop();
             MovementChanger = Plugin.Instance.StartCoroutine(ChangeMovement(updatedMovement));
         }
 
@@ -565,14 +623,102 @@ namespace UnturnedBlackout.Models.Global
                 KillstreakTriggers.Add(killstreak.Killstreak.KillstreakInfo.TriggerItemID, killstreak);
             }
 
+            if (OrderedKillstreaks.Count == 0)
+            {
+                Plugin.Instance.UI.ClearKillstreakUI(this);
+            }
+            else
+            {
+                Plugin.Instance.UI.SetupKillstreakUI(this);
+            }
+        }
+        
+        public void UpdateKillstreak(int currentKillstreak)
+        {
+            Logging.Debug($"Updating killstreak for {Player.CharacterName} with current killstreak {currentKillstreak}");
+            var availableKillstreak = OrderedKillstreaks.FirstOrDefault(k => k.Killstreak.KillstreakRequired == currentKillstreak && !AvailableKillstreaks[k]);
+            if (availableKillstreak != null)
+            {
+                Logging.Debug($"Found killstreak with id {availableKillstreak.Killstreak.KillstreakID} that is to be made available with requirement {availableKillstreak.Killstreak.KillstreakRequired}");
+                AvailableKillstreaks[availableKillstreak] = true;
+                Plugin.Instance.UI.UpdateKillstreakReady(this, availableKillstreak);
+            }
+
+            Logging.Debug($"Updating killstreak bars");
+            Plugin.Instance.UI.UpdateKillstreakBars(this, currentKillstreak);
+        }
+
+        public void ActivateKillstreak(LoadoutKillstreak killstreak)
+        {
+            Logging.Debug($"Activating killstreak with id {killstreak.Killstreak.KillstreakID} for {Player.CharacterName}");
+            var info = killstreak.Killstreak.KillstreakInfo;
+            var inv = Player.Player.inventory;
+            if (info.IsItem == false) return;
+
+            inv.forceAddItem(new Item(info.ItemID, true), true);
+            Logging.Debug($"Gave the item to the player");
+            for (byte page = 0; page < PlayerInventory.PAGES - 2; page++)
+            {
+                var shouldBreak = false;
+                for (int index = inv.getItemCount(page) - 1; index >= 0; index--)
+                {
+                    var item = inv.getItem(page, (byte)index);
+                    if (item != null && item.item.id == info.ItemID)
+                    {
+                        KillstreakPage = page;
+                        KillstreakX = item.x;
+                        KillstreakY = item.y;
+                        shouldBreak = true;
+                        break;
+                    }
+                }
+                if (shouldBreak) break;
+            }
+            Logging.Debug($"Stored the page: {KillstreakPage}, x: {KillstreakX}, y: {KillstreakY} for the item sent to the player");
+            KillstreakChecker.Stop();
+
+            HasKillstreakActive = true;
+            ActiveKillstreak = killstreak;
+            AvailableKillstreaks[killstreak] = false;
+            Plugin.Instance.UI.UpdateKillstreakReady(this, killstreak);
+            Logging.Debug($"Made the killstreak active on code side, sent the UI");
+
+            if (info.ItemStaySeconds == 0) return;
+            KillstreakChecker = Plugin.Instance.StartCoroutine(CheckKillstreak(info.ItemStaySeconds));
+            Logging.Debug($"Item stay seconds is not 0, starting the killstreak remover timer at {DateTime.UtcNow}");
+        }
+
+        public void RemoveActiveKillstreak()
+        {
+            Logging.Debug($"Removing the active killstreak for {Player.CharacterName}");
 
         }
 
+        public IEnumerator RemoveItemKillstreak(byte page, byte x, byte y)
+        {
+            while (true)
+            {
+                if (Player.Player.life.isDead)
+                {
+                    yield return new WaitForSeconds(1f);
+                    continue;
+                }
+
+                Player.Player.inventory.removeItem(page, Player.Player.inventory.getIndex(page, x, y));
+            }
+        }
+
+        public IEnumerator CheckKillstreak(int seconds)
+        {
+            yield return new WaitForSeconds(seconds);
+        }
+
+        /*
         private void CheckKillstreak(object sender, ElapsedEventArgs e)
         {
             throw new NotImplementedException();
         }
-
+        */
         // Events
 
         public void OnGameJoined(Game game)
@@ -584,50 +730,17 @@ namespace UnturnedBlackout.Models.Global
         {
             CurrentGame = null;
 
-            if (m_TacticalChecker.Enabled)
-            {
-                m_TacticalChecker.Stop();
-            }
-
-            if (m_LethalChecker.Enabled)
-            {
-                m_LethalChecker.Stop();
-            }
-
-            if (m_RemoveSpawnProtection.Enabled)
-            {
-                m_RemoveSpawnProtection.Stop();
-            }
-
-            if (Healer != null)
-            {
-                Plugin.Instance.StopCoroutine(Healer);
-            }
-
-            if (m_DamageChecker.Enabled)
-            {
-                m_DamageChecker.Stop();
-            }
-
-            if (RespawnTimer != null)
-            {
-                Plugin.Instance.StopCoroutine(RespawnTimer);
-            }
-
-            if (VoiceChatChecker != null)
-            {
-                Plugin.Instance.StopCoroutine(VoiceChatChecker);
-            }
-
-            if (AnimationChecker != null)
-            {
-                Plugin.Instance.StopCoroutine(AnimationChecker);
-            }
-
-            if (MovementChanger != null)
-            {
-                Plugin.Instance.StopCoroutine(MovementChanger);
-            }
+            TacticalChecker.Stop();
+            LethalChecker.Stop();
+            SpawnProtectionRemover.Stop();
+            Healer.Stop();
+            DamageChecker.Stop();
+            RespawnTimer.Stop();
+            VoiceChatChecker.Stop();
+            AnimationChecker.Stop();
+            MovementChanger.Stop();
+            GadgetGiver.Stop();
+            KillstreakItemRemover.Stop();
 
             HasScoreboard = false;
             HasAnimationGoingOn = false;

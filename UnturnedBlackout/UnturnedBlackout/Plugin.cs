@@ -25,8 +25,6 @@ namespace UnturnedBlackout
                 Harmony.PatchAll(Assembly);
             }
 
-            StartCoroutine(Day());
-
             Level.onLevelLoaded += OnLevelLoaded;
             PlayerVoice.onRelayVoice += OnVoice;
 
@@ -143,6 +141,8 @@ namespace UnturnedBlackout
             {
                 yield return new WaitForSeconds(60);
                 LightingManager.time = (uint)(LightingManager.cycle * LevelLighting.transition);
+                Logging.Debug($"TPS: {Provider.debugTPS}", System.ConsoleColor.Red);
+                Logging.Debug($"UPS: {Provider.debugUPS}", System.ConsoleColor.Red);
             }
         }
 
@@ -201,6 +201,8 @@ namespace UnturnedBlackout
             Logging.Debug("Init Game");
             HUD = new();
             Logging.Debug("Init HUD");
+
+            StartCoroutine(Day());
 
             var shouldFillAfterDetach = typeof(ItemMagazineAsset).GetProperty("shouldFillAfterDetach", BindingFlags.Public | BindingFlags.Instance);
             var magazines = Assets.find(EAssetType.ITEM).OfType<ItemMagazineAsset>();

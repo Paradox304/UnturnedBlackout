@@ -30,7 +30,8 @@ namespace UnturnedBlackout.GameTypes
 
         public Coroutine GameStarter { get; set; }
         public Coroutine GameEnder { get; set; }
-        public Timer m_SpawnSwitcher { get; set; }
+        //public Timer m_SpawnSwitcher { get; set; }
+        public Coroutine SpawnSwitcher { get; set; }
 
         public uint Frequency { get; set; }
 
@@ -58,8 +59,10 @@ namespace UnturnedBlackout.GameTypes
             RedTeam = new TDMTeam(this, (byte)ETeam.Red, false, redTeamInfo);
             Frequency = Utility.GetFreeFrequency();
 
+            /*
             m_SpawnSwitcher = new Timer(Config.Base.FileData.SpawnSwitchSeconds * 1000);
             m_SpawnSwitcher.Elapsed += SpawnSwitch;
+            */
         }
 
         public IEnumerator StartGame()
@@ -92,7 +95,7 @@ namespace UnturnedBlackout.GameTypes
                 Plugin.Instance.UI.ClearCountdownUI(player.GamePlayer);
             }
 
-            m_SpawnSwitcher.Start();
+            SpawnSwitcher = Plugin.Instance.StartCoroutine(SpawnSwitch());
             GameEnder = Plugin.Instance.StartCoroutine(EndGame());
         }
 
@@ -222,10 +225,7 @@ namespace UnturnedBlackout.GameTypes
             Players = new List<TDMPlayer>();
             BlueTeam.Destroy();
             RedTeam.Destroy();
-            if (m_SpawnSwitcher.Enabled)
-            {
-                m_SpawnSwitcher.Stop();
-            }
+            SpawnSwitcher.Stop();
 
             var locations = Plugin.Instance.Game.AvailableLocations;
             lock (locations)
@@ -665,7 +665,7 @@ namespace UnturnedBlackout.GameTypes
 
             if (player.GamePlayer.HasSpawnProtection)
             {
-                Logging.Debug($"{player.GamePlayer.Player.CharacterName} got damaged but damage got ignored due to spawn protection, Is Timer Enabled: {player.GamePlayer.m_RemoveSpawnProtection.Enabled}");
+                Logging.Debug($"{player.GamePlayer.Player.CharacterName} got damaged but damage got ignored due to spawn protection");
                 shouldAllow = false;
                 return;
             }
@@ -711,7 +711,7 @@ namespace UnturnedBlackout.GameTypes
             if (kPlayer.GamePlayer.HasSpawnProtection)
             {
                 Logging.Debug($"{kPlayer.GamePlayer.Player.CharacterName} damaged someone but had spawn protection, turning it off");
-                kPlayer.GamePlayer.m_RemoveSpawnProtection.Stop();
+                kPlayer.GamePlayer.SpawnProtectionRemover.Stop();
                 kPlayer.GamePlayer.HasSpawnProtection = false;
             }
         }
@@ -938,17 +938,22 @@ namespace UnturnedBlackout.GameTypes
             }
         }
 
+        /*
         private void SpawnSwitch(object sender, System.Timers.ElapsedEventArgs e)
         {
+            SwitchSpawn();
+        }
+        */
+
+        public IEnumerator SpawnSwitch()
+        {
+            yield return new WaitForSeconds(Config.Base.FileData.SpawnSwitchSeconds);
             SwitchSpawn();
         }
 
         public void SwitchSpawn()
         {
-            if (m_SpawnSwitcher.Enabled)
-            {
-                m_SpawnSwitcher.Stop();
-            }
+            SpawnSwitcher.Stop();
 
             if (RedTeam.m_CheckSpawnSwitch.Enabled)
             {
@@ -990,7 +995,7 @@ namespace UnturnedBlackout.GameTypes
                 RedTeam.SpawnPoint = currentSpawn.Item1;
             }
 
-            m_SpawnSwitcher.Start();
+            SpawnSwitcher = Plugin.Instance.StartCoroutine(SpawnSwitch());
         }
 
         public TDMPlayer GetTDMPlayer(CSteamID steamID)

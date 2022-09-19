@@ -50,7 +50,11 @@ namespace UnturnedBlackout.Models.KC
                 Frequency = Utility.GetFreeFrequency();
                 IngameGroup = GroupManager.addGroup(GroupManager.generateUniqueGroupID(), Info.TeamName);
 
-                m_CheckSpawnSwitch = new Timer(Config.Base.FileData.SpawnSwitchTimeFrame * 1000);
+                m_CheckSpawnSwitch = new Timer(Config.Base.FileData.SpawnSwitchTimeFrame * 1000)
+                {
+                    AutoReset = false
+                };
+
                 m_CheckSpawnSwitch.Elapsed += SpawnSwitch;
             }
         }
@@ -106,7 +110,6 @@ namespace UnturnedBlackout.Models.KC
                 Game.SwitchSpawn();
             }
             SpawnThreshold = 0;
-            m_CheckSpawnSwitch.Stop();
         }
 
         public void Destroy()
