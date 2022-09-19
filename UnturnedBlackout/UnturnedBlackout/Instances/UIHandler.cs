@@ -193,7 +193,6 @@ namespace UnturnedBlackout.Instances
 
         public void BuildLoadoutPages()
         {
-            Logging.Debug($"Creating loadout pages for {Player.CharacterName}, found {PlayerLoadout.Loadouts.Count} loadouts for player");
             LoadoutPages = new Dictionary<int, PageLoadout>();
             int index = 0;
             int page = 1;
@@ -216,7 +215,6 @@ namespace UnturnedBlackout.Instances
             {
                 LoadoutPages.Add(page, new PageLoadout(page, loadouts));
             }
-            Logging.Debug($"Created {LoadoutPages.Count} loadout pages for {Player.CharacterName}");
         }
 
         public void BuildPistolPages()
@@ -226,7 +224,6 @@ namespace UnturnedBlackout.Instances
             PistolPages = new Dictionary<int, PageGun>();
             int index = 0;
             int page = 1;
-            Logging.Debug($"Creating pistol pages for {Player.CharacterName}, found {guns.Count()} pistols");
 
             foreach (var gun in guns)
             {
@@ -245,7 +242,6 @@ namespace UnturnedBlackout.Instances
             {
                 PistolPages.Add(page, new PageGun(page, gunItems));
             }
-            Logging.Debug($"Created {PistolPages.Count} pistol pages for {Player.CharacterName}");
         }
 
         public void BuildSMGPages()
@@ -255,7 +251,6 @@ namespace UnturnedBlackout.Instances
             SMGPages = new Dictionary<int, PageGun>();
             int index = 0;
             int page = 1;
-            Logging.Debug($"Creating SMG pages for {Player.CharacterName}, found {guns.Count()} SMGs");
 
             foreach (var gun in guns)
             {
@@ -274,7 +269,6 @@ namespace UnturnedBlackout.Instances
             {
                 SMGPages.Add(page, new PageGun(page, gunItems));
             }
-            Logging.Debug($"Created {SMGPages.Count} SMG pages for {Player.CharacterName}");
         }
 
         public void BuildShotgunPages()
@@ -284,7 +278,6 @@ namespace UnturnedBlackout.Instances
             ShotgunPages = new Dictionary<int, PageGun>();
             int index = 0;
             int page = 1;
-            Logging.Debug($"Creating shotgun pages for {Player.CharacterName}, found {guns.Count()} shotguns");
 
             foreach (var gun in guns)
             {
@@ -303,7 +296,6 @@ namespace UnturnedBlackout.Instances
             {
                 ShotgunPages.Add(page, new PageGun(page, gunItems));
             }
-            Logging.Debug($"Created {ShotgunPages.Count} shotgun pages for {Player.CharacterName}");
         }
 
         public void BuildLMGPages()
@@ -313,7 +305,6 @@ namespace UnturnedBlackout.Instances
             LMGPages = new Dictionary<int, PageGun>();
             int index = 0;
             int page = 1;
-            Logging.Debug($"Creating LMG pages for {Player.CharacterName}, found {guns.Count()} LMGs");
 
             foreach (var gun in guns)
             {
@@ -332,7 +323,6 @@ namespace UnturnedBlackout.Instances
             {
                 LMGPages.Add(page, new PageGun(page, gunItems));
             }
-            Logging.Debug($"Created {LMGPages.Count} LMG pages for {Player.CharacterName}");
         }
 
         public void BuildARPages()
@@ -342,7 +332,6 @@ namespace UnturnedBlackout.Instances
             ARPages = new Dictionary<int, PageGun>();
             int index = 0;
             int page = 1;
-            Logging.Debug($"Creating AR pages for {Player.CharacterName}, found {guns.Count()} ARs");
 
             foreach (var gun in guns)
             {
@@ -361,7 +350,6 @@ namespace UnturnedBlackout.Instances
             {
                 ARPages.Add(page, new PageGun(page, gunItems));
             }
-            Logging.Debug($"Created {ARPages.Count} AR pages for {Player.CharacterName}");
         }
 
         public void BuildSniperPages()
@@ -371,7 +359,6 @@ namespace UnturnedBlackout.Instances
             SniperPages = new Dictionary<int, PageGun>();
             int index = 0;
             int page = 1;
-            Logging.Debug($"Creating sniper pages for {Player.CharacterName}, found {guns.Count()} snipers");
 
             foreach (var gun in guns)
             {
@@ -390,7 +377,6 @@ namespace UnturnedBlackout.Instances
             {
                 SniperPages.Add(page, new PageGun(page, gunItems));
             }
-            Logging.Debug($"Created {SniperPages.Count} sniper pages for {Player.CharacterName}");
         }
 
         public void BuildCarbinePages()
@@ -400,7 +386,6 @@ namespace UnturnedBlackout.Instances
             CarbinePages = new Dictionary<int, PageGun>();
             int index = 0;
             int page = 1;
-            Logging.Debug($"Creating carbine pages for {Player.CharacterName}, found {guns.Count()} snipers");
 
             foreach (var gun in guns)
             {
@@ -419,16 +404,13 @@ namespace UnturnedBlackout.Instances
             {
                 CarbinePages.Add(page, new PageGun(page, gunItems));
             }
-            Logging.Debug($"Created {CarbinePages.Count} carbine pages for {Player.CharacterName}");
         }
 
         public void BuildGunSkinPages()
         {
             GunSkinPages = new Dictionary<ushort, Dictionary<int, PageGunSkin>>();
-            Logging.Debug($"Creating gun skin pages for {Player.CharacterName}, found {PlayerLoadout.GunSkinsSearchByGunID.Count} guns which have skins");
             foreach (var gun in PlayerLoadout.GunSkinsSearchByGunID)
             {
-                Logging.Debug($"Creating gun skin pages for gun with id {gun.Key} for {Player.CharacterName}, found {gun.Value.Count} gun skins for that gun");
                 int index = 0;
                 int page = 1;
                 var gunSkins = new Dictionary<int, GunSkin>();
@@ -450,14 +432,12 @@ namespace UnturnedBlackout.Instances
                 {
                     GunSkinPages[gun.Key].Add(page, new PageGunSkin(page, gunSkins));
                 }
-                Logging.Debug($"Created {GunSkinPages[gun.Key].Count} gun skin pages for gun with id {gun.Key} for {Player.CharacterName}");
             }
         }
 
         public void BuildAttachmentPages()
         {
             AttachmentPages = new Dictionary<ushort, Dictionary<EAttachment, Dictionary<int, PageAttachment>>>();
-            Logging.Debug($"Creating attachment pages for {Player.CharacterName}, found {PlayerLoadout.Guns.Count} guns");
             foreach (var gun in PlayerLoadout.Guns)
             {
                 BuildAttachmentPages(gun.Value);
@@ -466,7 +446,6 @@ namespace UnturnedBlackout.Instances
 
         public void BuildAttachmentPages(LoadoutGun gun)
         {
-            Logging.Debug($"Creating attachment pages for gun with id {gun.Gun.GunID} for {Player.CharacterName}");
             if (AttachmentPages.ContainsKey(gun.Gun.GunID))
             {
                 AttachmentPages.Remove(gun.Gun.GunID);
@@ -476,7 +455,6 @@ namespace UnturnedBlackout.Instances
             for (int i = 0; i <= 3; i++)
             {
                 var attachmentType = (EAttachment)i;
-                Logging.Debug($"Creating {attachmentType} pages");
                 int index = 0;
                 int page = 1;
                 var attachments = new Dictionary<int, LoadoutAttachment>();
@@ -498,14 +476,12 @@ namespace UnturnedBlackout.Instances
                 {
                     AttachmentPages[gun.Gun.GunID][attachmentType].Add(page, new PageAttachment(page, attachments));
                 }
-                Logging.Debug($"Created {AttachmentPages[gun.Gun.GunID][attachmentType].Count} {attachmentType} pages for gun with id {gun.Gun.GunID} for {Player.CharacterName}");
             }
         }
 
         public void BuildGunCharmPages()
         {
             GunCharmPages = new Dictionary<int, PageGunCharm>();
-            Logging.Debug($"Creating gun charm pages for {Player.CharacterName}, found {PlayerLoadout.GunCharms.Count} gun charms");
             int index = 0;
             int page = 1;
             var gunCharms = new Dictionary<int, LoadoutGunCharm>();
@@ -526,13 +502,11 @@ namespace UnturnedBlackout.Instances
             {
                 GunCharmPages.Add(page, new PageGunCharm(page, gunCharms));
             }
-            Logging.Debug($"Created {GunCharmPages.Count} gun charm pages for {Player.CharacterName}");
         }
 
         public void BuildKnifePages()
         {
             KnifePages = new Dictionary<int, PageKnife>();
-            Logging.Debug($"Creating knife pages for {Player.CharacterName}, found {PlayerLoadout.Knives.Count} knives");
             int index = 0;
             int page = 1;
             var knives = new Dictionary<int, LoadoutKnife>();
@@ -553,16 +527,13 @@ namespace UnturnedBlackout.Instances
             {
                 KnifePages.Add(page, new PageKnife(page, knives));
             }
-            Logging.Debug($"Created {KnifePages.Count} knife pages for {Player.CharacterName}");
         }
 
         public void BuildPerkPages()
         {
             PerkPages = new Dictionary<int, Dictionary<int, PagePerk>>();
-            Logging.Debug($"Creating perk pages for {Player.CharacterName}, found {PlayerLoadout.Perks.Count} perks");
             for (int i = 1; i <= 3; i++)
             {
-                Logging.Debug($"Creating perk pages for perk type {i} for {Player.CharacterName}");
                 PerkPages.Add(i, new Dictionary<int, PagePerk>());
                 int index = 0;
                 int page = 1;
@@ -584,7 +555,6 @@ namespace UnturnedBlackout.Instances
                 {
                     PerkPages[i].Add(page, new PagePerk(page, perks));
                 }
-                Logging.Debug($"Created {PerkPages[i].Count} for perk type {i} for {Player.CharacterName}");
             }
         }
 
@@ -592,7 +562,6 @@ namespace UnturnedBlackout.Instances
         {
             TacticalPages = new Dictionary<int, PageGadget>();
             var gadgets = PlayerLoadout.Gadgets.Values.Where(k => k.Gadget.IsTactical).OrderBy(k => k.Gadget.LevelRequirement).ToList();
-            Logging.Debug($"Creating tactical pages for {Player.CharacterName}, found {gadgets.Count} tacticals");
             int index = 0;
             int page = 1;
             var gadgetItems = new Dictionary<int, LoadoutGadget>();
@@ -613,14 +582,12 @@ namespace UnturnedBlackout.Instances
             {
                 TacticalPages.Add(page, new PageGadget(page, gadgetItems));
             }
-            Logging.Debug($"Created {TacticalPages.Count} tactical pages for {Player.CharacterName}");
         }
 
         public void BuildLethalPages()
         {
             LethalPages = new Dictionary<int, PageGadget>();
             var gadgets = PlayerLoadout.Gadgets.Values.Where(k => !k.Gadget.IsTactical).OrderBy(k => k.Gadget.LevelRequirement).ToList();
-            Logging.Debug($"Creating lethal pages for {Player.CharacterName}, found {gadgets.Count} lethals");
             int index = 0;
             int page = 1;
             var gadgetItems = new Dictionary<int, LoadoutGadget>();
@@ -641,13 +608,11 @@ namespace UnturnedBlackout.Instances
             {
                 LethalPages.Add(page, new PageGadget(page, gadgetItems));
             }
-            Logging.Debug($"Created {LethalPages.Count} lethal pages for {Player.CharacterName}");
         }
 
         public void BuildCardPages()
         {
             CardPages = new Dictionary<int, PageCard>();
-            Logging.Debug($"Creating card pages for {Player.CharacterName}, found {PlayerLoadout.Cards.Count} cards");
             int index = 0;
             int page = 1;
             var cards = new Dictionary<int, LoadoutCard>();
@@ -668,13 +633,11 @@ namespace UnturnedBlackout.Instances
             {
                 CardPages.Add(page, new PageCard(page, cards));
             }
-            Logging.Debug($"Created {CardPages.Count} card pages for {Player.CharacterName}");
         }
 
         public void BuildGlovePages()
         {
             GlovePages = new Dictionary<int, PageGlove>();
-            Logging.Debug($"Creating glove pages for {Player.CharacterName}, found {PlayerLoadout.Cards.Count} gloves");
             int index = 0;
             int page = 1;
             var gloves = new Dictionary<int, LoadoutGlove>();
@@ -695,13 +658,11 @@ namespace UnturnedBlackout.Instances
             {
                 GlovePages.Add(page, new PageGlove(page, gloves));
             }
-            Logging.Debug($"Created {GlovePages.Count} glove pages for {Player.CharacterName}");
         }
 
         public void BuildKillstreakPages()
         {
             KillstreakPages = new Dictionary<int, PageKillstreak>();
-            Logging.Debug($"Creating killstreak pages for {Player.CharacterName}, found {PlayerLoadout.Killstreaks.Count} killstreaks");
             int index = 0;
             int page = 1;
             var killstreaks = new Dictionary<int, LoadoutKillstreak>();
@@ -722,13 +683,11 @@ namespace UnturnedBlackout.Instances
             {
                 KillstreakPages.Add(page, new PageKillstreak(page, killstreaks));
             }
-            Logging.Debug($"Created {KillstreakPages.Count} killstreak pages for {Player.CharacterName}");
         }
 
         public void BuildAchievementPages()
         {
             AchievementPages = new Dictionary<int, Dictionary<int, PageAchievement>>();
-            Logging.Debug($"Creating achievement pages for {Player.CharacterName}, found {PlayerData.Achievements.Count} achievements");
             for (int i = 1; i <= 5; i++)
             {
                 Logging.Debug($"Creating achievement pages for main page {i} for {Player.CharacterName}");
@@ -753,14 +712,12 @@ namespace UnturnedBlackout.Instances
                 {
                     AchievementPages[i].Add(page, new PageAchievement(page, achievements));
                 }
-                Logging.Debug($"Created {AchievementPages[i].Count} for achievement type {i} for {Player.CharacterName}");
             }
         }
 
         public void BuildUnboxingInventoryPages()
         {
             UnboxInventoryPages = new Dictionary<int, PageUnboxInventory>();
-            Logging.Debug($"Creating unbox inventory pages for {Player.CharacterName}, found {PlayerData.Cases.Count} cases");
             int index = 0;
             int page = 1;
             var cases = new Dictionary<int, PlayerCase>();
@@ -781,13 +738,11 @@ namespace UnturnedBlackout.Instances
             {
                 UnboxInventoryPages.Add(page, new PageUnboxInventory(page, cases));
             }
-            Logging.Debug($"Created {UnboxInventoryPages.Count} unbox inventory pages for {Player.CharacterName}");
         }
 
         public void BuildUnboxingStorePages()
         {
             UnboxStorePages = new Dictionary<int, PageUnboxStore>();
-            Logging.Debug($"Creating unbox store pages for {Player.CharacterName}, found {DB.Cases.Count} cases");
             int index = 0;
             int page = 1;
             var cases = new Dictionary<int, Case>();
@@ -808,7 +763,6 @@ namespace UnturnedBlackout.Instances
             {
                 UnboxStorePages.Add(page, new PageUnboxStore(page, cases));
             }
-            Logging.Debug($"Created {UnboxStorePages.Count} unbox store pages for {Player.CharacterName}");
         }
         #endregion
 
@@ -884,7 +838,6 @@ namespace UnturnedBlackout.Instances
 
         public void SendNotEnoughCurrencyModal(ECurrency currency)
         {
-            Logging.Debug($"Sending not enough currency modal for {Player.CharacterName} for {currency}");
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Enough Currency Modal", true);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Enough Currency Modal TEXT", Plugin.Instance.Translate("Not_Enough_Currency", Utility.ToFriendlyName(currency)).ToRich());
         }
@@ -915,7 +868,6 @@ namespace UnturnedBlackout.Instances
         {
             var games = Plugin.Instance.Game.Games;
             var servers = Plugin.Instance.DB.Servers;
-            Logging.Debug($"{Player.CharacterName} selected play button with id {selected}");
             if (PlayPage == EPlayPage.Games)
             {
                 if ((selected + 1) > games.Count)
@@ -958,7 +910,6 @@ namespace UnturnedBlackout.Instances
         {
             var games = Plugin.Instance.Game.Games;
             PlayPage = EPlayPage.Games;
-            Logging.Debug($"Showing games to {Player.CharacterName}, with SelectedGameID {SelectedGameID}");
 
             for (int i = 0; i <= 13; i++)
             {
@@ -994,7 +945,6 @@ namespace UnturnedBlackout.Instances
                 return;
             }
 
-            Logging.Debug($"Showing game to play with ID {SelectedGameID}");
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Play Server TEXT", "");
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Play Mode TEXT", (game.IsHardcore ? $"<color={Config.Base.FileData.HardcoreColor}>Hardcore</color> " : "") + $"<color={gameMode.GamemodeColor}>{Plugin.Instance.Translate($"{game.GameMode}_Name_Full")}</color>");
             EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Play IMAGE", game.Location.ImageLink);
@@ -3787,12 +3737,9 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item TEXT", attachment.Attachment.AttachmentName);
             SendRarityName("SERVER Item Rarity TEXT", attachment.Attachment.AttachmentRarity);
 
-            Logging.Debug($"Pros: {attachment.Attachment.AttachmentPros.Count}, Cons: {attachment.Attachment.AttachmentCons.Count}");
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item ProsCons", !(attachment.Attachment.AttachmentPros.Count == 0 && attachment.Attachment.AttachmentCons.Count == 0));
-            Logging.Debug($"Set visiblity to {attachment.Attachment.AttachmentPros.Count == 0 && attachment.Attachment.AttachmentCons.Count == 0}");
             for (int i = 0; i <= 2; i++)
             {
-                Logging.Debug($"i: {i}");
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Pro {i}", attachment.Attachment.AttachmentPros.Count > i);
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Pro TEXT {i}", attachment.Attachment.AttachmentPros.Count > i ? attachment.Attachment.AttachmentPros[i].Trim() : "");
 
