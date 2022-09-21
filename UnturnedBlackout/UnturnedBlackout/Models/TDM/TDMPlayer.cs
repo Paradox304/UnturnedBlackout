@@ -71,6 +71,7 @@ namespace UnturnedBlackout.Models.TDM
             {
                 HighestKillstreak = killstreak;
             }
+            GamePlayer.UpdateKillstreak(killstreak);
         }
 
         public void SetMultipleKills(int multikills)

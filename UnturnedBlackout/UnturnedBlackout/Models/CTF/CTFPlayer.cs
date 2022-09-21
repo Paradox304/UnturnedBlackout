@@ -79,6 +79,7 @@ namespace UnturnedBlackout.Models.CTF
             {
                 HighestKillstreak = killstreak;
             }
+            GamePlayer.UpdateKillstreak(killstreak);
         }
 
         public void SetMultipleKills(int multikills)

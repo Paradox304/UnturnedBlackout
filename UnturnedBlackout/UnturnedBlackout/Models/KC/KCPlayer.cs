@@ -77,6 +77,7 @@ namespace UnturnedBlackout.Models.KC
             {
                 HighestKillstreak = killstreak;
             }
+            GamePlayer.UpdateKillstreak(killstreak);
         }
 
         public void SetMultipleKills(int multikills)

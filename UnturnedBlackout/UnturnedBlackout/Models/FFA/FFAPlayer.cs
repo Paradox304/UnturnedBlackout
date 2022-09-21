@@ -52,6 +52,8 @@ namespace UnturnedBlackout.Models.FFA
 
             LastKill = DateTime.UtcNow;
             PlayersKilled.Remove(killer);
+
+            GamePlayer.UpdateKillstreak(0);
         }
 
         public void CheckKills()
@@ -68,6 +70,7 @@ namespace UnturnedBlackout.Models.FFA
             {
                 HighestKillstreak = killstreak;
             }
+            GamePlayer.UpdateKillstreak(killstreak);
         }
 
         public void SetMultipleKills(int multikills)

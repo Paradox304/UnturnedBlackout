@@ -265,6 +265,8 @@ namespace UnturnedBlackout.Models.Global
 
             Plugin.Instance.UI.UpdateGadgetUsed(this, false, !HasLethal);
             Plugin.Instance.UI.UpdateGadgetUsed(this, true, !HasTactical);
+
+            SetupKillstreaks();
         }
 
         // Tactical and Lethal
@@ -676,16 +678,16 @@ namespace UnturnedBlackout.Models.Global
             var info = killstreak.Killstreak.KillstreakInfo;
             var inv = Player.Player.inventory;
             if (info.IsItem == false) return;
-
             inv.forceAddItem(new Item(info.ItemID, true), true);
             Logging.Debug($"Gave the item to the player");
+
             for (byte page = 0; page < PlayerInventory.PAGES - 2; page++)
             {
                 var shouldBreak = false;
                 for (int index = inv.getItemCount(page) - 1; index >= 0; index--)
                 {
                     var item = inv.getItem(page, (byte)index);
-                    if (item != null && item.item.id == info.ItemID)
+                    if ((item?.item?.id ?? 0) == info.ItemID)
                     {
                         KillstreakPage = page;
                         KillstreakX = item.x;
@@ -696,6 +698,7 @@ namespace UnturnedBlackout.Models.Global
                 }
                 if (shouldBreak) break;
             }
+
             Logging.Debug($"Stored the page: {KillstreakPage}, x: {KillstreakX}, y: {KillstreakY} for the item sent to the player");
             KillstreakChecker.Stop();
 
@@ -719,7 +722,14 @@ namespace UnturnedBlackout.Models.Global
                 return;
             }
 
+            KillstreakChecker.Stop();
+            KillstreakItemRemover.Stop();
+            KillstreakItemRemover = Plugin.Instance.StartCoroutine(RemoveItemKillstreak(KillstreakPage, KillstreakX, KillstreakY));
+            Logging.Debug($"Removed the item of the killstreak for {Player.CharacterName}");
 
+            HasKillstreakActive = false;
+            ActiveKillstreak = null;
+            Logging.Debug($"Completely removed the killstreak from {Player.CharacterName}");            
         }
 
         public IEnumerator RemoveItemKillstreak(byte page, byte x, byte y)
@@ -733,6 +743,7 @@ namespace UnturnedBlackout.Models.Global
                 }
 
                 Player.Player.inventory.removeItem(page, Player.Player.inventory.getIndex(page, x, y));
+                break;
             }
         }
 

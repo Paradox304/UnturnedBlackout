@@ -787,6 +787,12 @@ namespace UnturnedBlackout.Managers
                 }
             }
 
+            // Giving killstreaks to player
+            foreach (var killstreak in activeLoadout.Killstreaks)
+            {
+                inv.forceAddItem(new Item(killstreak.Killstreak.KillstreakInfo.TriggerItemID, true), false);
+            }
+
             player.SetActiveLoadout(activeLoadout, knifePage, knifeX, knifeY);
         }
     }

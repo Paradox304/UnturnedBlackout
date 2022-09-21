@@ -63,9 +63,6 @@ namespace UnturnedBlackout.Managers
         public const ushort HUD_ID = 27631;
         public const short HUD_KEY = 27631;
 
-        public const ushort KILLSTREAK_ID = 27632;
-        public const short KILLSTREAK_KEY = 27632;
-
         public const ushort SOUNDS_ID = 27634;
         public const short SOUNDS_KEY = 27634;
 
@@ -104,6 +101,9 @@ namespace UnturnedBlackout.Managers
 
         public const ushort QUEST_COMPLETION_ID = 27648;
         public const short QUEST_COMPLETION_KEY = 27648;
+
+        public const ushort KILLSTREAK_ID = 27649;
+        public const short KILLSTREAK_KEY = 27649;
 
         public const ushort FLAG_POPUP_UI = 27900;
         public const short FLAG_POPUP_KEY = 27900;
@@ -636,6 +636,7 @@ namespace UnturnedBlackout.Managers
         public void SetupKillstreakUI(GamePlayer player, int currentKillstreak = 0)
         {
             EffectManager.sendUIEffect(KILLSTREAK_ID, KILLSTREAK_KEY, player.TransportConnection, true);
+
             for (int i = 0; i <= 2; i++)
             {
                 if (player.OrderedKillstreaks.Count < (i + 1))
@@ -739,7 +740,8 @@ namespace UnturnedBlackout.Managers
                 return;
             }
 
-            if (game.GameMode == Enums.EGameType.CTF && game.IsPlayerCarryingFlag(player) && equipment.player.inventory.getItem(0, 0) == jar)
+            var isCarryingFlag = game.IsPlayerCarryingFlag(player);
+            if (isCarryingFlag && equipment.player.inventory.getItem(0, 0) == jar)
             {
                 shouldAllow = false;
                 return;
@@ -759,6 +761,15 @@ namespace UnturnedBlackout.Managers
             {
                 shouldAllow = false;
                 return;
+            }
+
+            if (player.KillstreakTriggers.TryGetValue(jar.item.id, out LoadoutKillstreak activateKillstreak))
+            {
+                shouldAllow = false;
+                if (game.GamePhase == EGamePhase.Started && player.AvailableKillstreaks[activateKillstreak] && !isCarryingFlag && !player.HasKillstreakActive)
+                {
+                    player.ActivateKillstreak(activateKillstreak);
+                }
             }
 
             TaskDispatcher.QueueOnMainThread(() =>
