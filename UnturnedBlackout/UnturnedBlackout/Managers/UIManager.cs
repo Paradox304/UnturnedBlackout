@@ -664,7 +664,7 @@ namespace UnturnedBlackout.Managers
                     continue;
                 }
 
-                EffectManager.sendUIEffectText(KILLSTREAK_KEY, player.TransportConnection, true, $"BarFill{i}", spaces == 0 ? "" : new string(HAIRSPACE_SYMBOL_CHAR, spaces));
+                EffectManager.sendUIEffectText(KILLSTREAK_KEY, player.TransportConnection, true, $"BarFill{i}", new string(HAIRSPACE_SYMBOL_CHAR, spaces));
             }
         }
 
