@@ -656,8 +656,15 @@ namespace UnturnedBlackout.Managers
             for (int i = 0; i < player.OrderedKillstreaks.Count; i++)
             {
                 var killstreak = player.OrderedKillstreaks[i];
-                var spaces = Math.Min(MAX_SPACES_KILLSTREAK, Math.Max(1, currentKillstreak * MAX_SPACES_KILLSTREAK / killstreak.Killstreak.KillstreakRequired));
-                EffectManager.sendUIEffectText(KILLSTREAK_KEY, player.TransportConnection, true, $"BarFill{i}", new string(HAIRSPACE_SYMBOL_CHAR, spaces));
+                var spaces = Math.Min(MAX_SPACES_KILLSTREAK, Math.Max(0, currentKillstreak * MAX_SPACES_KILLSTREAK / killstreak.Killstreak.KillstreakRequired));
+                Logging.Debug($"Spaces: {spaces}");
+                if (spaces == 0)
+                {
+                    EffectManager.sendUIEffectVisibility(KILLSTREAK_KEY, player.TransportConnection, true, $"BarEmptier{i}", true);
+                    continue;
+                }
+
+                EffectManager.sendUIEffectText(KILLSTREAK_KEY, player.TransportConnection, true, $"BarFill{i}", spaces == 0 ? "" : new string(HAIRSPACE_SYMBOL_CHAR, spaces));
             }
         }
 

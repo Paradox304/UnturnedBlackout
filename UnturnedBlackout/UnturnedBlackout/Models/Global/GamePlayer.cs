@@ -439,6 +439,11 @@ namespace UnturnedBlackout.Models.Global
 
         public void OnDeath(CSteamID killer, int respawnSeconds)
         {
+            if (HasKillstreakActive)
+            {
+                RemoveActiveKillstreak();
+            }
+
             if (!Plugin.Instance.DB.PlayerData.TryGetValue(killer, out PlayerData killerData))
             {
                 TaskDispatcher.QueueOnMainThread(() => Player.Player.life.ServerRespawn(false));
@@ -678,7 +683,7 @@ namespace UnturnedBlackout.Models.Global
             var info = killstreak.Killstreak.KillstreakInfo;
             var inv = Player.Player.inventory;
             if (info.IsItem == false) return;
-            inv.forceAddItem(new Item(info.ItemID, true), true);
+            inv.forceAddItem(new Item(info.ItemID, true), false);
             Logging.Debug($"Gave the item to the player");
 
             for (byte page = 0; page < PlayerInventory.PAGES - 2; page++)
@@ -698,6 +703,8 @@ namespace UnturnedBlackout.Models.Global
                 }
                 if (shouldBreak) break;
             }
+
+            Player.Player.equipment.ServerEquip(KillstreakPage, KillstreakX, KillstreakY);
 
             Logging.Debug($"Stored the page: {KillstreakPage}, x: {KillstreakX}, y: {KillstreakY} for the item sent to the player");
             KillstreakChecker.Stop();

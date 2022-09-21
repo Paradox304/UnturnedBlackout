@@ -63,6 +63,8 @@ namespace UnturnedBlackout.Models.CTF
 
             LastKill = DateTime.UtcNow;
             PlayersKilled.Remove(killer);
+
+            GamePlayer.UpdateKillstreak(0);
         }
 
         public void CheckKills()
