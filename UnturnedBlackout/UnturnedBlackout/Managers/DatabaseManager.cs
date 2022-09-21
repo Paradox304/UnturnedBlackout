@@ -457,33 +457,27 @@ namespace UnturnedBlackout.Managers
                         var levelRewards = rdr[16].GetIntListFromReaderResult();
                         var rewardAttachments = new Dictionary<int, GunAttachment>();
                         var rewardAttachmentsInverse = new Dictionary<GunAttachment, int>();
-                        foreach (var id in levelRewards)
+                        for (int i = 0; i < levelRewards.Count; i++)
                         {
-                            if (GunAttachments.TryGetValue((ushort)id, out GunAttachment gunAttachment))
-                            {
-                                if (!rewardAttachments.ContainsKey(levelRewards.IndexOf(id) + 2))
-                                {
-                                    rewardAttachments.Add(levelRewards.IndexOf(id) + 2, gunAttachment);
-                                }
-                                else
-                                {
-                                    Logging.Debug($"Duplicate reward attachment with id {id} found for gun {gunID} with name {gunName}");
-                                }
+                            var id = levelRewards[i];
+                            var levelNeededReward = i + 2;
 
-                                if (!rewardAttachmentsInverse.ContainsKey(gunAttachment))
-                                {
-                                    rewardAttachmentsInverse.Add(gunAttachment, levelRewards.IndexOf(id) + 2);
-                                }
-                                else
-                                {
-                                    Logging.Debug($"Duplicate reward attachment inverse with id {id} found for gun {gunID} with name {gunName}");
-                                }
-                            }
-                            else
+                            if (id == 0) continue;
+
+                            if (!GunAttachments.TryGetValue((ushort)id, out GunAttachment gunAttachment))
                             {
-                                if (id != 0)
-                                    Logging.Debug($"Could'nt find reward attachment with id {id} for gun {gunID} with name {gunName}");
+                                Logging.Debug($"Could'nt find reward attachment with id {id} at level {levelNeededReward} for gun {gunID} with name {gunName}");
+                                continue;
                             }
+
+                            if (rewardAttachmentsInverse.TryGetValue(gunAttachment, out int alreadyRegisteredLevel))
+                            {
+                                Logging.Debug($"This reward attachment with id {id} at level {alreadyRegisteredLevel} (trying to register it again at {levelNeededReward}) --- for gun {gunID} with name {gunName}");
+                                continue;
+                            }
+
+                            rewardAttachments.Add(levelNeededReward, gunAttachment);
+                            rewardAttachmentsInverse.Add(gunAttachment, levelNeededReward);
                         }
 
                         if (Assets.find(EAssetType.ITEM, gunID) is not ItemGunAsset gunAsset)

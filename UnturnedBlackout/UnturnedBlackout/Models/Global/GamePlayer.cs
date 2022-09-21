@@ -713,6 +713,12 @@ namespace UnturnedBlackout.Models.Global
         public void RemoveActiveKillstreak()
         {
             Logging.Debug($"Removing the active killstreak for {Player.CharacterName}");
+            if (!HasKillstreakActive)
+            {
+                Logging.Debug($"{Player.CharacterName} has no active killstreak, what we tryna remove");
+                return;
+            }
+
 
         }
 
@@ -733,6 +739,7 @@ namespace UnturnedBlackout.Models.Global
         public IEnumerator CheckKillstreak(int seconds)
         {
             yield return new WaitForSeconds(seconds);
+            RemoveActiveKillstreak();
         }
 
         /*
