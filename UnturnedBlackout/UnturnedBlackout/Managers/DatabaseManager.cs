@@ -472,7 +472,7 @@ namespace UnturnedBlackout.Managers
 
                             if (rewardAttachmentsInverse.TryGetValue(gunAttachment, out int alreadyRegisteredLevel))
                             {
-                                Logging.Debug($"This reward attachment with id {id} at level {alreadyRegisteredLevel} (trying to register it again at {levelNeededReward}) --- for gun {gunID} with name {gunName}");
+                                Logging.Debug($"This reward attachment with id {id} was already registered at level {alreadyRegisteredLevel} (trying to register it again at {levelNeededReward}) --- for gun {gunID} with name {gunName}");
                                 continue;
                             }
 
