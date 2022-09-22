@@ -909,7 +909,7 @@ namespace UnturnedBlackout.GameTypes
             }
             else if (otherTeam.FlagID == itemData.item.id)
             {
-                Logging.Debug($"{player.Player.CharacterName} is trying to pick up the other team's flag, checking if they have their own flag");
+                Logging.Debug($"{player.Player.CharacterName} is trying to pick up the other team's flag");
                 /*if (!cPlayer.Team.HasFlag)
                 {
                     Logging.Debug($"Their own team doesn't have their flag, don't allow to pickup flag");
@@ -936,7 +936,10 @@ namespace UnturnedBlackout.GameTypes
                 TaskDispatcher.QueueOnMainThread(() =>
                 {
                     var ply = cPlayer.GamePlayer.Player.Player;
-                    if (ply.equipment.equippedPage == 0)
+                    if (cPlayer.GamePlayer.HasKillstreakActive)
+                    {
+                        cPlayer.GamePlayer.RemoveActiveKillstreak();
+                    } else if (ply.equipment.equippedPage == 0)
                     {
                         var secondary = ply.inventory.getItem(1, 0);
                         if (secondary != null)

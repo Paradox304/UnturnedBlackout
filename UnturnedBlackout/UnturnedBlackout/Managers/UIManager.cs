@@ -698,6 +698,22 @@ namespace UnturnedBlackout.Managers
             var i = player.OrderedKillstreaks.IndexOf(killstreak);
             EffectManager.sendUIEffectVisibility(KILLSTREAK_KEY, player.TransportConnection, true, $"KillstreakReady{i}", player.AvailableKillstreaks[killstreak]);
         }
+        
+        public void SendKillstreakTimer(GamePlayer player, int seconds)
+        {
+            EffectManager.sendUIEffectVisibility(KILLSTREAK_KEY, player.TransportConnection, true, "KillstreakTimer", true);
+            EffectManager.sendUIEffectText(KILLSTREAK_KEY, player.TransportConnection, true, "KillstreakTimerNum", seconds.ToString());
+        }
+
+        public void UpdateKillstreakTimer(GamePlayer player, int seconds)
+        {
+            EffectManager.sendUIEffectText(KILLSTREAK_KEY, player.TransportConnection, true, "KillstreakTimerNum", seconds.ToString());
+        }
+
+        public void ClearKillstreakTimer(GamePlayer player)
+        {
+            EffectManager.sendUIEffectVisibility(KILLSTREAK_KEY, player.TransportConnection, true, "KillstreakTimer", false);
+        }
 
         public void ClearKillstreakUI(GamePlayer player)
         {
@@ -777,18 +793,19 @@ namespace UnturnedBlackout.Managers
                 return;
             }
 
+            Logging.Debug($"Equip requested with item id {equipment.itemID} for {player.Player.CharacterName}");
             var isCarryingFlag = game.IsPlayerCarryingFlag(player);
             if (isCarryingFlag && inv.getItem(0, 0) == jar)
             {
                 shouldAllow = false;
                 return;
             }
-
+            Logging.Debug("1");
             if (player.ActiveLoadout == null)
             {
                 return;
             }
-
+            Logging.Debug("2");
             if ((jar.item.id == (player.ActiveLoadout.Tactical?.Gadget?.GadgetID ?? 0) && !player.HasTactical) || (jar.item.id == (player.ActiveLoadout.Tactical?.Gadget?.GadgetID ?? 0) && game.GamePhase != Enums.EGamePhase.Started))
             {
                 shouldAllow = false;
@@ -799,17 +816,18 @@ namespace UnturnedBlackout.Managers
                 shouldAllow = false;
                 return;
             }
+            Logging.Debug("3");
 
             if (player.KillstreakTriggers.TryGetValue(jar.item.id, out LoadoutKillstreak activateKillstreak))
             {
                 shouldAllow = false;
-                if (game.GamePhase == EGamePhase.Started && player.AvailableKillstreaks[activateKillstreak] && !isCarryingFlag && !player.HasKillstreakActive)
+                if (game.GamePhase == EGamePhase.Started /*&& player.AvailableKillstreaks[activateKillstreak]*/ && !isCarryingFlag && !player.HasKillstreakActive)
                 {
                     player.ActivateKillstreak(activateKillstreak);
                 }
                 return;
             }
-
+            Logging.Debug("4");
             TaskDispatcher.QueueOnMainThread(() =>
             {
                 var connection = player.TransportConnection;
@@ -817,16 +835,17 @@ namespace UnturnedBlackout.Managers
                 {
                     return;
                 }
-
-                if (player.HasKillstreakActive && asset.id != player.ActiveKillstreak.Killstreak.KillstreakID)
+                Logging.Debug("5");
+                if (player.HasKillstreakActive && asset.id != player.ActiveKillstreak.Killstreak.KillstreakInfo.ItemID)
                 {
+                    Logging.Debug($"9, killstreak active {player.HasKillstreakActive}, asset id: {asset.id}, killstreak id {player.ActiveKillstreak.Killstreak.KillstreakID}");
                     player.RemoveActiveKillstreak();
                 }
-
+                Logging.Debug("6");
                 EffectManager.sendUIEffectText(HUD_KEY, connection, true, "WeaponName", asset.itemName);
                 var isPrimarySecondaryMelee = (asset.id == (player.ActiveLoadout.PrimarySkin?.SkinID ?? 0)) || (asset.id == (player.ActiveLoadout.Primary?.Gun?.GunID ?? 0)) || (asset.id == (player.ActiveLoadout.SecondarySkin?.SkinID ?? 0)) || (asset.id == (player.ActiveLoadout.Secondary?.Gun?.GunID ?? 0)) || (asset.id == (player.ActiveLoadout.Knife?.Knife?.KnifeID ?? 0));
                 player.ForceEquip = !isPrimarySecondaryMelee;
-
+                Logging.Debug("7");
                 if (!player.ForceEquip)
                 {
                     player.LastEquippedPage = equipment.equippedPage;
@@ -891,29 +910,19 @@ namespace UnturnedBlackout.Managers
                 return;
             }
 
-            if (player.ForceEquip)
+            if (player.ForceEquip && !player.CurrentGame.IsPlayerCarryingFlag(player))
             {
                 Plugin.Instance.StartCoroutine(DelayedEquip(player.Player.Player.equipment, player.LastEquippedPage, player.LastEquippedX, player.LastEquippedY));
+                return;
             }
-            else
-            {
-                /*
-                var inv = player.Player.Player.inventory;
-                for (byte page = 0; page < PlayerInventory.PAGES - 2; page++)
-                {
-                    for (int index = inv.getItemCount(page) - 1; index >= 0; index--)
-                    {
-                        var item = inv.getItem(page, (byte)index);
-                        if (item != null && item.item.id == (player.ActiveLoadout.Knife?.Knife?.KnifeID ?? 0))
-                        {
-                            Plugin.Instance.StartCoroutine(Equip(player.Player.Player.equipment, page, item.x, item.y));
-                            break;
-                        }
-                    }
-                }*/
 
-                Plugin.Instance.StartCoroutine(DelayedEquip(player.Player.Player.equipment, player.KnifePage, player.KnifeX, player.KnifeY));
+            if (player.ForceEquip && player.Player.Player.inventory.getItem(1, 0) != null)
+            {
+                Plugin.Instance.StartCoroutine(DelayedEquip(player.Player.Player.equipment, 1, 0, 0));
+                return;
             }
+
+            Plugin.Instance.StartCoroutine(DelayedEquip(player.Player.Player.equipment, player.KnifePage, player.KnifeX, player.KnifeY));
         }
 
         public IEnumerator DelayedEquip(PlayerEquipment equipment, byte page, byte x, byte y)

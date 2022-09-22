@@ -724,6 +724,7 @@ namespace UnturnedBlackout.Models.Global
             Logging.Debug($"Made the killstreak active on code side, sent the UI");
 
             if (info.ItemStaySeconds == 0) return;
+            Plugin.Instance.UI.SendKillstreakTimer(this, info.ItemStaySeconds);
             KillstreakChecker = Plugin.Instance.StartCoroutine(CheckKillstreak(info.ItemStaySeconds));
             Logging.Debug($"Item stay seconds is not 0, starting the killstreak remover timer at {DateTime.UtcNow}");
         }
@@ -742,6 +743,7 @@ namespace UnturnedBlackout.Models.Global
             KillstreakItemRemover = Plugin.Instance.StartCoroutine(RemoveItemKillstreak(KillstreakPage, KillstreakX, KillstreakY, ActiveKillstreak.Killstreak.KillstreakInfo.MagID));
             Logging.Debug($"Removed the item of the killstreak for {Player.CharacterName}");
 
+            Plugin.Instance.UI.ClearKillstreakTimer(this);
             HasKillstreakActive = false;
             ActiveKillstreak = null;
             Logging.Debug($"Completely removed the killstreak from {Player.CharacterName}");            
@@ -779,7 +781,11 @@ namespace UnturnedBlackout.Models.Global
 
         public IEnumerator CheckKillstreak(int seconds)
         {
-            yield return new WaitForSeconds(seconds);
+            for (int i = seconds; i > 0; i--)
+            {
+                Plugin.Instance.UI.UpdateKillstreakTimer(this, i);
+                yield return new  WaitForSeconds(1f);
+            }
             RemoveActiveKillstreak();
         }
 

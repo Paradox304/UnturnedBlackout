@@ -5,6 +5,7 @@
         public int NormalKillXP { get; set; }
         public int MeleeKillXP { get; set; }
         public int HeadshotKillXP { get; set; }
+        public int KillstreakKillXP { get; set; }
         public int LethalKillXP { get; set; }
         public int AssistKillXP { get; set; }
         public int ShutdownXP { get; set; }
@@ -33,6 +34,7 @@
             NormalKillXP = 0;
             MeleeKillXP = 0;
             HeadshotKillXP = 0;
+            KillstreakKillXP = 0;
             LethalKillXP = 0;
             AssistKillXP = 0;
             ShutdownXP = 0;
