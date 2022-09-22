@@ -290,6 +290,7 @@ namespace UnturnedBlackout.GameTypes
             Plugin.Instance.UI.ClearPreEndingUI(player);
             Plugin.Instance.UI.ClearFFAHUD(player);
             Plugin.Instance.UI.ClearVoiceChatUI(player);
+            Plugin.Instance.UI.ClearKillstreakUI(player);
             OnStoppedTalking(player);
 
             if (GamePhase == EGamePhase.Starting)

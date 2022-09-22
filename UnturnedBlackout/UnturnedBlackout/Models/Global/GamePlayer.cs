@@ -683,9 +683,18 @@ namespace UnturnedBlackout.Models.Global
             var info = killstreak.Killstreak.KillstreakInfo;
             var inv = Player.Player.inventory;
             if (info.IsItem == false) return;
+
+            if (info.MagAmount > 0)
+            {
+                for (int i = 1; i <= info.MagAmount; i++)
+                {
+                    inv.forceAddItem(new Item(info.MagID, true), false);
+                }
+                Logging.Debug($"Killstreak has multiple ammo, gave {info.MagAmount} magazines with id {info.MagID}");
+            }
+
             inv.forceAddItem(new Item(info.ItemID, true), false);
             Logging.Debug($"Gave the item to the player");
-
             for (byte page = 0; page < PlayerInventory.PAGES - 2; page++)
             {
                 var shouldBreak = false;
@@ -705,7 +714,6 @@ namespace UnturnedBlackout.Models.Global
             }
 
             Player.Player.equipment.ServerEquip(KillstreakPage, KillstreakX, KillstreakY);
-
             Logging.Debug($"Stored the page: {KillstreakPage}, x: {KillstreakX}, y: {KillstreakY} for the item sent to the player");
             KillstreakChecker.Stop();
 
@@ -731,7 +739,7 @@ namespace UnturnedBlackout.Models.Global
 
             KillstreakChecker.Stop();
             KillstreakItemRemover.Stop();
-            KillstreakItemRemover = Plugin.Instance.StartCoroutine(RemoveItemKillstreak(KillstreakPage, KillstreakX, KillstreakY));
+            KillstreakItemRemover = Plugin.Instance.StartCoroutine(RemoveItemKillstreak(KillstreakPage, KillstreakX, KillstreakY, ActiveKillstreak.Killstreak.KillstreakInfo.MagID));
             Logging.Debug($"Removed the item of the killstreak for {Player.CharacterName}");
 
             HasKillstreakActive = false;
@@ -739,7 +747,7 @@ namespace UnturnedBlackout.Models.Global
             Logging.Debug($"Completely removed the killstreak from {Player.CharacterName}");            
         }
 
-        public IEnumerator RemoveItemKillstreak(byte page, byte x, byte y)
+        public IEnumerator RemoveItemKillstreak(byte page, byte x, byte y, ushort magID)
         {
             while (true)
             {
@@ -749,7 +757,22 @@ namespace UnturnedBlackout.Models.Global
                     continue;
                 }
 
-                Player.Player.inventory.removeItem(page, Player.Player.inventory.getIndex(page, x, y));
+                var inv = Player.Player.inventory;
+                inv.removeItem(page, Player.Player.inventory.getIndex(page, x, y));
+
+                if (magID != 0)
+                {
+                    Logging.Debug("Removing killstreak, killstreak has mags for it. Removing all the mags as well");
+                    var itemCount = inv.items[2].items.Count;
+                    for (int i = itemCount - 1; i >= 0; i--)
+                    {
+                        var item = inv.getItem(2, (byte)i);
+                        if ((item?.item?.id ?? 0) == magID)
+                        {
+                            inv.removeItem(2, (byte)i);
+                        }
+                    }
+                }
                 break;
             }
         }

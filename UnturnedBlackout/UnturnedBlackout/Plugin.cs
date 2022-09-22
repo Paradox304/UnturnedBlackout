@@ -7,6 +7,7 @@ using Steamworks;
 using System.Collections;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using UnityEngine;
 using UnturnedBlackout.Database.Data;
 using UnturnedBlackout.Managers;
@@ -204,10 +205,16 @@ namespace UnturnedBlackout
 
             StartCoroutine(Day());
 
+            var ignoreMags = Config.Killstreaks.FileData.KillstreaksData.Where(k => k.MagID != 0).Select(k => k.MagID);
             var shouldFillAfterDetach = typeof(ItemMagazineAsset).GetProperty("shouldFillAfterDetach", BindingFlags.Public | BindingFlags.Instance);
             var magazines = Assets.find(EAssetType.ITEM).OfType<ItemMagazineAsset>();
             foreach (var mag in magazines)
             {
+                if (ignoreMags.Contains(mag.id))
+                {
+                    continue;
+                }
+
                 shouldFillAfterDetach.GetSetMethod(true).Invoke(mag, new object[] { true });
             }
 

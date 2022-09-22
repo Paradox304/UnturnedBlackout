@@ -128,6 +128,7 @@ namespace UnturnedBlackout.Managers
 
             UseableGun.onChangeMagazineRequested += OnMagazineChanged;
             UseableGun.onBulletSpawned += OnBulletShot;
+            UseableGun.onProjectileSpawned += OnProjectileShot;
 
             PlayerEquipment.OnUseableChanged_Global += OnUseableChanged;
 
@@ -136,6 +137,21 @@ namespace UnturnedBlackout.Managers
 
             EffectManager.onEffectButtonClicked += OnButtonClicked;
             EffectManager.onEffectTextCommitted += OnTextCommitted;
+        }
+
+        public void Destroy()
+        {
+            EffectManager.onEffectButtonClicked -= OnButtonClicked;
+            EffectManager.onEffectTextCommitted -= OnTextCommitted;
+
+            UseableGun.onChangeMagazineRequested -= OnMagazineChanged;
+            UseableGun.onBulletSpawned -= OnBulletShot;
+            UseableGun.onProjectileSpawned -= OnProjectileShot;
+
+            PlayerEquipment.OnUseableChanged_Global -= OnUseableChanged;
+
+            U.Events.OnPlayerConnected -= OnConnected;
+            U.Events.OnPlayerDisconnected -= OnDisconnected;
         }
 
         public void RegisterUIHandler(UnturnedPlayer player)
@@ -655,18 +671,25 @@ namespace UnturnedBlackout.Managers
 
         public void UpdateKillstreakBars(GamePlayer player, int currentKillstreak)
         {
+            int previousKillstreakRequirement = 0;
             for (int i = 0; i < player.OrderedKillstreaks.Count; i++)
             {
                 var killstreak = player.OrderedKillstreaks[i];
-                var spaces = Math.Min(MAX_SPACES_KILLSTREAK, Math.Max(0, currentKillstreak * MAX_SPACES_KILLSTREAK / killstreak.Killstreak.KillstreakRequired));
-                Logging.Debug($"Spaces: {spaces}");
-                if (spaces == 0)
+                if (previousKillstreakRequirement > currentKillstreak)
                 {
-                    EffectManager.sendUIEffectVisibility(KILLSTREAK_KEY, player.TransportConnection, true, $"BarEmptier{i}", true);
+                    EffectManager.sendUIEffectText(KILLSTREAK_KEY, player.TransportConnection, true, $"BarFill{i}", VERY_SMALL_SQUARE);
                     continue;
                 }
 
-                EffectManager.sendUIEffectText(KILLSTREAK_KEY, player.TransportConnection, true, $"BarFill{i}", new string(HAIRSPACE_SYMBOL_CHAR, spaces));
+                previousKillstreakRequirement = killstreak.Killstreak.KillstreakRequired;
+                var spaces = Math.Min(MAX_SPACES_KILLSTREAK, Math.Max(0, currentKillstreak * MAX_SPACES_KILLSTREAK / killstreak.Killstreak.KillstreakRequired));
+                //if (spaces == 0)
+                //{
+                    //EffectManager.sendUIEffectVisibility(KILLSTREAK_KEY, player.TransportConnection, true, $"BarEmptier{i}", true);
+                    //continue;
+                //}
+
+                EffectManager.sendUIEffectText(KILLSTREAK_KEY, player.TransportConnection, true, $"BarFill{i}", spaces == 0 ? VERY_SMALL_SQUARE : new string(HAIRSPACE_SYMBOL_CHAR, spaces));
             }
         }
 
@@ -691,9 +714,12 @@ namespace UnturnedBlackout.Managers
             player.Player.disablePluginWidgetFlag(EPluginWidgetFlags.ShowDeathMenu);
 
             player.Player.equipment.onEquipRequested += OnEquipRequested;
+            player.Player.equipment.onDequipRequested += OnDequipRequested;
 
             player.Player.inventory.onDropItemRequested += OnDropItemRequested;
             player.Player.stance.onStanceUpdated += () => OnStanceUpdated(player.Player);
+
+            player.Player.inventory.items[2].resize(10, 10);
 
             var transportConnection = player.Player.channel.owner.transportConnection;
 
@@ -707,6 +733,7 @@ namespace UnturnedBlackout.Managers
         private void OnDisconnected(UnturnedPlayer player)
         {
             player.Player.equipment.onEquipRequested -= OnEquipRequested;
+            player.Player.equipment.onDequipRequested -= OnDequipRequested;
             player.Player.inventory.onDropItemRequested -= OnDropItemRequested;
             player.Player.stance.onStanceUpdated -= () => OnStanceUpdated(player.Player);
         }
@@ -743,6 +770,7 @@ namespace UnturnedBlackout.Managers
         protected void OnEquipRequested(PlayerEquipment equipment, ItemJar jar, ItemAsset asset, ref bool shouldAllow)
         {
             var player = Plugin.Instance.Game.GetGamePlayer(equipment.player);
+            var inv = player.Player.Player.inventory;
             var game = player.CurrentGame;
             if (game == null)
             {
@@ -750,7 +778,7 @@ namespace UnturnedBlackout.Managers
             }
 
             var isCarryingFlag = game.IsPlayerCarryingFlag(player);
-            if (isCarryingFlag && equipment.player.inventory.getItem(0, 0) == jar)
+            if (isCarryingFlag && inv.getItem(0, 0) == jar)
             {
                 shouldAllow = false;
                 return;
@@ -779,6 +807,7 @@ namespace UnturnedBlackout.Managers
                 {
                     player.ActivateKillstreak(activateKillstreak);
                 }
+                return;
             }
 
             TaskDispatcher.QueueOnMainThread(() =>
@@ -787,6 +816,11 @@ namespace UnturnedBlackout.Managers
                 if (asset == null)
                 {
                     return;
+                }
+
+                if (player.HasKillstreakActive && asset.id != player.ActiveKillstreak.Killstreak.KillstreakID)
+                {
+                    player.RemoveActiveKillstreak();
                 }
 
                 EffectManager.sendUIEffectText(HUD_KEY, connection, true, "WeaponName", asset.itemName);
@@ -821,6 +855,17 @@ namespace UnturnedBlackout.Managers
 
                 game.PlayerEquipmentChanged(player);
             });
+        }
+        
+        private void OnDequipRequested(PlayerEquipment equipment, ref bool shouldAllow)
+        {
+            var player = Plugin.Instance.Game.GetGamePlayer(equipment.player);
+            Logging.Debug($"{player.Player.CharacterName} tryna dequip his gun with id {equipment.itemID}");
+            if (player.HasKillstreakActive)
+            {
+                Logging.Debug($"{player.Player.CharacterName} has killstreak active and dequipped weapon with id {equipment.itemID}, waiting for a bit then removing the killstreak");
+                TaskDispatcher.QueueOnMainThread(() => player.RemoveActiveKillstreak());
+            }
         }
 
         public void OnUseableChanged(PlayerEquipment obj)
@@ -907,7 +952,57 @@ namespace UnturnedBlackout.Managers
 
         private void OnBulletShot(UseableGun gun, BulletInfo bullet)
         {
-            EffectManager.sendUIEffectText(HUD_KEY, gun.player.channel.GetOwnerTransportConnection(), true, "AmmoNum", gun.player.equipment.state[10].ToString());
+            var ammo = gun.player.equipment.state[10];
+            var player = Plugin.Instance.Game.GetGamePlayer(gun.player);
+            EffectManager.sendUIEffectText(HUD_KEY, player.TransportConnection, true, "AmmoNum", ammo.ToString());
+
+            var info = player.ActiveKillstreak?.Killstreak?.KillstreakInfo;
+            if (ammo == 0 && player.HasKillstreakActive && info.RemoveWhenAmmoEmpty)
+            {
+                Logging.Debug($"Ammo is 0, {player.Player.CharacterName} has a killstreak active");
+                if (info.MagID != 0)
+                {
+                    Logging.Debug($"Killstreak supposed to have mags, check if any mag is left with id {info.MagID}");
+                    var inv = gun.player.inventory;
+                    var itemCount = inv.items[2].items.Count;
+                    for (int i = itemCount - 1; i >= 0; i--)
+                    {
+                        var item = inv.getItem(2, (byte)i);
+                        if ((item?.item?.id ?? 0) == info.MagID)
+                        {
+                            return;
+                        }
+                    }
+                    Logging.Debug("No mag found in inventory, remove killstreak");
+                }
+                TaskDispatcher.QueueOnMainThread(() => player.RemoveActiveKillstreak());
+            }
+        }
+
+        private void OnProjectileShot(UseableGun sender, GameObject projectile)
+        {
+            var ammo = sender.player.equipment.state[10];
+            var player = Plugin.Instance.Game.GetGamePlayer(sender.player);
+            EffectManager.sendUIEffectText(HUD_KEY, player.TransportConnection, true, "AmmoNum", ammo.ToString());
+
+            var info = player.ActiveKillstreak?.Killstreak?.KillstreakInfo;
+            if (ammo == 0 && player.HasKillstreakActive && info.RemoveWhenAmmoEmpty)
+            {
+                if (info.MagID != 0)
+                {
+                    var inv = sender.player.inventory;
+                    var itemCount = inv.items[2].items.Count;
+                    for (int i = itemCount - 1; i >= 0; i--)
+                    {
+                        var item = inv.getItem(2, (byte)i);
+                        if ((item?.item?.id ?? 0) == info.MagID)
+                        {
+                            return;
+                        }
+                    }
+                }
+                TaskDispatcher.QueueOnMainThread(() => player.RemoveActiveKillstreak());
+            }
         }
 
         // FFA RELATED UI
@@ -1016,7 +1111,6 @@ namespace UnturnedBlackout.Managers
         {
             EffectManager.askEffectClearByID(FFA_ID, player.TransportConnection);
         }
-
 
         // TDM Related UI
 
@@ -2021,20 +2115,6 @@ namespace UnturnedBlackout.Managers
             {
                 handler.SendNotEnoughCurrencyModal(currency);
             }
-        }
-
-        public void Destroy()
-        {
-            EffectManager.onEffectButtonClicked -= OnButtonClicked;
-            EffectManager.onEffectTextCommitted -= OnTextCommitted;
-
-            UseableGun.onChangeMagazineRequested -= OnMagazineChanged;
-            UseableGun.onBulletSpawned -= OnBulletShot;
-
-            PlayerEquipment.OnUseableChanged_Global -= OnUseableChanged;
-
-            U.Events.OnPlayerConnected -= OnConnected;
-            U.Events.OnPlayerDisconnected -= OnDisconnected;
         }
     }
 }
