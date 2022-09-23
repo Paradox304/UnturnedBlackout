@@ -109,7 +109,7 @@ namespace UnturnedBlackout.Managers
         public const short FLAG_POPUP_KEY = 27900;
 
         public const int MAX_SPACES_TDM_SCORE = 98;
-        public const int MAX_SPACES_KILLSTREAK = 19;
+        public const int MAX_SPACES_KILLSTREAK = 18;
 
         public const string PRIME_SYMBOL = " ";
 
@@ -540,7 +540,6 @@ namespace UnturnedBlackout.Managers
             EffectManager.askEffectClearByID(LOADING_UI_ID, player.Player.channel.owner.transportConnection);
         }
 
-
         public IEnumerator SendTip(UnturnedPlayer player)
         {
             var db = Plugin.Instance.DB;
@@ -680,9 +679,7 @@ namespace UnturnedBlackout.Managers
                     EffectManager.sendUIEffectText(KILLSTREAK_KEY, player.TransportConnection, true, $"BarFill{i}", VERY_SMALL_SQUARE);
                     continue;
                 }
-
-                previousKillstreakRequirement = killstreak.Killstreak.KillstreakRequired;
-                var spaces = Math.Min(MAX_SPACES_KILLSTREAK, Math.Max(0, currentKillstreak * MAX_SPACES_KILLSTREAK / killstreak.Killstreak.KillstreakRequired));
+                var spaces = Math.Min(MAX_SPACES_KILLSTREAK, Math.Max(0, (currentKillstreak - previousKillstreakRequirement) * MAX_SPACES_KILLSTREAK / (killstreak.Killstreak.KillstreakRequired - previousKillstreakRequirement)));
                 //if (spaces == 0)
                 //{
                     //EffectManager.sendUIEffectVisibility(KILLSTREAK_KEY, player.TransportConnection, true, $"BarEmptier{i}", true);
@@ -690,6 +687,7 @@ namespace UnturnedBlackout.Managers
                 //}
 
                 EffectManager.sendUIEffectText(KILLSTREAK_KEY, player.TransportConnection, true, $"BarFill{i}", spaces == 0 ? VERY_SMALL_SQUARE : new string(HAIRSPACE_SYMBOL_CHAR, spaces));
+                previousKillstreakRequirement = killstreak.Killstreak.KillstreakRequired;
             }
         }
 
@@ -735,7 +733,7 @@ namespace UnturnedBlackout.Managers
             player.Player.inventory.onDropItemRequested += OnDropItemRequested;
             player.Player.stance.onStanceUpdated += () => OnStanceUpdated(player.Player);
 
-            player.Player.inventory.items[2].resize(10, 10);
+            player.Player.inventory.items[2].resize(Config.Base.FileData.HandSlotWidth, Config.Base.FileData.HandSlotHeight);
 
             var transportConnection = player.Player.channel.owner.transportConnection;
 
@@ -793,19 +791,16 @@ namespace UnturnedBlackout.Managers
                 return;
             }
 
-            Logging.Debug($"Equip requested with item id {equipment.itemID} for {player.Player.CharacterName}");
             var isCarryingFlag = game.IsPlayerCarryingFlag(player);
             if (isCarryingFlag && inv.getItem(0, 0) == jar)
             {
                 shouldAllow = false;
                 return;
             }
-            Logging.Debug("1");
             if (player.ActiveLoadout == null)
             {
                 return;
             }
-            Logging.Debug("2");
             if ((jar.item.id == (player.ActiveLoadout.Tactical?.Gadget?.GadgetID ?? 0) && !player.HasTactical) || (jar.item.id == (player.ActiveLoadout.Tactical?.Gadget?.GadgetID ?? 0) && game.GamePhase != Enums.EGamePhase.Started))
             {
                 shouldAllow = false;
@@ -816,18 +811,17 @@ namespace UnturnedBlackout.Managers
                 shouldAllow = false;
                 return;
             }
-            Logging.Debug("3");
 
             if (player.KillstreakTriggers.TryGetValue(jar.item.id, out LoadoutKillstreak activateKillstreak))
             {
                 shouldAllow = false;
-                if (game.GamePhase == EGamePhase.Started /*&& player.AvailableKillstreaks[activateKillstreak]*/ && !isCarryingFlag && !player.HasKillstreakActive)
+                if (game.GamePhase == EGamePhase.Started && player.AvailableKillstreaks[activateKillstreak] && !isCarryingFlag && !player.HasKillstreakActive)
                 {
                     player.ActivateKillstreak(activateKillstreak);
                 }
                 return;
             }
-            Logging.Debug("4");
+
             TaskDispatcher.QueueOnMainThread(() =>
             {
                 var connection = player.TransportConnection;
@@ -835,17 +829,13 @@ namespace UnturnedBlackout.Managers
                 {
                     return;
                 }
-                Logging.Debug("5");
                 if (player.HasKillstreakActive && asset.id != player.ActiveKillstreak.Killstreak.KillstreakInfo.ItemID)
                 {
-                    Logging.Debug($"9, killstreak active {player.HasKillstreakActive}, asset id: {asset.id}, killstreak id {player.ActiveKillstreak.Killstreak.KillstreakID}");
                     player.RemoveActiveKillstreak();
                 }
-                Logging.Debug("6");
                 EffectManager.sendUIEffectText(HUD_KEY, connection, true, "WeaponName", asset.itemName);
                 var isPrimarySecondaryMelee = (asset.id == (player.ActiveLoadout.PrimarySkin?.SkinID ?? 0)) || (asset.id == (player.ActiveLoadout.Primary?.Gun?.GunID ?? 0)) || (asset.id == (player.ActiveLoadout.SecondarySkin?.SkinID ?? 0)) || (asset.id == (player.ActiveLoadout.Secondary?.Gun?.GunID ?? 0)) || (asset.id == (player.ActiveLoadout.Knife?.Knife?.KnifeID ?? 0));
                 player.ForceEquip = !isPrimarySecondaryMelee;
-                Logging.Debug("7");
                 if (!player.ForceEquip)
                 {
                     player.LastEquippedPage = equipment.equippedPage;
@@ -969,7 +959,7 @@ namespace UnturnedBlackout.Managers
             if (ammo == 0 && player.HasKillstreakActive && info.RemoveWhenAmmoEmpty)
             {
                 Logging.Debug($"Ammo is 0, {player.Player.CharacterName} has a killstreak active");
-                if (info.MagID != 0)
+                if (info.MagAmount > 0)
                 {
                     Logging.Debug($"Killstreak supposed to have mags, check if any mag is left with id {info.MagID}");
                     var inv = gun.player.inventory;
@@ -984,7 +974,7 @@ namespace UnturnedBlackout.Managers
                     }
                     Logging.Debug("No mag found in inventory, remove killstreak");
                 }
-                TaskDispatcher.QueueOnMainThread(() => player.RemoveActiveKillstreak());
+                Plugin.Instance.StartCoroutine(DelayedRemoveActiveKillstreak(player));
             }
         }
 
@@ -997,7 +987,7 @@ namespace UnturnedBlackout.Managers
             var info = player.ActiveKillstreak?.Killstreak?.KillstreakInfo;
             if (ammo == 0 && player.HasKillstreakActive && info.RemoveWhenAmmoEmpty)
             {
-                if (info.MagID != 0)
+                if (info.MagAmount > 0)
                 {
                     var inv = sender.player.inventory;
                     var itemCount = inv.items[2].items.Count;
@@ -1010,8 +1000,14 @@ namespace UnturnedBlackout.Managers
                         }
                     }
                 }
-                TaskDispatcher.QueueOnMainThread(() => player.RemoveActiveKillstreak());
+                Plugin.Instance.StartCoroutine(DelayedRemoveActiveKillstreak(player));
             }
+        }
+
+        public IEnumerator DelayedRemoveActiveKillstreak(GamePlayer player)
+        {
+            yield return new WaitForSeconds(0.5f);
+            player.RemoveActiveKillstreak();
         }
 
         // FFA RELATED UI

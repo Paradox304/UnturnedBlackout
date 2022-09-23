@@ -486,7 +486,7 @@ namespace UnturnedBlackout.Managers
                             continue;
                         }
 
-                        var longshotRange = Mathf.Pow(gunAsset.damageFalloffRange * 100, 2);
+                        var longshotRange = Mathf.Pow(gunAsset.damageFalloffRange * 100, 2) * 1.2f;
                         var gun = new Gun(gunID, gunName, gunDesc, gunType, rarity, movementChange, movementChangeADS, iconLink, magAmount, coins, buyPrice, scrapAmount, levelRequirement, isPrimary, defaultAttachments, rewardAttachments, rewardAttachmentsInverse, levelXPNeeded, longshotRange);
                         if (!guns.ContainsKey(gunID))
                         {
@@ -2973,6 +2973,7 @@ namespace UnturnedBlackout.Managers
                                 updateLoadouts.Add(loadoutID);
                             }
                         }
+
                         var loadoutKillstreaks = new List<LoadoutKillstreak>();
                         foreach (var killstreakID in loadoutData.Killstreaks)
                         {
@@ -5006,7 +5007,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 await new MySqlCommand($"UPDATE `{PLAYERS_KILLSTREAKS}` SET `KillstreakKills` = `KillstreakKills` + {kills} WHERE `SteamID` = {steamID} AND `KillstreakID` = {killstreakID};", Conn).ExecuteScalarAsync();
-                var obj = await new MySqlCommand($"SELECT `KillstreakKills` WHERE `SteamID` = {steamID} AND `KillstreakID` = {killstreakID};", Conn).ExecuteScalarAsync();
+                var obj = await new MySqlCommand($"SELECT `KillstreakKills` FROM `{PLAYERS_KILLSTREAKS}` WHERE `SteamID` = {steamID} AND `KillstreakID` = {killstreakID};", Conn).ExecuteScalarAsync();
                 if (obj is int newKills)
                 {
                     killstreak.KillstreakKills = newKills;

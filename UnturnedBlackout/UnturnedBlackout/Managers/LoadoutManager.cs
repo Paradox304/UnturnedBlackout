@@ -88,10 +88,12 @@ namespace UnturnedBlackout.Managers
                 }
             }
 
-
+            Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
             ThreadPool.QueueUserWorkItem(async (o) =>
             {
+                Logging.Debug($"THREAD ENTERED LOADOUT CHECK {player.CharacterName}");
                 await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
+                Logging.Debug($"SQL QUERY EXECUTED LOADOUT CHECK {player.CharacterName}");
             });
         }
 
@@ -133,9 +135,12 @@ namespace UnturnedBlackout.Managers
                 attachments.Add(attachment.Attachment.AttachmentType, attachment);
             }
 
+            Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
             ThreadPool.QueueUserWorkItem(async (o) =>
             {
+                Logging.Debug($"THREAD ENTERED LOADOUT CHECK {player.CharacterName}");
                 await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
+                Logging.Debug($"SQL QUERY EXECUTED LOADOUT CHECK {player.CharacterName}");
             });
         }
 
@@ -172,9 +177,12 @@ namespace UnturnedBlackout.Managers
             {
                 attachments.Remove(attachment.Attachment.AttachmentType);
 
+                Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
                 ThreadPool.QueueUserWorkItem(async (o) =>
                 {
+                    Logging.Debug($"THREAD ENTERED LOADOUT CHECK {player.CharacterName}");
                     await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
+                    Logging.Debug($"SQL QUERY EXECUTED LOADOUT CHECK {player.CharacterName}");
                 });
             }
             else
@@ -214,9 +222,12 @@ namespace UnturnedBlackout.Managers
             }
 
 
+            Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
             ThreadPool.QueueUserWorkItem(async (o) =>
             {
+                Logging.Debug($"THREAD ENTERED LOADOUT CHECK {player.CharacterName}");
                 await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
+                Logging.Debug($"SQL QUERY EXECUTED LOADOUT CHECK {player.CharacterName}");
             });
         }
 
@@ -242,9 +253,12 @@ namespace UnturnedBlackout.Managers
             }
 
             playerLoadout.Knife = knife;
+            Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
             ThreadPool.QueueUserWorkItem(async (o) =>
             {
+                Logging.Debug($"THREAD ENTERED LOADOUT CHECK {player.CharacterName}");
                 await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
+                Logging.Debug($"SQL QUERY EXECUTED LOADOUT CHECK {player.CharacterName}");
             });
         }
 
@@ -270,9 +284,12 @@ namespace UnturnedBlackout.Managers
             }
 
             playerLoadout.Tactical = tactical;
+            Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
             ThreadPool.QueueUserWorkItem(async (o) =>
             {
+                Logging.Debug($"THREAD ENTERED LOADOUT CHECK {player.CharacterName}");
                 await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
+                Logging.Debug($"SQL QUERY EXECUTED LOADOUT CHECK {player.CharacterName}");
             });
         }
 
@@ -298,9 +315,12 @@ namespace UnturnedBlackout.Managers
             }
 
             playerLoadout.Lethal = lethal;
+            Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
             ThreadPool.QueueUserWorkItem(async (o) =>
             {
+                Logging.Debug($"THREAD ENTERED LOADOUT CHECK {player.CharacterName}");
                 await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
+                Logging.Debug($"SQL QUERY EXECUTED LOADOUT CHECK {player.CharacterName}");
             });
         }
 
@@ -326,9 +346,12 @@ namespace UnturnedBlackout.Managers
             }
 
             playerLoadout.Glove = glove;
+            Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
             ThreadPool.QueueUserWorkItem(async (o) =>
             {
+                Logging.Debug($"THREAD ENTERED LOADOUT CHECK {player.CharacterName}");
                 await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
+                Logging.Debug($"SQL QUERY EXECUTED LOADOUT CHECK {player.CharacterName}");
             });
         }
 
@@ -354,9 +377,12 @@ namespace UnturnedBlackout.Managers
             }
 
             playerLoadout.Card = card;
+            Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
             ThreadPool.QueueUserWorkItem(async (o) =>
             {
+                Logging.Debug($"THREAD ENTERED LOADOUT CHECK {player.CharacterName}");
                 await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
+                Logging.Debug($"SQL QUERY EXECUTED LOADOUT CHECK {player.CharacterName}");
             });
         }
 
@@ -392,9 +418,12 @@ namespace UnturnedBlackout.Managers
             }
 
             playerLoadout.PerksSearchByType.Add(newPerk.Perk.SkillType, newPerk);
+            Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
             ThreadPool.QueueUserWorkItem(async (o) =>
             {
+                Logging.Debug($"THREAD ENTERED LOADOUT CHECK {player.CharacterName}");
                 await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
+                Logging.Debug($"SQL QUERY EXECUTED LOADOUT CHECK {player.CharacterName}");
             });
         }
 
@@ -425,9 +454,12 @@ namespace UnturnedBlackout.Managers
                 return;
             }
 
+            Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
             ThreadPool.QueueUserWorkItem(async (o) =>
             {
+                Logging.Debug($"THREAD ENTERED LOADOUT CHECK {player.CharacterName}");
                 await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
+                Logging.Debug($"SQL QUERY EXECUTED LOADOUT CHECK {player.CharacterName}");
             });
         }
 
@@ -462,9 +494,12 @@ namespace UnturnedBlackout.Managers
                 playerLoadout.Killstreaks.Add(killstreak);
             }
 
+            Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
             ThreadPool.QueueUserWorkItem(async (o) =>
             {
+                Logging.Debug($"THREAD ENTERED LOADOUT CHECK {player.CharacterName}");
                 await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
+                Logging.Debug($"SQL QUERY EXECUTED LOADOUT CHECK {player.CharacterName}");
             });
         }
 
@@ -495,9 +530,12 @@ namespace UnturnedBlackout.Managers
                 return;
             }
 
+            Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
             ThreadPool.QueueUserWorkItem(async (o) =>
             {
+                Logging.Debug($"THREAD ENTERED LOADOUT CHECK {player.CharacterName}");
                 await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
+                Logging.Debug($"SQL QUERY EXECUTED LOADOUT CHECK {player.CharacterName}");
             });
         }
 
@@ -541,9 +579,12 @@ namespace UnturnedBlackout.Managers
                 playerLoadout.SecondarySkin = gunSkin;
             }
 
+            Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
             ThreadPool.QueueUserWorkItem(async (o) =>
             {
+                Logging.Debug($"THREAD ENTERED LOADOUT CHECK {player.CharacterName}");
                 await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
+                Logging.Debug($"SQL QUERY EXECUTED LOADOUT CHECK {player.CharacterName}");
             });
         }
 
@@ -571,39 +612,36 @@ namespace UnturnedBlackout.Managers
                 playerLoadout.SecondarySkin = null;
             }
 
+            Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
             ThreadPool.QueueUserWorkItem(async (o) =>
             {
+                Logging.Debug($"THREAD ENTERED LOADOUT CHECK {player.CharacterName}");
                 await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
+                Logging.Debug($"SQL QUERY EXECUTED LOADOUT CHECK {player.CharacterName}");
             });
         }
 
         public void GiveLoadout(GamePlayer player, Kit kit, List<TeamGlove> gloves)
         {
-            Logging.Debug($"Giving loadout to {player.Player.CharacterName}");
             var inv = player.Player.Player.inventory;
             inv.ClearInventory();
-
             // Adding clothes
             foreach (var id in kit.ItemIDs)
             {
                 inv.forceAddItem(new Item(id, true), true);
             }
-
             // Getting active loadout
             if (!DB.PlayerLoadouts.TryGetValue(player.SteamID, out PlayerLoadout loadout))
             {
-                Logging.Debug($"Error finding loadout for {player.Player.CharacterName}");
                 return;
             }
 
             var activeLoadout = loadout.Loadouts.Values.FirstOrDefault(k => k.IsActive);
             if (activeLoadout == null)
             {
-                Logging.Debug($"Error finding active loadout for {player.Player.CharacterName}");
                 player.SetActiveLoadout(null, 0, 0, 0);
                 return;
             }
-
             // Giving glove to player
             if (activeLoadout.Glove != null)
             {
@@ -612,7 +650,6 @@ namespace UnturnedBlackout.Managers
                 player.Player.Player.clothing.askWearShirt(0, 0, new byte[0], true);
                 inv.forceAddItem(new Item(glove.ItemID, true), true);
             }
-
             // Giving primary to player
             if (activeLoadout.Primary != null)
             {
@@ -652,7 +689,6 @@ namespace UnturnedBlackout.Managers
                 inv.items[0].tryAddItem(item);
                 player.Player.Player.equipment.ServerEquip(0, 0, 0);
             }
-
             // Giving secondary to player
             if (activeLoadout.Secondary != null)
             {
@@ -668,12 +704,10 @@ namespace UnturnedBlackout.Managers
                         var bytes = BitConverter.GetBytes(attachment.Attachment.AttachmentID);
                         item.state[startingPos] = bytes[0];
                         item.state[startingPos + 1] = bytes[1];
-
                         if (attachmentType == EAttachment.Magazine)
                         {
                             var asset = Assets.find(EAssetType.ITEM, attachment.Attachment.AttachmentID) as ItemMagazineAsset;
                             item.state[10] = asset.amount;
-
                             for (int i2 = 1; i2 <= activeLoadout.Secondary.Gun.MagAmount; i2++)
                             {
                                 inv.forceAddItem(new Item(attachment.Attachment.AttachmentID, true), false);
@@ -695,7 +729,6 @@ namespace UnturnedBlackout.Managers
                     player.Player.Player.equipment.ServerEquip(1, 0, 0);
                 }
             }
-
             // Giving knife to player
             byte knifePage = 0;
             byte knifeX = 0;
@@ -722,7 +755,6 @@ namespace UnturnedBlackout.Managers
                     if (shouldBreak) break;
                 }
             }
-
             // Giving perks to player
             var skill = player.Player.Player.skills;
             var skills = new Dictionary<(int, int), int>();
@@ -741,7 +773,6 @@ namespace UnturnedBlackout.Managers
                     }
                 }
             }
-
             foreach (var perk in activeLoadout.Perks)
             {
                 if (PlayerSkills.TryParseIndices(perk.Value.Perk.SkillType, out int specialtyIndex, out int skillIndex))
@@ -764,7 +795,6 @@ namespace UnturnedBlackout.Managers
                     }
                 }
             }
-
             for (int specialtyIndex = 0; specialtyIndex < skill.skills.Length; specialtyIndex++)
             {
                 for (int skillIndex = 0; skillIndex < skill.skills[specialtyIndex].Length; skillIndex++)
@@ -772,27 +802,20 @@ namespace UnturnedBlackout.Managers
                     skill.ServerSetSkillLevel(specialtyIndex, skillIndex, skills.TryGetValue((specialtyIndex, skillIndex), out int level) ? level : 0);
                 }
             }
-
             // Giving tactical and lethal to player
-            if (activeLoadout.Lethal != null || activeLoadout.Tactical != null)
+            if (activeLoadout.Lethal != null)
             {
-                if (activeLoadout.Lethal != null)
-                {
-                    inv.forceAddItem(new Item(activeLoadout.Lethal.Gadget.GadgetID, false), false);
-                }
-
-                if (activeLoadout.Tactical != null)
-                {
-                    inv.forceAddItem(new Item(activeLoadout.Tactical.Gadget.GadgetID, false), false);
-                }
+                inv.forceAddItem(new Item(activeLoadout.Lethal.Gadget.GadgetID, false), false);
             }
-
+            if (activeLoadout.Tactical != null)
+            {
+                inv.forceAddItem(new Item(activeLoadout.Tactical.Gadget.GadgetID, false), false);
+            }
             // Giving killstreaks to player
             foreach (var killstreak in activeLoadout.Killstreaks)
             {
                 inv.forceAddItem(new Item(killstreak.Killstreak.KillstreakInfo.TriggerItemID, true), false);
             }
-
             player.SetActiveLoadout(activeLoadout, knifePage, knifeX, knifeY);
         }
     }

@@ -10,6 +10,9 @@
         public int ItemStaySeconds { get; set; }
         public ushort MagID { get; set; }
         public int MagAmount { get; set; }
+        public string MedalName { get; set; }
+        public int MedalXP { get; set; }
+        public float MovementMultiplier { get; set; }
 
         public KillstreakData()
         {

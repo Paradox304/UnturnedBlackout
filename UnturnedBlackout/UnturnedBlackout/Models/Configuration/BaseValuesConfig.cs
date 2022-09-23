@@ -31,6 +31,9 @@ namespace UnturnedBlackout.Models.Configuration
 
         public int BattlepassTierSkipCost { get; set; }
 
+        public byte HandSlotWidth { get; set; }
+        public byte HandSlotHeight { get; set; }
+
         public BaseValuesConfig()
         {
             MaxPlayerNameCharacters = 20;
@@ -67,6 +70,9 @@ namespace UnturnedBlackout.Models.Configuration
             SpawnSwitchSeconds = 120;
 
             BattlepassTierSkipCost = 100;
+
+            HandSlotWidth = 10;
+            HandSlotHeight = 10;
         }
     }
 }

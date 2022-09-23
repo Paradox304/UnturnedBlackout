@@ -14,13 +14,6 @@ namespace UnturnedBlackout
 {
     public static class Utility
     {
-        public static void Stop(this Coroutine cr)
-        {
-            if (cr != null)
-            {
-                Plugin.Instance.StopCoroutine(cr);
-            }
-        }
 
         public static string ToRich(this string value)
         {
@@ -64,6 +57,14 @@ namespace UnturnedBlackout
             inv.player.equipment.sendSlot(1);
 
             Plugin.Instance.UI.RemoveGunUI(inv.player.channel.GetOwnerTransportConnection());
+        }
+
+        public static void Stop(this Coroutine cr)
+        {
+            if (cr != null)
+            {
+                Plugin.Instance.StopCoroutine(cr);
+            }
         }
 
         public static string GetOrdinal(int index) =>

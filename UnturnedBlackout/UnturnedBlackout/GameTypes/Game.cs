@@ -204,7 +204,6 @@ namespace UnturnedBlackout.GameTypes
 
         public void OnKill(GamePlayer killer, GamePlayer victim, ushort weaponID, string killerColor, string victimColor)
         {
-            Logging.Debug($"ON KILL: killer = {killer.Player.CharacterName}, victim = {victim.Player.CharacterName}, weapon id = {weaponID}, killer color = {killerColor}, victim color = {victimColor}");
             if (!Plugin.Instance.UI.KillFeedIcons.TryGetValue(weaponID, out FeedIcon icon) && weaponID != 0 && weaponID != 1)
             {
                 return;

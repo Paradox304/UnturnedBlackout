@@ -501,56 +501,70 @@ namespace UnturnedBlackout.GameTypes
                 ushort equipmentUsed = 0;
                 var longshotRange = 0f;
 
-                switch (cause)
+                var usedKillstreak = kPlayer.GamePlayer.HasKillstreakActive;
+                var killstreakID = kPlayer.GamePlayer.ActiveKillstreak?.Killstreak?.KillstreakID ?? 0;
+
+                if (usedKillstreak)
                 {
-                    case EDeathCause.MELEE:
-                        xpGained += Config.Medals.FileData.MeleeKillXP;
-                        xpText += Plugin.Instance.Translate("Melee_Kill").ToRich();
-                        equipmentUsed = kPlayer.GamePlayer.ActiveLoadout.Knife?.Knife?.KnifeID ?? 0;
-                        questConditions.Add(EQuestCondition.Knife, equipmentUsed);
-                        break;
-                    case EDeathCause.GUN:
-                        if (limb == ELimb.SKULL)
-                        {
-                            xpGained += Config.Medals.FileData.HeadshotKillXP;
-                            xpText += Plugin.Instance.Translate("Headshot_Kill").ToRich();
-                        }
-                        else
-                        {
-                            xpGained += Config.Medals.FileData.NormalKillXP;
-                            xpText += Plugin.Instance.Translate("Normal_Kill").ToRich();
-                        }
-                        var equipment = kPlayer.GamePlayer.Player.Player.equipment.itemID;
-                        if (equipment == (kPlayer.GamePlayer.ActiveLoadout.PrimarySkin?.SkinID ?? 0) || equipment == (kPlayer.GamePlayer.ActiveLoadout.Primary?.Gun?.GunID ?? 0))
-                        {
-                            questConditions.Add(EQuestCondition.GunType, (int)kPlayer.GamePlayer.ActiveLoadout.Primary.Gun.GunType);
-                            equipmentUsed = kPlayer.GamePlayer.ActiveLoadout.Primary.Gun.GunID;
-                            longshotRange = kPlayer.GamePlayer.ActiveLoadout.Primary.Gun.LongshotRange;
-                        }
-                        else if (equipment == (kPlayer.GamePlayer.ActiveLoadout.SecondarySkin?.SkinID ?? 0) || equipment == (kPlayer.GamePlayer.ActiveLoadout.Secondary?.Gun?.GunID ?? 0))
-                        {
-                            questConditions.Add(EQuestCondition.GunType, (int)kPlayer.GamePlayer.ActiveLoadout.Secondary.Gun.GunType);
-                            equipmentUsed = kPlayer.GamePlayer.ActiveLoadout.Secondary.Gun.GunID;
-                            longshotRange = kPlayer.GamePlayer.ActiveLoadout.Secondary.Gun.LongshotRange;
-                        }
-                        else
-                        {
-                            equipmentUsed = equipment;
-                        }
-                        questConditions.Add(EQuestCondition.Gun, equipmentUsed);
-                        break;
-                    case EDeathCause.CHARGE:
-                    case EDeathCause.GRENADE:
-                    case EDeathCause.LANDMINE:
-                    case EDeathCause.BURNING:
-                    case EDeathCause.SHRED:
-                        xpGained += Config.Medals.FileData.LethalKillXP;
-                        xpText += Plugin.Instance.Translate("Lethal_Kill").ToRich();
-                        equipmentUsed = kPlayer.GamePlayer.ActiveLoadout.Lethal?.Gadget?.GadgetID ?? 0;
-                        questConditions.Add(EQuestCondition.Gadget, equipmentUsed);
-                        break;
-                    default:
-                        break;
+                    var info = kPlayer.GamePlayer.ActiveKillstreak.Killstreak.KillstreakInfo;
+                    xpGained += info.MedalXP;
+                    xpText += info.MedalName;
+                    equipmentUsed += info.ItemID;
+                    questConditions.Add(EQuestCondition.Killstreak, equipmentUsed);
+                }
+                else
+                {
+                    switch (cause)
+                    {
+                        case EDeathCause.MELEE:
+                            xpGained += Config.Medals.FileData.MeleeKillXP;
+                            xpText += Plugin.Instance.Translate("Melee_Kill").ToRich();
+                            equipmentUsed = kPlayer.GamePlayer.ActiveLoadout.Knife?.Knife?.KnifeID ?? 0;
+                            questConditions.Add(EQuestCondition.Knife, equipmentUsed);
+                            break;
+                        case EDeathCause.GUN:
+                            if (limb == ELimb.SKULL)
+                            {
+                                xpGained += Config.Medals.FileData.HeadshotKillXP;
+                                xpText += Plugin.Instance.Translate("Headshot_Kill").ToRich();
+                            }
+                            else
+                            {
+                                xpGained += Config.Medals.FileData.NormalKillXP;
+                                xpText += Plugin.Instance.Translate("Normal_Kill").ToRich();
+                            }
+                            var equipment = kPlayer.GamePlayer.Player.Player.equipment.itemID;
+                            if (equipment == (kPlayer.GamePlayer.ActiveLoadout.PrimarySkin?.SkinID ?? 0) || equipment == (kPlayer.GamePlayer.ActiveLoadout.Primary?.Gun?.GunID ?? 0))
+                            {
+                                questConditions.Add(EQuestCondition.GunType, (int)kPlayer.GamePlayer.ActiveLoadout.Primary.Gun.GunType);
+                                equipmentUsed = kPlayer.GamePlayer.ActiveLoadout.Primary.Gun.GunID;
+                                longshotRange = kPlayer.GamePlayer.ActiveLoadout.Primary.Gun.LongshotRange;
+                            }
+                            else if (equipment == (kPlayer.GamePlayer.ActiveLoadout.SecondarySkin?.SkinID ?? 0) || equipment == (kPlayer.GamePlayer.ActiveLoadout.Secondary?.Gun?.GunID ?? 0))
+                            {
+                                questConditions.Add(EQuestCondition.GunType, (int)kPlayer.GamePlayer.ActiveLoadout.Secondary.Gun.GunType);
+                                equipmentUsed = kPlayer.GamePlayer.ActiveLoadout.Secondary.Gun.GunID;
+                                longshotRange = kPlayer.GamePlayer.ActiveLoadout.Secondary.Gun.LongshotRange;
+                            }
+                            else
+                            {
+                                equipmentUsed = equipment;
+                            }
+                            questConditions.Add(EQuestCondition.Gun, equipmentUsed);
+                            break;
+                        case EDeathCause.CHARGE:
+                        case EDeathCause.GRENADE:
+                        case EDeathCause.LANDMINE:
+                        case EDeathCause.BURNING:
+                        case EDeathCause.SHRED:
+                            xpGained += Config.Medals.FileData.LethalKillXP;
+                            xpText += Plugin.Instance.Translate("Lethal_Kill").ToRich();
+                            equipmentUsed = kPlayer.GamePlayer.ActiveLoadout.Lethal?.Gadget?.GadgetID ?? 0;
+                            questConditions.Add(EQuestCondition.Gadget, equipmentUsed);
+                            break;
+                        default:
+                            break;
+                    }
                 }
 
                 xpText += "\n";
@@ -624,7 +638,7 @@ namespace UnturnedBlackout.GameTypes
                     Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.FirstKill, questConditions);
                 }
 
-                if (cause == EDeathCause.GUN && (cPlayer.GamePlayer.Player.Position - kPlayer.GamePlayer.Player.Position).sqrMagnitude > longshotRange)
+                if (!usedKillstreak && cause == EDeathCause.GUN && (cPlayer.GamePlayer.Player.Position - kPlayer.GamePlayer.Player.Position).sqrMagnitude > longshotRange)
                 {
                     xpGained += Config.Medals.FileData.LongshotXP;
                     xpText += Plugin.Instance.Translate("Longshot_Kill").ToRich() + "\n";
@@ -664,6 +678,7 @@ namespace UnturnedBlackout.GameTypes
 
                 ThreadPool.QueueUserWorkItem(async (o) =>
                 {
+                    await Plugin.Instance.DB.IncreasePlayerXPAsync(kPlayer.GamePlayer.SteamID, xpGained);
                     if (cause == EDeathCause.GUN && limb == ELimb.SKULL)
                     {
                         await Plugin.Instance.DB.IncreasePlayerHeadshotKillsAsync(kPlayer.GamePlayer.SteamID, 1);
@@ -672,8 +687,12 @@ namespace UnturnedBlackout.GameTypes
                     {
                         await Plugin.Instance.DB.IncreasePlayerKillsAsync(kPlayer.GamePlayer.SteamID, 1);
                     }
-                    await Plugin.Instance.DB.IncreasePlayerXPAsync(kPlayer.GamePlayer.SteamID, xpGained);
-                    if ((kPlayer.GamePlayer.ActiveLoadout.Primary != null && kPlayer.GamePlayer.ActiveLoadout.Primary.Gun.GunID == equipmentUsed) || (kPlayer.GamePlayer.ActiveLoadout.Secondary != null && kPlayer.GamePlayer.ActiveLoadout.Secondary.Gun.GunID == equipmentUsed))
+
+                    if (usedKillstreak)
+                    {
+                        await Plugin.Instance.DB.IncreasePlayerKillstreakKillsAsync(kPlayer.GamePlayer.SteamID, killstreakID, 1);
+                    }
+                    else if ((kPlayer.GamePlayer.ActiveLoadout.Primary != null && kPlayer.GamePlayer.ActiveLoadout.Primary.Gun.GunID == equipmentUsed) || (kPlayer.GamePlayer.ActiveLoadout.Secondary != null && kPlayer.GamePlayer.ActiveLoadout.Secondary.Gun.GunID == equipmentUsed))
                     {
                         await Plugin.Instance.DB.IncreasePlayerGunXPAsync(kPlayer.GamePlayer.SteamID, equipmentUsed, xpGained);
                         await Plugin.Instance.DB.IncreasePlayerGunKillsAsync(kPlayer.GamePlayer.SteamID, equipmentUsed, 1);
@@ -681,10 +700,6 @@ namespace UnturnedBlackout.GameTypes
                     else if (kPlayer.GamePlayer.ActiveLoadout.Lethal != null && kPlayer.GamePlayer.ActiveLoadout.Lethal.Gadget.GadgetID == equipmentUsed)
                     {
                         await Plugin.Instance.DB.IncreasePlayerGadgetKillsAsync(kPlayer.GamePlayer.SteamID, equipmentUsed, 1);
-                    }
-                    else if (kPlayer.GamePlayer.ActiveLoadout.Killstreaks.Select(k => k.Killstreak.KillstreakID).Contains(equipmentUsed))
-                    {
-                        await Plugin.Instance.DB.IncreasePlayerKillstreakKillsAsync(kPlayer.GamePlayer.SteamID, equipmentUsed, 1);
                     }
                     else if (kPlayer.GamePlayer.ActiveLoadout.Knife != null && kPlayer.GamePlayer.ActiveLoadout.Knife.Knife.KnifeID == equipmentUsed)
                     {
@@ -711,6 +726,7 @@ namespace UnturnedBlackout.GameTypes
 
             if (player.GamePlayer.HasSpawnProtection)
             {
+                Logging.Debug($"{player.GamePlayer.Player.CharacterName} got damaged, but damaged got ignored due to the player having spawn prot. {player.GamePlayer.SpawnProtectionRemover == null}");
                 shouldAllow = false;
                 return;
             }

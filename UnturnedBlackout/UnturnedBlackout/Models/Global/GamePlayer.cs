@@ -583,36 +583,29 @@ namespace UnturnedBlackout.Models.Global
                 return;
             }
 
-            Logging.Debug($"Sending movement for {Player.CharacterName} with isADS {isADS}, isCarryingFlag {isCarryingFlag}");
             var flagCarryingSpeed = isCarryingFlag ? Config.CTF.FileData.FlagCarryingSpeed : 0f;
             float updatedMovement;
             if (isCarryingFlag)
             {
-                Logging.Debug($"Sending movement is carrying flag");
                 updatedMovement = Config.CTF.FileData.FlagCarryingSpeed;
             }
             else if (Player.Player.equipment.itemID == (ActiveLoadout.Primary?.Gun?.GunID ?? 0) || Player.Player.equipment.itemID == (ActiveLoadout.PrimarySkin?.SkinID ?? 0))
             {
-                Logging.Debug($"Sending movement primary");
                 updatedMovement = PrimaryMovementChange + SecondaryMovementChange + (isADS ? PrimaryMovementChangeADS : 0) + flagCarryingSpeed;
             }
             else if (Player.Player.equipment.itemID == (ActiveLoadout.Secondary?.Gun?.GunID ?? 0) || Player.Player.equipment.itemID == (ActiveLoadout.SecondarySkin?.SkinID ?? 0))
             {
-                Logging.Debug($"Sending movement secondary");
                 updatedMovement = PrimaryMovementChange + SecondaryMovementChange + (isADS ? SecondaryMovementChangeADS : 0) + flagCarryingSpeed;
             }
             else if (Player.Player.equipment.itemID == (ActiveLoadout.Knife.Knife.KnifeID))
             {
-                Logging.Debug($"Sending movement knife");
                 updatedMovement = KnifeMovementChange + flagCarryingSpeed;
             }
             else
             {
-                Logging.Debug($"Other movement, returning");
                 return;
             }
 
-            Logging.Debug($"Updated Movement: {updatedMovement}");
             if (updatedMovement == Player.Player.movement.pluginSpeedMultiplier)
             {
                 return;
@@ -636,7 +629,6 @@ namespace UnturnedBlackout.Models.Global
 
         public void SetupKillstreaks()
         {
-            Logging.Debug($"Setting up killstreaks for {Player.CharacterName}");
             HasKillstreakActive = false;
             ActiveKillstreak = null;
 
@@ -646,7 +638,6 @@ namespace UnturnedBlackout.Models.Global
 
             foreach (var killstreak in ActiveLoadout.Killstreaks.OrderBy(k => k.Killstreak.KillstreakRequired))
             {
-                Logging.Debug($"Adding killstreak with id {killstreak.Killstreak.KillstreakID} and trigger item id {killstreak.Killstreak.KillstreakInfo.TriggerItemID} and killstreak required {killstreak.Killstreak.KillstreakRequired}");
                 OrderedKillstreaks.Add(killstreak);
                 AvailableKillstreaks.Add(killstreak, false);
                 KillstreakTriggers.Add(killstreak.Killstreak.KillstreakInfo.TriggerItemID, killstreak);
@@ -664,16 +655,14 @@ namespace UnturnedBlackout.Models.Global
         
         public void UpdateKillstreak(int currentKillstreak)
         {
-            Logging.Debug($"Updating killstreak for {Player.CharacterName} with current killstreak {currentKillstreak}");
+            Logging.Debug($"Updating killstreak for {Player.CharacterName} with killstreak {currentKillstreak}");
             var availableKillstreak = OrderedKillstreaks.FirstOrDefault(k => k.Killstreak.KillstreakRequired == currentKillstreak && !AvailableKillstreaks[k]);
             if (availableKillstreak != null)
             {
-                Logging.Debug($"Found killstreak with id {availableKillstreak.Killstreak.KillstreakID} that is to be made available with requirement {availableKillstreak.Killstreak.KillstreakRequired}");
                 AvailableKillstreaks[availableKillstreak] = true;
                 Plugin.Instance.UI.UpdateKillstreakReady(this, availableKillstreak);
             }
 
-            Logging.Debug($"Updating killstreak bars");
             Plugin.Instance.UI.UpdateKillstreakBars(this, currentKillstreak);
         }
 
@@ -690,11 +679,9 @@ namespace UnturnedBlackout.Models.Global
                 {
                     inv.forceAddItem(new Item(info.MagID, true), false);
                 }
-                Logging.Debug($"Killstreak has multiple ammo, gave {info.MagAmount} magazines with id {info.MagID}");
             }
 
             inv.forceAddItem(new Item(info.ItemID, true), false);
-            Logging.Debug($"Gave the item to the player");
             for (byte page = 0; page < PlayerInventory.PAGES - 2; page++)
             {
                 var shouldBreak = false;
@@ -714,24 +701,24 @@ namespace UnturnedBlackout.Models.Global
             }
 
             Player.Player.equipment.ServerEquip(KillstreakPage, KillstreakX, KillstreakY);
-            Logging.Debug($"Stored the page: {KillstreakPage}, x: {KillstreakX}, y: {KillstreakY} for the item sent to the player");
             KillstreakChecker.Stop();
 
             HasKillstreakActive = true;
             ActiveKillstreak = killstreak;
             AvailableKillstreaks[killstreak] = false;
             Plugin.Instance.UI.UpdateKillstreakReady(this, killstreak);
-            Logging.Debug($"Made the killstreak active on code side, sent the UI");
+
+            MovementChanger.Stop();
+            MovementChanger = Plugin.Instance.StartCoroutine(ChangeMovement(info.MovementMultiplier));
 
             if (info.ItemStaySeconds == 0) return;
             Plugin.Instance.UI.SendKillstreakTimer(this, info.ItemStaySeconds);
             KillstreakChecker = Plugin.Instance.StartCoroutine(CheckKillstreak(info.ItemStaySeconds));
-            Logging.Debug($"Item stay seconds is not 0, starting the killstreak remover timer at {DateTime.UtcNow}");
         }
 
         public void RemoveActiveKillstreak()
         {
-            Logging.Debug($"Removing the active killstreak for {Player.CharacterName}");
+            Logging.Debug($"Removing killstreak for {Player.CharacterName} with id {ActiveKillstreak.Killstreak.KillstreakID}");
             if (!HasKillstreakActive)
             {
                 Logging.Debug($"{Player.CharacterName} has no active killstreak, what we tryna remove");
@@ -741,12 +728,10 @@ namespace UnturnedBlackout.Models.Global
             KillstreakChecker.Stop();
             KillstreakItemRemover.Stop();
             KillstreakItemRemover = Plugin.Instance.StartCoroutine(RemoveItemKillstreak(KillstreakPage, KillstreakX, KillstreakY, ActiveKillstreak.Killstreak.KillstreakInfo.MagID));
-            Logging.Debug($"Removed the item of the killstreak for {Player.CharacterName}");
 
             Plugin.Instance.UI.ClearKillstreakTimer(this);
             HasKillstreakActive = false;
-            ActiveKillstreak = null;
-            Logging.Debug($"Completely removed the killstreak from {Player.CharacterName}");            
+            ActiveKillstreak = null;        
         }
 
         public IEnumerator RemoveItemKillstreak(byte page, byte x, byte y, ushort magID)
@@ -764,7 +749,6 @@ namespace UnturnedBlackout.Models.Global
 
                 if (magID != 0)
                 {
-                    Logging.Debug("Removing killstreak, killstreak has mags for it. Removing all the mags as well");
                     var itemCount = inv.items[2].items.Count;
                     for (int i = itemCount - 1; i >= 0; i--)
                     {
