@@ -1,7 +1,6 @@
 ﻿using Steamworks;
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
 using UnturnedBlackout.Database.Base;
 using UnturnedBlackout.Enums;
@@ -13,11 +12,11 @@ namespace UnturnedBlackout.Managers
         public void GiveRewards(CSteamID steamID, List<Reward> rewards)
         {
             Logging.Debug($"Giving rewards to {steamID}, rewards: {rewards.Count}");
-            var db = Plugin.Instance.DB;
+            DatabaseManager db = Plugin.Instance.DB;
             Task.Run(async () =>
             {
                 Logging.Debug("Sending rewards");
-                foreach (var reward in rewards)
+                foreach (Reward reward in rewards)
                 {
                     switch (reward.RewardType)
                     {
@@ -85,10 +84,10 @@ namespace UnturnedBlackout.Managers
 
         public void RemoveRewards(CSteamID steamID, List<Reward> removeRewards)
         {
-            var db = Plugin.Instance.DB;
+            DatabaseManager db = Plugin.Instance.DB;
             Task.Run(async () =>
             {
-                foreach (var reward in removeRewards)
+                foreach (Reward reward in removeRewards)
                 {
                     switch (reward.RewardType)
                     {
@@ -107,12 +106,12 @@ namespace UnturnedBlackout.Managers
 
         public void GiveBulkRewards(List<(CSteamID, List<Reward>)> bulkRewards)
         {
-            var db = Plugin.Instance.DB;
+            DatabaseManager db = Plugin.Instance.DB;
             Task.Run(async () =>
             {
-                foreach (var bulkReward in bulkRewards)
+                foreach ((CSteamID, List<Reward>) bulkReward in bulkRewards)
                 {
-                    foreach (var reward in bulkReward.Item2)
+                    foreach (Reward reward in bulkReward.Item2)
                     {
                         switch (reward.RewardType)
                         {
@@ -182,7 +181,7 @@ namespace UnturnedBlackout.Managers
         public void MultiplyRewards(List<Reward> rewards, int multiply)
         {
             Logging.Debug($"Multiplying rewards by {multiply}");
-            foreach (var reward in rewards)
+            foreach (Reward reward in rewards)
             {
                 if (reward.RewardType != ERewardType.Coin && reward.RewardType != ERewardType.Credit)
                 {

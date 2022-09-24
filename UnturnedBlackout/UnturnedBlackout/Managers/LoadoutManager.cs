@@ -3,7 +3,6 @@ using SDG.Unturned;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using UnturnedBlackout.Database.Base;
 using UnturnedBlackout.Database.Data;
@@ -53,7 +52,7 @@ namespace UnturnedBlackout.Managers
                 }
                 if (gun != null)
                 {
-                    foreach (var defaultAttachment in gun.Gun.DefaultAttachments)
+                    foreach (GunAttachment defaultAttachment in gun.Gun.DefaultAttachments)
                     {
                         if (gun.Attachments.TryGetValue(defaultAttachment.AttachmentID, out LoadoutAttachment attachment))
                         {
@@ -76,7 +75,7 @@ namespace UnturnedBlackout.Managers
                 }
                 if (gun != null)
                 {
-                    foreach (var defaultAttachment in gun.Gun.DefaultAttachments)
+                    foreach (GunAttachment defaultAttachment in gun.Gun.DefaultAttachments)
                     {
                         if (gun.Attachments.TryGetValue(defaultAttachment.AttachmentID, out LoadoutAttachment attachment))
                         {
@@ -113,7 +112,7 @@ namespace UnturnedBlackout.Managers
                 return;
             }
 
-            var gun = isPrimary ? playerLoadout.Primary : playerLoadout.Secondary;
+            LoadoutGun gun = isPrimary ? playerLoadout.Primary : playerLoadout.Secondary;
             if (gun == null)
             {
                 Logging.Debug($"The gun which {player.CharacterName} is trying to equip an attachment on is null");
@@ -126,7 +125,7 @@ namespace UnturnedBlackout.Managers
                 return;
             }
 
-            var attachments = isPrimary ? playerLoadout.PrimaryAttachments : playerLoadout.SecondaryAttachments;
+            Dictionary<EAttachment, LoadoutAttachment> attachments = isPrimary ? playerLoadout.PrimaryAttachments : playerLoadout.SecondaryAttachments;
             if (attachments.ContainsKey(attachment.Attachment.AttachmentType))
             {
                 attachments[attachment.Attachment.AttachmentType] = attachment;
@@ -160,7 +159,7 @@ namespace UnturnedBlackout.Managers
                 return;
             }
 
-            var gun = isPrimary ? playerLoadout.Primary : playerLoadout.Secondary;
+            LoadoutGun gun = isPrimary ? playerLoadout.Primary : playerLoadout.Secondary;
             if (gun == null)
             {
                 Logging.Debug($"The gun which {player.CharacterName} is trying to dequip an attachment on is null");
@@ -173,7 +172,7 @@ namespace UnturnedBlackout.Managers
                 return;
             }
 
-            var attachments = isPrimary ? playerLoadout.PrimaryAttachments : playerLoadout.SecondaryAttachments;
+            Dictionary<EAttachment, LoadoutAttachment> attachments = isPrimary ? playerLoadout.PrimaryAttachments : playerLoadout.SecondaryAttachments;
             if (attachments.ContainsValue(attachment))
             {
                 attachments.Remove(attachment.Attachment.AttachmentType);
@@ -626,10 +625,10 @@ namespace UnturnedBlackout.Managers
 
         public void GiveLoadout(GamePlayer player, Kit kit, List<TeamGlove> gloves)
         {
-            var inv = player.Player.Player.inventory;
+            PlayerInventory inv = player.Player.Player.inventory;
             inv.ClearInventory();
             // Adding clothes
-            foreach (var id in kit.ItemIDs)
+            foreach (ushort id in kit.ItemIDs)
             {
                 inv.forceAddItem(new Item(id, true), true);
             }
@@ -639,7 +638,7 @@ namespace UnturnedBlackout.Managers
                 return;
             }
 
-            var activeLoadout = loadout.Loadouts.Values.FirstOrDefault(k => k.IsActive);
+            Loadout activeLoadout = loadout.Loadouts.Values.FirstOrDefault(k => k.IsActive);
             if (activeLoadout == null)
             {
                 player.SetActiveLoadout(null, 0, 0, 0);
@@ -648,7 +647,7 @@ namespace UnturnedBlackout.Managers
             // Giving glove to player
             if (activeLoadout.Glove != null)
             {
-                var glove = gloves.FirstOrDefault(k => k.GloveID == activeLoadout.Glove.Glove.GloveID);
+                TeamGlove glove = gloves.FirstOrDefault(k => k.GloveID == activeLoadout.Glove.Glove.GloveID);
                 player.Player.Player.clothing.thirdClothes.shirt = 0;
                 player.Player.Player.clothing.askWearShirt(0, 0, new byte[0], true);
                 inv.forceAddItem(new Item(glove.ItemID, true), true);
@@ -656,22 +655,22 @@ namespace UnturnedBlackout.Managers
             // Giving primary to player
             if (activeLoadout.Primary != null)
             {
-                var item = new Item(activeLoadout.PrimarySkin == null ? activeLoadout.Primary.Gun.GunID : activeLoadout.PrimarySkin.SkinID, false);
+                Item item = new(activeLoadout.PrimarySkin == null ? activeLoadout.Primary.Gun.GunID : activeLoadout.PrimarySkin.SkinID, false);
 
                 // Setting up attachments
                 for (int i = 0; i <= 3; i++)
                 {
-                    var attachmentType = (EAttachment)i;
-                    var startingPos = Utility.GetStartingPos(attachmentType);
+                    EAttachment attachmentType = (EAttachment)i;
+                    int startingPos = Utility.GetStartingPos(attachmentType);
                     if (activeLoadout.PrimaryAttachments.TryGetValue(attachmentType, out LoadoutAttachment attachment))
                     {
-                        var bytes = BitConverter.GetBytes(attachment.Attachment.AttachmentID);
+                        byte[] bytes = BitConverter.GetBytes(attachment.Attachment.AttachmentID);
                         item.state[startingPos] = bytes[0];
                         item.state[startingPos + 1] = bytes[1];
 
                         if (attachmentType == EAttachment.Magazine)
                         {
-                            var asset = Assets.find(EAssetType.ITEM, attachment.Attachment.AttachmentID) as ItemMagazineAsset;
+                            ItemMagazineAsset asset = Assets.find(EAssetType.ITEM, attachment.Attachment.AttachmentID) as ItemMagazineAsset;
                             item.state[10] = asset.amount;
 
                             for (int i2 = 1; i2 <= activeLoadout.Primary.Gun.MagAmount; i2++)
@@ -684,7 +683,7 @@ namespace UnturnedBlackout.Managers
 
                 if (activeLoadout.PrimaryGunCharm != null)
                 {
-                    var bytes = BitConverter.GetBytes(activeLoadout.PrimaryGunCharm.GunCharm.CharmID);
+                    byte[] bytes = BitConverter.GetBytes(activeLoadout.PrimaryGunCharm.GunCharm.CharmID);
                     item.state[2] = bytes[0];
                     item.state[3] = bytes[1];
                 }
@@ -695,21 +694,21 @@ namespace UnturnedBlackout.Managers
             // Giving secondary to player
             if (activeLoadout.Secondary != null)
             {
-                var item = new Item(activeLoadout.SecondarySkin == null ? activeLoadout.Secondary.Gun.GunID : activeLoadout.SecondarySkin.SkinID, true);
+                Item item = new(activeLoadout.SecondarySkin == null ? activeLoadout.Secondary.Gun.GunID : activeLoadout.SecondarySkin.SkinID, true);
 
                 // Setting up attachments
                 for (int i = 0; i <= 3; i++)
                 {
-                    var attachmentType = (EAttachment)i;
-                    var startingPos = Utility.GetStartingPos(attachmentType);
+                    EAttachment attachmentType = (EAttachment)i;
+                    int startingPos = Utility.GetStartingPos(attachmentType);
                     if (activeLoadout.SecondaryAttachments.TryGetValue(attachmentType, out LoadoutAttachment attachment))
                     {
-                        var bytes = BitConverter.GetBytes(attachment.Attachment.AttachmentID);
+                        byte[] bytes = BitConverter.GetBytes(attachment.Attachment.AttachmentID);
                         item.state[startingPos] = bytes[0];
                         item.state[startingPos + 1] = bytes[1];
                         if (attachmentType == EAttachment.Magazine)
                         {
-                            var asset = Assets.find(EAssetType.ITEM, attachment.Attachment.AttachmentID) as ItemMagazineAsset;
+                            ItemMagazineAsset asset = Assets.find(EAssetType.ITEM, attachment.Attachment.AttachmentID) as ItemMagazineAsset;
                             item.state[10] = asset.amount;
                             for (int i2 = 1; i2 <= activeLoadout.Secondary.Gun.MagAmount; i2++)
                             {
@@ -721,7 +720,7 @@ namespace UnturnedBlackout.Managers
 
                 if (activeLoadout.SecondaryGunCharm != null)
                 {
-                    var bytes = BitConverter.GetBytes(activeLoadout.SecondaryGunCharm.GunCharm.CharmID);
+                    byte[] bytes = BitConverter.GetBytes(activeLoadout.SecondaryGunCharm.GunCharm.CharmID);
                     item.state[2] = bytes[0];
                     item.state[3] = bytes[1];
                 }
@@ -742,10 +741,10 @@ namespace UnturnedBlackout.Managers
                 inv.forceAddItem(new Item(activeLoadout.Knife.Knife.KnifeID, true), activeLoadout.Primary == null && activeLoadout.Secondary == null);
                 for (byte page = 0; page < PlayerInventory.PAGES - 2; page++)
                 {
-                    var shouldBreak = false;
+                    bool shouldBreak = false;
                     for (int index = inv.getItemCount(page) - 1; index >= 0; index--)
                     {
-                        var item = inv.getItem(page, (byte)index);
+                        ItemJar item = inv.getItem(page, (byte)index);
                         if (item != null && item.item.id == activeLoadout.Knife.Knife.KnifeID)
                         {
                             knifePage = page;
@@ -759,13 +758,13 @@ namespace UnturnedBlackout.Managers
                 }
             }
             // Giving perks to player
-            var skill = player.Player.Player.skills;
-            var skills = new Dictionary<(int, int), int>();
-            foreach (var defaultSkill in Plugin.Instance.Config.DefaultSkills.FileData.DefaultSkills)
+            PlayerSkills skill = player.Player.Player.skills;
+            Dictionary<(int, int), int> skills = new();
+            foreach (DefaultSkill defaultSkill in Plugin.Instance.Config.DefaultSkills.FileData.DefaultSkills)
             {
                 if (PlayerSkills.TryParseIndices(defaultSkill.SkillName, out int specialtyIndex, out int skillIndex))
                 {
-                    var max = skill.skills[specialtyIndex][skillIndex].max;
+                    byte max = skill.skills[specialtyIndex][skillIndex].max;
                     if (skills.ContainsKey((specialtyIndex, skillIndex)))
                     {
                         skills[(specialtyIndex, skillIndex)] = defaultSkill.SkillLevel < max ? defaultSkill.SkillLevel : max;
@@ -776,11 +775,11 @@ namespace UnturnedBlackout.Managers
                     }
                 }
             }
-            foreach (var perk in activeLoadout.Perks)
+            foreach (KeyValuePair<int, LoadoutPerk> perk in activeLoadout.Perks)
             {
                 if (PlayerSkills.TryParseIndices(perk.Value.Perk.SkillType, out int specialtyIndex, out int skillIndex))
                 {
-                    var max = skill.skills[specialtyIndex][skillIndex].max;
+                    byte max = skill.skills[specialtyIndex][skillIndex].max;
                     if (skills.ContainsKey((specialtyIndex, skillIndex)))
                     {
                         if (skills[(specialtyIndex, skillIndex)] + perk.Value.Perk.SkillLevel > max)
@@ -815,7 +814,7 @@ namespace UnturnedBlackout.Managers
                 inv.forceAddItem(new Item(activeLoadout.Tactical.Gadget.GadgetID, false), false);
             }
             // Giving killstreaks to player
-            foreach (var killstreak in activeLoadout.Killstreaks)
+            foreach (LoadoutKillstreak killstreak in activeLoadout.Killstreaks)
             {
                 inv.forceAddItem(new Item(killstreak.Killstreak.KillstreakInfo.TriggerItemID, true), false);
             }

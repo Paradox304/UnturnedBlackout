@@ -29,7 +29,7 @@ namespace UnturnedBlackout.Managers
 
         public ConfigManager()
         {
-            var configInstance = Plugin.Instance.Configuration.Instance;
+            Config configInstance = Plugin.Instance.Configuration.Instance;
 
             Base = new(Plugin.Instance.Directory + "/LocalStorage/Configuration.BaseValues.xml", configInstance.URL + "Configuration.BaseValues.xml");
             Points = new(Plugin.Instance.Directory + "/LocalStorage/Configuration.Points.xml", configInstance.URL + "Configuration.Points.xml");

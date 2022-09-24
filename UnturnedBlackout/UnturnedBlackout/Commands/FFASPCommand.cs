@@ -36,7 +36,7 @@ namespace UnturnedBlackout.Commands
                 return;
             }
 
-            var location = Plugin.Instance.Config.Locations.FileData.ArenaLocations.FirstOrDefault(k => k.LocationID == locationID);
+            Models.Global.ArenaLocation location = Plugin.Instance.Config.Locations.FileData.ArenaLocations.FirstOrDefault(k => k.LocationID == locationID);
             if (location == null)
             {
                 Utility.Say(caller, Plugin.Instance.Translate("Location_Not_Found").ToRich());

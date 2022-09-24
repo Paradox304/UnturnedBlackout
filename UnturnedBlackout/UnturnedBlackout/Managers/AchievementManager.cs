@@ -1,7 +1,6 @@
 ﻿using Rocket.Core.Utils;
 using Steamworks;
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
 using UnturnedBlackout.Database.Base;
 using UnturnedBlackout.Database.Data;
@@ -14,20 +13,20 @@ namespace UnturnedBlackout.Managers
     {
         public void CheckAchievement(GamePlayer player, EQuestType achievementType, Dictionary<EQuestCondition, int> achievementConditions)
         {
-            var steamID = player.Player.CSteamID;
+            CSteamID steamID = player.Player.CSteamID;
 
-            var db = Plugin.Instance.DB;
-            var data = player.Data;
+            DatabaseManager db = Plugin.Instance.DB;
+            PlayerData data = player.Data;
 
             if (!data.AchievementsSearchByType.TryGetValue(achievementType, out List<PlayerAchievement> achievements))
             {
                 return;
             }
 
-            foreach (var achievement in achievements)
+            foreach (PlayerAchievement achievement in achievements)
             {
-                var conditionsMet = true;
-                foreach (var condition in achievement.Achievement.AchievementConditions)
+                bool conditionsMet = true;
+                foreach (KeyValuePair<EQuestCondition, List<int>> condition in achievement.Achievement.AchievementConditions)
                 {
                     if (!achievementConditions.TryGetValue(condition.Key, out int conditionValue))
                     {
@@ -35,7 +34,7 @@ namespace UnturnedBlackout.Managers
                         break;
                     }
 
-                    var isConditionMinimum = IsConditionMinimum(condition.Key);
+                    bool isConditionMinimum = IsConditionMinimum(condition.Key);
                     if (!condition.Value.Contains(conditionValue) && !condition.Value.Exists(k => isConditionMinimum && conditionValue >= k) && !condition.Value.Contains(-1))
                     {
                         conditionsMet = false;
@@ -67,7 +66,7 @@ namespace UnturnedBlackout.Managers
 
         public void ClaimAchievementTier(CSteamID steamID, int achievementID)
         {
-            var db = Plugin.Instance.DB;
+            DatabaseManager db = Plugin.Instance.DB;
             if (!db.PlayerData.TryGetValue(steamID, out PlayerData data))
             {
                 Logging.Debug($"Error finding player data for player with steamID {steamID}");
@@ -106,7 +105,7 @@ namespace UnturnedBlackout.Managers
 
         public bool IsConditionMinimum(EQuestCondition condition)
         {
-            var conditionInt = (int)condition;
+            int conditionInt = (int)condition;
             if (conditionInt >= 9 && conditionInt <= 12)
             {
                 return true;

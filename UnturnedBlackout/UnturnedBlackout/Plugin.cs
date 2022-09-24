@@ -7,7 +7,6 @@ using Steamworks;
 using System.Collections;
 using System.Linq;
 using System.Reflection;
-using System.Threading;
 using UnityEngine;
 using UnturnedBlackout.Database.Data;
 using UnturnedBlackout.Managers;
@@ -44,9 +43,7 @@ namespace UnturnedBlackout
         protected override void Unload()
         {
             Game.Destroy();
-            HUD.Destroy();
             UI.Destroy();
-            Server.Destroy();
 
             Level.onLevelLoaded -= OnLevelLoaded;
             PlayerVoice.onRelayVoice -= OnVoice;
@@ -71,11 +68,11 @@ namespace UnturnedBlackout
 
         private void OnJoining(CSteamID player, ref ESteamRejection? rejectionReason)
         {
-            var ply = Provider.pending.FirstOrDefault(k => k.playerID.steamID == player);
+            SteamPending ply = Provider.pending.FirstOrDefault(k => k.playerID.steamID == player);
             if (ply == null) return;
 
-            var newName = ply.playerID.characterName.ToUnrich().Trim();
-            var chars = newName.Count();
+            string newName = ply.playerID.characterName.ToUnrich().Trim();
+            int chars = newName.Count();
 
             if (chars == 0)
             {
@@ -114,13 +111,13 @@ namespace UnturnedBlackout
                 return;
             }
 
-            var gPlayer = Game.GetGamePlayer(player);
+            Models.Global.GamePlayer gPlayer = Game.GetGamePlayer(player);
             if (gPlayer == null)
             {
                 return;
             }
 
-            var game = gPlayer.CurrentGame;
+            GameTypes.Game game = gPlayer.CurrentGame;
             if (game == null)
             {
                 return;
@@ -193,8 +190,6 @@ namespace UnturnedBlackout
             Logging.Debug("Init BP");
             Loadout = new();
             Logging.Debug("Init Loadout");
-            Server = new();
-            Logging.Debug("Init Server");
             Data = new();
             Logging.Debug("Init Data");
             Reward = new();
@@ -207,15 +202,13 @@ namespace UnturnedBlackout
             Logging.Debug("Init Unbox");
             Game = new();
             Logging.Debug("Init Game");
-            HUD = new();
-            Logging.Debug("Init HUD");
 
             StartCoroutine(Day());
 
-            var ignoreMags = Config.Killstreaks.FileData.KillstreaksData.Where(k => k.MagID != 0).Select(k => k.MagID);
-            var shouldFillAfterDetach = typeof(ItemMagazineAsset).GetProperty("shouldFillAfterDetach", BindingFlags.Public | BindingFlags.Instance);
-            var magazines = Assets.find(EAssetType.ITEM).OfType<ItemMagazineAsset>();
-            foreach (var mag in magazines)
+            System.Collections.Generic.IEnumerable<ushort> ignoreMags = Config.Killstreaks.FileData.KillstreaksData.Where(k => k.MagID != 0).Select(k => k.MagID);
+            PropertyInfo shouldFillAfterDetach = typeof(ItemMagazineAsset).GetProperty("shouldFillAfterDetach", BindingFlags.Public | BindingFlags.Instance);
+            System.Collections.Generic.IEnumerable<ItemMagazineAsset> magazines = Assets.find(EAssetType.ITEM).OfType<ItemMagazineAsset>();
+            foreach (ItemMagazineAsset mag in magazines)
             {
                 if (ignoreMags.Contains(mag.id))
                 {
@@ -225,9 +218,9 @@ namespace UnturnedBlackout
                 shouldFillAfterDetach.GetSetMethod(true).Invoke(mag, new object[] { true });
             }
 
-            var isEarpiece = typeof(ItemMaskAsset).GetField("_isEarpiece", BindingFlags.NonPublic | BindingFlags.Instance);
-            var masks = Assets.find(EAssetType.ITEM).OfType<ItemMaskAsset>();
-            foreach (var mask in masks)
+            FieldInfo isEarpiece = typeof(ItemMaskAsset).GetField("_isEarpiece", BindingFlags.NonPublic | BindingFlags.Instance);
+            System.Collections.Generic.IEnumerable<ItemMaskAsset> masks = Assets.find(EAssetType.ITEM).OfType<ItemMaskAsset>();
+            foreach (ItemMaskAsset mask in masks)
             {
                 isEarpiece.SetValue(mask, true);
             }
@@ -327,13 +320,11 @@ namespace UnturnedBlackout
         public QuestManager Quest { get; set; }
         public AchievementManager Achievement { get; set; }
         public UIManager UI { get; set; }
-        public HUDManager HUD { get; set; }
         public GameManager Game { get; set; }
         public DataManager Data { get; set; }
         public DatabaseManager DB { get; set; }
         public LoadoutManager Loadout { get; set; }
         public RewardManager Reward { get; set; }
-        public ServerManager Server { get; set; }
         public UnboxManager Unbox { get; set; }
         public BPManager BP { get; set; }
         public static Harmony Harmony { get; set; }

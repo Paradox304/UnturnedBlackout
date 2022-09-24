@@ -61,7 +61,7 @@ namespace UnturnedBlackout.Models.TDM
 
         public void CheckKills()
         {
-            var data = GamePlayer.Data;
+            Database.Data.PlayerData data = GamePlayer.Data;
             data.CheckKillstreak(Killstreak);
             data.CheckMultipleKills(MultipleKills);
         }

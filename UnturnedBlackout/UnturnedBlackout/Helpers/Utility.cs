@@ -89,7 +89,7 @@ namespace UnturnedBlackout
         {
             while (true)
             {
-                var freq = (uint)UnityEngine.Random.Range(300000, 900000);
+                uint freq = (uint)UnityEngine.Random.Range(300000, 900000);
                 if (!UsedFrequencies.Contains(freq) && freq != 460327)
                 {
                     UsedFrequencies.Add(freq);
@@ -100,30 +100,30 @@ namespace UnturnedBlackout
 
         public static List<int> GetIntListFromReaderResult(this object readerResult)
         {
-            var readerText = readerResult.ToString();
+            string readerText = readerResult.ToString();
             if (readerText == "")
             {
                 return new List<int>();
             }
 
-            return readerText.Split(',').Select(k => int.TryParse(k, out var id) ? id : -1).Where(k => k != -1).ToList();
+            return readerText.Split(',').Select(k => int.TryParse(k, out int id) ? id : -1).Where(k => k != -1).ToList();
         }
 
         public static HashSet<int> GetHashSetIntFromReaderResult(this object readerResult)
         {
-            var readerText = readerResult.ToString();
+            string readerText = readerResult.ToString();
             if (readerText == "")
             {
                 return new HashSet<int>();
             }
 
-            return readerText.Split(',').Select(k => int.TryParse(k, out var id) ? id : -1).Where(k => k != -1).ToHashSet();
+            return readerText.Split(',').Select(k => int.TryParse(k, out int id) ? id : -1).Where(k => k != -1).ToHashSet();
         }
 
         public static string GetStringFromIntList(this List<int> listInt)
         {
-            var text = "";
-            foreach (var id in listInt)
+            string text = "";
+            foreach (int id in listInt)
             {
                 text += $"{id},";
             }
@@ -132,8 +132,8 @@ namespace UnturnedBlackout
 
         public static string GetStringFromHashSetInt(this HashSet<int> hashsetInt)
         {
-            var text = "";
-            foreach (var id in hashsetInt)
+            string text = "";
+            foreach (int id in hashsetInt)
             {
                 text += $"{id},";
             }
@@ -142,20 +142,20 @@ namespace UnturnedBlackout
 
         public static Dictionary<ushort, LoadoutAttachment> GetAttachmentsFromString(string text, Gun gun, UnturnedPlayer player)
         {
-            var attachments = new Dictionary<ushort, LoadoutAttachment>();
-            var attachmentsText = text.Split(',');
-            var numberRegex = new Regex("([0-9]+)");
+            Dictionary<ushort, LoadoutAttachment> attachments = new();
+            string[] attachmentsText = text.Split(',');
+            Regex numberRegex = new("([0-9]+)");
 
-            foreach (var attachmentText in attachmentsText)
+            foreach (string attachmentText in attachmentsText)
             {
                 if (string.IsNullOrEmpty(attachmentText))
                 {
                     continue;
                 }
 
-                var isBought = attachmentText.Contains("B.");
-                var isUnlocked = attachmentText.Contains("UL.");
-                var numberRegexMatch = numberRegex.Match(attachmentText).Value;
+                bool isBought = attachmentText.Contains("B.");
+                bool isUnlocked = attachmentText.Contains("UL.");
+                string numberRegexMatch = numberRegex.Match(attachmentText).Value;
 
                 if (!ushort.TryParse(numberRegexMatch, out ushort attachmentID))
                 {
@@ -192,8 +192,8 @@ namespace UnturnedBlackout
 
         public static string GetStringFromAttachments(List<LoadoutAttachment> attachments)
         {
-            var text = "";
-            foreach (var attachment in attachments)
+            string text = "";
+            foreach (LoadoutAttachment attachment in attachments)
             {
                 text += $"{(attachment.IsBought ? "B." : "")}{(attachment.IsUnlocked ? "UL." : "")}{attachment.Attachment.AttachmentID},";
             }
@@ -202,8 +202,8 @@ namespace UnturnedBlackout
 
         public static string CreateStringFromDefaultAttachments(List<GunAttachment> gunAttachments)
         {
-            var text = "";
-            foreach (var attachment in gunAttachments)
+            string text = "";
+            foreach (GunAttachment attachment in gunAttachments)
             {
                 text += $"B.{attachment.AttachmentID},";
             }
@@ -212,8 +212,8 @@ namespace UnturnedBlackout
 
         public static string CreateStringFromRewardAttachments(List<GunAttachment> gunAttachments)
         {
-            var text = "";
-            foreach (var attachment in gunAttachments)
+            string text = "";
+            foreach (GunAttachment attachment in gunAttachments)
             {
                 text += $"{attachment.AttachmentID},";
             }
@@ -222,11 +222,11 @@ namespace UnturnedBlackout
 
         public static List<Reward> GetRewardsFromString(string text)
         {
-            var rewards = new List<Reward>();
+            List<Reward> rewards = new();
 
-            foreach (var rewardText in text.Split(' '))
+            foreach (string rewardText in text.Split(' '))
             {
-                var reward = GetRewardFromString(rewardText);
+                Reward reward = GetRewardFromString(rewardText);
                 if (reward != null)
                 {
                     rewards.Add(reward);
@@ -238,8 +238,8 @@ namespace UnturnedBlackout
 
         public static Reward GetRewardFromString(string text)
         {
-            var letterRegex = new Regex(@"([a-zA-Z]+)");
-            var numberRegex = new Regex(@"([0-9.]+)");
+            Regex letterRegex = new(@"([a-zA-Z]+)");
+            Regex numberRegex = new(@"([0-9.]+)");
 
             if (string.IsNullOrEmpty(text))
             {
@@ -252,14 +252,14 @@ namespace UnturnedBlackout
                 return null;
             }
 
-            var letterRegexMatch = letterRegex.Match(text).Value;
+            string letterRegexMatch = letterRegex.Match(text).Value;
             if (!Enum.TryParse(letterRegexMatch, true, out ERewardType rewardType))
             {
                 Logging.Debug($"Cant find reward type with the match {letterRegexMatch}");
                 return null;
             }
 
-            var numberRegexMatch = numberRegex.Match(text).Value;
+            string numberRegexMatch = numberRegex.Match(text).Value;
             if (string.IsNullOrEmpty(numberRegexMatch))
             {
                 Logging.Debug($"Number regex match is coming empty");
@@ -276,12 +276,12 @@ namespace UnturnedBlackout
 
         public static Dictionary<int, List<Reward>> GetRankedRewardsFromString(string text)
         {
-            var rewardsRanked = new Dictionary<int, List<Reward>>();
+            Dictionary<int, List<Reward>> rewardsRanked = new();
             int rank = 0;
 
-            foreach (var rewardsTxt in text.Split(','))
+            foreach (string rewardsTxt in text.Split(','))
             {
-                var rewards = GetRewardsFromString(rewardsTxt);
+                List<Reward> rewards = GetRewardsFromString(rewardsTxt);
                 rewardsRanked.Add(rank, rewards);
                 rank++;
             }
@@ -291,12 +291,12 @@ namespace UnturnedBlackout
 
         public static List<PercentileReward> GetPercentileRewardsFromString(string text)
         {
-            var percentileRewards = new List<PercentileReward>();
-            var percentRegex = new Regex("([0-9]*)%");
+            List<PercentileReward> percentileRewards = new();
+            Regex percentRegex = new("([0-9]*)%");
 
             int lowerPercentile = 0;
 
-            foreach (var percRewards in text.Split(','))
+            foreach (string percRewards in text.Split(','))
             {
                 if (!percentRegex.IsMatch(percRewards))
                 {
@@ -304,16 +304,16 @@ namespace UnturnedBlackout
                     continue;
                 }
 
-                var percentRegexMatch = percentRegex.Match(percRewards).Value;
+                string percentRegexMatch = percentRegex.Match(percRewards).Value;
                 if (!int.TryParse(percentRegexMatch.Replace("%", ""), out int percentage))
                 {
                     Logging.Debug($"Couldnt find percentage with the match {percentRegexMatch}");
                     continue;
                 }
 
-                var upperPercentile = lowerPercentile + percentage;
-                var rewardsTxt = percRewards.Remove(0, percRewards.IndexOf('-') + 1);
-                var rewards = GetRewardsFromString(rewardsTxt);
+                int upperPercentile = lowerPercentile + percentage;
+                string rewardsTxt = percRewards.Remove(0, percRewards.IndexOf('-') + 1);
+                List<Reward> rewards = GetRewardsFromString(rewardsTxt);
                 percentileRewards.Add(new PercentileReward(lowerPercentile, upperPercentile, rewards));
                 lowerPercentile = upperPercentile;
             }
@@ -323,12 +323,12 @@ namespace UnturnedBlackout
 
         public static Dictionary<EQuestCondition, List<int>> GetQuestConditionsFromString(string text)
         {
-            var questConditions = new Dictionary<EQuestCondition, List<int>>();
+            Dictionary<EQuestCondition, List<int>> questConditions = new();
 
-            var letterRegex = new Regex("([a-zA-Z]+)");
-            var numberRegex = new Regex("([0-9-]+)");
+            Regex letterRegex = new("([a-zA-Z]+)");
+            Regex numberRegex = new("([0-9-]+)");
 
-            foreach (var conditionTxt in text.Split(','))
+            foreach (string conditionTxt in text.Split(','))
             {
                 if (string.IsNullOrEmpty(conditionTxt))
                 {
@@ -341,14 +341,14 @@ namespace UnturnedBlackout
                     continue;
                 }
 
-                var letterRegexMatch = letterRegex.Match(conditionTxt).Value;
+                string letterRegexMatch = letterRegex.Match(conditionTxt).Value;
                 if (!Enum.TryParse(letterRegexMatch, true, out EQuestCondition condition))
                 {
                     Logging.Debug($"Cant find condition type with the match {letterRegexMatch}");
                     continue;
                 }
 
-                var numberRegexMatch = numberRegex.Match(conditionTxt).Value;
+                string numberRegexMatch = numberRegex.Match(conditionTxt).Value;
                 if (!int.TryParse(numberRegexMatch, out int conditionValue))
                 {
                     Logging.Debug($"Cant find condition value with the match {numberRegexMatch}");
@@ -368,9 +368,9 @@ namespace UnturnedBlackout
 
         public static int GetLoadoutAmount(UnturnedPlayer player)
         {
-            var Config = Plugin.Instance.Config.Loadout.FileData;
-            var amount = Config.DefaultLoadoutAmount;
-            foreach (var loadoutAmount in Config.LoadoutAmounts.OrderByDescending(k => k.Amount))
+            Models.Configuration.LoadoutConfig Config = Plugin.Instance.Config.Loadout.FileData;
+            int amount = Config.DefaultLoadoutAmount;
+            foreach (Models.Global.LoadoutAmount loadoutAmount in Config.LoadoutAmounts.OrderByDescending(k => k.Amount))
             {
                 if (player.HasPermission(loadoutAmount.Permission))
                 {

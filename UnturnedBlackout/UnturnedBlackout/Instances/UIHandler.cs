@@ -7,7 +7,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnturnedBlackout.Database.Base;
@@ -197,9 +196,9 @@ namespace UnturnedBlackout.Instances
             LoadoutPages = new Dictionary<int, PageLoadout>();
             int index = 0;
             int page = 1;
-            var loadouts = new Dictionary<int, Loadout>();
+            Dictionary<int, Loadout> loadouts = new();
 
-            foreach (var loadout in PlayerLoadout.Loadouts)
+            foreach (KeyValuePair<int, Loadout> loadout in PlayerLoadout.Loadouts)
             {
                 loadouts.Add(index, loadout.Value);
                 if (index == 8)
@@ -220,13 +219,13 @@ namespace UnturnedBlackout.Instances
 
         public void BuildPistolPages()
         {
-            var guns = PlayerLoadout.Guns.Values.Where(k => k.Gun.GunType == EGun.PISTOL).OrderBy(k => k.Gun.LevelRequirement).ToList();
-            var gunItems = new Dictionary<int, LoadoutGun>();
+            List<LoadoutGun> guns = PlayerLoadout.Guns.Values.Where(k => k.Gun.GunType == EGun.PISTOL).OrderBy(k => k.Gun.LevelRequirement).ToList();
+            Dictionary<int, LoadoutGun> gunItems = new();
             PistolPages = new Dictionary<int, PageGun>();
             int index = 0;
             int page = 1;
 
-            foreach (var gun in guns)
+            foreach (LoadoutGun gun in guns)
             {
                 gunItems.Add(index, gun);
                 if (index == MAX_ITEMS_PER_PAGE)
@@ -247,13 +246,13 @@ namespace UnturnedBlackout.Instances
 
         public void BuildSMGPages()
         {
-            var guns = PlayerLoadout.Guns.Values.Where(k => k.Gun.GunType == EGun.SUBMACHINE_GUNS).OrderBy(k => k.Gun.LevelRequirement).ToList();
-            var gunItems = new Dictionary<int, LoadoutGun>();
+            List<LoadoutGun> guns = PlayerLoadout.Guns.Values.Where(k => k.Gun.GunType == EGun.SUBMACHINE_GUNS).OrderBy(k => k.Gun.LevelRequirement).ToList();
+            Dictionary<int, LoadoutGun> gunItems = new();
             SMGPages = new Dictionary<int, PageGun>();
             int index = 0;
             int page = 1;
 
-            foreach (var gun in guns)
+            foreach (LoadoutGun gun in guns)
             {
                 gunItems.Add(index, gun);
                 if (index == MAX_ITEMS_PER_PAGE)
@@ -274,13 +273,13 @@ namespace UnturnedBlackout.Instances
 
         public void BuildShotgunPages()
         {
-            var guns = PlayerLoadout.Guns.Values.Where(k => k.Gun.GunType == EGun.SHOTGUNS).OrderBy(k => k.Gun.LevelRequirement).ToList();
-            var gunItems = new Dictionary<int, LoadoutGun>();
+            List<LoadoutGun> guns = PlayerLoadout.Guns.Values.Where(k => k.Gun.GunType == EGun.SHOTGUNS).OrderBy(k => k.Gun.LevelRequirement).ToList();
+            Dictionary<int, LoadoutGun> gunItems = new();
             ShotgunPages = new Dictionary<int, PageGun>();
             int index = 0;
             int page = 1;
 
-            foreach (var gun in guns)
+            foreach (LoadoutGun gun in guns)
             {
                 gunItems.Add(index, gun);
                 if (index == MAX_ITEMS_PER_PAGE)
@@ -301,13 +300,13 @@ namespace UnturnedBlackout.Instances
 
         public void BuildLMGPages()
         {
-            var guns = PlayerLoadout.Guns.Values.Where(k => k.Gun.GunType == EGun.LIGHT_MACHINE_GUNS).OrderBy(k => k.Gun.LevelRequirement).ToList();
-            var gunItems = new Dictionary<int, LoadoutGun>();
+            List<LoadoutGun> guns = PlayerLoadout.Guns.Values.Where(k => k.Gun.GunType == EGun.LIGHT_MACHINE_GUNS).OrderBy(k => k.Gun.LevelRequirement).ToList();
+            Dictionary<int, LoadoutGun> gunItems = new();
             LMGPages = new Dictionary<int, PageGun>();
             int index = 0;
             int page = 1;
 
-            foreach (var gun in guns)
+            foreach (LoadoutGun gun in guns)
             {
                 gunItems.Add(index, gun);
                 if (index == MAX_ITEMS_PER_PAGE)
@@ -328,13 +327,13 @@ namespace UnturnedBlackout.Instances
 
         public void BuildARPages()
         {
-            var guns = PlayerLoadout.Guns.Values.Where(k => k.Gun.GunType == EGun.ASSAULT_RIFLES).OrderBy(k => k.Gun.LevelRequirement).ToList();
-            var gunItems = new Dictionary<int, LoadoutGun>();
+            List<LoadoutGun> guns = PlayerLoadout.Guns.Values.Where(k => k.Gun.GunType == EGun.ASSAULT_RIFLES).OrderBy(k => k.Gun.LevelRequirement).ToList();
+            Dictionary<int, LoadoutGun> gunItems = new();
             ARPages = new Dictionary<int, PageGun>();
             int index = 0;
             int page = 1;
 
-            foreach (var gun in guns)
+            foreach (LoadoutGun gun in guns)
             {
                 gunItems.Add(index, gun);
                 if (index == MAX_ITEMS_PER_PAGE)
@@ -355,13 +354,13 @@ namespace UnturnedBlackout.Instances
 
         public void BuildSniperPages()
         {
-            var guns = PlayerLoadout.Guns.Values.Where(k => k.Gun.GunType == EGun.SNIPER_RIFLES).OrderBy(k => k.Gun.LevelRequirement).ToList();
-            var gunItems = new Dictionary<int, LoadoutGun>();
+            List<LoadoutGun> guns = PlayerLoadout.Guns.Values.Where(k => k.Gun.GunType == EGun.SNIPER_RIFLES).OrderBy(k => k.Gun.LevelRequirement).ToList();
+            Dictionary<int, LoadoutGun> gunItems = new();
             SniperPages = new Dictionary<int, PageGun>();
             int index = 0;
             int page = 1;
 
-            foreach (var gun in guns)
+            foreach (LoadoutGun gun in guns)
             {
                 gunItems.Add(index, gun);
                 if (index == MAX_ITEMS_PER_PAGE)
@@ -382,13 +381,13 @@ namespace UnturnedBlackout.Instances
 
         public void BuildCarbinePages()
         {
-            var guns = PlayerLoadout.Guns.Values.Where(k => k.Gun.GunType == EGun.CARBINES).OrderBy(k => k.Gun.LevelRequirement).ToList();
-            var gunItems = new Dictionary<int, LoadoutGun>();
+            List<LoadoutGun> guns = PlayerLoadout.Guns.Values.Where(k => k.Gun.GunType == EGun.CARBINES).OrderBy(k => k.Gun.LevelRequirement).ToList();
+            Dictionary<int, LoadoutGun> gunItems = new();
             CarbinePages = new Dictionary<int, PageGun>();
             int index = 0;
             int page = 1;
 
-            foreach (var gun in guns)
+            foreach (LoadoutGun gun in guns)
             {
                 gunItems.Add(index, gun);
                 if (index == MAX_ITEMS_PER_PAGE)
@@ -410,13 +409,13 @@ namespace UnturnedBlackout.Instances
         public void BuildGunSkinPages()
         {
             GunSkinPages = new Dictionary<ushort, Dictionary<int, PageGunSkin>>();
-            foreach (var gun in PlayerLoadout.GunSkinsSearchByGunID)
+            foreach (KeyValuePair<ushort, List<GunSkin>> gun in PlayerLoadout.GunSkinsSearchByGunID)
             {
                 int index = 0;
                 int page = 1;
-                var gunSkins = new Dictionary<int, GunSkin>();
+                Dictionary<int, GunSkin> gunSkins = new();
                 GunSkinPages.Add(gun.Key, new Dictionary<int, PageGunSkin>());
-                foreach (var gunSkin in gun.Value.OrderByDescending(k => (byte)k.SkinRarity))
+                foreach (GunSkin gunSkin in gun.Value.OrderByDescending(k => (byte)k.SkinRarity))
                 {
                     gunSkins.Add(index, gunSkin);
                     if (index == MAX_ITEMS_PER_GRID)
@@ -439,7 +438,7 @@ namespace UnturnedBlackout.Instances
         public void BuildAttachmentPages()
         {
             AttachmentPages = new Dictionary<ushort, Dictionary<EAttachment, Dictionary<int, PageAttachment>>>();
-            foreach (var gun in PlayerLoadout.Guns)
+            foreach (KeyValuePair<ushort, LoadoutGun> gun in PlayerLoadout.Guns)
             {
                 BuildAttachmentPages(gun.Value);
             }
@@ -455,12 +454,12 @@ namespace UnturnedBlackout.Instances
 
             for (int i = 0; i <= 3; i++)
             {
-                var attachmentType = (EAttachment)i;
+                EAttachment attachmentType = (EAttachment)i;
                 int index = 0;
                 int page = 1;
-                var attachments = new Dictionary<int, LoadoutAttachment>();
+                Dictionary<int, LoadoutAttachment> attachments = new();
                 AttachmentPages[gun.Gun.GunID].Add(attachmentType, new Dictionary<int, PageAttachment>());
-                foreach (var attachment in gun.Attachments.Values.Where(k => k.Attachment.AttachmentType == attachmentType).OrderBy(k => k.LevelRequirement))
+                foreach (LoadoutAttachment attachment in gun.Attachments.Values.Where(k => k.Attachment.AttachmentType == attachmentType).OrderBy(k => k.LevelRequirement))
                 {
                     attachments.Add(index, attachment);
                     if (index == MAX_ITEMS_PER_PAGE)
@@ -485,8 +484,8 @@ namespace UnturnedBlackout.Instances
             GunCharmPages = new Dictionary<int, PageGunCharm>();
             int index = 0;
             int page = 1;
-            var gunCharms = new Dictionary<int, LoadoutGunCharm>();
-            foreach (var gunCharm in PlayerLoadout.GunCharms.Values.OrderByDescending(k => (byte)k.GunCharm.CharmRarity))
+            Dictionary<int, LoadoutGunCharm> gunCharms = new();
+            foreach (LoadoutGunCharm gunCharm in PlayerLoadout.GunCharms.Values.OrderByDescending(k => (byte)k.GunCharm.CharmRarity))
             {
                 gunCharms.Add(index, gunCharm);
                 if (index == MAX_ITEMS_PER_GRID)
@@ -510,8 +509,8 @@ namespace UnturnedBlackout.Instances
             KnifePages = new Dictionary<int, PageKnife>();
             int index = 0;
             int page = 1;
-            var knives = new Dictionary<int, LoadoutKnife>();
-            foreach (var knife in PlayerLoadout.Knives.Values.OrderByDescending(k => (byte)k.Knife.KnifeRarity))
+            Dictionary<int, LoadoutKnife> knives = new();
+            foreach (LoadoutKnife knife in PlayerLoadout.Knives.Values.OrderByDescending(k => (byte)k.Knife.KnifeRarity))
             {
                 knives.Add(index, knife);
                 if (index == MAX_ITEMS_PER_GRID)
@@ -538,8 +537,8 @@ namespace UnturnedBlackout.Instances
                 PerkPages.Add(i, new Dictionary<int, PagePerk>());
                 int index = 0;
                 int page = 1;
-                var perks = new Dictionary<int, LoadoutPerk>();
-                foreach (var perk in PlayerLoadout.Perks.Values.Where(k => k.Perk.PerkType == i).OrderBy(k => k.Perk.LevelRequirement))
+                Dictionary<int, LoadoutPerk> perks = new();
+                foreach (LoadoutPerk perk in PlayerLoadout.Perks.Values.Where(k => k.Perk.PerkType == i).OrderBy(k => k.Perk.LevelRequirement))
                 {
                     perks.Add(index, perk);
                     if (index == MAX_ITEMS_PER_PAGE)
@@ -562,11 +561,11 @@ namespace UnturnedBlackout.Instances
         public void BuildTacticalPages()
         {
             TacticalPages = new Dictionary<int, PageGadget>();
-            var gadgets = PlayerLoadout.Gadgets.Values.Where(k => k.Gadget.IsTactical).OrderBy(k => k.Gadget.LevelRequirement).ToList();
+            List<LoadoutGadget> gadgets = PlayerLoadout.Gadgets.Values.Where(k => k.Gadget.IsTactical).OrderBy(k => k.Gadget.LevelRequirement).ToList();
             int index = 0;
             int page = 1;
-            var gadgetItems = new Dictionary<int, LoadoutGadget>();
-            foreach (var gadget in gadgets)
+            Dictionary<int, LoadoutGadget> gadgetItems = new();
+            foreach (LoadoutGadget gadget in gadgets)
             {
                 gadgetItems.Add(index, gadget);
                 if (index == MAX_ITEMS_PER_PAGE)
@@ -588,11 +587,11 @@ namespace UnturnedBlackout.Instances
         public void BuildLethalPages()
         {
             LethalPages = new Dictionary<int, PageGadget>();
-            var gadgets = PlayerLoadout.Gadgets.Values.Where(k => !k.Gadget.IsTactical).OrderBy(k => k.Gadget.LevelRequirement).ToList();
+            List<LoadoutGadget> gadgets = PlayerLoadout.Gadgets.Values.Where(k => !k.Gadget.IsTactical).OrderBy(k => k.Gadget.LevelRequirement).ToList();
             int index = 0;
             int page = 1;
-            var gadgetItems = new Dictionary<int, LoadoutGadget>();
-            foreach (var gadget in gadgets)
+            Dictionary<int, LoadoutGadget> gadgetItems = new();
+            foreach (LoadoutGadget gadget in gadgets)
             {
                 gadgetItems.Add(index, gadget);
                 if (index == MAX_ITEMS_PER_PAGE)
@@ -616,8 +615,8 @@ namespace UnturnedBlackout.Instances
             CardPages = new Dictionary<int, PageCard>();
             int index = 0;
             int page = 1;
-            var cards = new Dictionary<int, LoadoutCard>();
-            foreach (var card in PlayerLoadout.Cards.Values.OrderByDescending(k => (byte)k.Card.CardRarity))
+            Dictionary<int, LoadoutCard> cards = new();
+            foreach (LoadoutCard card in PlayerLoadout.Cards.Values.OrderByDescending(k => (byte)k.Card.CardRarity))
             {
                 cards.Add(index, card);
                 if (index == MAX_ITEMS_PER_GRID)
@@ -641,8 +640,8 @@ namespace UnturnedBlackout.Instances
             GlovePages = new Dictionary<int, PageGlove>();
             int index = 0;
             int page = 1;
-            var gloves = new Dictionary<int, LoadoutGlove>();
-            foreach (var glove in PlayerLoadout.Gloves.Values.OrderByDescending(k => (byte)k.Glove.GloveRarity))
+            Dictionary<int, LoadoutGlove> gloves = new();
+            foreach (LoadoutGlove glove in PlayerLoadout.Gloves.Values.OrderByDescending(k => (byte)k.Glove.GloveRarity))
             {
                 gloves.Add(index, glove);
                 if (index == MAX_ITEMS_PER_GRID)
@@ -666,8 +665,8 @@ namespace UnturnedBlackout.Instances
             KillstreakPages = new Dictionary<int, PageKillstreak>();
             int index = 0;
             int page = 1;
-            var killstreaks = new Dictionary<int, LoadoutKillstreak>();
-            foreach (var killstreak in PlayerLoadout.Killstreaks.Values.OrderBy(k => k.Killstreak.LevelRequirement))
+            Dictionary<int, LoadoutKillstreak> killstreaks = new();
+            foreach (LoadoutKillstreak killstreak in PlayerLoadout.Killstreaks.Values.OrderBy(k => k.Killstreak.LevelRequirement))
             {
                 killstreaks.Add(index, killstreak);
                 if (index == MAX_ITEMS_PER_PAGE)
@@ -695,8 +694,8 @@ namespace UnturnedBlackout.Instances
                 AchievementPages.Add(i, new Dictionary<int, PageAchievement>());
                 int index = 0;
                 int page = 1;
-                var achievements = new Dictionary<int, PlayerAchievement>();
-                foreach (var achievement in PlayerData.Achievements.Where(k => k.Achievement.PageID == i).OrderByDescending(k => k.CurrentTier).ThenByDescending(k => k.TryGetNextTier(out AchievementTier nextTier) ? (k.Amount * 100 / nextTier.TargetAmount) : 100))
+                Dictionary<int, PlayerAchievement> achievements = new();
+                foreach (PlayerAchievement achievement in PlayerData.Achievements.Where(k => k.Achievement.PageID == i).OrderByDescending(k => k.CurrentTier).ThenByDescending(k => k.TryGetNextTier(out AchievementTier nextTier) ? (k.Amount * 100 / nextTier.TargetAmount) : 100))
                 {
                     achievements.Add(index, achievement);
                     if (index == MAX_ACHIEVEMENTS_PER_PAGE)
@@ -721,8 +720,8 @@ namespace UnturnedBlackout.Instances
             UnboxInventoryPages = new Dictionary<int, PageUnboxInventory>();
             int index = 0;
             int page = 1;
-            var cases = new Dictionary<int, PlayerCase>();
-            foreach (var @case in PlayerData.Cases)
+            Dictionary<int, PlayerCase> cases = new();
+            foreach (PlayerCase @case in PlayerData.Cases)
             {
                 cases.Add(index, @case);
                 if (index == MAX_CASES_PER_INVENTORY_PAGE)
@@ -746,8 +745,8 @@ namespace UnturnedBlackout.Instances
             UnboxStorePages = new Dictionary<int, PageUnboxStore>();
             int index = 0;
             int page = 1;
-            var cases = new Dictionary<int, Case>();
-            foreach (var @case in DB.Cases)
+            Dictionary<int, Case> cases = new();
+            foreach (KeyValuePair<int, Case> @case in DB.Cases)
             {
                 cases.Add(index, @case.Value);
                 if (index == MAX_CASES_PER_STORE_PAGE)
@@ -830,7 +829,7 @@ namespace UnturnedBlackout.Instances
 
         public void ClearChat()
         {
-            var steamPlayer = Player.SteamPlayer();
+            SteamPlayer steamPlayer = Player.SteamPlayer();
             for (int i = 0; i <= 10; i++)
             {
                 ChatManager.serverSendMessage("", Color.white, toPlayer: steamPlayer);
@@ -867,8 +866,8 @@ namespace UnturnedBlackout.Instances
 
         public void SelectedPlayButton(int selected)
         {
-            var games = Plugin.Instance.Game.Games;
-            var servers = Plugin.Instance.DB.Servers;
+            List<Game> games = Plugin.Instance.Game.Games;
+            List<Server> servers = Plugin.Instance.DB.Servers;
             if (PlayPage == EPlayPage.Games)
             {
                 if ((selected + 1) > games.Count)
@@ -897,7 +896,7 @@ namespace UnturnedBlackout.Instances
             }
             else if (PlayPage == EPlayPage.Servers)
             {
-                var server = Plugin.Instance.DB.Servers[SelectedGameID];
+                Server server = Plugin.Instance.DB.Servers[SelectedGameID];
                 if (server.IsOnline)
                 {
                     Player.Player.sendRelayToServer(server.IPNo, server.PortNo, "", shouldShowMenu: false);
@@ -909,7 +908,7 @@ namespace UnturnedBlackout.Instances
         #region PlayGamesPage
         public void ShowGames()
         {
-            var games = Plugin.Instance.Game.Games;
+            List<Game> games = Plugin.Instance.Game.Games;
             PlayPage = EPlayPage.Games;
 
             for (int i = 0; i <= 13; i++)
@@ -917,12 +916,12 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Play BUTTON {i}", false);
             }
 
-            var maxCount = Math.Min(14, games.Count);
+            int maxCount = Math.Min(14, games.Count);
 
             for (int index = 0; index < maxCount; index++)
             {
-                var game = games[index];
-                var gameMode = Config.Gamemode.FileData.GamemodeOptions.FirstOrDefault(k => k.GameType == game.GameMode);
+                Game game = games[index];
+                GamemodeOption gameMode = Config.Gamemode.FileData.GamemodeOptions.FirstOrDefault(k => k.GameType == game.GameMode);
                 if (gameMode == null)
                 {
                     return;
@@ -940,7 +939,7 @@ namespace UnturnedBlackout.Instances
 
         public void ShowGame(Game game)
         {
-            var gameMode = Config.Gamemode.FileData.GamemodeOptions.FirstOrDefault(k => k.GameType == game.GameMode);
+            GamemodeOption gameMode = Config.Gamemode.FileData.GamemodeOptions.FirstOrDefault(k => k.GameType == game.GameMode);
             if (gameMode == null)
             {
                 return;
@@ -970,14 +969,14 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Play BUTTON {i}", false);
             }
 
-            var servers = DB.Servers;
-            var maxCount = Math.Min(14, servers.Count);
+            List<Server> servers = DB.Servers;
+            int maxCount = Math.Min(14, servers.Count);
 
             for (int index = 0; index < maxCount; index++)
             {
-                var server = servers[index];
+                Server server = servers[index];
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Play BUTTON {index}", true);
-                var name = string.IsNullOrEmpty(server.Name) ? server.ServerName : server.Name;
+                string name = string.IsNullOrEmpty(server.Name) ? server.ServerName : server.Name;
                 if (server.IsCurrentServer)
                 {
                     name = $"<color=#FFFF00>{name}</color>";
@@ -1124,7 +1123,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Loadout Primary Level TEXT", loadout.Primary == null ? "" : loadout.Primary.Level.ToString());
             for (int i = 0; i <= 3; i++)
             {
-                var attachmentType = (EAttachment)i;
+                EAttachment attachmentType = (EAttachment)i;
                 loadout.PrimaryAttachments.TryGetValue(attachmentType, out LoadoutAttachment attachment);
                 EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout Primary {attachmentType} IMAGE", attachment == null ? Utility.GetDefaultAttachmentImage(attachmentType.ToString()) : attachment.Attachment.IconLink);
             }
@@ -1137,7 +1136,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Loadout Secondary Level TEXT", loadout.Secondary == null ? "" : loadout.Secondary.Level.ToString());
             for (int i = 0; i <= 3; i++)
             {
-                var attachmentType = (EAttachment)i;
+                EAttachment attachmentType = (EAttachment)i;
                 loadout.SecondaryAttachments.TryGetValue(attachmentType, out LoadoutAttachment attachment);
                 EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout Secondary {attachmentType} IMAGE", attachment == null ? Utility.GetDefaultAttachmentImage(attachmentType.ToString()) : attachment.Attachment.IconLink);
             }
@@ -1190,7 +1189,7 @@ namespace UnturnedBlackout.Instances
 
             Task.Run(async () =>
             {
-                foreach (var activeLoadout in PlayerLoadout.Loadouts.Values.Where(k => k.IsActive))
+                foreach (Loadout activeLoadout in PlayerLoadout.Loadouts.Values.Where(k => k.IsActive))
                 {
                     await DB.UpdatePlayerLoadoutActiveAsync(Player.CSteamID, activeLoadout.LoadoutID, false);
                 }
@@ -1339,7 +1338,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectText(MIDGAME_LOADOUT_KEY, TransportConnection, true, "SERVER Loadout Primary Level TEXT", loadout.Primary == null ? "" : loadout.Primary.Level.ToString());
             for (int i = 0; i <= 3; i++)
             {
-                var attachmentType = (EAttachment)i;
+                EAttachment attachmentType = (EAttachment)i;
                 loadout.PrimaryAttachments.TryGetValue(attachmentType, out LoadoutAttachment attachment);
                 EffectManager.sendUIEffectImageURL(MIDGAME_LOADOUT_KEY, TransportConnection, true, $"SERVER Loadout Primary {attachmentType} IMAGE", attachment == null ? Utility.GetDefaultAttachmentImage(attachmentType.ToString()) : attachment.Attachment.IconLink);
             }
@@ -1352,7 +1351,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectText(MIDGAME_LOADOUT_KEY, TransportConnection, true, "SERVER Loadout Secondary Level TEXT", loadout.Secondary == null ? "" : loadout.Secondary.Level.ToString());
             for (int i = 0; i <= 3; i++)
             {
-                var attachmentType = (EAttachment)i;
+                EAttachment attachmentType = (EAttachment)i;
                 loadout.SecondaryAttachments.TryGetValue(attachmentType, out LoadoutAttachment attachment);
                 EffectManager.sendUIEffectImageURL(MIDGAME_LOADOUT_KEY, TransportConnection, true, $"SERVER Loadout Secondary {attachmentType} IMAGE", attachment == null ? Utility.GetDefaultAttachmentImage(attachmentType.ToString()) : attachment.Attachment.IconLink);
             }
@@ -1405,7 +1404,7 @@ namespace UnturnedBlackout.Instances
 
             Task.Run(async () =>
             {
-                foreach (var activeLoadout in PlayerLoadout.Loadouts.Values.Where(k => k.IsActive))
+                foreach (Loadout activeLoadout in PlayerLoadout.Loadouts.Values.Where(k => k.IsActive))
                 {
                     await DB.UpdatePlayerLoadoutActiveAsync(Player.CSteamID, activeLoadout.LoadoutID, false);
                 }
@@ -1414,7 +1413,7 @@ namespace UnturnedBlackout.Instances
                 TaskDispatcher.QueueOnMainThread(() =>
                 {
                     ClearMidgameLoadouts();
-                    var gPlayer = Plugin.Instance.Game.GetGamePlayer(Player);
+                    GamePlayer gPlayer = Plugin.Instance.Game.GetGamePlayer(Player);
                     if (gPlayer != null)
                     {
                         gPlayer.IsPendingLoadoutChange = true;
@@ -1425,7 +1424,7 @@ namespace UnturnedBlackout.Instances
 
         public void ClearMidgameLoadouts()
         {
-            var gPlayer = Plugin.Instance.Game.GetGamePlayer(Player);
+            GamePlayer gPlayer = Plugin.Instance.Game.GetGamePlayer(Player);
             if (gPlayer != null)
             {
                 gPlayer.HasMidgameLoadout = false;
@@ -1542,7 +1541,7 @@ namespace UnturnedBlackout.Instances
                                         return;
                                     }
 
-                                    if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out var attachmentTypePages))
+                                    if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out Dictionary<EAttachment, Dictionary<int, PageAttachment>> attachmentTypePages))
                                     {
                                         Logging.Debug($"Error finding primary attachments for {gun.Gun.GunID} for {Player.CharacterName}");
                                         return;
@@ -1596,7 +1595,7 @@ namespace UnturnedBlackout.Instances
                                         return;
                                     }
 
-                                    if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out var attachmentTypePages))
+                                    if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out Dictionary<EAttachment, Dictionary<int, PageAttachment>> attachmentTypePages))
                                     {
                                         Logging.Debug($"Error finding secondary attachments for {gun.Gun.GunID} for {Player.CharacterName}");
                                         return;
@@ -1880,7 +1879,7 @@ namespace UnturnedBlackout.Instances
                                         return;
                                     }
 
-                                    if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out var attachmentTypePages))
+                                    if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out Dictionary<EAttachment, Dictionary<int, PageAttachment>> attachmentTypePages))
                                     {
                                         Logging.Debug($"Error finding primary attachments for {gun.Gun.GunID} for {Player.CharacterName}");
                                         return;
@@ -1931,7 +1930,7 @@ namespace UnturnedBlackout.Instances
                                         return;
                                     }
 
-                                    if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out var attachmentTypePages))
+                                    if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out Dictionary<EAttachment, Dictionary<int, PageAttachment>> attachmentTypePages))
                                     {
                                         Logging.Debug($"Error finding secondary attachments for {gun.Gun.GunID} for {Player.CharacterName}");
                                         return;
@@ -2203,7 +2202,7 @@ namespace UnturnedBlackout.Instances
                                         return;
                                     }
 
-                                    if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out var attachmentTypePages))
+                                    if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out Dictionary<EAttachment, Dictionary<int, PageAttachment>> attachmentTypePages))
                                     {
                                         Logging.Debug($"Error finding primary attachments for {gun.Gun.GunID} for {Player.CharacterName}");
                                         return;
@@ -2255,7 +2254,7 @@ namespace UnturnedBlackout.Instances
                                         return;
                                     }
 
-                                    if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out var attachmentTypePages))
+                                    if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out Dictionary<EAttachment, Dictionary<int, PageAttachment>> attachmentTypePages))
                                     {
                                         Logging.Debug($"Error finding Secondary attachments for {gun.Gun.GunID} for {Player.CharacterName}");
                                         return;
@@ -2526,7 +2525,7 @@ namespace UnturnedBlackout.Instances
                                         return;
                                     }
 
-                                    if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out var attachmentTypePages))
+                                    if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out Dictionary<EAttachment, Dictionary<int, PageAttachment>> attachmentTypePages))
                                     {
                                         Logging.Debug($"Error finding primary attachments for {gun.Gun.GunID} for {Player.CharacterName}");
                                         return;
@@ -2577,7 +2576,7 @@ namespace UnturnedBlackout.Instances
                                         return;
                                     }
 
-                                    if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out var attachmentTypePages))
+                                    if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out Dictionary<EAttachment, Dictionary<int, PageAttachment>> attachmentTypePages))
                                     {
                                         Logging.Debug($"Error finding secondary attachments for {gun.Gun.GunID} for {Player.CharacterName}");
                                         return;
@@ -3322,7 +3321,7 @@ namespace UnturnedBlackout.Instances
                                         return;
                                     }
 
-                                    if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out var attachmentTypePages))
+                                    if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out Dictionary<EAttachment, Dictionary<int, PageAttachment>> attachmentTypePages))
                                     {
                                         Logging.Debug($"Error finding primary attachments for {gun.Gun.GunID} for {Player.CharacterName}");
                                         return;
@@ -3385,7 +3384,7 @@ namespace UnturnedBlackout.Instances
                                         return;
                                     }
 
-                                    if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out var attachmentTypePages))
+                                    if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out Dictionary<EAttachment, Dictionary<int, PageAttachment>> attachmentTypePages))
                                     {
                                         Logging.Debug($"Error finding Secondary attachments for {gun.Gun.GunID} for {Player.CharacterName}");
                                         return;
@@ -3691,7 +3690,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy Locked", !gun.IsUnlocked && gun.Gun.LevelRequirement > PlayerData.Level);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.Credits)} <color={(PlayerData.Credits >= gun.Gun.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{gun.Gun.BuyPrice}</color>");
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !gun.IsBought && !gun.IsUnlocked && gun.Gun.LevelRequirement > PlayerData.Level);
-            var coins = gun.Gun.GetCoins(PlayerData.Level);
+            int coins = gun.Gun.GetCoins(PlayerData.Level);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.Coins)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Equip BUTTON", gun.IsBought && ((LoadoutPage == ELoadoutPage.Primary && loadout.Primary != gun) || (LoadoutPage == ELoadoutPage.Secondary && loadout.Secondary != gun)));
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Dequip BUTTON", gun.IsBought && ((LoadoutPage == ELoadoutPage.Primary && loadout.Primary == gun) || (LoadoutPage == ELoadoutPage.Secondary && loadout.Secondary == gun)));
@@ -3703,7 +3702,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Description TEXT", true);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Credits", false);
             gun.TryGetNeededXP(out int neededXP);
-            var spaces = neededXP != 0 ? (gun.XP * 188 / neededXP) : 0;
+            int spaces = neededXP != 0 ? (gun.XP * 188 / neededXP) : 0;
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item XP Bar Fill", spaces == 0 ? UIManager.HAIRSPACE_SYMBOL_STRING : new string(UIManager.HAIRSPACE_SYMBOL_CHAR, spaces));
             SendRarityName("SERVER Item Rarity TEXT", gun.Gun.GunRarity);
         }
@@ -3721,7 +3720,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy Locked", !attachment.IsUnlocked && attachment.LevelRequirement > gun.Level);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.Credits)} <color={(PlayerData.Credits >= attachment.Attachment.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{attachment.Attachment.BuyPrice}</color>");
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !attachment.IsBought && !attachment.IsUnlocked && attachment.LevelRequirement > gun.Level);
-            var coins = attachment.GetCoins(gun.Level);
+            int coins = attachment.GetCoins(gun.Level);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.Coins)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Equip BUTTON", attachment.IsBought && ((LoadoutPage.ToString().StartsWith("AttachmentPrimary") && !loadout.PrimaryAttachments.ContainsValue(attachment)) || (LoadoutPage.ToString().StartsWith("AttachmentSecondary") && !loadout.SecondaryAttachments.ContainsValue(attachment))));
             if (attachment.Attachment.AttachmentType != EAttachment.Magazine)
@@ -3763,7 +3762,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy Locked", !gunCharm.IsUnlocked && gunCharm.GunCharm.LevelRequirement > PlayerData.Level);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.Credits)} <color={(PlayerData.Credits >= gunCharm.GunCharm.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{gunCharm.GunCharm.BuyPrice}</color>");
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !gunCharm.IsBought && !gunCharm.IsUnlocked && gunCharm.GunCharm.LevelRequirement > PlayerData.Level);
-            var coins = gunCharm.GunCharm.GetCoins(PlayerData.Level);
+            int coins = gunCharm.GunCharm.GetCoins(PlayerData.Level);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.Coins)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.Coins)} {gunCharm.GunCharm.GetCoins(PlayerData.Level)}");
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Equip BUTTON", gunCharm.IsBought && ((LoadoutPage.ToString().StartsWith("AttachmentPrimary") && loadout.PrimaryGunCharm != gunCharm) || (LoadoutPage.ToString().StartsWith("AttachmentSecondary") && loadout.SecondaryGunCharm != gunCharm)));
@@ -3814,7 +3813,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy Locked", !knife.IsUnlocked && knife.Knife.LevelRequirement > PlayerData.Level);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.Credits)} <color={(PlayerData.Credits >= knife.Knife.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{knife.Knife.BuyPrice}</color>");
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !knife.IsBought && !knife.IsUnlocked && knife.Knife.LevelRequirement > PlayerData.Level);
-            var coins = knife.Knife.GetCoins(PlayerData.Level);
+            int coins = knife.Knife.GetCoins(PlayerData.Level);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.Coins)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Equip BUTTON", knife.IsBought && loadout.Knife != knife);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Dequip BUTTON", false);
@@ -3840,7 +3839,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy Locked", !perk.IsUnlocked && perk.Perk.LevelRequirement > PlayerData.Level);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.Credits)} <color={(PlayerData.Credits >= perk.Perk.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{perk.Perk.BuyPrice}</color>");
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !perk.IsBought && !perk.IsUnlocked && perk.Perk.LevelRequirement > PlayerData.Level);
-            var coins = perk.Perk.GetCoins(PlayerData.Level);
+            int coins = perk.Perk.GetCoins(PlayerData.Level);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.Coins)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Equip BUTTON", perk.IsBought && !loadout.Perks.ContainsValue(perk));
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Dequip BUTTON", perk.IsBought && loadout.Perks.ContainsValue(perk));
@@ -3877,7 +3876,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy Locked", !gadget.IsUnlocked && gadget.Gadget.LevelRequirement > PlayerData.Level);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.Credits)} <color={(PlayerData.Credits >= gadget.Gadget.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{gadget.Gadget.BuyPrice}</color>");
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !gadget.IsBought && !gadget.IsUnlocked && gadget.Gadget.LevelRequirement > PlayerData.Level);
-            var coins = gadget.Gadget.GetCoins(PlayerData.Level);
+            int coins = gadget.Gadget.GetCoins(PlayerData.Level);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.Coins)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Equip BUTTON", gadget.IsBought && ((LoadoutPage == ELoadoutPage.Tactical && loadout.Tactical != gadget) || (LoadoutPage == ELoadoutPage.Lethal && loadout.Lethal != gadget)));
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Dequip BUTTON", gadget.IsBought && ((LoadoutPage == ELoadoutPage.Tactical && loadout.Tactical == gadget) || (LoadoutPage == ELoadoutPage.Lethal && loadout.Lethal == gadget)));
@@ -3903,7 +3902,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy Locked", !card.IsUnlocked && card.Card.LevelRequirement > PlayerData.Level);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.Credits)} <color={(PlayerData.Credits >= card.Card.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{card.Card.BuyPrice}</color>");
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !card.IsBought && !card.IsUnlocked && card.Card.LevelRequirement > PlayerData.Level);
-            var coins = card.Card.GetCoins(PlayerData.Level);
+            int coins = card.Card.GetCoins(PlayerData.Level);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.Coins)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Equip BUTTON", card.IsBought && loadout.Card != card);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Dequip BUTTON", card.IsBought && loadout.Card == card);
@@ -3930,7 +3929,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy Locked", !glove.IsUnlocked && glove.Glove.LevelRequirement > PlayerData.Level);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.Credits)} <color={(PlayerData.Credits >= glove.Glove.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{glove.Glove.BuyPrice}</color>");
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !glove.IsBought && !glove.IsUnlocked && glove.Glove.LevelRequirement > PlayerData.Level);
-            var coins = glove.Glove.GetCoins(PlayerData.Level);
+            int coins = glove.Glove.GetCoins(PlayerData.Level);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.Coins)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Equip BUTTON", glove.IsBought && loadout.Glove != glove);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Dequip BUTTON", glove.IsBought && loadout.Glove == glove);
@@ -3956,7 +3955,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy Locked", !killstreak.IsUnlocked && killstreak.Killstreak.LevelRequirement > PlayerData.Level);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.Credits)} <color={(PlayerData.Credits >= killstreak.Killstreak.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{killstreak.Killstreak.BuyPrice}</color>");
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !killstreak.IsBought && !killstreak.IsUnlocked && killstreak.Killstreak.LevelRequirement > PlayerData.Level);
-            var coins = killstreak.Killstreak.GetCoins(PlayerData.Level);
+            int coins = killstreak.Killstreak.GetCoins(PlayerData.Level);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.Coins)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Equip BUTTON", killstreak.IsBought && !loadout.Killstreaks.Contains(killstreak));
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Dequip BUTTON", killstreak.IsBought && loadout.Killstreaks.Contains(killstreak));
@@ -3976,7 +3975,7 @@ namespace UnturnedBlackout.Instances
 
         public void SendRarityName(string objectName, ERarity rarity)
         {
-            var rarities = new List<string> { "COMMON", "ACHIEVEMENT", "UNCOMMON", "RARE", "EPIC", "LEGENDARY", "MYTHICAL", "SPECIAL", "LIMITED" };
+            List<string> rarities = new() { "COMMON", "ACHIEVEMENT", "UNCOMMON", "RARE", "EPIC", "LEGENDARY", "MYTHICAL", "SPECIAL", "LIMITED" };
 
             // SERVER Item Rarity TEXT
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, objectName, $"<color={Utility.GetRarityColor(rarity)}>{rarities[(byte)rarity]}</color>");
@@ -4383,7 +4382,7 @@ namespace UnturnedBlackout.Instances
 
                         Task.Run(async () =>
                         {
-                            var cost = gun.Gun.GetCoins(PlayerData.Level);
+                            int cost = gun.Gun.GetCoins(PlayerData.Level);
                             if (PlayerData.Coins >= cost && !gun.IsBought && !gun.IsUnlocked && gun.Gun.LevelRequirement > PlayerData.Level)
                             {
                                 await DB.DecreasePlayerCoinsAsync(Player.CSteamID, cost);
@@ -4422,7 +4421,7 @@ namespace UnturnedBlackout.Instances
 
                         Task.Run(async () =>
                         {
-                            var cost = attachment.GetCoins(gun.Level);
+                            int cost = attachment.GetCoins(gun.Level);
                             if (PlayerData.Coins >= cost && !attachment.IsBought && !attachment.IsUnlocked && attachment.LevelRequirement > gun.Level)
                             {
                                 await DB.DecreasePlayerCoinsAsync(Player.CSteamID, cost);
@@ -4460,7 +4459,7 @@ namespace UnturnedBlackout.Instances
 
                         Task.Run(async () =>
                         {
-                            var cost = attachment.GetCoins(gun.Level);
+                            int cost = attachment.GetCoins(gun.Level);
                             if (PlayerData.Coins >= cost && !attachment.IsBought && !attachment.IsUnlocked && attachment.LevelRequirement > gun.Level)
                             {
                                 await DB.DecreasePlayerCoinsAsync(Player.CSteamID, cost);
@@ -4491,7 +4490,7 @@ namespace UnturnedBlackout.Instances
 
                         Task.Run(async () =>
                         {
-                            var cost = gunCharm.GunCharm.GetCoins(PlayerData.Level);
+                            int cost = gunCharm.GunCharm.GetCoins(PlayerData.Level);
                             if (PlayerData.Coins >= cost && !gunCharm.IsBought && !gunCharm.IsUnlocked && gunCharm.GunCharm.LevelRequirement > PlayerData.Level)
                             {
                                 await DB.DecreasePlayerCoinsAsync(Player.CSteamID, cost);
@@ -4521,7 +4520,7 @@ namespace UnturnedBlackout.Instances
 
                         Task.Run(async () =>
                         {
-                            var cost = knife.Knife.GetCoins(PlayerData.Level);
+                            int cost = knife.Knife.GetCoins(PlayerData.Level);
                             if (PlayerData.Coins >= cost && !knife.IsBought && !knife.IsUnlocked && knife.Knife.LevelRequirement > PlayerData.Level)
                             {
                                 await DB.DecreasePlayerCoinsAsync(Player.CSteamID, cost);
@@ -4552,7 +4551,7 @@ namespace UnturnedBlackout.Instances
 
                         Task.Run(async () =>
                         {
-                            var cost = gadget.Gadget.GetCoins(PlayerData.Level);
+                            int cost = gadget.Gadget.GetCoins(PlayerData.Level);
                             if (PlayerData.Coins >= cost && !gadget.IsBought && !gadget.IsUnlocked && gadget.Gadget.LevelRequirement > PlayerData.Level)
                             {
                                 await DB.DecreasePlayerCoinsAsync(Player.CSteamID, cost);
@@ -4584,7 +4583,7 @@ namespace UnturnedBlackout.Instances
 
                         Task.Run(async () =>
                         {
-                            var cost = perk.Perk.GetCoins(PlayerData.Level);
+                            int cost = perk.Perk.GetCoins(PlayerData.Level);
                             if (PlayerData.Coins >= cost && !perk.IsBought && !perk.IsUnlocked && perk.Perk.LevelRequirement > PlayerData.Level)
                             {
                                 await DB.DecreasePlayerCoinsAsync(Player.CSteamID, perk.Perk.GetCoins(PlayerData.Level));
@@ -4614,7 +4613,7 @@ namespace UnturnedBlackout.Instances
 
                         Task.Run(async () =>
                         {
-                            var cost = killstreak.Killstreak.GetCoins(PlayerData.Level);
+                            int cost = killstreak.Killstreak.GetCoins(PlayerData.Level);
                             if (PlayerData.Coins >= cost && !killstreak.IsBought && !killstreak.IsUnlocked && killstreak.Killstreak.LevelRequirement > PlayerData.Level)
                             {
                                 await DB.DecreasePlayerCoinsAsync(Player.CSteamID, cost);
@@ -4644,7 +4643,7 @@ namespace UnturnedBlackout.Instances
 
                         Task.Run(async () =>
                         {
-                            var cost = card.Card.GetCoins(PlayerData.Level);
+                            int cost = card.Card.GetCoins(PlayerData.Level);
                             if (PlayerData.Coins >= cost && !card.IsBought && !card.IsUnlocked && card.Card.LevelRequirement > PlayerData.Level)
                             {
                                 await DB.DecreasePlayerCoinsAsync(Player.CSteamID, cost);
@@ -4674,7 +4673,7 @@ namespace UnturnedBlackout.Instances
 
                         Task.Run(async () =>
                         {
-                            var cost = glove.Glove.GetCoins(PlayerData.Level);
+                            int cost = glove.Glove.GetCoins(PlayerData.Level);
                             if (PlayerData.Coins >= cost && !glove.IsBought && !glove.IsUnlocked && glove.Glove.LevelRequirement > PlayerData.Level)
                             {
                                 await DB.DecreasePlayerCoinsAsync(Player.CSteamID, cost);
@@ -4698,7 +4697,7 @@ namespace UnturnedBlackout.Instances
 
         public void EquipSelectedItem()
         {
-            var loadoutManager = Plugin.Instance.Loadout;
+            LoadoutManager loadoutManager = Plugin.Instance.Loadout;
             if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
             {
                 Logging.Debug($"Error finding selected loadout with id {LoadoutID} for {Player.CharacterName}");
@@ -4947,7 +4946,7 @@ namespace UnturnedBlackout.Instances
 
         public void DequipSelectedItem()
         {
-            var loadoutManager = Plugin.Instance.Loadout;
+            LoadoutManager loadoutManager = Plugin.Instance.Loadout;
             if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
             {
                 Logging.Debug($"Error finding selected loadout with id {LoadoutID} for {Player.CharacterName}");
@@ -5109,8 +5108,8 @@ namespace UnturnedBlackout.Instances
 
         public void ShowLeaderboard()
         {
-            var data = GetLeaderboardData();
-            var dataLookup = GetLeaderboardDataLookup();
+            List<LeaderboardData> data = GetLeaderboardData();
+            Dictionary<CSteamID, LeaderboardData> dataLookup = GetLeaderboardDataLookup();
 
             for (int i = 0; i <= 10; i++)
             {
@@ -5125,10 +5124,10 @@ namespace UnturnedBlackout.Instances
 
             if (dataLookup.TryGetValue(SteamID, out LeaderboardData playerData))
             {
-                var kills = (decimal)(playerData.Kills + playerData.HeadshotKills);
-                var deaths = (decimal)playerData.Deaths;
+                decimal kills = playerData.Kills + playerData.HeadshotKills;
+                decimal deaths = playerData.Deaths;
 
-                var ratio = playerData.Deaths == 0 ? String.Format("{0:n}", kills) : String.Format("{0:n}", Math.Round(kills / deaths, 2));
+                string ratio = playerData.Deaths == 0 ? String.Format("{0:n}", kills) : String.Format("{0:n}", Math.Round(kills / deaths, 2));
 
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards BUTTON 10", true);
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Leaderboards Rank TEXT 10", (data.IndexOf(playerData) + 1).ToString());
@@ -5146,7 +5145,7 @@ namespace UnturnedBlackout.Instances
         public void ShowLeaderboardPage(int pageNum)
         {
             LeaderboardPageID = pageNum;
-            var data = GetLeaderboardData();
+            List<LeaderboardData> data = GetLeaderboardData();
 
             for (int i = 0; i <= 9; i++)
             {
@@ -5156,17 +5155,17 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Leaderboards Page TEXT", $"Page {pageNum}");
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Leaderboards Reset TEXT", GetLeaderboardRefreshTime());
 
-            var lowerIndex = 10 * (pageNum - 1);
-            var upperIndex = Math.Min(lowerIndex + 9, data.Count - 1);
+            int lowerIndex = 10 * (pageNum - 1);
+            int upperIndex = Math.Min(lowerIndex + 9, data.Count - 1);
 
-            var index = 0;
+            int index = 0;
             for (int i = lowerIndex; i <= upperIndex; i++)
             {
-                var playerData = data[i];
-                var kills = (decimal)(playerData.Kills + playerData.HeadshotKills);
-                var deaths = (decimal)playerData.Deaths;
+                LeaderboardData playerData = data[i];
+                decimal kills = playerData.Kills + playerData.HeadshotKills;
+                decimal deaths = playerData.Deaths;
 
-                var ratio = playerData.Deaths == 0 ? String.Format("{0:n}", kills) : String.Format("{0:n}", Math.Round(kills / deaths, 2));
+                string ratio = playerData.Deaths == 0 ? String.Format("{0:n}", kills) : String.Format("{0:n}", Math.Round(kills / deaths, 2));
 
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards BUTTON {index}", true);
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Rank TEXT {index}", (i + 1).ToString());
@@ -5182,7 +5181,7 @@ namespace UnturnedBlackout.Instances
 
         public void ForwardLeaderboardPage()
         {
-            var data = GetLeaderboardData();
+            List<LeaderboardData> data = GetLeaderboardData();
 
             if ((data.Count - 1) < LeaderboardPageID * 8)
             {
@@ -5205,7 +5204,7 @@ namespace UnturnedBlackout.Instances
 
         public void SearchLeaderboardPlayer(string input)
         {
-            var data = GetLeaderboardData();
+            List<LeaderboardData> data = GetLeaderboardData();
 
             for (int i = 0; i <= 9; i++)
             {
@@ -5214,18 +5213,18 @@ namespace UnturnedBlackout.Instances
 
             Task.Run(() =>
             {
-                var inputLower = input.ToLower();
-                var searchPlayers = data.Where(k => k.SteamName.ToLower().Contains(inputLower)).Take(10).ToList();
+                string inputLower = input.ToLower();
+                List<LeaderboardData> searchPlayers = data.Where(k => k.SteamName.ToLower().Contains(inputLower)).Take(10).ToList();
                 TaskDispatcher.QueueOnMainThread(() =>
                 {
-                    var maxCount = Math.Min(10, searchPlayers.Count);
+                    int maxCount = Math.Min(10, searchPlayers.Count);
                     for (int i = 0; i < maxCount; i++)
                     {
-                        var playerData = searchPlayers[i];
-                        var kills = (decimal)(playerData.Kills + playerData.HeadshotKills);
-                        var deaths = (decimal)playerData.Deaths;
+                        LeaderboardData playerData = searchPlayers[i];
+                        decimal kills = playerData.Kills + playerData.HeadshotKills;
+                        decimal deaths = playerData.Deaths;
 
-                        var ratio = playerData.Deaths == 0 ? String.Format("{0:n}", kills) : String.Format("{0:n}", Math.Round(kills / deaths, 2));
+                        string ratio = playerData.Deaths == 0 ? String.Format("{0:n}", kills) : String.Format("{0:n}", Math.Round(kills / deaths, 2));
 
                         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards BUTTON {i}", true);
                         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Rank TEXT {i}", (data.IndexOf(playerData) + 1).ToString());
@@ -5272,11 +5271,11 @@ namespace UnturnedBlackout.Instances
         #region QuestPage
         public void ShowQuests()
         {
-            var quests = PlayerData.Quests.OrderBy(k => (int)k.Quest.QuestTier).ToList();
-            var maxCount = Math.Min(6, quests.Count);
+            List<Database.Data.PlayerQuest> quests = PlayerData.Quests.OrderBy(k => (int)k.Quest.QuestTier).ToList();
+            int maxCount = Math.Min(6, quests.Count);
             for (int i = 0; i < maxCount; i++)
             {
-                var quest = quests[i];
+                Database.Data.PlayerQuest quest = quests[i];
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Quest Complete {i} Toggler", quest.Amount >= quest.Quest.TargetAmount);
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Quest Description TEXT {i}", quest.Quest.QuestDesc);
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Quest Title TEXT {i}", quest.Quest.QuestTitle);
@@ -5288,8 +5287,8 @@ namespace UnturnedBlackout.Instances
 
         public void ShowQuestCompletion()
         {
-            var completedQuests = PlayerData.Quests.Count(k => k.Amount >= k.Quest.TargetAmount);
-            var totalQuests = PlayerData.Quests.Count;
+            int completedQuests = PlayerData.Quests.Count(k => k.Amount >= k.Quest.TargetAmount);
+            int totalQuests = PlayerData.Quests.Count;
 
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Quest Complete", completedQuests == totalQuests);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Quest Complete Count TEXT", $"{completedQuests}/{totalQuests}");
@@ -5356,7 +5355,7 @@ namespace UnturnedBlackout.Instances
                 }
 
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Achievements BUTTON {i}", true);
-                var tier = achievement.GetCurrentTier();
+                AchievementTier tier = achievement.GetCurrentTier();
                 if (tier != null)
                 {
                     EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Achievements IMAGE {i}", tier.TierPrevLarge);
@@ -5370,7 +5369,7 @@ namespace UnturnedBlackout.Instances
                 if (achievement.TryGetNextTier(out AchievementTier nextTier))
                 {
 
-                    var fillTxt = achievement.Amount == 0 ? UIManager.VERY_SMALL_SQUARE : new string(UIManager.HAIRSPACE_SYMBOL_CHAR, Math.Min(68, achievement.Amount * 68 / nextTier.TargetAmount));
+                    string fillTxt = achievement.Amount == 0 ? UIManager.VERY_SMALL_SQUARE : new string(UIManager.HAIRSPACE_SYMBOL_CHAR, Math.Min(68, achievement.Amount * 68 / nextTier.TargetAmount));
 
                     switch (achievement.CurrentTier)
                     {
@@ -5475,14 +5474,14 @@ namespace UnturnedBlackout.Instances
         {
             SelectedAchievementID = achievement.Achievement.AchievementID;
 
-            var tier = achievement.GetCurrentTier();
+            AchievementTier tier = achievement.GetCurrentTier();
             if (tier != null)
             {
                 EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements IMAGE", tier.TierPrevLarge);
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements TEXT", tier.TierTitle);
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements Description TEXT", tier.TierDesc);
 
-                var targetAmount = tier.TargetAmount;
+                int targetAmount = tier.TargetAmount;
                 if (achievement.TryGetNextTier(out AchievementTier nextTier))
                 {
                     targetAmount = nextTier.TargetAmount;
@@ -5503,7 +5502,7 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements Claim BUTTON", nextTier != null && achievement.Amount >= targetAmount);
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements Target TEXT", $"{achievement.Amount}/{targetAmount}");
 
-                var fill = achievement.Amount == 0 ? UIManager.HAIRSPACE_SYMBOL_STRING : new string(UIManager.HAIRSPACE_SYMBOL_CHAR, Math.Min(291, achievement.Amount * 291 / targetAmount));
+                string fill = achievement.Amount == 0 ? UIManager.HAIRSPACE_SYMBOL_STRING : new string(UIManager.HAIRSPACE_SYMBOL_CHAR, Math.Min(291, achievement.Amount * 291 / targetAmount));
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements Fill 0", fill);
             }
 
@@ -5640,7 +5639,7 @@ namespace UnturnedBlackout.Instances
         public void ShowBattlepass()
         {
             Logging.Debug($"Showing bp for {Player.CharacterName}");
-            var bp = PlayerData.Battlepass;
+            PlayerBattlepass bp = PlayerData.Battlepass;
 
             if (!DB.BattlepassTiersSearchByID.TryGetValue(bp.CurrentTier, out BattlepassTier currentTier))
             {
@@ -5648,13 +5647,13 @@ namespace UnturnedBlackout.Instances
                 return;
             }
 
-            var isBattlePassCompleted = !DB.BattlepassTiersSearchByID.TryGetValue(bp.CurrentTier + 1, out BattlepassTier nextTier);
+            bool isBattlePassCompleted = !DB.BattlepassTiersSearchByID.TryGetValue(bp.CurrentTier + 1, out BattlepassTier nextTier);
             Logging.Debug($"Is Battlepass Completed: {isBattlePassCompleted}, next tier null: {nextTier == null}, current xp: {bp.XP}, current tier xp: {currentTier.XP}, next tier xp: {nextTier?.XP ?? 0}");
 
             // Setup the XP bar
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass Tier Target TEXT", $"{bp.XP}/{(isBattlePassCompleted ? currentTier.XP : nextTier.XP)}★");
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass Tier TEXT", $"{bp.CurrentTier}");
-            var fill = bp.XP == 0 ? UIManager.VERY_SMALL_SQUARE : new string(' ', Math.Min(72, bp.XP * 72 / (isBattlePassCompleted ? currentTier.XP : nextTier.XP)));
+            string fill = bp.XP == 0 ? UIManager.VERY_SMALL_SQUARE : new string(' ', Math.Min(72, bp.XP * 72 / (isBattlePassCompleted ? currentTier.XP : nextTier.XP)));
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass Tier XP Fill", fill);
             EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass IMAGE", "");
 
@@ -5669,18 +5668,18 @@ namespace UnturnedBlackout.Instances
 
         public void ShowBattlepassTier(int tierID)
         {
-            var bp = PlayerData.Battlepass;
+            PlayerBattlepass bp = PlayerData.Battlepass;
             if (!DB.BattlepassTiersSearchByID.TryGetValue(tierID, out BattlepassTier tier))
             {
                 return;
             }
-            var isTierUnlocked = bp.CurrentTier >= tierID;
+            bool isTierUnlocked = bp.CurrentTier >= tierID;
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass Tier Completed Toggler {tierID}", isTierUnlocked);
-            var spaces = bp.CurrentTier > tierID ? 70 : (bp.CurrentTier == tierID ? Math.Min(70, bp.XP * 70 / (DB.BattlepassTiersSearchByID.TryGetValue(tierID + 1, out BattlepassTier nextTier) ? nextTier.XP : tier.XP)) : 0);
+            int spaces = bp.CurrentTier > tierID ? 70 : (bp.CurrentTier == tierID ? Math.Min(70, bp.XP * 70 / (DB.BattlepassTiersSearchByID.TryGetValue(tierID + 1, out BattlepassTier nextTier) ? nextTier.XP : tier.XP)) : 0);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass Tier Fill {tierID}", spaces == 0 ? UIManager.VERY_SMALL_SQUARE : new string(UIManager.HAIRSPACE_SYMBOL_CHAR, spaces));
 
             // Setup top reward (free reward)
-            var isRewardClaimed = bp.ClaimedFreeRewards.Contains(tierID);
+            bool isRewardClaimed = bp.ClaimedFreeRewards.Contains(tierID);
             if (tier.FreeReward != null && TryGetBattlepassRewardInfo(tier.FreeReward, out string topRewardName, out string topRewardImage, out ERarity topRewardRarity))
             {
                 EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass T IMAGE {tierID}", topRewardImage);
@@ -5734,7 +5733,7 @@ namespace UnturnedBlackout.Instances
                 return;
             }
 
-            var reward = isTop ? tier.FreeReward : tier.PremiumReward;
+            Reward reward = isTop ? tier.FreeReward : tier.PremiumReward;
             if (reward != null && TryGetBattlepassRewardInfo(reward, out _, out string rewardImage, out _))
             {
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass IMAGE", reward.RewardType != ERewardType.Card);
@@ -5867,7 +5866,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Inventory Next BUTTON", UnboxInventoryPages.Count > 1);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Inventory Previous BUTTON", UnboxInventoryPages.Count > 1);
 
-            if (!UnboxInventoryPages.TryGetValue(1, out var firstPage))
+            if (!UnboxInventoryPages.TryGetValue(1, out PageUnboxInventory firstPage))
             {
                 Logging.Debug($"Unable to find first page of unboxing inventory for {Player.CharacterName}");
                 for (int i = 0; i <= MAX_CASES_PER_INVENTORY_PAGE; i++)
@@ -5904,7 +5903,7 @@ namespace UnturnedBlackout.Instances
 
         public void ForwardUnboxingInventoryPage()
         {
-            if (!UnboxInventoryPages.TryGetValue(UnboxingPageID + 1, out var nextPage) && !UnboxInventoryPages.TryGetValue(1, out nextPage))
+            if (!UnboxInventoryPages.TryGetValue(UnboxingPageID + 1, out PageUnboxInventory nextPage) && !UnboxInventoryPages.TryGetValue(1, out nextPage))
             {
                 Logging.Debug($"Unable to find the next or first unboxing inventory page for {Player.CharacterName}");
                 ShowUnboxingInventoryPage();
@@ -5916,7 +5915,7 @@ namespace UnturnedBlackout.Instances
 
         public void BackwardUnboxingInventoryPage()
         {
-            if (!UnboxInventoryPages.TryGetValue(UnboxingPageID - 1, out var nextPage) && !UnboxInventoryPages.TryGetValue(UnboxInventoryPages.Keys.Max(), out nextPage))
+            if (!UnboxInventoryPages.TryGetValue(UnboxingPageID - 1, out PageUnboxInventory nextPage) && !UnboxInventoryPages.TryGetValue(UnboxInventoryPages.Keys.Max(), out nextPage))
             {
                 Logging.Debug($"Unable to find the previous or max unboxing inventory page for {Player.CharacterName}");
                 ShowUnboxingInventoryPage();
@@ -5928,7 +5927,7 @@ namespace UnturnedBlackout.Instances
 
         public void UnboxInventoryCase(int selected)
         {
-            if (!UnboxInventoryPages.TryGetValue(UnboxingPageID, out var page))
+            if (!UnboxInventoryPages.TryGetValue(UnboxingPageID, out PageUnboxInventory page))
             {
                 Logging.Debug($"Error finding the unbox inventory page with id {UnboxingPageID} for {Player.CharacterName}");
                 return;
@@ -5955,7 +5954,7 @@ namespace UnturnedBlackout.Instances
             int accumulatedProbability = 0;
             for (int i = 0; i < weights.Count; i++)
             {
-                var weight = weights[i];
+                (ECaseRarity, int) weight = weights[i];
                 Logging.Debug($"i: {i}, rarity: {weight.Item1}, weight: {weight.Item2}");
                 accumulatedProbability += weight.Item2;
                 Logging.Debug($"accumulated probability: {accumulatedProbability}, rand int: {randInt}");
@@ -5985,7 +5984,7 @@ namespace UnturnedBlackout.Instances
 
 
             int poolSize = 0;
-            foreach (var weight in @case.Case.Weights) poolSize += weight.Item2;
+            foreach ((ECaseRarity, int) weight in @case.Case.Weights) poolSize += weight.Item2;
 
             for (int i = 0; i <= MAX_ROLLING_CONTENT_PER_CASE; i++)
             {
@@ -5996,7 +5995,7 @@ namespace UnturnedBlackout.Instances
                     continue;
                 }
 
-                var caseRarity = CalculateCaseRarity(@case.Case.Weights, poolSize);
+                ECaseRarity caseRarity = CalculateCaseRarity(@case.Case.Weights, poolSize);
 
                 switch (caseRarity)
                 {
@@ -6021,14 +6020,14 @@ namespace UnturnedBlackout.Instances
                             break;
                         }
 
-                        var randomSkin = raritySkins[UnityEngine.Random.Range(0, raritySkins.Count)];
+                        GunSkin randomSkin = raritySkins[UnityEngine.Random.Range(0, raritySkins.Count)];
 
                         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Rolling IMAGE {i}", randomSkin.IconLink);
                         SendRarity("SERVER Unbox Content Rolling", randomSkin.SkinRarity, i);
                         continue;
                 }
 
-                var randomS = @case.Case.AvailableSkins[UnityEngine.Random.Range(0, @case.Case.AvailableSkins.Count)];
+                GunSkin randomS = @case.Case.AvailableSkins[UnityEngine.Random.Range(0, @case.Case.AvailableSkins.Count)];
 
                 EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Rolling IMAGE {i}", randomS.IconLink);
                 SendRarity("SERVER Unbox Content Rolling", randomS.SkinRarity, i);
@@ -6077,7 +6076,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Buy Next BUTTON", UnboxStorePages.Count > 1);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Buy Previous BUTTON", UnboxStorePages.Count > 1);
 
-            if (!UnboxStorePages.TryGetValue(1, out var firstPage))
+            if (!UnboxStorePages.TryGetValue(1, out PageUnboxStore firstPage))
             {
                 Logging.Debug($"Unable to find the first unboxing store page for {Player.CharacterName}");
                 for (int i = 0; i <= MAX_CASES_PER_STORE_PAGE; i++)
@@ -6122,7 +6121,7 @@ namespace UnturnedBlackout.Instances
 
         public void ForwardUnboxingStorePage()
         {
-            if (!UnboxStorePages.TryGetValue(UnboxingPageID + 1, out var nextPage) && !UnboxStorePages.TryGetValue(1, out nextPage))
+            if (!UnboxStorePages.TryGetValue(UnboxingPageID + 1, out PageUnboxStore nextPage) && !UnboxStorePages.TryGetValue(1, out nextPage))
             {
                 Logging.Debug($"Unable to find the next or first page for unboxing store for {Player.CharacterName}");
                 ShowUnboxingStorePage();
@@ -6134,7 +6133,7 @@ namespace UnturnedBlackout.Instances
 
         public void BackwardUnboxingStorePage()
         {
-            if (!UnboxStorePages.TryGetValue(UnboxingPageID - 1, out var nextPage) && !UnboxStorePages.TryGetValue(UnboxStorePages.Keys.Max(), out nextPage))
+            if (!UnboxStorePages.TryGetValue(UnboxingPageID - 1, out PageUnboxStore nextPage) && !UnboxStorePages.TryGetValue(UnboxStorePages.Keys.Max(), out nextPage))
             {
                 Logging.Debug($"Unable to find previous or max page for unboxing store for {Player.CharacterName}");
                 ShowUnboxingStorePage();
@@ -6146,7 +6145,7 @@ namespace UnturnedBlackout.Instances
 
         public void SelectedUnboxingStoreCase(int selected)
         {
-            if (!UnboxStorePages.TryGetValue(UnboxingPageID, out var page))
+            if (!UnboxStorePages.TryGetValue(UnboxingPageID, out PageUnboxStore page))
             {
                 Logging.Debug($"Unable to find the selected page with id {UnboxingPageID} for {Player.CharacterName}");
                 return;
@@ -6184,7 +6183,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Crate EXAMPLE Drop ANIM", true);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Description TEXT", @case.CaseName);
 
-            var skins = @case.AvailableSkins.Where(k => k.MaxAmount == 0).ToList();
+            List<GunSkin> skins = @case.AvailableSkins.Where(k => k.MaxAmount == 0).ToList();
             for (int i = 0; i <= MAX_PREVIEW_CONTENT_PER_CASE; i++)
             {
                 if (i == 18 && @case.Weights.Exists(k => k.Item1 == ECaseRarity.GLOVE || k.Item1 == ECaseRarity.LIMITED_GLOVE))
@@ -6213,7 +6212,7 @@ namespace UnturnedBlackout.Instances
                     continue;
                 }
 
-                var skin = skins[i];
+                GunSkin skin = skins[i];
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content BUTTON {i}", true);
                 EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content IMAGE {i}", skin.IconLink);
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Name TEXT {i}", skin.SkinName);
@@ -6243,7 +6242,7 @@ namespace UnturnedBlackout.Instances
                 return;
             }
 
-            var buyPrice = @case.GetBuyPrice(SelectedCaseBuyMethod);
+            int buyPrice = @case.GetBuyPrice(SelectedCaseBuyMethod);
             if (buyPrice > PlayerData.GetCurrency(SelectedCaseBuyMethod))
             {
                 SendNotEnoughCurrencyModal(SelectedCaseBuyMethod);
@@ -6341,9 +6340,9 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary", true);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary XP Toggle", true);
             // Set the current level, xp and next level xp to animate the bar
-            var currentLevel = summary.StartingLevel;
-            var currentXP = summary.StartingXP;
-            var nextLevelXP = DB.Levels.TryGetValue(currentLevel + 1, out XPLevel level) ? level.XPNeeded : 0;
+            int currentLevel = summary.StartingLevel;
+            int currentXP = summary.StartingXP;
+            int nextLevelXP = DB.Levels.TryGetValue(currentLevel + 1, out XPLevel level) ? level.XPNeeded : 0;
 
             // Send the filled amount of bar and set the toggle to true and animate the text
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP 1 TEXT", $"Match <color=#AD6816>{summary.MatchXP}</color> XP");
@@ -6355,7 +6354,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Level 1 TEXT", nextLevelXP == 0 ? "MAX" : (currentLevel + 1).ToString("D3"));
             // Animate Match XP
 
-            var boldSpaces = currentXP == 0 ? 1 : Math.Max(1, Math.Min(MAX_SPACES_MATCH_END_SUMMARY, currentXP * MAX_SPACES_MATCH_END_SUMMARY / (nextLevelXP == 0 ? 1 : nextLevelXP)));
+            int boldSpaces = currentXP == 0 ? 1 : Math.Max(1, Math.Min(MAX_SPACES_MATCH_END_SUMMARY, currentXP * MAX_SPACES_MATCH_END_SUMMARY / (nextLevelXP == 0 ? 1 : nextLevelXP)));
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", UIManager.HAIRSPACE_SYMBOL_STRING);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 0", new string(' ', boldSpaces));
             yield return new WaitForSeconds(0.7f);
@@ -6363,7 +6362,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP 0 TEXT", $"+{summary.MatchXP} XP");
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary XP 0 Toggle", true);
 
-            var b = summary.MatchXP;
+            int b = summary.MatchXP;
             while (nextLevelXP != 0 && (currentXP + b) >= nextLevelXP)
             {
                 // Level has changed
@@ -6385,7 +6384,7 @@ namespace UnturnedBlackout.Instances
                 boldSpaces = 0;
             }
 
-            var highlightedSpaces = Math.Max(1, Math.Min(MAX_SPACES_MATCH_END_SUMMARY - boldSpaces, b * (MAX_SPACES_MATCH_END_SUMMARY - boldSpaces) / (nextLevelXP - currentXP)));
+            int highlightedSpaces = Math.Max(1, Math.Min(MAX_SPACES_MATCH_END_SUMMARY - boldSpaces, b * (MAX_SPACES_MATCH_END_SUMMARY - boldSpaces) / (nextLevelXP - currentXP)));
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", new string(' ', highlightedSpaces));
             currentXP += b;
             yield return new WaitForSeconds(0.7f);

@@ -33,21 +33,21 @@ namespace UnturnedBlackout.FileReaders
         {
             try
             {
-                var file = LoadURL();
+                string file = LoadURL();
                 if (string.IsNullOrEmpty(file))
                 {
                     if (!File.Exists(FilePath))
                         Save();
 
-                    using var reader = File.OpenRead(FilePath);
-                    var deserializedData = Serializer.Deserialize(reader);
+                    using FileStream reader = File.OpenRead(FilePath);
+                    object deserializedData = Serializer.Deserialize(reader);
                     if (deserializedData is T t)
                         FileData = t;
                 }
                 else
                 {
-                    using var reader = new StringReader(file);
-                    var deserializedData = Serializer.Deserialize(reader);
+                    using StringReader reader = new(file);
+                    object deserializedData = Serializer.Deserialize(reader);
                     if (deserializedData is T t)
                         FileData = t;
                     Save();
@@ -63,7 +63,7 @@ namespace UnturnedBlackout.FileReaders
         {
             try
             {
-                using var wc = new HttpClient();
+                using HttpClient wc = new();
                 return Task.Run(async Task<string> () => await wc.GetStringAsync(URLPath)).Result;
             }
             catch (Exception ex)
@@ -77,12 +77,12 @@ namespace UnturnedBlackout.FileReaders
         {
             try
             {
-                var directoryName = Path.GetDirectoryName(FilePath);
+                string directoryName = Path.GetDirectoryName(FilePath);
 
                 if (!string.IsNullOrWhiteSpace(directoryName) && !Directory.Exists(directoryName))
                     Directory.CreateDirectory(directoryName);
 
-                using var writer = File.Open(FilePath, FileMode.Create);
+                using FileStream writer = File.Open(FilePath, FileMode.Create);
                 Serializer.Serialize(writer, FileData);
             }
             catch (Exception ex)

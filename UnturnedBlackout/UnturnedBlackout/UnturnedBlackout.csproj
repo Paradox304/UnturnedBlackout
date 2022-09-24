@@ -259,11 +259,9 @@
     <Compile Include="Managers\DataManager.cs" />
     <Compile Include="Managers\DiscordManager.cs" />
     <Compile Include="Managers\GameManager.cs" />
-    <Compile Include="Managers\HUDManager.cs" />
     <Compile Include="Managers\LoadoutManager.cs" />
     <Compile Include="Managers\QuestManager.cs" />
     <Compile Include="Managers\RewardManager.cs" />
-    <Compile Include="Managers\ServerManager.cs" />
     <Compile Include="Managers\UIManager.cs" />
     <Compile Include="Managers\UnboxManager.cs" />
     <Compile Include="Models\Animation\AnimationItemUnlock.cs" />

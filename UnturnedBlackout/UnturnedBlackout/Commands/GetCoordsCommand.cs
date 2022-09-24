@@ -20,7 +20,7 @@ namespace UnturnedBlackout.Commands
 
         public void Execute(IRocketPlayer caller, string[] command)
         {
-            var player = caller as UnturnedPlayer;
+            UnturnedPlayer player = caller as UnturnedPlayer;
             Utility.Say(caller, $"X: {player.Position.x}, Y: {player.Position.z}, Z: {player.Position.z}");
         }
     }

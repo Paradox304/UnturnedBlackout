@@ -1,8 +1,5 @@
-﻿using Rocket.Core.Logging;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using UnturnedBlackout.Database.Data;
 using UnturnedBlackout.Enums;
@@ -14,9 +11,9 @@ namespace UnturnedBlackout.Managers
     {
         public void CheckQuest(GamePlayer player, EQuestType questType, Dictionary<EQuestCondition, int> questConditions)
         {
-            var steamID = player.Player.CSteamID;
-            var db = Plugin.Instance.DB;
-            var data = player.Data;
+            Steamworks.CSteamID steamID = player.Player.CSteamID;
+            DatabaseManager db = Plugin.Instance.DB;
+            PlayerData data = player.Data;
 
             Task.Run(() =>
             {
@@ -28,11 +25,11 @@ namespace UnturnedBlackout.Managers
                 return;
             }
 
-            var pendingQuestsProgression = new List<PlayerQuest>();
-            foreach (var quest in quests.Where(k => k.Amount < k.Quest.TargetAmount))
+            List<PlayerQuest> pendingQuestsProgression = new();
+            foreach (PlayerQuest quest in quests.Where(k => k.Amount < k.Quest.TargetAmount))
             {
-                var conditionsMet = true;
-                foreach (var condition in quest.Quest.QuestConditions)
+                bool conditionsMet = true;
+                foreach (KeyValuePair<EQuestCondition, List<int>> condition in quest.Quest.QuestConditions)
                 {
                     if (!questConditions.TryGetValue(condition.Key, out int conditionValue))
                     {
@@ -40,7 +37,7 @@ namespace UnturnedBlackout.Managers
                         break;
                     }
 
-                    var isConditionMinimum = IsConditionMinimum(condition.Key);
+                    bool isConditionMinimum = IsConditionMinimum(condition.Key);
                     if (!condition.Value.Contains(conditionValue) && !condition.Value.Exists(k => isConditionMinimum && conditionValue >= k) && !condition.Value.Contains(-1))
                     {
                         conditionsMet = false;
@@ -81,7 +78,7 @@ namespace UnturnedBlackout.Managers
 
         public bool IsConditionMinimum(EQuestCondition condition)
         {
-            var conditionInt = (int)condition;
+            int conditionInt = (int)condition;
             if (conditionInt >= 9 && conditionInt <= 12)
             {
                 return true;

@@ -40,7 +40,7 @@ namespace UnturnedBlackout.Database.Base
                 throw new ArgumentException("IP is not correct");
             }
 
-            var ipBytes = ipAddress.GetAddressBytes();
+            byte[] ipBytes = ipAddress.GetAddressBytes();
             if (BitConverter.IsLittleEndian)
             {
                 Array.Reverse(ipBytes);

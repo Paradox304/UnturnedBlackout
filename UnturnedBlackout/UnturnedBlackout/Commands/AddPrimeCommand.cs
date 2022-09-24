@@ -1,7 +1,6 @@
 ﻿using Rocket.API;
 using Steamworks;
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace UnturnedBlackout.Commands
@@ -34,7 +33,7 @@ namespace UnturnedBlackout.Commands
                 return;
             }
 
-            var steamID = new CSteamID(steamid);
+            CSteamID steamID = new(steamid);
 
             if (!int.TryParse(command[1].ToString(), out int days))
             {

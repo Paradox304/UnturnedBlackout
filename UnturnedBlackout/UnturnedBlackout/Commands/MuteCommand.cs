@@ -6,7 +6,6 @@ using SDG.Unturned;
 using Steamworks;
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
 using UnturnedBlackout.Managers;
 using UnturnedBlackout.Models.Webhook;
@@ -35,7 +34,7 @@ namespace UnturnedBlackout.Commands
                 return;
             }
 
-            var steamID = CSteamID.Nil;
+            CSteamID steamID = CSteamID.Nil;
             if (!ulong.TryParse(command[0], out ulong steamid))
             {
                 steamID = PlayerTool.getPlayer(command[0])?.channel?.owner?.playerID?.steamID ?? CSteamID.Nil;
@@ -70,7 +69,7 @@ namespace UnturnedBlackout.Commands
                     return;
                 }
 
-                var expiry = DateTimeOffset.UtcNow.AddSeconds(seconds);
+                DateTimeOffset expiry = DateTimeOffset.UtcNow.AddSeconds(seconds);
                 await Plugin.Instance.DB.ChangePlayerMutedAsync(steamID, true);
                 await Plugin.Instance.DB.ChangePlayerMuteExpiryAsync(steamID, expiry);
 

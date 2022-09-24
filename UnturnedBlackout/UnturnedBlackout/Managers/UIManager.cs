@@ -121,7 +121,7 @@ namespace UnturnedBlackout.Managers
         public const char HAIRSPACE_SYMBOL_CHAR = ' ';
 
         public const string VERY_SMALL_SQUARE = "⬞";
-        
+
         public UIManager()
         {
             KillFeedIcons = Config.Killfeed.FileData.KillFeedIcons.ToDictionary(k => k.WeaponID);
@@ -167,7 +167,7 @@ namespace UnturnedBlackout.Managers
             UIHandlers.RemoveAll(k => k.SteamID == player.CSteamID);
             UIHandlersLookup.Remove(player.CSteamID);
 
-            var handler = new UIHandler(player);
+            UIHandler handler = new(player);
             UIHandlersLookup.Add(player.CSteamID, handler);
             UIHandlers.Add(handler);
         }
@@ -325,7 +325,7 @@ namespace UnturnedBlackout.Managers
                     }
                 case EAnimationType.GunLevelUp:
                     {
-                        var gun = animationInfo.Info as AnimationItemUnlock;
+                        AnimationItemUnlock gun = animationInfo.Info as AnimationItemUnlock;
                         EffectManager.sendUIEffect(GUN_LEVEL_UP_ID, GUN_LEVEL_UP_KEY, player.TransportConnection, true);
                         EffectManager.sendUIEffectImageURL(GUN_LEVEL_UP_KEY, player.TransportConnection, true, "LevelUpIcon", gun.ItemIcon);
                         EffectManager.sendUIEffectText(GUN_LEVEL_UP_KEY, player.TransportConnection, true, "LevelUpDesc", $"Level {gun.ItemType}");
@@ -334,21 +334,21 @@ namespace UnturnedBlackout.Managers
                     }
                 case EAnimationType.QuestCompletion:
                     {
-                        var quest = animationInfo.Info as Quest;
+                        Quest quest = animationInfo.Info as Quest;
                         EffectManager.sendUIEffect(QUEST_COMPLETION_ID, QUEST_COMPLETION_KEY, player.TransportConnection, true);
                         EffectManager.sendUIEffectText(QUEST_COMPLETION_KEY, player.TransportConnection, true, "LevelUpDesc", quest.QuestTitle);
                         break;
                     }
                 case EAnimationType.BattlepassTierCompletion:
                     {
-                        var tier = animationInfo.Info as BattlepassTier;
+                        BattlepassTier tier = animationInfo.Info as BattlepassTier;
                         EffectManager.sendUIEffect(BP_TIER_COMPLETION_ID, BP_TIER_COMPLETION_KEY, player.TransportConnection, true);
                         EffectManager.sendUIEffectText(BP_TIER_COMPLETION_KEY, player.TransportConnection, true, "LevelUpDesc", tier.TierID.ToString());
                         break;
                     }
                 case EAnimationType.ItemUnlock:
                     {
-                        var itemUnlock = animationInfo.Info as AnimationItemUnlock;
+                        AnimationItemUnlock itemUnlock = animationInfo.Info as AnimationItemUnlock;
                         EffectManager.sendUIEffect(ITEM_UNLOCK_ID, ITEM_UNLOCK_KEY, player.TransportConnection, true);
                         EffectManager.sendUIEffectImageURL(ITEM_UNLOCK_KEY, player.TransportConnection, true, "LevelUpIcon", itemUnlock.ItemIcon);
                         EffectManager.sendUIEffectText(ITEM_UNLOCK_KEY, player.TransportConnection, true, "LevelUpTxt", "UNLOCKED");
@@ -357,7 +357,7 @@ namespace UnturnedBlackout.Managers
                     }
                 case EAnimationType.AchievementCompletion:
                     {
-                        var achievement = animationInfo.Info as AchievementTier;
+                        AchievementTier achievement = animationInfo.Info as AchievementTier;
                         EffectManager.sendUIEffect(ACHIEVEMENT_COMPLETION_ID, ACHIEVEMENT_COMPLETION_KEY, player.TransportConnection, true);
                         EffectManager.sendUIEffectImageURL(ACHIEVEMENT_COMPLETION_KEY, player.TransportConnection, true, "LevelUpIcon", achievement.TierPrevLarge);
                         EffectManager.sendUIEffectText(ACHIEVEMENT_COMPLETION_KEY, player.TransportConnection, true, "LevelUpTxt", achievement.TierTitle);
@@ -366,7 +366,7 @@ namespace UnturnedBlackout.Managers
                     }
                 case EAnimationType.KillstreakAvailable:
                     {
-                        var killstreak = animationInfo.Info as Killstreak;
+                        Killstreak killstreak = animationInfo.Info as Killstreak;
                         EffectManager.sendUIEffect(KILLSTREAK_AVAILABLE_ID, KILLSTREAK_AVAILABLE_KEY, player.TransportConnection, true);
                         EffectManager.sendUIEffectImageURL(KILLSTREAK_AVAILABLE_KEY, player.TransportConnection, true, "LevelUpIcon", killstreak.IconLink);
                         EffectManager.sendUIEffectText(KILLSTREAK_AVAILABLE_KEY, player.TransportConnection, true, "LevelUpTxt", "KILLSTREAK AVAILABLE");
@@ -401,8 +401,8 @@ namespace UnturnedBlackout.Managers
                     return;
             }
 
-            var feedText = "";
-            foreach (var feed in killfeed)
+            string feedText = "";
+            foreach (Feed feed in killfeed)
             {
                 feedText += feed.KillMessage + "\n";
             }
@@ -410,10 +410,10 @@ namespace UnturnedBlackout.Managers
             {
                 feedText = $"<size={Config.Base.FileData.KillFeedFont}>{feedText}</size>";
             }
-            foreach (var player in players)
+            foreach (GamePlayer player in players)
             {
-                var playerName = player.Player.CharacterName;
-                var updatedText = new Regex($@"<color=[^>]*>{playerName.Replace("[", @"\[").Replace("]", @"\]").Replace("(", @"\(").Replace(")", @"\)").Replace("|", @"\|")}<\/color>", RegexOptions.IgnoreCase).Replace(feedText, $"<color={Config.Base.FileData.PlayerColorHexCode}>{playerName}</color>");
+                string playerName = player.Player.CharacterName;
+                string updatedText = new Regex($@"<color=[^>]*>{playerName.Replace("[", @"\[").Replace("]", @"\]").Replace("(", @"\(").Replace(")", @"\)").Replace("|", @"\|")}<\/color>", RegexOptions.IgnoreCase).Replace(feedText, $"<color={Config.Base.FileData.PlayerColorHexCode}>{playerName}</color>");
                 EffectManager.sendUIEffectText(key, player.TransportConnection, true, "Killfeed", updatedText);
             }
         }
@@ -427,8 +427,8 @@ namespace UnturnedBlackout.Managers
 
         public void UpdateVoiceChatUI(List<GamePlayer> players, List<GamePlayer> playersTalking)
         {
-            var voiceChatText = "";
-            foreach (var talking in playersTalking)
+            string voiceChatText = "";
+            foreach (GamePlayer talking in playersTalking)
             {
                 voiceChatText += $" {talking.Player.CharacterName.ToUnrich()} \n";
             }
@@ -436,7 +436,7 @@ namespace UnturnedBlackout.Managers
             {
                 voiceChatText = $"<size={Config.Base.FileData.VoiceChatFont}>{voiceChatText}</size>";
             }
-            foreach (var player in players)
+            foreach (GamePlayer player in players)
             {
                 EffectManager.sendUIEffectText(VOICE_CHAT_KEY, player.TransportConnection, true, "VoiceChatUsers", voiceChatText);
             }
@@ -494,7 +494,7 @@ namespace UnturnedBlackout.Managers
 
         public void SendLoadingUI(UnturnedPlayer player, bool isMatch, EGameType gameMode, ArenaLocation location, string loadingText = "LOADING...")
         {
-            var transportConnection = player.Player.channel.owner.transportConnection;
+            ITransportConnection transportConnection = player.Player.channel.owner.transportConnection;
 
             player.Player.enablePluginWidgetFlag(EPluginWidgetFlags.Modal);
 
@@ -505,7 +505,7 @@ namespace UnturnedBlackout.Managers
 
             if (isMatch)
             {
-                var gameModeOption = Config.Gamemode.FileData.GamemodeOptions.FirstOrDefault(k => k.GameType == gameMode);
+                GamemodeOption gameModeOption = Config.Gamemode.FileData.GamemodeOptions.FirstOrDefault(k => k.GameType == gameMode);
                 if (gameModeOption == null)
                 {
                     return;
@@ -532,7 +532,7 @@ namespace UnturnedBlackout.Managers
 
         public void UpdateLoadingBar(UnturnedPlayer player, string bar, string loadingText = "LOADING...")
         {
-            var transportConnection = player.Player.channel.owner.transportConnection;
+            ITransportConnection transportConnection = player.Player.channel.owner.transportConnection;
             EffectManager.sendUIEffectText(LOADING_UI_KEY, transportConnection, true, "LOADING Bar TEXT", loadingText);
             EffectManager.sendUIEffectText(LOADING_UI_KEY, transportConnection, true, "LOADING Bar Fill", bar);
         }
@@ -559,7 +559,7 @@ namespace UnturnedBlackout.Managers
 
         public IEnumerator SendTip(UnturnedPlayer player)
         {
-            var db = Plugin.Instance.DB;
+            DatabaseManager db = Plugin.Instance.DB;
             while (true)
             {
                 UpdateLoadingTip(player, db.ServerOptions.GameTips[UnityEngine.Random.Range(0, db.ServerOptions.GameTips.Count)]);
@@ -615,7 +615,7 @@ namespace UnturnedBlackout.Managers
 
         public void SendGamemodePopup(GamePlayer player, EGameType gameMode)
         {
-            var option = Config.Gamemode.FileData.GamemodeOptions.FirstOrDefault(k => k.GameType == gameMode);
+            GamemodeOption option = Config.Gamemode.FileData.GamemodeOptions.FirstOrDefault(k => k.GameType == gameMode);
             if (option == null)
             {
                 return;
@@ -632,9 +632,9 @@ namespace UnturnedBlackout.Managers
         public void SendQuestProgression(GamePlayer player, List<PlayerQuest> questsUpdate)
         {
             EffectManager.sendUIEffect(QUEST_PROGRESSION_ID, QUEST_PROGRESSION_KEY, player.TransportConnection, true);
-            foreach (var quest in questsUpdate)
+            foreach (PlayerQuest quest in questsUpdate)
             {
-                var i = (int)quest.Quest.QuestTier;
+                int i = (int)quest.Quest.QuestTier;
                 EffectManager.sendUIEffectVisibility(QUEST_PROGRESSION_KEY, player.TransportConnection, true, $"QUEST Item {i}", true);
                 EffectManager.sendUIEffectText(QUEST_PROGRESSION_KEY, player.TransportConnection, true, $"QUEST Description {i} TEXT", quest.Quest.QuestDesc);
                 EffectManager.sendUIEffectText(QUEST_PROGRESSION_KEY, player.TransportConnection, true, $"QUEST Target {i} TEXT", $"{quest.Amount} / {quest.Quest.TargetAmount}");
@@ -646,7 +646,7 @@ namespace UnturnedBlackout.Managers
 
         public IEnumerator SetupRoundEndDrops(List<GamePlayer> players, List<(GamePlayer, Case)> roundEndCases, int v)
         {
-            foreach (var player in players)
+            foreach (GamePlayer player in players)
             {
                 EffectManager.sendUIEffectVisibility(PRE_ENDING_UI_KEY, player.TransportConnection, true, $"Drops{v}", true);
             }
@@ -654,8 +654,8 @@ namespace UnturnedBlackout.Managers
             for (int i = 0; i < roundEndCases.Count; i++)
             {
                 yield return new WaitForSeconds(1f);
-                var roundEndCase = roundEndCases[i];
-                foreach (var player in players)
+                (GamePlayer, Case) roundEndCase = roundEndCases[i];
+                foreach (GamePlayer player in players)
                 {
                     EffectManager.sendUIEffectVisibility(PRE_ENDING_UI_KEY, player.TransportConnection, true, $"SERVER Scoreboard{v} Drop {i}", true);
                     EffectManager.sendUIEffectVisibility(PRE_ENDING_UI_KEY, player.TransportConnection, true, $"SERVER Scoreboard{v} Drop {roundEndCase.Item2.CaseRarity} {i}", true);
@@ -680,7 +680,7 @@ namespace UnturnedBlackout.Managers
                     continue;
                 }
 
-                var killstreak = player.OrderedKillstreaks[i];
+                LoadoutKillstreak killstreak = player.OrderedKillstreaks[i];
                 EffectManager.sendUIEffectImageURL(KILLSTREAK_KEY, player.TransportConnection, true, $"KillstreakIcon{i}", killstreak.Killstreak.IconLink);
             }
         }
@@ -690,17 +690,17 @@ namespace UnturnedBlackout.Managers
             int previousKillstreakRequirement = 0;
             for (int i = 0; i < player.OrderedKillstreaks.Count; i++)
             {
-                var killstreak = player.OrderedKillstreaks[i];
+                LoadoutKillstreak killstreak = player.OrderedKillstreaks[i];
                 if (previousKillstreakRequirement > currentKillstreak)
                 {
                     EffectManager.sendUIEffectText(KILLSTREAK_KEY, player.TransportConnection, true, $"BarFill{i}", VERY_SMALL_SQUARE);
                     continue;
                 }
-                var spaces = Math.Min(MAX_SPACES_KILLSTREAK, Math.Max(0, (currentKillstreak - previousKillstreakRequirement) * MAX_SPACES_KILLSTREAK / (killstreak.Killstreak.KillstreakRequired - previousKillstreakRequirement)));
+                int spaces = Math.Min(MAX_SPACES_KILLSTREAK, Math.Max(0, (currentKillstreak - previousKillstreakRequirement) * MAX_SPACES_KILLSTREAK / (killstreak.Killstreak.KillstreakRequired - previousKillstreakRequirement)));
                 //if (spaces == 0)
                 //{
-                    //EffectManager.sendUIEffectVisibility(KILLSTREAK_KEY, player.TransportConnection, true, $"BarEmptier{i}", true);
-                    //continue;
+                //EffectManager.sendUIEffectVisibility(KILLSTREAK_KEY, player.TransportConnection, true, $"BarEmptier{i}", true);
+                //continue;
                 //}
 
                 EffectManager.sendUIEffectText(KILLSTREAK_KEY, player.TransportConnection, true, $"BarFill{i}", spaces == 0 ? VERY_SMALL_SQUARE : new string(HAIRSPACE_SYMBOL_CHAR, spaces));
@@ -710,10 +710,10 @@ namespace UnturnedBlackout.Managers
 
         public void UpdateKillstreakReady(GamePlayer player, LoadoutKillstreak killstreak)
         {
-            var i = player.OrderedKillstreaks.IndexOf(killstreak);
+            int i = player.OrderedKillstreaks.IndexOf(killstreak);
             EffectManager.sendUIEffectVisibility(KILLSTREAK_KEY, player.TransportConnection, true, $"KillstreakReady{i}", player.AvailableKillstreaks[killstreak]);
         }
-        
+
         public void SendKillstreakTimer(GamePlayer player, int seconds)
         {
             EffectManager.sendUIEffectVisibility(KILLSTREAK_KEY, player.TransportConnection, true, "KillstreakTimer", true);
@@ -752,7 +752,7 @@ namespace UnturnedBlackout.Managers
 
             player.Player.inventory.items[2].resize(Config.Base.FileData.HandSlotWidth, Config.Base.FileData.HandSlotHeight);
 
-            var transportConnection = player.Player.channel.owner.transportConnection;
+            ITransportConnection transportConnection = player.Player.channel.owner.transportConnection;
 
             EffectManager.sendUIEffect(HUD_ID, HUD_KEY, transportConnection, true);
             RemoveGunUI(transportConnection);
@@ -773,7 +773,7 @@ namespace UnturnedBlackout.Managers
         {
             if (stamina > 50) return;
 
-            var gPlayer = Plugin.Instance.Game.GetGamePlayer(player);
+            GamePlayer gPlayer = Plugin.Instance.Game.GetGamePlayer(player);
             if (gPlayer.HasKillstreakActive && gPlayer.ActiveKillstreak.Killstreak.KillstreakInfo.HasInfiniteStamina)
             {
                 player.Player.life.serverModifyStamina(100);
@@ -782,15 +782,11 @@ namespace UnturnedBlackout.Managers
 
         private void OnStanceUpdated(Player player)
         {
-            var gPlayer = Plugin.Instance.Game.GetGamePlayer(player);
+            GamePlayer gPlayer = Plugin.Instance.Game.GetGamePlayer(player);
             if (gPlayer.CurrentGame != null)
             {
                 gPlayer.OnStanceChanged(player.stance.stance);
             }
-            /*if (Plugin.Instance.Game.TryGetCurrentGame(player.channel.owner.playerID.steamID, out Game game))
-            {
-                game.OnStanceChanged(player.stance);
-            }*/
         }
 
         private void OnDropItemRequested(PlayerInventory inventory, Item item, ref bool shouldAllow)
@@ -811,15 +807,15 @@ namespace UnturnedBlackout.Managers
 
         protected void OnEquipRequested(PlayerEquipment equipment, ItemJar jar, ItemAsset asset, ref bool shouldAllow)
         {
-            var player = Plugin.Instance.Game.GetGamePlayer(equipment.player);
-            var inv = player.Player.Player.inventory;
-            var game = player.CurrentGame;
+            GamePlayer player = Plugin.Instance.Game.GetGamePlayer(equipment.player);
+            PlayerInventory inv = player.Player.Player.inventory;
+            Game game = player.CurrentGame;
             if (game == null)
             {
                 return;
             }
 
-            var isCarryingFlag = game.IsPlayerCarryingFlag(player);
+            bool isCarryingFlag = game.IsPlayerCarryingFlag(player);
             if (isCarryingFlag && inv.getItem(0, 0) == jar)
             {
                 shouldAllow = false;
@@ -852,7 +848,7 @@ namespace UnturnedBlackout.Managers
 
             TaskDispatcher.QueueOnMainThread(() =>
             {
-                var connection = player.TransportConnection;
+                ITransportConnection connection = player.TransportConnection;
                 if (asset == null)
                 {
                     return;
@@ -862,7 +858,7 @@ namespace UnturnedBlackout.Managers
                     player.RemoveActiveKillstreak();
                 }
                 EffectManager.sendUIEffectText(HUD_KEY, connection, true, "WeaponName", asset.itemName);
-                var isPrimarySecondaryMelee = (asset.id == (player.ActiveLoadout.PrimarySkin?.SkinID ?? 0)) || (asset.id == (player.ActiveLoadout.Primary?.Gun?.GunID ?? 0)) || (asset.id == (player.ActiveLoadout.SecondarySkin?.SkinID ?? 0)) || (asset.id == (player.ActiveLoadout.Secondary?.Gun?.GunID ?? 0)) || (asset.id == (player.ActiveLoadout.Knife?.Knife?.KnifeID ?? 0));
+                bool isPrimarySecondaryMelee = (asset.id == (player.ActiveLoadout.PrimarySkin?.SkinID ?? 0)) || (asset.id == (player.ActiveLoadout.Primary?.Gun?.GunID ?? 0)) || (asset.id == (player.ActiveLoadout.SecondarySkin?.SkinID ?? 0)) || (asset.id == (player.ActiveLoadout.Secondary?.Gun?.GunID ?? 0)) || (asset.id == (player.ActiveLoadout.Knife?.Knife?.KnifeID ?? 0));
                 player.ForceEquip = !isPrimarySecondaryMelee;
                 if (!player.ForceEquip)
                 {
@@ -874,7 +870,7 @@ namespace UnturnedBlackout.Managers
                 if (asset.type == EItemType.GUN)
                 {
                     int currentAmmo = equipment.state[10];
-                    var ammo = 0;
+                    int ammo = 0;
 
                     if (Assets.find(EAssetType.ITEM, BitConverter.ToUInt16(equipment.state, 8)) is ItemMagazineAsset mAsset)
                     {
@@ -893,10 +889,10 @@ namespace UnturnedBlackout.Managers
                 game.PlayerEquipmentChanged(player);
             });
         }
-        
+
         private void OnDequipRequested(PlayerEquipment equipment, ref bool shouldAllow)
         {
-            var player = Plugin.Instance.Game.GetGamePlayer(equipment.player);
+            GamePlayer player = Plugin.Instance.Game.GetGamePlayer(equipment.player);
             Logging.Debug($"{player.Player.CharacterName} tryna dequip his gun with id {equipment.itemID}");
             if (player.HasKillstreakActive)
             {
@@ -907,7 +903,7 @@ namespace UnturnedBlackout.Managers
 
         public void OnUseableChanged(PlayerEquipment obj)
         {
-            var player = Plugin.Instance.Game.GetGamePlayer(obj.player);
+            GamePlayer player = Plugin.Instance.Game.GetGamePlayer(obj.player);
             if (player == null)
             {
                 return;
@@ -970,8 +966,8 @@ namespace UnturnedBlackout.Managers
 
         private void OnMagazineChanged(PlayerEquipment equipment, UseableGun gun, Item oldItem, ItemJar newItem, ref bool shouldAllow)
         {
-            var amount = newItem == null ? 0 : newItem.item.amount;
-            var transportConnection = equipment.player.channel.GetOwnerTransportConnection();
+            int amount = newItem == null ? 0 : newItem.item.amount;
+            ITransportConnection transportConnection = equipment.player.channel.GetOwnerTransportConnection();
 
             EffectManager.sendUIEffectText(HUD_KEY, transportConnection, true, "AmmoNum", amount.ToString());
             EffectManager.sendUIEffectText(HUD_KEY, transportConnection, true, "ReserveNum", $" / {amount}");
@@ -979,22 +975,22 @@ namespace UnturnedBlackout.Managers
 
         private void OnBulletShot(UseableGun gun, BulletInfo bullet)
         {
-            var ammo = gun.player.equipment.state[10];
-            var player = Plugin.Instance.Game.GetGamePlayer(gun.player);
+            byte ammo = gun.player.equipment.state[10];
+            GamePlayer player = Plugin.Instance.Game.GetGamePlayer(gun.player);
             EffectManager.sendUIEffectText(HUD_KEY, player.TransportConnection, true, "AmmoNum", ammo.ToString());
 
-            var info = player.ActiveKillstreak?.Killstreak?.KillstreakInfo;
+            Models.Data.KillstreakData info = player.ActiveKillstreak?.Killstreak?.KillstreakInfo;
             if (ammo == 0 && player.HasKillstreakActive && info.RemoveWhenAmmoEmpty)
             {
                 Logging.Debug($"Ammo is 0, {player.Player.CharacterName} has a killstreak active");
                 if (info.MagAmount > 0)
                 {
                     Logging.Debug($"Killstreak supposed to have mags, check if any mag is left with id {info.MagID}");
-                    var inv = gun.player.inventory;
-                    var itemCount = inv.items[2].items.Count;
+                    PlayerInventory inv = gun.player.inventory;
+                    int itemCount = inv.items[2].items.Count;
                     for (int i = itemCount - 1; i >= 0; i--)
                     {
-                        var item = inv.getItem(2, (byte)i);
+                        ItemJar item = inv.getItem(2, (byte)i);
                         if ((item?.item?.id ?? 0) == info.MagID)
                         {
                             return;
@@ -1008,20 +1004,20 @@ namespace UnturnedBlackout.Managers
 
         private void OnProjectileShot(UseableGun sender, GameObject projectile)
         {
-            var ammo = sender.player.equipment.state[10];
-            var player = Plugin.Instance.Game.GetGamePlayer(sender.player);
+            byte ammo = sender.player.equipment.state[10];
+            GamePlayer player = Plugin.Instance.Game.GetGamePlayer(sender.player);
             EffectManager.sendUIEffectText(HUD_KEY, player.TransportConnection, true, "AmmoNum", ammo.ToString());
 
-            var info = player.ActiveKillstreak?.Killstreak?.KillstreakInfo;
+            Models.Data.KillstreakData info = player.ActiveKillstreak?.Killstreak?.KillstreakInfo;
             if (ammo == 0 && player.HasKillstreakActive && info.RemoveWhenAmmoEmpty)
             {
                 if (info.MagAmount > 0)
                 {
-                    var inv = sender.player.inventory;
-                    var itemCount = inv.items[2].items.Count;
+                    PlayerInventory inv = sender.player.inventory;
+                    int itemCount = inv.items[2].items.Count;
                     for (int i = itemCount - 1; i >= 0; i--)
                     {
-                        var item = inv.getItem(2, (byte)i);
+                        ItemJar item = inv.getItem(2, (byte)i);
                         if ((item?.item?.id ?? 0) == info.MagID)
                         {
                             return;
@@ -1061,8 +1057,8 @@ namespace UnturnedBlackout.Managers
                 return;
             }
 
-            var firstPlayer = Players[0];
-            var secondPlayer = player;
+            FFAPlayer firstPlayer = Players[0];
+            FFAPlayer secondPlayer = player;
             if (player.GamePlayer.SteamID == firstPlayer.GamePlayer.SteamID)
             {
                 secondPlayer = Players.Count > 1 ? Players[1] : null;
@@ -1086,7 +1082,7 @@ namespace UnturnedBlackout.Managers
 
         public void SetupFFALeaderboard(List<FFAPlayer> players, ArenaLocation location, bool isPlaying, bool isHardcore)
         {
-            foreach (var player in players)
+            foreach (FFAPlayer player in players)
             {
                 SetupFFALeaderboard(player, players, location, isPlaying, isHardcore);
             }
@@ -1105,14 +1101,14 @@ namespace UnturnedBlackout.Managers
 
             for (int i = 0; i < players.Count; i++)
             {
-                var player = players[i];
+                FFAPlayer player = players[i];
                 bool isPlayer = player == ply;
-                var data = player.GamePlayer.Data;
+                PlayerData data = player.GamePlayer.Data;
 
-                var kills = (decimal)player.Kills;
-                var deaths = (decimal)player.Deaths;
+                decimal kills = player.Kills;
+                decimal deaths = player.Deaths;
 
-                var ratio = player.Deaths == 0 ? String.Format("{0:n}", kills) : String.Format("{0:n}", Math.Round(kills / deaths, 2));
+                string ratio = player.Deaths == 0 ? String.Format("{0:n}", kills) : String.Format("{0:n}", Math.Round(kills / deaths, 2));
 
                 EffectManager.sendUIEffectVisibility(PRE_ENDING_UI_KEY, ply.GamePlayer.TransportConnection, true, $"PlayerStats{i}", true);
                 EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, ply.GamePlayer.TransportConnection, true, $"NameTxt{i}", (data.HasPrime ? PRIME_SYMBOL : "") + data.SteamName.ToColor(isPlayer));
@@ -1174,7 +1170,7 @@ namespace UnturnedBlackout.Managers
         public void UpdateTDMScore(TDMPlayer player, TDMTeam changeTeam)
         {
             int index = player.Team.TeamID == (byte)ETeam.Blue ? 1 : 0;
-            var team = (ETeam)changeTeam.TeamID;
+            ETeam team = (ETeam)changeTeam.TeamID;
             int spaces = changeTeam.Score * MAX_SPACES_TDM_SCORE / Config.TDM.FileData.ScoreLimit;
 
             EffectManager.sendUIEffectText(TDM_KEY, player.GamePlayer.TransportConnection, true, $"{team}Num{index}", changeTeam.Score.ToString());
@@ -1183,7 +1179,7 @@ namespace UnturnedBlackout.Managers
 
         public void SetupTDMLeaderboard(List<TDMPlayer> players, ArenaLocation location, TDMTeam wonTeam, TDMTeam blueTeam, TDMTeam redTeam, bool isPlaying, bool isHardcore)
         {
-            foreach (var player in players)
+            foreach (TDMPlayer player in players)
             {
                 SetupTDMLeaderboard(player, players, location, wonTeam, blueTeam, redTeam, isPlaying, isHardcore);
             }
@@ -1191,8 +1187,8 @@ namespace UnturnedBlackout.Managers
 
         public void SetupTDMLeaderboard(TDMPlayer player, List<TDMPlayer> players, ArenaLocation location, TDMTeam wonTeam, TDMTeam blueTeam, TDMTeam redTeam, bool isPlaying, bool isHardcore)
         {
-            var bluePlayers = players.Where(k => k.Team.TeamID == (byte)ETeam.Blue).ToList();
-            var redPlayers = players.Where(k => k.Team.TeamID == (byte)ETeam.Red).ToList();
+            List<TDMPlayer> bluePlayers = players.Where(k => k.Team.TeamID == (byte)ETeam.Blue).ToList();
+            List<TDMPlayer> redPlayers = players.Where(k => k.Team.TeamID == (byte)ETeam.Red).ToList();
 
             EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "MatchResult0", Plugin.Instance.Translate(player.Team == wonTeam ? (isPlaying ? "Winning_Text" : "Victory_Text") : (isPlaying ? "Losing_Text" : "Defeat_Text")).ToRich());
             EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "MapName0", location.LocationName.ToUpper());
@@ -1210,14 +1206,14 @@ namespace UnturnedBlackout.Managers
 
             for (int i = 0; i < bluePlayers.Count; i++)
             {
-                var ply = bluePlayers[i];
+                TDMPlayer ply = bluePlayers[i];
                 bool isPlayer = player == ply;
-                var data = ply.GamePlayer.Data;
+                PlayerData data = ply.GamePlayer.Data;
 
-                var kills = (decimal)ply.Kills;
-                var deaths = (decimal)ply.Deaths;
+                decimal kills = ply.Kills;
+                decimal deaths = ply.Deaths;
 
-                var ratio = ply.Deaths == 0 ? String.Format("{0:n}", kills) : String.Format("{0:n}", Math.Round(kills / deaths, 2));
+                string ratio = ply.Deaths == 0 ? String.Format("{0:n}", kills) : String.Format("{0:n}", Math.Round(kills / deaths, 2));
 
                 EffectManager.sendUIEffectVisibility(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, $"PlayerStats{i}B0", true);
                 EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, $"NameTxt{i}B0", (data.HasPrime ? PRIME_SYMBOL : "") + data.SteamName.ToColor(isPlayer));
@@ -1232,14 +1228,14 @@ namespace UnturnedBlackout.Managers
 
             for (int i = 0; i < redPlayers.Count; i++)
             {
-                var ply = redPlayers[i];
+                TDMPlayer ply = redPlayers[i];
                 bool isPlayer = player == ply;
-                var data = ply.GamePlayer.Data;
+                PlayerData data = ply.GamePlayer.Data;
 
-                var kills = (decimal)ply.Kills;
-                var deaths = (decimal)ply.Deaths;
+                decimal kills = ply.Kills;
+                decimal deaths = ply.Deaths;
 
-                var ratio = ply.Deaths == 0 ? String.Format("{0:n}", kills) : String.Format("{0:n}", Math.Round(kills / deaths, 2));
+                string ratio = ply.Deaths == 0 ? String.Format("{0:n}", kills) : String.Format("{0:n}", Math.Round(kills / deaths, 2));
 
                 EffectManager.sendUIEffectVisibility(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, $"PlayerStats{i}R0", true);
                 EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, $"NameTxt{i}R0", (data.HasPrime ? PRIME_SYMBOL : "") + data.SteamName.ToColor(isPlayer));
@@ -1301,7 +1297,7 @@ namespace UnturnedBlackout.Managers
         public void UpdateKCScore(KCPlayer player, KCTeam changeTeam)
         {
             int index = player.Team.TeamID == (byte)ETeam.Blue ? 1 : 0;
-            var team = (ETeam)changeTeam.TeamID;
+            ETeam team = (ETeam)changeTeam.TeamID;
             int spaces = changeTeam.Score * MAX_SPACES_TDM_SCORE / Config.KC.FileData.ScoreLimit;
 
             EffectManager.sendUIEffectText(KC_KEY, player.GamePlayer.TransportConnection, true, $"{team}Num{index}", changeTeam.Score.ToString());
@@ -1310,7 +1306,7 @@ namespace UnturnedBlackout.Managers
 
         public void SetupKCLeaderboard(List<KCPlayer> players, ArenaLocation location, KCTeam wonTeam, KCTeam blueTeam, KCTeam redTeam, bool isPlaying, bool isHardcore)
         {
-            foreach (var player in players)
+            foreach (KCPlayer player in players)
             {
                 SetupKCLeaderboard(player, players, location, wonTeam, blueTeam, redTeam, isPlaying, isHardcore);
             }
@@ -1318,8 +1314,8 @@ namespace UnturnedBlackout.Managers
 
         public void SetupKCLeaderboard(KCPlayer player, List<KCPlayer> players, ArenaLocation location, KCTeam wonTeam, KCTeam blueTeam, KCTeam redTeam, bool isPlaying, bool isHardcore)
         {
-            var bluePlayers = players.Where(k => k.Team.TeamID == (byte)ETeam.Blue).ToList();
-            var redPlayers = players.Where(k => k.Team.TeamID == (byte)ETeam.Red).ToList();
+            List<KCPlayer> bluePlayers = players.Where(k => k.Team.TeamID == (byte)ETeam.Blue).ToList();
+            List<KCPlayer> redPlayers = players.Where(k => k.Team.TeamID == (byte)ETeam.Red).ToList();
 
             EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "MatchResult2", Plugin.Instance.Translate(player.Team == wonTeam ? (isPlaying ? "Winning_Text" : "Victory_Text") : (isPlaying ? "Losing_Text" : "Defeat_Text")).ToRich());
             EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "MapName2", location.LocationName.ToUpper());
@@ -1337,15 +1333,15 @@ namespace UnturnedBlackout.Managers
 
             for (int i = 0; i < bluePlayers.Count; i++)
             {
-                var ply = bluePlayers[i];
+                KCPlayer ply = bluePlayers[i];
                 bool isPlayer = player == ply;
-                var data = ply.GamePlayer.Data;
+                PlayerData data = ply.GamePlayer.Data;
 
-                var kills = (decimal)ply.Kills;
-                var deaths = (decimal)ply.Deaths;
-                var objective = ply.KillsConfirmed + ply.KillsDenied;
+                decimal kills = ply.Kills;
+                decimal deaths = ply.Deaths;
+                int objective = ply.KillsConfirmed + ply.KillsDenied;
 
-                var ratio = ply.Deaths == 0 ? String.Format("{0:n}", kills) : String.Format("{0:n}", Math.Round(kills / deaths, 2));
+                string ratio = ply.Deaths == 0 ? String.Format("{0:n}", kills) : String.Format("{0:n}", Math.Round(kills / deaths, 2));
 
                 EffectManager.sendUIEffectVisibility(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, $"PlayerStats{i}B1", true);
                 EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, $"NameTxt{i}B1", (data.HasPrime ? PRIME_SYMBOL : "") + data.SteamName.ToColor(isPlayer));
@@ -1361,15 +1357,15 @@ namespace UnturnedBlackout.Managers
 
             for (int i = 0; i < redPlayers.Count; i++)
             {
-                var ply = redPlayers[i];
+                KCPlayer ply = redPlayers[i];
                 bool isPlayer = player == ply;
-                var data = ply.GamePlayer.Data;
+                PlayerData data = ply.GamePlayer.Data;
 
-                var kills = (decimal)ply.Kills;
-                var deaths = (decimal)ply.Deaths;
-                var objective = ply.KillsConfirmed + ply.KillsDenied;
+                decimal kills = ply.Kills;
+                decimal deaths = ply.Deaths;
+                int objective = ply.KillsConfirmed + ply.KillsDenied;
 
-                var ratio = ply.Deaths == 0 ? String.Format("{0:n}", kills) : String.Format("{0:n}", Math.Round(kills / deaths, 2));
+                string ratio = ply.Deaths == 0 ? String.Format("{0:n}", kills) : String.Format("{0:n}", Math.Round(kills / deaths, 2));
 
                 EffectManager.sendUIEffectVisibility(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, $"PlayerStats{i}R1", true);
                 EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, $"NameTxt{i}R1", (data.HasPrime ? PRIME_SYMBOL : "") + data.SteamName.ToColor(isPlayer));
@@ -1400,14 +1396,14 @@ namespace UnturnedBlackout.Managers
 
         public void SendKillConfirmedSound(GamePlayer player)
         {
-            var random = UnityEngine.Random.Range(0, 4);
+            int random = UnityEngine.Random.Range(0, 4);
             EffectManager.sendUIEffectVisibility(SOUNDS_KEY, player.TransportConnection, true, $"KillConfirmed{random}", false);
             EffectManager.sendUIEffectVisibility(SOUNDS_KEY, player.TransportConnection, true, $"KillConfirmed{random}", true);
         }
 
         public void SendKillDeniedSound(GamePlayer player)
         {
-            var random = UnityEngine.Random.Range(0, 3);
+            int random = UnityEngine.Random.Range(0, 3);
             EffectManager.sendUIEffectVisibility(SOUNDS_KEY, player.TransportConnection, true, $"KillDenied{random}", false);
             EffectManager.sendUIEffectVisibility(SOUNDS_KEY, player.TransportConnection, true, $"KillDenied{random}", true);
         }
@@ -1421,9 +1417,9 @@ namespace UnturnedBlackout.Managers
 
         public void SendCTFHUD(CTFPlayer player, CTFTeam blueTeam, CTFTeam redTeam, List<CTFPlayer> players)
         {
-            var bluePlayers = players.Where(k => k.Team.TeamID == blueTeam.TeamID);
-            var redPlayers = players.Where(k => k.Team.TeamID == redTeam.TeamID);
-            var index = player.Team.TeamID == blueTeam.TeamID ? 1 : 0;
+            IEnumerable<CTFPlayer> bluePlayers = players.Where(k => k.Team.TeamID == blueTeam.TeamID);
+            IEnumerable<CTFPlayer> redPlayers = players.Where(k => k.Team.TeamID == redTeam.TeamID);
+            int index = player.Team.TeamID == blueTeam.TeamID ? 1 : 0;
 
             EffectManager.sendUIEffect(CTF_ID, CTF_KEY, player.GamePlayer.TransportConnection, true);
             EffectManager.sendUIEffectVisibility(CTF_KEY, player.GamePlayer.TransportConnection, true, "Timer", true);
@@ -1434,8 +1430,8 @@ namespace UnturnedBlackout.Managers
             EffectManager.sendUIEffectText(CTF_KEY, player.GamePlayer.TransportConnection, true, $"RedFlag{index}", redTeam.HasFlag ? "" : "");
             EffectManager.sendUIEffectText(CTF_KEY, player.GamePlayer.TransportConnection, true, $"BlueFlag{index}", blueTeam.HasFlag ? "" : "");
 
-            var blueFlagTaker = redPlayers.FirstOrDefault(k => k.IsCarryingFlag);
-            var redFlagTaker = bluePlayers.FirstOrDefault(k => k.IsCarryingFlag);
+            CTFPlayer blueFlagTaker = redPlayers.FirstOrDefault(k => k.IsCarryingFlag);
+            CTFPlayer redFlagTaker = bluePlayers.FirstOrDefault(k => k.IsCarryingFlag);
 
             EffectManager.sendUIEffectText(CTF_KEY, player.GamePlayer.TransportConnection, true, $"RedTxt{index}", redTeam.HasFlag ? "Home" : (redFlagTaker == null ? "Away" : redFlagTaker.GamePlayer.Player.CharacterName.ToUnrich()));
             EffectManager.sendUIEffectText(CTF_KEY, player.GamePlayer.TransportConnection, true, $"BlueTxt{index}", blueTeam.HasFlag ? "Home" : (redFlagTaker == null ? "Away" : redFlagTaker.GamePlayer.Player.CharacterName.ToUnrich()));
@@ -1443,15 +1439,15 @@ namespace UnturnedBlackout.Managers
 
         public void SendCTFHUD(CTFTeam blueTeam, CTFTeam redTeam, List<CTFPlayer> players)
         {
-            var bluePlayers = players.Where(k => k.Team.TeamID == blueTeam.TeamID);
-            var redPlayers = players.Where(k => k.Team.TeamID == redTeam.TeamID);
+            IEnumerable<CTFPlayer> bluePlayers = players.Where(k => k.Team.TeamID == blueTeam.TeamID);
+            IEnumerable<CTFPlayer> redPlayers = players.Where(k => k.Team.TeamID == redTeam.TeamID);
 
-            var blueFlagTaker = redPlayers.FirstOrDefault(k => k.IsCarryingFlag);
-            var redFlagTaker = bluePlayers.FirstOrDefault(k => k.IsCarryingFlag);
+            CTFPlayer blueFlagTaker = redPlayers.FirstOrDefault(k => k.IsCarryingFlag);
+            CTFPlayer redFlagTaker = bluePlayers.FirstOrDefault(k => k.IsCarryingFlag);
 
-            foreach (var player in players)
+            foreach (CTFPlayer player in players)
             {
-                var index = player.Team.TeamID == blueTeam.TeamID ? 1 : 0;
+                int index = player.Team.TeamID == blueTeam.TeamID ? 1 : 0;
 
                 EffectManager.sendUIEffect(CTF_ID, CTF_KEY, player.GamePlayer.TransportConnection, true);
                 EffectManager.sendUIEffect(27613, 27613, player.GamePlayer.TransportConnection, true, Plugin.Instance.Translate("CTF_Name").ToRich(), Plugin.Instance.Translate("CTF_Desc").ToRich());
@@ -1474,13 +1470,13 @@ namespace UnturnedBlackout.Managers
 
         public void UpdateCTFHUD(List<CTFPlayer> players, CTFTeam changeTeam)
         {
-            var team = (ETeam)changeTeam.TeamID == ETeam.Blue ? "Blue" : "Red";
-            var otherTeamPlayers = players.Where(k => k.Team.TeamID != changeTeam.TeamID);
-            var teamFlagTaker = otherTeamPlayers.FirstOrDefault(k => k.IsCarryingFlag);
+            string team = (ETeam)changeTeam.TeamID == ETeam.Blue ? "Blue" : "Red";
+            IEnumerable<CTFPlayer> otherTeamPlayers = players.Where(k => k.Team.TeamID != changeTeam.TeamID);
+            CTFPlayer teamFlagTaker = otherTeamPlayers.FirstOrDefault(k => k.IsCarryingFlag);
 
-            foreach (var player in players)
+            foreach (CTFPlayer player in players)
             {
-                var index = (ETeam)player.Team.TeamID == ETeam.Blue ? 1 : 0;
+                int index = (ETeam)player.Team.TeamID == ETeam.Blue ? 1 : 0;
 
                 EffectManager.sendUIEffectText(CTF_KEY, player.GamePlayer.TransportConnection, true, $"{team}Num{index}", changeTeam.Score.ToString());
                 EffectManager.sendUIEffectText(CTF_KEY, player.GamePlayer.TransportConnection, true, $"{team}Flag{index}", changeTeam.HasFlag ? "" : "");
@@ -1490,7 +1486,7 @@ namespace UnturnedBlackout.Managers
 
         public void SetupCTFLeaderboard(List<CTFPlayer> players, ArenaLocation location, CTFTeam wonTeam, CTFTeam blueTeam, CTFTeam redTeam, bool isPlaying, bool isHardcore)
         {
-            foreach (var player in players)
+            foreach (CTFPlayer player in players)
             {
                 SetupCTFLeaderboard(player, players, location, wonTeam, blueTeam, redTeam, isPlaying, isHardcore);
             }
@@ -1498,8 +1494,8 @@ namespace UnturnedBlackout.Managers
 
         public void SetupCTFLeaderboard(CTFPlayer player, List<CTFPlayer> players, ArenaLocation location, CTFTeam wonTeam, CTFTeam blueTeam, CTFTeam redTeam, bool isPlaying, bool isHardcore)
         {
-            var bluePlayers = players.Where(k => k.Team.TeamID == (byte)ETeam.Blue).ToList();
-            var redPlayers = players.Where(k => k.Team.TeamID == (byte)ETeam.Red).ToList();
+            List<CTFPlayer> bluePlayers = players.Where(k => k.Team.TeamID == (byte)ETeam.Blue).ToList();
+            List<CTFPlayer> redPlayers = players.Where(k => k.Team.TeamID == (byte)ETeam.Red).ToList();
 
             EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "MatchResult2", Plugin.Instance.Translate(player.Team == wonTeam ? (isPlaying ? "Winning_Text" : "Victory_Text") : (isPlaying ? "Losing_Text" : "Defeat_Text")).ToRich());
             EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "MapName2", location.LocationName.ToUpper());
@@ -1517,15 +1513,15 @@ namespace UnturnedBlackout.Managers
 
             for (int i = 0; i < bluePlayers.Count; i++)
             {
-                var ply = bluePlayers[i];
+                CTFPlayer ply = bluePlayers[i];
                 bool isPlayer = player == ply;
-                var data = ply.GamePlayer.Data;
+                PlayerData data = ply.GamePlayer.Data;
 
-                var kills = (decimal)ply.Kills;
-                var deaths = (decimal)ply.Deaths;
-                var objective = ply.FlagsCaptured + ply.FlagsSaved;
+                decimal kills = ply.Kills;
+                decimal deaths = ply.Deaths;
+                int objective = ply.FlagsCaptured + ply.FlagsSaved;
 
-                var ratio = ply.Deaths == 0 ? String.Format("{0:n}", kills) : String.Format("{0:n}", Math.Round(kills / deaths, 2));
+                string ratio = ply.Deaths == 0 ? String.Format("{0:n}", kills) : String.Format("{0:n}", Math.Round(kills / deaths, 2));
 
                 EffectManager.sendUIEffectVisibility(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, $"PlayerStats{i}B1", true);
                 EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, $"NameTxt{i}B1", (data.HasPrime ? PRIME_SYMBOL : "") + data.SteamName.ToColor(isPlayer));
@@ -1541,15 +1537,15 @@ namespace UnturnedBlackout.Managers
 
             for (int i = 0; i < redPlayers.Count; i++)
             {
-                var ply = redPlayers[i];
+                CTFPlayer ply = redPlayers[i];
                 bool isPlayer = player == ply;
-                var data = ply.GamePlayer.Data;
+                PlayerData data = ply.GamePlayer.Data;
 
-                var kills = (decimal)ply.Kills;
-                var deaths = (decimal)ply.Deaths;
-                var objective = ply.FlagsSaved + ply.FlagsCaptured;
+                decimal kills = ply.Kills;
+                decimal deaths = ply.Deaths;
+                int objective = ply.FlagsSaved + ply.FlagsCaptured;
 
-                var ratio = ply.Deaths == 0 ? String.Format("{0:n}", kills) : String.Format("{0:n}", Math.Round(kills / deaths, 2));
+                string ratio = ply.Deaths == 0 ? String.Format("{0:n}", kills) : String.Format("{0:n}", Math.Round(kills / deaths, 2));
 
                 EffectManager.sendUIEffectVisibility(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, $"PlayerStats{i}R1", true);
                 EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, $"NameTxt{i}R1", (data.HasPrime ? PRIME_SYMBOL : "") + data.SteamName.ToColor(isPlayer));
@@ -1580,7 +1576,7 @@ namespace UnturnedBlackout.Managers
 
         public void SendCTFFlagStates(CTFTeam team, ETeam flag, List<CTFPlayer> players, EFlagState state)
         {
-            foreach (var player in players)
+            foreach (CTFPlayer player in players)
             {
                 EffectManager.sendUIEffect(FLAG_POPUP_UI, FLAG_POPUP_KEY, player.GamePlayer.TransportConnection, true);
                 EffectManager.sendUIEffectVisibility(FLAG_POPUP_KEY, player.GamePlayer.TransportConnection, true, $"FLAG {flag} Toggler", true);
@@ -1682,7 +1678,7 @@ namespace UnturnedBlackout.Managers
 
         public void OnGameUpdated()
         {
-            foreach (var handler in UIHandlers)
+            foreach (UIHandler handler in UIHandlers)
             {
                 if (handler.MainPage == EMainPage.Play && handler.PlayPage == EPlayPage.Games)
                 {
@@ -1693,7 +1689,7 @@ namespace UnturnedBlackout.Managers
 
         public void OnGameCountUpdated(Game game)
         {
-            foreach (var handler in UIHandlers)
+            foreach (UIHandler handler in UIHandlers)
             {
                 if (handler.MainPage == EMainPage.Play && handler.PlayPage == EPlayPage.Games)
                 {
@@ -1704,7 +1700,7 @@ namespace UnturnedBlackout.Managers
 
         public void OnServersUpdated()
         {
-            foreach (var handler in UIHandlers)
+            foreach (UIHandler handler in UIHandlers)
             {
                 if (handler.MainPage == EMainPage.Play && handler.PlayPage == EPlayPage.Servers)
                 {
@@ -1749,8 +1745,8 @@ namespace UnturnedBlackout.Managers
 
         private void OnButtonClicked(Player player, string buttonName)
         {
-            var ply = UnturnedPlayer.FromPlayer(player);
-            var gPly = Plugin.Instance.Game.GetGamePlayer(ply);
+            UnturnedPlayer ply = UnturnedPlayer.FromPlayer(player);
+            GamePlayer gPly = Plugin.Instance.Game.GetGamePlayer(ply);
             bool isGame = gPly.CurrentGame != null;
             if (gPly == null)
             {
@@ -2072,7 +2068,7 @@ namespace UnturnedBlackout.Managers
                     break;
             }
 
-            var numberRegexMatch = new Regex(@"([0-9]+)").Match(buttonName).Value;
+            string numberRegexMatch = new Regex(@"([0-9]+)").Match(buttonName).Value;
             if (!int.TryParse(numberRegexMatch, out int selected))
             {
                 return;

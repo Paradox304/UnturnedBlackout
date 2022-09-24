@@ -1,7 +1,6 @@
 ﻿using Rocket.Core.Utils;
 using Steamworks;
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
 using UnturnedBlackout.Database.Base;
 using UnturnedBlackout.Enums;
@@ -43,7 +42,7 @@ namespace UnturnedBlackout.Managers
                 return;
             }
 
-            var bp = player.Data.Battlepass;
+            Database.Data.PlayerBattlepass bp = player.Data.Battlepass;
             if (isTop && bp.ClaimedFreeRewards.Contains(tierID) || (!isTop && bp.ClaimedPremiumRewards.Contains(tierID)))
             {
                 Logging.Debug($"{player.Player.CharacterName} has already claimed the reward for IsTop {isTop} and selected {tierID}, why is the plugin asking again?");
@@ -85,7 +84,7 @@ namespace UnturnedBlackout.Managers
 
         public void SkipTier(GamePlayer player)
         {
-            var bp = player.Data.Battlepass;
+            Database.Data.PlayerBattlepass bp = player.Data.Battlepass;
             if (!DB.BattlepassTiersSearchByID.ContainsKey(bp.CurrentTier + 1))
             {
                 Logging.Debug($"{player.Player.CharacterName} has already reached the end of battlepass");
@@ -104,7 +103,7 @@ namespace UnturnedBlackout.Managers
             {
                 if (player.Data.Coins >= Config.Base.FileData.BattlepassTierSkipCost)
                 {
-                    var oldTier = bp.CurrentTier;
+                    int oldTier = bp.CurrentTier;
                     bp.CurrentTier += 1;
                     player.Data.Coins -= Config.Base.FileData.BattlepassTierSkipCost;
 

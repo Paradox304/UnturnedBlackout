@@ -32,8 +32,8 @@ namespace UnturnedBlackout.Commands
                 return;
             }
 
-            var steamID = new CSteamID(steamid);
-            var rewards = Utility.GetRewardsFromString(command[1]);
+            CSteamID steamID = new(steamid);
+            List<Database.Base.Reward> rewards = Utility.GetRewardsFromString(command[1]);
             Plugin.Instance.Reward.GiveRewards(steamID, rewards);
         }
     }

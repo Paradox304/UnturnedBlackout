@@ -25,8 +25,8 @@ namespace UnturnedBlackout.Database.Base
 
         public decimal GetKDR()
         {
-            var kills = (decimal)(Kills + HeadshotKills);
-            var deaths = (decimal)Deaths;
+            decimal kills = Kills + HeadshotKills;
+            decimal deaths = Deaths;
             decimal kdr = kills / deaths;
             return kdr;
         }

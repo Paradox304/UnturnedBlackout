@@ -2,7 +2,6 @@
 using Steamworks;
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
 using UnturnedBlackout.Enums;
 
@@ -36,7 +35,7 @@ namespace UnturnedBlackout.Commands
                 return;
             }
 
-            var steamID = new CSteamID(steamid);
+            CSteamID steamID = new(steamid);
 
             if (!Enum.TryParse(command[1], true, out EBoosterType boosterType))
             {

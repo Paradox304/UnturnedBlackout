@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using UnturnedBlackout.Database.Base;
 using UnturnedBlackout.Enums;
@@ -127,19 +126,19 @@ namespace UnturnedBlackout.Database.Data
 
         public void SetAchievementXPBooster()
         {
-            var completedTiers = Achievements.Sum(k => k.CurrentTier);
-            var totalTiers = (float)Achievements.Sum(k => k.Achievement.Tiers.Max(k => k.TierID));
+            int completedTiers = Achievements.Sum(k => k.CurrentTier);
+            float totalTiers = Achievements.Sum(k => k.Achievement.Tiers.Max(k => k.TierID));
 
-            var xpBooster = completedTiers / totalTiers;
+            float xpBooster = completedTiers / totalTiers;
 
             AchievementXPBooster = xpBooster;
         }
 
         public void SetPersonalBooster(EBoosterType type, float permanentBooster)
         {
-            var boosters = ActiveBoosters.Where(k => k.BoosterType == type);
-            var max = boosters.Count() > 0 ? boosters.Max(k => k.BoosterValue) : 0f;
-            var updatedValue = permanentBooster + max;
+            IEnumerable<PlayerBooster> boosters = ActiveBoosters.Where(k => k.BoosterType == type);
+            float max = boosters.Count() > 0 ? boosters.Max(k => k.BoosterValue) : 0f;
+            float updatedValue = permanentBooster + max;
             switch (type)
             {
                 case EBoosterType.XP:
