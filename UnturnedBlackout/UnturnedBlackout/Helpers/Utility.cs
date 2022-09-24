@@ -480,7 +480,7 @@ namespace UnturnedBlackout
                 _ => throw new ArgumentOutOfRangeException("currency", "Currency is not as expected")
             };
 
-        public static string GetFlag(string country) => $"https://www.countryflagsapi.com/png/{country}";
+        public static string GetFlag(string country) => $"https://flagcdn.com/120x90/{country.ToLower()}.png";
 
         public static List<uint> UsedFrequencies = new();
     }

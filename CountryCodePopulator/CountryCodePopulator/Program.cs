@@ -31,6 +31,7 @@ using (var connection = new MySqlConnection(connectionString))
 
     foreach (var playerIP in playerIPs)
     {
+        Console.WriteLine($"PlayerIP: {playerIP.Key}, CountryCode: {playerIP.Value}");
         await new MySqlCommand($"UPDATE `UB_Players` SET `CountryCode` = '{playerIP.Value}' WHERE `SteamID` = {playerIP.Key};", connection).ExecuteScalarAsync();
     }
 }
