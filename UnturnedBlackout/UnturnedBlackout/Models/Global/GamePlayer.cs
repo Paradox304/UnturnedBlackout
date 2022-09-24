@@ -34,6 +34,8 @@ namespace UnturnedBlackout.Models.Global
         public PlayerData Data { get; set; }
         public ITransportConnection TransportConnection { get; set; }
 
+        public bool IsLoading { get; set; }
+
         public bool IsPendingLoadoutChange { get; set; }
         public Loadout ActiveLoadout { get; set; }
 
@@ -677,11 +679,13 @@ namespace UnturnedBlackout.Models.Global
         public void OnGameJoined(Game game)
         {
             CurrentGame = game;
+            IsLoading = true;
         }
 
         public void OnGameLeft()
         {
             CurrentGame = null;
+            IsLoading = false;
 
             TacticalChecker.Stop();
             LethalChecker.Stop();

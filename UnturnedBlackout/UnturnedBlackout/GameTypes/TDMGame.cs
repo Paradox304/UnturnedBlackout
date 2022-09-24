@@ -64,6 +64,7 @@ namespace UnturnedBlackout.GameTypes
             GamePhase = EGamePhase.Starting;
             foreach (TDMPlayer player in Players)
             {
+                if (player.GamePlayer.IsLoading) continue;
                 Plugin.Instance.UI.ClearWaitingForPlayersUI(player.GamePlayer);
                 player.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(0);
                 Plugin.Instance.UI.ShowCountdownUI(player.GamePlayer);
@@ -174,6 +175,7 @@ namespace UnturnedBlackout.GameTypes
                     player.GamePlayer.Player.Player.life.ServerRespawn(false);
                 }
                 Plugin.Instance.UI.RemoveKillCard(player.GamePlayer);
+                Plugin.Instance.UI.ClearAnimations(player.GamePlayer);
 
                 if (player.GamePlayer.HasScoreboard)
                 {
@@ -325,6 +327,7 @@ namespace UnturnedBlackout.GameTypes
                     Plugin.Instance.UI.SendTDMHUD(tPlayer, BlueTeam, RedTeam);
                     break;
             }
+            player.IsLoading = false;
         }
 
         public override void RemovePlayerFromGame(GamePlayer player)

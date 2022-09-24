@@ -46,6 +46,7 @@ namespace UnturnedBlackout.GameTypes
             Plugin.Instance.UI.OnGameUpdated();
             foreach (FFAPlayer player in Players)
             {
+                if (player.GamePlayer.IsLoading) continue;
                 Plugin.Instance.UI.ClearWaitingForPlayersUI(player.GamePlayer);
                 player.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(0);
                 Plugin.Instance.UI.ShowCountdownUI(player.GamePlayer);
@@ -146,6 +147,8 @@ namespace UnturnedBlackout.GameTypes
                     player.GamePlayer.Player.Player.life.ServerRespawn(false);
                 }
                 Plugin.Instance.UI.RemoveKillCard(player.GamePlayer);
+                Plugin.Instance.UI.ClearAnimations(player.GamePlayer);
+
                 if (player.GamePlayer.HasScoreboard)
                 {
                     player.GamePlayer.HasScoreboard = false;
@@ -279,6 +282,7 @@ namespace UnturnedBlackout.GameTypes
                     break;
             }
 
+            player.IsLoading = false;
             Plugin.Instance.UI.ClearLoadingUI(player.Player);
             Plugin.Instance.UI.SendVoiceChatUI(player);
         }

@@ -298,6 +298,12 @@ namespace UnturnedBlackout.Managers
 
         public void SendAnimation(GamePlayer player, AnimationInfo animationInfo)
         {
+            var game = player.CurrentGame;
+            if (game != null && game.GamePhase != EGamePhase.Started)
+            {
+                return;
+            }
+
             if (player.HasAnimationGoingOn)
             {
                 player.PendingAnimations.Add(animationInfo);
@@ -378,6 +384,17 @@ namespace UnturnedBlackout.Managers
                 default:
                     break;
             }
+        }
+
+        public void ClearAnimations(GamePlayer player)
+        {
+            EffectManager.askEffectClearByID(LEVEL_UP_ID, player.TransportConnection);
+            EffectManager.askEffectClearByID(GUN_LEVEL_UP_ID, player.TransportConnection);
+            EffectManager.askEffectClearByID(QUEST_COMPLETION_ID, player.TransportConnection);
+            EffectManager.askEffectClearByID(BP_TIER_COMPLETION_ID, player.TransportConnection);
+            EffectManager.askEffectClearByID(ITEM_UNLOCK_ID, player.TransportConnection);
+            EffectManager.askEffectClearByID(ACHIEVEMENT_COMPLETION_ID, player.TransportConnection);
+            EffectManager.askEffectClearByID(KILLSTREAK_AVAILABLE_ID, player.TransportConnection);
         }
 
         // KILLFEED
@@ -1580,6 +1597,7 @@ namespace UnturnedBlackout.Managers
         {
             foreach (CTFPlayer player in players)
             {
+                if (player.GamePlayer.IsLoading) continue;
                 EffectManager.sendUIEffect(FLAG_POPUP_UI, FLAG_POPUP_KEY, player.GamePlayer.TransportConnection, true);
                 EffectManager.sendUIEffectVisibility(FLAG_POPUP_KEY, player.GamePlayer.TransportConnection, true, $"FLAG {flag} Toggler", true);
                 EffectManager.sendUIEffectText(FLAG_POPUP_KEY, player.GamePlayer.TransportConnection, true, "FlagTxt", Plugin.Instance.Translate($"CTF_{(player.Team.TeamID == team.TeamID ? "Team" : "Enemy")}_{state}_Flag").ToRich());
