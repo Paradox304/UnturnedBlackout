@@ -14,5 +14,23 @@ var connectionString = builder.ConnectionString;
 using (var connection = new MySqlConnection(connectionString))
 {
     connection.Open();
-    var rdr = new MySqlCommand()
+    var rdr = new MySqlCommand("SELECT `Moderation_PlayerInfo`.`PlayerID` , `Moderation_IPInfo`.`CountryCode` FROM `Moderation_IPInfo` INNER JOIN `Moderation_PlayerInfo` ON `Moderation_IPInfo`.`IP` = `Moderation_PlayerInfo`.`IP`;", connection).ExecuteReader();
+    var playerIPs = new Dictionary<ulong, string>();
+    while (rdr.Read())
+    {
+        if (!ulong.TryParse(rdr[0].ToString(), out ulong steamID))
+        {
+            continue;
+        }
+
+        var countryCode = rdr[1].ToString();
+
+        playerIPs.Add(steamID, countryCode);
+    }
+    rdr.Close();
+
+    foreach (var playerIP in playerIPs)
+    {
+        await new MySqlCommand($"UPDATE `UB_Players` SET `CountryCode` = '{playerIP.Value}' WHERE `SteamID` = {playerIP.Key};", connection).ExecuteScalarAsync();
+    }
 }
