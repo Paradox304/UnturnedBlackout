@@ -810,11 +810,6 @@ namespace UnturnedBlackout.Instances
             Task.Run(() => BuildAchievementPages());
         }
 
-        public void ReloadMainMenu()
-        {
-            // Code to update the balance or sumthin
-        }
-
         public void ShowXP()
         {
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER XP Num", Plugin.Instance.Translate("Level_Show", PlayerData.Level).ToRich());
@@ -824,7 +819,7 @@ namespace UnturnedBlackout.Instances
             {
                 spaces = Math.Min(176, neededXP == 0 ? 0 : PlayerData.XP * 176 / neededXP);
             }
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER XP Bar Fill", spaces == 0 ? UIManager.HAIRSPACE_SYMBOL_STRING : new string(UIManager.HAIRSPACE_SYMBOL_CHAR, spaces));
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER XP Bar Fill", spaces == 0 ? "" : new string(UIManager.HAIRSPACE_SYMBOL_CHAR, spaces));
         }
 
         public void ClearChat()

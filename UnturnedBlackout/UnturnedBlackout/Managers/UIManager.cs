@@ -117,10 +117,12 @@ namespace UnturnedBlackout.Managers
 
         public const string PRIME_SYMBOL = " ";
 
-        public const string HAIRSPACE_SYMBOL_STRING = " ";
+        //public const string HAIRSPACE_SYMBOL_STRING = " ";
+        public const string HAIRSPACE_SYMBOL_STRING = "";
         public const char HAIRSPACE_SYMBOL_CHAR = ' ';
 
-        public const string VERY_SMALL_SQUARE = "⬞";
+        public const string VERY_SMALL_SQUARE = "";
+        //public const string VERY_SMALL_SQUARE = "⬞";
 
         public UIManager()
         {
