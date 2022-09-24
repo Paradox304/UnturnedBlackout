@@ -13,7 +13,7 @@ namespace UnturnedBlackout.Managers
         public ServerManager()
         {
             Continue = true;
-            ThreadPool.QueueUserWorkItem(async (o) =>
+            Task.Run(async () =>
             {
                 await CheckServersAsync();
             });

@@ -8,6 +8,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnturnedBlackout.Database.Base;
 using UnturnedBlackout.Database.Data;
@@ -130,7 +131,7 @@ namespace UnturnedBlackout.GameTypes
                 }
 
                 roundEndCases.Add((roundEndCasePlayer, @case));
-                ThreadPool.QueueUserWorkItem(async (o) =>
+                Task.Run(async () =>
                 {
                     await Plugin.Instance.DB.IncreasePlayerCaseAsync(roundEndCasePlayer.SteamID, @case.CaseID, 1);
                 });
@@ -154,7 +155,7 @@ namespace UnturnedBlackout.GameTypes
                 Plugin.Instance.UI.SetupPreEndingUI(player.GamePlayer, EGameType.FFA, index == 0, 0, 0, "", "");
                 var summary = new MatchEndSummary(player.GamePlayer, player.XP, player.StartingLevel, player.StartingXP, player.Kills, player.Deaths, player.Assists, player.HighestKillstreak, player.HighestMK, player.StartTime, GameMode, index == 0);
                 summaries.Add(player.GamePlayer, summary);
-                ThreadPool.QueueUserWorkItem(async (o) =>
+                Task.Run(async () =>
                 {
                     await Plugin.Instance.DB.IncreasePlayerXPAsync(player.GamePlayer.SteamID, summary.PendingXP);
                     await Plugin.Instance.DB.IncreasePlayerCreditsAsync(player.GamePlayer.SteamID, summary.PendingCredits);
@@ -347,7 +348,7 @@ namespace UnturnedBlackout.GameTypes
             fPlayer.OnDeath(updatedKiller);
             fPlayer.GamePlayer.OnDeath(updatedKiller, Config.FFA.FileData.RespawnSeconds);
 
-            ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DB.IncreasePlayerDeathsAsync(fPlayer.GamePlayer.SteamID, 1));
+            Task.Run(async () => await Plugin.Instance.DB.IncreasePlayerDeathsAsync(fPlayer.GamePlayer.SteamID, 1));
 
             TaskDispatcher.QueueOnMainThread(() =>
             {
@@ -390,7 +391,7 @@ namespace UnturnedBlackout.GameTypes
                         {
                             Plugin.Instance.UI.ShowXPUI(assister.GamePlayer, Config.Medals.FileData.AssistKillXP, Plugin.Instance.Translate("Assist_Kill", fPlayer.GamePlayer.Player.CharacterName.ToUnrich()));
                         }
-                        ThreadPool.QueueUserWorkItem(async (o) => await Plugin.Instance.DB.IncreasePlayerXPAsync(assister.GamePlayer.SteamID, Config.Medals.FileData.AssistKillXP));
+                        Task.Run(async () => await Plugin.Instance.DB.IncreasePlayerXPAsync(assister.GamePlayer.SteamID, Config.Medals.FileData.AssistKillXP));
                     }
                     fPlayer.GamePlayer.LastDamager.Clear();
                 }
@@ -573,7 +574,7 @@ namespace UnturnedBlackout.GameTypes
                 }
                 Plugin.Instance.Quest.CheckQuest(fPlayer.GamePlayer, EQuestType.Death, questConditions);
 
-                ThreadPool.QueueUserWorkItem(async (o) =>
+                Task.Run(async () =>
                 {
                     await Plugin.Instance.DB.IncreasePlayerXPAsync(kPlayer.GamePlayer.SteamID, xpGained);
                     if (cause == EDeathCause.GUN && limb == ELimb.SKULL)

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using UnturnedBlackout.Database.Base;
 using UnturnedBlackout.Database.Data;
 using UnturnedBlackout.Enums;
@@ -89,7 +90,7 @@ namespace UnturnedBlackout.Managers
             }
 
             Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
-            ThreadPool.QueueUserWorkItem(async (o) =>
+            Task.Run(async () =>
             {
                 Logging.Debug($"THREAD ENTERED LOADOUT CHECK {player.CharacterName}");
                 await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
@@ -136,7 +137,7 @@ namespace UnturnedBlackout.Managers
             }
 
             Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
-            ThreadPool.QueueUserWorkItem(async (o) =>
+            Task.Run(async () =>
             {
                 Logging.Debug($"THREAD ENTERED LOADOUT CHECK {player.CharacterName}");
                 await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
@@ -178,7 +179,7 @@ namespace UnturnedBlackout.Managers
                 attachments.Remove(attachment.Attachment.AttachmentType);
 
                 Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
-                ThreadPool.QueueUserWorkItem(async (o) =>
+                Task.Run(async () =>
                 {
                     Logging.Debug($"THREAD ENTERED LOADOUT CHECK {player.CharacterName}");
                     await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
@@ -223,7 +224,7 @@ namespace UnturnedBlackout.Managers
 
 
             Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
-            ThreadPool.QueueUserWorkItem(async (o) =>
+            Task.Run(async () =>
             {
                 Logging.Debug($"THREAD ENTERED LOADOUT CHECK {player.CharacterName}");
                 await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
@@ -254,7 +255,7 @@ namespace UnturnedBlackout.Managers
 
             playerLoadout.Knife = knife;
             Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
-            ThreadPool.QueueUserWorkItem(async (o) =>
+            Task.Run(async () =>
             {
                 Logging.Debug($"THREAD ENTERED LOADOUT CHECK {player.CharacterName}");
                 await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
@@ -285,7 +286,7 @@ namespace UnturnedBlackout.Managers
 
             playerLoadout.Tactical = tactical;
             Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
-            ThreadPool.QueueUserWorkItem(async (o) =>
+            Task.Run(async () =>
             {
                 Logging.Debug($"THREAD ENTERED LOADOUT CHECK {player.CharacterName}");
                 await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
@@ -316,7 +317,7 @@ namespace UnturnedBlackout.Managers
 
             playerLoadout.Lethal = lethal;
             Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
-            ThreadPool.QueueUserWorkItem(async (o) =>
+            Task.Run(async () =>
             {
                 Logging.Debug($"THREAD ENTERED LOADOUT CHECK {player.CharacterName}");
                 await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
@@ -347,7 +348,7 @@ namespace UnturnedBlackout.Managers
 
             playerLoadout.Glove = glove;
             Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
-            ThreadPool.QueueUserWorkItem(async (o) =>
+            Task.Run(async () =>
             {
                 Logging.Debug($"THREAD ENTERED LOADOUT CHECK {player.CharacterName}");
                 await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
@@ -378,7 +379,7 @@ namespace UnturnedBlackout.Managers
 
             playerLoadout.Card = card;
             Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
-            ThreadPool.QueueUserWorkItem(async (o) =>
+            Task.Run(async () =>
             {
                 Logging.Debug($"THREAD ENTERED LOADOUT CHECK {player.CharacterName}");
                 await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
@@ -419,7 +420,7 @@ namespace UnturnedBlackout.Managers
 
             playerLoadout.PerksSearchByType.Add(newPerk.Perk.SkillType, newPerk);
             Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
-            ThreadPool.QueueUserWorkItem(async (o) =>
+            Task.Run(async () =>
             {
                 Logging.Debug($"THREAD ENTERED LOADOUT CHECK {player.CharacterName}");
                 await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
@@ -455,7 +456,7 @@ namespace UnturnedBlackout.Managers
             }
 
             Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
-            ThreadPool.QueueUserWorkItem(async (o) =>
+            Task.Run(async () =>
             {
                 Logging.Debug($"THREAD ENTERED LOADOUT CHECK {player.CharacterName}");
                 await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
@@ -497,7 +498,7 @@ namespace UnturnedBlackout.Managers
             }
 
             Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
-            ThreadPool.QueueUserWorkItem(async (o) =>
+            Task.Run(async () =>
             {
                 Logging.Debug($"THREAD ENTERED LOADOUT CHECK {player.CharacterName}");
                 await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
@@ -533,7 +534,7 @@ namespace UnturnedBlackout.Managers
             }
 
             Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
-            ThreadPool.QueueUserWorkItem(async (o) =>
+            Task.Run(async () =>
             {
                 Logging.Debug($"THREAD ENTERED LOADOUT CHECK {player.CharacterName}");
                 await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
@@ -582,7 +583,7 @@ namespace UnturnedBlackout.Managers
             }
 
             Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
-            ThreadPool.QueueUserWorkItem(async (o) =>
+            Task.Run(async () =>
             {
                 Logging.Debug($"THREAD ENTERED LOADOUT CHECK {player.CharacterName}");
                 await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
@@ -615,7 +616,7 @@ namespace UnturnedBlackout.Managers
             }
 
             Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
-            ThreadPool.QueueUserWorkItem(async (o) =>
+            Task.Run(async () =>
             {
                 Logging.Debug($"THREAD ENTERED LOADOUT CHECK {player.CharacterName}");
                 await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);

@@ -2,6 +2,7 @@
 using Steamworks;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 using UnturnedBlackout.Database.Base;
 using UnturnedBlackout.Database.Data;
 using UnturnedBlackout.Enums;
@@ -57,7 +58,7 @@ namespace UnturnedBlackout.Managers
                     }
                 }
 
-                ThreadPool.QueueUserWorkItem(async (o) =>
+                Task.Run(async () =>
                 {
                     await db.IncreasePlayerAchievementAmountAsync(steamID, achievement.Achievement.AchievementID, 1);
                 });
@@ -97,7 +98,7 @@ namespace UnturnedBlackout.Managers
             Plugin.Instance.UI.OnAchievementsUpdated(steamID);
 
             data.SetAchievementXPBooster();
-            ThreadPool.QueueUserWorkItem(async (o) =>
+            Task.Run(async () =>
             {
                 await Plugin.Instance.DB.UpdatePlayerAchievementTierAsync(steamID, achievementID, nextTier.TierID);
             });

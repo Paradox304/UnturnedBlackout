@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using UnturnedBlackout.Database.Data;
 using UnturnedBlackout.Enums;
 using UnturnedBlackout.Models.Global;
@@ -17,7 +18,7 @@ namespace UnturnedBlackout.Managers
             var db = Plugin.Instance.DB;
             var data = player.Data;
 
-            ThreadPool.QueueUserWorkItem((o) =>
+            Task.Run(() =>
             {
                 Plugin.Instance.Achievement.CheckAchievement(player, questType, questConditions);
             });
@@ -56,7 +57,7 @@ namespace UnturnedBlackout.Managers
                 if (quest.Amount >= quest.Quest.TargetAmount)
                 {
                     Plugin.Instance.UI.SendAnimation(player, new Models.Animation.AnimationInfo(EAnimationType.QuestCompletion, quest.Quest));
-                    ThreadPool.QueueUserWorkItem(async (o) =>
+                    Task.Run(async () =>
                     {
                         await db.IncreasePlayerBPXPAsync(steamID, quest.Quest.XP);
                     });
@@ -66,7 +67,7 @@ namespace UnturnedBlackout.Managers
                     pendingQuestsProgression.Add(quest);
                 }
 
-                ThreadPool.QueueUserWorkItem(async (o) =>
+                Task.Run(async () =>
                 {
                     await db.IncreasePlayerQuestAmountAsync(steamID, quest.Quest.QuestID, 1);
                 });

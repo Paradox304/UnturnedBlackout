@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 using UnturnedBlackout.Database.Base;
 using UnturnedBlackout.Enums;
 
@@ -13,7 +14,7 @@ namespace UnturnedBlackout.Managers
         {
             Logging.Debug($"Giving rewards to {steamID}, rewards: {rewards.Count}");
             var db = Plugin.Instance.DB;
-            ThreadPool.QueueUserWorkItem(async (o) =>
+            Task.Run(async () =>
             {
                 Logging.Debug("Sending rewards");
                 foreach (var reward in rewards)
@@ -85,7 +86,7 @@ namespace UnturnedBlackout.Managers
         public void RemoveRewards(CSteamID steamID, List<Reward> removeRewards)
         {
             var db = Plugin.Instance.DB;
-            ThreadPool.QueueUserWorkItem(async (o) =>
+            Task.Run(async () =>
             {
                 foreach (var reward in removeRewards)
                 {
@@ -107,7 +108,7 @@ namespace UnturnedBlackout.Managers
         public void GiveBulkRewards(List<(CSteamID, List<Reward>)> bulkRewards)
         {
             var db = Plugin.Instance.DB;
-            ThreadPool.QueueUserWorkItem(async (o) =>
+            Task.Run(async () =>
             {
                 foreach (var bulkReward in bulkRewards)
                 {

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using UnturnedBlackout.Database.Base;
 using UnturnedBlackout.Enums;
 
@@ -106,7 +107,7 @@ namespace UnturnedBlackout.Database.Data
         {
             if (multiKills > HighestMultiKills)
             {
-                ThreadPool.QueueUserWorkItem(async (o) =>
+                Task.Run(async () =>
                 {
                     await Plugin.Instance.DB.UpdatePlayerHighestMultiKillsAsync(SteamID, multiKills);
                 });
@@ -117,7 +118,7 @@ namespace UnturnedBlackout.Database.Data
         {
             if (killStreak > HighestKillstreak)
             {
-                ThreadPool.QueueUserWorkItem(async (o) =>
+                Task.Run(async () =>
                 {
                     await Plugin.Instance.DB.UpdatePlayerHighestKillStreakAsync(SteamID, killStreak);
                 });

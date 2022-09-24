@@ -7,6 +7,7 @@ using Steamworks;
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 using UnturnedBlackout.Managers;
 using UnturnedBlackout.Models.Webhook;
 
@@ -50,7 +51,7 @@ namespace UnturnedBlackout.Commands
                 return;
             }
 
-            ThreadPool.QueueUserWorkItem(async (o) =>
+            Task.Run(async () =>
             {
                 Profile profile;
                 try

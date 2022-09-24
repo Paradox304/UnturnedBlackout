@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using UnturnedBlackout.Database.Base;
 using UnturnedBlackout.Database.Data;
 using UnturnedBlackout.Enums;
@@ -77,7 +78,7 @@ namespace UnturnedBlackout.Managers
                             knife = CalculateKnife(knivesAvailable);
 
                             // Send unboxed amount +1
-                            ThreadPool.QueueUserWorkItem(async (o) => await DB.UpdatePlayerKnifeUnboxedAmountAsync(knife.KnifeID, 1));
+                            Task.Run(async () => await DB.UpdatePlayerKnifeUnboxedAmountAsync(knife.KnifeID, 1));
                         }
 
                         rewardName = knife.KnifeName;
@@ -124,7 +125,7 @@ namespace UnturnedBlackout.Managers
                             glove = CalculateGlove(glovesAvailable);
 
                             // Send updated unbox amount +1
-                            ThreadPool.QueueUserWorkItem(async (o) => await DB.UpdatePlayerGloveUnboxedAmountAsync(glove.GloveID, 1));
+                            Task.Run(async () => await DB.UpdatePlayerGloveUnboxedAmountAsync(glove.GloveID, 1));
                         }
 
                         rewardName = glove.GloveName;
@@ -161,7 +162,7 @@ namespace UnturnedBlackout.Managers
                         else
                         {
                             // Send unboxed amount by +1
-                            ThreadPool.QueueUserWorkItem(async (o) => await DB.UpdatePlayerGunSkinUnboxedAmountAsync(skin.ID, 1));
+                            Task.Run(async () => await DB.UpdatePlayerGunSkinUnboxedAmountAsync(skin.ID, 1));
                         }
 
                         rewardName = skin.Gun.GunName + " | " + skin.SkinName;

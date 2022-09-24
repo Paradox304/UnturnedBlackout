@@ -8,6 +8,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnturnedBlackout.Database.Base;
 using UnturnedBlackout.Database.Data;
@@ -807,7 +808,7 @@ namespace UnturnedBlackout.Instances
             ShowQuestCompletion();
             OnMusicChanged(PlayerData.Music);
 
-            ThreadPool.QueueUserWorkItem((o) => BuildAchievementPages());
+            Task.Run(() => BuildAchievementPages());
         }
 
         public void ReloadMainMenu()
@@ -1187,7 +1188,7 @@ namespace UnturnedBlackout.Instances
                 return;
             }
 
-            ThreadPool.QueueUserWorkItem(async (o) =>
+            Task.Run(async () =>
             {
                 foreach (var activeLoadout in PlayerLoadout.Loadouts.Values.Where(k => k.IsActive))
                 {
@@ -1223,7 +1224,7 @@ namespace UnturnedBlackout.Instances
                     return;
                 }
                 loadout.LoadoutName = LoadoutNameText;
-                ThreadPool.QueueUserWorkItem(async (o) =>
+                Task.Run(async () =>
                 {
                     await DB.UpdatePlayerLoadoutAsync(Player.CSteamID, LoadoutID);
                 });
@@ -1402,7 +1403,7 @@ namespace UnturnedBlackout.Instances
                 return;
             }
 
-            ThreadPool.QueueUserWorkItem(async (o) =>
+            Task.Run(async () =>
             {
                 foreach (var activeLoadout in PlayerLoadout.Loadouts.Values.Where(k => k.IsActive))
                 {
@@ -3999,7 +4000,7 @@ namespace UnturnedBlackout.Instances
                             return;
                         }
 
-                        ThreadPool.QueueUserWorkItem(async (o) =>
+                        Task.Run(async () =>
                         {
                             if (PlayerData.Credits >= gun.Gun.BuyPrice && !gun.IsBought)
                             {
@@ -4037,7 +4038,7 @@ namespace UnturnedBlackout.Instances
                             return;
                         }
 
-                        ThreadPool.QueueUserWorkItem(async (o) =>
+                        Task.Run(async () =>
                         {
                             if (PlayerData.Credits >= attachment.Attachment.BuyPrice && !attachment.IsBought)
                             {
@@ -4066,7 +4067,7 @@ namespace UnturnedBlackout.Instances
                             return;
                         }
 
-                        ThreadPool.QueueUserWorkItem(async (o) =>
+                        Task.Run(async () =>
                         {
                             if (PlayerData.Credits >= gun.Gun.BuyPrice && !gun.IsBought)
                             {
@@ -4103,7 +4104,7 @@ namespace UnturnedBlackout.Instances
                             return;
                         }
 
-                        ThreadPool.QueueUserWorkItem(async (o) =>
+                        Task.Run(async () =>
                         {
                             if (PlayerData.Credits >= attachment.Attachment.BuyPrice && !attachment.IsBought)
                             {
@@ -4133,7 +4134,7 @@ namespace UnturnedBlackout.Instances
                             return;
                         }
 
-                        ThreadPool.QueueUserWorkItem(async (o) =>
+                        Task.Run(async () =>
                         {
                             if (PlayerData.Credits >= gunCharm.GunCharm.BuyPrice && !gunCharm.IsBought)
                             {
@@ -4162,7 +4163,7 @@ namespace UnturnedBlackout.Instances
                             return;
                         }
 
-                        ThreadPool.QueueUserWorkItem(async (o) =>
+                        Task.Run(async () =>
                         {
                             if (PlayerData.Credits >= knife.Knife.BuyPrice && !knife.IsBought)
                             {
@@ -4191,7 +4192,7 @@ namespace UnturnedBlackout.Instances
                             return;
                         }
 
-                        ThreadPool.QueueUserWorkItem(async (o) =>
+                        Task.Run(async () =>
                         {
                             if (PlayerData.Credits >= gadget.Gadget.BuyPrice && !gadget.IsBought)
                             {
@@ -4220,7 +4221,7 @@ namespace UnturnedBlackout.Instances
                             return;
                         }
 
-                        ThreadPool.QueueUserWorkItem(async (o) =>
+                        Task.Run(async () =>
                         {
                             if (PlayerData.Credits >= gadget.Gadget.BuyPrice && !gadget.IsBought)
                             {
@@ -4251,7 +4252,7 @@ namespace UnturnedBlackout.Instances
                             return;
                         }
 
-                        ThreadPool.QueueUserWorkItem(async (o) =>
+                        Task.Run(async () =>
                         {
                             if (PlayerData.Credits >= perk.Perk.BuyPrice && !perk.IsBought)
                             {
@@ -4280,7 +4281,7 @@ namespace UnturnedBlackout.Instances
                             return;
                         }
 
-                        ThreadPool.QueueUserWorkItem(async (o) =>
+                        Task.Run(async () =>
                         {
                             if (PlayerData.Credits >= killstreak.Killstreak.BuyPrice && !killstreak.IsBought)
                             {
@@ -4309,7 +4310,7 @@ namespace UnturnedBlackout.Instances
                             return;
                         }
 
-                        ThreadPool.QueueUserWorkItem(async (o) =>
+                        Task.Run(async () =>
                         {
                             if (PlayerData.Credits >= card.Card.BuyPrice && !card.IsBought)
                             {
@@ -4338,7 +4339,7 @@ namespace UnturnedBlackout.Instances
                             return;
                         }
 
-                        ThreadPool.QueueUserWorkItem(async (o) =>
+                        Task.Run(async () =>
                         {
                             if (PlayerData.Credits >= glove.Glove.BuyPrice && !glove.IsBought)
                             {
@@ -4380,7 +4381,7 @@ namespace UnturnedBlackout.Instances
                             return;
                         }
 
-                        ThreadPool.QueueUserWorkItem(async (o) =>
+                        Task.Run(async () =>
                         {
                             var cost = gun.Gun.GetCoins(PlayerData.Level);
                             if (PlayerData.Coins >= cost && !gun.IsBought && !gun.IsUnlocked && gun.Gun.LevelRequirement > PlayerData.Level)
@@ -4419,7 +4420,7 @@ namespace UnturnedBlackout.Instances
                             return;
                         }
 
-                        ThreadPool.QueueUserWorkItem(async (o) =>
+                        Task.Run(async () =>
                         {
                             var cost = attachment.GetCoins(gun.Level);
                             if (PlayerData.Coins >= cost && !attachment.IsBought && !attachment.IsUnlocked && attachment.LevelRequirement > gun.Level)
@@ -4457,7 +4458,7 @@ namespace UnturnedBlackout.Instances
                             return;
                         }
 
-                        ThreadPool.QueueUserWorkItem(async (o) =>
+                        Task.Run(async () =>
                         {
                             var cost = attachment.GetCoins(gun.Level);
                             if (PlayerData.Coins >= cost && !attachment.IsBought && !attachment.IsUnlocked && attachment.LevelRequirement > gun.Level)
@@ -4488,7 +4489,7 @@ namespace UnturnedBlackout.Instances
                             return;
                         }
 
-                        ThreadPool.QueueUserWorkItem(async (o) =>
+                        Task.Run(async () =>
                         {
                             var cost = gunCharm.GunCharm.GetCoins(PlayerData.Level);
                             if (PlayerData.Coins >= cost && !gunCharm.IsBought && !gunCharm.IsUnlocked && gunCharm.GunCharm.LevelRequirement > PlayerData.Level)
@@ -4518,7 +4519,7 @@ namespace UnturnedBlackout.Instances
                             return;
                         }
 
-                        ThreadPool.QueueUserWorkItem(async (o) =>
+                        Task.Run(async () =>
                         {
                             var cost = knife.Knife.GetCoins(PlayerData.Level);
                             if (PlayerData.Coins >= cost && !knife.IsBought && !knife.IsUnlocked && knife.Knife.LevelRequirement > PlayerData.Level)
@@ -4549,7 +4550,7 @@ namespace UnturnedBlackout.Instances
                             return;
                         }
 
-                        ThreadPool.QueueUserWorkItem(async (o) =>
+                        Task.Run(async () =>
                         {
                             var cost = gadget.Gadget.GetCoins(PlayerData.Level);
                             if (PlayerData.Coins >= cost && !gadget.IsBought && !gadget.IsUnlocked && gadget.Gadget.LevelRequirement > PlayerData.Level)
@@ -4581,7 +4582,7 @@ namespace UnturnedBlackout.Instances
                             return;
                         }
 
-                        ThreadPool.QueueUserWorkItem(async (o) =>
+                        Task.Run(async () =>
                         {
                             var cost = perk.Perk.GetCoins(PlayerData.Level);
                             if (PlayerData.Coins >= cost && !perk.IsBought && !perk.IsUnlocked && perk.Perk.LevelRequirement > PlayerData.Level)
@@ -4611,7 +4612,7 @@ namespace UnturnedBlackout.Instances
                             return;
                         }
 
-                        ThreadPool.QueueUserWorkItem(async (o) =>
+                        Task.Run(async () =>
                         {
                             var cost = killstreak.Killstreak.GetCoins(PlayerData.Level);
                             if (PlayerData.Coins >= cost && !killstreak.IsBought && !killstreak.IsUnlocked && killstreak.Killstreak.LevelRequirement > PlayerData.Level)
@@ -4641,7 +4642,7 @@ namespace UnturnedBlackout.Instances
                             return;
                         }
 
-                        ThreadPool.QueueUserWorkItem(async (o) =>
+                        Task.Run(async () =>
                         {
                             var cost = card.Card.GetCoins(PlayerData.Level);
                             if (PlayerData.Coins >= cost && !card.IsBought && !card.IsUnlocked && card.Card.LevelRequirement > PlayerData.Level)
@@ -4671,7 +4672,7 @@ namespace UnturnedBlackout.Instances
                             return;
                         }
 
-                        ThreadPool.QueueUserWorkItem(async (o) =>
+                        Task.Run(async () =>
                         {
                             var cost = glove.Glove.GetCoins(PlayerData.Level);
                             if (PlayerData.Coins >= cost && !glove.IsBought && !glove.IsUnlocked && glove.Glove.LevelRequirement > PlayerData.Level)
@@ -5211,7 +5212,7 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards BUTTON {i}", false);
             }
 
-            ThreadPool.QueueUserWorkItem((o) =>
+            Task.Run(() =>
             {
                 var inputLower = input.ToLower();
                 var searchPlayers = data.Where(k => k.SteamName.ToLower().Contains(inputLower)).Take(10).ToList();
@@ -6034,14 +6035,14 @@ namespace UnturnedBlackout.Instances
             }
 
             @case.Amount--;
-            ThreadPool.QueueUserWorkItem(async (o) =>
+            Task.Run(async () =>
             {
                 await DB.DecreasePlayerCaseAsync(SteamID, @case.Case.CaseID, 1);
             });
 
             if (isDuplicate)
             {
-                ThreadPool.QueueUserWorkItem(async (o) =>
+                Task.Run(async () =>
                 {
                     await DB.IncreasePlayerScrapAsync(SteamID, duplicateScrapAmount);
                 });
@@ -6253,17 +6254,17 @@ namespace UnturnedBlackout.Instances
             {
                 case ECurrency.Coins:
                     PlayerData.Coins -= buyPrice;
-                    ThreadPool.QueueUserWorkItem(async (o) => await DB.DecreasePlayerCoinsAsync(SteamID, buyPrice));
+                    Task.Run(async () => await DB.DecreasePlayerCoinsAsync(SteamID, buyPrice));
                     break;
                 case ECurrency.Scrap:
                     PlayerData.Scrap -= buyPrice;
-                    ThreadPool.QueueUserWorkItem(async (o) => await DB.DecreasePlayerScrapAsync(SteamID, buyPrice));
+                    Task.Run(async () => await DB.DecreasePlayerScrapAsync(SteamID, buyPrice));
                     break;
                 default:
                     return;
             }
 
-            ThreadPool.QueueUserWorkItem(async (o) => await DB.IncreasePlayerCaseAsync(SteamID, @case.CaseID, 1));
+            Task.Run(async () => await DB.IncreasePlayerCaseAsync(SteamID, @case.CaseID, 1));
         }
 
         public bool TryGetUnboxRewardInfo(Reward reward, out string rewardName, out string rewardImage, out ERarity rewardRarity)
@@ -6577,7 +6578,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SwitchOn", isMusic);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Music", isMusic);
 
-            ThreadPool.QueueUserWorkItem(async (o) =>
+            Task.Run(async () =>
             {
                 await Plugin.Instance.DB.ChangePlayerMusicAsync(SteamID, isMusic);
             });

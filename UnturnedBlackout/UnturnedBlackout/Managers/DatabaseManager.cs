@@ -219,7 +219,7 @@ namespace UnturnedBlackout.Managers
                 await GetBaseDataAsync();
             }).Wait();
 
-            ThreadPool.QueueUserWorkItem((o) =>
+            Task.Run(() =>
             {
                 RefreshData(null, null);
                 m_LeaderboardChecker.Start();
@@ -5828,7 +5828,7 @@ namespace UnturnedBlackout.Managers
                         embed.fields[1].value += $"**Top {percentileReward.UpperPercentile}%:** {upperIndex - lowerIndex} players \n";
                     }
 
-                    ThreadPool.QueueUserWorkItem((o) =>
+                    Task.Run(() =>
                     {
                         try
                         {
@@ -5913,7 +5913,7 @@ namespace UnturnedBlackout.Managers
                         embed.fields[1].value += $"**Top {percentileReward.UpperPercentile}%:** {upperIndex - lowerIndex} players \n";
                     }
 
-                    ThreadPool.QueueUserWorkItem((o) =>
+                    Task.Run(() =>
                     {
                         try
                         {
@@ -5994,7 +5994,7 @@ namespace UnturnedBlackout.Managers
                         embed.fields[1].value += $"**Top {percentileReward.UpperPercentile}%:** {upperIndex - lowerIndex} players \n";
                     }
 
-                    ThreadPool.QueueUserWorkItem((o) =>
+                    Task.Run(() =>
                     {
                         try
                         {

@@ -3,6 +3,7 @@ using Steamworks;
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 using UnturnedBlackout.Enums;
 
 namespace UnturnedBlackout.Commands
@@ -55,7 +56,7 @@ namespace UnturnedBlackout.Commands
                 return;
             }
 
-            ThreadPool.QueueUserWorkItem(async (o) =>
+            Task.Run(async () =>
             {
                 await Plugin.Instance.DB.AddPlayerBoosterAsync(steamID, boosterType, boosterValue, expirationDays);
             });

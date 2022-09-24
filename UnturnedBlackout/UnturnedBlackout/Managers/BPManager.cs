@@ -2,6 +2,7 @@
 using Steamworks;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 using UnturnedBlackout.Database.Base;
 using UnturnedBlackout.Enums;
 using UnturnedBlackout.Models.Global;
@@ -73,7 +74,7 @@ namespace UnturnedBlackout.Managers
             Plugin.Instance.UI.OnBattlepassTierUpdated(player.SteamID, tierID);
 
             PendingWork.Remove(player.SteamID);
-            ThreadPool.QueueUserWorkItem(async (o) =>
+            Task.Run(async () =>
             {
                 if (isTop)
                     await DB.UpdatePlayerBPClaimedFreeRewardsAsync(player.SteamID);
@@ -99,7 +100,7 @@ namespace UnturnedBlackout.Managers
 
             PendingWork.Add(player.SteamID);
 
-            ThreadPool.QueueUserWorkItem(async (o) =>
+            Task.Run(async () =>
             {
                 if (player.Data.Coins >= Config.Base.FileData.BattlepassTierSkipCost)
                 {

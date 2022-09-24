@@ -3,6 +3,7 @@ using Rocket.Core.Utils;
 using Rocket.Unturned.Chat;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace UnturnedBlackout.Commands
 {
@@ -34,7 +35,7 @@ namespace UnturnedBlackout.Commands
                 return;
             }
 
-            ThreadPool.QueueUserWorkItem(async (o) =>
+            Task.Run(async () =>
             {
                 await Plugin.Instance.DB.GenerateAchievementTiersAsync(achievementID, command[1]);
 

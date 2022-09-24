@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using UnturnedBlackout.Enums;
 using UnturnedBlackout.GameTypes;
 using UnturnedBlackout.Models.Global;
@@ -163,7 +164,7 @@ namespace UnturnedBlackout.Managers
 
             var db = Plugin.Instance.DB;
             Plugin.Instance.UI.SendLoadingUI(player, false, EGameType.None, null, "LOADING...");
-            ThreadPool.QueueUserWorkItem(async (o) =>
+            Task.Run(async () =>
             {
                 var avatarURL = "";
                 try
