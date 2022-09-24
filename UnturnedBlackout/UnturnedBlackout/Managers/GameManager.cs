@@ -6,6 +6,7 @@ using Steamworks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using UnturnedBlackout.Enums;
 using UnturnedBlackout.GameTypes;
@@ -166,6 +167,7 @@ namespace UnturnedBlackout.Managers
             Task.Run(async () =>
             {
                 string avatarURL = "";
+                string countryCode = "EU";
                 try
                 {
                     avatarURL = player.SteamProfile.AvatarFull.ToString();
@@ -175,9 +177,19 @@ namespace UnturnedBlackout.Managers
                     Logger.Log("Error getting the steam profile for the player");
                     Logger.Log(ex);
                 }
-                finally
+
+                try
                 {
-                    await db.AddPlayerAsync(player, player.CharacterName, avatarURL);
+                    using HttpClient wc = new();
+                    countryCode = await wc.GetStringAsync($"http://ipinfo.io/{player.IP}/country");
+                } catch (Exception ex)
+                {
+                    Logger.Log($"Error getting the country code for the player with ip {player.IP}");
+                    Logger.Log(ex);
+                } finally
+                {
+                    Logging.Debug($"{player.CharacterName}, country code: {countryCode}");
+                    await db.AddPlayerAsync(player, player.CharacterName, avatarURL, countryCode);
                     await db.GetPlayerDataAsync(player);
                 }
 

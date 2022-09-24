@@ -550,6 +550,11 @@ namespace UnturnedBlackout.Models.Global
             {
                 Plugin.Instance.UI.SetupKillstreakUI(this);
             }
+
+            if (ExtraKillstreak > 0)
+            {
+                UpdateKillstreak(ExtraKillstreak);
+            }
         }
 
         public void UpdateKillstreak(int currentKillstreak)

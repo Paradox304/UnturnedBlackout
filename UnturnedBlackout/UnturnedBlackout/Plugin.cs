@@ -145,7 +145,7 @@ namespace UnturnedBlackout
             while (true)
             {
                 yield return new WaitForSeconds(60);
-                LightingManager.time = (uint)(LightingManager.cycle * LevelLighting.transition);
+                //LightingManager.time = (uint)(LightingManager.cycle * LevelLighting.transition);
                 Logging.Debug($"TPS: {Provider.debugTPS}", System.ConsoleColor.Red);
                 Logging.Debug($"UPS: {Provider.debugUPS}", System.ConsoleColor.Red);
             }
