@@ -1,5 +1,6 @@
 ﻿using Rocket.Core.Utils;
 using Rocket.Unturned;
+using Rocket.Unturned.Events;
 using Rocket.Unturned.Player;
 using SDG.NetTransport;
 using SDG.Unturned;
@@ -105,6 +106,9 @@ namespace UnturnedBlackout.Managers
         public const ushort KILLSTREAK_ID = 27649;
         public const short KILLSTREAK_KEY = 27649;
 
+        public const ushort KILLSTREAK_AVAILABLE_ID = 27650;
+        public const short KILLSTREAK_AVAILABLE_KEY = 27650;
+
         public const ushort FLAG_POPUP_UI = 27900;
         public const short FLAG_POPUP_KEY = 27900;
 
@@ -135,6 +139,8 @@ namespace UnturnedBlackout.Managers
             U.Events.OnPlayerConnected += OnConnected;
             U.Events.OnPlayerDisconnected += OnDisconnected;
 
+            UnturnedPlayerEvents.OnPlayerUpdateStamina += OnStaminaUpdated;
+
             EffectManager.onEffectButtonClicked += OnButtonClicked;
             EffectManager.onEffectTextCommitted += OnTextCommitted;
         }
@@ -152,6 +158,8 @@ namespace UnturnedBlackout.Managers
 
             U.Events.OnPlayerConnected -= OnConnected;
             U.Events.OnPlayerDisconnected -= OnDisconnected;
+
+            UnturnedPlayerEvents.OnPlayerUpdateStamina -= OnStaminaUpdated;
         }
 
         public void RegisterUIHandler(UnturnedPlayer player)
@@ -354,6 +362,15 @@ namespace UnturnedBlackout.Managers
                         EffectManager.sendUIEffectImageURL(ACHIEVEMENT_COMPLETION_KEY, player.TransportConnection, true, "LevelUpIcon", achievement.TierPrevLarge);
                         EffectManager.sendUIEffectText(ACHIEVEMENT_COMPLETION_KEY, player.TransportConnection, true, "LevelUpTxt", achievement.TierTitle);
                         EffectManager.sendUIEffectText(ACHIEVEMENT_COMPLETION_KEY, player.TransportConnection, true, "LevelUpDesc", achievement.TierDesc);
+                        break;
+                    }
+                case EAnimationType.KillstreakAvailable:
+                    {
+                        var killstreak = animationInfo.Info as Killstreak;
+                        EffectManager.sendUIEffect(KILLSTREAK_AVAILABLE_ID, KILLSTREAK_AVAILABLE_KEY, player.TransportConnection, true);
+                        EffectManager.sendUIEffectImageURL(KILLSTREAK_AVAILABLE_KEY, player.TransportConnection, true, "LevelUpIcon", killstreak.IconLink);
+                        EffectManager.sendUIEffectText(KILLSTREAK_AVAILABLE_KEY, player.TransportConnection, true, "LevelUpTxt", "KILLSTREAK AVAILABLE");
+                        EffectManager.sendUIEffectText(KILLSTREAK_AVAILABLE_KEY, player.TransportConnection, true, "LevelUpDesc", $"{killstreak.KillstreakName} is available");
                         break;
                     }
                 default:
@@ -750,6 +767,17 @@ namespace UnturnedBlackout.Managers
             player.Player.equipment.onDequipRequested -= OnDequipRequested;
             player.Player.inventory.onDropItemRequested -= OnDropItemRequested;
             player.Player.stance.onStanceUpdated -= () => OnStanceUpdated(player.Player);
+        }
+
+        private void OnStaminaUpdated(UnturnedPlayer player, byte stamina)
+        {
+            if (stamina > 50) return;
+
+            var gPlayer = Plugin.Instance.Game.GetGamePlayer(player);
+            if (gPlayer.HasKillstreakActive && gPlayer.ActiveKillstreak.Killstreak.KillstreakInfo.HasInfiniteStamina)
+            {
+                player.Player.life.serverModifyStamina(100);
+            }
         }
 
         private void OnStanceUpdated(Player player)

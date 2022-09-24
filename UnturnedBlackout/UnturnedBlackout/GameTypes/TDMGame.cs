@@ -67,7 +67,7 @@ namespace UnturnedBlackout.GameTypes
 
         public IEnumerator StartGame()
         {
-            TaskDispatcher.QueueOnMainThread(() => WipeItems());
+            TaskDispatcher.QueueOnMainThread(() => CleanMap());
             GamePhase = EGamePhase.Starting;
             foreach (var player in Players)
             {
@@ -176,12 +176,18 @@ namespace UnturnedBlackout.GameTypes
             {
                 Plugin.Instance.UI.ClearTDMHUD(player.GamePlayer);
                 Plugin.Instance.UI.ClearMidgameLoadoutUI(player.GamePlayer);
+                if (player.GamePlayer.Player.Player.life.isDead)
+                {
+                    player.GamePlayer.Player.Player.life.ServerRespawn(false);
+                }
+                Plugin.Instance.UI.RemoveKillCard(player.GamePlayer);
 
                 if (player.GamePlayer.HasScoreboard)
                 {
                     player.GamePlayer.HasScoreboard = false;
                     Plugin.Instance.UI.HideTDMLeaderboard(player.GamePlayer);
                 }
+
                 var summary = new MatchEndSummary(player.GamePlayer, player.XP, player.StartingLevel, player.StartingXP, player.Kills, player.Deaths, player.Assists, player.HighestKillstreak, player.HighestMK, player.StartTime, GameMode, player.Team == wonTeam);
                 summaries.Add(player.GamePlayer, summary);
                 ThreadPool.QueueUserWorkItem(async (o) =>
@@ -196,13 +202,14 @@ namespace UnturnedBlackout.GameTypes
                 {
                     TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.Quest.CheckQuest(player.GamePlayer, EQuestType.Win, new Dictionary<EQuestCondition, int> { { EQuestCondition.Map, Location.LocationID }, { EQuestCondition.Gamemode, (int)GameMode }, { EQuestCondition.WinKills, player.Kills } }));
                 }
+
                 Plugin.Instance.UI.SetupPreEndingUI(player.GamePlayer, EGameType.TDM, player.Team.TeamID == wonTeam.TeamID, BlueTeam.Score, RedTeam.Score, BlueTeam.Info.TeamName, RedTeam.Info.TeamName);
                 player.GamePlayer.Player.Player.quests.askSetRadioFrequency(CSteamID.Nil, Frequency);
             }
             TaskDispatcher.QueueOnMainThread(() =>
             {
                 Plugin.Instance.UI.SetupTDMLeaderboard(Players, Location, wonTeam, BlueTeam, RedTeam, false, IsHardcore);
-                WipeItems();
+                CleanMap();
             });
             yield return new WaitForSeconds(5);
             foreach (var player in Players)

@@ -484,6 +484,8 @@ namespace UnturnedBlackout.Managers
                 return;
             }
 
+            playerLoadout.Killstreaks.RemoveAll(k => k.Killstreak.KillstreakRequired == killstreak.Killstreak.KillstreakRequired);
+
             if (playerLoadout.Killstreaks.Count == 3)
             {
                 playerLoadout.Killstreaks.RemoveAt(0);

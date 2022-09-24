@@ -75,6 +75,7 @@ namespace UnturnedBlackout.Models.Global
         public List<LoadoutKillstreak> OrderedKillstreaks { get; set; }
         public Dictionary<LoadoutKillstreak, bool> AvailableKillstreaks { get; set; }
         public Dictionary<ushort, LoadoutKillstreak> KillstreakTriggers { get; set; }
+        public int ExtraKillstreak { get; set; }
 
         public float PrimaryMovementChange { get; set; }
         public float PrimaryMovementChangeADS { get; set; }
@@ -468,6 +469,7 @@ namespace UnturnedBlackout.Models.Global
 
             Plugin.Instance.UI.SendDeathUI(this, killerPlayer, killerData);
             PreviousStance = EPlayerStance.STAND;
+            RespawnTimer.Stop();
             RespawnTimer = Plugin.Instance.StartCoroutine(RespawnTime(respawnSeconds));
         }
 
@@ -485,6 +487,8 @@ namespace UnturnedBlackout.Models.Global
 
         public void OnRevived(Kit kit, List<TeamGlove> gloves)
         {
+            RespawnTimer.Stop();
+
             if (IsPendingLoadoutChange)
             {
                 Plugin.Instance.Loadout.GiveLoadout(this, kit, gloves);
@@ -636,6 +640,8 @@ namespace UnturnedBlackout.Models.Global
             KillstreakTriggers = new();
             OrderedKillstreaks = new();
 
+            ExtraKillstreak = ActiveLoadout.PerksSearchByType.TryGetValue("expert", out LoadoutPerk expertPerk) ? expertPerk.Perk.SkillLevel : 0;
+
             foreach (var killstreak in ActiveLoadout.Killstreaks.OrderBy(k => k.Killstreak.KillstreakRequired))
             {
                 OrderedKillstreaks.Add(killstreak);
@@ -655,15 +661,17 @@ namespace UnturnedBlackout.Models.Global
         
         public void UpdateKillstreak(int currentKillstreak)
         {
-            Logging.Debug($"Updating killstreak for {Player.CharacterName} with killstreak {currentKillstreak}");
-            var availableKillstreak = OrderedKillstreaks.FirstOrDefault(k => k.Killstreak.KillstreakRequired == currentKillstreak && !AvailableKillstreaks[k]);
+            var updatedKillstreak = currentKillstreak + ExtraKillstreak;
+            Logging.Debug($"Updating killstreak for {Player.CharacterName} with killstreak {updatedKillstreak}");
+            var availableKillstreak = OrderedKillstreaks.FirstOrDefault(k => k.Killstreak.KillstreakRequired == updatedKillstreak && !AvailableKillstreaks[k]);
             if (availableKillstreak != null)
             {
                 AvailableKillstreaks[availableKillstreak] = true;
                 Plugin.Instance.UI.UpdateKillstreakReady(this, availableKillstreak);
+                Plugin.Instance.UI.SendAnimation(this, new AnimationInfo(EAnimationType.KillstreakAvailable, availableKillstreak.Killstreak));
             }
 
-            Plugin.Instance.UI.UpdateKillstreakBars(this, currentKillstreak);
+            Plugin.Instance.UI.UpdateKillstreakBars(this, updatedKillstreak);
         }
 
         public void ActivateKillstreak(LoadoutKillstreak killstreak)

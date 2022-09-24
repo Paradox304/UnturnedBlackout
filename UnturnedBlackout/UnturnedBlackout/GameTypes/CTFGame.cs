@@ -106,7 +106,7 @@ namespace UnturnedBlackout.GameTypes
 
             TaskDispatcher.QueueOnMainThread(() =>
             {
-                WipeItems();
+                CleanMap();
                 ItemManager.dropItem(new Item(RedTeam.FlagID, true), RedTeam.FlagSP, true, true, true);
                 ItemManager.dropItem(new Item(BlueTeam.FlagID, true), BlueTeam.FlagSP, true, true, true);
             });
@@ -192,6 +192,11 @@ namespace UnturnedBlackout.GameTypes
             {
                 Plugin.Instance.UI.ClearCTFHUD(player.GamePlayer);
                 Plugin.Instance.UI.ClearMidgameLoadoutUI(player.GamePlayer);
+                if (player.GamePlayer.Player.Player.life.isDead)
+                {
+                    player.GamePlayer.Player.Player.life.ServerRespawn(false);
+                }
+                Plugin.Instance.UI.RemoveKillCard(player.GamePlayer);
 
                 if (player.GamePlayer.HasScoreboard)
                 {
@@ -218,7 +223,7 @@ namespace UnturnedBlackout.GameTypes
             TaskDispatcher.QueueOnMainThread(() =>
             {
                 Plugin.Instance.UI.SetupCTFLeaderboard(Players, Location, wonTeam, BlueTeam, RedTeam, false, IsHardcore);
-                WipeItems();
+                CleanMap();
             });
             yield return new WaitForSeconds(5);
             foreach (var player in Players)

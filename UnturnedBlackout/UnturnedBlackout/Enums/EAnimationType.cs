@@ -7,6 +7,7 @@
         QuestCompletion,
         AchievementCompletion,
         BattlepassTierCompletion,
-        ItemUnlock
+        ItemUnlock,
+        KillstreakAvailable
     }
 }

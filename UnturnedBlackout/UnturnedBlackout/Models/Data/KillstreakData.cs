@@ -13,6 +13,7 @@
         public string MedalName { get; set; }
         public int MedalXP { get; set; }
         public float MovementMultiplier { get; set; }
+        public bool HasInfiniteStamina { get; set; }
 
         public KillstreakData()
         {

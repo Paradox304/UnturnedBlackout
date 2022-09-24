@@ -295,11 +295,16 @@ namespace UnturnedBlackout.GameTypes
             return Plugin.Instance.DB.Cases.TryGetValue(cases[UnityEngine.Random.Range(0, cases.Count)].CaseID, out @case) ? @case : null;
         }
 
-        public void WipeItems()
+        public void CleanMap()
         {
             foreach (var region in ItemManager.regions)
             {
                 region.items.RemoveAll(k => LevelNavigation.tryGetNavigation(k.point, out byte nav) && nav == Location.NavMesh);
+            }
+
+            foreach (var region in BarricadeManager.BarricadeRegions)
+            {
+                region.drops.RemoveAll(k => LevelNavigation.tryGetNavigation(k.model.transform.position, out byte nav) && nav == Location.NavMesh);
             }
         }
 

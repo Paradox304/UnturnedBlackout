@@ -68,7 +68,7 @@ namespace UnturnedBlackout.GameTypes
 
         public IEnumerator StartGame()
         {
-            TaskDispatcher.QueueOnMainThread(() => WipeItems());
+            TaskDispatcher.QueueOnMainThread(() => CleanMap());
             GamePhase = EGamePhase.Starting;
             foreach (var player in Players)
             {
@@ -179,6 +179,11 @@ namespace UnturnedBlackout.GameTypes
             {
                 Plugin.Instance.UI.ClearKCHUD(player.GamePlayer);
                 Plugin.Instance.UI.ClearMidgameLoadoutUI(player.GamePlayer);
+                if (player.GamePlayer.Player.Player.life.isDead)
+                {
+                    player.GamePlayer.Player.Player.life.ServerRespawn(false);
+                }
+                Plugin.Instance.UI.RemoveKillCard(player.GamePlayer);
 
                 if (player.GamePlayer.HasScoreboard)
                 {
@@ -205,7 +210,7 @@ namespace UnturnedBlackout.GameTypes
             TaskDispatcher.QueueOnMainThread(() =>
             {
                 Plugin.Instance.UI.SetupKCLeaderboard(Players, Location, wonTeam, BlueTeam, RedTeam, false, IsHardcore);
-                WipeItems();
+                CleanMap();
             });
             yield return new WaitForSeconds(5);
             foreach (var player in Players)

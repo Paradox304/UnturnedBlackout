@@ -68,6 +68,9 @@ namespace UnturnedBlackout.Models.TDM
 
         public void SetKillstreak(int killstreak)
         {
+            if (GamePlayer.Player.Player.life.isDead)
+                return;
+
             Killstreak = killstreak;
             if (killstreak > HighestKillstreak)
             {
@@ -78,6 +81,9 @@ namespace UnturnedBlackout.Models.TDM
 
         public void SetMultipleKills(int multikills)
         {
+            if (GamePlayer.Player.Player.life.isDead)
+                return;
+
             MultipleKills = multikills;
             if (multikills > HighestMK)
             {

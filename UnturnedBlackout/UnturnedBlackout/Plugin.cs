@@ -74,8 +74,15 @@ namespace UnturnedBlackout
             var ply = Provider.pending.FirstOrDefault(k => k.playerID.steamID == player);
             if (ply == null) return;
 
-            var newName = ply.playerID.characterName.ToUnrich();
+            var newName = ply.playerID.characterName.ToUnrich().Trim();
             var chars = newName.Count();
+
+            if (chars == 0)
+            {
+                rejectionReason = ESteamRejection.NAME_CHARACTER_INVALID;
+                return;
+            }
+
             if (chars > Config.Base.FileData.MaxPlayerNameCharacters)
             {
                 newName = newName.Remove(Config.Base.FileData.MaxPlayerNameCharacters, chars - Config.Base.FileData.MaxPlayerNameCharacters);

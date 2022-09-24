@@ -243,6 +243,7 @@ namespace UnturnedBlackout.Managers
 
         public void SendPlayerToLobby(UnturnedPlayer player, MatchEndSummary summary = null)
         {
+            player.Player.enablePluginWidgetFlag(EPluginWidgetFlags.Modal);
             player.Player.inventory.ClearInventory();
             player.Player.life.serverModifyHealth(100);
             TaskDispatcher.QueueOnMainThread(() =>
