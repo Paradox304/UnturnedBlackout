@@ -787,6 +787,8 @@ namespace UnturnedBlackout.Instances
 
         public void SetupMainMenu()
         {
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Options Audio Music Toggler", PlayerData.Music);
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Options Audio Flag Toggler", PlayerData.HideFlag);
             EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Player Icon", PlayerData.AvatarLink);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Player Name", (PlayerData.HasPrime ? UIManager.PRIME_SYMBOL : "") + PlayerData.SteamName);
 
@@ -805,7 +807,6 @@ namespace UnturnedBlackout.Instances
             ClearChat();
             ShowXP();
             ShowQuestCompletion();
-            OnMusicChanged(PlayerData.Music);
 
             Task.Run(() => BuildAchievementPages());
         }
@@ -995,6 +996,34 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Play Ping TEXT", " ");
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Play IP TEXT", $"{server.FriendlyIP}:{server.Port}");
         }
+        #endregion
+
+        #region OptionsPage
+
+        public void MusicButtonPressed()
+        {
+            PlayerData.Music = !PlayerData.Music;
+
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Options Audio Music Toggler", PlayerData.Music);
+
+            Task.Run(async () =>
+            {
+                await Plugin.Instance.DB.ChangePlayerMusicAsync(SteamID, PlayerData.Music);
+            });
+        }
+
+        public void FlagButtonPressed()
+        {
+            PlayerData.HideFlag = !PlayerData.HideFlag;
+
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Options Audio Flag Toggler", PlayerData.HideFlag);
+
+            Task.Run(async () =>
+            {
+                await Plugin.Instance.DB.ChangePlayerHideFlagAsync(SteamID, PlayerData.HideFlag);
+            });
+        }
+
         #endregion
 
         #region LoadoutPage
@@ -5089,7 +5118,7 @@ namespace UnturnedBlackout.Instances
 
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Leaderboards Level TEXT 10", PlayerData.Level.ToString());
             EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Leaderboards Level IMAGE 10", Plugin.Instance.DB.Levels.TryGetValue(PlayerData.Level, out XPLevel level) ? level.IconLinkMedium : "");
-            EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Leaderboards Flag IMAGE 10", Utility.GetFlag(PlayerData.CountryCode));
+            EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Leaderboards Flag IMAGE 10", PlayerData.HideFlag ? Config.Icons.FileData.UnkownFlagIconLink : Utility.GetFlag(PlayerData.CountryCode), forceRefresh: true);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Leaderboards Name TEXT 10", (PlayerData.HasPrime ? UIManager.PRIME_SYMBOL : "") + PlayerData.SteamName);
 
             SelectLeaderboardPage(ELeaderboardPage.Daily);
@@ -5172,7 +5201,7 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Rank TEXT {index}", (i + 1).ToString());
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Level TEXT {index}", playerData.Level.ToString());
                 EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Level IMAGE {index}", Plugin.Instance.DB.Levels.TryGetValue(playerData.Level, out XPLevel level) ? level.IconLinkMedium : "");
-                EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Flag IMAGE {index}", Utility.GetFlag(playerData.CountryCode));
+                EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Flag IMAGE {index}", playerData.HideFlag ? Config.Icons.FileData.UnkownFlagIconLink : Utility.GetFlag(playerData.CountryCode), forceRefresh: true);
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Name TEXT {index}", (playerData.HasPrime ? UIManager.PRIME_SYMBOL : "") + playerData.SteamName);
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Kills TEXT {index}", (playerData.Kills + playerData.HeadshotKills).ToString());
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Deaths TEXT {index}", playerData.Deaths.ToString());
@@ -5232,7 +5261,7 @@ namespace UnturnedBlackout.Instances
                         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Rank TEXT {i}", (data.IndexOf(playerData) + 1).ToString());
                         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Level TEXT {i}", playerData.Level.ToString());
                         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Level IMAGE {i}", Plugin.Instance.DB.Levels.TryGetValue(playerData.Level, out XPLevel level) ? level.IconLinkMedium : "");
-                        EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Flag IMAGE {i}", Utility.GetFlag(playerData.CountryCode));
+                        EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Flag IMAGE {i}", playerData.HideFlag ? Config.Icons.FileData.UnkownFlagIconLink : Utility.GetFlag(playerData.CountryCode), forceRefresh: true);
                         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Name TEXT {i}", playerData.SteamName);
                         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Kills TEXT {i}", (playerData.Kills + playerData.HeadshotKills).ToString());
                         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Deaths TEXT {i}", playerData.Deaths.ToString());
@@ -5284,9 +5313,7 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Quest Title TEXT {i}", quest.Quest.QuestTitle);
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Quest Target TEXT {i}", $"{quest.Amount}/{quest.Quest.TargetAmount}");
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Quest Reward TEXT {i}", $"+{quest.Quest.XP}★");
-                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Quest Bar Fill {i}", quest.Amount == 0 ? UIManager.
-                    
-                    : new string(UIManager.HAIRSPACE_SYMBOL_CHAR, Math.Min(256, quest.Amount * 256 / quest.Quest.TargetAmount)));
+                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Quest Bar Fill {i}", quest.Amount == 0 ? UIManager.HAIRSPACE_SYMBOL_STRING : new string(UIManager.HAIRSPACE_SYMBOL_CHAR, Math.Min(256, quest.Amount * 256 / quest.Quest.TargetAmount)));
             }
         }
 
@@ -6573,19 +6600,6 @@ namespace UnturnedBlackout.Instances
         {
             Logging.Debug($"Currency updated {Player.CharacterName}, {currency}");
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Currency {currency} TEXT", PlayerData.GetCurrency(currency).ToString());
-        }
-
-        public void OnMusicChanged(bool isMusic)
-        {
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, isMusic ? "KnobOn" : "KnobOff", true);
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, isMusic ? "KnobOff" : "KnobOn", false);
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SwitchOn", isMusic);
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Music", isMusic);
-
-            Task.Run(async () =>
-            {
-                await Plugin.Instance.DB.ChangePlayerMusicAsync(SteamID, isMusic);
-            });
         }
 
         public IEnumerator RefreshTimer()

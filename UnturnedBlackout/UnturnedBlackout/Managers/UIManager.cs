@@ -211,6 +211,7 @@ namespace UnturnedBlackout.Managers
         // ALL GAMES RELATED UI
 
         // WAITING FOR PLAYERS
+
         public void SendWaitingForPlayersUI(GamePlayer player, int playerCount, int waitingPlayers)
         {
             EffectManager.sendUIEffect(WAITING_FOR_PLAYERS_ID, WAITING_FOR_PLAYERS_KEY, player.TransportConnection, true, Plugin.Instance.Translate("Waiting_For_Players_Show", playerCount, waitingPlayers).ToRich());
@@ -375,8 +376,7 @@ namespace UnturnedBlackout.Managers
                         Killstreak killstreak = animationInfo.Info as Killstreak;
                         EffectManager.sendUIEffect(KILLSTREAK_AVAILABLE_ID, KILLSTREAK_AVAILABLE_KEY, player.TransportConnection, true);
                         EffectManager.sendUIEffectImageURL(KILLSTREAK_AVAILABLE_KEY, player.TransportConnection, true, "LevelUpIcon", killstreak.IconLink);
-                        EffectManager.sendUIEffectText(KILLSTREAK_AVAILABLE_KEY, player.TransportConnection, true, "LevelUpTxt", "KILLSTREAK AVAILABLE");
-                        EffectManager.sendUIEffectText(KILLSTREAK_AVAILABLE_KEY, player.TransportConnection, true, "LevelUpDesc", $"{killstreak.KillstreakName} is available");
+                        EffectManager.sendUIEffectText(KILLSTREAK_AVAILABLE_KEY, player.TransportConnection, true, "LevelUpTxt", killstreak.KillstreakName.ToUpper());
                         break;
                     }
                 default:
@@ -1807,6 +1807,8 @@ namespace UnturnedBlackout.Managers
                 case "SERVER Battlepass BUTTON":
                     Plugin.Instance.StartCoroutine(handler.SetupBattlepass());
                     return;
+                case "SERVER Options BUTTON":
+                    return;
                 case "SERVER Exit BUTTON":
                     Provider.kick(player.channel.owner.playerID.steamID, "You exited");
                     return;
@@ -2076,11 +2078,11 @@ namespace UnturnedBlackout.Managers
                         Plugin.Instance.StopCoroutine(handler.MatchEndSummaryShower);
                     }
                     return;
-                case "KnobOff":
-                    handler.OnMusicChanged(true);
+                case "Music Toggle BUTTON":
+                    handler.MusicButtonPressed();
                     return;
-                case "KnobOn":
-                    handler.OnMusicChanged(false);
+                case "Flag Toggle BUTTON":
+                    handler.FlagButtonPressed();
                     return;
                 default:
                     break;
