@@ -6,6 +6,7 @@ using Steamworks;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using UnityEngine;
 using UnturnedBlackout.Database.Base;
@@ -301,11 +302,11 @@ namespace UnturnedBlackout.GameTypes
             {
                 region.items.RemoveAll(k => LevelNavigation.tryGetNavigation(k.point, out byte nav) && nav == Location.NavMesh);
             }
-
-            foreach (BarricadeRegion region in BarricadeManager.BarricadeRegions)
-            {
-                region.drops.RemoveAll(k => LevelNavigation.tryGetNavigation(k.model.transform.position, out byte nav) && nav == Location.NavMesh);
-            }
+            Stopwatch stopWatch = new();
+            stopWatch.Start();
+            BarricadeManager.BarricadeRegions.Cast<BarricadeRegion>().SelectMany(k => k.drops).Where(k => LevelNavigation.tryGetNavigation(k.model.transform.position, out byte nav) && nav == Location.NavMesh).Select(k => BarricadeManager.tryGetRegion(k.model.transform, out byte x, out byte y, out ushort plant, out _) ? (k, x, y, plant) : (k, Byte.MaxValue, Byte.MaxValue, ushort.MaxValue)).Where(k => k.Item2 != Byte.MaxValue).ToList().ForEach(k => BarricadeManager.destroyBarricade(k.k, k.Item2, k.Item3, k.Item4));
+            stopWatch.Stop();
+            Logging.Debug($"Clearing all barricades in a game, that one liner took {stopWatch.ElapsedTicks} ticks, {stopWatch.ElapsedMilliseconds}ms");
         }
 
         public void Destroy()
