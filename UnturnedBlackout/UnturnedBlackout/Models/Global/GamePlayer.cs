@@ -553,7 +553,7 @@ namespace UnturnedBlackout.Models.Global
 
             if (ExtraKillstreak > 0)
             {
-                UpdateKillstreak(ExtraKillstreak);
+                Plugin.Instance.UI.UpdateKillstreakBars(this, ExtraKillstreak);
             }
         }
 

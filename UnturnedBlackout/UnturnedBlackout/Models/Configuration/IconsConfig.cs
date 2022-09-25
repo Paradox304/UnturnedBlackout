@@ -22,6 +22,7 @@
         public string BPXPBoostIconLink { get; set; }
 
         public string HiddenFlagIconLink { get; set; }
+        public string FlagAPILink { get; set; }
 
         public IconsConfig()
         {
