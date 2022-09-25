@@ -21,7 +21,7 @@
         public string GunXPBoostIconLink { get; set; }
         public string BPXPBoostIconLink { get; set; }
 
-        public string UnkownFlagIconLink { get; set; }
+        public string HiddenFlagIconLink { get; set; }
 
         public IconsConfig()
         {
