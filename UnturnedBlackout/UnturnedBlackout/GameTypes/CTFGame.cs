@@ -300,6 +300,7 @@ namespace UnturnedBlackout.GameTypes
             Plugin.Instance.UI.ClearLoadingUI(player.Player);
             Plugin.Instance.UI.SendVoiceChatUI(player);
 
+            player.IsLoading = false;
             switch (GamePhase)
             {
                 case EGamePhase.WaitingForPlayers:
@@ -347,8 +348,6 @@ namespace UnturnedBlackout.GameTypes
                     Plugin.Instance.UI.SendCTFHUD(cPlayer, BlueTeam, RedTeam, Players);
                     break;
             }
-
-            player.IsLoading = false;
         }
 
         public override void RemovePlayerFromGame(GamePlayer player)

@@ -243,6 +243,7 @@ namespace UnturnedBlackout.GameTypes
             GiveLoadout(fPlayer);
             Plugin.Instance.UI.SendPreEndingUI(fPlayer.GamePlayer);
 
+            player.IsLoading = false;
             switch (GamePhase)
             {
                 case EGamePhase.WaitingForPlayers:
@@ -282,7 +283,6 @@ namespace UnturnedBlackout.GameTypes
                     break;
             }
 
-            player.IsLoading = false;
             Plugin.Instance.UI.ClearLoadingUI(player.Player);
             Plugin.Instance.UI.SendVoiceChatUI(player);
         }
