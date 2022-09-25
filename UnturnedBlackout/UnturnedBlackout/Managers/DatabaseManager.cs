@@ -3847,6 +3847,30 @@ namespace UnturnedBlackout.Managers
             }
         }
 
+        public async Task UpdatePlayerCountryCodeAsync(CSteamID steamID, string countryCode)
+        {
+            using MySqlConnection Conn = new(ConnectionString);
+            try
+            {
+                await Conn.OpenAsync();
+
+                await new MySqlCommand($"UPDATE `{PLAYERS}` SET `CountryCode` = '{countryCode}' WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                if (PlayerData.TryGetValue(steamID, out PlayerData data))
+                {
+                    data.CountryCode = countryCode;
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"Error changing country code to {countryCode} for player with steam id {steamID}");
+                Logger.Log(ex);
+            }
+            finally
+            {
+                await Conn.CloseAsync();
+            }
+        }
+
         public async Task ChangePlayerHideFlagAsync(CSteamID steamID, bool hideFlag)
         {
             using MySqlConnection Conn = new(ConnectionString);
