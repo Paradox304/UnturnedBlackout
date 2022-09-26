@@ -33,6 +33,7 @@ namespace UnturnedBlackout.Instances
         public const int MAX_PREVIEW_CONTENT_PER_CASE = 19;
         public const int MAX_ROLLING_CONTENT_PER_CASE = 23;
         private const int MAX_SPACES_MATCH_END_SUMMARY = 113;
+        private const int MAX_LOADOUTS_PER_PAGE = 9;
 
         public DatabaseManager DB { get; set; }
         public CSteamID SteamID { get; set; }
@@ -201,7 +202,7 @@ namespace UnturnedBlackout.Instances
             foreach (KeyValuePair<int, Loadout> loadout in PlayerLoadout.Loadouts)
             {
                 loadouts.Add(index, loadout.Value);
-                if (index == 8)
+                if (index == MAX_LOADOUTS_PER_PAGE)
                 {
                     LoadoutPages.Add(page, new PageLoadout(page, loadouts));
                     index = 0;
@@ -1094,7 +1095,7 @@ namespace UnturnedBlackout.Instances
         {
             LoadoutPageID = page.PageID;
 
-            for (int i = 0; i <= 9; i++)
+            for (int i = 0; i <= MAX_LOADOUTS_PER_PAGE; i++)
             {
                 if (!page.Loadouts.TryGetValue(i, out Loadout loadout))
                 {
