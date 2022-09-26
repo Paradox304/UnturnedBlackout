@@ -1,13 +1,13 @@
-﻿using Rocket.Unturned.Enumerations;
-using Rocket.Unturned.Events;
-using Rocket.Unturned.Player;
-using SDG.Unturned;
-using Steamworks;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using Rocket.Unturned.Enumerations;
+using Rocket.Unturned.Events;
+using Rocket.Unturned.Player;
+using SDG.Unturned;
+using Steamworks;
 using UnityEngine;
 using UnturnedBlackout.Database.Base;
 using UnturnedBlackout.Enums;
@@ -278,7 +278,7 @@ namespace UnturnedBlackout.GameTypes
             int randInt = UnityEngine.Random.Range(0, poolSize) + 1;
 
             int accumulatedProbability = 0;
-            Case @case = null;
+            Case @case;
             for (int i = 0; i < cases.Count; i++)
             {
                 RoundEndCase roundEndCase = cases[i];
@@ -304,7 +304,7 @@ namespace UnturnedBlackout.GameTypes
             }
             Stopwatch stopWatch = new();
             stopWatch.Start();
-            BarricadeManager.BarricadeRegions.Cast<BarricadeRegion>().SelectMany(k => k.drops).Where(k => LevelNavigation.tryGetNavigation(k.model.transform.position, out byte nav) && nav == Location.NavMesh).Select(k => BarricadeManager.tryGetRegion(k.model.transform, out byte x, out byte y, out ushort plant, out _) ? (k, x, y, plant) : (k, Byte.MaxValue, Byte.MaxValue, ushort.MaxValue)).Where(k => k.Item2 != Byte.MaxValue).ToList().ForEach(k => BarricadeManager.destroyBarricade(k.k, k.Item2, k.Item3, k.Item4));
+            BarricadeManager.BarricadeRegions.Cast<BarricadeRegion>().SelectMany(k => k.drops).Where(k => LevelNavigation.tryGetNavigation(k.model.transform.position, out byte nav) && nav == Location.NavMesh).Select(k => BarricadeManager.tryGetRegion(k.model.transform, out byte x, out byte y, out ushort plant, out _) ? (k, x, y, plant) : (k, byte.MaxValue, byte.MaxValue, ushort.MaxValue)).Where(k => k.Item2 != byte.MaxValue).ToList().ForEach(k => BarricadeManager.destroyBarricade(k.k, k.Item2, k.Item3, k.Item4));
             stopWatch.Stop();
             Logging.Debug($"Clearing all barricades in a game, that one liner took {stopWatch.ElapsedTicks} ticks, {stopWatch.ElapsedMilliseconds}ms");
         }

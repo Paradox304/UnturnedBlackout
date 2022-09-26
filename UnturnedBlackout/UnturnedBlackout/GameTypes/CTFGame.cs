@@ -493,8 +493,7 @@ namespace UnturnedBlackout.GameTypes
                         {
                             Plugin.Instance.UI.ShowXPUI(assister.GamePlayer, Config.Medals.FileData.AssistKillXP, Plugin.Instance.Translate("Assist_Kill", cPlayer.GamePlayer.Player.CharacterName.ToUnrich()));
                         }
-                        Task.Run(async () => await Plugin.Instance.DB.IncreasePlayerXPAsync(assister.GamePlayer.SteamID,
-                            Config.Medals.FileData.AssistKillXP));
+                        Task.Run(async () => await Plugin.Instance.DB.IncreasePlayerXPAsync(assister.GamePlayer.SteamID, Config.Medals.FileData.AssistKillXP));
                     }
                     cPlayer.GamePlayer.LastDamager.Clear();
                 }

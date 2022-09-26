@@ -363,7 +363,10 @@
     <Content Include="Libraries\UnityEngine.dll" />
     <Content Include="Libraries\UnityEngine.PhysicsModule.dll" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Analyzer Include="..\packages\StyleCop.Analyzers.1.1.118\analyzers\dotnet\cs\StyleCop.Analyzers.CodeFixes.dll" />
+    <Analyzer Include="..\packages\StyleCop.Analyzers.1.1.118\analyzers\dotnet\cs\StyleCop.Analyzers.dll" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>C:\Users\maazk\source\repos\UnturnedBlackout\UnturnedBlackout\UnturnedBlackout\bin\Debug\obfuscation.bat</PostBuildEvent>

@@ -141,7 +141,6 @@ namespace UnturnedBlackout.Models.Global
         }
 
         // Loadout
-
         public void SetActiveLoadout(Loadout loadout, byte knifePage, byte knifeX, byte knifeY)
         {
             ActiveLoadout = loadout;
@@ -198,7 +197,6 @@ namespace UnturnedBlackout.Models.Global
         }
 
         // Tactical and Lethal
-
         public void UsedTactical()
         {
             HasTactical = false;
@@ -278,7 +276,6 @@ namespace UnturnedBlackout.Models.Global
         }
 
         // Healing
-
         public void OnDamaged(CSteamID damager)
         {
             DamageChecker.Stop();
@@ -322,7 +319,6 @@ namespace UnturnedBlackout.Models.Global
         }
 
         // Kill Card
-
         public void OnKilled(GamePlayer victim)
         {
             PlayerData victimData = victim.Data;
@@ -330,7 +326,6 @@ namespace UnturnedBlackout.Models.Global
         }
 
         // Death screen
-
         public void OnDeath(CSteamID killer, int respawnSeconds)
         {
             if (HasKillstreakActive)
@@ -377,7 +372,6 @@ namespace UnturnedBlackout.Models.Global
         }
 
         // Equipping and refilling on guns on respawn
-
         public void OnRevived(Kit kit, List<TeamGlove> gloves)
         {
             RespawnTimer.Stop();
@@ -408,7 +402,6 @@ namespace UnturnedBlackout.Models.Global
         }
 
         // Stance changing
-
         public void OnStanceChanged(EPlayerStance newStance)
         {
             TaskDispatcher.QueueOnMainThread(() =>
@@ -425,7 +418,6 @@ namespace UnturnedBlackout.Models.Global
         }
 
         // Voice chat
-
         public void OnTalking()
         {
             if (VoiceChatChecker != null)
@@ -452,7 +444,6 @@ namespace UnturnedBlackout.Models.Global
         }
 
         // Animation
-
         public IEnumerator CheckAnimation()
         {
             HasAnimationGoingOn = true;
@@ -467,7 +458,6 @@ namespace UnturnedBlackout.Models.Global
         }
 
         // Movement
-
         public void GiveMovement(bool isADS, bool isCarryingFlag, bool doSteps)
         {
             if (ActiveLoadout == null)
@@ -523,7 +513,6 @@ namespace UnturnedBlackout.Models.Global
         }
 
         // Killstreak
-
         public void SetupKillstreaks()
         {
             HasKillstreakActive = false;
@@ -680,7 +669,6 @@ namespace UnturnedBlackout.Models.Global
         }
 
         // Events
-
         public void OnGameJoined(Game game)
         {
             CurrentGame = game;
