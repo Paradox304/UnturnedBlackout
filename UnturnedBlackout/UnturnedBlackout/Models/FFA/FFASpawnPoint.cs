@@ -12,6 +12,11 @@ namespace UnturnedBlackout.Models.FFA
 
         public float Yaw { get; set; }
 
+        public FFASpawnPoint()
+        {
+
+        }
+
         public FFASpawnPoint(int locationID, float x, float y, float z, float yaw)
         {
             LocationID = locationID;

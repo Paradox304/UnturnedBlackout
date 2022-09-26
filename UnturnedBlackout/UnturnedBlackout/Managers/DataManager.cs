@@ -1,5 +1,5 @@
-﻿using Newtonsoft.Json;
-using System.IO;
+﻿using System.IO;
+using System.Text.Json;
 using UnturnedBlackout.Models.Data;
 
 namespace UnturnedBlackout.Managers
@@ -38,25 +38,25 @@ namespace UnturnedBlackout.Managers
 
         public void LoadJson()
         {
-            PositionsData deserialized = JsonConvert.DeserializeObject<PositionsData>(File.ReadAllText(Path));
+            PositionsData deserialized = JsonSerializer.Deserialize<PositionsData>(File.ReadAllText(Path));
             Data = deserialized;
         }
 
         public string ToJson(PositionsData data)
         {
-            string serialized = JsonConvert.SerializeObject(data, Formatting.Indented);
+            string serialized = JsonSerializer.Serialize(data);
             return serialized;
         }
 
         public string ConvertLoadoutToJson(LoadoutData data)
         {
-            string serialized = JsonConvert.SerializeObject(data, Formatting.None);
+            string serialized = JsonSerializer.Serialize(data);
             return serialized;
         }
 
         public LoadoutData ConvertLoadoutFromJson(string serialized)
         {
-            LoadoutData deserialized = JsonConvert.DeserializeObject<LoadoutData>(serialized);
+            LoadoutData deserialized = JsonSerializer.Deserialize<LoadoutData>(serialized);
             return deserialized;
         }
     }

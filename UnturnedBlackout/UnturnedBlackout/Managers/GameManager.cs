@@ -182,13 +182,15 @@ namespace UnturnedBlackout.Managers
                 {
                     using HttpClient wc = new();
                     countryCode = await wc.GetStringAsync($"http://ipinfo.io/{player.IP}/country");
-                } catch (Exception ex)
+                    countryCode = countryCode.Replace("\n", "").Replace("\r", "");
+                }
+                catch (Exception ex)
                 {
                     Logger.Log($"Error getting the country code for the player with ip {player.IP}");
                     Logger.Log(ex);
                 } finally
                 {
-                    Logging.Debug($"{player.CharacterName}, country code: {countryCode}");
+                    Logging.Debug($"{player.CharacterName}, country code: {countryCode}asdas");
                     await db.AddPlayerAsync(player, player.CharacterName, avatarURL, countryCode);
                     await db.GetPlayerDataAsync(player);
                 }

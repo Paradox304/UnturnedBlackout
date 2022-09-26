@@ -14,6 +14,11 @@ namespace UnturnedBlackout.Models.CTF
         public float Yaw { get; set; }
         public bool IsFlagSP { get; set; }
 
+        public CTFSpawnPoint()
+        {
+
+        }
+
         public CTFSpawnPoint(int locationID, int groupID, float x, float y, float z, float yaw, bool isFlagSP)
         {
             LocationID = locationID;

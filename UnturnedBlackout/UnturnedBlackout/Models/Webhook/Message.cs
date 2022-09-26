@@ -1,8 +1,5 @@
-﻿using Newtonsoft.Json;
-
-namespace UnturnedBlackout.Models.Webhook
+﻿namespace UnturnedBlackout.Models.Webhook
 {
-    [JsonObject]
     public class Message
     {
         public string username;
@@ -10,6 +7,11 @@ namespace UnturnedBlackout.Models.Webhook
         public string avatar_url;
 
         public Embed[] embeds;
+
+        public Message()
+        {
+
+        }
 
         public Message(string username, string avatar_url, Embed[] embeds)
         {

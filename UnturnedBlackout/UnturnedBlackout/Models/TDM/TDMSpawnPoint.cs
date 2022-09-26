@@ -13,6 +13,11 @@ namespace UnturnedBlackout.Models.TDM
 
         public float Yaw { get; set; }
 
+        public TDMSpawnPoint()
+        {
+
+        }
+
         public TDMSpawnPoint(int locationID, int groupID, float x, float y, float z, float yaw)
         {
             LocationID = locationID;

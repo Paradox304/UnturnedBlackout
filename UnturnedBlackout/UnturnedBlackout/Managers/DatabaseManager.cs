@@ -5491,11 +5491,14 @@ namespace UnturnedBlackout.Managers
 
         private void RefreshData(object sender, System.Timers.ElapsedEventArgs e)
         {
+
             using MySqlConnection Conn = new(ConnectionString);
+
             try
             {
+
                 Conn.Open();
-                MySqlDataReader rdr = new MySqlCommand($"SELECT * FROM `{OPTIONS}`;", Conn).ExecuteReader();
+                var rdr = new MySqlCommand($"SELECT * FROM `{OPTIONS}`;", Conn).ExecuteReader();
                 try
                 {
                     while (rdr.Read())
@@ -5861,6 +5864,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 List<(CSteamID, List<Reward>)> bulkRewards = new();
+
                 if (ServerOptions.DailyLeaderboardWipe < DateTimeOffset.UtcNow)
                 {
 
@@ -6087,7 +6091,8 @@ namespace UnturnedBlackout.Managers
                     });
                 }
 
-                Plugin.Instance.Reward.GiveBulkRewards(bulkRewards);
+                if (bulkRewards.Count > 0)
+                    Plugin.Instance.Reward.GiveBulkRewards(bulkRewards);
 
                 foreach (PlayerData data in PlayerData.Values)
                 {

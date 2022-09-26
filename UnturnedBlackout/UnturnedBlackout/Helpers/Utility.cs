@@ -482,6 +482,7 @@ namespace UnturnedBlackout
 
         public static string GetFlag(string country) => Plugin.Instance.Config.Icons.FileData.FlagAPILink.Replace("{country}", country.ToLower());
 
+
         public static List<uint> UsedFrequencies = new();
     }
 }

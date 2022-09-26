@@ -146,8 +146,8 @@ namespace UnturnedBlackout
             {
                 yield return new WaitForSeconds(60);
                 //LightingManager.time = (uint)(LightingManager.cycle * LevelLighting.transition);
-                Logging.Debug($"TPS: {Provider.debugTPS}", System.ConsoleColor.Red);
-                Logging.Debug($"UPS: {Provider.debugUPS}", System.ConsoleColor.Red);
+                Logging.Debug($"TPS: {Provider.debugTPS}", System.ConsoleColor.Yellow);
+                Logging.Debug($"UPS: {Provider.debugUPS}", System.ConsoleColor.Yellow);
             }
         }
 
@@ -184,6 +184,8 @@ namespace UnturnedBlackout
             Logging.Debug("Init Config");
             UI = new();
             Logging.Debug("Init UI");
+            Reward = new();
+            Logging.Debug("Init Reward");
             DB = new();
             Logging.Debug("Init Database");
             BP = new();
@@ -192,8 +194,6 @@ namespace UnturnedBlackout
             Logging.Debug("Init Loadout");
             Data = new();
             Logging.Debug("Init Data");
-            Reward = new();
-            Logging.Debug("Init Reward");
             Quest = new();
             Logging.Debug("Init Quest");
             Achievement = new();
