@@ -2,11 +2,11 @@
 {
     public class Message
     {
-        public string username;
+        public string username { get; set; }
 
-        public string avatar_url;
+        public string avatar_url { get; set; }
 
-        public Embed[] embeds;
+        public Embed[] embeds { get; set; }
 
         public Message()
         {

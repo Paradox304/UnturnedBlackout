@@ -190,7 +190,7 @@ namespace UnturnedBlackout.Managers
                     Logger.Log(ex);
                 } finally
                 {
-                    Logging.Debug($"{player.CharacterName}, country code: {countryCode}asdas");
+                    Logging.Debug($"{player.CharacterName}, country code: {countryCode}");
                     await db.AddPlayerAsync(player, player.CharacterName, avatarURL, countryCode);
                     await db.GetPlayerDataAsync(player);
                 }

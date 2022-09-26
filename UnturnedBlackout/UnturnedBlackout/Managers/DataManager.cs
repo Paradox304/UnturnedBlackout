@@ -33,7 +33,8 @@ namespace UnturnedBlackout.Managers
 
         public void SaveJson()
         {
-            File.WriteAllText(Path, ToJson(Data));
+            using var writer = File.Open(Path, FileMode.Create);
+            JsonSerializer.Serialize(writer, Data, new JsonSerializerOptions() { WriteIndented = true });
         }
 
         public void LoadJson()
@@ -42,15 +43,9 @@ namespace UnturnedBlackout.Managers
             Data = deserialized;
         }
 
-        public string ToJson(PositionsData data)
-        {
-            string serialized = JsonSerializer.Serialize(data);
-            return serialized;
-        }
-
         public string ConvertLoadoutToJson(LoadoutData data)
         {
-            string serialized = JsonSerializer.Serialize(data);
+            string serialized = JsonSerializer.Serialize(data, new JsonSerializerOptions() { WriteIndented = true });
             return serialized;
         }
 
