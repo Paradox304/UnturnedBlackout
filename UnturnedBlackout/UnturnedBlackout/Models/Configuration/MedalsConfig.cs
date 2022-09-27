@@ -7,6 +7,7 @@
         public int HeadshotKillXP { get; set; }
         public int KillstreakKillXP { get; set; }
         public int LethalKillXP { get; set; }
+        public int LethalHitXP { get; set; }
         public int AssistKillXP { get; set; }
         public int ShutdownXP { get; set; }
         public int DominationXP { get; set; }
@@ -36,6 +37,7 @@
             HeadshotKillXP = 0;
             KillstreakKillXP = 0;
             LethalKillXP = 0;
+            LethalHitXP = 0;
             AssistKillXP = 0;
             ShutdownXP = 0;
             DominationXP = 0;

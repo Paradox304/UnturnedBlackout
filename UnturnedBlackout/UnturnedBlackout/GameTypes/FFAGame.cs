@@ -312,6 +312,14 @@ namespace UnturnedBlackout.GameTypes
                 Plugin.Instance.UI.ClearWaitingForPlayersUI(player);
             }
 
+            if (GamePhase != EGamePhase.Ending)
+            {
+                TaskDispatcher.QueueOnMainThread(() =>
+                {
+                    BarricadeManager.BarricadeRegions.Cast<BarricadeRegion>().SelectMany(k => k.drops).Where(k => (k.GetServersideData()?.owner ?? 0UL) == player.SteamID.m_SteamID && LevelNavigation.tryGetNavigation(k.model.transform.position, out byte nav) && nav == Location.NavMesh).Select(k => BarricadeManager.tryGetRegion(k.model.transform, out byte x, out byte y, out ushort plant, out _) ? (k, x, y, plant) : (k, byte.MaxValue, byte.MaxValue, ushort.MaxValue)).ToList().ForEach(k => BarricadeManager.destroyBarricade(k.k, k.Item2, k.Item3, k.Item4));
+                });
+            }
+
             player.Player.Player.quests.askSetRadioFrequency(CSteamID.Nil, 0);
             fPlayer.GamePlayer.OnGameLeft();
             Players.Remove(fPlayer);
@@ -665,6 +673,11 @@ namespace UnturnedBlackout.GameTypes
 
             float damageIncreasePercent = kPlayer.GamePlayer.ActiveLoadout.PerksSearchByType.TryGetValue(damageIncreasePerkName, out LoadoutPerk damageIncreaserPerk) ? ((float)damageIncreaserPerk.Perk.SkillLevel / 100) : 0f;
             parameters.damage += damageIncreasePercent * parameters.damage;
+
+            if (parameters.cause == EDeathCause.GRENADE && parameters.damage < player.GamePlayer.Player.Player.life.health)
+            {
+                Plugin.Instance.UI.ShowXPUI(kPlayer.GamePlayer, Config.Medals.FileData.LethalHitXP, Plugin.Instance.Translate("Lethal_Hit"));
+            }
 
             if (kPlayer.GamePlayer.HasSpawnProtection)
             {

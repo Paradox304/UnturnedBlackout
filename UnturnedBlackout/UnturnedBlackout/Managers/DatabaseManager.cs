@@ -1,4 +1,6 @@
 ﻿using MySql.Data.MySqlClient;
+using Rocket.API;
+using Rocket.Core;
 using Rocket.Core.Steam;
 using Rocket.Core.Utils;
 using Rocket.Unturned.Player;
@@ -3993,6 +3995,7 @@ namespace UnturnedBlackout.Managers
                 DateTimeOffset primeLastDailyReward = DateTimeOffset.UtcNow;
                 await new MySqlCommand($"UPDATE `{PLAYERS}` SET `PrimeExpiry` = `PrimeExpiry` + {days * 24 * 60 * 60} WHERE `HasPrime` = true AND `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
                 await new MySqlCommand($"UPDATE `{PLAYERS}` SET `HasPrime` = true, `PrimeExpiry` = {expiryDate.ToUnixTimeSeconds()} , `PrimeLastDailyReward` = {primeLastDailyReward.ToUnixTimeSeconds()} WHERE `HasPrime` = false AND `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                R.Permissions.AddPlayerToGroup("Prime", new RocketPlayer(steamID.ToString()));
 
                 if (!PlayerData.TryGetValue(steamID, out PlayerData data))
                 {
@@ -6205,6 +6208,7 @@ namespace UnturnedBlackout.Managers
                             data.HasPrime = false;
                             Plugin.Instance.Reward.RemoveRewards(data.SteamID, ServerOptions.PrimeRewards);
                             new MySqlCommand($"UPDATE `{PLAYERS}` SET `HasPrime` = false WHERE `SteamID` = {data.SteamID};", Conn).ExecuteScalar();
+                            R.Permissions.RemovePlayerFromGroup("Prime", new RocketPlayer(data.SteamID.ToString()));
                         }
 
                         int daysWorthReward = (int)(maxRewardDate - data.PrimeLastDailyReward.UtcDateTime).TotalDays;

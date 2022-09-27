@@ -667,10 +667,11 @@ namespace UnturnedBlackout.Instances
             int index = 0;
             int page = 1;
             Dictionary<int, LoadoutKillstreak> killstreaks = new();
+
             foreach (LoadoutKillstreak killstreak in PlayerLoadout.Killstreaks.Values.OrderBy(k => k.Killstreak.LevelRequirement))
             {
                 killstreaks.Add(index, killstreak);
-                if (index == MAX_ITEMS_PER_PAGE)
+                if (index == MAX_ITEMS_PER_GRID)
                 {
                     KillstreakPages.Add(page, new PageKillstreak(page, killstreaks));
                     killstreaks = new Dictionary<int, LoadoutKillstreak>();
@@ -680,6 +681,7 @@ namespace UnturnedBlackout.Instances
                 }
                 index++;
             }
+
             if (killstreaks.Count != 0)
             {
                 KillstreakPages.Add(page, new PageKillstreak(page, killstreaks));
@@ -1192,7 +1194,7 @@ namespace UnturnedBlackout.Instances
             for (int i = 0; i <= 2; i++)
             {
                 EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout Killstreak IMAGE {i}", loadout.Killstreaks.Count < (i + 1) ? "" : loadout.Killstreaks[i].Killstreak.IconLink);
-                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout Killstreak TEXT {i}", loadout.Killstreaks.Count < (i + 1) ? "" : loadout.Killstreaks[i].Killstreak.KillstreakName);
+                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout Killstreak TEXT {i}", loadout.Killstreaks.Count < (i + 1) ? "" : loadout.Killstreaks[i].Killstreak.KillstreakRequired.ToString());
             }
 
             // Card
@@ -1410,7 +1412,7 @@ namespace UnturnedBlackout.Instances
             for (int i = 0; i <= 2; i++)
             {
                 EffectManager.sendUIEffectImageURL(MIDGAME_LOADOUT_KEY, TransportConnection, true, $"SERVER Loadout Killstreak IMAGE {i}", loadout.Killstreaks.Count < (i + 1) ? "" : loadout.Killstreaks[i].Killstreak.IconLink);
-                EffectManager.sendUIEffectText(MIDGAME_LOADOUT_KEY, TransportConnection, true, $"SERVER Loadout Killstreak TEXT {i}", loadout.Killstreaks.Count < (i + 1) ? "" : loadout.Killstreaks[i].Killstreak.KillstreakName);
+                EffectManager.sendUIEffectText(MIDGAME_LOADOUT_KEY, TransportConnection, true, $"SERVER Loadout Killstreak TEXT {i}", loadout.Killstreaks.Count < (i + 1) ? "" : loadout.Killstreaks[i].Killstreak.KillstreakRequired.ToString());
             }
 
             // Card
@@ -1713,6 +1715,9 @@ namespace UnturnedBlackout.Instances
                                         Logging.Debug($"Error finding the first page for killstreaks for {Player.CharacterName}");
                                         return;
                                     }
+
+                                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Next BUTTON", KillstreakPages.Count > 1);
+                                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Previous BUTTON", KillstreakPages.Count > 1);
 
                                     ShowKillstreakPage(firstPage);
                                     break;
@@ -3079,7 +3084,7 @@ namespace UnturnedBlackout.Instances
             }
 
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Page TEXT", $"Page {page.PageID}");
-            for (int i = 0; i <= MAX_ITEMS_PER_PAGE; i++)
+            for (int i = 0; i <= MAX_ITEMS_PER_GRID; i++)
             {
                 if (!page.Killstreaks.TryGetValue(i, out LoadoutKillstreak killstreak))
                 {
@@ -3087,13 +3092,10 @@ namespace UnturnedBlackout.Instances
                     continue;
                 }
 
-                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item BUTTON {i}", true);
-                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Equipped {i}", currentLoadout.Killstreaks.Contains(killstreak));
-                EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item IMAGE {i}", killstreak.Killstreak.IconLink);
-                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item TEXT {i}", killstreak.Killstreak.KillstreakName);
-                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay {i}", !killstreak.IsBought);
-                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", killstreak.Killstreak.LevelRequirement > PlayerData.Level && !killstreak.IsUnlocked ? Plugin.Instance.Translate("Unlock_Level", killstreak.Killstreak.LevelRequirement) : $"{Utility.GetCurrencySymbol(ECurrency.Credits)} <color={(PlayerData.Credits >= killstreak.Killstreak.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{killstreak.Killstreak.BuyPrice}</color>");
-                SendRarity("SERVER Item", killstreak.Killstreak.KillstreakRarity, i);
+                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Grid BUTTON {i}", true);
+                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Grid Equipped {i}", currentLoadout.Killstreaks.Contains(killstreak));
+                EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Grid IMAGE {i}", killstreak.Killstreak.IconLink);
+                SendRarity("SERVER Item Grid", killstreak.Killstreak.KillstreakRarity, i);
             }
         }
 

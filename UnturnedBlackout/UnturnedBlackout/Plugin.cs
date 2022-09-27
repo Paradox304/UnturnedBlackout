@@ -253,6 +253,7 @@ namespace UnturnedBlackout
             { "Assist_Kill", "Kill Assist ({0})" },
             { "Melee_Kill", "Melee Kill" },
             { "Lethal_Kill", "Lethal Kill" },
+            { "Lethal_Hit", "Lethal Hit" },
             { "Killstreak_Kill", "Killstreak Kill" },
             { "Kill_Confirmed", "Kill Confirmed" },
             { "Kill_Denied", "Kill Denied" },
