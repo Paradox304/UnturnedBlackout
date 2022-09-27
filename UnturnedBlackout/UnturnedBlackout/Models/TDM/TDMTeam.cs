@@ -94,6 +94,7 @@ namespace UnturnedBlackout.Models.TDM
                     CheckSpawnSwitcher = Plugin.Instance.StartCoroutine(SpawnSwitch());
                 }
             }
+
             Players[steamID] = DateTime.UtcNow;
         }
 
