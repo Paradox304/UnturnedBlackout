@@ -1212,14 +1212,17 @@ namespace UnturnedBlackout.Instances
                 return;
             }
 
+            Logging.Debug($"PRE LOADOUT EQUIP CHECK {Player.CharacterName}");
             Task.Run(async () =>
             {
+                Logging.Debug($"TASK ENTERED LOADOUT CHECK {Player.CharacterName}");
                 foreach (Loadout activeLoadout in PlayerLoadout.Loadouts.Values.Where(k => k.IsActive))
                 {
                     await DB.UpdatePlayerLoadoutActiveAsync(Player.CSteamID, activeLoadout.LoadoutID, false);
                 }
 
                 await DB.UpdatePlayerLoadoutActiveAsync(Player.CSteamID, LoadoutID, true);
+                Logging.Debug($"SQL QUERY EXECUTED LOADOUT CHECK {Player.CharacterName}");
                 TaskDispatcher.QueueOnMainThread(() =>
                 {
                     ReloadLoadoutPage();
@@ -1427,14 +1430,17 @@ namespace UnturnedBlackout.Instances
                 return;
             }
 
+            Logging.Debug($"PRE LOADOUT ACTIVE CHECK {Player.CharacterName}");
             Task.Run(async () =>
             {
+                Logging.Debug($"TASK ENTERED LOADOUT CHECK {Player.CharacterName}");
                 foreach (Loadout activeLoadout in PlayerLoadout.Loadouts.Values.Where(k => k.IsActive))
                 {
                     await DB.UpdatePlayerLoadoutActiveAsync(Player.CSteamID, activeLoadout.LoadoutID, false);
                 }
 
                 await DB.UpdatePlayerLoadoutActiveAsync(Player.CSteamID, LoadoutID, true);
+                Logging.Debug($"SQL QUERY EXECUTED LOADOUT CHECK {Player.CharacterName}");
                 TaskDispatcher.QueueOnMainThread(() =>
                 {
                     ClearMidgameLoadouts();

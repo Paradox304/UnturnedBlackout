@@ -91,7 +91,7 @@ namespace UnturnedBlackout.Managers
             Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
             Task.Run(async () =>
             {
-                Logging.Debug($"THREAD ENTERED LOADOUT CHECK {player.CharacterName}");
+                Logging.Debug($"TASK ENTERED LOADOUT CHECK {player.CharacterName}");
                 await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
                 Logging.Debug($"SQL QUERY EXECUTED LOADOUT CHECK {player.CharacterName}");
             });
@@ -138,7 +138,7 @@ namespace UnturnedBlackout.Managers
             Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
             Task.Run(async () =>
             {
-                Logging.Debug($"THREAD ENTERED LOADOUT CHECK {player.CharacterName}");
+                Logging.Debug($"TASK ENTERED LOADOUT CHECK {player.CharacterName}");
                 await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
                 Logging.Debug($"SQL QUERY EXECUTED LOADOUT CHECK {player.CharacterName}");
             });
@@ -180,7 +180,7 @@ namespace UnturnedBlackout.Managers
                 Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
                 Task.Run(async () =>
                 {
-                    Logging.Debug($"THREAD ENTERED LOADOUT CHECK {player.CharacterName}");
+                    Logging.Debug($"TASK ENTERED LOADOUT CHECK {player.CharacterName}");
                     await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
                     Logging.Debug($"SQL QUERY EXECUTED LOADOUT CHECK {player.CharacterName}");
                 });
@@ -225,7 +225,7 @@ namespace UnturnedBlackout.Managers
             Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
             Task.Run(async () =>
             {
-                Logging.Debug($"THREAD ENTERED LOADOUT CHECK {player.CharacterName}");
+                Logging.Debug($"TASK ENTERED LOADOUT CHECK {player.CharacterName}");
                 await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
                 Logging.Debug($"SQL QUERY EXECUTED LOADOUT CHECK {player.CharacterName}");
             });
@@ -256,7 +256,7 @@ namespace UnturnedBlackout.Managers
             Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
             Task.Run(async () =>
             {
-                Logging.Debug($"THREAD ENTERED LOADOUT CHECK {player.CharacterName}");
+                Logging.Debug($"TASK ENTERED LOADOUT CHECK {player.CharacterName}");
                 await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
                 Logging.Debug($"SQL QUERY EXECUTED LOADOUT CHECK {player.CharacterName}");
             });
@@ -287,7 +287,7 @@ namespace UnturnedBlackout.Managers
             Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
             Task.Run(async () =>
             {
-                Logging.Debug($"THREAD ENTERED LOADOUT CHECK {player.CharacterName}");
+                Logging.Debug($"TASK ENTERED LOADOUT CHECK {player.CharacterName}");
                 await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
                 Logging.Debug($"SQL QUERY EXECUTED LOADOUT CHECK {player.CharacterName}");
             });
@@ -318,7 +318,7 @@ namespace UnturnedBlackout.Managers
             Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
             Task.Run(async () =>
             {
-                Logging.Debug($"THREAD ENTERED LOADOUT CHECK {player.CharacterName}");
+                Logging.Debug($"TASK ENTERED LOADOUT CHECK {player.CharacterName}");
                 await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
                 Logging.Debug($"SQL QUERY EXECUTED LOADOUT CHECK {player.CharacterName}");
             });
@@ -349,7 +349,7 @@ namespace UnturnedBlackout.Managers
             Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
             Task.Run(async () =>
             {
-                Logging.Debug($"THREAD ENTERED LOADOUT CHECK {player.CharacterName}");
+                Logging.Debug($"TASK ENTERED LOADOUT CHECK {player.CharacterName}");
                 await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
                 Logging.Debug($"SQL QUERY EXECUTED LOADOUT CHECK {player.CharacterName}");
             });
@@ -380,7 +380,7 @@ namespace UnturnedBlackout.Managers
             Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
             Task.Run(async () =>
             {
-                Logging.Debug($"THREAD ENTERED LOADOUT CHECK {player.CharacterName}");
+                Logging.Debug($"TASK ENTERED LOADOUT CHECK {player.CharacterName}");
                 await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
                 Logging.Debug($"SQL QUERY EXECUTED LOADOUT CHECK {player.CharacterName}");
             });
@@ -421,7 +421,7 @@ namespace UnturnedBlackout.Managers
             Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
             Task.Run(async () =>
             {
-                Logging.Debug($"THREAD ENTERED LOADOUT CHECK {player.CharacterName}");
+                Logging.Debug($"TASK ENTERED LOADOUT CHECK {player.CharacterName}");
                 await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
                 Logging.Debug($"SQL QUERY EXECUTED LOADOUT CHECK {player.CharacterName}");
             });
@@ -457,7 +457,7 @@ namespace UnturnedBlackout.Managers
             Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
             Task.Run(async () =>
             {
-                Logging.Debug($"THREAD ENTERED LOADOUT CHECK {player.CharacterName}");
+                Logging.Debug($"TASK ENTERED LOADOUT CHECK {player.CharacterName}");
                 await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
                 Logging.Debug($"SQL QUERY EXECUTED LOADOUT CHECK {player.CharacterName}");
             });
@@ -499,7 +499,7 @@ namespace UnturnedBlackout.Managers
             Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
             Task.Run(async () =>
             {
-                Logging.Debug($"THREAD ENTERED LOADOUT CHECK {player.CharacterName}");
+                Logging.Debug($"TASK ENTERED LOADOUT CHECK {player.CharacterName}");
                 await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
                 Logging.Debug($"SQL QUERY EXECUTED LOADOUT CHECK {player.CharacterName}");
             });
@@ -535,7 +535,7 @@ namespace UnturnedBlackout.Managers
             Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
             Task.Run(async () =>
             {
-                Logging.Debug($"THREAD ENTERED LOADOUT CHECK {player.CharacterName}");
+                Logging.Debug($"TASK ENTERED LOADOUT CHECK {player.CharacterName}");
                 await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
                 Logging.Debug($"SQL QUERY EXECUTED LOADOUT CHECK {player.CharacterName}");
             });
@@ -584,7 +584,7 @@ namespace UnturnedBlackout.Managers
             Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
             Task.Run(async () =>
             {
-                Logging.Debug($"THREAD ENTERED LOADOUT CHECK {player.CharacterName}");
+                Logging.Debug($"TASK ENTERED LOADOUT CHECK {player.CharacterName}");
                 await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
                 Logging.Debug($"SQL QUERY EXECUTED LOADOUT CHECK {player.CharacterName}");
             });
@@ -617,7 +617,7 @@ namespace UnturnedBlackout.Managers
             Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
             Task.Run(async () =>
             {
-                Logging.Debug($"THREAD ENTERED LOADOUT CHECK {player.CharacterName}");
+                Logging.Debug($"TASK ENTERED LOADOUT CHECK {player.CharacterName}");
                 await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
                 Logging.Debug($"SQL QUERY EXECUTED LOADOUT CHECK {player.CharacterName}");
             });
