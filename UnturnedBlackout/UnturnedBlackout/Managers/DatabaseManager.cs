@@ -347,6 +347,7 @@ namespace UnturnedBlackout.Managers
                         {
                             continue;
                         }
+                        
                         if (!int.TryParse(rdr[11].ToString(), out int coins))
                         {
                             continue;
@@ -5287,7 +5288,6 @@ namespace UnturnedBlackout.Managers
         }
 
         // Player Gloves
-
         public async Task AddPlayerGloveAsync(CSteamID steamID, int gloveID, bool isBought)
         {
             using MySqlConnection Conn = new(ConnectionString);
@@ -5425,7 +5425,6 @@ namespace UnturnedBlackout.Managers
         }
 
         // Player Loadouts
-
         public async Task UpdatePlayerLoadoutAsync(CSteamID steamID, int loadoutID)
         {
             using MySqlConnection Conn = new(ConnectionString);
@@ -5491,7 +5490,6 @@ namespace UnturnedBlackout.Managers
         }
 
         // Player Leaderboard
-
         private void RefreshData(object sender, System.Timers.ElapsedEventArgs e)
         {
 
@@ -6392,7 +6390,6 @@ namespace UnturnedBlackout.Managers
         }
 
         // Player Quest
-
         public async Task IncreasePlayerQuestAmountAsync(CSteamID steamID, int questID, int amount)
         {
             using MySqlConnection Conn = new(ConnectionString);
@@ -6432,7 +6429,6 @@ namespace UnturnedBlackout.Managers
         }
 
         // Player Achievement
-
         public async Task UpdatePlayerAchievementTierAsync(CSteamID steamID, int achievementID, int currentTier)
         {
             using MySqlConnection Conn = new(ConnectionString);
@@ -6536,7 +6532,6 @@ namespace UnturnedBlackout.Managers
         }
 
         // Player Battlepass
-
         public async Task IncreasePlayerBPXPAsync(CSteamID steamID, int xp)
         {
             using MySqlConnection Conn = new(ConnectionString);
@@ -6657,7 +6652,6 @@ namespace UnturnedBlackout.Managers
         }
 
         // Player Cases
-
         public async Task IncreasePlayerCaseAsync(CSteamID steamID, int caseID, int amount)
         {
             using MySqlConnection Conn = new(ConnectionString);
@@ -6767,7 +6761,6 @@ namespace UnturnedBlackout.Managers
         }
 
         // Player Boosters
-
         public async Task AddPlayerBoosterAsync(CSteamID steamID, EBoosterType boosterType, float boosterValue, int days)
         {
             using MySqlConnection Conn = new(ConnectionString);

@@ -4041,8 +4041,7 @@ namespace UnturnedBlackout.Instances
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
                                     EquipSelectedItem();
-                                    ReloadLoadoutTab();
-                                    ReloadSelectedItem();
+                                    BackToLoadout();
                                 });
                             }
                             else
@@ -4079,8 +4078,7 @@ namespace UnturnedBlackout.Instances
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
                                     EquipSelectedItem();
-                                    ReloadLoadoutTab();
-                                    ReloadSelectedItem();
+                                    BackToLoadout();
                                 });
                             }
                             else
@@ -4108,8 +4106,7 @@ namespace UnturnedBlackout.Instances
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
                                     EquipSelectedItem();
-                                    ReloadLoadoutTab();
-                                    ReloadSelectedItem();
+                                    BackToLoadout();
                                 });
                             }
                             else
@@ -4145,8 +4142,7 @@ namespace UnturnedBlackout.Instances
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
                                     EquipSelectedItem();
-                                    ReloadLoadoutTab();
-                                    ReloadSelectedItem();
+                                    BackToLoadout();
                                 });
                             }
                             else
@@ -4175,8 +4171,7 @@ namespace UnturnedBlackout.Instances
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
                                     EquipSelectedItem();
-                                    ReloadLoadoutTab();
-                                    ReloadSelectedItem();
+                                    BackToLoadout();
                                 });
                             }
                             else
@@ -4204,8 +4199,7 @@ namespace UnturnedBlackout.Instances
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
                                     EquipSelectedItem();
-                                    ReloadLoadoutTab();
-                                    ReloadSelectedItem();
+                                    BackToLoadout();
                                 });
                             }
                             else
@@ -4233,8 +4227,7 @@ namespace UnturnedBlackout.Instances
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
                                     EquipSelectedItem();
-                                    ReloadLoadoutTab();
-                                    ReloadSelectedItem();
+                                    BackToLoadout();
                                 });
                             }
                             else
@@ -4262,8 +4255,7 @@ namespace UnturnedBlackout.Instances
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
                                     EquipSelectedItem();
-                                    ReloadLoadoutTab();
-                                    ReloadSelectedItem();
+                                    BackToLoadout();
                                 });
                             }
                             else
@@ -4293,8 +4285,7 @@ namespace UnturnedBlackout.Instances
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
                                     EquipSelectedItem();
-                                    ReloadLoadoutTab();
-                                    ReloadSelectedItem();
+                                    BackToLoadout();
                                 });
                             }
                             else
@@ -4351,8 +4342,7 @@ namespace UnturnedBlackout.Instances
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
                                     EquipSelectedItem();
-                                    ReloadLoadoutTab();
-                                    ReloadSelectedItem();
+                                    BackToLoadout();
                                 });
                             }
                             else
@@ -4380,8 +4370,7 @@ namespace UnturnedBlackout.Instances
                                 TaskDispatcher.QueueOnMainThread(() =>
                                 {
                                     EquipSelectedItem();
-                                    ReloadLoadoutTab();
-                                    ReloadSelectedItem();
+                                    BackToLoadout();
                                 });
                             }
                             else
@@ -4748,6 +4737,7 @@ namespace UnturnedBlackout.Instances
                         }
 
                         loadoutManager.EquipGunSkin(Player, LoadoutID, skin.ID, true);
+                        BackToLoadout();
                         break;
                     }
 
@@ -4760,6 +4750,7 @@ namespace UnturnedBlackout.Instances
                         }
 
                         loadoutManager.EquipGunSkin(Player, LoadoutID, skin.ID, false);
+                        BackToLoadout();
                         break;
                     }
 
@@ -4774,6 +4765,7 @@ namespace UnturnedBlackout.Instances
                         if (gun.IsBought)
                         {
                             loadoutManager.EquipGun(Player, LoadoutID, gun.Gun.GunID, true);
+                            BackToLoadout();
                         }
 
                         break;
@@ -4799,6 +4791,7 @@ namespace UnturnedBlackout.Instances
                         if (attachment.IsBought)
                         {
                             loadoutManager.EquipAttachment(Player, attachment.Attachment.AttachmentID, LoadoutID, true);
+                            BackToLoadout();
                         }
 
                         break;
@@ -4815,6 +4808,7 @@ namespace UnturnedBlackout.Instances
                         if (gun.IsBought)
                         {
                             loadoutManager.EquipGun(Player, LoadoutID, gun.Gun.GunID, false);
+                            BackToLoadout();
                         }
 
                         break;
@@ -4839,6 +4833,7 @@ namespace UnturnedBlackout.Instances
                         if (attachment.IsBought)
                         {
                             loadoutManager.EquipAttachment(Player, attachment.Attachment.AttachmentID, LoadoutID, false);
+                            BackToLoadout();
                         }
 
                         break;
@@ -4856,7 +4851,9 @@ namespace UnturnedBlackout.Instances
                         if (gunCharm.IsBought)
                         {
                             loadoutManager.EquipGunCharm(Player, LoadoutID, gunCharm.GunCharm.CharmID, LoadoutPage.ToString().StartsWith("AttachmentPrimary"));
+                            BackToLoadout();
                         }
+
                         break;
                     }
 
@@ -4871,6 +4868,7 @@ namespace UnturnedBlackout.Instances
                         if (gadget.IsBought)
                         {
                             loadoutManager.EquipTactical(Player, LoadoutID, gadget.Gadget.GadgetID);
+                            BackToLoadout();
                         }
 
                         break;
@@ -4887,6 +4885,7 @@ namespace UnturnedBlackout.Instances
                         if (gadget.IsBought)
                         {
                             loadoutManager.EquipLethal(Player, LoadoutID, gadget.Gadget.GadgetID);
+                            BackToLoadout();
                         }
 
                         break;
@@ -4905,6 +4904,7 @@ namespace UnturnedBlackout.Instances
                         if (perk.IsBought)
                         {
                             loadoutManager.EquipPerk(Player, LoadoutID, perk.Perk.PerkID);
+                            BackToLoadout();
                         }
 
                         break;
@@ -4921,6 +4921,7 @@ namespace UnturnedBlackout.Instances
                         if (knife.IsBought)
                         {
                             loadoutManager.EquipKnife(Player, LoadoutID, knife.Knife.KnifeID);
+                            BackToLoadout();
                         }
 
                         break;
@@ -4937,6 +4938,8 @@ namespace UnturnedBlackout.Instances
                         if (killstreak.IsBought)
                         {
                             loadoutManager.EquipKillstreak(Player, LoadoutID, killstreak.Killstreak.KillstreakID);
+                            ReloadLoadoutTab();
+                            ReloadSelectedItem();
                         }
 
                         break;
@@ -4953,6 +4956,7 @@ namespace UnturnedBlackout.Instances
                         if (glove.IsBought)
                         {
                             loadoutManager.EquipGlove(Player, LoadoutID, glove.Glove.GloveID);
+                            BackToLoadout();
                         }
 
                         break;
@@ -4969,11 +4973,13 @@ namespace UnturnedBlackout.Instances
                         if (card.IsBought)
                         {
                             loadoutManager.EquipCard(Player, LoadoutID, card.Card.CardID);
+                            BackToLoadout();
                         }
 
                         break;
                     }
             }
+            
             ReloadLoadout();
         }
 
@@ -5117,6 +5123,11 @@ namespace UnturnedBlackout.Instances
                     }
             }
             ReloadLoadout();
+        }
+
+        public void BackToLoadout()
+        {
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Item Page Disabler", true);
         }
         #endregion
 
