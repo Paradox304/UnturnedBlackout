@@ -496,6 +496,8 @@ namespace UnturnedBlackout.Managers
                 playerLoadout.Killstreaks.Add(killstreak);
             }
 
+            playerLoadout.Killstreaks.Sort((x, y) => x.Killstreak.KillstreakRequired.CompareTo(y.Killstreak.KillstreakRequired));
+
             Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
             Task.Run(async () =>
             {
