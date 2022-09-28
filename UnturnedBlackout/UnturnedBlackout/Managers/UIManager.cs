@@ -870,7 +870,7 @@ namespace UnturnedBlackout.Managers
                 {
                     return;
                 }
-                if (player.HasKillstreakActive && asset.id != player.ActiveKillstreak.Killstreak.KillstreakInfo.ItemID)
+                if (player.HasKillstreakActive && player.ActiveKillstreak.Killstreak.KillstreakInfo.IsItem && asset.id != player.ActiveKillstreak.Killstreak.KillstreakInfo.ItemID)
                 {
                     player.RemoveActiveKillstreak();
                 }
@@ -911,7 +911,7 @@ namespace UnturnedBlackout.Managers
         {
             GamePlayer player = Plugin.Instance.Game.GetGamePlayer(equipment.player);
             Logging.Debug($"{player.Player.CharacterName} tryna dequip his gun with id {equipment.itemID}");
-            if (player.HasKillstreakActive)
+            if (player.HasKillstreakActive && player.ActiveKillstreak.Killstreak.KillstreakInfo.IsItem)
             {
                 Logging.Debug($"{player.Player.CharacterName} has killstreak active and dequipped weapon with id {equipment.itemID}, waiting for a bit then removing the killstreak");
                 TaskDispatcher.QueueOnMainThread(() => player.RemoveActiveKillstreak());
@@ -997,7 +997,7 @@ namespace UnturnedBlackout.Managers
             EffectManager.sendUIEffectText(HUD_KEY, player.TransportConnection, true, "AmmoNum", ammo.ToString());
 
             Models.Data.KillstreakData info = player.ActiveKillstreak?.Killstreak?.KillstreakInfo;
-            if (ammo == 0 && player.HasKillstreakActive && info.RemoveWhenAmmoEmpty)
+            if (ammo == 0 && player.HasKillstreakActive && player.ActiveKillstreak.Killstreak.KillstreakInfo.IsItem && info.RemoveWhenAmmoEmpty)
             {
                 Logging.Debug($"Ammo is 0, {player.Player.CharacterName} has a killstreak active");
                 if (info.MagAmount > 0)
@@ -1026,7 +1026,7 @@ namespace UnturnedBlackout.Managers
             EffectManager.sendUIEffectText(HUD_KEY, player.TransportConnection, true, "AmmoNum", ammo.ToString());
 
             Models.Data.KillstreakData info = player.ActiveKillstreak?.Killstreak?.KillstreakInfo;
-            if (ammo == 0 && player.HasKillstreakActive && info.RemoveWhenAmmoEmpty)
+            if (ammo == 0 && player.HasKillstreakActive && player.ActiveKillstreak.Killstreak.KillstreakInfo.IsItem && info.RemoveWhenAmmoEmpty)
             {
                 if (info.MagAmount > 0)
                 {

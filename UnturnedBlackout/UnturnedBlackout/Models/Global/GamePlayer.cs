@@ -414,7 +414,7 @@ namespace UnturnedBlackout.Models.Global
             {
                 if (PreviousStance == EPlayerStance.CLIMB && newStance != EPlayerStance.CLIMB)
                 {
-                    if (!HasKillstreakActive)
+                    if (HasKillstreakActive && ActiveKillstreak.Killstreak.KillstreakInfo.IsItem)
                         Player.Player.equipment.ServerEquip(LastEquippedPage, LastEquippedX, LastEquippedY);
                     else
                         Player.Player.equipment.ServerEquip(KillstreakPage, KillstreakX, KillstreakY);
