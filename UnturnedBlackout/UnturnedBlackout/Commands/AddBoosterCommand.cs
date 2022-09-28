@@ -9,53 +9,17 @@ namespace UnturnedBlackout.Commands;
 
 class AddBoosterCommand : IRocketCommand
 {
-    public AllowedCaller AllowedCaller
-    {
-        get
-        {
-            return AllowedCaller.Both;
-        }
-    }
+    public AllowedCaller AllowedCaller => AllowedCaller.Both;
 
-    public string Name
-    {
-        get
-        {
-            return "addbooster";
-        }
-    }
+    public string Name => "addbooster";
 
-    public string Help
-    {
-        get
-        {
-            return "Add a booster to a player";
-        }
-    }
+    public string Help => "Add a booster to a player";
 
-    public string Syntax
-    {
-        get
-        {
-            return "/addbooster (SteamID) (BoosterType) (BoosterValue) (ExpirationDays)";
-        }
-    }
+    public string Syntax => "/addbooster (SteamID) (BoosterType) (BoosterValue) (ExpirationDays)";
 
-    public List<string> Aliases
-    {
-        get
-        {
-            return new();
-        }
-    }
+    public List<string> Aliases => new();
 
-    public List<string> Permissions
-    {
-        get
-        {
-            return new();
-        }
-    }
+    public List<string> Permissions => new();
 
     public void Execute(IRocketPlayer caller, string[] command)
     {

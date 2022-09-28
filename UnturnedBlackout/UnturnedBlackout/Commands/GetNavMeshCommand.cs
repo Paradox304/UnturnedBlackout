@@ -8,53 +8,17 @@ namespace UnturnedBlackout.Commands;
 
 class GetNavMeshCommand : IRocketCommand
 {
-    public AllowedCaller AllowedCaller
-    {
-        get
-        {
-            return AllowedCaller.Player;
-        }
-    }
+    public AllowedCaller AllowedCaller => AllowedCaller.Player;
 
-    public string Name
-    {
-        get
-        {
-            return "getnavmesh";
-        }
-    }
+    public string Name => "getnavmesh";
 
-    public string Help
-    {
-        get
-        {
-            return "Get the nav mesh of the area you're in";
-        }
-    }
+    public string Help => "Get the nav mesh of the area you're in";
 
-    public string Syntax
-    {
-        get
-        {
-            return "/getnavmesh";
-        }
-    }
+    public string Syntax => "/getnavmesh";
 
-    public List<string> Aliases
-    {
-        get
-        {
-            return new();
-        }
-    }
+    public List<string> Aliases => new();
 
-    public List<string> Permissions
-    {
-        get
-        {
-            return new();
-        }
-    }
+    public List<string> Permissions => new();
 
     public void Execute(IRocketPlayer caller, string[] command)
     {

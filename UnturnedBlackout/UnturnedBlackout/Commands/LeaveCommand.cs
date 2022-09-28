@@ -6,53 +6,17 @@ namespace UnturnedBlackout.Commands;
 
 class LeaveCommand : IRocketCommand
 {
-    public AllowedCaller AllowedCaller
-    {
-        get
-        {
-            return AllowedCaller.Player;
-        }
-    }
+    public AllowedCaller AllowedCaller => AllowedCaller.Player;
 
-    public string Name
-    {
-        get
-        {
-            return "leave";
-        }
-    }
+    public string Name => "leave";
 
-    public string Help
-    {
-        get
-        {
-            return "Leave the game going on";
-        }
-    }
+    public string Help => "Leave the game going on";
 
-    public string Syntax
-    {
-        get
-        {
-            return "/leave";
-        }
-    }
+    public string Syntax => "/leave";
 
-    public List<string> Aliases
-    {
-        get
-        {
-            return new();
-        }
-    }
+    public List<string> Aliases => new();
 
-    public List<string> Permissions
-    {
-        get
-        {
-            return new();
-        }
-    }
+    public List<string> Permissions => new();
 
     public void Execute(IRocketPlayer caller, string[] command)
     {

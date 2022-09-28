@@ -20,13 +20,7 @@ namespace UnturnedBlackout.GameTypes;
 
 public abstract class Game
 {
-    public ConfigManager Config
-    {
-        get
-        {
-            return Plugin.Instance.Config;
-        }
-    }
+    public ConfigManager Config => Plugin.Instance.Config;
 
     public EGameType GameMode { get; set; }
     public ArenaLocation Location { get; set; }

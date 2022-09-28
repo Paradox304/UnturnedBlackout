@@ -29,13 +29,7 @@ namespace UnturnedBlackout.Managers;
 
 public class UIManager
 {
-    public ConfigManager Config
-    {
-        get
-        {
-            return Plugin.Instance.Config;
-        }
-    }
+    public ConfigManager Config => Plugin.Instance.Config;
 
     public Dictionary<ushort, FeedIcon> KillFeedIcons { get; set; }
     public List<UIHandler> UIHandlers { get; set; }

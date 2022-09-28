@@ -6,53 +6,17 @@ namespace UnturnedBlackout.Commands;
 
 class GetCoordsCommand : IRocketCommand
 {
-    public AllowedCaller AllowedCaller
-    {
-        get
-        {
-            return AllowedCaller.Player;
-        }
-    }
+    public AllowedCaller AllowedCaller => AllowedCaller.Player;
 
-    public string Name
-    {
-        get
-        {
-            return "getcoords";
-        }
-    }
+    public string Name => "getcoords";
 
-    public string Help
-    {
-        get
-        {
-            return "Get your coordinates";
-        }
-    }
+    public string Help => "Get your coordinates";
 
-    public string Syntax
-    {
-        get
-        {
-            return "/getcoords";
-        }
-    }
+    public string Syntax => "/getcoords";
 
-    public List<string> Aliases
-    {
-        get
-        {
-            return new();
-        }
-    }
+    public List<string> Aliases => new();
 
-    public List<string> Permissions
-    {
-        get
-        {
-            return new();
-        }
-    }
+    public List<string> Permissions => new();
 
     public void Execute(IRocketPlayer caller, string[] command)
     {

@@ -7,53 +7,17 @@ namespace UnturnedBlackout.Commands;
 
 class AddPrimeCommand : IRocketCommand
 {
-    public AllowedCaller AllowedCaller
-    {
-        get
-        {
-            return AllowedCaller.Both;
-        }
-    }
+    public AllowedCaller AllowedCaller => AllowedCaller.Both;
 
-    public string Name
-    {
-        get
-        {
-            return "addprime";
-        }
-    }
+    public string Name => "addprime";
 
-    public string Help
-    {
-        get
-        {
-            return "Add prime to a player";
-        }
-    }
+    public string Help => "Add prime to a player";
 
-    public string Syntax
-    {
-        get
-        {
-            return "/addprime (SteamID) (Days)";
-        }
-    }
+    public string Syntax => "/addprime (SteamID) (Days)";
 
-    public List<string> Aliases
-    {
-        get
-        {
-            return new();
-        }
-    }
+    public List<string> Aliases => new();
 
-    public List<string> Permissions
-    {
-        get
-        {
-            return new();
-        }
-    }
+    public List<string> Permissions => new();
 
     public void Execute(IRocketPlayer caller, string[] command)
     {

@@ -6,13 +6,7 @@ namespace UnturnedBlackout.Models.Global;
 
 public class MatchEndSummary
 {
-    public ConfigManager Config
-    {
-        get
-        {
-            return Plugin.Instance.Config;
-        }
-    }
+    public ConfigManager Config => Plugin.Instance.Config;
 
     public GamePlayer Player { get; set; }
 

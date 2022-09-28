@@ -28,13 +28,7 @@ namespace UnturnedBlackout.Managers;
 public class DatabaseManager
 {
     public MySqlConnectionStringBuilder Builder { get; set; }
-    public string ConnectionString
-    {
-        get
-        {
-            return Builder.ConnectionString;
-        }
-    }
+    public string ConnectionString => Builder.ConnectionString;
     public Config Config { get; set; }
 
     public Timer CacheRefresher { get; set; }

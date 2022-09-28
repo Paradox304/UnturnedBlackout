@@ -8,53 +8,17 @@ namespace UnturnedBlackout.Commands;
 
 public class FFASPCommand : IRocketCommand
 {
-    public AllowedCaller AllowedCaller
-    {
-        get
-        {
-            return AllowedCaller.Player;
-        }
-    }
+    public AllowedCaller AllowedCaller => AllowedCaller.Player;
 
-    public string Name
-    {
-        get
-        {
-            return "ffasp";
-        }
-    }
+    public string Name => "ffasp";
 
-    public string Help
-    {
-        get
-        {
-            return "Set the ffa spawnpoints for an area location";
-        }
-    }
+    public string Help => "Set the ffa spawnpoints for an area location";
 
-    public string Syntax
-    {
-        get
-        {
-            return "/ffasp (LocationID)";
-        }
-    }
+    public string Syntax => "/ffasp (LocationID)";
 
-    public List<string> Aliases
-    {
-        get
-        {
-            return new();
-        }
-    }
+    public List<string> Aliases => new();
 
-    public List<string> Permissions
-    {
-        get
-        {
-            return new();
-        }
-    }
+    public List<string> Permissions => new();
 
     public void Execute(IRocketPlayer caller, string[] command)
     {

@@ -7,53 +7,17 @@ namespace UnturnedBlackout.Commands;
 
 public class CountryCommand : IRocketCommand
 {
-    public AllowedCaller AllowedCaller
-    {
-        get
-        {
-            return AllowedCaller.Console;
-        }
-    }
+    public AllowedCaller AllowedCaller => AllowedCaller.Console;
 
-    public string Name
-    {
-        get
-        {
-            return "country";
-        }
-    }
+    public string Name => "country";
 
-    public string Help
-    {
-        get
-        {
-            return "Override the country code of a player";
-        }
-    }
+    public string Help => "Override the country code of a player";
 
-    public string Syntax
-    {
-        get
-        {
-            return "/country (SteamID) (CountryCode)";
-        }
-    }
+    public string Syntax => "/country (SteamID) (CountryCode)";
 
-    public List<string> Aliases
-    {
-        get
-        {
-            return new();
-        }
-    }
+    public List<string> Aliases => new();
 
-    public List<string> Permissions
-    {
-        get
-        {
-            return new();
-        }
-    }
+    public List<string> Permissions => new();
 
     public void Execute(IRocketPlayer caller, string[] command)
     {

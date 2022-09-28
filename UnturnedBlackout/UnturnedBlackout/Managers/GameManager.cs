@@ -17,13 +17,7 @@ namespace UnturnedBlackout.Managers;
 
 public class GameManager
 {
-    public ConfigManager Config
-    {
-        get
-        {
-            return Plugin.Instance.Config;
-        }
-    }
+    public ConfigManager Config => Plugin.Instance.Config;
 
     public Dictionary<CSteamID, GamePlayer> Players { get; set; }
     public List<Game> Games { get; set; }

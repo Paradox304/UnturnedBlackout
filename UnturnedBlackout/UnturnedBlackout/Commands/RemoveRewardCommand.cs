@@ -6,53 +6,17 @@ namespace UnturnedBlackout.Commands;
 
 class RemoveRewardCommand : IRocketCommand
 {
-    public AllowedCaller AllowedCaller
-    {
-        get
-        {
-            return AllowedCaller.Both;
-        }
-    }
+    public AllowedCaller AllowedCaller => AllowedCaller.Both;
 
-    public string Name
-    {
-        get
-        {
-            return "removereward";
-        }
-    }
+    public string Name => "removereward";
 
-    public string Help
-    {
-        get
-        {
-            return "Remove rewards to a player";
-        }
-    }
+    public string Help => "Remove rewards to a player";
 
-    public string Syntax
-    {
-        get
-        {
-            return "/removereward (SteamID) (RewardString)";
-        }
-    }
+    public string Syntax => "/removereward (SteamID) (RewardString)";
 
-    public List<string> Aliases
-    {
-        get
-        {
-            return new();
-        }
-    }
+    public List<string> Aliases => new();
 
-    public List<string> Permissions
-    {
-        get
-        {
-            return new();
-        }
-    }
+    public List<string> Permissions => new();
 
     public void Execute(IRocketPlayer caller, string[] command)
     {

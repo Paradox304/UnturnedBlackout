@@ -12,13 +12,7 @@ namespace UnturnedBlackout.Models.TDM;
 
 public class TDMTeam
 {
-    public ConfigManager Config
-    {
-        get
-        {
-            return Plugin.Instance.Config;
-        }
-    }
+    public ConfigManager Config => Plugin.Instance.Config;
 
     public TDMGame Game { get; set; }
     public TeamInfo Info { get; set; }

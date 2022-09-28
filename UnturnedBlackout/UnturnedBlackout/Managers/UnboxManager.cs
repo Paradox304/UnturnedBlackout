@@ -10,13 +10,7 @@ namespace UnturnedBlackout.Managers;
 
 public class UnboxManager
 {
-    public DatabaseManager DB
-    {
-        get
-        {
-            return Plugin.Instance.DB;
-        }
-    }
+    public DatabaseManager DB => Plugin.Instance.DB;
 
     public bool TryCalculateReward(Case @case, UnturnedPlayer player, out Reward reward, out string rewardImage, out string rewardName, out string rewardDesc, out ERarity rewardRarity, out bool isDuplicate, out int duplicateScrapAmount)
     {

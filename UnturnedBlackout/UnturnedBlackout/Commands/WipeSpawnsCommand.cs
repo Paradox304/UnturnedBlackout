@@ -7,53 +7,17 @@ namespace UnturnedBlackout.Commands;
 
 class WipeSpawnsCommand : IRocketCommand
 {
-    public AllowedCaller AllowedCaller
-    {
-        get
-        {
-            return AllowedCaller.Both;
-        }
-    }
+    public AllowedCaller AllowedCaller => AllowedCaller.Both;
 
-    public string Name
-    {
-        get
-        {
-            return "wipespawns";
-        }
-    }
+    public string Name => "wipespawns";
 
-    public string Help
-    {
-        get
-        {
-            return "Wipe spawns";
-        }
-    }
+    public string Help => "Wipe spawns";
 
-    public string Syntax
-    {
-        get
-        {
-            return "/wipespawns (MapID) (Gamemode)";
-        }
-    }
+    public string Syntax => "/wipespawns (MapID) (Gamemode)";
 
-    public List<string> Aliases
-    {
-        get
-        {
-            return new();
-        }
-    }
+    public List<string> Aliases => new();
 
-    public List<string> Permissions
-    {
-        get
-        {
-            return new();
-        }
-    }
+    public List<string> Permissions => new();
 
     public void Execute(IRocketPlayer caller, string[] command)
     {

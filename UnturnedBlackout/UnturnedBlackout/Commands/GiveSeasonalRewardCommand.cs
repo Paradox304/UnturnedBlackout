@@ -5,53 +5,17 @@ namespace UnturnedBlackout.Commands;
 
 class GiveSeasonalRewardCommand : IRocketCommand
 {
-    public AllowedCaller AllowedCaller
-    {
-        get
-        {
-            return AllowedCaller.Player;
-        }
-    }
+    public AllowedCaller AllowedCaller => AllowedCaller.Player;
 
-    public string Name
-    {
-        get
-        {
-            return "giveseasonalreward";
-        }
-    }
+    public string Name => "giveseasonalreward";
 
-    public string Help
-    {
-        get
-        {
-            return "Giving out seasonal rewards";
-        }
-    }
+    public string Help => "Giving out seasonal rewards";
 
-    public string Syntax
-    {
-        get
-        {
-            return "/giveseasonalreward";
-        }
-    }
+    public string Syntax => "/giveseasonalreward";
 
-    public List<string> Aliases
-    {
-        get
-        {
-            return new();
-        }
-    }
+    public List<string> Aliases => new();
 
-    public List<string> Permissions
-    {
-        get
-        {
-            return new();
-        }
-    }
+    public List<string> Permissions => new();
 
     public void Execute(IRocketPlayer caller, string[] command) => Plugin.Instance.DB.IsPendingSeasonalWipe = true;
 }

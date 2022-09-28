@@ -6,53 +6,17 @@ namespace UnturnedBlackout.Commands;
 
 class GiveRewardCommand : IRocketCommand
 {
-    public AllowedCaller AllowedCaller
-    {
-        get
-        {
-            return AllowedCaller.Both;
-        }
-    }
+    public AllowedCaller AllowedCaller => AllowedCaller.Both;
 
-    public string Name
-    {
-        get
-        {
-            return "givereward";
-        }
-    }
+    public string Name => "givereward";
 
-    public string Help
-    {
-        get
-        {
-            return "Give rewards to a player";
-        }
-    }
+    public string Help => "Give rewards to a player";
 
-    public string Syntax
-    {
-        get
-        {
-            return "/givereward (SteamID) (RewardString)";
-        }
-    }
+    public string Syntax => "/givereward (SteamID) (RewardString)";
 
-    public List<string> Aliases
-    {
-        get
-        {
-            return new();
-        }
-    }
+    public List<string> Aliases => new();
 
-    public List<string> Permissions
-    {
-        get
-        {
-            return new();
-        }
-    }
+    public List<string> Permissions => new();
 
     public void Execute(IRocketPlayer caller, string[] command)
     {

@@ -12,13 +12,7 @@ namespace UnturnedBlackout.Models.KC;
 
 public class KCTeam
 {
-    public ConfigManager Config
-    {
-        get
-        {
-            return Plugin.Instance.Config;
-        }
-    }
+    public ConfigManager Config => Plugin.Instance.Config;
 
     public KCGame Game { get; set; }
     public TeamInfo Info { get; set; }

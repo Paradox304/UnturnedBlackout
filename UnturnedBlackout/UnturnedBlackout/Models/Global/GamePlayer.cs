@@ -19,13 +19,7 @@ namespace UnturnedBlackout.Models.Global;
 
 public class GamePlayer
 {
-    public ConfigManager Config
-    {
-        get
-        {
-            return Plugin.Instance.Config;
-        }
-    }
+    public ConfigManager Config => Plugin.Instance.Config;
 
     public Game CurrentGame { get; set; }
 

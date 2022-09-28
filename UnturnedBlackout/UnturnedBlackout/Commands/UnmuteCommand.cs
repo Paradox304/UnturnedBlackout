@@ -14,53 +14,17 @@ namespace UnturnedBlackout.Commands;
 
 class UnmuteCommand : IRocketCommand
 {
-    public AllowedCaller AllowedCaller
-    {
-        get
-        {
-            return AllowedCaller.Both;
-        }
-    }
+    public AllowedCaller AllowedCaller => AllowedCaller.Both;
 
-    public string Name
-    {
-        get
-        {
-            return "unmute";
-        }
-    }
+    public string Name => "unmute";
 
-    public string Help
-    {
-        get
-        {
-            return "Unmute a player";
-        }
-    }
+    public string Help => "Unmute a player";
 
-    public string Syntax
-    {
-        get
-        {
-            return "/unmute (PlayerName/SteamID)";
-        }
-    }
+    public string Syntax => "/unmute (PlayerName/SteamID)";
 
-    public List<string> Aliases
-    {
-        get
-        {
-            return new();
-        }
-    }
+    public List<string> Aliases => new();
 
-    public List<string> Permissions
-    {
-        get
-        {
-            return new();
-        }
-    }
+    public List<string> Permissions => new();
 
     public void Execute(IRocketPlayer caller, string[] command)
     {

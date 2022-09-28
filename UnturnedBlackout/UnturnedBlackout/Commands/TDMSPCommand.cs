@@ -8,53 +8,17 @@ namespace UnturnedBlackout.Commands;
 
 class TDMSPCommand : IRocketCommand
 {
-    public AllowedCaller AllowedCaller
-    {
-        get
-        {
-            return AllowedCaller.Player;
-        }
-    }
+    public AllowedCaller AllowedCaller => AllowedCaller.Player;
 
-    public string Name
-    {
-        get
-        {
-            return "tdmsp";
-        }
-    }
+    public string Name => "tdmsp";
 
-    public string Help
-    {
-        get
-        {
-            return "Set the tdm spawnpoints for an area location for a group";
-        }
-    }
+    public string Help => "Set the tdm spawnpoints for an area location for a group";
 
-    public string Syntax
-    {
-        get
-        {
-            return "/tdmsp (LocationID) (GroupID)";
-        }
-    }
+    public string Syntax => "/tdmsp (LocationID) (GroupID)";
 
-    public List<string> Aliases
-    {
-        get
-        {
-            return new();
-        }
-    }
+    public List<string> Aliases => new();
 
-    public List<string> Permissions
-    {
-        get
-        {
-            return new();
-        }
-    }
+    public List<string> Permissions => new();
 
     public void Execute(IRocketPlayer caller, string[] command)
     {

@@ -6,53 +6,17 @@ namespace UnturnedBlackout.Commands;
 
 class SetLobbyCommand : IRocketCommand
 {
-    public AllowedCaller AllowedCaller
-    {
-        get
-        {
-            return AllowedCaller.Player;
-        }
-    }
+    public AllowedCaller AllowedCaller => AllowedCaller.Player;
 
-    public string Name
-    {
-        get
-        {
-            return "setlobby";
-        }
-    }
+    public string Name => "setlobby";
 
-    public string Help
-    {
-        get
-        {
-            return "Set the lobby for players to join at your position";
-        }
-    }
+    public string Help => "Set the lobby for players to join at your position";
 
-    public string Syntax
-    {
-        get
-        {
-            return "/setlobby";
-        }
-    }
+    public string Syntax => "/setlobby";
 
-    public List<string> Aliases
-    {
-        get
-        {
-            return new();
-        }
-    }
+    public List<string> Aliases => new();
 
-    public List<string> Permissions
-    {
-        get
-        {
-            return new();
-        }
-    }
+    public List<string> Permissions => new();
 
     public void Execute(IRocketPlayer caller, string[] command)
     {

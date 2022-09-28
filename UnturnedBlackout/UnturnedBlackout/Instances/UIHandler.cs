@@ -47,13 +47,7 @@ public class UIHandler
     public Coroutine CrateUnboxer { get; set; }
 
     public ITransportConnection TransportConnection { get; set; }
-    public ConfigManager Config
-    {
-        get
-        {
-            return Plugin.Instance.Config;
-        }
-    }
+    public ConfigManager Config => Plugin.Instance.Config;
 
     public EMainPage MainPage { get; set; }
 

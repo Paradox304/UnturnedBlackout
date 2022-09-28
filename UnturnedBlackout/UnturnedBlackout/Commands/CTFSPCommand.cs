@@ -8,53 +8,17 @@ namespace UnturnedBlackout.Commands;
 
 class CTFSPCommand : IRocketCommand
 {
-    public AllowedCaller AllowedCaller
-    {
-        get
-        {
-            return AllowedCaller.Player;
-        }
-    }
+    public AllowedCaller AllowedCaller => AllowedCaller.Player;
 
-    public string Name
-    {
-        get
-        {
-            return "ctfsp";
-        }
-    }
+    public string Name => "ctfsp";
 
-    public string Help
-    {
-        get
-        {
-            return "Set the ctf spawnpoints for an area location for a group and the flag sp";
-        }
-    }
+    public string Help => "Set the ctf spawnpoints for an area location for a group and the flag sp";
 
-    public string Syntax
-    {
-        get
-        {
-            return "/ctfsp (LocationID) (GroupID) [IsFlag]";
-        }
-    }
+    public string Syntax => "/ctfsp (LocationID) (GroupID) [IsFlag]";
 
-    public List<string> Aliases
-    {
-        get
-        {
-            return new();
-        }
-    }
+    public List<string> Aliases => new();
 
-    public List<string> Permissions
-    {
-        get
-        {
-            return new();
-        }
-    }
+    public List<string> Permissions => new();
 
     public void Execute(IRocketPlayer caller, string[] command)
     {

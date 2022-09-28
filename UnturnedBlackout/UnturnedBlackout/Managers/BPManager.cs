@@ -12,21 +12,9 @@ public class BPManager
 {
     public HashSet<CSteamID> PendingWork { get; set; }
 
-    public DatabaseManager DB
-    {
-        get
-        {
-            return Plugin.Instance.DB;
-        }
-    }
+    public DatabaseManager DB => Plugin.Instance.DB;
 
-    public ConfigManager Config
-    {
-        get
-        {
-            return Plugin.Instance.Config;
-        }
-    }
+    public ConfigManager Config => Plugin.Instance.Config;
 
     public BPManager()
     {
