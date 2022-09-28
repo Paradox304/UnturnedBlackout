@@ -813,7 +813,7 @@ public class FFAGame : Game
 
     public override void PlayerBarricadeSpawned(GamePlayer player, BarricadeDrop drop)
     {
-        if (IsPlayerIngame(player.SteamID))
+        if (!IsPlayerIngame(player.SteamID))
         {
             return;
         }
@@ -831,10 +831,19 @@ public class FFAGame : Game
         }
 
         var turret = player.ActiveLoadout.Killstreaks.FirstOrDefault(k => k.Killstreak.KillstreakInfo.IsTurret && drop.asset.id == k.Killstreak.KillstreakInfo.TurretID);
-        if (turret == null)
+        if (turret == null || drop.interactable is not InteractableSentry sentry)
         {
             return;
         }
+
+        Logging.Debug("Turret spawned");
+        if (sentry.items.tryAddItem(new Item(turret.Killstreak.KillstreakInfo.GunID, true), true))
+        {
+            Logging.Debug("Successfully added gun in turret");
+            sentry.refreshDisplay();
+        }
+
+        Logging.Debug("Add turret to tracking system");
 
         GameTurrets.Add(player, (drop, turret.Killstreak.KillstreakInfo));
         GameTurretsInverse.Add(drop, player);
@@ -865,18 +874,20 @@ public class FFAGame : Game
         {
             return;
         }
-
+        
         var barricadeData = drop.GetServersideData();
         if (barricadeData == null)
         {
             return;
         }
 
+        Logging.Debug($"Turret damaged by {damager.GamePlayer.Player.CharacterName}, damage: {pendingTotalDamage}, health: {barricadeData.barricade.health}");
         if (barricadeData.barricade.health > pendingTotalDamage)
         {
             return;
         }
 
+        Logging.Debug($"Turret destroyed, send xp");
         Plugin.Instance.UI.ShowXPUI(player, Config.Medals.FileData.TurretDestroyXP, Plugin.Instance.Translate("Turret_Destroy"));
         _ = Task.Run(async () => await Plugin.Instance.DB.IncreasePlayerXPAsync(player.SteamID, Config.Medals.FileData.TurretDestroyXP));
     }

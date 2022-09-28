@@ -806,7 +806,7 @@ public class UIManager
         if (player.KillstreakTriggers.TryGetValue(jar.item.id, out var activateKillstreak))
         {
             shouldAllow = false;
-            if (game.GamePhase == EGamePhase.Started && player.AvailableKillstreaks[activateKillstreak] && !isCarryingFlag && !player.HasKillstreakActive)
+            if (game.GamePhase == EGamePhase.Started && /*player.AvailableKillstreaks[activateKillstreak] &&*/ !isCarryingFlag && !player.HasKillstreakActive)
             {
                 player.ActivateKillstreak(activateKillstreak);
             }

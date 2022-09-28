@@ -1084,7 +1084,7 @@ public class CTFGame : Game
 
     public override void PlayerBarricadeSpawned(GamePlayer player, BarricadeDrop drop)
     {
-        if (IsPlayerIngame(player.SteamID))
+        if (!IsPlayerIngame(player.SteamID))
         {
             return;
         }
@@ -1107,8 +1107,14 @@ public class CTFGame : Game
             return;
         }
 
-        _ = sentry.items.tryAddItem(new Item(turret.Killstreak.KillstreakInfo.GunID, true), true);
-        sentry.refreshDisplay();
+        Logging.Debug("Turret spawned");
+        if (sentry.items.tryAddItem(new Item(turret.Killstreak.KillstreakInfo.GunID, true), true))
+        {
+            Logging.Debug("Successfully added gun in turret");
+            sentry.refreshDisplay();
+        }
+
+        Logging.Debug("Add turret to tracking system");
 
         GameTurrets.Add(player, (drop, turret.Killstreak.KillstreakInfo));
         GameTurretsInverse.Add(drop, player);

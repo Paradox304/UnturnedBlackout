@@ -626,8 +626,10 @@ public class GamePlayer
         }
         else if (info.IsTurret)
         {
+            Logging.Debug($"Killstreak is a turret");
             if (CurrentGame.GameTurrets.ContainsKey(this))
             {
+                Logging.Debug($"Player already has a placed turret in the game, returning");
                 return;
             }
 

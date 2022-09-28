@@ -963,7 +963,7 @@ public class KCGame : Game
 
     public override void PlayerBarricadeSpawned(GamePlayer player, BarricadeDrop drop)
     {
-        if (IsPlayerIngame(player.SteamID))
+        if (!IsPlayerIngame(player.SteamID))
         {
             return;
         }
@@ -985,9 +985,11 @@ public class KCGame : Game
         {
             return;
         }
-
-        _ = sentry.items.tryAddItem(new Item(turret.Killstreak.KillstreakInfo.GunID, true), true);
-        sentry.refreshDisplay();
+        
+        if (sentry.items.tryAddItem(new Item(turret.Killstreak.KillstreakInfo.GunID, true), true))
+        {
+            sentry.refreshDisplay();
+        }
 
         GameTurrets.Add(player, (drop, turret.Killstreak.KillstreakInfo));
         GameTurretsInverse.Add(drop, player);

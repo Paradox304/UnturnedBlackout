@@ -139,15 +139,19 @@ public abstract class Game
 
     public void OnBarricadeDestroyed(BarricadeDrop drop)
     {
+        Logging.Debug($"Barricade destroyed");
         if (!GameTurretsInverse.TryGetValue(drop, out var gPlayer))
         {
             return;
         }
 
+        Logging.Debug($"Drop found to be registered as a turret in the game by {gPlayer.Player.CharacterName}");
+        
         _ = GameTurrets.Remove(gPlayer);
         _ = GameTurretsInverse.Remove(drop);
         if (GameTurretDamager.TryGetValue(drop, out var damager) && damager != null)
         {
+            Logging.Debug($"Turret damager coroutine not null, remove");
             Plugin.Instance.StopCoroutine(damager);
         }
 
