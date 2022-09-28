@@ -516,7 +516,7 @@ namespace UnturnedBlackout.GameTypes
                 ushort equipmentUsed = 0;
                 float longshotRange = 0f;
 
-                bool usedKillstreak = kPlayer.GamePlayer.HasKillstreakActive;
+                bool usedKillstreak = kPlayer.GamePlayer.HasKillstreakActive && (kPlayer.GamePlayer.ActiveKillstreak?.Killstreak?.KillstreakInfo?.IsItem ?? false);
                 int killstreakID = kPlayer.GamePlayer.ActiveKillstreak?.Killstreak?.KillstreakID ?? 0;
 
                 if (usedKillstreak)

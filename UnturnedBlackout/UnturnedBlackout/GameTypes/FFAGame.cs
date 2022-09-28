@@ -674,8 +674,10 @@ namespace UnturnedBlackout.GameTypes
             float damageIncreasePercent = kPlayer.GamePlayer.ActiveLoadout.PerksSearchByType.TryGetValue(damageIncreasePerkName, out LoadoutPerk damageIncreaserPerk) ? ((float)damageIncreaserPerk.Perk.SkillLevel / 100) : 0f;
             parameters.damage += damageIncreasePercent * parameters.damage;
 
+            Logging.Debug($"cause: {parameters.cause}, damage: {parameters.damage}, player health: {player.GamePlayer.Player.Player.life.health}");
             if (parameters.cause == EDeathCause.GRENADE && parameters.damage < player.GamePlayer.Player.Player.life.health)
             {
+                Logging.Debug($"Condition fulfilled, send hit xp for {Config.Medals.FileData.LethalHitXP}");
                 Plugin.Instance.UI.ShowXPUI(kPlayer.GamePlayer, Config.Medals.FileData.LethalHitXP, Plugin.Instance.Translate("Lethal_Hit"));
             }
 
