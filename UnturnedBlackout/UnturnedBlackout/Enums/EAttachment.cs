@@ -1,10 +1,9 @@
-﻿namespace UnturnedBlackout.Enums
+﻿namespace UnturnedBlackout.Enums;
+
+public enum EAttachment
 {
-    public enum EAttachment
-    {
-        Sights,
-        Grip,
-        Barrel,
-        Magazine
-    }
+    Sights,
+    Grip,
+    Barrel,
+    Magazine
 }

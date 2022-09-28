@@ -1,24 +1,23 @@
-﻿namespace UnturnedBlackout.Enums
+﻿namespace UnturnedBlackout.Enums;
+
+public enum EUIPage
 {
-    public enum EUIPage
-    {
-        Pistol,
-        SMG,
-        Shotgun,
-        LMG,
-        AR,
-        Sniper,
-        Carbine,
-        GunCharm,
-        GunSkin,
-        Knife,
-        Perk,
-        Tactical,
-        Lethal,
-        Card,
-        Glove,
-        Killstreak,
-        Case,
-        Achievement
-    }
+    Pistol,
+    SMG,
+    Shotgun,
+    LMG,
+    AR,
+    Sniper,
+    Carbine,
+    GunCharm,
+    GunSkin,
+    Knife,
+    Perk,
+    Tactical,
+    Lethal,
+    Card,
+    Glove,
+    Killstreak,
+    Case,
+    Achievement
 }

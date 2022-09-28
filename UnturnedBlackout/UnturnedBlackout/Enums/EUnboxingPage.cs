@@ -1,9 +1,8 @@
-﻿namespace UnturnedBlackout.Enums
+﻿namespace UnturnedBlackout.Enums;
+
+public enum EUnboxingPage
 {
-    public enum EUnboxingPage
-    {
-        Inventory,
-        Buy,
-        Open
-    }
+    Inventory,
+    Buy,
+    Open
 }

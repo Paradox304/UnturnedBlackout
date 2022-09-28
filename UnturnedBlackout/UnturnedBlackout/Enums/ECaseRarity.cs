@@ -1,16 +1,15 @@
-﻿namespace UnturnedBlackout.Enums
+﻿namespace UnturnedBlackout.Enums;
+
+public enum ECaseRarity
 {
-    public enum ECaseRarity
-    {
-        COMMON,
-        UNCOMMON,
-        RARE,
-        EPIC,
-        LEGENDARY,
-        MYTHICAL,
-        KNIFE,
-        GLOVE,
-        LIMITED_KNIFE,
-        LIMITED_GLOVE
-    }
+    COMMON,
+    UNCOMMON,
+    RARE,
+    EPIC,
+    LEGENDARY,
+    MYTHICAL,
+    KNIFE,
+    GLOVE,
+    LIMITED_KNIFE,
+    LIMITED_GLOVE
 }

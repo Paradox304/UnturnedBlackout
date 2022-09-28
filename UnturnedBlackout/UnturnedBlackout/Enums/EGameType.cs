@@ -1,11 +1,10 @@
-﻿namespace UnturnedBlackout.Enums
+﻿namespace UnturnedBlackout.Enums;
+
+public enum EGameType
 {
-    public enum EGameType
-    {
-        FFA,
-        TDM,
-        KC,
-        CTF,
-        None
-    }
+    FFA,
+    TDM,
+    KC,
+    CTF,
+    None
 }

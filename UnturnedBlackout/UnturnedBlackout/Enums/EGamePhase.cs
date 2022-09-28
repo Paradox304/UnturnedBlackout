@@ -1,11 +1,10 @@
-﻿namespace UnturnedBlackout.Enums
+﻿namespace UnturnedBlackout.Enums;
+
+public enum EGamePhase
 {
-    public enum EGamePhase
-    {
-        WaitingForPlayers,
-        Starting,
-        Started,
-        Ending,
-        Ended
-    }
+    WaitingForPlayers,
+    Starting,
+    Started,
+    Ending,
+    Ended
 }

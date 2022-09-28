@@ -1,8 +1,7 @@
-﻿namespace UnturnedBlackout.Enums
+﻿namespace UnturnedBlackout.Enums;
+
+public enum ETeam
 {
-    public enum ETeam
-    {
-        Blue,
-        Red
-    }
+    Blue,
+    Red
 }

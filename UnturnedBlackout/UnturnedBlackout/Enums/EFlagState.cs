@@ -1,11 +1,10 @@
-﻿namespace UnturnedBlackout.Enums
+﻿namespace UnturnedBlackout.Enums;
+
+public enum EFlagState
 {
-    public enum EFlagState
-    {
-        Captured,
-        Recovered,
-        Taken,
-        Dropped,
-        Picked
-    }
+    Captured,
+    Recovered,
+    Taken,
+    Dropped,
+    Picked
 }

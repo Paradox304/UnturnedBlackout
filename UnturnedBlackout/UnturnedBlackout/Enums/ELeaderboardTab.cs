@@ -1,8 +1,7 @@
-﻿namespace UnturnedBlackout.Enums
+﻿namespace UnturnedBlackout.Enums;
+
+public enum ELeaderboardTab
 {
-    public enum ELeaderboardTab
-    {
-        Kill,
-        Level
-    }
+    Kill,
+    Level
 }

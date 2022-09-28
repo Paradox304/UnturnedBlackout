@@ -1,13 +1,12 @@
-﻿namespace UnturnedBlackout.Enums
+﻿namespace UnturnedBlackout.Enums;
+
+public enum EAnimationType
 {
-    public enum EAnimationType
-    {
-        LevelUp,
-        GunLevelUp,
-        QuestCompletion,
-        AchievementCompletion,
-        BattlepassTierCompletion,
-        ItemUnlock,
-        KillstreakAvailable
-    }
+    LevelUp,
+    GunLevelUp,
+    QuestCompletion,
+    AchievementCompletion,
+    BattlepassTierCompletion,
+    ItemUnlock,
+    KillstreakAvailable
 }

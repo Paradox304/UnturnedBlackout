@@ -1,9 +1,8 @@
-﻿namespace UnturnedBlackout.Enums
+﻿namespace UnturnedBlackout.Enums;
+
+public enum ECurrency
 {
-    public enum ECurrency
-    {
-        Credits,
-        Coins,
-        Scrap
-    }
+    Credits,
+    Coins,
+    Scrap
 }

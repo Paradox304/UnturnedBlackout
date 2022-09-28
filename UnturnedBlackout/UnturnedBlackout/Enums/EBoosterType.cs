@@ -1,9 +1,8 @@
-﻿namespace UnturnedBlackout.Enums
+﻿namespace UnturnedBlackout.Enums;
+
+public enum EBoosterType
 {
-    public enum EBoosterType
-    {
-        XP,
-        BPXP,
-        GUNXP
-    }
+    XP,
+    BPXP,
+    GUNXP
 }

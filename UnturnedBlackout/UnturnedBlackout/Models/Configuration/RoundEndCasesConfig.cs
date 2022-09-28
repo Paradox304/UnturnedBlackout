@@ -1,20 +1,19 @@
 ﻿using System.Collections.Generic;
 using UnturnedBlackout.Models.Global;
 
-namespace UnturnedBlackout.Models.Configuration
+namespace UnturnedBlackout.Models.Configuration;
+
+public class RoundEndCasesConfig
 {
-    public class RoundEndCasesConfig
+    public int Chance { get; set; }
+    public int MinimumMinutesPlayed { get; set; }
+
+    public List<RoundEndCase> RoundEndCases { get; set; }
+
+    public RoundEndCasesConfig()
     {
-        public int Chance { get; set; }
-        public int MinimumMinutesPlayed { get; set; }
-
-        public List<RoundEndCase> RoundEndCases { get; set; }
-
-        public RoundEndCasesConfig()
-        {
-            Chance = 0;
-            MinimumMinutesPlayed = 0;
-            RoundEndCases = new();
-        }
+        Chance = 0;
+        MinimumMinutesPlayed = 0;
+        RoundEndCases = new();
     }
 }

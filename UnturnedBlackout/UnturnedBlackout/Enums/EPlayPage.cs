@@ -1,8 +1,7 @@
-﻿namespace UnturnedBlackout.Enums
+﻿namespace UnturnedBlackout.Enums;
+
+public enum EPlayPage
 {
-    public enum EPlayPage
-    {
-        Games,
-        Servers
-    }
+    Games,
+    Servers
 }

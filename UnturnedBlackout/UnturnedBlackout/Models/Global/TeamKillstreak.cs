@@ -1,16 +1,15 @@
-﻿namespace UnturnedBlackout.Models.Global
+﻿namespace UnturnedBlackout.Models.Global;
+
+public class TeamKillstreak
 {
-    public class TeamKillstreak
+    public int KillstreakID { get; set; }
+    public ushort ShirtID { get; set; }
+    public ushort PantsID { get; set; }
+    public ushort HatID { get; set; }
+    public ushort VestID { get; set; }
+
+    public TeamKillstreak()
     {
-        public int KillstreakID { get; set; }
-        public ushort ShirtID { get; set; }
-        public ushort PantsID { get; set; }
-        public ushort HatID { get; set; }
-        public ushort VestID { get; set; }
 
-        public TeamKillstreak()
-        {
-
-        }
     }
 }

@@ -1,10 +1,9 @@
-﻿namespace UnturnedBlackout.Enums
+﻿namespace UnturnedBlackout.Enums;
+
+public enum ELeaderboardPage
 {
-    public enum ELeaderboardPage
-    {
-        Daily,
-        Weekly,
-        Seasonal,
-        All
-    }
+    Daily,
+    Weekly,
+    Seasonal,
+    All
 }

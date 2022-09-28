@@ -2,39 +2,74 @@
 using Steamworks;
 using System.Collections.Generic;
 
-namespace UnturnedBlackout.Commands
+namespace UnturnedBlackout.Commands;
+
+class RemoveRewardCommand : IRocketCommand
 {
-    class RemoveRewardCommand : IRocketCommand
+    public AllowedCaller AllowedCaller
     {
-        public AllowedCaller AllowedCaller => AllowedCaller.Both;
-
-        public string Name => "removereward";
-
-        public string Help => "Remove rewards to a player";
-
-        public string Syntax => "/removereward (SteamID) (RewardString)";
-
-        public List<string> Aliases => new();
-
-        public List<string> Permissions => new();
-
-        public void Execute(IRocketPlayer caller, string[] command)
+        get
         {
-            if (command.Length < 2)
-            {
-                Utility.Say(caller, $"<color=red>Correct Usage: {Syntax}</color>");
-                return;
-            }
-
-            if (!ulong.TryParse(command[0], out var steamid))
-            {
-                Utility.Say(caller, $"<color=red>SteamID is not in the correct format</color>");
-                return;
-            }
-
-            CSteamID steamID = new(steamid);
-            var rewards = Utility.GetRewardsFromString(command[1]);
-            Plugin.Instance.Reward.RemoveRewards(steamID, rewards);
+            return AllowedCaller.Both;
         }
+    }
+
+    public string Name
+    {
+        get
+        {
+            return "removereward";
+        }
+    }
+
+    public string Help
+    {
+        get
+        {
+            return "Remove rewards to a player";
+        }
+    }
+
+    public string Syntax
+    {
+        get
+        {
+            return "/removereward (SteamID) (RewardString)";
+        }
+    }
+
+    public List<string> Aliases
+    {
+        get
+        {
+            return new();
+        }
+    }
+
+    public List<string> Permissions
+    {
+        get
+        {
+            return new();
+        }
+    }
+
+    public void Execute(IRocketPlayer caller, string[] command)
+    {
+        if (command.Length < 2)
+        {
+            Utility.Say(caller, $"<color=red>Correct Usage: {Syntax}</color>");
+            return;
+        }
+
+        if (!ulong.TryParse(command[0], out var steamid))
+        {
+            Utility.Say(caller, $"<color=red>SteamID is not in the correct format</color>");
+            return;
+        }
+
+        CSteamID steamID = new(steamid);
+        var rewards = Utility.GetRewardsFromString(command[1]);
+        Plugin.Instance.Reward.RemoveRewards(steamID, rewards);
     }
 }

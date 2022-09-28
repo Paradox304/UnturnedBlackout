@@ -2,26 +2,61 @@
 using Rocket.Unturned.Player;
 using System.Collections.Generic;
 
-namespace UnturnedBlackout.Commands
+namespace UnturnedBlackout.Commands;
+
+class LeaveCommand : IRocketCommand
 {
-    class LeaveCommand : IRocketCommand
+    public AllowedCaller AllowedCaller
     {
-        public AllowedCaller AllowedCaller => AllowedCaller.Player;
-
-        public string Name => "leave";
-
-        public string Help => "Leave the game going on";
-
-        public string Syntax => "/leave";
-
-        public List<string> Aliases => new();
-
-        public List<string> Permissions => new();
-
-        public void Execute(IRocketPlayer caller, string[] command)
+        get
         {
-            var player = caller as UnturnedPlayer;
-            Plugin.Instance.Game.RemovePlayerFromGame(player);
+            return AllowedCaller.Player;
         }
+    }
+
+    public string Name
+    {
+        get
+        {
+            return "leave";
+        }
+    }
+
+    public string Help
+    {
+        get
+        {
+            return "Leave the game going on";
+        }
+    }
+
+    public string Syntax
+    {
+        get
+        {
+            return "/leave";
+        }
+    }
+
+    public List<string> Aliases
+    {
+        get
+        {
+            return new();
+        }
+    }
+
+    public List<string> Permissions
+    {
+        get
+        {
+            return new();
+        }
+    }
+
+    public void Execute(IRocketPlayer caller, string[] command)
+    {
+        var player = caller as UnturnedPlayer;
+        Plugin.Instance.Game.RemovePlayerFromGame(player);
     }
 }

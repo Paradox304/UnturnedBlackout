@@ -1,14 +1,13 @@
-﻿namespace UnturnedBlackout.Enums
+﻿namespace UnturnedBlackout.Enums;
+
+public enum ELoadoutTab
 {
-    public enum ELoadoutTab
-    {
-        ALL,
-        PISTOLS,
-        SUBMACHINE_GUNS,
-        SHOTGUNS,
-        LIGHT_MACHINE_GUNS,
-        ASSAULT_RIFLES,
-        SNIPER_RIFLES,
-        CARBINES
-    }
+    ALL,
+    PISTOLS,
+    SUBMACHINE_GUNS,
+    SHOTGUNS,
+    LIGHT_MACHINE_GUNS,
+    ASSAULT_RIFLES,
+    SNIPER_RIFLES,
+    CARBINES
 }
