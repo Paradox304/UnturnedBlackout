@@ -12,18 +12,7 @@ namespace UnturnedBlackout.Models.Global
         public string ChatMessageHexCode { get; set; }
         public List<Kit> TeamKits { get; set; }
         public List<TeamGlove> TeamGloves { get; set; }
-
-        public TeamInfo(int teamID, string teamName, string teamColorHexCode, string killFeedHexCode, string chatPlayerHexCode, string chatMessageHexCode, List<Kit> teamKits, List<TeamGlove> teamGloves)
-        {
-            TeamID = teamID;
-            TeamName = teamName;
-            TeamColorHexCode = teamColorHexCode;
-            KillFeedHexCode = killFeedHexCode;
-            ChatPlayerHexCode = chatPlayerHexCode;
-            ChatMessageHexCode = chatMessageHexCode;
-            TeamKits = teamKits;
-            TeamGloves = teamGloves;
-        }
+        public List<TeamKillstreak> TeamKillstreaks { get; set; }
 
         public TeamInfo()
         {

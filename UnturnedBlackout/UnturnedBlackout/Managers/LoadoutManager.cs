@@ -625,15 +625,11 @@ namespace UnturnedBlackout.Managers
             });
         }
 
-        public void GiveLoadout(GamePlayer player, Kit kit, List<TeamGlove> gloves)
+        public void GiveLoadout(GamePlayer player)
         {
             PlayerInventory inv = player.Player.Player.inventory;
             inv.ClearInventory();
-            // Adding clothes
-            foreach (ushort id in kit.ItemIDs)
-            {
-                inv.forceAddItem(new Item(id, true), true);
-            }
+
             // Getting active loadout
             if (!DB.PlayerLoadouts.TryGetValue(player.SteamID, out PlayerLoadout loadout))
             {
@@ -646,6 +642,24 @@ namespace UnturnedBlackout.Managers
                 player.SetActiveLoadout(null, 0, 0, 0);
                 return;
             }
+
+            // Getting team info of player
+            var game = player.CurrentGame;
+            if (game == null)
+            {
+                return;
+            }
+
+            var team = game.GetTeam(player);
+            var gloves = team.TeamGloves;
+            var kit = team.TeamKits[UnityEngine.Random.Range(0, team.TeamKits.Count)];
+            
+            // Adding clothes
+            foreach (ushort id in kit.ItemIDs)
+            {
+                inv.forceAddItem(new Item(id, true), true);
+            }
+            
             // Giving glove to player
             if (activeLoadout.Glove != null)
             {
@@ -654,6 +668,7 @@ namespace UnturnedBlackout.Managers
                 player.Player.Player.clothing.askWearShirt(0, 0, new byte[0], true);
                 inv.forceAddItem(new Item(glove.ItemID, true), true);
             }
+            
             // Giving primary to player
             if (activeLoadout.Primary != null)
             {
@@ -693,6 +708,7 @@ namespace UnturnedBlackout.Managers
                 inv.items[0].tryAddItem(item);
                 player.Player.Player.equipment.ServerEquip(0, 0, 0);
             }
+            
             // Giving secondary to player
             if (activeLoadout.Secondary != null)
             {
@@ -733,6 +749,7 @@ namespace UnturnedBlackout.Managers
                     player.Player.Player.equipment.ServerEquip(1, 0, 0);
                 }
             }
+            
             // Giving knife to player
             byte knifePage = 0;
             byte knifeX = 0;
@@ -759,9 +776,11 @@ namespace UnturnedBlackout.Managers
                     if (shouldBreak) break;
                 }
             }
+            
             // Giving perks to player
             PlayerSkills skill = player.Player.Player.skills;
             Dictionary<(int, int), int> skills = new();
+            
             foreach (DefaultSkill defaultSkill in Plugin.Instance.Config.DefaultSkills.FileData.DefaultSkills)
             {
                 if (PlayerSkills.TryParseIndices(defaultSkill.SkillName, out int specialtyIndex, out int skillIndex))
@@ -777,6 +796,7 @@ namespace UnturnedBlackout.Managers
                     }
                 }
             }
+            
             foreach (KeyValuePair<int, LoadoutPerk> perk in activeLoadout.Perks)
             {
                 if (PlayerSkills.TryParseIndices(perk.Value.Perk.SkillType, out int specialtyIndex, out int skillIndex))
@@ -799,6 +819,7 @@ namespace UnturnedBlackout.Managers
                     }
                 }
             }
+            
             for (int specialtyIndex = 0; specialtyIndex < skill.skills.Length; specialtyIndex++)
             {
                 for (int skillIndex = 0; skillIndex < skill.skills[specialtyIndex].Length; skillIndex++)
@@ -806,20 +827,24 @@ namespace UnturnedBlackout.Managers
                     skill.ServerSetSkillLevel(specialtyIndex, skillIndex, skills.TryGetValue((specialtyIndex, skillIndex), out int level) ? level : 0);
                 }
             }
+            
             // Giving tactical and lethal to player
             if (activeLoadout.Lethal != null)
             {
                 inv.forceAddItem(new Item(activeLoadout.Lethal.Gadget.GadgetID, false), false);
             }
+            
             if (activeLoadout.Tactical != null)
             {
                 inv.forceAddItem(new Item(activeLoadout.Tactical.Gadget.GadgetID, false), false);
             }
+            
             // Giving killstreaks to player
             foreach (LoadoutKillstreak killstreak in activeLoadout.Killstreaks)
             {
                 inv.forceAddItem(new Item(killstreak.Killstreak.KillstreakInfo.TriggerItemID, true), false);
             }
+            
             player.SetActiveLoadout(activeLoadout, knifePage, knifeX, knifeY);
         }
     }

@@ -372,8 +372,8 @@ namespace UnturnedBlackout.GameTypes
 
                 if (kPlayer.GamePlayer.SteamID == fPlayer.GamePlayer.SteamID)
                 {
-                    OnKill(kPlayer.GamePlayer, fPlayer.GamePlayer, cause == EDeathCause.WATER ? (ushort)0 : (ushort)1, Config.FFA.FileData.KillFeedHexCode, Config.FFA.FileData.KillFeedHexCode);
-
+                    OnKill(kPlayer.GamePlayer, fPlayer.GamePlayer, cause == EDeathCause.WATER ? (ushort)0 : (ushort)1, Config.FFA.FileData.FFATeam.KillFeedHexCode, Config.FFA.FileData.FFATeam.KillFeedHexCode);
+                    
                     Logging.Debug("Player killed themselves, returning");
                     return;
                 }
@@ -565,7 +565,7 @@ namespace UnturnedBlackout.GameTypes
 
                 if (equipmentUsed != 0)
                 {
-                    OnKill(kPlayer.GamePlayer, fPlayer.GamePlayer, equipmentUsed, Config.FFA.FileData.KillFeedHexCode, Config.FFA.FileData.KillFeedHexCode);
+                    OnKill(kPlayer.GamePlayer, fPlayer.GamePlayer, equipmentUsed, Config.FFA.FileData.FFATeam.KillFeedHexCode, Config.FFA.FileData.FFATeam.KillFeedHexCode);
                 }
 
                 foreach (FFAPlayer ply in Players)
@@ -694,7 +694,7 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
-            fPlayer.GamePlayer.OnRevived(Config.FFA.FileData.Kit, Config.FFA.FileData.TeamGloves);
+            fPlayer.GamePlayer.OnRevived();
         }
 
         public override void OnPlayerRespawn(GamePlayer player, ref Vector3 respawnPosition, ref float yaw)
@@ -735,7 +735,7 @@ namespace UnturnedBlackout.GameTypes
                 }
 
                 string iconLink = Plugin.Instance.DB.Levels.TryGetValue(data.Level, out XPLevel level) ? level.IconLinkSmall : "";
-                string updatedText = $"[{Utility.ToFriendlyName(chatMode)}] <color={Utility.GetLevelColor(player.Data.Level)}>[{player.Data.Level}]</color> <color={Config.FFA.FileData.ChatPlayerHexCode}>{player.Player.CharacterName.ToUnrich()}</color>: <color={Config.FFA.FileData.ChatMessageHexCode}>{text.ToUnrich()}</color>";
+                string updatedText = $"[{Utility.ToFriendlyName(chatMode)}] <color={Utility.GetLevelColor(player.Data.Level)}>[{player.Data.Level}]</color> <color={Config.FFA.FileData.FFATeam.ChatPlayerHexCode}>{player.Player.CharacterName.ToUnrich()}</color>: <color={Config.FFA.FileData.FFATeam.ChatMessageHexCode}>{text.ToUnrich()}</color>";
 
                 foreach (FFAPlayer reciever in Players)
                 {
@@ -752,7 +752,7 @@ namespace UnturnedBlackout.GameTypes
         public void GiveLoadout(FFAPlayer player)
         {
             player.GamePlayer.Player.Player.inventory.ClearInventory();
-            Plugin.Instance.Loadout.GiveLoadout(player.GamePlayer, Config.FFA.FileData.Kit, Config.FFA.FileData.TeamGloves);
+            Plugin.Instance.Loadout.GiveLoadout(player.GamePlayer);
         }
 
         public void SpawnPlayer(FFAPlayer player)
@@ -929,6 +929,11 @@ namespace UnturnedBlackout.GameTypes
         public override bool IsPlayerCarryingFlag(GamePlayer player)
         {
             return false;
+        }
+
+        public override TeamInfo GetTeam(GamePlayer player)
+        {
+            return Config.FFA.FileData.FFATeam;
         }
     }
 }

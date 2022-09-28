@@ -351,5 +351,6 @@ namespace UnturnedBlackout.GameTypes
         public abstract int GetPlayerCount();
         public abstract bool IsPlayerCarryingFlag(GamePlayer player);
         public abstract List<GamePlayer> GetPlayers();
+        public abstract TeamInfo GetTeam(GamePlayer player);
     }
 }

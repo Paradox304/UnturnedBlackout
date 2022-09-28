@@ -746,7 +746,7 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
-            tPlayer.GamePlayer.OnRevived(tPlayer.Team.Info.TeamKits[UnityEngine.Random.Range(0, tPlayer.Team.Info.TeamKits.Count)], tPlayer.Team.Info.TeamGloves);
+            tPlayer.GamePlayer.OnRevived();
         }
 
         public override void OnPlayerRespawn(GamePlayer player, ref Vector3 respawnPosition, ref float yaw)
@@ -824,7 +824,7 @@ namespace UnturnedBlackout.GameTypes
         public void GiveLoadout(TDMPlayer player)
         {
             player.GamePlayer.Player.Player.inventory.ClearInventory();
-            Plugin.Instance.Loadout.GiveLoadout(player.GamePlayer, player.Team.Info.TeamKits[UnityEngine.Random.Range(0, player.Team.Info.TeamKits.Count)], player.Team.Info.TeamGloves);
+            Plugin.Instance.Loadout.GiveLoadout(player.GamePlayer);
         }
 
         public void SpawnPlayer(TDMPlayer player)
@@ -1046,6 +1046,12 @@ namespace UnturnedBlackout.GameTypes
         public override bool IsPlayerCarryingFlag(GamePlayer player)
         {
             return false;
+        }
+
+        public override TeamInfo GetTeam(GamePlayer player)
+        {
+            var tPlayer = GetTDMPlayer(player.SteamID);
+            return tPlayer?.Team?.Info;
         }
     }
 }

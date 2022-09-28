@@ -307,6 +307,7 @@
     <Compile Include="Models\Global\Kit.cs" />
     <Compile Include="Models\Global\MatchEndSummary.cs" />
     <Compile Include="Models\Global\RoundEndCase.cs" />
+    <Compile Include="Models\Global\TeamKillstreak.cs" />
     <Compile Include="Models\Global\TeamGlove.cs" />
     <Compile Include="Models\KC\KCConfig.cs" />
     <Compile Include="Models\KC\KCPlayer.cs" />
@@ -362,10 +363,6 @@
     <Content Include="Libraries\UnityEngine.CoreModule.dll" />
     <Content Include="Libraries\UnityEngine.dll" />
     <Content Include="Libraries\UnityEngine.PhysicsModule.dll" />
-  </ItemGroup>
-  <ItemGroup>
-    <Analyzer Include="..\packages\StyleCop.Analyzers.1.1.118\analyzers\dotnet\cs\StyleCop.Analyzers.CodeFixes.dll" />
-    <Analyzer Include="..\packages\StyleCop.Analyzers.1.1.118\analyzers\dotnet\cs\StyleCop.Analyzers.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

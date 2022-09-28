@@ -75,3 +75,6 @@ dotnet_diagnostic.SA1000.severity = None
 
 # Declare an access modifier
 dotnet_diagnostic.SA1400.severity = None
+
+# Trailing whitespaces
+dotnet_diagnostic.SA1028.severity = None

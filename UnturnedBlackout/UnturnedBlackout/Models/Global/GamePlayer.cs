@@ -65,6 +65,11 @@ namespace UnturnedBlackout.Models.Global
         public byte KillstreakX { get; set; }
         public byte KillstreakY { get; set; }
 
+        public ushort KillstreakPreviousShirtID { get; set; }
+        public ushort KillstreakPreviousPantsID { get; set; }
+        public ushort KillstreakPreviousHatID { get; set; }
+        public ushort KillstreakPreviousVestID { get; set; }
+        
         public bool HasTactical { get; set; }
         public bool HasLethal { get; set; }
 
@@ -94,6 +99,7 @@ namespace UnturnedBlackout.Models.Global
         public Coroutine VoiceChatChecker { get; set; }
         public Coroutine AnimationChecker { get; set; }
         public Coroutine KillstreakItemRemover { get; set; }
+        public Coroutine KillstreakClothingRemover { get; set; }
         public Coroutine GadgetGiver { get; set; }
         public Coroutine SpawnProtectionRemover { get; set; }
         public Coroutine DamageChecker { get; set; }
@@ -372,13 +378,13 @@ namespace UnturnedBlackout.Models.Global
         }
 
         // Equipping and refilling on guns on respawn
-        public void OnRevived(Kit kit, List<TeamGlove> gloves)
+        public void OnRevived()
         {
             RespawnTimer.Stop();
 
             if (IsPendingLoadoutChange)
             {
-                Plugin.Instance.Loadout.GiveLoadout(this, kit, gloves);
+                Plugin.Instance.Loadout.GiveLoadout(this);
                 IsPendingLoadoutChange = false;
                 Plugin.Instance.UI.ClearDeathUI(this);
                 return;
@@ -564,38 +570,84 @@ namespace UnturnedBlackout.Models.Global
         public void ActivateKillstreak(LoadoutKillstreak killstreak)
         {
             Logging.Debug($"Activating killstreak with id {killstreak.Killstreak.KillstreakID} for {Player.CharacterName}");
-            Data.KillstreakData info = killstreak.Killstreak.KillstreakInfo;
-            PlayerInventory inv = Player.Player.inventory;
-            if (info.IsItem == false) return;
+            var info = killstreak.Killstreak.KillstreakInfo;
+            var inv = Player.Player.inventory;
 
-            if (info.MagAmount > 0)
+            if (info.IsItem)
             {
-                for (int i = 1; i <= info.MagAmount; i++)
+                if (info.MagAmount > 0)
                 {
-                    inv.forceAddItem(new Item(info.MagID, true), false);
-                }
-            }
-
-            inv.forceAddItem(new Item(info.ItemID, true), false);
-            for (byte page = 0; page < PlayerInventory.PAGES - 2; page++)
-            {
-                bool shouldBreak = false;
-                for (int index = inv.getItemCount(page) - 1; index >= 0; index--)
-                {
-                    ItemJar item = inv.getItem(page, (byte)index);
-                    if ((item?.item?.id ?? 0) == info.ItemID)
+                    for (int i = 1; i <= info.MagAmount; i++)
                     {
-                        KillstreakPage = page;
-                        KillstreakX = item.x;
-                        KillstreakY = item.y;
-                        shouldBreak = true;
+                        inv.forceAddItem(new Item(info.MagID, true), false);
+                    }
+                }
+
+                inv.forceAddItem(new Item(info.ItemID, true), false);
+                for (byte page = 0; page < PlayerInventory.PAGES - 2; page++)
+                {
+                    bool shouldBreak = false;
+                    for (int index = inv.getItemCount(page) - 1; index >= 0; index--)
+                    {
+                        ItemJar item = inv.getItem(page, (byte)index);
+                        if ((item?.item?.id ?? 0) == info.ItemID)
+                        {
+                            KillstreakPage = page;
+                            KillstreakX = item.x;
+                            KillstreakY = item.y;
+                            shouldBreak = true;
+                            break;
+                        }
+                    }
+                    if (shouldBreak)
+                    {
                         break;
                     }
                 }
-                if (shouldBreak) break;
+
+                Player.Player.equipment.ServerEquip(KillstreakPage, KillstreakX, KillstreakY);
             }
 
-            Player.Player.equipment.ServerEquip(KillstreakPage, KillstreakX, KillstreakY);
+            if (info.IsClothing)
+            {
+                var clothing = Player.Player.clothing;
+                var clothes = clothing.thirdClothes;
+                var clothingKillstreak = CurrentGame.GetTeam(this).TeamKillstreaks.FirstOrDefault(k => k.KillstreakID == killstreak.Killstreak.KillstreakID);
+                
+                KillstreakPreviousShirtID = clothing.shirt;
+                KillstreakPreviousPantsID = clothing.pants;
+                KillstreakPreviousHatID = clothing.hat;
+                KillstreakPreviousVestID = clothing.vest;
+
+                if (clothingKillstreak.ShirtID != 0)
+                {
+                    clothes.shirt = 0;
+                    clothing.askWearShirt(0, 0, new byte[0], false);
+                    inv.forceAddItem(new Item(clothingKillstreak.ShirtID, true), true);
+                }
+
+                if (clothingKillstreak.PantsID != 0)
+                {
+                    clothes.pants = 0;
+                    clothing.askWearPants(0, 0, new byte[0], false);
+                    inv.forceAddItem(new Item(clothingKillstreak.PantsID, true), true);
+                }
+
+                if (clothingKillstreak.HatID != 0)
+                {
+                    clothes.hat = 0;
+                    clothing.askWearHat(0, 0, new byte[0], false);
+                    inv.forceAddItem(new Item(clothingKillstreak.HatID, true), true);
+                }
+
+                if (clothingKillstreak.VestID != 0)
+                {
+                    clothes.vest = 0;
+                    clothing.askWearVest(0, 0, new byte[0], false);
+                    inv.forceAddItem(new Item(clothingKillstreak.VestID, true), true);
+                }
+            }
+
             KillstreakChecker.Stop();
 
             HasKillstreakActive = true;
@@ -606,9 +658,13 @@ namespace UnturnedBlackout.Models.Global
             MovementChanger.Stop();
             MovementChanger = Plugin.Instance.StartCoroutine(ChangeMovement(info.MovementMultiplier));
 
-            if (info.ItemStaySeconds == 0) return;
-            Plugin.Instance.UI.SendKillstreakTimer(this, info.ItemStaySeconds);
-            KillstreakChecker = Plugin.Instance.StartCoroutine(CheckKillstreak(info.ItemStaySeconds));
+            if (info.KillstreakStaySeconds == 0)
+            {
+                return;
+            }
+
+            Plugin.Instance.UI.SendKillstreakTimer(this, info.KillstreakStaySeconds);
+            KillstreakChecker = Plugin.Instance.StartCoroutine(CheckKillstreak(info.KillstreakStaySeconds));
         }
 
         public void RemoveActiveKillstreak()
@@ -620,9 +676,20 @@ namespace UnturnedBlackout.Models.Global
                 return;
             }
 
+            var info = ActiveKillstreak.Killstreak.KillstreakInfo;
             KillstreakChecker.Stop();
             KillstreakItemRemover.Stop();
-            KillstreakItemRemover = Plugin.Instance.StartCoroutine(RemoveItemKillstreak(KillstreakPage, KillstreakX, KillstreakY, ActiveKillstreak.Killstreak.KillstreakInfo.MagID));
+            KillstreakClothingRemover.Stop();
+
+            if (info.IsItem)
+            {
+                KillstreakItemRemover = Plugin.Instance.StartCoroutine(RemoveItemKillstreak(KillstreakPage, KillstreakX, KillstreakY, info.MagID));
+            }
+
+            if (info.IsClothing)
+            {
+                KillstreakClothingRemover = Plugin.Instance.StartCoroutine(RemoveClothingKillstreak(KillstreakPreviousShirtID, KillstreakPreviousPantsID, KillstreakPreviousHatID, KillstreakPreviousVestID));
+            }
 
             Plugin.Instance.UI.ClearKillstreakTimer(this);
             HasKillstreakActive = false;
@@ -658,6 +725,51 @@ namespace UnturnedBlackout.Models.Global
             }
         }
 
+        public IEnumerator RemoveClothingKillstreak(ushort shirt, ushort pants, ushort hat, ushort vest)
+        {
+            while (true)
+            {
+                if (Player.Player.life.isDead)
+                {
+                    yield return new WaitForSeconds(1f);
+                    continue;
+                }
+
+                var clothing = Player.Player.clothing;
+                var clothes = clothing.thirdClothes;
+
+                if (shirt != 0 && clothing.shirt != shirt)
+                {
+                    clothes.shirt = 0;
+                    clothing.askWearShirt(0, 0, new byte[0], false);
+                    Player.Player.inventory.forceAddItem(new Item(shirt, true), true);
+                }
+
+                if (pants != 0 && clothing.pants != pants)
+                {
+                    clothes.pants = 0;
+                    clothing.askWearPants(0, 0, new byte[0], false);
+                    Player.Player.inventory.forceAddItem(new Item(pants, true), true);
+                }
+
+                if (hat != 0 && clothing.hat != hat)
+                {
+                    clothes.hat = 0;
+                    clothing.askWearHat(0, 0, new byte[0], false);
+                    Player.Player.inventory.forceAddItem(new Item(hat, true), true);
+                }
+
+                if (vest != 0 && clothing.vest != vest)
+                {
+                    clothes.vest = 0;
+                    clothing.askWearVest(0, 0, new byte[0], false);
+                    Player.Player.inventory.forceAddItem(new Item(vest, true), true);
+                }
+                
+                break;
+            }
+        }
+        
         public IEnumerator CheckKillstreak(int seconds)
         {
             for (int i = seconds; i > 0; i--)
