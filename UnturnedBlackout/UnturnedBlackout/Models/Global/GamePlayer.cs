@@ -653,6 +653,7 @@ namespace UnturnedBlackout.Models.Global
             HasKillstreakActive = true;
             ActiveKillstreak = killstreak;
             AvailableKillstreaks[killstreak] = false;
+            
             Plugin.Instance.UI.UpdateKillstreakReady(this, killstreak);
 
             MovementChanger.Stop();
