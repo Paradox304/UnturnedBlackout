@@ -12,6 +12,7 @@ using UnityEngine;
 using UnturnedBlackout.Database.Base;
 using UnturnedBlackout.Enums;
 using UnturnedBlackout.Managers;
+using UnturnedBlackout.Models.Data;
 using UnturnedBlackout.Models.Feed;
 using UnturnedBlackout.Models.Global;
 
@@ -37,8 +38,9 @@ namespace UnturnedBlackout.GameTypes
 
         public List<GamePlayer> PlayersTalking { get; set; }
 
-        public Dictionary<GamePlayer, BarricadeDrop> GameTurrets { get; set; }
+        public Dictionary<GamePlayer, (BarricadeDrop, KillstreakData)> GameTurrets { get; set; }
         public Dictionary<BarricadeDrop, GamePlayer> GameTurretsInverse { get; set; }
+        public Dictionary<BarricadeDrop, Coroutine> GameTurretDamager { get; set; }
         
         public Coroutine VoteEnder { get; set; }
         public Coroutine KillFeedChecker { get; set; }
@@ -49,9 +51,13 @@ namespace UnturnedBlackout.GameTypes
             Location = location;
             IsHardcore = isHardcore;
             GamePhase = EGamePhase.WaitingForPlayers;
-            Killfeed = new List<Feed>();
+            Killfeed = new();
 
-            PlayersTalking = new List<GamePlayer>();
+            GameTurrets = new();
+            GameTurretsInverse = new();
+            GameTurretDamager = new();
+            
+            PlayersTalking = new();
 
             UnturnedPlayerEvents.OnPlayerDeath += OnPlayerDeath;
             PlayerLife.OnSelectingRespawnPoint += OnPlayerRespawning;
@@ -63,6 +69,7 @@ namespace UnturnedBlackout.GameTypes
             UseableThrowable.onThrowableSpawned += OnThrowableSpawned;
             BarricadeManager.onBarricadeSpawned += OnBarricadeSpawned;
             BarricadeManager.onDamageBarricadeRequested += OnBarricadeDamage;
+            
             UseableConsumeable.onConsumePerformed += OnConsumed;
             UseableGun.OnAimingChanged_Global += OnAimingChanged;
 
@@ -80,6 +87,7 @@ namespace UnturnedBlackout.GameTypes
             ItemManager.onTakeItemRequested -= OnTakeItem;
             UseableThrowable.onThrowableSpawned -= OnThrowableSpawned;
             BarricadeManager.onBarricadeSpawned -= OnBarricadeSpawned;
+            BarricadeManager.onDamageBarricadeRequested -= OnBarricadeDamage;
             UseableConsumeable.onConsumePerformed -= OnConsumed;
             UseableGun.OnAimingChanged_Global -= OnAimingChanged;
 
@@ -134,7 +142,38 @@ namespace UnturnedBlackout.GameTypes
 
             PlayerBarricadeDamaged(gPlayer, drop, ref pendingTotalDamage, ref shouldAllow);
         }
+        
+        public void OnBarricadeDestroyed(BarricadeDrop drop)
+        {
+            if (!GameTurretsInverse.TryGetValue(drop, out var gPlayer))
+            {
+                return;
+            }
 
+            GameTurrets.Remove(gPlayer);
+            GameTurretsInverse.Remove(drop);
+            if (GameTurretDamager.TryGetValue(drop, out var damager) && damager != null)
+            {
+                Plugin.Instance.StopCoroutine(damager);
+            }
+            GameTurretDamager.Remove(drop);
+        }
+
+        public IEnumerator DamageTurret(BarricadeDrop drop, int healthPerSecond)
+        {
+            var data = drop.GetServersideData();
+            if (data == null)
+            {
+                yield break;
+            }
+            
+            while (!data.barricade.isDead)
+            {
+                yield return new WaitForSeconds(1f);
+                BarricadeManager.damage(drop.model.transform, healthPerSecond, 1, false);
+            }
+        }
+        
         private void OnThrowableSpawned(UseableThrowable useable, GameObject throwable)
         {
             var gPlayer = Plugin.Instance.Game.GetGamePlayer(useable.player);

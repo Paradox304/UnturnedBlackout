@@ -335,6 +335,7 @@
     <Compile Include="Models\Webhook\Field.cs" />
     <Compile Include="Models\Webhook\Footer.cs" />
     <Compile Include="Models\Webhook\Message.cs" />
+    <Compile Include="Patches\BarricadePatches.cs" />
     <Compile Include="Patches\ClothingPatches.cs" />
     <Compile Include="Models\FFA\FFAPlayer.cs" />
     <Compile Include="Models\Global\GamePlayer.cs" />

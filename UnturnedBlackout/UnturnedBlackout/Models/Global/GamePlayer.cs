@@ -382,6 +382,18 @@ namespace UnturnedBlackout.Models.Global
         {
             RespawnTimer.Stop();
 
+            // Remove any left over turrets in the player's inventory
+            for (int i = 0; i <= Player.Player.inventory.getItemCount(PlayerInventory.SLOTS); i++)
+            {
+                var item = Player.Player.inventory.getItem(PlayerInventory.SLOTS, (byte)i);
+                if (item != null && ActiveLoadout.Killstreaks.Exists(k => k.Killstreak.KillstreakInfo.IsTurret && item.item.id == k.Killstreak.KillstreakInfo.TurretID))
+                {
+                    Player.Player.inventory.removeItem(PlayerInventory.SLOTS, (byte)i);
+                    break;
+                }
+            }
+
+            // Check if loadout needs to be changed, if so change it
             if (IsPendingLoadoutChange)
             {
                 Plugin.Instance.Loadout.GiveLoadout(this);
@@ -390,6 +402,7 @@ namespace UnturnedBlackout.Models.Global
                 return;
             }
 
+            // Fill up the guns
             for (byte i = 0; i <= 1; i++)
             {
                 var item = Player.Player.inventory.getItem(i, 0);
@@ -572,7 +585,11 @@ namespace UnturnedBlackout.Models.Global
             Logging.Debug($"Activating killstreak with id {killstreak.Killstreak.KillstreakID} for {Player.CharacterName}");
             var info = killstreak.Killstreak.KillstreakInfo;
             var inv = Player.Player.inventory;
-
+            if (CurrentGame == null)
+            {
+                return;
+            }
+            
             if (info.IsItem)
             {
                 if (info.MagAmount > 0)
@@ -609,6 +626,11 @@ namespace UnturnedBlackout.Models.Global
             }
             else if (info.IsTurret)
             {
+                if (CurrentGame.GameTurrets.ContainsKey(this))
+                {
+                    return;
+                }
+                
                 inv.forceAddItem(new Item(info.TurretID, true), false);
 
                 for (byte page = 0; page < PlayerInventory.PAGES - 2; page++)
@@ -740,16 +762,17 @@ namespace UnturnedBlackout.Models.Global
 
                 if (magID != 0)
                 {
-                    var itemCount = inv.items[2].items.Count;
+                    var itemCount = inv.getItemCount(PlayerInventory.SLOTS);
                     for (var i = itemCount - 1; i >= 0; i--)
                     {
-                        var item = inv.getItem(2, (byte)i);
+                        var item = inv.getItem(PlayerInventory.SLOTS, (byte)i);
                         if ((item?.item?.id ?? 0) == magID)
                         {
-                            inv.removeItem(2, (byte)i);
+                            inv.removeItem(PlayerInventory.SLOTS, (byte)i);
                         }
                     }
                 }
+                
                 break;
             }
         }

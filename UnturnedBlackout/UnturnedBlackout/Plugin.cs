@@ -4,6 +4,7 @@ using Rocket.Core.Plugins;
 using Rocket.Unturned.Permissions;
 using SDG.Unturned;
 using Steamworks;
+using System;
 using System.Collections;
 using System.Linq;
 using System.Reflection;
@@ -31,7 +32,9 @@ namespace UnturnedBlackout
             ResourceManager.onDamageResourceRequested += OnDamageResource;
             StructureManager.onDamageStructureRequested += OnDamageStructure;
             UseableConsumeable.onPerformingAid += OnPerformingAid;
-
+            BarricadeDrop.OnSalvageRequested_Global += OnSalvageBarricade;
+            BarricadeManager.onOpenStorageRequested += OnStorageOpen;
+            
             UnturnedPermissions.OnJoinRequested += OnJoining;
 
             PlayerInput.onPluginKeyTick += OnHotkeyPressed;
@@ -51,7 +54,8 @@ namespace UnturnedBlackout
             ResourceManager.onDamageResourceRequested -= OnDamageResource;
             StructureManager.onDamageStructureRequested -= OnDamageStructure;
             UseableConsumeable.onPerformingAid -= OnPerformingAid;
-
+            BarricadeDrop.OnSalvageRequested_Global -= OnSalvageBarricade;
+            BarricadeManager.onOpenStorageRequested -= OnStorageOpen;
             UnturnedPermissions.OnJoinRequested -= OnJoining;
 
             PlayerInput.onPluginKeyTick -= OnHotkeyPressed;
@@ -60,6 +64,16 @@ namespace UnturnedBlackout
             Logger.Log("Unturned Blackout has been unloaded");
         }
 
+        private void OnStorageOpen(CSteamID instigator, InteractableStorage storage, ref bool shouldAllow)
+        {
+            shouldAllow = false;
+        }
+        
+        private void OnSalvageBarricade(BarricadeDrop barricade, SteamPlayer instigatorClient, ref bool shouldAllow)
+        {
+            shouldAllow = false;
+        }
+        
         private void OnPerformingAid(Player instigator, Player target, ItemConsumeableAsset asset, ref bool shouldAllow)
         {
             shouldAllow = false;
@@ -253,6 +267,7 @@ namespace UnturnedBlackout
             { "Melee_Kill", "Melee Kill" },
             { "Lethal_Kill", "Lethal Kill" },
             { "Lethal_Hit", "Lethal Hit" },
+            { "Turret_Destroy", "Turret Destroyed" },
             { "Killstreak_Kill", "Killstreak Kill" },
             { "Kill_Confirmed", "Kill Confirmed" },
             { "Kill_Denied", "Kill Denied" },

@@ -466,7 +466,7 @@ namespace UnturnedBlackout.GameTypes
                 ushort equipmentUsed = 0;
                 var longshotRange = 0f;
 
-                var usedKillstreak = kPlayer.GamePlayer.HasKillstreakActive && (kPlayer.GamePlayer.ActiveKillstreak?.Killstreak?.KillstreakInfo?.IsItem ?? false);
+                var usedKillstreak = kPlayer.GamePlayer.HasKillstreakActive && (kPlayer.GamePlayer.ActiveKillstreak?.Killstreak?.KillstreakInfo?.IsItem ?? false) && cause != EDeathCause.SENTRY;
                 var killstreakID = kPlayer.GamePlayer.ActiveKillstreak?.Killstreak?.KillstreakID ?? 0;
 
                 if (usedKillstreak)
@@ -475,7 +475,7 @@ namespace UnturnedBlackout.GameTypes
                     xpGained += info.MedalXP;
                     xpText += info.MedalName;
                     equipmentUsed += info.ItemID;
-                    questConditions.Add(EQuestCondition.Killstreak, equipmentUsed);
+                    questConditions.Add(EQuestCondition.Killstreak, killstreakID);
                 }
                 else
                 {
@@ -526,6 +526,16 @@ namespace UnturnedBlackout.GameTypes
                             xpText += Plugin.Instance.Translate("Lethal_Kill").ToRich();
                             equipmentUsed = kPlayer.GamePlayer.ActiveLoadout.Lethal?.Gadget?.GadgetID ?? 0;
                             questConditions.Add(EQuestCondition.Gadget, equipmentUsed);
+                            break;
+                        case EDeathCause.SENTRY:
+                            if (!GameTurrets.TryGetValue(kPlayer.GamePlayer, out var sentry))
+                            {
+                                break;
+                            }
+
+                            equipmentUsed = sentry.Item1.asset.id;
+                            xpGained += sentry.Item2.MedalXP;
+                            xpText += sentry.Item2.MedalName;
                             break;
                         default:
                             break;
@@ -960,8 +970,7 @@ namespace UnturnedBlackout.GameTypes
 
         public override void PlayerBarricadeSpawned(GamePlayer player, BarricadeDrop drop)
         {
-            var kPlayer = GetKCPlayer(player.Player);
-            if (kPlayer == null)
+            if (IsPlayerIngame(player.SteamID))
             {
                 return;
             }
@@ -969,13 +978,69 @@ namespace UnturnedBlackout.GameTypes
             if (drop.asset.id == (player.ActiveLoadout.Lethal?.Gadget?.GadgetID ?? 0))
             {
                 player.UsedLethal();
+                return;
             }
-            else if (drop.asset.id == (player.ActiveLoadout.Tactical?.Gadget?.GadgetID ?? 0))
+
+            if (drop.asset.id == (player.ActiveLoadout.Tactical?.Gadget?.GadgetID ?? 0))
             {
                 player.UsedTactical();
+                return;
             }
+
+            var turret = player.ActiveLoadout.Killstreaks.FirstOrDefault(k => k.Killstreak.KillstreakInfo.IsTurret && drop.asset.id == k.Killstreak.KillstreakInfo.TurretID);
+            if (turret == null || drop.interactable is not InteractableSentry sentry)
+            {
+                return;
+            }
+
+            sentry.items.tryAddItem(new Item(turret.Killstreak.KillstreakInfo.GunID, true), true);
+            sentry.refreshDisplay();
+
+            GameTurrets.Add(player, (drop, turret.Killstreak.KillstreakInfo));
+            GameTurretsInverse.Add(drop, player);
+            GameTurretDamager.Add(drop, Plugin.Instance.StartCoroutine(DamageTurret(drop, turret.Killstreak.KillstreakInfo.TurretDamagePerSecond)));
         }
 
+        public override void PlayerBarricadeDamaged(GamePlayer player, BarricadeDrop drop, ref ushort pendingTotalDamage, ref bool shouldAllow)
+        {
+            var damager = GetKCPlayer(player.Player);
+            if (damager == null)
+            {
+                return;
+            }
+
+            if (!GameTurretsInverse.TryGetValue(drop, out var gPlayer))
+            {
+                return;
+            }
+
+            var owner = GetKCPlayer(gPlayer.Player);
+            if (owner == null)
+            {
+                return;
+            }
+
+            if (owner.Team == damager.Team)
+            {
+                shouldAllow = false;
+                return;
+            }
+
+            var barricadeData = drop.GetServersideData();
+            if (barricadeData == null)
+            {
+                return;
+            }
+
+            if (barricadeData.barricade.health > pendingTotalDamage)
+            {
+                return;
+            }
+
+            Plugin.Instance.UI.ShowXPUI(player, Config.Medals.FileData.TurretDestroyXP, Plugin.Instance.Translate("Turret_Destroy"));
+            Task.Run(async () => await Plugin.Instance.DB.IncreasePlayerXPAsync(player.SteamID, Config.Medals.FileData.TurretDestroyXP));
+        }
+        
         public override void PlayerChangeFiremode(GamePlayer player)
         {
             var kPlayer = GetKCPlayer(player.Player);
