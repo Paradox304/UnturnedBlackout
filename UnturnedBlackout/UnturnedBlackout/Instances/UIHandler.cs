@@ -4997,12 +4997,16 @@ namespace UnturnedBlackout.Instances
                 case ELoadoutPage.PrimarySkin:
                     {
                         loadoutManager.DequipGunSkin(Player, LoadoutID, true);
+                        ReloadLoadoutTab();
+                        ReloadSelectedItem();
                         break;
                     }
 
                 case ELoadoutPage.SecondarySkin:
                     {
                         loadoutManager.DequipGunSkin(Player, LoadoutID, false);
+                        ReloadLoadoutTab();
+                        ReloadSelectedItem();
                         break;
                     }
 
@@ -5030,6 +5034,8 @@ namespace UnturnedBlackout.Instances
                         }
 
                         loadoutManager.DequipAttachment(Player, attachment.Attachment.AttachmentID, LoadoutID, true);
+                        ReloadLoadoutTab();
+                        ReloadSelectedItem();
                         break;
                     }
 
@@ -5056,6 +5062,8 @@ namespace UnturnedBlackout.Instances
                         }
 
                         loadoutManager.DequipAttachment(Player, attachment.Attachment.AttachmentID, LoadoutID, false);
+                        ReloadLoadoutTab();
+                        ReloadSelectedItem();
                         break;
                     }
 
@@ -5063,18 +5071,24 @@ namespace UnturnedBlackout.Instances
                 case ELoadoutPage.AttachmentSecondaryCharm:
                     {
                         loadoutManager.EquipGunCharm(Player, LoadoutID, 0, LoadoutPage.ToString().StartsWith("AttachmentPrimary"));
+                        ReloadLoadoutTab();
+                        ReloadSelectedItem();
                         break;
                     }
 
                 case ELoadoutPage.Tactical:
                     {
                         loadoutManager.EquipTactical(Player, LoadoutID, 0);
+                        ReloadLoadoutTab();
+                        ReloadSelectedItem();
                         break;
                     }
 
                 case ELoadoutPage.Lethal:
                     {
                         loadoutManager.EquipLethal(Player, LoadoutID, 0);
+                        ReloadLoadoutTab();
+                        ReloadSelectedItem();
                         break;
                     }
 
@@ -5089,12 +5103,16 @@ namespace UnturnedBlackout.Instances
                         }
 
                         loadoutManager.DequipPerk(Player, LoadoutID, perk.Perk.PerkID);
+                        ReloadLoadoutTab();
+                        ReloadSelectedItem();
                         break;
                     }
 
                 case ELoadoutPage.Knife:
                     {
                         loadoutManager.EquipKnife(Player, LoadoutID, 0);
+                        ReloadLoadoutTab();
+                        ReloadSelectedItem();
                         break;
                     }
 
@@ -5107,18 +5125,24 @@ namespace UnturnedBlackout.Instances
                         }
 
                         loadoutManager.DequipKillstreak(Player, LoadoutID, killstreak.Killstreak.KillstreakID);
+                        ReloadLoadoutTab();
+                        ReloadSelectedItem();
                         break;
                     }
 
                 case ELoadoutPage.Glove:
                     {
                         loadoutManager.EquipGlove(Player, LoadoutID, 0);
+                        ReloadLoadoutTab();
+                        ReloadSelectedItem();
                         break;
                     }
 
                 case ELoadoutPage.Card:
                     {
                         loadoutManager.EquipCard(Player, LoadoutID, 0);
+                        ReloadLoadoutTab();
+                        ReloadSelectedItem();
                         break;
                     }
             }
@@ -5148,7 +5172,7 @@ namespace UnturnedBlackout.Instances
         public void SelectLeaderboardPage(ELeaderboardPage page)
         {
             LeaderboardPage = page;
-            SelectLeaderboardTab(ELeaderboardTab.Kill);
+            SelectLeaderboardTab(page == ELeaderboardPage.All ? ELeaderboardTab.Level : ELeaderboardTab.Kill);
         }
 
         public void SelectLeaderboardTab(ELeaderboardTab tab)
@@ -5166,8 +5190,7 @@ namespace UnturnedBlackout.Instances
             {
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards BUTTON {i}", false);
             }
-
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Leaderboards Level BUTTON", LeaderboardPage == ELeaderboardPage.All);
+            
             if (data.Count == 0)
             {
                 return;
