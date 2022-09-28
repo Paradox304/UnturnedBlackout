@@ -1,13 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Threading.Tasks;
-using Rocket.Core.Utils;
+﻿using Rocket.Core.Utils;
 using Rocket.Unturned;
 using Rocket.Unturned.Player;
 using SDG.Unturned;
 using Steamworks;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Threading.Tasks;
 using UnturnedBlackout.Enums;
 using UnturnedBlackout.GameTypes;
 using UnturnedBlackout.Models.Global;
@@ -47,12 +47,12 @@ namespace UnturnedBlackout.Managers
         public void StartGames()
         {
             Logging.Debug("Starting games");
-            for (int i = 1; i <= Config.Base.FileData.GamesCount; i++)
+            for (var i = 1; i <= Config.Base.FileData.GamesCount; i++)
             {
                 Logging.Debug($"{AvailableLocations.Count} locations available");
-                int locationID = AvailableLocations[UnityEngine.Random.Range(0, AvailableLocations.Count)];
-                ArenaLocation location = Config.Locations.FileData.ArenaLocations.FirstOrDefault(k => k.LocationID == locationID);
-                (EGameType, bool) gameMode = GetRandomGameMode(locationID);
+                var locationID = AvailableLocations[UnityEngine.Random.Range(0, AvailableLocations.Count)];
+                var location = Config.Locations.FileData.ArenaLocations.FirstOrDefault(k => k.LocationID == locationID);
+                var gameMode = GetRandomGameMode(locationID);
                 Logging.Debug($"Found Location: {location.LocationName}, GameMode: {gameMode.Item1}, IsHardcore: {gameMode.Item2}");
                 StartGame(location, gameMode.Item1, gameMode.Item2);
             }
@@ -117,7 +117,7 @@ namespace UnturnedBlackout.Managers
                 return;
             }
 
-            GamePlayer gPlayer = GetGamePlayer(player);
+            var gPlayer = GetGamePlayer(player);
             if (gPlayer == null)
             {
                 return;
@@ -129,7 +129,7 @@ namespace UnturnedBlackout.Managers
                 return;
             }
 
-            Game game = Games[selectedID];
+            var game = Games[selectedID];
             if (game.GetPlayerCount() >= game.Location.GetMaxPlayers(game.GameMode))
             {
                 Utility.Say(player, Plugin.Instance.Translate("Game_Full").ToRich());
@@ -142,7 +142,7 @@ namespace UnturnedBlackout.Managers
 
         public void RemovePlayerFromGame(UnturnedPlayer player)
         {
-            GamePlayer gPlayer = GetGamePlayer(player);
+            var gPlayer = GetGamePlayer(player);
             if (gPlayer == null)
             {
                 return;
@@ -162,12 +162,12 @@ namespace UnturnedBlackout.Managers
         {
             SendPlayerToLobby(player);
 
-            DatabaseManager db = Plugin.Instance.DB;
+            var db = Plugin.Instance.DB;
             Plugin.Instance.UI.SendLoadingUI(player, false, EGameType.None, null, "LOADING...");
             Task.Run(async () =>
             {
-                string avatarURL = "";
-                string countryCode = "EU";
+                var avatarURL = "";
+                var countryCode = "EU";
                 try
                 {
                     avatarURL = player.SteamProfile.AvatarFull.ToString();
@@ -188,7 +188,8 @@ namespace UnturnedBlackout.Managers
                 {
                     Logger.Log($"Error getting the country code for the player with ip {player.IP}");
                     Logger.Log(ex);
-                } finally
+                }
+                finally
                 {
                     Logging.Debug($"{player.CharacterName}, country code: {countryCode}");
                     await db.AddPlayerAsync(player, player.CharacterName, avatarURL, countryCode);
@@ -213,9 +214,9 @@ namespace UnturnedBlackout.Managers
         private void OnPlayerLeft(UnturnedPlayer player)
         {
             Plugin.Instance.UI.UnregisterUIHandler(player);
-            if (Players.TryGetValue(player.CSteamID, out GamePlayer gPlayer))
+            if (Players.TryGetValue(player.CSteamID, out var gPlayer))
             {
-                Game game = gPlayer.CurrentGame;
+                var game = gPlayer.CurrentGame;
                 if (game != null)
                 {
                     game.RemovePlayerFromGame(gPlayer);
@@ -227,15 +228,15 @@ namespace UnturnedBlackout.Managers
 
         private void OnPlayerDeath(PlayerLife sender, EDeathCause cause, ELimb limb, CSteamID instigator)
         {
-            UnturnedPlayer ply = UnturnedPlayer.FromPlayer(sender.player);
+            var ply = UnturnedPlayer.FromPlayer(sender.player);
             if (ply == null)
             {
                 return;
             }
 
-            if (Players.TryGetValue(ply.CSteamID, out GamePlayer gPlayer))
+            if (Players.TryGetValue(ply.CSteamID, out var gPlayer))
             {
-                Game game = gPlayer.CurrentGame;
+                var game = gPlayer.CurrentGame;
                 if (game == null)
                 {
                     SendPlayerToLobby(ply);
@@ -245,9 +246,9 @@ namespace UnturnedBlackout.Managers
 
         private void OnMessageSent(SteamPlayer player, EChatMode mode, ref UnityEngine.Color chatted, ref bool isRich, string text, ref bool isVisible)
         {
-            if (Players.TryGetValue(player.playerID.steamID, out GamePlayer gPlayer))
+            if (Players.TryGetValue(player.playerID.steamID, out var gPlayer))
             {
-                Game game = gPlayer.CurrentGame;
+                var game = gPlayer.CurrentGame;
                 if (game == null)
                 {
                     isVisible = false;
@@ -271,23 +272,23 @@ namespace UnturnedBlackout.Managers
         public (EGameType, bool) GetRandomGameMode(int locationID)
         {
             Logging.Debug($"Getting list of random gamemodes for location with id {locationID}");
-            List<GamemodeOption> gameModeOptions = Config.Gamemode.FileData.GamemodeOptions.Where(k => !k.IgnoredLocations.Contains(locationID)).ToList();
+            var gameModeOptions = Config.Gamemode.FileData.GamemodeOptions.Where(k => !k.IgnoredLocations.Contains(locationID)).ToList();
             Logging.Debug($"Found {gameModeOptions.Count} gamemode options to choose from");
-            GamemodeOption option = CalculateRandomGameMode(gameModeOptions);
+            var option = CalculateRandomGameMode(gameModeOptions);
             Logging.Debug($"Found gamemode with name {option.GameType}");
-            bool isHardcore = option.HasHardcore && UnityEngine.Random.Range(0, 100) <= option.HardcoreChance;
+            var isHardcore = option.HasHardcore && UnityEngine.Random.Range(0, 100) <= option.HardcoreChance;
             Logging.Debug($"hardcore: {isHardcore}");
             return (option.GameType, isHardcore);
         }
 
         public GamemodeOption CalculateRandomGameMode(List<GamemodeOption> options)
         {
-            int poolSize = 0;
-            foreach (GamemodeOption option in options) poolSize += option.GamemodeWeight;
-            int randInt = UnityEngine.Random.Range(0, poolSize) + 1;
+            var poolSize = 0;
+            foreach (var option in options) poolSize += option.GamemodeWeight;
+            var randInt = UnityEngine.Random.Range(0, poolSize) + 1;
 
-            int accumulatedProbability = 0;
-            for (int i = 0; i < options.Count; i++)
+            var accumulatedProbability = 0;
+            for (var i = 0; i < options.Count; i++)
             {
                 accumulatedProbability += options[i].GamemodeWeight;
                 if (randInt <= accumulatedProbability)
@@ -308,17 +309,17 @@ namespace UnturnedBlackout.Managers
 
         public GamePlayer GetGamePlayer(UnturnedPlayer player)
         {
-            return Players.TryGetValue(player.CSteamID, out GamePlayer gPlayer) ? gPlayer : null;
+            return Players.TryGetValue(player.CSteamID, out var gPlayer) ? gPlayer : null;
         }
 
         public GamePlayer GetGamePlayer(CSteamID steamID)
         {
-            return Players.TryGetValue(steamID, out GamePlayer gPlayer) ? gPlayer : null;
+            return Players.TryGetValue(steamID, out var gPlayer) ? gPlayer : null;
         }
 
         public GamePlayer GetGamePlayer(Player player)
         {
-            return Players.TryGetValue(player.channel.owner.playerID.steamID, out GamePlayer gPlayer) ? gPlayer : null;
+            return Players.TryGetValue(player.channel.owner.playerID.steamID, out var gPlayer) ? gPlayer : null;
         }
 
         /*

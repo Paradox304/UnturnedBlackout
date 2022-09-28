@@ -1,6 +1,5 @@
 ﻿using Rocket.Core.Logging;
 using System;
-using System.Diagnostics;
 
 namespace UnturnedBlackout
 {

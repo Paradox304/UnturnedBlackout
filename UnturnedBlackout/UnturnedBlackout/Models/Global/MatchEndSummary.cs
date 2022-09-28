@@ -63,9 +63,9 @@ namespace UnturnedBlackout.Models.Global
             HasWon = hasWon;
             EndTime = DateTime.UtcNow;
 
-            int minutesPlayed = (int)Math.Floor((EndTime - StartTime).TotalMinutes);
-            Configuration.WinningValuesConfig data = Config.WinningValues.FileData;
-            Database.Base.Options global = Plugin.Instance.DB.ServerOptions;
+            var minutesPlayed = (int)Math.Floor((EndTime - StartTime).TotalMinutes);
+            var data = Config.WinningValues.FileData;
+            var global = Plugin.Instance.DB.ServerOptions;
 
             PendingCredits = MatchXP == 0 ? 0 : ((MatchXP / data.PointsDivisible) + (minutesPlayed * data.PointsPerMinutePlayed));
             MatchXPBonus = (int)((Kills > 0 ? (MatchXP / (HasWon ? data.BonusXPVictoryDivisible : data.BonusXPDefeatDivisible)) : 0) * (1f + player.Data.XPBooster + global.XPBooster + (player.Data.HasPrime ? data.PrimeXPBooster : 0f)));

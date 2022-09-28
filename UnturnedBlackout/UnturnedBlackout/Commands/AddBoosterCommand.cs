@@ -29,7 +29,7 @@ namespace UnturnedBlackout.Commands
                 return;
             }
 
-            if (!ulong.TryParse(command[0], out ulong steamid))
+            if (!ulong.TryParse(command[0], out var steamid))
             {
                 Utility.Say(caller, $"<color=red>SteamID is not in the correct format</color>");
                 return;
@@ -43,13 +43,13 @@ namespace UnturnedBlackout.Commands
                 return;
             }
 
-            if (!float.TryParse(command[2], out float boosterValue))
+            if (!float.TryParse(command[2], out var boosterValue))
             {
                 Utility.Say(caller, $"<color=red>Booster Value is not in the correct format</color>");
                 return;
             }
 
-            if (!int.TryParse(command[3], out int expirationDays))
+            if (!int.TryParse(command[3], out var expirationDays))
             {
                 Utility.Say(caller, $"<color=red>Expiration Days is not in the correct format</color>");
                 return;

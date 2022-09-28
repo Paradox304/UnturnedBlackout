@@ -27,7 +27,7 @@ namespace UnturnedBlackout.Commands
                 return;
             }
 
-            if (!int.TryParse(command[0], out int mapID))
+            if (!int.TryParse(command[0], out var mapID))
             {
                 Utility.Say(caller, $"<color=red>Correct Usage: {Syntax}</color>");
                 return;

@@ -53,7 +53,7 @@ namespace UnturnedBlackout.Models.TDM
 
         public void AddPlayer(CSteamID steamID)
         {
-            Player player = PlayerTool.getPlayer(steamID);
+            var player = PlayerTool.getPlayer(steamID);
             Players.Add(steamID, DateTime.UtcNow);
 
             player.quests.ServerAssignToGroup(IngameGroup.groupID, EPlayerGroupRank.MEMBER, true);
@@ -62,7 +62,7 @@ namespace UnturnedBlackout.Models.TDM
 
         public void RemovePlayer(CSteamID steamID)
         {
-            Player player = PlayerTool.getPlayer(steamID);
+            var player = PlayerTool.getPlayer(steamID);
             Players.Remove(steamID);
             player.quests.leaveGroup(true);
             player.quests.askSetRadioFrequency(CSteamID.Nil, 0);
@@ -71,7 +71,7 @@ namespace UnturnedBlackout.Models.TDM
         public void OnDeath(CSteamID steamID)
         {
             Logging.Debug($"Player with {steamID} died, team: {Info.TeamName}");
-            if (!Players.TryGetValue(steamID, out DateTime lastDeath))
+            if (!Players.TryGetValue(steamID, out var lastDeath))
             {
                 Logging.Debug($"Could'nt find player registered to the team, return");
                 return;

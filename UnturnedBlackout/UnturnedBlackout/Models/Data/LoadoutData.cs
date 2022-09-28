@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json.Serialization;
 using UnturnedBlackout.Database.Data;
 
 namespace UnturnedBlackout.Models.Data

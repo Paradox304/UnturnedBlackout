@@ -20,8 +20,8 @@ namespace UnturnedBlackout.Patches
                 return;
             }
 
-            Player player = DamageTool.getPlayer(other.transform);
-            BarricadeDrop drop = BarricadeManager.FindBarricadeByRootTransform(__instance.transform.parent);
+            var player = DamageTool.getPlayer(other.transform);
+            var drop = BarricadeManager.FindBarricadeByRootTransform(__instance.transform.parent);
             if (player == null)
             {
                 return;
@@ -32,17 +32,17 @@ namespace UnturnedBlackout.Patches
                 return;
             }
 
-            Models.Global.GamePlayer gPlayer = Plugin.Instance.Game.GetGamePlayer(player);
+            var gPlayer = Plugin.Instance.Game.GetGamePlayer(player);
             if (gPlayer == null)
             {
                 return;
             }
-            GameTypes.Game game = gPlayer.CurrentGame;
+            var game = gPlayer.CurrentGame;
             if (game == null)
             {
                 return;
             }
-            BarricadeData data = drop.GetServersideData();
+            var data = drop.GetServersideData();
             if (data == null)
             {
                 return;

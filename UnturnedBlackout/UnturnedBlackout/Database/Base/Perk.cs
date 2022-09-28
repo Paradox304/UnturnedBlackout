@@ -35,8 +35,8 @@ namespace UnturnedBlackout.Database.Base
 
         public int GetCoins(int currentLevel)
         {
-            int levelsNeeded = LevelRequirement - currentLevel;
-            int coinsRequired = Coins * levelsNeeded;
+            var levelsNeeded = LevelRequirement - currentLevel;
+            var coinsRequired = Coins * levelsNeeded;
             return coinsRequired > 0 ? coinsRequired : 0;
         }
     }

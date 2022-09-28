@@ -12,11 +12,11 @@ namespace UnturnedBlackout.Managers
         public void GiveRewards(CSteamID steamID, List<Reward> rewards)
         {
             Logging.Debug($"Giving rewards to {steamID}, rewards: {rewards.Count}");
-            DatabaseManager db = Plugin.Instance.DB;
+            var db = Plugin.Instance.DB;
             Task.Run(async () =>
             {
                 Logging.Debug("Sending rewards");
-                foreach (Reward reward in rewards)
+                foreach (var reward in rewards)
                 {
                     switch (reward.RewardType)
                     {
@@ -66,7 +66,7 @@ namespace UnturnedBlackout.Managers
                             await db.IncreasePlayerCaseAsync(steamID, Convert.ToInt32(reward.RewardValue), 1);
                             break;
                         case ERewardType.BPBooster:
-                            if (float.TryParse(reward.RewardValue.ToString(), out float booster))
+                            if (float.TryParse(reward.RewardValue.ToString(), out var booster))
                                 await db.IncreasePlayerBoosterAsync(steamID, EBoosterType.BPXP, booster);
                             break;
                         case ERewardType.XPBooster:
@@ -84,10 +84,10 @@ namespace UnturnedBlackout.Managers
 
         public void RemoveRewards(CSteamID steamID, List<Reward> removeRewards)
         {
-            DatabaseManager db = Plugin.Instance.DB;
+            var db = Plugin.Instance.DB;
             Task.Run(async () =>
             {
-                foreach (Reward reward in removeRewards)
+                foreach (var reward in removeRewards)
                 {
                     switch (reward.RewardType)
                     {
@@ -106,12 +106,12 @@ namespace UnturnedBlackout.Managers
 
         public void GiveBulkRewards(List<(CSteamID, List<Reward>)> bulkRewards)
         {
-            DatabaseManager db = Plugin.Instance.DB;
+            var db = Plugin.Instance.DB;
             Task.Run(async () =>
             {
-                foreach ((CSteamID, List<Reward>) bulkReward in bulkRewards)
+                foreach (var bulkReward in bulkRewards)
                 {
-                    foreach (Reward reward in bulkReward.Item2)
+                    foreach (var reward in bulkReward.Item2)
                     {
                         switch (reward.RewardType)
                         {
@@ -161,7 +161,7 @@ namespace UnturnedBlackout.Managers
                                 await db.IncreasePlayerCaseAsync(bulkReward.Item1, Convert.ToInt32(reward.RewardValue), 1);
                                 break;
                             case ERewardType.BPBooster:
-                                if (float.TryParse(reward.RewardValue.ToString(), out float booster))
+                                if (float.TryParse(reward.RewardValue.ToString(), out var booster))
                                     await db.IncreasePlayerBoosterAsync(bulkReward.Item1, EBoosterType.BPXP, booster);
                                 break;
                             case ERewardType.XPBooster:
@@ -181,7 +181,7 @@ namespace UnturnedBlackout.Managers
         public void MultiplyRewards(List<Reward> rewards, int multiply)
         {
             Logging.Debug($"Multiplying rewards by {multiply}");
-            foreach (Reward reward in rewards)
+            foreach (var reward in rewards)
             {
                 if (reward.RewardType != ERewardType.Coin && reward.RewardType != ERewardType.Credit)
                 {

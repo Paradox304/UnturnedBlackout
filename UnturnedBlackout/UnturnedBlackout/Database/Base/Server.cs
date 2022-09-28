@@ -35,19 +35,19 @@ namespace UnturnedBlackout.Database.Base
             ServerBanner = serverBanner;
             ServerDesc = serverDesc;
 
-            if (!IPAddress.TryParse(IP, out IPAddress ipAddress))
+            if (!IPAddress.TryParse(IP, out var ipAddress))
             {
                 throw new ArgumentException("IP is not correct");
             }
 
-            byte[] ipBytes = ipAddress.GetAddressBytes();
+            var ipBytes = ipAddress.GetAddressBytes();
             if (BitConverter.IsLittleEndian)
             {
                 Array.Reverse(ipBytes);
             }
             IPNo = BitConverter.ToUInt32(ipBytes, 0);
 
-            if (!ushort.TryParse(Port, out ushort portNo))
+            if (!ushort.TryParse(Port, out var portNo))
             {
                 throw new ArgumentException("Port is not correct");
             }

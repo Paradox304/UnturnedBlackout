@@ -31,7 +31,7 @@ namespace UnturnedBlackout.Database.Base
         {
             decimal kills = Kills + HeadshotKills;
             decimal deaths = Deaths;
-            decimal kdr = kills / deaths;
+            var kdr = kills / deaths;
             return kdr;
         }
     }

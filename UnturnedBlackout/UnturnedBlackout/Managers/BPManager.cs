@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using Rocket.Core.Utils;
+﻿using Rocket.Core.Utils;
 using Steamworks;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnturnedBlackout.Database.Base;
 using UnturnedBlackout.Enums;
 using UnturnedBlackout.Models.Global;
@@ -36,13 +36,13 @@ namespace UnturnedBlackout.Managers
 
         public void ClaimReward(GamePlayer player, bool isTop, int tierID)
         {
-            if (!DB.BattlepassTiersSearchByID.TryGetValue(tierID, out BattlepassTier tier))
+            if (!DB.BattlepassTiersSearchByID.TryGetValue(tierID, out var tier))
             {
                 Logging.Debug($"Error finding battlepass tier with id {tierID} for {player.Player.CharacterName}");
                 return;
             }
 
-            Database.Data.PlayerBattlepass bp = player.Data.Battlepass;
+            var bp = player.Data.Battlepass;
             if (isTop && bp.ClaimedFreeRewards.Contains(tierID) || (!isTop && bp.ClaimedPremiumRewards.Contains(tierID)))
             {
                 Logging.Debug($"{player.Player.CharacterName} has already claimed the reward for IsTop {isTop} and selected {tierID}, why is the plugin asking again?");
@@ -84,7 +84,7 @@ namespace UnturnedBlackout.Managers
 
         public void SkipTier(GamePlayer player)
         {
-            Database.Data.PlayerBattlepass bp = player.Data.Battlepass;
+            var bp = player.Data.Battlepass;
             if (!DB.BattlepassTiersSearchByID.ContainsKey(bp.CurrentTier + 1))
             {
                 Logging.Debug($"{player.Player.CharacterName} has already reached the end of battlepass");
@@ -103,7 +103,7 @@ namespace UnturnedBlackout.Managers
             {
                 if (player.Data.Coins >= Config.Base.FileData.BattlepassTierSkipCost)
                 {
-                    int oldTier = bp.CurrentTier;
+                    var oldTier = bp.CurrentTier;
                     bp.CurrentTier += 1;
                     player.Data.Coins -= Config.Base.FileData.BattlepassTierSkipCost;
 

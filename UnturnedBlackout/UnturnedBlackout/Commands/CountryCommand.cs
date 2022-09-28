@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Rocket.API;
+﻿using Rocket.API;
 using Steamworks;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace UnturnedBlackout.Commands
 {
@@ -30,7 +27,7 @@ namespace UnturnedBlackout.Commands
                 return;
             }
 
-            if (!ulong.TryParse(command[0], out ulong steamid))
+            if (!ulong.TryParse(command[0], out var steamid))
             {
                 Utility.Say(caller, $"<color=red>SteamID is not in the correct format</color>");
                 return;

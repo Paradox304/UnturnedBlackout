@@ -22,8 +22,8 @@ namespace UnturnedBlackout.Commands
 
         public void Execute(IRocketPlayer caller, string[] command)
         {
-            UnturnedPlayer player = caller as UnturnedPlayer;
-            if (LevelNavigation.tryGetNavigation(player.Position, out byte nav))
+            var player = caller as UnturnedPlayer;
+            if (LevelNavigation.tryGetNavigation(player.Position, out var nav))
             {
                 UnturnedChat.Say(caller, $"Nav Mesh: {nav}");
             }

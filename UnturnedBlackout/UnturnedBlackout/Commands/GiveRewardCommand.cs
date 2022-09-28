@@ -26,14 +26,14 @@ namespace UnturnedBlackout.Commands
                 return;
             }
 
-            if (!ulong.TryParse(command[0], out ulong steamid))
+            if (!ulong.TryParse(command[0], out var steamid))
             {
                 Utility.Say(caller, $"<color=red>SteamID is not in the correct format</color>");
                 return;
             }
 
             CSteamID steamID = new(steamid);
-            List<Database.Base.Reward> rewards = Utility.GetRewardsFromString(command[1]);
+            var rewards = Utility.GetRewardsFromString(command[1]);
             Plugin.Instance.Reward.GiveRewards(steamID, rewards);
         }
     }

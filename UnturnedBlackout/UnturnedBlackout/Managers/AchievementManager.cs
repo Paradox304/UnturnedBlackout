@@ -2,8 +2,6 @@
 using Steamworks;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using UnturnedBlackout.Database.Base;
-using UnturnedBlackout.Database.Data;
 using UnturnedBlackout.Enums;
 using UnturnedBlackout.Models.Global;
 
@@ -13,28 +11,28 @@ namespace UnturnedBlackout.Managers
     {
         public void CheckAchievement(GamePlayer player, EQuestType achievementType, Dictionary<EQuestCondition, int> achievementConditions)
         {
-            CSteamID steamID = player.Player.CSteamID;
+            var steamID = player.Player.CSteamID;
 
-            DatabaseManager db = Plugin.Instance.DB;
-            PlayerData data = player.Data;
+            var db = Plugin.Instance.DB;
+            var data = player.Data;
 
-            if (!data.AchievementsSearchByType.TryGetValue(achievementType, out List<PlayerAchievement> achievements))
+            if (!data.AchievementsSearchByType.TryGetValue(achievementType, out var achievements))
             {
                 return;
             }
 
-            foreach (PlayerAchievement achievement in achievements)
+            foreach (var achievement in achievements)
             {
-                bool conditionsMet = true;
-                foreach (KeyValuePair<EQuestCondition, List<int>> condition in achievement.Achievement.AchievementConditions)
+                var conditionsMet = true;
+                foreach (var condition in achievement.Achievement.AchievementConditions)
                 {
-                    if (!achievementConditions.TryGetValue(condition.Key, out int conditionValue))
+                    if (!achievementConditions.TryGetValue(condition.Key, out var conditionValue))
                     {
                         conditionsMet = false;
                         break;
                     }
 
-                    bool isConditionMinimum = IsConditionMinimum(condition.Key);
+                    var isConditionMinimum = IsConditionMinimum(condition.Key);
                     if (!condition.Value.Contains(conditionValue) && !condition.Value.Exists(k => isConditionMinimum && conditionValue >= k) && !condition.Value.Contains(-1))
                     {
                         conditionsMet = false;
@@ -49,7 +47,7 @@ namespace UnturnedBlackout.Managers
 
                 achievement.Amount += 1;
 
-                if (achievement.Achievement.TiersLookup.TryGetValue(achievement.CurrentTier + 1, out AchievementTier nextTier))
+                if (achievement.Achievement.TiersLookup.TryGetValue(achievement.CurrentTier + 1, out var nextTier))
                 {
                     if (achievement.Amount == nextTier.TargetAmount)
                     {
@@ -66,20 +64,20 @@ namespace UnturnedBlackout.Managers
 
         public void ClaimAchievementTier(CSteamID steamID, int achievementID)
         {
-            DatabaseManager db = Plugin.Instance.DB;
-            if (!db.PlayerData.TryGetValue(steamID, out PlayerData data))
+            var db = Plugin.Instance.DB;
+            if (!db.PlayerData.TryGetValue(steamID, out var data))
             {
                 Logging.Debug($"Error finding player data for player with steamID {steamID}");
                 return;
             }
 
-            if (!data.AchievementsSearchByID.TryGetValue(achievementID, out PlayerAchievement achievement))
+            if (!data.AchievementsSearchByID.TryGetValue(achievementID, out var achievement))
             {
                 Logging.Debug($"Player has no achievement with ID {achievementID}, returning");
                 return;
             }
 
-            if (!achievement.Achievement.TiersLookup.TryGetValue(achievement.CurrentTier + 1, out AchievementTier nextTier))
+            if (!achievement.Achievement.TiersLookup.TryGetValue(achievement.CurrentTier + 1, out var nextTier))
             {
                 Logging.Debug("Could'nt find next tier, returning");
                 return;
@@ -105,7 +103,7 @@ namespace UnturnedBlackout.Managers
 
         public bool IsConditionMinimum(EQuestCondition condition)
         {
-            int conditionInt = (int)condition;
+            var conditionInt = (int)condition;
             if (conditionInt >= 9 && conditionInt <= 12)
             {
                 return true;

@@ -1,9 +1,8 @@
-﻿using System;
+﻿using Steamworks;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Steamworks;
-using UnturnedBlackout.Database.Base;
 using UnturnedBlackout.Enums;
 
 namespace UnturnedBlackout.Database.Data
@@ -97,7 +96,7 @@ namespace UnturnedBlackout.Database.Data
 
         public bool TryGetNeededXP(out int xp)
         {
-            if (Plugin.Instance.DB.Levels.TryGetValue(Level + 1, out XPLevel level))
+            if (Plugin.Instance.DB.Levels.TryGetValue(Level + 1, out var level))
             {
                 xp = level.XPNeeded;
                 return true;
@@ -130,19 +129,19 @@ namespace UnturnedBlackout.Database.Data
 
         public void SetAchievementXPBooster()
         {
-            int completedTiers = Achievements.Sum(k => k.CurrentTier);
+            var completedTiers = Achievements.Sum(k => k.CurrentTier);
             float totalTiers = Achievements.Sum(k => k.Achievement.Tiers.Max(k => k.TierID));
 
-            float xpBooster = completedTiers / totalTiers;
+            var xpBooster = completedTiers / totalTiers;
 
             AchievementXPBooster = xpBooster;
         }
 
         public void SetPersonalBooster(EBoosterType type, float permanentBooster)
         {
-            IEnumerable<PlayerBooster> boosters = ActiveBoosters.Where(k => k.BoosterType == type);
-            float max = boosters.Count() > 0 ? boosters.Max(k => k.BoosterValue) : 0f;
-            float updatedValue = permanentBooster + max;
+            var boosters = ActiveBoosters.Where(k => k.BoosterType == type);
+            var max = boosters.Count() > 0 ? boosters.Max(k => k.BoosterValue) : 0f;
+            var updatedValue = permanentBooster + max;
             switch (type)
             {
                 case EBoosterType.XP:

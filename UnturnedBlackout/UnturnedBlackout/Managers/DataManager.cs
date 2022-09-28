@@ -21,7 +21,7 @@ namespace UnturnedBlackout.Managers
         {
             if (!File.Exists(Path))
             {
-                FileStream stream = File.Create(Path);
+                var stream = File.Create(Path);
                 stream.Close();
                 SaveJson();
             }
@@ -39,19 +39,19 @@ namespace UnturnedBlackout.Managers
 
         public void LoadJson()
         {
-            PositionsData deserialized = JsonSerializer.Deserialize<PositionsData>(File.ReadAllText(Path));
+            var deserialized = JsonSerializer.Deserialize<PositionsData>(File.ReadAllText(Path));
             Data = deserialized;
         }
 
         public string ConvertLoadoutToJson(LoadoutData data)
         {
-            string serialized = JsonSerializer.Serialize(data, new JsonSerializerOptions() { WriteIndented = true });
+            var serialized = JsonSerializer.Serialize(data, new JsonSerializerOptions() { WriteIndented = true });
             return serialized;
         }
 
         public LoadoutData ConvertLoadoutFromJson(string serialized)
         {
-            LoadoutData deserialized = JsonSerializer.Deserialize<LoadoutData>(serialized);
+            var deserialized = JsonSerializer.Deserialize<LoadoutData>(serialized);
             return deserialized;
         }
     }

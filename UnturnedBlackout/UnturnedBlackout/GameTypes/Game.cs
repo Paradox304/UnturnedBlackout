@@ -1,13 +1,13 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using Rocket.Unturned.Enumerations;
+﻿using Rocket.Unturned.Enumerations;
 using Rocket.Unturned.Events;
 using Rocket.Unturned.Player;
 using SDG.Unturned;
 using Steamworks;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using UnityEngine;
 using UnturnedBlackout.Database.Base;
 using UnturnedBlackout.Enums;
@@ -37,6 +37,9 @@ namespace UnturnedBlackout.GameTypes
 
         public List<GamePlayer> PlayersTalking { get; set; }
 
+        public Dictionary<GamePlayer, BarricadeDrop> GameTurrets { get; set; }
+        public Dictionary<BarricadeDrop, GamePlayer> GameTurretsInverse { get; set; }
+        
         public Coroutine VoteEnder { get; set; }
         public Coroutine KillFeedChecker { get; set; }
 
@@ -59,15 +62,36 @@ namespace UnturnedBlackout.GameTypes
             ItemManager.onTakeItemRequested += OnTakeItem;
             UseableThrowable.onThrowableSpawned += OnThrowableSpawned;
             BarricadeManager.onBarricadeSpawned += OnBarricadeSpawned;
+            BarricadeManager.onDamageBarricadeRequested += OnBarricadeDamage;
             UseableConsumeable.onConsumePerformed += OnConsumed;
             UseableGun.OnAimingChanged_Global += OnAimingChanged;
 
             KillFeedChecker = Plugin.Instance.StartCoroutine(UpdateKillfeed());
         }
 
+        public void Destroy()
+        {
+            UnturnedPlayerEvents.OnPlayerDeath -= OnPlayerDeath;
+            PlayerLife.OnSelectingRespawnPoint -= OnPlayerRespawning;
+            UnturnedPlayerEvents.OnPlayerRevive -= OnPlayerRevive;
+            UnturnedPlayerEvents.OnPlayerInventoryAdded -= OnPlayerPickupItem;
+            DamageTool.damagePlayerRequested -= OnPlayerDamaged;
+            ChatManager.onChatted -= OnChatted;
+            ItemManager.onTakeItemRequested -= OnTakeItem;
+            UseableThrowable.onThrowableSpawned -= OnThrowableSpawned;
+            BarricadeManager.onBarricadeSpawned -= OnBarricadeSpawned;
+            UseableConsumeable.onConsumePerformed -= OnConsumed;
+            UseableGun.OnAimingChanged_Global -= OnAimingChanged;
+
+            if (KillFeedChecker != null)
+            {
+                Plugin.Instance.StopCoroutine(KillFeedChecker);
+            }
+        }
+
         private void OnAimingChanged(UseableGun obj)
         {
-            GamePlayer gPlayer = Plugin.Instance.Game.GetGamePlayer(obj.player);
+            var gPlayer = Plugin.Instance.Game.GetGamePlayer(obj.player);
             if (gPlayer == null)
             {
                 return;
@@ -78,7 +102,7 @@ namespace UnturnedBlackout.GameTypes
 
         private void OnConsumed(Player instigatingPlayer, ItemConsumeableAsset consumeableAsset)
         {
-            GamePlayer gPlayer = Plugin.Instance.Game.GetGamePlayer(instigatingPlayer);
+            var gPlayer = Plugin.Instance.Game.GetGamePlayer(instigatingPlayer);
             if (gPlayer == null)
             {
                 return;
@@ -90,7 +114,7 @@ namespace UnturnedBlackout.GameTypes
         private void OnBarricadeSpawned(BarricadeRegion region, BarricadeDrop drop)
         {
             CSteamID steamID = new(drop.GetServersideData()?.owner ?? 0UL);
-            GamePlayer gPlayer = Plugin.Instance.Game.GetGamePlayer(steamID);
+            var gPlayer = Plugin.Instance.Game.GetGamePlayer(steamID);
             if (gPlayer == null)
             {
                 return;
@@ -99,9 +123,21 @@ namespace UnturnedBlackout.GameTypes
             PlayerBarricadeSpawned(gPlayer, drop);
         }
 
+        private void OnBarricadeDamage(CSteamID instigatorSteamID, Transform barricadeTransform, ref ushort pendingTotalDamage, ref bool shouldAllow, EDamageOrigin damageOrigin)
+        {
+            var gPlayer = Plugin.Instance.Game.GetGamePlayer(instigatorSteamID);
+            var drop = BarricadeManager.FindBarricadeByRootTransform(barricadeTransform);
+            if (gPlayer == null || drop == null)
+            {
+                return;
+            }
+
+            PlayerBarricadeDamaged(gPlayer, drop, ref pendingTotalDamage, ref shouldAllow);
+        }
+
         private void OnThrowableSpawned(UseableThrowable useable, GameObject throwable)
         {
-            GamePlayer gPlayer = Plugin.Instance.Game.GetGamePlayer(useable.player);
+            var gPlayer = Plugin.Instance.Game.GetGamePlayer(useable.player);
             if (gPlayer == null)
             {
                 return;
@@ -112,7 +148,7 @@ namespace UnturnedBlackout.GameTypes
 
         public void OnTrapTriggered(GamePlayer player, BarricadeDrop drop)
         {
-            GamePlayer trapOwner = Plugin.Instance.Game.GetGamePlayer(new CSteamID(drop.GetServersideData().owner));
+            var trapOwner = Plugin.Instance.Game.GetGamePlayer(new CSteamID(drop.GetServersideData().owner));
             Logging.Debug($"Trap triggered by {player.Player.CharacterName}, owner is {(trapOwner?.Player?.CharacterName ?? "None")}");
             if (trapOwner != null)
             {
@@ -127,7 +163,7 @@ namespace UnturnedBlackout.GameTypes
 
         private void OnPlayerRespawning(PlayerLife sender, bool wantsToSpawnAtHome, ref Vector3 position, ref float yaw)
         {
-            GamePlayer gPlayer = Plugin.Instance.Game.GetGamePlayer(sender.player);
+            var gPlayer = Plugin.Instance.Game.GetGamePlayer(sender.player);
             if (gPlayer == null)
             {
                 return;
@@ -138,7 +174,7 @@ namespace UnturnedBlackout.GameTypes
 
         private void OnTakeItem(Player player, byte x, byte y, uint instanceID, byte to_x, byte to_y, byte to_rot, byte to_page, ItemData itemData, ref bool shouldAllow)
         {
-            GamePlayer gPlayer = Plugin.Instance.Game.GetGamePlayer(player);
+            var gPlayer = Plugin.Instance.Game.GetGamePlayer(player);
             if (gPlayer == null)
             {
                 shouldAllow = false;
@@ -150,7 +186,7 @@ namespace UnturnedBlackout.GameTypes
 
         private void OnChatted(SteamPlayer player, EChatMode mode, ref Color chatted, ref bool isRich, string text, ref bool isVisible)
         {
-            GamePlayer gPlayer = Plugin.Instance.Game.GetGamePlayer(player.player);
+            var gPlayer = Plugin.Instance.Game.GetGamePlayer(player.player);
             if (gPlayer == null)
             {
                 isVisible = false;
@@ -180,7 +216,7 @@ namespace UnturnedBlackout.GameTypes
 
         public void SendVoiceChat(List<GamePlayer> players, bool isTeam)
         {
-            List<GamePlayer> talkingPlayers = PlayersTalking;
+            var talkingPlayers = PlayersTalking;
             if (isTeam)
             {
                 talkingPlayers = PlayersTalking.Where(k => players.Contains(k)).ToList();
@@ -205,7 +241,7 @@ namespace UnturnedBlackout.GameTypes
 
         public void OnKill(GamePlayer killer, GamePlayer victim, ushort weaponID, string killerColor, string victimColor)
         {
-            if (!Plugin.Instance.UI.KillFeedIcons.TryGetValue(weaponID, out FeedIcon icon) && weaponID != 0 && weaponID != 1)
+            if (!Plugin.Instance.UI.KillFeedIcons.TryGetValue(weaponID, out var icon) && weaponID != 0 && weaponID != 1)
             {
                 return;
             }
@@ -227,7 +263,7 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
-            Feed removeKillfeed = Killfeed.OrderBy(k => k.Time).FirstOrDefault();
+            var removeKillfeed = Killfeed.OrderBy(k => k.Time).FirstOrDefault();
 
             Killfeed.Remove(removeKillfeed);
             Killfeed.Add(feed);
@@ -268,20 +304,20 @@ namespace UnturnedBlackout.GameTypes
 
         public Case GetRandomRoundEndCase()
         {
-            List<RoundEndCase> cases = Config.RoundEndCases.FileData.RoundEndCases;
+            var cases = Config.RoundEndCases.FileData.RoundEndCases;
             if (cases.Count == 0)
             {
                 return null;
             }
-            int poolSize = 0;
-            foreach (RoundEndCase roundEndCase in cases) poolSize += roundEndCase.Weight;
-            int randInt = UnityEngine.Random.Range(0, poolSize) + 1;
+            var poolSize = 0;
+            foreach (var roundEndCase in cases) poolSize += roundEndCase.Weight;
+            var randInt = UnityEngine.Random.Range(0, poolSize) + 1;
 
-            int accumulatedProbability = 0;
+            var accumulatedProbability = 0;
             Case @case;
-            for (int i = 0; i < cases.Count; i++)
+            for (var i = 0; i < cases.Count; i++)
             {
-                RoundEndCase roundEndCase = cases[i];
+                var roundEndCase = cases[i];
                 accumulatedProbability += roundEndCase.Weight;
                 if (randInt <= accumulatedProbability)
                 {
@@ -298,36 +334,16 @@ namespace UnturnedBlackout.GameTypes
 
         public void CleanMap()
         {
-            foreach (ItemRegion region in ItemManager.regions)
+            foreach (var region in ItemManager.regions)
             {
-                region.items.RemoveAll(k => LevelNavigation.tryGetNavigation(k.point, out byte nav) && nav == Location.NavMesh);
+                region.items.RemoveAll(k => LevelNavigation.tryGetNavigation(k.point, out var nav) && nav == Location.NavMesh);
             }
 
-            Stopwatch stopWatch = new();
+            var stopWatch = new Stopwatch();
             stopWatch.Start();
-            BarricadeManager.BarricadeRegions.Cast<BarricadeRegion>().SelectMany(k => k.drops).Where(k => LevelNavigation.tryGetNavigation(k.model.transform.position, out byte nav) && nav == Location.NavMesh).Select(k => BarricadeManager.tryGetRegion(k.model.transform, out byte x, out byte y, out ushort plant, out _) ? (k, x, y, plant) : (k, byte.MaxValue, byte.MaxValue, ushort.MaxValue)).ToList().ForEach(k => BarricadeManager.destroyBarricade(k.k, k.Item2, k.Item3, k.Item4));
+            BarricadeManager.BarricadeRegions.Cast<BarricadeRegion>().SelectMany(k => k.drops).Where(k => LevelNavigation.tryGetNavigation(k.model.transform.position, out var nav) && nav == Location.NavMesh).Select(k => BarricadeManager.tryGetRegion(k.model.transform, out var x, out var y, out var plant, out _) ? (k, x, y, plant) : (k, byte.MaxValue, byte.MaxValue, ushort.MaxValue)).ToList().ForEach(k => BarricadeManager.destroyBarricade(k.k, k.Item2, k.Item3, k.Item4));
             stopWatch.Stop();
             Logging.Debug($"Clearing all barricades in a game, that one liner took {stopWatch.ElapsedTicks} ticks, {stopWatch.ElapsedMilliseconds}ms");
-        }
-
-        public void Destroy()
-        {
-            UnturnedPlayerEvents.OnPlayerDeath -= OnPlayerDeath;
-            PlayerLife.OnSelectingRespawnPoint -= OnPlayerRespawning;
-            UnturnedPlayerEvents.OnPlayerRevive -= OnPlayerRevive;
-            UnturnedPlayerEvents.OnPlayerInventoryAdded -= OnPlayerPickupItem;
-            DamageTool.damagePlayerRequested -= OnPlayerDamaged;
-            ChatManager.onChatted -= OnChatted;
-            ItemManager.onTakeItemRequested -= OnTakeItem;
-            UseableThrowable.onThrowableSpawned -= OnThrowableSpawned;
-            BarricadeManager.onBarricadeSpawned -= OnBarricadeSpawned;
-            UseableConsumeable.onConsumePerformed -= OnConsumed;
-            UseableGun.OnAimingChanged_Global -= OnAimingChanged;
-
-            if (KillFeedChecker != null)
-            {
-                Plugin.Instance.StopCoroutine(KillFeedChecker);
-            }
         }
 
         public abstract bool IsPlayerIngame(CSteamID steamID);
@@ -342,6 +358,7 @@ namespace UnturnedBlackout.GameTypes
         public abstract void PlayerStanceChanged(PlayerStance obj);
         public abstract void PlayerThrowableSpawned(GamePlayer player, UseableThrowable throwable);
         public abstract void PlayerBarricadeSpawned(GamePlayer player, BarricadeDrop drop);
+        public abstract void PlayerBarricadeDamaged(GamePlayer player, BarricadeDrop drop, ref ushort pendingTotalDamage, ref bool shouldAllow);
         public abstract void PlayerConsumeableUsed(GamePlayer player, ItemConsumeableAsset consumeableAsset);
         public abstract void OnChatMessageSent(GamePlayer player, EChatMode chatMode, string text, ref bool isVisible);
         public abstract void OnVoiceChatUpdated(GamePlayer player);

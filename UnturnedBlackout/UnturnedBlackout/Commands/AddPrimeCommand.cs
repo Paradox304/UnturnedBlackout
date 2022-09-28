@@ -27,7 +27,7 @@ namespace UnturnedBlackout.Commands
                 return;
             }
 
-            if (!ulong.TryParse(command[0], out ulong steamid))
+            if (!ulong.TryParse(command[0], out var steamid))
             {
                 Utility.Say(caller, $"<color=red>SteamID is not in the correct format</color>");
                 return;
@@ -35,7 +35,7 @@ namespace UnturnedBlackout.Commands
 
             CSteamID steamID = new(steamid);
 
-            if (!int.TryParse(command[1].ToString(), out int days))
+            if (!int.TryParse(command[1].ToString(), out var days))
             {
                 Utility.Say(caller, $"<color=red>Days is not in the correct format</color>");
                 return;

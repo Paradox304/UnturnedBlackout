@@ -1,16 +1,15 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Rocket.Core.Utils;
+﻿using Rocket.Core.Utils;
 using Rocket.Unturned.Enumerations;
 using Rocket.Unturned.Player;
 using SDG.Unturned;
 using Steamworks;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnturnedBlackout.Database.Base;
-using UnturnedBlackout.Database.Data;
 using UnturnedBlackout.Enums;
 using UnturnedBlackout.Models.Global;
 using UnturnedBlackout.Models.KC;
@@ -37,9 +36,9 @@ namespace UnturnedBlackout.GameTypes
         public KCGame(ArenaLocation location, bool isHardcore) : base(EGameType.KC, location, isHardcore)
         {
             SpawnPoints = new Dictionary<int, List<TDMSpawnPoint>>();
-            foreach (TDMSpawnPoint spawnPoint in Plugin.Instance.Data.Data.TDMSpawnPoints.Where(k => k.LocationID == location.LocationID))
+            foreach (var spawnPoint in Plugin.Instance.Data.Data.TDMSpawnPoints.Where(k => k.LocationID == location.LocationID))
             {
-                if (SpawnPoints.TryGetValue(spawnPoint.GroupID, out List<TDMSpawnPoint> spawnPoints))
+                if (SpawnPoints.TryGetValue(spawnPoint.GroupID, out var spawnPoints))
                 {
                     spawnPoints.Add(spawnPoint);
                 }
@@ -51,8 +50,8 @@ namespace UnturnedBlackout.GameTypes
             Players = new List<KCPlayer>();
             PlayersLookup = new Dictionary<CSteamID, KCPlayer>();
 
-            TeamInfo blueTeamInfo = Config.Teams.FileData.TeamsInfo.FirstOrDefault(k => k.TeamID == location.BlueTeamID);
-            TeamInfo redTeamInfo = Config.Teams.FileData.TeamsInfo.FirstOrDefault(k => k.TeamID == location.RedTeamID);
+            var blueTeamInfo = Config.Teams.FileData.TeamsInfo.FirstOrDefault(k => k.TeamID == location.BlueTeamID);
+            var redTeamInfo = Config.Teams.FileData.TeamsInfo.FirstOrDefault(k => k.TeamID == location.RedTeamID);
 
             BlueTeam = new KCTeam(this, (byte)ETeam.Blue, false, Config.KC.FileData.BlueDogTagID, blueTeamInfo);
             RedTeam = new KCTeam(this, (byte)ETeam.Red, false, Config.KC.FileData.RedDogTagID, redTeamInfo);
@@ -63,7 +62,7 @@ namespace UnturnedBlackout.GameTypes
         {
             TaskDispatcher.QueueOnMainThread(() => CleanMap());
             GamePhase = EGamePhase.Starting;
-            foreach (KCPlayer player in Players)
+            foreach (var player in Players)
             {
                 if (player.GamePlayer.IsLoading) continue;
                 Plugin.Instance.UI.ClearWaitingForPlayersUI(player.GamePlayer);
@@ -72,17 +71,17 @@ namespace UnturnedBlackout.GameTypes
                 SpawnPlayer(player);
             }
 
-            for (int seconds = Config.KC.FileData.StartSeconds; seconds >= 0; seconds--)
+            for (var seconds = Config.KC.FileData.StartSeconds; seconds >= 0; seconds--)
             {
                 yield return new WaitForSeconds(1);
-                foreach (KCPlayer player in Players)
+                foreach (var player in Players)
                 {
                     Plugin.Instance.UI.SendCountdownSeconds(player.GamePlayer, seconds);
                 }
             }
             GamePhase = EGamePhase.Started;
 
-            foreach (KCPlayer player in Players)
+            foreach (var player in Players)
             {
                 player.GamePlayer.GiveMovement(player.GamePlayer.Player.Player.equipment.useable is UseableGun gun && gun.isAiming, false, false);
                 player.StartTime = DateTime.UtcNow;
@@ -96,11 +95,11 @@ namespace UnturnedBlackout.GameTypes
 
         public IEnumerator EndGame()
         {
-            for (int seconds = Config.KC.FileData.EndSeconds; seconds >= 0; seconds--)
+            for (var seconds = Config.KC.FileData.EndSeconds; seconds >= 0; seconds--)
             {
                 yield return new WaitForSeconds(1);
-                TimeSpan timeSpan = TimeSpan.FromSeconds(seconds);
-                foreach (KCPlayer player in Players)
+                var timeSpan = TimeSpan.FromSeconds(seconds);
+                foreach (var player in Players)
                 {
                     Plugin.Instance.UI.UpdateKCTimer(player.GamePlayer, timeSpan.ToString(@"m\:ss"));
                 }
@@ -133,17 +132,17 @@ namespace UnturnedBlackout.GameTypes
 
             Plugin.Instance.UI.OnGameUpdated();
 
-            DateTime endTime = DateTime.UtcNow;
+            var endTime = DateTime.UtcNow;
             List<GamePlayer> roundEndCasesPlayers = new();
-            foreach (KCPlayer player in Players)
+            foreach (var player in Players)
             {
-                int totalMinutesPlayed = (int)(endTime - player.StartTime).TotalMinutes;
+                var totalMinutesPlayed = (int)(endTime - player.StartTime).TotalMinutes;
                 if (totalMinutesPlayed < Config.RoundEndCases.FileData.MinimumMinutesPlayed || player.Kills == 0)
                 {
                     continue;
                 }
 
-                int chance = Config.RoundEndCases.FileData.Chance * totalMinutesPlayed;
+                var chance = Config.RoundEndCases.FileData.Chance * totalMinutesPlayed;
                 if (UnityEngine.Random.Range(1, 101) > chance)
                 {
                     continue;
@@ -153,9 +152,9 @@ namespace UnturnedBlackout.GameTypes
             }
 
             List<(GamePlayer, Case)> roundEndCases = new();
-            foreach (GamePlayer roundEndCasePlayer in roundEndCasesPlayers)
+            foreach (var roundEndCasePlayer in roundEndCasesPlayers)
             {
-                Case @case = GetRandomRoundEndCase();
+                var @case = GetRandomRoundEndCase();
                 if (@case == null)
                 {
                     continue;
@@ -169,7 +168,7 @@ namespace UnturnedBlackout.GameTypes
             }
 
             Dictionary<GamePlayer, MatchEndSummary> summaries = new();
-            foreach (KCPlayer player in Players)
+            foreach (var player in Players)
             {
                 Plugin.Instance.UI.ClearKCHUD(player.GamePlayer);
                 Plugin.Instance.UI.ClearMidgameLoadoutUI(player.GamePlayer);
@@ -208,7 +207,7 @@ namespace UnturnedBlackout.GameTypes
                 CleanMap();
             });
             yield return new WaitForSeconds(5);
-            foreach (KCPlayer player in Players)
+            foreach (var player in Players)
             {
                 Plugin.Instance.UI.ShowKCLeaderboard(player.GamePlayer);
             }
@@ -219,10 +218,10 @@ namespace UnturnedBlackout.GameTypes
             }
 
             yield return new WaitForSeconds(Config.Base.FileData.EndingLeaderboardSeconds);
-            foreach (KCPlayer player in Players.ToList())
+            foreach (var player in Players.ToList())
             {
                 RemovePlayerFromGame(player.GamePlayer);
-                Plugin.Instance.Game.SendPlayerToLobby(player.GamePlayer.Player, summaries.TryGetValue(player.GamePlayer, out MatchEndSummary pendingSummary) ? pendingSummary : null);
+                Plugin.Instance.Game.SendPlayerToLobby(player.GamePlayer.Player, summaries.TryGetValue(player.GamePlayer, out var pendingSummary) ? pendingSummary : null);
             }
 
             Players = new List<KCPlayer>();
@@ -230,18 +229,18 @@ namespace UnturnedBlackout.GameTypes
             RedTeam.Destroy();
             SpawnSwitcher.Stop();
 
-            List<int> locations = Plugin.Instance.Game.AvailableLocations;
+            var locations = Plugin.Instance.Game.AvailableLocations;
             lock (locations)
             {
-                string locString = "";
-                foreach (int loc in locations)
+                var locString = "";
+                foreach (var loc in locations)
                 {
-                    ArenaLocation locc = Config.Locations.FileData.ArenaLocations.FirstOrDefault(k => k.LocationID == loc);
+                    var locc = Config.Locations.FileData.ArenaLocations.FirstOrDefault(k => k.LocationID == loc);
                     locString += $"{locc.LocationName},";
                 }
-                int randomLocation = locations.Count > 0 ? locations[UnityEngine.Random.Range(0, locations.Count)] : Location.LocationID;
-                ArenaLocation location = Config.Locations.FileData.ArenaLocations.FirstOrDefault(k => k.LocationID == randomLocation);
-                (EGameType, bool) gameMode = Plugin.Instance.Game.GetRandomGameMode(location.LocationID);
+                var randomLocation = locations.Count > 0 ? locations[UnityEngine.Random.Range(0, locations.Count)] : Location.LocationID;
+                var location = Config.Locations.FileData.ArenaLocations.FirstOrDefault(k => k.LocationID == randomLocation);
+                var gameMode = Plugin.Instance.Game.GetRandomGameMode(location.LocationID);
                 GamePhase = EGamePhase.Ended;
                 Plugin.Instance.Game.EndGame(this);
                 Plugin.Instance.Game.StartGame(location, gameMode.Item1, gameMode.Item2);
@@ -256,7 +255,7 @@ namespace UnturnedBlackout.GameTypes
             }
             player.OnGameJoined(this);
 
-            KCTeam team = BlueTeam.Players.Count > RedTeam.Players.Count ? RedTeam : BlueTeam;
+            var team = BlueTeam.Players.Count > RedTeam.Players.Count ? RedTeam : BlueTeam;
             KCPlayer kPlayer = new(player, team);
             team.AddPlayer(player.SteamID);
             Players.Add(kPlayer);
@@ -268,12 +267,12 @@ namespace UnturnedBlackout.GameTypes
 
             Plugin.Instance.UI.OnGameCountUpdated(this);
             Plugin.Instance.UI.SendLoadingUI(player.Player, true, GameMode, Location);
-            for (int seconds = 1; seconds <= 5; seconds++)
+            for (var seconds = 1; seconds <= 5; seconds++)
             {
                 yield return new WaitForSeconds(1);
                 Plugin.Instance.UI.UpdateLoadingBar(player.Player, new string('　', Math.Min(96, seconds * 96 / 5)));
             }
-            Vector3 currentPos = player.Player.Position;
+            var currentPos = player.Player.Position;
             player.Player.Player.teleportToLocationUnsafe(new Vector3(currentPos.x, currentPos.y + 100, currentPos.z), 0);
             GiveLoadout(kPlayer);
             Plugin.Instance.UI.SendPreEndingUI(kPlayer.GamePlayer);
@@ -285,7 +284,7 @@ namespace UnturnedBlackout.GameTypes
             switch (GamePhase)
             {
                 case EGamePhase.WaitingForPlayers:
-                    int minPlayers = Location.GetMinPlayers(GameMode);
+                    var minPlayers = Location.GetMinPlayers(GameMode);
                     if (Players.Count >= minPlayers)
                     {
                         GameStarter = Plugin.Instance.StartCoroutine(StartGame());
@@ -293,7 +292,7 @@ namespace UnturnedBlackout.GameTypes
                     else
                     {
                         Plugin.Instance.UI.SendWaitingForPlayersUI(player, Players.Count, minPlayers);
-                        foreach (KCPlayer ply in Players)
+                        foreach (var ply in Players)
                         {
                             if (ply == kPlayer)
                             {
@@ -338,7 +337,7 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
-            KCPlayer kPlayer = GetKCPlayer(player.Player);
+            var kPlayer = GetKCPlayer(player.Player);
 
             Plugin.Instance.UI.ClearKCHUD(player);
             Plugin.Instance.UI.ClearPreEndingUI(player);
@@ -360,7 +359,7 @@ namespace UnturnedBlackout.GameTypes
             {
                 TaskDispatcher.QueueOnMainThread(() =>
                 {
-                    BarricadeManager.BarricadeRegions.Cast<BarricadeRegion>().SelectMany(k => k.drops).Where(k => (k.GetServersideData()?.owner ?? 0UL) == player.SteamID.m_SteamID && LevelNavigation.tryGetNavigation(k.model.transform.position, out byte nav) && nav == Location.NavMesh).Select(k => BarricadeManager.tryGetRegion(k.model.transform, out byte x, out byte y, out ushort plant, out _) ? (k, x, y, plant) : (k, byte.MaxValue, byte.MaxValue, ushort.MaxValue)).ToList().ForEach(k => BarricadeManager.destroyBarricade(k.k, k.Item2, k.Item3, k.Item4));
+                    BarricadeManager.BarricadeRegions.Cast<BarricadeRegion>().SelectMany(k => k.drops).Where(k => (k.GetServersideData()?.owner ?? 0UL) == player.SteamID.m_SteamID && LevelNavigation.tryGetNavigation(k.model.transform.position, out var nav) && nav == Location.NavMesh).Select(k => BarricadeManager.tryGetRegion(k.model.transform, out var x, out var y, out var plant, out _) ? (k, x, y, plant) : (k, byte.MaxValue, byte.MaxValue, ushort.MaxValue)).ToList().ForEach(k => BarricadeManager.destroyBarricade(k.k, k.Item2, k.Item3, k.Item4));
                 });
             }
 
@@ -377,7 +376,7 @@ namespace UnturnedBlackout.GameTypes
 
         public override void OnPlayerDead(Player player, CSteamID killer, ELimb limb, EDeathCause cause)
         {
-            KCPlayer vPlayer = GetKCPlayer(player);
+            var vPlayer = GetKCPlayer(player);
             if (vPlayer == null)
             {
                 return;
@@ -401,8 +400,8 @@ namespace UnturnedBlackout.GameTypes
                 Plugin.Instance.UI.HideKCLeaderboard(vPlayer.GamePlayer);
             }
 
-            int victimKS = vPlayer.Killstreak;
-            CSteamID updatedKiller = cause == EDeathCause.WATER ? vPlayer.GamePlayer.SteamID : (cause == EDeathCause.LANDMINE || cause == EDeathCause.SHRED ? (vPlayer.GamePlayer.LastDamager.Count > 0 ? vPlayer.GamePlayer.LastDamager.Pop() : killer) : killer);
+            var victimKS = vPlayer.Killstreak;
+            var updatedKiller = cause == EDeathCause.WATER ? vPlayer.GamePlayer.SteamID : (cause == EDeathCause.LANDMINE || cause == EDeathCause.SHRED ? (vPlayer.GamePlayer.LastDamager.Count > 0 ? vPlayer.GamePlayer.LastDamager.Pop() : killer) : killer);
 
             Logging.Debug($"Game player died, player name: {vPlayer.GamePlayer.Player.CharacterName}, cause: {cause}");
             vPlayer.OnDeath(updatedKiller);
@@ -414,7 +413,7 @@ namespace UnturnedBlackout.GameTypes
             {
                 ItemManager.dropItem(new Item(vPlayer.Team.DogTagID, true), vPlayer.GamePlayer.Player.Player.transform.position, true, true, true);
 
-                KCPlayer kPlayer = GetKCPlayer(updatedKiller);
+                var kPlayer = GetKCPlayer(updatedKiller);
                 if (kPlayer == null)
                 {
                     Logging.Debug("Killer not found, returning");
@@ -444,7 +443,7 @@ namespace UnturnedBlackout.GameTypes
 
                 if (vPlayer.GamePlayer.LastDamager.Count > 0)
                 {
-                    KCPlayer assister = GetKCPlayer(vPlayer.GamePlayer.LastDamager.Pop());
+                    var assister = GetKCPlayer(vPlayer.GamePlayer.LastDamager.Pop());
                     if (assister != null && assister != kPlayer)
                     {
                         assister.Assists++;
@@ -458,21 +457,21 @@ namespace UnturnedBlackout.GameTypes
                     vPlayer.GamePlayer.LastDamager.Clear();
                 }
 
-                bool isFirstKill = Players[0].Kills == 0;
+                var isFirstKill = Players[0].Kills == 0;
                 kPlayer.Kills++;
                 kPlayer.Score += Config.Points.FileData.KillPoints;
 
-                int xpGained = 0;
-                string xpText = "";
+                var xpGained = 0;
+                var xpText = "";
                 ushort equipmentUsed = 0;
-                float longshotRange = 0f;
+                var longshotRange = 0f;
 
-                bool usedKillstreak = kPlayer.GamePlayer.HasKillstreakActive && (kPlayer.GamePlayer.ActiveKillstreak?.Killstreak?.KillstreakInfo?.IsItem ?? false);
-                int killstreakID = kPlayer.GamePlayer.ActiveKillstreak?.Killstreak?.KillstreakID ?? 0;
+                var usedKillstreak = kPlayer.GamePlayer.HasKillstreakActive && (kPlayer.GamePlayer.ActiveKillstreak?.Killstreak?.KillstreakInfo?.IsItem ?? false);
+                var killstreakID = kPlayer.GamePlayer.ActiveKillstreak?.Killstreak?.KillstreakID ?? 0;
 
                 if (usedKillstreak)
                 {
-                    Models.Data.KillstreakData info = kPlayer.GamePlayer.ActiveKillstreak.Killstreak.KillstreakInfo;
+                    var info = kPlayer.GamePlayer.ActiveKillstreak.Killstreak.KillstreakInfo;
                     xpGained += info.MedalXP;
                     xpText += info.MedalName;
                     equipmentUsed += info.ItemID;
@@ -499,7 +498,7 @@ namespace UnturnedBlackout.GameTypes
                                 xpGained += Config.Medals.FileData.NormalKillXP;
                                 xpText += Plugin.Instance.Translate("Normal_Kill").ToRich();
                             }
-                            ushort equipment = kPlayer.GamePlayer.Player.Player.equipment.itemID;
+                            var equipment = kPlayer.GamePlayer.Player.Player.equipment.itemID;
                             if (equipment == (kPlayer.GamePlayer.ActiveLoadout.PrimarySkin?.SkinID ?? 0) || equipment == (kPlayer.GamePlayer.ActiveLoadout.Primary?.Gun?.GunID ?? 0))
                             {
                                 questConditions.Add(EQuestCondition.GunType, (int)kPlayer.GamePlayer.ActiveLoadout.Primary.Gun.GunType);
@@ -544,7 +543,7 @@ namespace UnturnedBlackout.GameTypes
                 {
                     kPlayer.SetMultipleKills(kPlayer.MultipleKills + 1);
                     xpGained += Config.Medals.FileData.BaseXPMK + (kPlayer.MultipleKills * Config.Medals.FileData.IncreaseXPPerMK);
-                    string multiKillText = Plugin.Instance.Translate($"Multiple_Kills_Show_{kPlayer.MultipleKills}").ToRich();
+                    var multiKillText = Plugin.Instance.Translate($"Multiple_Kills_Show_{kPlayer.MultipleKills}").ToRich();
                     xpText += (multiKillText == $"Multiple_Kills_Show_{kPlayer.MultipleKills}" ? Plugin.Instance.Translate("Multiple_Kills_Show", kPlayer.MultipleKills).ToRich() : multiKillText) + "\n";
                 }
                 else
@@ -663,7 +662,7 @@ namespace UnturnedBlackout.GameTypes
 
         public override void OnPlayerDamage(ref DamagePlayerParameters parameters, ref bool shouldAllow)
         {
-            KCPlayer player = GetKCPlayer(parameters.player);
+            var player = GetKCPlayer(parameters.player);
             if (player == null)
             {
                 return;
@@ -683,8 +682,8 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
-            string damageReducePerkName = "none";
-            string damageIncreasePerkName = "none";
+            var damageReducePerkName = "none";
+            var damageIncreasePerkName = "none";
             switch (parameters.cause)
             {
                 case EDeathCause.SENTRY:
@@ -702,11 +701,11 @@ namespace UnturnedBlackout.GameTypes
                     break;
             }
 
-            parameters.damage -= (player.GamePlayer.ActiveLoadout.PerksSearchByType.TryGetValue(damageReducePerkName, out LoadoutPerk damageReducerPerk) ? ((float)damageReducerPerk.Perk.SkillLevel / 100) : 0f) * parameters.damage;
+            parameters.damage -= (player.GamePlayer.ActiveLoadout.PerksSearchByType.TryGetValue(damageReducePerkName, out var damageReducerPerk) ? ((float)damageReducerPerk.Perk.SkillLevel / 100) : 0f) * parameters.damage;
 
             player.GamePlayer.OnDamaged(parameters.killer);
 
-            KCPlayer kPlayer = GetKCPlayer(parameters.killer);
+            var kPlayer = GetKCPlayer(parameters.killer);
             if (kPlayer == null)
             {
                 return;
@@ -718,8 +717,8 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
-            parameters.damage += (kPlayer.GamePlayer.ActiveLoadout.PerksSearchByType.TryGetValue(damageIncreasePerkName, out LoadoutPerk damageIncreaserPerk) ? ((float)damageIncreaserPerk.Perk.SkillLevel / 100) : 0f) * parameters.damage;
-            
+            parameters.damage += (kPlayer.GamePlayer.ActiveLoadout.PerksSearchByType.TryGetValue(damageIncreasePerkName, out var damageIncreaserPerk) ? ((float)damageIncreaserPerk.Perk.SkillLevel / 100) : 0f) * parameters.damage;
+
             if (parameters.cause == EDeathCause.GRENADE && parameters.damage < player.GamePlayer.Player.Player.life.health)
             {
                 Plugin.Instance.UI.ShowXPUI(kPlayer.GamePlayer, Config.Medals.FileData.LethalHitXP, Plugin.Instance.Translate("Lethal_Hit"));
@@ -734,7 +733,7 @@ namespace UnturnedBlackout.GameTypes
 
         public override void OnPlayerRevived(UnturnedPlayer player)
         {
-            KCPlayer kPlayer = GetKCPlayer(player);
+            var kPlayer = GetKCPlayer(player);
             if (kPlayer == null)
             {
                 return;
@@ -745,13 +744,13 @@ namespace UnturnedBlackout.GameTypes
 
         public override void OnPlayerRespawn(GamePlayer player, ref Vector3 respawnPosition, ref float yaw)
         {
-            KCPlayer kPlayer = GetKCPlayer(player.Player);
+            var kPlayer = GetKCPlayer(player.Player);
             if (kPlayer == null)
             {
                 return;
             }
 
-            if (!SpawnPoints.TryGetValue(kPlayer.Team.SpawnPoint, out List<TDMSpawnPoint> spawnPoints))
+            if (!SpawnPoints.TryGetValue(kPlayer.Team.SpawnPoint, out var spawnPoints))
             {
                 return;
             }
@@ -761,7 +760,7 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
-            TDMSpawnPoint spawnPoint = spawnPoints[UnityEngine.Random.Range(0, spawnPoints.Count)];
+            var spawnPoint = spawnPoints[UnityEngine.Random.Range(0, spawnPoints.Count)];
             respawnPosition = spawnPoint.GetSpawnPoint();
             yaw = spawnPoint.Yaw;
 
@@ -770,7 +769,7 @@ namespace UnturnedBlackout.GameTypes
 
         public override void OnChatMessageSent(GamePlayer player, EChatMode chatMode, string text, ref bool isVisible)
         {
-            KCPlayer kPlayer = GetKCPlayer(player.Player);
+            var kPlayer = GetKCPlayer(player.Player);
             if (kPlayer == null)
             {
                 return;
@@ -784,19 +783,19 @@ namespace UnturnedBlackout.GameTypes
             isVisible = false;
             TaskDispatcher.QueueOnMainThread(() =>
             {
-                PlayerData data = player.Data;
+                var data = player.Data;
                 if (data.IsMuted)
                 {
-                    TimeSpan expiryTime = data.MuteExpiry.UtcDateTime - DateTime.UtcNow;
+                    var expiryTime = data.MuteExpiry.UtcDateTime - DateTime.UtcNow;
                     Utility.Say(player.Player, $"<color=red>You are muted for{(expiryTime.Days == 0 ? "" : $" {expiryTime.Days} Days ")}{(expiryTime.Hours == 0 ? "" : $" {expiryTime.Hours} Hours")} {expiryTime.Minutes} Minutes");
                     return;
                 }
 
-                string iconLink = Plugin.Instance.DB.Levels.TryGetValue(data.Level, out XPLevel level) ? level.IconLinkSmall : "";
-                string updatedText = $"[{Utility.ToFriendlyName(chatMode)}] <color={Utility.GetLevelColor(player.Data.Level)}>[{player.Data.Level}]</color> <color={kPlayer.Team.Info.ChatPlayerHexCode}>{player.Player.CharacterName.ToUnrich()}</color>: <color={kPlayer.Team.Info.ChatMessageHexCode}>{text.ToUnrich()}</color>";
+                var iconLink = Plugin.Instance.DB.Levels.TryGetValue(data.Level, out var level) ? level.IconLinkSmall : "";
+                var updatedText = $"[{Utility.ToFriendlyName(chatMode)}] <color={Utility.GetLevelColor(player.Data.Level)}>[{player.Data.Level}]</color> <color={kPlayer.Team.Info.ChatPlayerHexCode}>{player.Player.CharacterName.ToUnrich()}</color>: <color={kPlayer.Team.Info.ChatMessageHexCode}>{text.ToUnrich()}</color>";
 
-                IEnumerable<KCPlayer> loopPlayers = chatMode == EChatMode.GLOBAL ? Players : Players.Where(k => k.Team == kPlayer.Team);
-                foreach (KCPlayer reciever in loopPlayers)
+                var loopPlayers = chatMode == EChatMode.GLOBAL ? Players : Players.Where(k => k.Team == kPlayer.Team);
+                foreach (var reciever in loopPlayers)
                 {
                     ChatManager.serverSendMessage(updatedText, Color.white, toPlayer: reciever.GamePlayer.Player.SteamPlayer(), iconURL: player.Data.AvatarLink, useRichTextFormatting: true);
                 }
@@ -811,7 +810,7 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
-            KCPlayer kPlayer = GetKCPlayer(player.Player);
+            var kPlayer = GetKCPlayer(player.Player);
             SendVoiceChat(Players.Where(k => k.Team == kPlayer.Team).Select(k => k.GamePlayer).ToList(), true);
         }
 
@@ -822,7 +821,7 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
-            KCPlayer kPlayer = GetKCPlayer(player.CSteamID);
+            var kPlayer = GetKCPlayer(player.CSteamID);
             if (kPlayer == null)
             {
                 return;
@@ -833,15 +832,15 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
-            KCTeam otherTeam = kPlayer.Team.TeamID == (byte)ETeam.Blue ? RedTeam : BlueTeam;
+            var otherTeam = kPlayer.Team.TeamID == (byte)ETeam.Blue ? RedTeam : BlueTeam;
             Dictionary<EQuestCondition, int> questConditions = new()
             {
                 { EQuestCondition.Map, Location.LocationID },
                 { EQuestCondition.Gamemode, (int)GameMode }
             };
 
-            int xpGained = 0;
-            string xpText = "";
+            var xpGained = 0;
+            var xpText = "";
 
             if (kPlayer.Team.DogTagID == P.item.id)
             {
@@ -875,7 +874,7 @@ namespace UnturnedBlackout.GameTypes
 
                 TaskDispatcher.QueueOnMainThread(() =>
                 {
-                    foreach (KCPlayer ply in Players)
+                    foreach (var ply in Players)
                     {
                         Plugin.Instance.UI.UpdateKCScore(ply, kPlayer.Team);
                     }
@@ -918,7 +917,7 @@ namespace UnturnedBlackout.GameTypes
 
         public void SpawnPlayer(KCPlayer player)
         {
-            if (!SpawnPoints.TryGetValue(player.Team.SpawnPoint, out List<TDMSpawnPoint> spawnPoints))
+            if (!SpawnPoints.TryGetValue(player.Team.SpawnPoint, out var spawnPoints))
             {
                 return;
             }
@@ -928,14 +927,14 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
-            TDMSpawnPoint spawnPoint = spawnPoints[UnityEngine.Random.Range(0, spawnPoints.Count)];
+            var spawnPoint = spawnPoints[UnityEngine.Random.Range(0, spawnPoints.Count)];
             player.GamePlayer.Player.Player.teleportToLocationUnsafe(spawnPoint.GetSpawnPoint(), spawnPoint.Yaw);
             player.GamePlayer.GiveSpawnProtection(Config.KC.FileData.SpawnProtectionSeconds);
         }
 
         public override void PlayerThrowableSpawned(GamePlayer player, UseableThrowable throwable)
         {
-            KCPlayer kPlayer = GetKCPlayer(player.Player);
+            var kPlayer = GetKCPlayer(player.Player);
             if (kPlayer == null)
             {
                 return;
@@ -961,7 +960,7 @@ namespace UnturnedBlackout.GameTypes
 
         public override void PlayerBarricadeSpawned(GamePlayer player, BarricadeDrop drop)
         {
-            KCPlayer kPlayer = GetKCPlayer(player.Player);
+            var kPlayer = GetKCPlayer(player.Player);
             if (kPlayer == null)
             {
                 return;
@@ -979,7 +978,7 @@ namespace UnturnedBlackout.GameTypes
 
         public override void PlayerChangeFiremode(GamePlayer player)
         {
-            KCPlayer kPlayer = GetKCPlayer(player.Player);
+            var kPlayer = GetKCPlayer(player.Player);
             if (kPlayer == null)
             {
                 return;
@@ -1024,7 +1023,7 @@ namespace UnturnedBlackout.GameTypes
 
         public override void PlayerStanceChanged(PlayerStance obj)
         {
-            KCPlayer kPlayer = GetKCPlayer(obj.player);
+            var kPlayer = GetKCPlayer(obj.player);
             if (kPlayer == null)
             {
                 return;
@@ -1061,17 +1060,17 @@ namespace UnturnedBlackout.GameTypes
             RedTeam.CheckSpawnSwitcher.Stop();
             BlueTeam.CheckSpawnSwitcher.Stop();
 
-            List<int> keys = SpawnPoints.Keys.ToList();
+            var keys = SpawnPoints.Keys.ToList();
             if (keys.Count == 0)
             {
                 return;
             }
 
-            (int, int) currentSpawn = (BlueTeam.SpawnPoint, RedTeam.SpawnPoint);
-            (int, int) forwardPossibleSpawn = (BlueTeam.SpawnPoint + 2, RedTeam.SpawnPoint + 2); // If blue has 0 and red has 1, the next possible group is 2 and 3
-            (int, int) backwardPossibleSpawn = (BlueTeam.SpawnPoint - 2, RedTeam.SpawnPoint - 2); // If blue has 2 and 3, the backward possible group is 0 and 1
+            var currentSpawn = (BlueTeam.SpawnPoint, RedTeam.SpawnPoint);
+            var forwardPossibleSpawn = (BlueTeam.SpawnPoint + 2, RedTeam.SpawnPoint + 2); // If blue has 0 and red has 1, the next possible group is 2 and 3
+            var backwardPossibleSpawn = (BlueTeam.SpawnPoint - 2, RedTeam.SpawnPoint - 2); // If blue has 2 and 3, the backward possible group is 0 and 1
 
-            bool shouldSwitch = UnityEngine.Random.Range(1, 101) > 50;
+            var shouldSwitch = UnityEngine.Random.Range(1, 101) > 50;
             // check if forward is possible
             if (keys.Contains(forwardPossibleSpawn.Item1) && keys.Contains(forwardPossibleSpawn.Item2))
             {
@@ -1094,17 +1093,17 @@ namespace UnturnedBlackout.GameTypes
 
         public KCPlayer GetKCPlayer(CSteamID steamID)
         {
-            return PlayersLookup.TryGetValue(steamID, out KCPlayer tPlayer) ? tPlayer : null;
+            return PlayersLookup.TryGetValue(steamID, out var tPlayer) ? tPlayer : null;
         }
 
         public KCPlayer GetKCPlayer(UnturnedPlayer player)
         {
-            return PlayersLookup.TryGetValue(player.CSteamID, out KCPlayer tPlayer) ? tPlayer : null;
+            return PlayersLookup.TryGetValue(player.CSteamID, out var tPlayer) ? tPlayer : null;
         }
 
         public KCPlayer GetKCPlayer(Player player)
         {
-            return PlayersLookup.TryGetValue(player.channel.owner.playerID.steamID, out KCPlayer tPlayer) ? tPlayer : null;
+            return PlayersLookup.TryGetValue(player.channel.owner.playerID.steamID, out var tPlayer) ? tPlayer : null;
         }
 
         public override bool IsPlayerIngame(CSteamID steamID)

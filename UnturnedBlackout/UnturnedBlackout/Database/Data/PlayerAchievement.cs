@@ -21,7 +21,7 @@ namespace UnturnedBlackout.Database.Data
         public bool TryGetNextTier(out AchievementTier nextTier)
         {
             nextTier = null;
-            if (Achievement.TiersLookup.TryGetValue(CurrentTier + 1, out AchievementTier tier))
+            if (Achievement.TiersLookup.TryGetValue(CurrentTier + 1, out var tier))
             {
                 nextTier = tier;
                 return true;
@@ -31,7 +31,7 @@ namespace UnturnedBlackout.Database.Data
 
         public AchievementTier GetCurrentTier()
         {
-            return Achievement.TiersLookup.TryGetValue(CurrentTier, out AchievementTier tier) ? tier : null;
+            return Achievement.TiersLookup.TryGetValue(CurrentTier, out var tier) ? tier : null;
         }
     }
 }

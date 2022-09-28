@@ -69,7 +69,7 @@ namespace UnturnedBlackout.Models.Global
         public ushort KillstreakPreviousPantsID { get; set; }
         public ushort KillstreakPreviousHatID { get; set; }
         public ushort KillstreakPreviousVestID { get; set; }
-        
+
         public bool HasTactical { get; set; }
         public bool HasLethal { get; set; }
 
@@ -111,7 +111,7 @@ namespace UnturnedBlackout.Models.Global
         {
             SteamID = player.CSteamID;
             Player = player;
-            if (!Plugin.Instance.DB.PlayerData.TryGetValue(SteamID, out PlayerData data))
+            if (!Plugin.Instance.DB.PlayerData.TryGetValue(SteamID, out var data))
             {
                 Provider.kick(SteamID, "Your data was not found, please contact an admin on unturnedblackout.com");
                 throw new Exception($"PLAYER DATA FOR PLAYER WITH {SteamID} NOT FOUND, KICKING THE PLAYER");
@@ -163,11 +163,11 @@ namespace UnturnedBlackout.Models.Global
                 return;
             }
 
-            loadout.GetPrimaryMovement(out float primaryMovementChange, out float primaryMovementChangeADS);
+            loadout.GetPrimaryMovement(out var primaryMovementChange, out var primaryMovementChangeADS);
             PrimaryMovementChange = primaryMovementChange;
             PrimaryMovementChangeADS = primaryMovementChangeADS;
 
-            loadout.GetSecondaryMovement(out float secondaryMovementChange, out float secondaryMovementChangeADS);
+            loadout.GetSecondaryMovement(out var secondaryMovementChange, out var secondaryMovementChangeADS);
             SecondaryMovementChange = secondaryMovementChange;
             SecondaryMovementChangeADS = secondaryMovementChangeADS;
 
@@ -177,7 +177,7 @@ namespace UnturnedBlackout.Models.Global
             LethalChecker.Stop();
             TacticalChecker.Stop();
 
-            float medic = loadout.PerksSearchByType.TryGetValue("medic", out LoadoutPerk medicPerk) ? medicPerk.Perk.SkillLevel : 0f;
+            var medic = loadout.PerksSearchByType.TryGetValue("medic", out var medicPerk) ? medicPerk.Perk.SkillLevel : 0f;
             HealAmount = Config.Base.FileData.HealAmount * (1 + (medic / 100));
 
             Plugin.Instance.UI.SendGadgetIcons(this);
@@ -185,14 +185,14 @@ namespace UnturnedBlackout.Models.Global
             if (loadout.Tactical != null)
             {
                 HasTactical = true;
-                float tactician = loadout.PerksSearchByType.TryGetValue("tactician", out LoadoutPerk tacticianPerk) ? tacticianPerk.Perk.SkillLevel : 0f;
+                var tactician = loadout.PerksSearchByType.TryGetValue("tactician", out var tacticianPerk) ? tacticianPerk.Perk.SkillLevel : 0f;
                 TacticalIntervalSeconds = loadout.Tactical.Gadget.GiveSeconds * (1 - (tactician / 100));
             }
 
             if (loadout.Lethal != null)
             {
                 HasLethal = true;
-                float grenadier = loadout.PerksSearchByType.TryGetValue("grenadier", out LoadoutPerk grenadierPerk) ? grenadierPerk.Perk.SkillLevel : 0f;
+                var grenadier = loadout.PerksSearchByType.TryGetValue("grenadier", out var grenadierPerk) ? grenadierPerk.Perk.SkillLevel : 0f;
                 LethalIntervalSeconds = loadout.Lethal.Gadget.GiveSeconds * (1 - (grenadier / 100));
             }
 
@@ -288,7 +288,7 @@ namespace UnturnedBlackout.Models.Global
             Healer.Stop();
             DamageChecker = Plugin.Instance.StartCoroutine(CheckDamage());
 
-            GamePlayer damagerPlayer = Plugin.Instance.Game.GetGamePlayer(damager);
+            var damagerPlayer = Plugin.Instance.Game.GetGamePlayer(damager);
             if (damagerPlayer == null)
             {
                 return;
@@ -310,11 +310,11 @@ namespace UnturnedBlackout.Models.Global
 
         public IEnumerator HealPlayer()
         {
-            float seconds = Config.Base.FileData.HealSeconds;
+            var seconds = Config.Base.FileData.HealSeconds;
             while (true)
             {
                 yield return new WaitForSeconds(seconds);
-                byte health = Player.Player.life.health;
+                var health = Player.Player.life.health;
                 if (health == 100)
                 {
                     LastDamager.Clear();
@@ -327,7 +327,7 @@ namespace UnturnedBlackout.Models.Global
         // Kill Card
         public void OnKilled(GamePlayer victim)
         {
-            PlayerData victimData = victim.Data;
+            var victimData = victim.Data;
             Plugin.Instance.UI.SendKillCard(this, victim, victimData);
         }
 
@@ -339,7 +339,7 @@ namespace UnturnedBlackout.Models.Global
                 RemoveActiveKillstreak();
             }
 
-            if (!Plugin.Instance.DB.PlayerData.TryGetValue(killer, out PlayerData killerData))
+            if (!Plugin.Instance.DB.PlayerData.TryGetValue(killer, out var killerData))
             {
                 TaskDispatcher.QueueOnMainThread(() => Player.Player.life.ServerRespawn(false));
                 return;
@@ -355,7 +355,7 @@ namespace UnturnedBlackout.Models.Global
 
             Plugin.Instance.UI.RemoveKillCard(this);
 
-            GamePlayer killerPlayer = Plugin.Instance.Game.GetGamePlayer(killer);
+            var killerPlayer = Plugin.Instance.Game.GetGamePlayer(killer);
             if (killer == null)
             {
                 return;
@@ -369,7 +369,7 @@ namespace UnturnedBlackout.Models.Global
 
         public IEnumerator RespawnTime(int respawnSeconds)
         {
-            for (int seconds = respawnSeconds; seconds >= 0; seconds--)
+            for (var seconds = respawnSeconds; seconds >= 0; seconds--)
             {
                 yield return new WaitForSeconds(1);
                 Plugin.Instance.UI.UpdateRespawnTimer(this, $"{seconds}s");
@@ -392,10 +392,10 @@ namespace UnturnedBlackout.Models.Global
 
             for (byte i = 0; i <= 1; i++)
             {
-                ItemJar item = Player.Player.inventory.getItem(i, 0);
+                var item = Player.Player.inventory.getItem(i, 0);
                 if (item != null && item.item.state.Length > 8)
                 {
-                    ushort magID = BitConverter.ToUInt16(item.item.state, 8);
+                    var magID = BitConverter.ToUInt16(item.item.state, 8);
                     if (Assets.find(EAssetType.ITEM, magID) is ItemMagazineAsset mAsset)
                     {
                         item.item.state[10] = mAsset.amount;
@@ -476,7 +476,7 @@ namespace UnturnedBlackout.Models.Global
                 return;
             }
 
-            float flagCarryingSpeed = isCarryingFlag ? Config.CTF.FileData.FlagCarryingSpeed : 0f;
+            var flagCarryingSpeed = isCarryingFlag ? Config.CTF.FileData.FlagCarryingSpeed : 0f;
             float updatedMovement;
             if (isCarryingFlag)
             {
@@ -510,9 +510,9 @@ namespace UnturnedBlackout.Models.Global
 
         public IEnumerator ChangeMovement(float newMovement)
         {
-            Type type = typeof(PlayerMovement);
-            FieldInfo info = type.GetField("SendPluginSpeedMultiplier", BindingFlags.NonPublic | BindingFlags.Static);
-            object value = info.GetValue(null);
+            var type = typeof(PlayerMovement);
+            var info = type.GetField("SendPluginSpeedMultiplier", BindingFlags.NonPublic | BindingFlags.Static);
+            var value = info.GetValue(null);
             ((ClientInstanceMethod<float>)value).Invoke(Player.Player.movement.GetNetId(), ENetReliability.Reliable, Player.Player.channel.GetOwnerTransportConnection(), newMovement);
             yield return new WaitForSeconds(Player.Ping - 0.01f);
             Player.Player.movement.pluginSpeedMultiplier = newMovement;
@@ -528,9 +528,9 @@ namespace UnturnedBlackout.Models.Global
             KillstreakTriggers = new();
             OrderedKillstreaks = new();
 
-            ExtraKillstreak = ActiveLoadout.PerksSearchByType.TryGetValue("expert", out LoadoutPerk expertPerk) ? expertPerk.Perk.SkillLevel : 0;
+            ExtraKillstreak = ActiveLoadout.PerksSearchByType.TryGetValue("expert", out var expertPerk) ? expertPerk.Perk.SkillLevel : 0;
 
-            foreach (LoadoutKillstreak killstreak in ActiveLoadout.Killstreaks.OrderBy(k => k.Killstreak.KillstreakRequired))
+            foreach (var killstreak in ActiveLoadout.Killstreaks.OrderBy(k => k.Killstreak.KillstreakRequired))
             {
                 OrderedKillstreaks.Add(killstreak);
                 AvailableKillstreaks.Add(killstreak, false);
@@ -554,9 +554,9 @@ namespace UnturnedBlackout.Models.Global
 
         public void UpdateKillstreak(int currentKillstreak)
         {
-            int updatedKillstreak = currentKillstreak + ExtraKillstreak;
+            var updatedKillstreak = currentKillstreak + ExtraKillstreak;
             Logging.Debug($"Updating killstreak for {Player.CharacterName} with killstreak {updatedKillstreak}");
-            LoadoutKillstreak availableKillstreak = OrderedKillstreaks.FirstOrDefault(k => k.Killstreak.KillstreakRequired == updatedKillstreak && !AvailableKillstreaks[k]);
+            var availableKillstreak = OrderedKillstreaks.FirstOrDefault(k => k.Killstreak.KillstreakRequired == updatedKillstreak && !AvailableKillstreaks[k]);
             if (availableKillstreak != null)
             {
                 AvailableKillstreaks[availableKillstreak] = true;
@@ -577,7 +577,7 @@ namespace UnturnedBlackout.Models.Global
             {
                 if (info.MagAmount > 0)
                 {
-                    for (int i = 1; i <= info.MagAmount; i++)
+                    for (var i = 1; i <= info.MagAmount; i++)
                     {
                         inv.forceAddItem(new Item(info.MagID, true), false);
                     }
@@ -586,10 +586,10 @@ namespace UnturnedBlackout.Models.Global
                 inv.forceAddItem(new Item(info.ItemID, true), false);
                 for (byte page = 0; page < PlayerInventory.PAGES - 2; page++)
                 {
-                    bool shouldBreak = false;
-                    for (int index = inv.getItemCount(page) - 1; index >= 0; index--)
+                    var shouldBreak = false;
+                    for (var index = inv.getItemCount(page) - 1; index >= 0; index--)
                     {
-                        ItemJar item = inv.getItem(page, (byte)index);
+                        var item = inv.getItem(page, (byte)index);
                         if ((item?.item?.id ?? 0) == info.ItemID)
                         {
                             KillstreakPage = page;
@@ -607,13 +607,41 @@ namespace UnturnedBlackout.Models.Global
 
                 Player.Player.equipment.ServerEquip(KillstreakPage, KillstreakX, KillstreakY);
             }
+            else if (info.IsTurret)
+            {
+                inv.forceAddItem(new Item(info.TurretID, true), false);
+
+                for (byte page = 0; page < PlayerInventory.PAGES - 2; page++)
+                {
+                    var shouldBreak = false;
+                    for (var index = inv.getItemCount(page) - 1; index >= 0; index--)
+                    {
+                        var item = inv.getItem(page, (byte)index);
+                        if ((item?.item?.id ?? 0) == info.TurretID)
+                        {
+                            shouldBreak = true;
+                            Player.Player.equipment.ServerEquip(page, item.x, item.y);
+                            break;
+                        }
+                    }
+                    if (shouldBreak)
+                    {
+                        break;
+                    }
+                }
+
+                AvailableKillstreaks[killstreak] = false;
+                Plugin.Instance.UI.UpdateKillstreakReady(this, killstreak);
+
+                return;
+            }
 
             if (info.IsClothing)
             {
                 var clothing = Player.Player.clothing;
                 var clothes = clothing.thirdClothes;
                 var clothingKillstreak = CurrentGame.GetTeam(this).TeamKillstreaks.FirstOrDefault(k => k.KillstreakID == killstreak.Killstreak.KillstreakID);
-                
+
                 KillstreakPreviousShirtID = clothing.shirt;
                 KillstreakPreviousPantsID = clothing.pants;
                 KillstreakPreviousHatID = clothing.hat;
@@ -653,7 +681,7 @@ namespace UnturnedBlackout.Models.Global
             HasKillstreakActive = true;
             ActiveKillstreak = killstreak;
             AvailableKillstreaks[killstreak] = false;
-            
+
             Plugin.Instance.UI.UpdateKillstreakReady(this, killstreak);
 
             MovementChanger.Stop();
@@ -707,15 +735,15 @@ namespace UnturnedBlackout.Models.Global
                     continue;
                 }
 
-                PlayerInventory inv = Player.Player.inventory;
+                var inv = Player.Player.inventory;
                 inv.removeItem(page, Player.Player.inventory.getIndex(page, x, y));
 
                 if (magID != 0)
                 {
-                    int itemCount = inv.items[2].items.Count;
-                    for (int i = itemCount - 1; i >= 0; i--)
+                    var itemCount = inv.items[2].items.Count;
+                    for (var i = itemCount - 1; i >= 0; i--)
                     {
-                        ItemJar item = inv.getItem(2, (byte)i);
+                        var item = inv.getItem(2, (byte)i);
                         if ((item?.item?.id ?? 0) == magID)
                         {
                             inv.removeItem(2, (byte)i);
@@ -766,14 +794,14 @@ namespace UnturnedBlackout.Models.Global
                     clothing.askWearVest(0, 0, new byte[0], false);
                     Player.Player.inventory.forceAddItem(new Item(vest, true), true);
                 }
-                
+
                 break;
             }
         }
-        
+
         public IEnumerator CheckKillstreak(int seconds)
         {
-            for (int i = seconds; i > 0; i--)
+            for (var i = seconds; i > 0; i--)
             {
                 Plugin.Instance.UI.UpdateKillstreakTimer(this, i);
                 yield return new WaitForSeconds(1f);

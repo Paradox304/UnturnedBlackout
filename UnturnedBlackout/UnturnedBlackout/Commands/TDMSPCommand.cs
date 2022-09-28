@@ -22,7 +22,7 @@ namespace UnturnedBlackout.Commands
 
         public void Execute(IRocketPlayer caller, string[] command)
         {
-            UnturnedPlayer player = caller as UnturnedPlayer;
+            var player = caller as UnturnedPlayer;
 
             if (command.Length < 2)
             {
@@ -30,19 +30,19 @@ namespace UnturnedBlackout.Commands
                 return;
             }
 
-            if (!int.TryParse(command[0], out int locationID))
+            if (!int.TryParse(command[0], out var locationID))
             {
                 Utility.Say(caller, Plugin.Instance.Translate("Location_Not_Found").ToRich());
                 return;
             }
 
-            if (!int.TryParse(command[1], out int groupID))
+            if (!int.TryParse(command[1], out var groupID))
             {
                 Utility.Say(caller, Plugin.Instance.Translate("Group_Not_Found").ToRich());
                 return;
             }
 
-            Models.Global.ArenaLocation location = Plugin.Instance.Config.Locations.FileData.ArenaLocations.FirstOrDefault(k => k.LocationID == locationID);
+            var location = Plugin.Instance.Config.Locations.FileData.ArenaLocations.FirstOrDefault(k => k.LocationID == locationID);
             if (location == null)
             {
                 Utility.Say(caller, Plugin.Instance.Translate("Location_Not_Found").ToRich());

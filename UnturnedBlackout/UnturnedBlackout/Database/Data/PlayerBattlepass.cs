@@ -1,6 +1,5 @@
 ﻿using Steamworks;
 using System.Collections.Generic;
-using UnturnedBlackout.Database.Base;
 
 namespace UnturnedBlackout.Database.Data
 {
@@ -28,7 +27,7 @@ namespace UnturnedBlackout.Database.Data
 
         public bool TryGetNeededXP(out int xp)
         {
-            if (Plugin.Instance.DB.BattlepassTiersSearchByID.TryGetValue(CurrentTier + 1, out BattlepassTier battlepassTier))
+            if (Plugin.Instance.DB.BattlepassTiersSearchByID.TryGetValue(CurrentTier + 1, out var battlepassTier))
             {
                 xp = battlepassTier.XP;
                 return true;

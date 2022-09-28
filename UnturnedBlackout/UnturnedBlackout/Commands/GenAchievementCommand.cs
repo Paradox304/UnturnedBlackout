@@ -28,7 +28,7 @@ namespace UnturnedBlackout.Commands
                 return;
             }
 
-            if (!int.TryParse(command[0], out int achievementID))
+            if (!int.TryParse(command[0], out var achievementID))
             {
                 UnturnedChat.Say(caller, "Achievement tier is not correct");
                 return;

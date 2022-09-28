@@ -1,16 +1,15 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Rocket.Core.Utils;
+﻿using Rocket.Core.Utils;
 using Rocket.Unturned.Enumerations;
 using Rocket.Unturned.Player;
 using SDG.Unturned;
 using Steamworks;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnturnedBlackout.Database.Base;
-using UnturnedBlackout.Database.Data;
 using UnturnedBlackout.Enums;
 using UnturnedBlackout.Models.FFA;
 using UnturnedBlackout.Models.Global;
@@ -44,7 +43,7 @@ namespace UnturnedBlackout.GameTypes
             TaskDispatcher.QueueOnMainThread(() => CleanMap());
             GamePhase = EGamePhase.Starting;
             Plugin.Instance.UI.OnGameUpdated();
-            foreach (FFAPlayer player in Players)
+            foreach (var player in Players)
             {
                 if (player.GamePlayer.IsLoading) continue;
                 Plugin.Instance.UI.ClearWaitingForPlayersUI(player.GamePlayer);
@@ -53,17 +52,17 @@ namespace UnturnedBlackout.GameTypes
                 SpawnPlayer(player);
             }
 
-            for (int seconds = Config.FFA.FileData.StartSeconds; seconds >= 0; seconds--)
+            for (var seconds = Config.FFA.FileData.StartSeconds; seconds >= 0; seconds--)
             {
                 yield return new WaitForSeconds(1);
-                foreach (FFAPlayer player in Players)
+                foreach (var player in Players)
                 {
                     Plugin.Instance.UI.SendCountdownSeconds(player.GamePlayer, seconds);
                 }
             }
             GamePhase = EGamePhase.Started;
             Plugin.Instance.UI.OnGameUpdated();
-            foreach (FFAPlayer player in Players)
+            foreach (var player in Players)
             {
                 player.GamePlayer.GiveMovement(player.GamePlayer.Player.Player.equipment.useable is UseableGun gun && gun.isAiming, false, false);
 
@@ -78,11 +77,11 @@ namespace UnturnedBlackout.GameTypes
 
         public IEnumerator EndGame()
         {
-            for (int seconds = Config.FFA.FileData.EndSeconds; seconds >= 0; seconds--)
+            for (var seconds = Config.FFA.FileData.EndSeconds; seconds >= 0; seconds--)
             {
                 yield return new WaitForSeconds(1);
-                TimeSpan timeSpan = TimeSpan.FromSeconds(seconds);
-                foreach (FFAPlayer player in Players)
+                var timeSpan = TimeSpan.FromSeconds(seconds);
+                foreach (var player in Players)
                 {
                     Plugin.Instance.UI.UpdateFFATimer(player.GamePlayer, timeSpan.ToString(@"m\:ss"));
                 }
@@ -102,17 +101,17 @@ namespace UnturnedBlackout.GameTypes
             Plugin.Instance.UI.OnGameUpdated();
             Dictionary<GamePlayer, MatchEndSummary> summaries = new();
 
-            DateTime endTime = DateTime.UtcNow;
+            var endTime = DateTime.UtcNow;
             List<GamePlayer> roundEndCasesPlayers = new();
-            foreach (FFAPlayer player in Players)
+            foreach (var player in Players)
             {
-                int totalMinutesPlayed = (int)(endTime - player.StartTime).TotalMinutes;
+                var totalMinutesPlayed = (int)(endTime - player.StartTime).TotalMinutes;
                 if (totalMinutesPlayed < Config.RoundEndCases.FileData.MinimumMinutesPlayed || player.Kills == 0)
                 {
                     continue;
                 }
 
-                int chance = Config.RoundEndCases.FileData.Chance * totalMinutesPlayed;
+                var chance = Config.RoundEndCases.FileData.Chance * totalMinutesPlayed;
                 if (UnityEngine.Random.Range(1, 101) > chance)
                 {
                     continue;
@@ -122,9 +121,9 @@ namespace UnturnedBlackout.GameTypes
             }
 
             List<(GamePlayer, Case)> roundEndCases = new();
-            foreach (GamePlayer roundEndCasePlayer in roundEndCasesPlayers)
+            foreach (var roundEndCasePlayer in roundEndCasesPlayers)
             {
-                Case @case = GetRandomRoundEndCase();
+                var @case = GetRandomRoundEndCase();
                 if (@case == null)
                 {
                     continue;
@@ -137,9 +136,9 @@ namespace UnturnedBlackout.GameTypes
                 });
             }
 
-            for (int index = 0; index < Players.Count; index++)
+            for (var index = 0; index < Players.Count; index++)
             {
-                FFAPlayer player = Players[index];
+                var player = Players[index];
                 Plugin.Instance.UI.ClearFFAHUD(player.GamePlayer);
                 Plugin.Instance.UI.ClearMidgameLoadoutUI(player.GamePlayer);
                 if (player.GamePlayer.Player.Player.life.isDead)
@@ -176,7 +175,7 @@ namespace UnturnedBlackout.GameTypes
                 CleanMap();
             });
             yield return new WaitForSeconds(5);
-            foreach (FFAPlayer player in Players)
+            foreach (var player in Players)
             {
                 Plugin.Instance.UI.ShowFFALeaderboard(player.GamePlayer);
             }
@@ -187,26 +186,26 @@ namespace UnturnedBlackout.GameTypes
             }
 
             yield return new WaitForSeconds(Config.Base.FileData.EndingLeaderboardSeconds);
-            foreach (FFAPlayer player in Players.ToList())
+            foreach (var player in Players.ToList())
             {
                 RemovePlayerFromGame(player.GamePlayer);
-                Plugin.Instance.Game.SendPlayerToLobby(player.GamePlayer.Player, summaries.TryGetValue(player.GamePlayer, out MatchEndSummary pendingSummary) ? pendingSummary : null);
+                Plugin.Instance.Game.SendPlayerToLobby(player.GamePlayer.Player, summaries.TryGetValue(player.GamePlayer, out var pendingSummary) ? pendingSummary : null);
             }
 
             Players = new List<FFAPlayer>();
 
-            List<int> locations = Plugin.Instance.Game.AvailableLocations;
+            var locations = Plugin.Instance.Game.AvailableLocations;
             lock (locations)
             {
-                string locString = "";
-                foreach (int loc in locations)
+                var locString = "";
+                foreach (var loc in locations)
                 {
-                    ArenaLocation locc = Config.Locations.FileData.ArenaLocations.FirstOrDefault(k => k.LocationID == loc);
+                    var locc = Config.Locations.FileData.ArenaLocations.FirstOrDefault(k => k.LocationID == loc);
                     locString += $"{locc.LocationName},";
                 }
-                int randomLocation = locations.Count > 0 ? locations[UnityEngine.Random.Range(0, locations.Count)] : Location.LocationID;
-                ArenaLocation location = Config.Locations.FileData.ArenaLocations.FirstOrDefault(k => k.LocationID == randomLocation);
-                (EGameType, bool) gameMode = Plugin.Instance.Game.GetRandomGameMode(location.LocationID);
+                var randomLocation = locations.Count > 0 ? locations[UnityEngine.Random.Range(0, locations.Count)] : Location.LocationID;
+                var location = Config.Locations.FileData.ArenaLocations.FirstOrDefault(k => k.LocationID == randomLocation);
+                var gameMode = Plugin.Instance.Game.GetRandomGameMode(location.LocationID);
                 GamePhase = EGamePhase.Ended;
                 Plugin.Instance.Game.EndGame(this);
                 Plugin.Instance.Game.StartGame(location, gameMode.Item1, gameMode.Item2);
@@ -233,12 +232,12 @@ namespace UnturnedBlackout.GameTypes
             Plugin.Instance.UI.OnGameCountUpdated(this);
 
             Plugin.Instance.UI.SendLoadingUI(player.Player, true, GameMode, Location);
-            for (int seconds = 1; seconds <= 5; seconds++)
+            for (var seconds = 1; seconds <= 5; seconds++)
             {
                 yield return new WaitForSeconds(1);
                 Plugin.Instance.UI.UpdateLoadingBar(player.Player, new string('　', Math.Min(96, seconds * 96 / 5)));
             }
-            Vector3 currentPos = player.Player.Position;
+            var currentPos = player.Player.Position;
             player.Player.Player.teleportToLocationUnsafe(new Vector3(currentPos.x, currentPos.y + 100, currentPos.z), 0);
             GiveLoadout(fPlayer);
             Plugin.Instance.UI.SendPreEndingUI(fPlayer.GamePlayer);
@@ -247,7 +246,7 @@ namespace UnturnedBlackout.GameTypes
             switch (GamePhase)
             {
                 case EGamePhase.WaitingForPlayers:
-                    int minPlayers = Location.GetMinPlayers(GameMode);
+                    var minPlayers = Location.GetMinPlayers(GameMode);
                     if (Players.Count >= minPlayers)
                     {
                         GameStarter = Plugin.Instance.StartCoroutine(StartGame());
@@ -255,7 +254,7 @@ namespace UnturnedBlackout.GameTypes
                     else
                     {
                         Plugin.Instance.UI.SendWaitingForPlayersUI(player, Players.Count, minPlayers);
-                        foreach (FFAPlayer ply in Players)
+                        foreach (var ply in Players)
                         {
                             if (ply == fPlayer)
                             {
@@ -289,7 +288,7 @@ namespace UnturnedBlackout.GameTypes
 
         public override void RemovePlayerFromGame(GamePlayer player)
         {
-            FFAPlayer fPlayer = GetFFAPlayer(player.Player);
+            var fPlayer = GetFFAPlayer(player.Player);
 
             if (fPlayer == null)
             {
@@ -316,7 +315,7 @@ namespace UnturnedBlackout.GameTypes
             {
                 TaskDispatcher.QueueOnMainThread(() =>
                 {
-                    BarricadeManager.BarricadeRegions.Cast<BarricadeRegion>().SelectMany(k => k.drops).Where(k => (k.GetServersideData()?.owner ?? 0UL) == player.SteamID.m_SteamID && LevelNavigation.tryGetNavigation(k.model.transform.position, out byte nav) && nav == Location.NavMesh).Select(k => BarricadeManager.tryGetRegion(k.model.transform, out byte x, out byte y, out ushort plant, out _) ? (k, x, y, plant) : (k, byte.MaxValue, byte.MaxValue, ushort.MaxValue)).ToList().ForEach(k => BarricadeManager.destroyBarricade(k.k, k.Item2, k.Item3, k.Item4));
+                    BarricadeManager.BarricadeRegions.Cast<BarricadeRegion>().SelectMany(k => k.drops).Where(k => (k.GetServersideData()?.owner ?? 0UL) == player.SteamID.m_SteamID && LevelNavigation.tryGetNavigation(k.model.transform.position, out var nav) && nav == Location.NavMesh).Select(k => BarricadeManager.tryGetRegion(k.model.transform, out var x, out var y, out var plant, out _) ? (k, x, y, plant) : (k, byte.MaxValue, byte.MaxValue, ushort.MaxValue)).ToList().ForEach(k => BarricadeManager.destroyBarricade(k.k, k.Item2, k.Item3, k.Item4));
                 });
             }
 
@@ -325,7 +324,7 @@ namespace UnturnedBlackout.GameTypes
             Players.Remove(fPlayer);
             PlayersLookup.Remove(fPlayer.GamePlayer.SteamID);
 
-            foreach (FFAPlayer ply in Players)
+            foreach (var ply in Players)
             {
                 Plugin.Instance.UI.UpdateFFATopUI(ply, Players);
             }
@@ -334,7 +333,7 @@ namespace UnturnedBlackout.GameTypes
 
         public override void OnPlayerDead(Player player, CSteamID killer, ELimb limb, EDeathCause cause)
         {
-            FFAPlayer fPlayer = GetFFAPlayer(player);
+            var fPlayer = GetFFAPlayer(player);
             if (fPlayer == null)
             {
                 return;
@@ -352,8 +351,8 @@ namespace UnturnedBlackout.GameTypes
                 Plugin.Instance.UI.HideFFALeaderboard(fPlayer.GamePlayer);
             }
 
-            int victimKS = fPlayer.Killstreak;
-            CSteamID updatedKiller = cause == EDeathCause.WATER ? fPlayer.GamePlayer.SteamID : (cause == EDeathCause.LANDMINE || cause == EDeathCause.SHRED ? (fPlayer.GamePlayer.LastDamager.Count > 0 ? fPlayer.GamePlayer.LastDamager.Pop() : killer) : killer);
+            var victimKS = fPlayer.Killstreak;
+            var updatedKiller = cause == EDeathCause.WATER ? fPlayer.GamePlayer.SteamID : (cause == EDeathCause.LANDMINE || cause == EDeathCause.SHRED ? (fPlayer.GamePlayer.LastDamager.Count > 0 ? fPlayer.GamePlayer.LastDamager.Pop() : killer) : killer);
 
             Logging.Debug($"Game player died, player name: {fPlayer.GamePlayer.Player.CharacterName}, cause: {cause}");
             fPlayer.OnDeath(updatedKiller);
@@ -363,7 +362,7 @@ namespace UnturnedBlackout.GameTypes
 
             TaskDispatcher.QueueOnMainThread(() =>
             {
-                FFAPlayer kPlayer = GetFFAPlayer(updatedKiller);
+                var kPlayer = GetFFAPlayer(updatedKiller);
                 if (kPlayer == null)
                 {
                     Logging.Debug("Killer not found, returning");
@@ -373,7 +372,7 @@ namespace UnturnedBlackout.GameTypes
                 if (kPlayer.GamePlayer.SteamID == fPlayer.GamePlayer.SteamID)
                 {
                     OnKill(kPlayer.GamePlayer, fPlayer.GamePlayer, cause == EDeathCause.WATER ? (ushort)0 : (ushort)1, Config.FFA.FileData.FFATeam.KillFeedHexCode, Config.FFA.FileData.FFATeam.KillFeedHexCode);
-                    
+
                     Logging.Debug("Player killed themselves, returning");
                     return;
                 }
@@ -393,7 +392,7 @@ namespace UnturnedBlackout.GameTypes
 
                 if (fPlayer.GamePlayer.LastDamager.Count > 0)
                 {
-                    FFAPlayer assister = GetFFAPlayer(fPlayer.GamePlayer.LastDamager.Pop());
+                    var assister = GetFFAPlayer(fPlayer.GamePlayer.LastDamager.Pop());
                     if (assister != null && assister != kPlayer)
                     {
                         assister.Assists++;
@@ -407,21 +406,21 @@ namespace UnturnedBlackout.GameTypes
                     fPlayer.GamePlayer.LastDamager.Clear();
                 }
 
-                bool isFirstKill = Players[0].Kills == 0;
+                var isFirstKill = Players[0].Kills == 0;
                 kPlayer.Kills++;
                 kPlayer.Score += Config.Points.FileData.KillPoints;
 
-                int xpGained = 0;
-                string xpText = "";
+                var xpGained = 0;
+                var xpText = "";
                 ushort equipmentUsed = 0;
-                float longshotRange = 0f;
+                var longshotRange = 0f;
 
-                bool usedKillstreak = kPlayer.GamePlayer.HasKillstreakActive && (kPlayer.GamePlayer.ActiveKillstreak?.Killstreak?.KillstreakInfo?.IsItem ?? false);
-                int killstreakID = kPlayer.GamePlayer.ActiveKillstreak?.Killstreak?.KillstreakID ?? 0;
+                var usedKillstreak = kPlayer.GamePlayer.HasKillstreakActive && (kPlayer.GamePlayer.ActiveKillstreak?.Killstreak?.KillstreakInfo?.IsItem ?? false);
+                var killstreakID = kPlayer.GamePlayer.ActiveKillstreak?.Killstreak?.KillstreakID ?? 0;
 
                 if (usedKillstreak)
                 {
-                    Models.Data.KillstreakData info = kPlayer.GamePlayer.ActiveKillstreak.Killstreak.KillstreakInfo;
+                    var info = kPlayer.GamePlayer.ActiveKillstreak.Killstreak.KillstreakInfo;
                     xpGained += info.MedalXP;
                     xpText += info.MedalName;
                     equipmentUsed += info.ItemID;
@@ -448,7 +447,7 @@ namespace UnturnedBlackout.GameTypes
                                 xpGained += Config.Medals.FileData.NormalKillXP;
                                 xpText += Plugin.Instance.Translate("Normal_Kill").ToRich();
                             }
-                            ushort equipment = kPlayer.GamePlayer.Player.Player.equipment.itemID;
+                            var equipment = kPlayer.GamePlayer.Player.Player.equipment.itemID;
                             if (equipment == (kPlayer.GamePlayer.ActiveLoadout.PrimarySkin?.SkinID ?? 0) || equipment == (kPlayer.GamePlayer.ActiveLoadout.Primary?.Gun?.GunID ?? 0))
                             {
                                 questConditions.Add(EQuestCondition.GunType, (int)kPlayer.GamePlayer.ActiveLoadout.Primary.Gun.GunType);
@@ -493,7 +492,7 @@ namespace UnturnedBlackout.GameTypes
                 {
                     kPlayer.SetMultipleKills(kPlayer.MultipleKills + 1);
                     xpGained += Config.Medals.FileData.BaseXPMK + (kPlayer.MultipleKills * Config.Medals.FileData.IncreaseXPPerMK);
-                    string multiKillText = Plugin.Instance.Translate($"Multiple_Kills_Show_{kPlayer.MultipleKills}").ToRich();
+                    var multiKillText = Plugin.Instance.Translate($"Multiple_Kills_Show_{kPlayer.MultipleKills}").ToRich();
                     xpText += (multiKillText == $"Multiple_Kills_Show_{kPlayer.MultipleKills}" ? Plugin.Instance.Translate("Multiple_Kills_Show", kPlayer.MultipleKills).ToRich() : multiKillText) + "\n";
                 }
                 else
@@ -568,7 +567,7 @@ namespace UnturnedBlackout.GameTypes
                     OnKill(kPlayer.GamePlayer, fPlayer.GamePlayer, equipmentUsed, Config.FFA.FileData.FFATeam.KillFeedHexCode, Config.FFA.FileData.FFATeam.KillFeedHexCode);
                 }
 
-                foreach (FFAPlayer ply in Players)
+                foreach (var ply in Players)
                 {
                     Plugin.Instance.UI.UpdateFFATopUI(ply, Players);
                 }
@@ -621,7 +620,7 @@ namespace UnturnedBlackout.GameTypes
 
         public override void OnPlayerDamage(ref DamagePlayerParameters parameters, ref bool shouldAllow)
         {
-            FFAPlayer player = GetFFAPlayer(parameters.player);
+            var player = GetFFAPlayer(parameters.player);
             if (player == null)
             {
                 return;
@@ -641,8 +640,8 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
-            string damageReducePerkName = "none";
-            string damageIncreasePerkName = "none";
+            var damageReducePerkName = "none";
+            var damageIncreasePerkName = "none";
             switch (parameters.cause)
             {
                 case EDeathCause.SENTRY:
@@ -660,18 +659,18 @@ namespace UnturnedBlackout.GameTypes
                     break;
             }
 
-            float damageReducePercent = player.GamePlayer.ActiveLoadout.PerksSearchByType.TryGetValue(damageReducePerkName, out LoadoutPerk damageReducerPerk) ? ((float)damageReducerPerk.Perk.SkillLevel / 100) : 0f;
+            var damageReducePercent = player.GamePlayer.ActiveLoadout.PerksSearchByType.TryGetValue(damageReducePerkName, out var damageReducerPerk) ? ((float)damageReducerPerk.Perk.SkillLevel / 100) : 0f;
             parameters.damage -= damageReducePercent * parameters.damage;
 
             player.GamePlayer.OnDamaged(parameters.killer);
 
-            FFAPlayer kPlayer = GetFFAPlayer(parameters.killer);
+            var kPlayer = GetFFAPlayer(parameters.killer);
             if (kPlayer == null)
             {
                 return;
             }
 
-            float damageIncreasePercent = kPlayer.GamePlayer.ActiveLoadout.PerksSearchByType.TryGetValue(damageIncreasePerkName, out LoadoutPerk damageIncreaserPerk) ? ((float)damageIncreaserPerk.Perk.SkillLevel / 100) : 0f;
+            var damageIncreasePercent = kPlayer.GamePlayer.ActiveLoadout.PerksSearchByType.TryGetValue(damageIncreasePerkName, out var damageIncreaserPerk) ? ((float)damageIncreaserPerk.Perk.SkillLevel / 100) : 0f;
             parameters.damage += damageIncreasePercent * parameters.damage;
 
             Logging.Debug($"cause: {parameters.cause}, damage: {parameters.damage}, player health: {player.GamePlayer.Player.Player.life.health}");
@@ -690,7 +689,7 @@ namespace UnturnedBlackout.GameTypes
 
         public override void OnPlayerRevived(UnturnedPlayer player)
         {
-            FFAPlayer fPlayer = GetFFAPlayer(player);
+            var fPlayer = GetFFAPlayer(player);
             if (fPlayer == null)
             {
                 return;
@@ -706,7 +705,7 @@ namespace UnturnedBlackout.GameTypes
                 return;
             }
 
-            FFASpawnPoint spawnPoint = GetFreeSpawn();
+            var spawnPoint = GetFreeSpawn();
             respawnPosition = spawnPoint.GetSpawnPoint();
             yaw = spawnPoint.Yaw;
             player.GiveSpawnProtection(Config.FFA.FileData.SpawnProtectionSeconds);
@@ -714,7 +713,7 @@ namespace UnturnedBlackout.GameTypes
 
         public override void OnChatMessageSent(GamePlayer player, EChatMode chatMode, string text, ref bool isVisible)
         {
-            FFAPlayer fPlayer = GetFFAPlayer(player.Player);
+            var fPlayer = GetFFAPlayer(player.Player);
             if (fPlayer == null)
             {
                 return;
@@ -728,18 +727,18 @@ namespace UnturnedBlackout.GameTypes
             isVisible = false;
             TaskDispatcher.QueueOnMainThread(() =>
             {
-                PlayerData data = player.Data;
+                var data = player.Data;
                 if (data.IsMuted)
                 {
-                    TimeSpan expiryTime = data.MuteExpiry.UtcDateTime - DateTime.UtcNow;
+                    var expiryTime = data.MuteExpiry.UtcDateTime - DateTime.UtcNow;
                     Utility.Say(player.Player, $"<color=red>You are muted for{(expiryTime.Days == 0 ? "" : $" {expiryTime.Days} Days ")}{(expiryTime.Hours == 0 ? "" : $" {expiryTime.Hours} Hours")} {expiryTime.Minutes} Minutes");
                     return;
                 }
 
-                string iconLink = Plugin.Instance.DB.Levels.TryGetValue(data.Level, out XPLevel level) ? level.IconLinkSmall : "";
-                string updatedText = $"[{Utility.ToFriendlyName(chatMode)}] <color={Utility.GetLevelColor(player.Data.Level)}>[{player.Data.Level}]</color> <color={Config.FFA.FileData.FFATeam.ChatPlayerHexCode}>{player.Player.CharacterName.ToUnrich()}</color>: <color={Config.FFA.FileData.FFATeam.ChatMessageHexCode}>{text.ToUnrich()}</color>";
+                var iconLink = Plugin.Instance.DB.Levels.TryGetValue(data.Level, out var level) ? level.IconLinkSmall : "";
+                var updatedText = $"[{Utility.ToFriendlyName(chatMode)}] <color={Utility.GetLevelColor(player.Data.Level)}>[{player.Data.Level}]</color> <color={Config.FFA.FileData.FFATeam.ChatPlayerHexCode}>{player.Player.CharacterName.ToUnrich()}</color>: <color={Config.FFA.FileData.FFATeam.ChatMessageHexCode}>{text.ToUnrich()}</color>";
 
-                foreach (FFAPlayer reciever in Players)
+                foreach (var reciever in Players)
                 {
                     ChatManager.serverSendMessage(updatedText, Color.white, toPlayer: reciever.GamePlayer.Player.SteamPlayer(), iconURL: player.Data.AvatarLink, useRichTextFormatting: true);
                 }
@@ -761,14 +760,14 @@ namespace UnturnedBlackout.GameTypes
         {
             if (SpawnPoints.Count == 0) return;
 
-            FFASpawnPoint spawnPoint = GetFreeSpawn();
+            var spawnPoint = GetFreeSpawn();
             player.GamePlayer.Player.Player.teleportToLocationUnsafe(spawnPoint.GetSpawnPoint(), spawnPoint.Yaw);
             player.GamePlayer.GiveSpawnProtection(Config.FFA.FileData.SpawnProtectionSeconds);
         }
 
         public override void PlayerThrowableSpawned(GamePlayer player, UseableThrowable throwable)
         {
-            FFAPlayer fPlayer = GetFFAPlayer(player.Player);
+            var fPlayer = GetFFAPlayer(player.Player);
             if (fPlayer == null)
             {
                 return;
@@ -794,7 +793,7 @@ namespace UnturnedBlackout.GameTypes
 
         public override void PlayerBarricadeSpawned(GamePlayer player, BarricadeDrop drop)
         {
-            FFAPlayer fPlayer = GetFFAPlayer(player.Player);
+            var fPlayer = GetFFAPlayer(player.Player);
             if (fPlayer == null)
             {
                 return;
@@ -812,7 +811,7 @@ namespace UnturnedBlackout.GameTypes
 
         public override void PlayerChangeFiremode(GamePlayer player)
         {
-            FFAPlayer fPlayer = GetFFAPlayer(player.Player);
+            var fPlayer = GetFFAPlayer(player.Player);
             if (fPlayer == null)
             {
                 return;
@@ -844,7 +843,7 @@ namespace UnturnedBlackout.GameTypes
 
         public override void PlayerStanceChanged(PlayerStance obj)
         {
-            FFAPlayer fPlayer = GetFFAPlayer(obj.player);
+            var fPlayer = GetFFAPlayer(obj.player);
             if (fPlayer == null)
             {
                 return;
@@ -880,17 +879,17 @@ namespace UnturnedBlackout.GameTypes
 
         public FFAPlayer GetFFAPlayer(CSteamID steamID)
         {
-            return PlayersLookup.TryGetValue(steamID, out FFAPlayer fPlayer) ? fPlayer : null;
+            return PlayersLookup.TryGetValue(steamID, out var fPlayer) ? fPlayer : null;
         }
 
         public FFAPlayer GetFFAPlayer(UnturnedPlayer player)
         {
-            return PlayersLookup.TryGetValue(player.CSteamID, out FFAPlayer fPlayer) ? fPlayer : null;
+            return PlayersLookup.TryGetValue(player.CSteamID, out var fPlayer) ? fPlayer : null;
         }
 
         public FFAPlayer GetFFAPlayer(Player player)
         {
-            return PlayersLookup.TryGetValue(player.channel.owner.playerID.steamID, out FFAPlayer fPlayer) ? fPlayer : null;
+            return PlayersLookup.TryGetValue(player.channel.owner.playerID.steamID, out var fPlayer) ? fPlayer : null;
         }
 
         public FFASpawnPoint GetFreeSpawn()

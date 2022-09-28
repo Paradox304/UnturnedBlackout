@@ -306,49 +306,49 @@ namespace UnturnedBlackout.Managers
 
                 Dictionary<int, List<AnimationItemUnlock>> itemsSearchByLevel = new();
 
-                MySqlDataReader rdr = (MySqlDataReader)await new MySqlCommand($"SELECT `AttachmentID`, `AttachmentName`, `AttachmentDesc`, `AttachmentPros` , `AttachmentCons` , `AttachmentType`-1, `AttachmentRarity`, `MovementChange`, `MovementChangeADS`, `IconLink`, `BuyPrice`, `Coins` FROM `{ATTACHMENTS}`;", Conn).ExecuteReaderAsync();
+                var rdr = (MySqlDataReader)await new MySqlCommand($"SELECT `AttachmentID`, `AttachmentName`, `AttachmentDesc`, `AttachmentPros` , `AttachmentCons` , `AttachmentType`-1, `AttachmentRarity`, `MovementChange`, `MovementChangeADS`, `IconLink`, `BuyPrice`, `Coins` FROM `{ATTACHMENTS}`;", Conn).ExecuteReaderAsync();
                 try
                 {
                     Dictionary<ushort, GunAttachment> gunAttachments = new();
                     while (await rdr.ReadAsync())
                     {
-                        if (!ushort.TryParse(rdr[0].ToString(), out ushort attachmentID))
+                        if (!ushort.TryParse(rdr[0].ToString(), out var attachmentID))
                         {
                             continue;
                         }
 
-                        string attachmentName = rdr[1].ToString();
-                        string attachmentDesc = rdr[2].ToString();
-                        List<string> attachmentPros = rdr[3].ToString().Split(',').Where(k => !string.IsNullOrEmpty(k)).ToList();
-                        List<string> attachmentCons = rdr[4].ToString().Split(',').Where(k => !string.IsNullOrEmpty(k)).ToList();
-                        if (!int.TryParse(rdr[5].ToString(), out int attachmentTypeInt))
+                        var attachmentName = rdr[1].ToString();
+                        var attachmentDesc = rdr[2].ToString();
+                        var attachmentPros = rdr[3].ToString().Split(',').Where(k => !string.IsNullOrEmpty(k)).ToList();
+                        var attachmentCons = rdr[4].ToString().Split(',').Where(k => !string.IsNullOrEmpty(k)).ToList();
+                        if (!int.TryParse(rdr[5].ToString(), out var attachmentTypeInt))
                         {
                             continue;
                         }
 
-                        EAttachment attachmentType = (EAttachment)attachmentTypeInt;
+                        var attachmentType = (EAttachment)attachmentTypeInt;
                         if (!Enum.TryParse(rdr[6].ToString(), true, out ERarity rarity))
                         {
                             continue;
                         }
 
-                        if (!float.TryParse(rdr[7].ToString(), out float movementChange))
+                        if (!float.TryParse(rdr[7].ToString(), out var movementChange))
                         {
                             continue;
                         }
 
-                        if (!float.TryParse(rdr[8].ToString(), out float movementChangeADS))
+                        if (!float.TryParse(rdr[8].ToString(), out var movementChangeADS))
                         {
                             continue;
                         }
 
-                        string iconLink = rdr[9].ToString();
-                        if (!int.TryParse(rdr[10].ToString(), out int buyPrice))
+                        var iconLink = rdr[9].ToString();
+                        if (!int.TryParse(rdr[10].ToString(), out var buyPrice))
                         {
                             continue;
                         }
-                        
-                        if (!int.TryParse(rdr[11].ToString(), out int coins))
+
+                        if (!int.TryParse(rdr[11].ToString(), out var coins))
                         {
                             continue;
                         }
@@ -383,69 +383,69 @@ namespace UnturnedBlackout.Managers
                     Dictionary<ushort, Gun> guns = new();
                     while (await rdr.ReadAsync())
                     {
-                        if (!ushort.TryParse(rdr[0].ToString(), out ushort gunID))
+                        if (!ushort.TryParse(rdr[0].ToString(), out var gunID))
                         {
                             continue;
                         }
 
-                        string gunName = rdr[1].ToString();
-                        string gunDesc = rdr[2].ToString();
-                        if (!byte.TryParse(rdr[3].ToString(), out byte gunTypeInt))
+                        var gunName = rdr[1].ToString();
+                        var gunDesc = rdr[2].ToString();
+                        if (!byte.TryParse(rdr[3].ToString(), out var gunTypeInt))
                         {
                             continue;
                         }
 
-                        EGun gunType = (EGun)gunTypeInt;
+                        var gunType = (EGun)gunTypeInt;
                         if (!Enum.TryParse(rdr[4].ToString(), true, out ERarity rarity))
                         {
                             continue;
                         }
 
-                        if (!float.TryParse(rdr[5].ToString(), out float movementChange))
+                        if (!float.TryParse(rdr[5].ToString(), out var movementChange))
                         {
                             continue;
                         }
 
-                        if (!float.TryParse(rdr[6].ToString(), out float movementChangeADS))
+                        if (!float.TryParse(rdr[6].ToString(), out var movementChangeADS))
                         {
                             continue;
                         }
 
-                        string iconLink = rdr[7].ToString();
-                        if (!int.TryParse(rdr[8].ToString(), out int magAmount))
+                        var iconLink = rdr[7].ToString();
+                        if (!int.TryParse(rdr[8].ToString(), out var magAmount))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[9].ToString(), out int coins))
+                        if (!int.TryParse(rdr[9].ToString(), out var coins))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[10].ToString(), out int buyPrice))
+                        if (!int.TryParse(rdr[10].ToString(), out var buyPrice))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[11].ToString(), out int scrapAmount))
+                        if (!int.TryParse(rdr[11].ToString(), out var scrapAmount))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[12].ToString(), out int levelRequirement))
+                        if (!int.TryParse(rdr[12].ToString(), out var levelRequirement))
                         {
                             continue;
                         }
 
-                        if (!bool.TryParse(rdr[13].ToString(), out bool isPrimary))
+                        if (!bool.TryParse(rdr[13].ToString(), out var isPrimary))
                         {
                             continue;
                         }
 
                         List<GunAttachment> defaultAttachments = new();
-                        foreach (int id in rdr[14].GetIntListFromReaderResult())
+                        foreach (var id in rdr[14].GetIntListFromReaderResult())
                         {
-                            if (GunAttachments.TryGetValue((ushort)id, out GunAttachment gunAttachment))
+                            if (GunAttachments.TryGetValue((ushort)id, out var gunAttachment))
                             {
                                 defaultAttachments.Add(gunAttachment);
                             }
@@ -456,24 +456,24 @@ namespace UnturnedBlackout.Managers
                             }
                         }
 
-                        List<int> levelXPNeeded = rdr[15].GetIntListFromReaderResult();
-                        List<int> levelRewards = rdr[16].GetIntListFromReaderResult();
+                        var levelXPNeeded = rdr[15].GetIntListFromReaderResult();
+                        var levelRewards = rdr[16].GetIntListFromReaderResult();
                         Dictionary<int, GunAttachment> rewardAttachments = new();
                         Dictionary<GunAttachment, int> rewardAttachmentsInverse = new();
-                        for (int i = 0; i < levelRewards.Count; i++)
+                        for (var i = 0; i < levelRewards.Count; i++)
                         {
-                            int id = levelRewards[i];
-                            int levelNeededReward = i + 2;
+                            var id = levelRewards[i];
+                            var levelNeededReward = i + 2;
 
                             if (id == 0) continue;
 
-                            if (!GunAttachments.TryGetValue((ushort)id, out GunAttachment gunAttachment))
+                            if (!GunAttachments.TryGetValue((ushort)id, out var gunAttachment))
                             {
                                 Logging.Debug($"Could'nt find reward attachment with id {id} at level {levelNeededReward} for gun {gunID} with name {gunName}");
                                 continue;
                             }
 
-                            if (rewardAttachmentsInverse.TryGetValue(gunAttachment, out int alreadyRegisteredLevel))
+                            if (rewardAttachmentsInverse.TryGetValue(gunAttachment, out var alreadyRegisteredLevel))
                             {
                                 Logging.Debug($"This reward attachment with id {id} was already registered at level {alreadyRegisteredLevel} (trying to register it again at {levelNeededReward}) --- for gun {gunID} with name {gunName}");
                                 continue;
@@ -489,7 +489,7 @@ namespace UnturnedBlackout.Managers
                             continue;
                         }
 
-                        float longshotRange = Mathf.Pow(gunAsset.damageFalloffRange * 100, 2) * 1.2f;
+                        var longshotRange = Mathf.Pow(gunAsset.damageFalloffRange * 100, 2) * 1.2f;
                         Gun gun = new(gunID, gunName, gunDesc, gunType, rarity, movementChange, movementChangeADS, iconLink, magAmount, coins, buyPrice, scrapAmount, levelRequirement, isPrimary, defaultAttachments, rewardAttachments, rewardAttachmentsInverse, levelXPNeeded, longshotRange);
                         if (!guns.ContainsKey(gunID))
                         {
@@ -538,46 +538,46 @@ namespace UnturnedBlackout.Managers
 
                     while (await rdr.ReadAsync())
                     {
-                        if (!int.TryParse(rdr[0].ToString(), out int id))
+                        if (!int.TryParse(rdr[0].ToString(), out var id))
                         {
                             continue;
                         }
 
-                        if (!ushort.TryParse(rdr[1].ToString(), out ushort gunID))
+                        if (!ushort.TryParse(rdr[1].ToString(), out var gunID))
                         {
                             continue;
                         }
 
-                        if (!Guns.TryGetValue(gunID, out Gun gun))
+                        if (!Guns.TryGetValue(gunID, out var gun))
                         {
                             Logging.Debug($"Could'nt find gun id with {gunID} for skin with id {id}");
                             continue;
                         }
-                        if (!ushort.TryParse(rdr[2].ToString(), out ushort skinID))
+                        if (!ushort.TryParse(rdr[2].ToString(), out var skinID))
                         {
                             continue;
                         }
 
-                        string skinName = rdr[3].ToString();
-                        string skinDesc = rdr[4].ToString();
+                        var skinName = rdr[3].ToString();
+                        var skinDesc = rdr[4].ToString();
                         if (!Enum.TryParse(rdr[5].ToString(), true, out ERarity rarity))
                         {
                             continue;
                         }
 
-                        string patternLink = rdr[6].ToString();
-                        string iconLink = rdr[7].ToString();
-                        if (!int.TryParse(rdr[8].ToString(), out int scrapAmount))
+                        var patternLink = rdr[6].ToString();
+                        var iconLink = rdr[7].ToString();
+                        if (!int.TryParse(rdr[8].ToString(), out var scrapAmount))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[9].ToString(), out int maxAmount))
+                        if (!int.TryParse(rdr[9].ToString(), out var maxAmount))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[10].ToString(), out int unboxedAmount))
+                        if (!int.TryParse(rdr[10].ToString(), out var unboxedAmount))
                         {
                             continue;
                         }
@@ -593,7 +593,7 @@ namespace UnturnedBlackout.Managers
                             gunSkinsSearchByID.Add(id, skin);
                         }
 
-                        if (gunSkinsSearchByGunID.TryGetValue(gunID, out List<GunSkin> skins))
+                        if (gunSkinsSearchByGunID.TryGetValue(gunID, out var skins))
                         {
                             if (skins.Exists(k => k.ID == id))
                             {
@@ -643,40 +643,40 @@ namespace UnturnedBlackout.Managers
                     Dictionary<ushort, GunCharm> gunCharms = new();
                     while (await rdr.ReadAsync())
                     {
-                        if (!ushort.TryParse(rdr[0].ToString(), out ushort charmID))
+                        if (!ushort.TryParse(rdr[0].ToString(), out var charmID))
                         {
                             continue;
                         }
 
-                        string charmName = rdr[1].ToString();
-                        string charmDesc = rdr[2].ToString();
+                        var charmName = rdr[1].ToString();
+                        var charmDesc = rdr[2].ToString();
                         if (!Enum.TryParse(rdr[3].ToString(), true, out ERarity rarity))
                         {
                             continue;
                         }
 
-                        string iconLink = rdr[4].ToString();
-                        if (!int.TryParse(rdr[5].ToString(), out int buyPrice))
+                        var iconLink = rdr[4].ToString();
+                        if (!int.TryParse(rdr[5].ToString(), out var buyPrice))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[6].ToString(), out int coins))
+                        if (!int.TryParse(rdr[6].ToString(), out var coins))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[7].ToString(), out int scrapAmount))
+                        if (!int.TryParse(rdr[7].ToString(), out var scrapAmount))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[8].ToString(), out int levelRequirement))
+                        if (!int.TryParse(rdr[8].ToString(), out var levelRequirement))
                         {
                             continue;
                         }
 
-                        string authorCredits = rdr[9].ToString();
+                        var authorCredits = rdr[9].ToString();
 
                         if (gunCharms.ContainsKey(charmID))
                         {
@@ -706,55 +706,55 @@ namespace UnturnedBlackout.Managers
                     Dictionary<ushort, Knife> knives = new();
                     while (await rdr.ReadAsync())
                     {
-                        if (!ushort.TryParse(rdr[0].ToString(), out ushort knifeID))
+                        if (!ushort.TryParse(rdr[0].ToString(), out var knifeID))
                         {
                             continue;
                         }
 
-                        string knifeName = rdr[1].ToString();
-                        string knifeDesc = rdr[2].ToString();
+                        var knifeName = rdr[1].ToString();
+                        var knifeDesc = rdr[2].ToString();
                         if (!Enum.TryParse(rdr[3].ToString(), true, out ERarity rarity))
                         {
                             continue;
                         }
 
-                        if (!float.TryParse(rdr[4].ToString(), out float movementChange))
+                        if (!float.TryParse(rdr[4].ToString(), out var movementChange))
                         {
                             continue;
                         }
 
-                        string iconLink = rdr[5].ToString();
-                        if (!int.TryParse(rdr[6].ToString(), out int scrapAmount))
+                        var iconLink = rdr[5].ToString();
+                        if (!int.TryParse(rdr[6].ToString(), out var scrapAmount))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[7].ToString(), out int coins))
+                        if (!int.TryParse(rdr[7].ToString(), out var coins))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[8].ToString(), out int buyPrice))
+                        if (!int.TryParse(rdr[8].ToString(), out var buyPrice))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[9].ToString(), out int levelRequirement))
+                        if (!int.TryParse(rdr[9].ToString(), out var levelRequirement))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[10].ToString(), out int knifeWeight))
+                        if (!int.TryParse(rdr[10].ToString(), out var knifeWeight))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[11].ToString(), out int maxAmount))
+                        if (!int.TryParse(rdr[11].ToString(), out var maxAmount))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[12].ToString(), out int unboxedAmount))
+                        if (!int.TryParse(rdr[12].ToString(), out var unboxedAmount))
                         {
                             continue;
                         }
@@ -796,45 +796,45 @@ namespace UnturnedBlackout.Managers
                     Dictionary<ushort, Gadget> gadgets = new();
                     while (await rdr.ReadAsync())
                     {
-                        if (!ushort.TryParse(rdr[0].ToString(), out ushort gadgetID))
+                        if (!ushort.TryParse(rdr[0].ToString(), out var gadgetID))
                         {
                             continue;
                         }
 
-                        string gadgetName = rdr[1].ToString();
-                        string gadgetDesc = rdr[2].ToString();
+                        var gadgetName = rdr[1].ToString();
+                        var gadgetDesc = rdr[2].ToString();
                         if (!Enum.TryParse(rdr[3].ToString(), true, out ERarity rarity))
                         {
                             continue;
                         }
 
-                        string iconLink = rdr[4].ToString();
-                        if (!int.TryParse(rdr[5].ToString(), out int coins))
+                        var iconLink = rdr[4].ToString();
+                        if (!int.TryParse(rdr[5].ToString(), out var coins))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[6].ToString(), out int buyPrice))
+                        if (!int.TryParse(rdr[6].ToString(), out var buyPrice))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[7].ToString(), out int scrapAmount))
+                        if (!int.TryParse(rdr[7].ToString(), out var scrapAmount))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[8].ToString(), out int giveSeconds))
+                        if (!int.TryParse(rdr[8].ToString(), out var giveSeconds))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[9].ToString(), out int levelRequirement))
+                        if (!int.TryParse(rdr[9].ToString(), out var levelRequirement))
                         {
                             continue;
                         }
 
-                        if (!bool.TryParse(rdr[10].ToString(), out bool isTactical))
+                        if (!bool.TryParse(rdr[10].ToString(), out var isTactical))
                         {
                             continue;
                         }
@@ -884,45 +884,45 @@ namespace UnturnedBlackout.Managers
                     Dictionary<int, Killstreak> killstreaks = new();
                     while (await rdr.ReadAsync())
                     {
-                        if (!int.TryParse(rdr[0].ToString(), out int killstreakID))
+                        if (!int.TryParse(rdr[0].ToString(), out var killstreakID))
                         {
                             continue;
                         }
 
-                        string killstreakName = rdr[1].ToString();
-                        string killstreakDesc = rdr[2].ToString();
+                        var killstreakName = rdr[1].ToString();
+                        var killstreakDesc = rdr[2].ToString();
                         if (!Enum.TryParse(rdr[3].ToString(), true, out ERarity rarity))
                         {
                             continue;
                         }
 
-                        string iconLink = rdr[4].ToString();
-                        if (!int.TryParse(rdr[5].ToString(), out int killstreakRequired))
+                        var iconLink = rdr[4].ToString();
+                        if (!int.TryParse(rdr[5].ToString(), out var killstreakRequired))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[6].ToString(), out int buyPrice))
+                        if (!int.TryParse(rdr[6].ToString(), out var buyPrice))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[7].ToString(), out int coins))
+                        if (!int.TryParse(rdr[7].ToString(), out var coins))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[8].ToString(), out int scrapAmount))
+                        if (!int.TryParse(rdr[8].ToString(), out var scrapAmount))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[9].ToString(), out int levelRequirement))
+                        if (!int.TryParse(rdr[9].ToString(), out var levelRequirement))
                         {
                             continue;
                         }
 
-                        KillstreakData killstreakInfo = Plugin.Instance.Config.Killstreaks.FileData.KillstreaksData.FirstOrDefault(k => k.KillstreakID == killstreakID);
+                        var killstreakInfo = Plugin.Instance.Config.Killstreaks.FileData.KillstreaksData.FirstOrDefault(k => k.KillstreakID == killstreakID);
                         if (killstreakInfo == null)
                         {
                             Logging.Debug($"Error finding killstreak info for killstreak with id {killstreakID}, ignoring");
@@ -974,14 +974,14 @@ namespace UnturnedBlackout.Managers
                     Dictionary<int, Perk> perks = new();
                     while (await rdr.ReadAsync())
                     {
-                        if (!int.TryParse(rdr[0].ToString(), out int perkID))
+                        if (!int.TryParse(rdr[0].ToString(), out var perkID))
                         {
                             continue;
                         }
 
-                        string perkName = rdr[1].ToString();
-                        string perkDesc = rdr[2].ToString();
-                        if (!int.TryParse(rdr[3].ToString(), out int perkType))
+                        var perkName = rdr[1].ToString();
+                        var perkDesc = rdr[2].ToString();
+                        if (!int.TryParse(rdr[3].ToString(), out var perkType))
                         {
                             continue;
                         }
@@ -991,29 +991,29 @@ namespace UnturnedBlackout.Managers
                             continue;
                         }
 
-                        string iconLink = rdr[5].ToString();
-                        string skillType = rdr[6].ToString();
-                        if (!int.TryParse(rdr[7].ToString(), out int skillLevel))
+                        var iconLink = rdr[5].ToString();
+                        var skillType = rdr[6].ToString();
+                        if (!int.TryParse(rdr[7].ToString(), out var skillLevel))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[8].ToString(), out int coins))
+                        if (!int.TryParse(rdr[8].ToString(), out var coins))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[9].ToString(), out int buyPrice))
+                        if (!int.TryParse(rdr[9].ToString(), out var buyPrice))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[10].ToString(), out int scrapAmount))
+                        if (!int.TryParse(rdr[10].ToString(), out var scrapAmount))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[11].ToString(), out int levelRequirement))
+                        if (!int.TryParse(rdr[11].ToString(), out var levelRequirement))
                         {
                             continue;
                         }
@@ -1063,50 +1063,50 @@ namespace UnturnedBlackout.Managers
                     Dictionary<int, Glove> gloves = new();
                     while (await rdr.ReadAsync())
                     {
-                        if (!int.TryParse(rdr[0].ToString(), out int gloveID))
+                        if (!int.TryParse(rdr[0].ToString(), out var gloveID))
                         {
                             continue;
                         }
 
-                        string gloveName = rdr[1].ToString();
-                        string gloveDesc = rdr[2].ToString();
+                        var gloveName = rdr[1].ToString();
+                        var gloveDesc = rdr[2].ToString();
                         if (!Enum.TryParse(rdr[3].ToString(), true, out ERarity rarity))
                         {
                             continue;
                         }
 
-                        string iconLink = rdr[4].ToString();
-                        if (!int.TryParse(rdr[5].ToString(), out int scrapAmount))
+                        var iconLink = rdr[4].ToString();
+                        if (!int.TryParse(rdr[5].ToString(), out var scrapAmount))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[6].ToString(), out int buyPrice))
+                        if (!int.TryParse(rdr[6].ToString(), out var buyPrice))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[7].ToString(), out int coins))
+                        if (!int.TryParse(rdr[7].ToString(), out var coins))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[8].ToString(), out int levelRequirement))
+                        if (!int.TryParse(rdr[8].ToString(), out var levelRequirement))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[9].ToString(), out int gloveWeight))
+                        if (!int.TryParse(rdr[9].ToString(), out var gloveWeight))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[10].ToString(), out int maxAmount))
+                        if (!int.TryParse(rdr[10].ToString(), out var maxAmount))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[11].ToString(), out int unboxedAmount))
+                        if (!int.TryParse(rdr[11].ToString(), out var unboxedAmount))
                         {
                             continue;
                         }
@@ -1156,41 +1156,41 @@ namespace UnturnedBlackout.Managers
                     Dictionary<int, Card> cards = new();
                     while (await rdr.ReadAsync())
                     {
-                        if (!int.TryParse(rdr[0].ToString(), out int cardID))
+                        if (!int.TryParse(rdr[0].ToString(), out var cardID))
                         {
                             continue;
                         }
 
-                        string cardName = rdr[1].ToString();
-                        string cardDesc = rdr[2].ToString();
+                        var cardName = rdr[1].ToString();
+                        var cardDesc = rdr[2].ToString();
                         if (!Enum.TryParse(rdr[3].ToString(), true, out ERarity rarity))
                         {
                             continue;
                         }
 
-                        string iconLink = rdr[4].ToString();
-                        string cardLink = rdr[5].ToString();
-                        if (!int.TryParse(rdr[6].ToString(), out int scrapAmount))
+                        var iconLink = rdr[4].ToString();
+                        var cardLink = rdr[5].ToString();
+                        if (!int.TryParse(rdr[6].ToString(), out var scrapAmount))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[7].ToString(), out int buyPrice))
+                        if (!int.TryParse(rdr[7].ToString(), out var buyPrice))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[8].ToString(), out int coins))
+                        if (!int.TryParse(rdr[8].ToString(), out var coins))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[9].ToString(), out int levelRequirement))
+                        if (!int.TryParse(rdr[9].ToString(), out var levelRequirement))
                         {
                             continue;
                         }
 
-                        string authorCredits = rdr[10].ToString();
+                        var authorCredits = rdr[10].ToString();
 
                         Card card = new(cardID, cardName, cardDesc, rarity, iconLink, cardLink, scrapAmount, buyPrice, coins, levelRequirement, authorCredits);
                         if (!cards.ContainsKey(cardID))
@@ -1239,17 +1239,17 @@ namespace UnturnedBlackout.Managers
                     Dictionary<int, XPLevel> levels = new();
                     while (await rdr.ReadAsync())
                     {
-                        if (!int.TryParse(rdr[0].ToString(), out int level))
+                        if (!int.TryParse(rdr[0].ToString(), out var level))
                         {
                             continue;
                         }
-                        if (!int.TryParse(rdr[1].ToString(), out int xpNeeded))
+                        if (!int.TryParse(rdr[1].ToString(), out var xpNeeded))
                         {
                             continue;
                         }
-                        string iconLinkLarge = rdr[2].ToString();
-                        string iconLinkMedium = rdr[3].ToString();
-                        string iconLinkSmall = rdr[4].ToString();
+                        var iconLinkLarge = rdr[2].ToString();
+                        var iconLinkMedium = rdr[3].ToString();
+                        var iconLinkSmall = rdr[4].ToString();
 
                         if (!levels.ContainsKey(level))
                         {
@@ -1278,35 +1278,35 @@ namespace UnturnedBlackout.Managers
 
                     while (await rdr.ReadAsync())
                     {
-                        if (!int.TryParse(rdr[0].ToString(), out int questID))
+                        if (!int.TryParse(rdr[0].ToString(), out var questID))
                         {
                             continue;
                         }
 
-                        string questTitle = rdr[1].ToString();
-                        string questDesc = rdr[2].ToString();
+                        var questTitle = rdr[1].ToString();
+                        var questDesc = rdr[2].ToString();
 
-                        if (!int.TryParse(rdr[3].ToString(), out int questTypeInt))
+                        if (!int.TryParse(rdr[3].ToString(), out var questTypeInt))
                         {
                             continue;
                         }
-                        EQuestType questType = (EQuestType)questTypeInt;
+                        var questType = (EQuestType)questTypeInt;
 
-                        if (!int.TryParse(rdr[4].ToString(), out int questTierInt))
+                        if (!int.TryParse(rdr[4].ToString(), out var questTierInt))
                         {
                             continue;
                         }
-                        EQuestTier questTier = (EQuestTier)questTierInt;
+                        var questTier = (EQuestTier)questTierInt;
 
-                        string questConditions = rdr[5].ToString();
-                        Dictionary<EQuestCondition, List<int>> conditions = Utility.GetQuestConditionsFromString(questConditions);
+                        var questConditions = rdr[5].ToString();
+                        var conditions = Utility.GetQuestConditionsFromString(questConditions);
 
-                        if (!int.TryParse(rdr[6].ToString(), out int targetAmount))
+                        if (!int.TryParse(rdr[6].ToString(), out var targetAmount))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[7].ToString(), out int xp))
+                        if (!int.TryParse(rdr[7].ToString(), out var xp))
                         {
                             continue;
                         }
@@ -1345,20 +1345,20 @@ namespace UnturnedBlackout.Managers
                     Dictionary<int, Achievement> achievementsSearchByID = new();
                     while (await rdr.ReadAsync())
                     {
-                        if (!int.TryParse(rdr[0].ToString(), out int achievementID))
+                        if (!int.TryParse(rdr[0].ToString(), out var achievementID))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[1].ToString(), out int achievementTypeInt))
+                        if (!int.TryParse(rdr[1].ToString(), out var achievementTypeInt))
                         {
                             continue;
                         }
 
-                        EQuestType achievementType = (EQuestType)achievementTypeInt;
-                        string achievementConditions = rdr[2].ToString();
-                        Dictionary<EQuestCondition, List<int>> conditions = Utility.GetQuestConditionsFromString(achievementConditions);
-                        if (!int.TryParse(rdr[3].ToString(), out int pageID))
+                        var achievementType = (EQuestType)achievementTypeInt;
+                        var achievementConditions = rdr[2].ToString();
+                        var conditions = Utility.GetQuestConditionsFromString(achievementConditions);
+                        if (!int.TryParse(rdr[3].ToString(), out var pageID))
                         {
                             continue;
                         }
@@ -1395,32 +1395,32 @@ namespace UnturnedBlackout.Managers
                 {
                     while (await rdr.ReadAsync())
                     {
-                        if (!int.TryParse(rdr[0].ToString(), out int achievementID))
+                        if (!int.TryParse(rdr[0].ToString(), out var achievementID))
                         {
                             continue;
                         }
 
-                        if (!AchievementsSearchByID.TryGetValue(achievementID, out Achievement achievement))
+                        if (!AchievementsSearchByID.TryGetValue(achievementID, out var achievement))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[1].ToString(), out int tierID))
+                        if (!int.TryParse(rdr[1].ToString(), out var tierID))
                         {
                             continue;
                         }
 
-                        string tierTitle = rdr[2].ToString();
-                        string tierDesc = rdr[3].ToString();
-                        string tierColor = rdr[4].ToString();
-                        string tierPrevSmall = rdr[5].ToString();
-                        string tierPrevLarge = rdr[6].ToString();
-                        if (!int.TryParse(rdr[7].ToString(), out int targetAmount))
+                        var tierTitle = rdr[2].ToString();
+                        var tierDesc = rdr[3].ToString();
+                        var tierColor = rdr[4].ToString();
+                        var tierPrevSmall = rdr[5].ToString();
+                        var tierPrevLarge = rdr[6].ToString();
+                        if (!int.TryParse(rdr[7].ToString(), out var targetAmount))
                         {
                             continue;
                         }
-                        List<Reward> rewards = Utility.GetRewardsFromString(rdr[8].ToString());
-                        List<Reward> removeRewards = Utility.GetRewardsFromString(rdr[9].ToString());
+                        var rewards = Utility.GetRewardsFromString(rdr[8].ToString());
+                        var removeRewards = Utility.GetRewardsFromString(rdr[9].ToString());
                         AchievementTier achievementTier = new(achievement, tierID, tierTitle, tierDesc, tierColor, tierPrevSmall, tierPrevLarge, targetAmount, rewards, removeRewards);
 
                         if (!achievement.TiersLookup.ContainsKey(tierID))
@@ -1454,15 +1454,15 @@ namespace UnturnedBlackout.Managers
                     List<BattlepassTier> battlepassTiers = new();
                     while (await rdr.ReadAsync())
                     {
-                        if (!int.TryParse(rdr[0].ToString(), out int tierID))
+                        if (!int.TryParse(rdr[0].ToString(), out var tierID))
                         {
                             continue;
                         }
 
-                        Reward freeReward = Utility.GetRewardFromString(rdr[1].ToString());
-                        Reward premiumReward = Utility.GetRewardFromString(rdr[2].ToString());
+                        var freeReward = Utility.GetRewardFromString(rdr[1].ToString());
+                        var premiumReward = Utility.GetRewardFromString(rdr[2].ToString());
 
-                        if (!int.TryParse(rdr[3].ToString(), out int xp))
+                        if (!int.TryParse(rdr[3].ToString(), out var xp))
                         {
                             continue;
                         }
@@ -1500,40 +1500,40 @@ namespace UnturnedBlackout.Managers
                     Dictionary<int, Case> cases = new();
                     while (await rdr.ReadAsync())
                     {
-                        if (!int.TryParse(rdr[0].ToString(), out int caseID))
+                        if (!int.TryParse(rdr[0].ToString(), out var caseID))
                         {
                             continue;
                         }
 
-                        string caseName = rdr[1].ToString();
-                        string iconLink = rdr[2].ToString();
+                        var caseName = rdr[1].ToString();
+                        var iconLink = rdr[2].ToString();
                         if (!Enum.TryParse(rdr[3].ToString(), true, out ERarity caseRarity))
                         {
                             continue;
                         }
 
-                        if (!bool.TryParse(rdr[4].ToString(), out bool isBuyable))
+                        if (!bool.TryParse(rdr[4].ToString(), out var isBuyable))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[5].ToString(), out int scrapPrice))
+                        if (!int.TryParse(rdr[5].ToString(), out var scrapPrice))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[6].ToString(), out int coinPrice))
+                        if (!int.TryParse(rdr[6].ToString(), out var coinPrice))
                         {
                             continue;
                         }
 
                         List<(ECaseRarity, int)> caseRarities = new();
 
-                        bool shouldContinue = true;
-                        for (int i = 7; i <= 16; i++)
+                        var shouldContinue = true;
+                        for (var i = 7; i <= 16; i++)
                         {
-                            ECaseRarity rarity = (ECaseRarity)(i - 7);
-                            if (!int.TryParse(rdr[i].ToString(), out int weight))
+                            var rarity = (ECaseRarity)(i - 7);
+                            if (!int.TryParse(rdr[i].ToString(), out var weight))
                             {
                                 shouldContinue = false;
                                 break;
@@ -1548,13 +1548,13 @@ namespace UnturnedBlackout.Managers
                             continue;
                         }
 
-                        List<int> availableSkinIDs = rdr[17].GetIntListFromReaderResult();
+                        var availableSkinIDs = rdr[17].GetIntListFromReaderResult();
                         List<GunSkin> availableSkins = new();
                         Dictionary<ERarity, List<GunSkin>> availableSkinsSearchByRarity = new();
 
-                        foreach (int skinID in availableSkinIDs)
+                        foreach (var skinID in availableSkinIDs)
                         {
-                            if (!GunSkinsSearchByID.TryGetValue(skinID, out GunSkin skin))
+                            if (!GunSkinsSearchByID.TryGetValue(skinID, out var skin))
                             {
                                 Logging.Debug($"Case with id {caseID} has a skin with id {skinID} which is not a valid skin registered in the database");
                                 continue;
@@ -1604,12 +1604,12 @@ namespace UnturnedBlackout.Managers
                     List<Server> servers = new();
                     while (await rdr.ReadAsync())
                     {
-                        string ip = rdr[0].ToString();
-                        string port = rdr[1].ToString();
-                        string serverName = rdr[2].ToString();
-                        string friendlyIP = rdr[3].ToString();
-                        string serverBanner = rdr[4].ToString();
-                        string serverDesc = rdr[5].ToString();
+                        var ip = rdr[0].ToString();
+                        var port = rdr[1].ToString();
+                        var serverName = rdr[2].ToString();
+                        var friendlyIP = rdr[3].ToString();
+                        var serverBanner = rdr[4].ToString();
+                        var serverDesc = rdr[5].ToString();
 
                         Server server = new(ip, port, serverName, friendlyIP, serverBanner, serverDesc);
 
@@ -1632,13 +1632,13 @@ namespace UnturnedBlackout.Managers
                 Logging.Debug("Building a default loadout for new players");
                 try
                 {
-                    Gun defaultPrimary = defaultGuns.FirstOrDefault(k => k.IsPrimary);
+                    var defaultPrimary = defaultGuns.FirstOrDefault(k => k.IsPrimary);
                     Logging.Debug($"Found default primary with id {defaultPrimary?.GunID ?? 0}");
                     List<ushort> defaultPrimaryAttachments = new();
                     if (defaultPrimary != null)
                     {
                         Dictionary<EAttachment, GunAttachment> defaultAttachments = new();
-                        foreach (GunAttachment defaultAttachment in defaultPrimary.DefaultAttachments)
+                        foreach (var defaultAttachment in defaultPrimary.DefaultAttachments)
                         {
                             if (!defaultAttachments.ContainsKey(defaultAttachment.AttachmentType))
                             {
@@ -1648,13 +1648,13 @@ namespace UnturnedBlackout.Managers
                         defaultPrimaryAttachments = defaultAttachments.Values.Select(k => k.AttachmentID).ToList();
                     }
                     Logging.Debug($"Found {defaultPrimaryAttachments.Count} default primary attachments");
-                    Gun defaultSecondary = defaultGuns.FirstOrDefault(k => !k.IsPrimary);
+                    var defaultSecondary = defaultGuns.FirstOrDefault(k => !k.IsPrimary);
                     Logging.Debug($"Found default secondary with id {defaultSecondary?.GunID ?? 0}");
                     List<ushort> defaultSecondaryAttachments = new();
                     if (defaultSecondary != null)
                     {
                         Dictionary<EAttachment, GunAttachment> defaultAttachments = new();
-                        foreach (GunAttachment defaultAttachment in defaultSecondary.DefaultAttachments)
+                        foreach (var defaultAttachment in defaultSecondary.DefaultAttachments)
                         {
                             if (!defaultAttachments.ContainsKey(defaultAttachment.AttachmentType))
                             {
@@ -1665,23 +1665,23 @@ namespace UnturnedBlackout.Managers
                     }
                     Logging.Debug($"Found {defaultSecondaryAttachments.Count} default secondary attachments");
                     List<int> defaultPerk = new();
-                    for (int i = 1; i <= 3; i++)
+                    for (var i = 1; i <= 3; i++)
                     {
-                        List<Perk> randomPerks = defaultPerks.Where(k => k.PerkType == i).ToList();
+                        var randomPerks = defaultPerks.Where(k => k.PerkType == i).ToList();
                         if (randomPerks.Count == 0) continue;
-                        Perk randomPerk = randomPerks[UnityEngine.Random.Range(0, randomPerks.Count)];
+                        var randomPerk = randomPerks[UnityEngine.Random.Range(0, randomPerks.Count)];
                         defaultPerk.Add(randomPerk.PerkID);
                     }
 
                     Logging.Debug($"Found {defaultPerk.Count} default perks");
-                    Knife defaultKnife = defaultKnives.Count > 0 ? defaultKnives[0] : null;
+                    var defaultKnife = defaultKnives.Count > 0 ? defaultKnives[0] : null;
                     Logging.Debug($"Found default knife with id {defaultKnife?.KnifeID ?? 0}");
-                    Gadget defaultTactical = defaultGadgets.FirstOrDefault(k => k.IsTactical);
+                    var defaultTactical = defaultGadgets.FirstOrDefault(k => k.IsTactical);
                     Logging.Debug($"Found default tactical with id {defaultTactical?.GadgetID ?? 0}");
-                    Gadget defaultLethal = defaultGadgets.FirstOrDefault(k => !k.IsTactical);
+                    var defaultLethal = defaultGadgets.FirstOrDefault(k => !k.IsTactical);
                     Logging.Debug($"Found default lethal with id {defaultLethal?.GadgetID ?? 0}");
                     List<int> defaultKillstreak = new();
-                    foreach (Killstreak killstreak in defaultKillstreaks)
+                    foreach (var killstreak in defaultKillstreaks)
                     {
                         defaultKillstreak.Add(killstreak.KillstreakID);
                         if (defaultKillstreaks.Count == 3)
@@ -1690,9 +1690,9 @@ namespace UnturnedBlackout.Managers
                         }
                     }
                     Logging.Debug($"Found {defaultKillstreak.Count} default killstreaks");
-                    Glove defaultGlove = defaultGloves.FirstOrDefault();
+                    var defaultGlove = defaultGloves.FirstOrDefault();
                     Logging.Debug($"Found default glove with id {defaultGlove?.GloveID ?? 0}");
-                    Card defaultCard = defaultCards.FirstOrDefault();
+                    var defaultCard = defaultCards.FirstOrDefault();
                     Logging.Debug($"Found default card with id {defaultCard?.CardID ?? 0}");
                     DefaultLoadout = new LoadoutData("DEFAULT LOADOUT", defaultPrimary?.GunID ?? 0, 0, 0, defaultPrimaryAttachments, defaultSecondary?.GunID ?? 0, 0, 0, defaultSecondaryAttachments, defaultKnife?.KnifeID ?? 0, defaultTactical?.GadgetID ?? 0, defaultLethal?.GadgetID ?? 0, defaultKillstreak, defaultPerk, defaultGlove?.GloveID ?? 0, defaultCard?.CardID ?? 0);
                     Logging.Debug("Built a default loadout to give to the players when they join");
@@ -1742,7 +1742,7 @@ namespace UnturnedBlackout.Managers
 
                 Logging.Debug($"Giving {steamName} the guns");
                 TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.15f)), loadingText: "LOADING GUNS..."));
-                foreach (Gun gun in Guns.Values)
+                foreach (var gun in Guns.Values)
                 {
                     if (gun.LevelRequirement < 0)
                     {
@@ -1754,7 +1754,7 @@ namespace UnturnedBlackout.Managers
                 await new MySqlCommand($"INSERT IGNORE INTO `{PLAYERS_GUNS_SKINS}` (`SteamID` , `SkinIDs`) VALUES ({player.CSteamID}, '');", Conn).ExecuteScalarAsync();
 
                 Logging.Debug($"Giving {steamName} the gun charms");
-                foreach (GunCharm gunCharm in GunCharms.Values)
+                foreach (var gunCharm in GunCharms.Values)
                 {
                     if (gunCharm.LevelRequirement < 0)
                     {
@@ -1766,7 +1766,7 @@ namespace UnturnedBlackout.Managers
 
                 Logging.Debug($"Giving {steamName} the knives");
                 TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.2f)), loadingText: "LOADING KNIVES..."));
-                foreach (Knife knife in Knives.Values)
+                foreach (var knife in Knives.Values)
                 {
                     if (knife.LevelRequirement < 0)
                     {
@@ -1778,7 +1778,7 @@ namespace UnturnedBlackout.Managers
 
                 Logging.Debug($"Giving {steamName} the gadgets");
                 TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.25f)), loadingText: "LOADING GADGETS..."));
-                foreach (Gadget gadget in Gadgets.Values)
+                foreach (var gadget in Gadgets.Values)
                 {
                     if (gadget.LevelRequirement < 0)
                     {
@@ -1790,7 +1790,7 @@ namespace UnturnedBlackout.Managers
 
                 Logging.Debug($"Giving {steamName} the killstreaks");
                 TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.3f)), loadingText: "LOADING KILLSTREAKS..."));
-                foreach (Killstreak killstreak in Killstreaks.Values)
+                foreach (var killstreak in Killstreaks.Values)
                 {
                     if (killstreak.LevelRequirement < 0)
                     {
@@ -1802,7 +1802,7 @@ namespace UnturnedBlackout.Managers
 
                 Logging.Debug($"Giving {steamName} the perks");
                 TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.35f)), loadingText: "LOADING PERKS..."));
-                foreach (Perk perk in Perks.Values)
+                foreach (var perk in Perks.Values)
                 {
                     if (perk.LevelRequirement < 0)
                     {
@@ -1814,7 +1814,7 @@ namespace UnturnedBlackout.Managers
 
                 Logging.Debug($"Giving {steamName} the gloves");
                 TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.4f)), loadingText: "LOADING GLOVES..."));
-                foreach (Glove glove in Gloves.Values)
+                foreach (var glove in Gloves.Values)
                 {
                     if (glove.LevelRequirement < 0)
                     {
@@ -1826,7 +1826,7 @@ namespace UnturnedBlackout.Managers
 
                 Logging.Debug($"Giving {steamName} the cards");
                 TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.45f)), loadingText: "LOADING CARDS..."));
-                foreach (Card card in Cards.Values)
+                foreach (var card in Cards.Values)
                 {
                     if (card.LevelRequirement < 0)
                     {
@@ -1842,16 +1842,16 @@ namespace UnturnedBlackout.Managers
 
                 Logging.Debug($"Giving {steamName} the achievements");
                 TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.5f)), loadingText: "LOADING ACHIEVEMENTS..."));
-                foreach (Achievement achievement in Achievements)
+                foreach (var achievement in Achievements)
                 {
                     await new MySqlCommand($"INSERT IGNORE INTO `{PLAYERS_ACHIEVEMENTS}` (`SteamID`, `AchievementID`) VALUES ({player.CSteamID}, {achievement.AchievementID});", Conn).ExecuteScalarAsync();
                 }
 
-                int loadoutAmount = Utility.GetLoadoutAmount(player);
+                var loadoutAmount = Utility.GetLoadoutAmount(player);
                 TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.51f)), loadingText: "LOADING LOADOUTS..."));
                 Logging.Debug($"{steamName} should have {loadoutAmount} loadouts, adding them");
-                string data = Plugin.Instance.Data.ConvertLoadoutToJson(DefaultLoadout);
-                for (int i = 1; i <= loadoutAmount; i++)
+                var data = Plugin.Instance.Data.ConvertLoadoutToJson(DefaultLoadout);
+                for (var i = 1; i <= loadoutAmount; i++)
                 {
                     await new MySqlCommand($"INSERT IGNORE INTO `{PLAYERS_LOADOUTS}` (`SteamID` , `LoadoutID` , `IsActive` , `Loadout`) VALUES ({player.CSteamID}, {i}, {i == 1}, '{data}');", Conn).ExecuteScalarAsync();
                 }
@@ -1877,150 +1877,150 @@ namespace UnturnedBlackout.Managers
                 Logging.Debug($"Getting data for {player.CharacterName} from the main table");
                 TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.6f)), loadingText: "PREPARING PLAYER DATA..."));
                 await Conn.OpenAsync();
-                MySqlDataReader rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
+                var rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
                 try
                 {
                     while (await rdr.ReadAsync())
                     {
-                        string steamName = rdr[1].ToString();
-                        string avatarLink = rdr[2].ToString();
-                        string countryCode = rdr[3].ToString();
+                        var steamName = rdr[1].ToString();
+                        var avatarLink = rdr[2].ToString();
+                        var countryCode = rdr[3].ToString();
 
-                        if (!bool.TryParse(rdr[4].ToString(), out bool hideFlag))
+                        if (!bool.TryParse(rdr[4].ToString(), out var hideFlag))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[5].ToString(), out int xp))
+                        if (!int.TryParse(rdr[5].ToString(), out var xp))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[6].ToString(), out int level))
+                        if (!int.TryParse(rdr[6].ToString(), out var level))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[7].ToString(), out int credits))
+                        if (!int.TryParse(rdr[7].ToString(), out var credits))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[8].ToString(), out int scrap))
+                        if (!int.TryParse(rdr[8].ToString(), out var scrap))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[9].ToString(), out int coins))
+                        if (!int.TryParse(rdr[9].ToString(), out var coins))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[10].ToString(), out int kills))
+                        if (!int.TryParse(rdr[10].ToString(), out var kills))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[11].ToString(), out int headshotKills))
+                        if (!int.TryParse(rdr[11].ToString(), out var headshotKills))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[12].ToString(), out int highestKillstreak))
+                        if (!int.TryParse(rdr[12].ToString(), out var highestKillstreak))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[13].ToString(), out int highestMultiKills))
+                        if (!int.TryParse(rdr[13].ToString(), out var highestMultiKills))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[14].ToString(), out int killsConfirmed))
+                        if (!int.TryParse(rdr[14].ToString(), out var killsConfirmed))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[15].ToString(), out int killsDenied))
+                        if (!int.TryParse(rdr[15].ToString(), out var killsDenied))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[16].ToString(), out int flagsCaptured))
+                        if (!int.TryParse(rdr[16].ToString(), out var flagsCaptured))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[17].ToString(), out int flagsSaved))
+                        if (!int.TryParse(rdr[17].ToString(), out var flagsSaved))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[18].ToString(), out int areasTaken))
+                        if (!int.TryParse(rdr[18].ToString(), out var areasTaken))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[19].ToString(), out int deaths))
+                        if (!int.TryParse(rdr[19].ToString(), out var deaths))
                         {
                             continue;
                         }
 
-                        if (!bool.TryParse(rdr[20].ToString(), out bool music))
+                        if (!bool.TryParse(rdr[20].ToString(), out var music))
                         {
                             continue;
                         }
 
-                        if (!bool.TryParse(rdr[21].ToString(), out bool isMuted))
+                        if (!bool.TryParse(rdr[21].ToString(), out var isMuted))
                         {
                             continue;
                         }
 
-                        if (!long.TryParse(rdr[22].ToString(), out long muteUnixSeconds))
+                        if (!long.TryParse(rdr[22].ToString(), out var muteUnixSeconds))
                         {
                             continue;
                         }
 
-                        DateTimeOffset muteExpiry = DateTimeOffset.FromUnixTimeSeconds(muteUnixSeconds);
+                        var muteExpiry = DateTimeOffset.FromUnixTimeSeconds(muteUnixSeconds);
 
-                        if (!bool.TryParse(rdr[23].ToString(), out bool hasBattlepass))
+                        if (!bool.TryParse(rdr[23].ToString(), out var hasBattlepass))
                         {
                             continue;
                         }
 
-                        if (!float.TryParse(rdr[24].ToString(), out float xpBooster))
+                        if (!float.TryParse(rdr[24].ToString(), out var xpBooster))
                         {
                             continue;
                         }
 
-                        if (!float.TryParse(rdr[25].ToString(), out float bpBooster))
+                        if (!float.TryParse(rdr[25].ToString(), out var bpBooster))
                         {
                             continue;
                         }
 
-                        if (!float.TryParse(rdr[26].ToString(), out float gunXPBooster))
+                        if (!float.TryParse(rdr[26].ToString(), out var gunXPBooster))
                         {
                             continue;
                         }
 
-                        if (!bool.TryParse(rdr[27].ToString(), out bool hasPrime))
+                        if (!bool.TryParse(rdr[27].ToString(), out var hasPrime))
                         {
                             continue;
                         }
 
-                        if (!long.TryParse(rdr[28].ToString(), out long primeExpiryUnixSeconds))
+                        if (!long.TryParse(rdr[28].ToString(), out var primeExpiryUnixSeconds))
                         {
                             continue;
                         }
 
-                        DateTimeOffset primeExpiry = DateTimeOffset.FromUnixTimeSeconds(primeExpiryUnixSeconds);
+                        var primeExpiry = DateTimeOffset.FromUnixTimeSeconds(primeExpiryUnixSeconds);
 
-                        if (!long.TryParse(rdr[29].ToString(), out long primeLastDailyRewardUnixSeconds))
+                        if (!long.TryParse(rdr[29].ToString(), out var primeLastDailyRewardUnixSeconds))
                         {
                             continue;
                         }
 
-                        DateTimeOffset primeLastDailyReward = DateTimeOffset.FromUnixTimeSeconds(primeLastDailyRewardUnixSeconds);
+                        var primeLastDailyReward = DateTimeOffset.FromUnixTimeSeconds(primeLastDailyRewardUnixSeconds);
                         if (PlayerData.ContainsKey(player.CSteamID))
                         {
                             PlayerData.Remove(player.CSteamID);
@@ -2040,7 +2040,7 @@ namespace UnturnedBlackout.Managers
                 }
 
                 Logging.Debug($"Getting all time data for {player.CharacterName} from the all time table");
-                if (PlayerData.TryGetValue(player.CSteamID, out PlayerData playerData))
+                if (PlayerData.TryGetValue(player.CSteamID, out var playerData))
                 {
                     LeaderboardData leaderboardData = new(player.CSteamID, playerData.SteamName, playerData.CountryCode, playerData.HideFlag, playerData.Level, playerData.HasPrime, playerData.Kills, playerData.HeadshotKills, playerData.Deaths);
                     if (!PlayerAllTimeLeaderboardLookup.ContainsKey(player.CSteamID))
@@ -2058,22 +2058,22 @@ namespace UnturnedBlackout.Managers
                 {
                     while (await rdr.ReadAsync())
                     {
-                        if (!PlayerData.TryGetValue(player.CSteamID, out PlayerData data))
+                        if (!PlayerData.TryGetValue(player.CSteamID, out var data))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[1].ToString(), out int kills))
+                        if (!int.TryParse(rdr[1].ToString(), out var kills))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[2].ToString(), out int headshotKills))
+                        if (!int.TryParse(rdr[2].ToString(), out var headshotKills))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[3].ToString(), out int deaths))
+                        if (!int.TryParse(rdr[3].ToString(), out var deaths))
                         {
                             continue;
                         }
@@ -2102,22 +2102,22 @@ namespace UnturnedBlackout.Managers
                 {
                     while (await rdr.ReadAsync())
                     {
-                        if (!PlayerData.TryGetValue(player.CSteamID, out PlayerData data))
+                        if (!PlayerData.TryGetValue(player.CSteamID, out var data))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[1].ToString(), out int kills))
+                        if (!int.TryParse(rdr[1].ToString(), out var kills))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[2].ToString(), out int headshotKills))
+                        if (!int.TryParse(rdr[2].ToString(), out var headshotKills))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[3].ToString(), out int deaths))
+                        if (!int.TryParse(rdr[3].ToString(), out var deaths))
                         {
                             continue;
                         }
@@ -2146,22 +2146,22 @@ namespace UnturnedBlackout.Managers
                 {
                     while (await rdr.ReadAsync())
                     {
-                        if (!PlayerData.TryGetValue(player.CSteamID, out PlayerData data))
+                        if (!PlayerData.TryGetValue(player.CSteamID, out var data))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[1].ToString(), out int kills))
+                        if (!int.TryParse(rdr[1].ToString(), out var kills))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[2].ToString(), out int headshotKills))
+                        if (!int.TryParse(rdr[2].ToString(), out var headshotKills))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[3].ToString(), out int deaths))
+                        if (!int.TryParse(rdr[3].ToString(), out var deaths))
                         {
                             continue;
                         }
@@ -2194,28 +2194,28 @@ namespace UnturnedBlackout.Managers
 
                     while (await rdr.ReadAsync())
                     {
-                        if (!int.TryParse(rdr[1].ToString(), out int questID))
+                        if (!int.TryParse(rdr[1].ToString(), out var questID))
                         {
                             continue;
                         }
 
-                        if (!QuestsSearchByID.TryGetValue(questID, out Quest quest))
+                        if (!QuestsSearchByID.TryGetValue(questID, out var quest))
                         {
                             Logging.Debug($"Error finding quest with id {questID} for {player.CharacterName}, ignoring it");
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[2].ToString(), out int amount))
+                        if (!int.TryParse(rdr[2].ToString(), out var amount))
                         {
                             continue;
                         }
 
-                        if (!long.TryParse(rdr[3].ToString(), out long questEndDate))
+                        if (!long.TryParse(rdr[3].ToString(), out var questEndDate))
                         {
                             continue;
                         }
 
-                        DateTimeOffset questEndDateTime = DateTimeOffset.FromUnixTimeSeconds(questEndDate);
+                        var questEndDateTime = DateTimeOffset.FromUnixTimeSeconds(questEndDate);
 
                         PlayerQuest playerQuest = new(player.CSteamID, quest, amount, questEndDateTime);
                         playerQuests.Add(playerQuest);
@@ -2236,16 +2236,16 @@ namespace UnturnedBlackout.Managers
                         playerQuestsSearchByType.Clear();
 
                         await new MySqlCommand($"DELETE FROM `{PLAYERS_QUESTS}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteScalarAsync();
-                        DateTimeOffset expiryDate = ServerOptions.DailyLeaderboardWipe;
+                        var expiryDate = ServerOptions.DailyLeaderboardWipe;
                         List<Quest> questsToAdd = new();
-                        for (int i = 0; i < 6; i++)
+                        for (var i = 0; i < 6; i++)
                         {
-                            List<Quest> randomQuests = Quests.Where(k => (int)k.QuestTier == i).ToList();
-                            Quest randomQuest = randomQuests[UnityEngine.Random.Range(0, randomQuests.Count)];
+                            var randomQuests = Quests.Where(k => (int)k.QuestTier == i).ToList();
+                            var randomQuest = randomQuests[UnityEngine.Random.Range(0, randomQuests.Count)];
                             questsToAdd.Add(randomQuest);
                         }
 
-                        foreach (Quest quest in questsToAdd)
+                        foreach (var quest in questsToAdd)
                         {
                             PlayerQuest playerQuest = new(player.CSteamID, quest, 0, expiryDate);
                             playerQuests.Add(playerQuest);
@@ -2285,23 +2285,23 @@ namespace UnturnedBlackout.Managers
 
                     while (await rdr.ReadAsync())
                     {
-                        if (!int.TryParse(rdr[1].ToString(), out int achievementID))
+                        if (!int.TryParse(rdr[1].ToString(), out var achievementID))
                         {
                             continue;
                         }
 
-                        if (!AchievementsSearchByID.TryGetValue(achievementID, out Achievement achievement))
+                        if (!AchievementsSearchByID.TryGetValue(achievementID, out var achievement))
                         {
                             Logging.Debug($"Error finding achievement with id {achievementID} for {player.CharacterName}, ignoring");
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[2].ToString(), out int currentTier))
+                        if (!int.TryParse(rdr[2].ToString(), out var currentTier))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[3].ToString(), out int amount))
+                        if (!int.TryParse(rdr[3].ToString(), out var amount))
                         {
                             continue;
                         }
@@ -2346,18 +2346,18 @@ namespace UnturnedBlackout.Managers
                 {
                     while (await rdr.ReadAsync())
                     {
-                        if (!int.TryParse(rdr[1].ToString(), out int currentTier))
+                        if (!int.TryParse(rdr[1].ToString(), out var currentTier))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[2].ToString(), out int xp))
+                        if (!int.TryParse(rdr[2].ToString(), out var xp))
                         {
                             continue;
                         }
 
-                        HashSet<int> claimedFreeRewards = rdr[3].GetHashSetIntFromReaderResult();
-                        HashSet<int> claimedPremiumRewards = rdr[4].GetHashSetIntFromReaderResult();
+                        var claimedFreeRewards = rdr[3].GetHashSetIntFromReaderResult();
+                        var claimedPremiumRewards = rdr[4].GetHashSetIntFromReaderResult();
 
                         Logging.Debug($"Got battlepass with current tier {currentTier}, xp {xp} and claimed free rewards {claimedFreeRewards.Count} and claimed premium rewards {claimedPremiumRewards.Count} registered to the player");
                         playerData.Battlepass = new PlayerBattlepass(player.CSteamID, currentTier, xp, claimedFreeRewards, claimedPremiumRewards);
@@ -2399,43 +2399,43 @@ namespace UnturnedBlackout.Managers
                 {
                     while (await rdr.ReadAsync())
                     {
-                        if (!ushort.TryParse(rdr[1].ToString(), out ushort gunID))
+                        if (!ushort.TryParse(rdr[1].ToString(), out var gunID))
                         {
                             continue;
                         }
 
-                        if (!Guns.TryGetValue(gunID, out Gun gun))
+                        if (!Guns.TryGetValue(gunID, out var gun))
                         {
                             Logging.Debug($"Error finding gun with id {gunID}, ignoring it");
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[2].ToString(), out int level))
+                        if (!int.TryParse(rdr[2].ToString(), out var level))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[3].ToString(), out int xp))
+                        if (!int.TryParse(rdr[3].ToString(), out var xp))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[4].ToString(), out int gunKills))
+                        if (!int.TryParse(rdr[4].ToString(), out var gunKills))
                         {
                             continue;
                         }
 
-                        if (!bool.TryParse(rdr[5].ToString(), out bool isBought))
+                        if (!bool.TryParse(rdr[5].ToString(), out var isBought))
                         {
                             continue;
                         }
 
-                        if (!bool.TryParse(rdr[6].ToString(), out bool isUnlocked))
+                        if (!bool.TryParse(rdr[6].ToString(), out var isUnlocked))
                         {
                             continue;
                         }
 
-                        Dictionary<ushort, LoadoutAttachment> attachments = Utility.GetAttachmentsFromString(rdr[7].ToString(), gun, player);
+                        var attachments = Utility.GetAttachmentsFromString(rdr[7].ToString(), gun, player);
                         if (!guns.ContainsKey(gunID))
                         {
                             guns.Add(gunID, new LoadoutGun(gun, level, xp, gunKills, isBought, isUnlocked, attachments));
@@ -2461,9 +2461,9 @@ namespace UnturnedBlackout.Managers
                 TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.84f)), loadingText: "PREPARING ATTACHMENTS..."));
                 try
                 {
-                    foreach (LoadoutGun gun in guns.Values)
+                    foreach (var gun in guns.Values)
                     {
-                        foreach (KeyValuePair<int, GunAttachment> rewardAttachment in gun.Gun.RewardAttachments)
+                        foreach (var rewardAttachment in gun.Gun.RewardAttachments)
                         {
                             if (!gun.Attachments.ContainsKey(rewardAttachment.Value.AttachmentID))
                             {
@@ -2482,12 +2482,12 @@ namespace UnturnedBlackout.Managers
 
                 Logging.Debug($"Getting gun skins for {player.CharacterName}");
                 TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.86f)), loadingText: "PREPARING SKINS..."));
-                object gunSkinsTxt = await new MySqlCommand($"SELECT `SkinIDs` FROM `{PLAYERS_GUNS_SKINS}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteScalarAsync();
+                var gunSkinsTxt = await new MySqlCommand($"SELECT `SkinIDs` FROM `{PLAYERS_GUNS_SKINS}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteScalarAsync();
                 if (gunSkinsTxt is string gunSkinsText)
                 {
-                    foreach (int id in gunSkinsText.GetIntListFromReaderResult())
+                    foreach (var id in gunSkinsText.GetIntListFromReaderResult())
                     {
-                        if (!GunSkinsSearchByID.TryGetValue(id, out GunSkin skin))
+                        if (!GunSkinsSearchByID.TryGetValue(id, out var skin))
                         {
                             Logging.Debug($"Error finding gun skin with id {id}, ignoring it");
                             continue;
@@ -2500,7 +2500,7 @@ namespace UnturnedBlackout.Managers
                         }
 
                         gunSkinsSearchByID.Add(id, skin);
-                        if (gunSkinsSearchByGunID.TryGetValue(skin.Gun.GunID, out List<GunSkin> gunSkins))
+                        if (gunSkinsSearchByGunID.TryGetValue(skin.Gun.GunID, out var gunSkins))
                         {
                             gunSkins.Add(skin);
                         }
@@ -2520,23 +2520,23 @@ namespace UnturnedBlackout.Managers
                 {
                     while (await rdr.ReadAsync())
                     {
-                        if (!ushort.TryParse(rdr[1].ToString(), out ushort charmID))
+                        if (!ushort.TryParse(rdr[1].ToString(), out var charmID))
                         {
                             continue;
                         }
 
-                        if (!GunCharms.TryGetValue(charmID, out GunCharm gunCharm))
+                        if (!GunCharms.TryGetValue(charmID, out var gunCharm))
                         {
                             Logging.Debug($"Error finding gun charm with id {charmID} for {player.CharacterName}, ignoring it");
                             continue;
                         }
 
-                        if (!bool.TryParse(rdr[2].ToString(), out bool isBought))
+                        if (!bool.TryParse(rdr[2].ToString(), out var isBought))
                         {
                             continue;
                         }
 
-                        if (!bool.TryParse(rdr[3].ToString(), out bool isUnlocked))
+                        if (!bool.TryParse(rdr[3].ToString(), out var isUnlocked))
                         {
                             continue;
                         }
@@ -2569,27 +2569,27 @@ namespace UnturnedBlackout.Managers
                 {
                     while (await rdr.ReadAsync())
                     {
-                        if (!ushort.TryParse(rdr[1].ToString(), out ushort knifeID))
+                        if (!ushort.TryParse(rdr[1].ToString(), out var knifeID))
                         {
                             continue;
                         }
 
-                        if (!Knives.TryGetValue(knifeID, out Knife knife))
+                        if (!Knives.TryGetValue(knifeID, out var knife))
                         {
                             Logging.Debug($"Error finding knife with id {knifeID}, ignoring it");
                             continue;
                         }
-                        if (!int.TryParse(rdr[2].ToString(), out int knifeKills))
+                        if (!int.TryParse(rdr[2].ToString(), out var knifeKills))
                         {
                             continue;
                         }
 
-                        if (!bool.TryParse(rdr[3].ToString(), out bool isBought))
+                        if (!bool.TryParse(rdr[3].ToString(), out var isBought))
                         {
                             continue;
                         }
 
-                        if (!bool.TryParse(rdr[4].ToString(), out bool isUnlocked))
+                        if (!bool.TryParse(rdr[4].ToString(), out var isUnlocked))
                         {
                             continue;
                         }
@@ -2622,22 +2622,22 @@ namespace UnturnedBlackout.Managers
                 {
                     while (await rdr.ReadAsync())
                     {
-                        if (!int.TryParse(rdr[1].ToString(), out int perkID))
+                        if (!int.TryParse(rdr[1].ToString(), out var perkID))
                         {
                             continue;
                         }
 
-                        if (!Perks.TryGetValue(perkID, out Perk perk))
+                        if (!Perks.TryGetValue(perkID, out var perk))
                         {
                             Logging.Debug($"Error finding perk with id {perkID}, ignoring this");
                             continue;
                         }
-                        if (!bool.TryParse(rdr[2].ToString(), out bool isBought))
+                        if (!bool.TryParse(rdr[2].ToString(), out var isBought))
                         {
                             continue;
                         }
 
-                        if (!bool.TryParse(rdr[3].ToString(), out bool isUnlocked))
+                        if (!bool.TryParse(rdr[3].ToString(), out var isUnlocked))
                         {
                             continue;
                         }
@@ -2670,27 +2670,27 @@ namespace UnturnedBlackout.Managers
                 {
                     while (await rdr.ReadAsync())
                     {
-                        if (!ushort.TryParse(rdr[1].ToString(), out ushort gadgetID))
+                        if (!ushort.TryParse(rdr[1].ToString(), out var gadgetID))
                         {
                             continue;
                         }
 
-                        if (!Gadgets.TryGetValue(gadgetID, out Gadget gadget))
+                        if (!Gadgets.TryGetValue(gadgetID, out var gadget))
                         {
                             Logging.Debug($"Error finding gadget with id {gadgetID} for {player.CharacterName}, ignoring it");
                             continue;
                         }
-                        if (!int.TryParse(rdr[2].ToString(), out int gadgetKills))
+                        if (!int.TryParse(rdr[2].ToString(), out var gadgetKills))
                         {
                             continue;
                         }
 
-                        if (!bool.TryParse(rdr[3].ToString(), out bool isBought))
+                        if (!bool.TryParse(rdr[3].ToString(), out var isBought))
                         {
                             continue;
                         }
 
-                        if (!bool.TryParse(rdr[4].ToString(), out bool isUnlocked))
+                        if (!bool.TryParse(rdr[4].ToString(), out var isUnlocked))
                         {
                             continue;
                         }
@@ -2723,27 +2723,27 @@ namespace UnturnedBlackout.Managers
                 {
                     while (await rdr.ReadAsync())
                     {
-                        if (!int.TryParse(rdr[1].ToString(), out int killstreakID))
+                        if (!int.TryParse(rdr[1].ToString(), out var killstreakID))
                         {
                             continue;
                         }
 
-                        if (!Killstreaks.TryGetValue(killstreakID, out Killstreak killstreak))
+                        if (!Killstreaks.TryGetValue(killstreakID, out var killstreak))
                         {
                             Logging.Debug($"Error finding killstreak with id {killstreakID} for {player.CharacterName}, ignoring it");
                             continue;
                         }
-                        if (!int.TryParse(rdr[2].ToString(), out int killstreakKills))
+                        if (!int.TryParse(rdr[2].ToString(), out var killstreakKills))
                         {
                             continue;
                         }
 
-                        if (!bool.TryParse(rdr[3].ToString(), out bool isBought))
+                        if (!bool.TryParse(rdr[3].ToString(), out var isBought))
                         {
                             continue;
                         }
 
-                        if (!bool.TryParse(rdr[4].ToString(), out bool isUnlocked))
+                        if (!bool.TryParse(rdr[4].ToString(), out var isUnlocked))
                         {
                             continue;
                         }
@@ -2776,23 +2776,23 @@ namespace UnturnedBlackout.Managers
                 {
                     while (await rdr.ReadAsync())
                     {
-                        if (!int.TryParse(rdr[1].ToString(), out int cardID))
+                        if (!int.TryParse(rdr[1].ToString(), out var cardID))
                         {
                             continue;
                         }
 
-                        if (!Cards.TryGetValue(cardID, out Card card))
+                        if (!Cards.TryGetValue(cardID, out var card))
                         {
                             Logging.Debug($"Error finding card with id {cardID} for {player.CharacterName}, ignoring it");
                             continue;
                         }
 
-                        if (!bool.TryParse(rdr[2].ToString(), out bool isBought))
+                        if (!bool.TryParse(rdr[2].ToString(), out var isBought))
                         {
                             continue;
                         }
 
-                        if (!bool.TryParse(rdr[3].ToString(), out bool isUnlocked))
+                        if (!bool.TryParse(rdr[3].ToString(), out var isUnlocked))
                         {
                             continue;
                         }
@@ -2825,21 +2825,21 @@ namespace UnturnedBlackout.Managers
                 {
                     while (await rdr.ReadAsync())
                     {
-                        if (!int.TryParse(rdr[1].ToString(), out int gloveID))
+                        if (!int.TryParse(rdr[1].ToString(), out var gloveID))
                         {
                             continue;
                         }
 
-                        if (!Gloves.TryGetValue(gloveID, out Glove glove))
+                        if (!Gloves.TryGetValue(gloveID, out var glove))
                         {
                             Logging.Debug($"Error finding glove with id {gloveID} for {player.CharacterName}, ignoring it");
                             continue;
                         }
-                        if (!bool.TryParse(rdr[2].ToString(), out bool isBought))
+                        if (!bool.TryParse(rdr[2].ToString(), out var isBought))
                         {
                             continue;
                         }
-                        if (!bool.TryParse(rdr[3].ToString(), out bool isUnlocked))
+                        if (!bool.TryParse(rdr[3].ToString(), out var isUnlocked))
                         {
                             continue;
                         }
@@ -2873,11 +2873,11 @@ namespace UnturnedBlackout.Managers
                 {
                     while (await rdr.ReadAsync())
                     {
-                        if (!int.TryParse(rdr[1].ToString(), out int loadoutID))
+                        if (!int.TryParse(rdr[1].ToString(), out var loadoutID))
                         {
                             continue;
                         }
-                        if (!bool.TryParse(rdr[2].ToString(), out bool isActive))
+                        if (!bool.TryParse(rdr[2].ToString(), out var isActive))
                         {
                             continue;
                         }
@@ -2886,8 +2886,8 @@ namespace UnturnedBlackout.Managers
                             Logging.Debug($"Found a duplicate loadout with id {loadoutID} for {player.CharacterName}, ignoring it");
                             continue;
                         }
-                        LoadoutData loadoutData = Plugin.Instance.Data.ConvertLoadoutFromJson(rdr[3].ToString());
-                        if (!guns.TryGetValue(loadoutData.Primary, out LoadoutGun primary) && loadoutData.Primary != 0)
+                        var loadoutData = Plugin.Instance.Data.ConvertLoadoutFromJson(rdr[3].ToString());
+                        if (!guns.TryGetValue(loadoutData.Primary, out var primary) && loadoutData.Primary != 0)
                         {
                             Logging.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a primary with id {loadoutData.Primary} which is not owned by the player, removing primary");
                             if (!updateLoadouts.Contains(loadoutID))
@@ -2895,7 +2895,7 @@ namespace UnturnedBlackout.Managers
                                 updateLoadouts.Add(loadoutID);
                             }
                         }
-                        if (!gunCharms.TryGetValue(loadoutData.PrimaryGunCharm, out LoadoutGunCharm primaryGunCharm) && loadoutData.PrimaryGunCharm != 0)
+                        if (!gunCharms.TryGetValue(loadoutData.PrimaryGunCharm, out var primaryGunCharm) && loadoutData.PrimaryGunCharm != 0)
                         {
                             Logging.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a primary gun charm with id {loadoutData.PrimaryGunCharm} which is not owned by the player, not counting this loadout");
                             if (!updateLoadouts.Contains(loadoutID))
@@ -2903,7 +2903,7 @@ namespace UnturnedBlackout.Managers
                                 updateLoadouts.Add(loadoutID);
                             }
                         }
-                        if (!gunSkinsSearchByID.TryGetValue(loadoutData.PrimarySkin, out GunSkin primarySkin) && loadoutData.PrimarySkin != 0)
+                        if (!gunSkinsSearchByID.TryGetValue(loadoutData.PrimarySkin, out var primarySkin) && loadoutData.PrimarySkin != 0)
                         {
                             Logging.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a primary skin with id {loadoutData.PrimarySkin} which is not owned by the player, not counting this loadout");
                             if (!updateLoadouts.Contains(loadoutID))
@@ -2912,9 +2912,9 @@ namespace UnturnedBlackout.Managers
                             }
                         }
                         Dictionary<EAttachment, LoadoutAttachment> primaryAttachments = new();
-                        foreach (ushort primaryAttachment in loadoutData.PrimaryAttachments)
+                        foreach (var primaryAttachment in loadoutData.PrimaryAttachments)
                         {
-                            if (primary.Attachments.TryGetValue(primaryAttachment, out LoadoutAttachment attachment))
+                            if (primary.Attachments.TryGetValue(primaryAttachment, out var attachment))
                             {
                                 primaryAttachments.Add(attachment.Attachment.AttachmentType, attachment);
                             }
@@ -2923,7 +2923,7 @@ namespace UnturnedBlackout.Managers
                                 Logging.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a primary attachment id with {primaryAttachment} which is not owned by the player, not counting it");
                             }
                         }
-                        if (!guns.TryGetValue(loadoutData.Secondary, out LoadoutGun secondary) && loadoutData.Secondary != 0)
+                        if (!guns.TryGetValue(loadoutData.Secondary, out var secondary) && loadoutData.Secondary != 0)
                         {
                             Logging.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a secondary with id {loadoutData.Secondary} which is not owned by the player, not counting this loadout");
                             if (!updateLoadouts.Contains(loadoutID))
@@ -2931,7 +2931,7 @@ namespace UnturnedBlackout.Managers
                                 updateLoadouts.Add(loadoutID);
                             }
                         }
-                        if (!gunCharms.TryGetValue(loadoutData.SecondaryGunCharm, out LoadoutGunCharm secondaryGunCharm) && loadoutData.SecondaryGunCharm != 0)
+                        if (!gunCharms.TryGetValue(loadoutData.SecondaryGunCharm, out var secondaryGunCharm) && loadoutData.SecondaryGunCharm != 0)
                         {
                             Logging.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a secondary gun charm with id {loadoutData.SecondaryGunCharm} which is not owned by the player, not counting this loadout");
                             if (!updateLoadouts.Contains(loadoutID))
@@ -2939,7 +2939,7 @@ namespace UnturnedBlackout.Managers
                                 updateLoadouts.Add(loadoutID);
                             }
                         }
-                        if (!gunSkinsSearchByID.TryGetValue(loadoutData.SecondarySkin, out GunSkin secondarySkin) && loadoutData.SecondarySkin != 0)
+                        if (!gunSkinsSearchByID.TryGetValue(loadoutData.SecondarySkin, out var secondarySkin) && loadoutData.SecondarySkin != 0)
                         {
                             Logging.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a secondary skin with id {loadoutData.SecondarySkin} which is not owned by the player, not counting this loadout");
                             if (!updateLoadouts.Contains(loadoutID))
@@ -2948,9 +2948,9 @@ namespace UnturnedBlackout.Managers
                             }
                         }
                         Dictionary<EAttachment, LoadoutAttachment> secondaryAttachments = new();
-                        foreach (ushort secondaryAttachment in loadoutData.SecondaryAttachments)
+                        foreach (var secondaryAttachment in loadoutData.SecondaryAttachments)
                         {
-                            if (secondary.Attachments.TryGetValue(secondaryAttachment, out LoadoutAttachment attachment))
+                            if (secondary.Attachments.TryGetValue(secondaryAttachment, out var attachment))
                             {
                                 secondaryAttachments.Add(attachment.Attachment.AttachmentType, attachment);
                             }
@@ -2959,7 +2959,7 @@ namespace UnturnedBlackout.Managers
                                 Logging.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a secondary attachment id with {secondaryAttachment} which is not owned by the player, not counting it");
                             }
                         }
-                        if (!knives.TryGetValue(loadoutData.Knife, out LoadoutKnife knife) && loadoutData.Knife != 0)
+                        if (!knives.TryGetValue(loadoutData.Knife, out var knife) && loadoutData.Knife != 0)
                         {
                             Logging.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a knife with id {loadoutData.Knife} which is not owned by the player, not counting this loadout");
                             if (!updateLoadouts.Contains(loadoutID))
@@ -2967,7 +2967,7 @@ namespace UnturnedBlackout.Managers
                                 updateLoadouts.Add(loadoutID);
                             }
                         }
-                        if (!gadgets.TryGetValue(loadoutData.Tactical, out LoadoutGadget tactical) && loadoutData.Tactical != 0)
+                        if (!gadgets.TryGetValue(loadoutData.Tactical, out var tactical) && loadoutData.Tactical != 0)
                         {
                             Logging.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a tactical with id {loadoutData.Tactical} which is not owned by the player, not counting this loadout");
                             if (!updateLoadouts.Contains(loadoutID))
@@ -2975,7 +2975,7 @@ namespace UnturnedBlackout.Managers
                                 updateLoadouts.Add(loadoutID);
                             }
                         }
-                        if (!gadgets.TryGetValue(loadoutData.Lethal, out LoadoutGadget lethal) && loadoutData.Lethal != 0)
+                        if (!gadgets.TryGetValue(loadoutData.Lethal, out var lethal) && loadoutData.Lethal != 0)
                         {
                             Logging.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a lethal with id {loadoutData.Lethal} which is not owned by the player, not counting this loadout");
                             if (!updateLoadouts.Contains(loadoutID))
@@ -2985,9 +2985,9 @@ namespace UnturnedBlackout.Managers
                         }
 
                         List<LoadoutKillstreak> loadoutKillstreaks = new();
-                        foreach (int killstreakID in loadoutData.Killstreaks)
+                        foreach (var killstreakID in loadoutData.Killstreaks)
                         {
-                            if (killstreaks.TryGetValue(killstreakID, out LoadoutKillstreak killstreak))
+                            if (killstreaks.TryGetValue(killstreakID, out var killstreak))
                             {
                                 loadoutKillstreaks.Add(killstreak);
                             }
@@ -3002,9 +3002,9 @@ namespace UnturnedBlackout.Managers
                         }
 
                         Dictionary<int, LoadoutPerk> loadoutPerks = new();
-                        foreach (int perkID in loadoutData.Perks)
+                        foreach (var perkID in loadoutData.Perks)
                         {
-                            if (perks.TryGetValue(perkID, out LoadoutPerk perk))
+                            if (perks.TryGetValue(perkID, out var perk))
                             {
                                 loadoutPerks.Add(perk.Perk.PerkType, perk);
                             }
@@ -3018,7 +3018,7 @@ namespace UnturnedBlackout.Managers
                             }
                         }
                         Dictionary<string, LoadoutPerk> perksSearchByType = new(StringComparer.OrdinalIgnoreCase);
-                        foreach (LoadoutPerk perk in loadoutPerks.Values)
+                        foreach (var perk in loadoutPerks.Values)
                         {
                             if (perksSearchByType.ContainsKey(perk.Perk.SkillType))
                             {
@@ -3029,7 +3029,7 @@ namespace UnturnedBlackout.Managers
                                 perksSearchByType.Add(perk.Perk.SkillType, perk);
                             }
                         }
-                        if (!gloves.TryGetValue(loadoutData.Glove, out LoadoutGlove glove) && loadoutData.Glove != 0)
+                        if (!gloves.TryGetValue(loadoutData.Glove, out var glove) && loadoutData.Glove != 0)
                         {
                             Logging.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a glove with id {loadoutData.Glove} which is not owned by the player, not counting this loadout");
                             if (!updateLoadouts.Contains(loadoutID))
@@ -3037,7 +3037,7 @@ namespace UnturnedBlackout.Managers
                                 updateLoadouts.Add(loadoutID);
                             }
                         }
-                        if (!cards.TryGetValue(loadoutData.Card, out LoadoutCard card) && loadoutData.Card != 0)
+                        if (!cards.TryGetValue(loadoutData.Card, out var card) && loadoutData.Card != 0)
                         {
                             Logging.Debug($"Loadout with id {loadoutID} has a card with id {loadoutData.Card} which is not owned by the player, not counting this loadout");
                             if (!updateLoadouts.Contains(loadoutID))
@@ -3060,9 +3060,9 @@ namespace UnturnedBlackout.Managers
                 }
 
                 Logging.Debug($"Fixing broken loadouts for {player.CharacterName}, found {updateLoadouts.Count} broken loadouts");
-                foreach (int updateLoadout in updateLoadouts)
+                foreach (var updateLoadout in updateLoadouts)
                 {
-                    if (!loadouts.TryGetValue(updateLoadout, out Loadout playerLoadout))
+                    if (!loadouts.TryGetValue(updateLoadout, out var playerLoadout))
                     {
                         Logging.Debug($"Error finding loadout with id {updateLoadout} for player with steam id {player.CSteamID}");
                         continue;
@@ -3086,17 +3086,17 @@ namespace UnturnedBlackout.Managers
                             return;
                         }
 
-                        if (!float.TryParse(rdr[2].ToString(), out float boosterValue))
+                        if (!float.TryParse(rdr[2].ToString(), out var boosterValue))
                         {
                             return;
                         }
 
-                        if (!long.TryParse(rdr[3].ToString(), out long boosterExpirationUnix))
+                        if (!long.TryParse(rdr[3].ToString(), out var boosterExpirationUnix))
                         {
                             return;
                         }
 
-                        DateTimeOffset boosterExpiration = DateTimeOffset.FromUnixTimeSeconds(boosterExpirationUnix);
+                        var boosterExpiration = DateTimeOffset.FromUnixTimeSeconds(boosterExpirationUnix);
                         PlayerBooster booster = new(player.CSteamID, boosterType, boosterValue, boosterExpiration);
 
                         boosters.Add(booster);
@@ -3125,18 +3125,18 @@ namespace UnturnedBlackout.Managers
                     Dictionary<int, PlayerCase> playerCasesSearchByID = new();
                     while (await rdr.ReadAsync())
                     {
-                        if (!int.TryParse(rdr[1].ToString(), out int caseID))
+                        if (!int.TryParse(rdr[1].ToString(), out var caseID))
                         {
                             continue;
                         }
 
-                        if (!Cases.TryGetValue(caseID, out Case @case))
+                        if (!Cases.TryGetValue(caseID, out var @case))
                         {
                             Logging.Debug($"Error finding case with id {caseID} for {player.CharacterName}, ignoring it");
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[2].ToString(), out int amount))
+                        if (!int.TryParse(rdr[2].ToString(), out var amount))
                         {
                             continue;
                         }
@@ -3174,17 +3174,17 @@ namespace UnturnedBlackout.Managers
                 Logging.Debug($"Checking if player has more loadouts for {player.CharacterName}");
                 try
                 {
-                    int loadoutAmount = Utility.GetLoadoutAmount(player);
+                    var loadoutAmount = Utility.GetLoadoutAmount(player);
                     Logging.Debug($"{player.CharacterName} should have {loadoutAmount} loadouts, he has {loadouts.Count} registered");
-                    string data = Plugin.Instance.Data.ConvertLoadoutToJson(DefaultLoadout);
+                    var data = Plugin.Instance.Data.ConvertLoadoutToJson(DefaultLoadout);
                     if (loadoutAmount < loadouts.Count)
                     {
                         Logging.Debug($"{player.CharacterName} has more loadouts than he should have, deleting the last ones");
-                        for (int i = loadouts.Count; i > loadoutAmount; i--)
+                        for (var i = loadouts.Count; i > loadoutAmount; i--)
                         {
                             Logging.Debug($"Removing loadout with id {i} for {player.CharacterName}");
 
-                            if (!loadouts.TryGetValue(i, out Loadout loadout))
+                            if (!loadouts.TryGetValue(i, out var loadout))
                             {
                                 continue;
                             }
@@ -3231,18 +3231,18 @@ namespace UnturnedBlackout.Managers
                 await Conn.OpenAsync();
 
                 await new MySqlCommand($"UPDATE `{PLAYERS}` SET `XP` = `XP` + {xp} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-                object obj = await new MySqlCommand($"Select `XP` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                var obj = await new MySqlCommand($"Select `XP` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
 
-                if (PlayerData.TryGetValue(steamID, out PlayerData data))
+                if (PlayerData.TryGetValue(steamID, out var data))
                 {
                     if (obj is int newXp)
                     {
                         data.XP = newXp;
                     }
 
-                    while (data.TryGetNeededXP(out int neededXP) && data.XP >= neededXP)
+                    while (data.TryGetNeededXP(out var neededXP) && data.XP >= neededXP)
                     {
-                        int newXP = data.XP - neededXP;
+                        var newXP = data.XP - neededXP;
                         await new MySqlCommand($"UPDATE `{PLAYERS}` SET `XP` = {newXP}, `Level` = `Level` + 1 WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
                         obj = await new MySqlCommand($"Select `Level` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
                         if (obj is int level)
@@ -3250,13 +3250,13 @@ namespace UnturnedBlackout.Managers
                             data.Level = level;
                             TaskDispatcher.QueueOnMainThread(() =>
                             {
-                                Models.Global.GamePlayer player = Plugin.Instance.Game.GetGamePlayer(data.SteamID);
+                                var player = Plugin.Instance.Game.GetGamePlayer(data.SteamID);
                                 if (player != null)
                                 {
                                     Plugin.Instance.UI.SendAnimation(player, new AnimationInfo(EAnimationType.LevelUp, level));
-                                    if (ItemsSearchByLevel.TryGetValue(level, out List<AnimationItemUnlock> unlocks))
+                                    if (ItemsSearchByLevel.TryGetValue(level, out var unlocks))
                                     {
-                                        foreach (AnimationItemUnlock unlock in unlocks)
+                                        foreach (var unlock in unlocks)
                                         {
                                             Plugin.Instance.UI.SendAnimation(player, new AnimationInfo(EAnimationType.ItemUnlock, unlock));
                                         }
@@ -3288,8 +3288,8 @@ namespace UnturnedBlackout.Managers
                 await Conn.OpenAsync();
 
                 await new MySqlCommand($"UPDATE `{PLAYERS}` SET `Credits` = `Credits` + {credits} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-                object obj = await new MySqlCommand($"Select `Credits` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-                if (PlayerData.TryGetValue(steamID, out PlayerData data))
+                var obj = await new MySqlCommand($"Select `Credits` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                if (PlayerData.TryGetValue(steamID, out var data))
                 {
                     if (obj is int newCredits)
                     {
@@ -3318,8 +3318,8 @@ namespace UnturnedBlackout.Managers
                 await Conn.OpenAsync();
 
                 await new MySqlCommand($"UPDATE `{PLAYERS}` SET `Credits` = `Credits` - {credits} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-                object obj = await new MySqlCommand($"Select `Credits` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-                if (PlayerData.TryGetValue(steamID, out PlayerData data))
+                var obj = await new MySqlCommand($"Select `Credits` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                if (PlayerData.TryGetValue(steamID, out var data))
                 {
                     if (obj is int newCredits)
                     {
@@ -3348,8 +3348,8 @@ namespace UnturnedBlackout.Managers
                 await Conn.OpenAsync();
 
                 await new MySqlCommand($"UPDATE `{PLAYERS}` SET `Scrap` = `Scrap` + {scrap} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-                object obj = await new MySqlCommand($"Select `Scrap` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-                if (PlayerData.TryGetValue(steamID, out PlayerData data))
+                var obj = await new MySqlCommand($"Select `Scrap` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                if (PlayerData.TryGetValue(steamID, out var data))
                 {
                     if (obj is int newScrap)
                     {
@@ -3378,8 +3378,8 @@ namespace UnturnedBlackout.Managers
                 await Conn.OpenAsync();
 
                 await new MySqlCommand($"UPDATE `{PLAYERS}` SET `Scrap` = `Scrap` - {scrap} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-                object obj = await new MySqlCommand($"Select `Scrap` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-                if (PlayerData.TryGetValue(steamID, out PlayerData data))
+                var obj = await new MySqlCommand($"Select `Scrap` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                if (PlayerData.TryGetValue(steamID, out var data))
                 {
                     if (obj is int newScrap)
                     {
@@ -3408,8 +3408,8 @@ namespace UnturnedBlackout.Managers
                 await Conn.OpenAsync();
 
                 await new MySqlCommand($"UPDATE `{PLAYERS}` SET `Coins` = `Coins` + {coins} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-                object obj = await new MySqlCommand($"Select `Coins` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-                if (PlayerData.TryGetValue(steamID, out PlayerData data))
+                var obj = await new MySqlCommand($"Select `Coins` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                if (PlayerData.TryGetValue(steamID, out var data))
                 {
                     if (obj is int newCoins)
                     {
@@ -3438,8 +3438,8 @@ namespace UnturnedBlackout.Managers
                 await Conn.OpenAsync();
 
                 await new MySqlCommand($"UPDATE `{PLAYERS}` SET `Coins` = `Coins` - {coins} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-                object obj = await new MySqlCommand($"Select `Coins` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-                if (PlayerData.TryGetValue(steamID, out PlayerData data))
+                var obj = await new MySqlCommand($"Select `Coins` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                if (PlayerData.TryGetValue(steamID, out var data))
                 {
                     if (obj is int newCoins)
                     {
@@ -3468,9 +3468,9 @@ namespace UnturnedBlackout.Managers
                 await Conn.OpenAsync();
 
                 await new MySqlCommand($"UPDATE `{PLAYERS}` SET `Kills` = `Kills` + {kills} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-                object obj = await new MySqlCommand($"Select `Kills` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                var obj = await new MySqlCommand($"Select `Kills` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
 
-                if (PlayerData.TryGetValue(steamID, out PlayerData data))
+                if (PlayerData.TryGetValue(steamID, out var data))
                 {
                     if (obj is int newKills)
                     {
@@ -3481,7 +3481,7 @@ namespace UnturnedBlackout.Managers
                 await new MySqlCommand($"UPDATE `{PLAYERS_LEADERBOARD_DAILY}` SET `Kills` = `Kills` + {kills} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
                 obj = await new MySqlCommand($"SELECT `Kills` FROM `{PLAYERS_LEADERBOARD_DAILY}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
 
-                if (PlayerDailyLeaderboardLookup.TryGetValue(steamID, out LeaderboardData lData))
+                if (PlayerDailyLeaderboardLookup.TryGetValue(steamID, out var lData))
                 {
                     if (obj is int newKills)
                     {
@@ -3530,8 +3530,8 @@ namespace UnturnedBlackout.Managers
                 await Conn.OpenAsync();
 
                 await new MySqlCommand($"UPDATE `{PLAYERS}` SET `HeadshotKills` = `HeadshotKills` + {headshotKills} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-                object obj = await new MySqlCommand($"Select `HeadshotKills` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-                if (PlayerData.TryGetValue(steamID, out PlayerData data))
+                var obj = await new MySqlCommand($"Select `HeadshotKills` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                if (PlayerData.TryGetValue(steamID, out var data))
                 {
                     if (obj is int newHeadshotKills)
                     {
@@ -3541,7 +3541,7 @@ namespace UnturnedBlackout.Managers
 
                 await new MySqlCommand($"UPDATE `{PLAYERS_LEADERBOARD_DAILY}` SET `HeadshotKills` = `HeadshotKills` + {headshotKills} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
                 obj = await new MySqlCommand($"Select `HeadshotKills` FROM `{PLAYERS_LEADERBOARD_DAILY}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-                if (PlayerDailyLeaderboardLookup.TryGetValue(steamID, out LeaderboardData lData))
+                if (PlayerDailyLeaderboardLookup.TryGetValue(steamID, out var lData))
                 {
                     if (obj is int newHeadshotKills)
                     {
@@ -3588,7 +3588,7 @@ namespace UnturnedBlackout.Managers
                 await Conn.OpenAsync();
 
                 await new MySqlCommand($"UPDATE `{PLAYERS}` SET `HighestKillstreak` = {killStreak} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-                if (PlayerData.TryGetValue(steamID, out PlayerData data))
+                if (PlayerData.TryGetValue(steamID, out var data))
                 {
                     data.HighestKillstreak = killStreak;
                 }
@@ -3612,7 +3612,7 @@ namespace UnturnedBlackout.Managers
                 await Conn.OpenAsync();
 
                 await new MySqlCommand($"UPDATE `{PLAYERS}` SET `HighestMultiKills` = {multiKills} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-                if (PlayerData.TryGetValue(steamID, out PlayerData data))
+                if (PlayerData.TryGetValue(steamID, out var data))
                 {
                     data.HighestMultiKills = multiKills;
                 }
@@ -3636,8 +3636,8 @@ namespace UnturnedBlackout.Managers
                 await Conn.OpenAsync();
 
                 await new MySqlCommand($"UPDATE `{PLAYERS}` SET `KillsConfirmed` = `KillsConfirmed` + {killsConfirmed} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-                object obj = await new MySqlCommand($"Select `KillsConfirmed` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-                if (PlayerData.TryGetValue(steamID, out PlayerData data))
+                var obj = await new MySqlCommand($"Select `KillsConfirmed` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                if (PlayerData.TryGetValue(steamID, out var data))
                 {
                     if (obj is int newKillsConfirmed)
                     {
@@ -3664,8 +3664,8 @@ namespace UnturnedBlackout.Managers
                 await Conn.OpenAsync();
 
                 await new MySqlCommand($"UPDATE `{PLAYERS}` SET `KillsDenied` = `KillsDenied` + {killsDenied} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-                object obj = await new MySqlCommand($"Select `KillsDenied` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-                if (PlayerData.TryGetValue(steamID, out PlayerData data))
+                var obj = await new MySqlCommand($"Select `KillsDenied` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                if (PlayerData.TryGetValue(steamID, out var data))
                 {
                     if (obj is int newKillsDenied)
                     {
@@ -3692,8 +3692,8 @@ namespace UnturnedBlackout.Managers
                 await Conn.OpenAsync();
 
                 await new MySqlCommand($"UPDATE `{PLAYERS}` SET `FlagsCaptured` = `FlagsCaptured` + {flagsCaptured} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-                object obj = await new MySqlCommand($"Select `FlagsCaptured` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-                if (PlayerData.TryGetValue(steamID, out PlayerData data))
+                var obj = await new MySqlCommand($"Select `FlagsCaptured` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                if (PlayerData.TryGetValue(steamID, out var data))
                 {
                     if (obj is int newFlagsCaptured)
                     {
@@ -3720,8 +3720,8 @@ namespace UnturnedBlackout.Managers
                 await Conn.OpenAsync();
 
                 await new MySqlCommand($"UPDATE `{PLAYERS}` SET `FlagsSaved` = `FlagsSaved` + {flagsSaved} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-                object obj = await new MySqlCommand($"Select `FlagsSaved` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-                if (PlayerData.TryGetValue(steamID, out PlayerData data))
+                var obj = await new MySqlCommand($"Select `FlagsSaved` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                if (PlayerData.TryGetValue(steamID, out var data))
                 {
                     if (obj is int newFlagsSaved)
                     {
@@ -3748,8 +3748,8 @@ namespace UnturnedBlackout.Managers
                 await Conn.OpenAsync();
 
                 await new MySqlCommand($"UPDATE `{PLAYERS}` SET `AreasTaken` = `AreasTaken` + {areasTaken} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-                object obj = await new MySqlCommand($"Select `AreasTaken` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-                if (PlayerData.TryGetValue(steamID, out PlayerData data))
+                var obj = await new MySqlCommand($"Select `AreasTaken` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                if (PlayerData.TryGetValue(steamID, out var data))
                 {
                     if (obj is int newArenasTaken)
                     {
@@ -3776,8 +3776,8 @@ namespace UnturnedBlackout.Managers
                 await Conn.OpenAsync();
 
                 await new MySqlCommand($"UPDATE `{PLAYERS}` SET `Deaths` = `Deaths` + {deaths} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-                object obj = await new MySqlCommand($"Select `Deaths` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-                if (PlayerData.TryGetValue(steamID, out PlayerData data))
+                var obj = await new MySqlCommand($"Select `Deaths` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                if (PlayerData.TryGetValue(steamID, out var data))
                 {
                     if (obj is int newDeaths)
                     {
@@ -3787,7 +3787,7 @@ namespace UnturnedBlackout.Managers
 
                 await new MySqlCommand($"UPDATE `{PLAYERS_LEADERBOARD_DAILY}` SET `Deaths` = `Deaths` + {deaths} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
                 obj = await new MySqlCommand($"Select `Deaths` FROM `{PLAYERS_LEADERBOARD_DAILY}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-                if (PlayerDailyLeaderboardLookup.TryGetValue(steamID, out LeaderboardData lData))
+                if (PlayerDailyLeaderboardLookup.TryGetValue(steamID, out var lData))
                 {
                     if (obj is int newDeaths)
                     {
@@ -3834,7 +3834,7 @@ namespace UnturnedBlackout.Managers
                 await Conn.OpenAsync();
 
                 await new MySqlCommand($"UPDATE `{PLAYERS}` SET `Music` = {isMusic} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-                if (PlayerData.TryGetValue(steamID, out PlayerData data))
+                if (PlayerData.TryGetValue(steamID, out var data))
                 {
                     data.Music = isMusic;
                 }
@@ -3858,7 +3858,7 @@ namespace UnturnedBlackout.Managers
                 await Conn.OpenAsync();
 
                 await new MySqlCommand($"UPDATE `{PLAYERS}` SET `CountryCode` = '{countryCode}' WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-                if (PlayerData.TryGetValue(steamID, out PlayerData data))
+                if (PlayerData.TryGetValue(steamID, out var data))
                 {
                     data.CountryCode = countryCode;
                 }
@@ -3882,7 +3882,7 @@ namespace UnturnedBlackout.Managers
                 await Conn.OpenAsync();
 
                 await new MySqlCommand($"UPDATE `{PLAYERS}` SET `HideFlag` = {hideFlag} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-                if (PlayerData.TryGetValue(steamID, out PlayerData data))
+                if (PlayerData.TryGetValue(steamID, out var data))
                 {
                     data.HideFlag = hideFlag;
                 }
@@ -3906,7 +3906,7 @@ namespace UnturnedBlackout.Managers
                 await Conn.OpenAsync();
 
                 await new MySqlCommand($"UPDATE `{PLAYERS}` SET `IsMuted` = {isMuted} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-                if (PlayerData.TryGetValue(steamID, out PlayerData data))
+                if (PlayerData.TryGetValue(steamID, out var data))
                 {
                     data.IsMuted = isMuted;
                 }
@@ -3929,7 +3929,7 @@ namespace UnturnedBlackout.Managers
             {
                 await Conn.OpenAsync();
                 await new MySqlCommand($"UPDATE `{PLAYERS}` SET `MuteExpiry` = {muteExpiry.ToUnixTimeSeconds()} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-                if (PlayerData.TryGetValue(steamID, out PlayerData data))
+                if (PlayerData.TryGetValue(steamID, out var data))
                 {
                     data.MuteExpiry = muteExpiry;
                 }
@@ -3953,7 +3953,7 @@ namespace UnturnedBlackout.Managers
             {
                 await Conn.OpenAsync();
 
-                string coloumnName = "None";
+                var coloumnName = "None";
                 switch (boosterType)
                 {
                     case EBoosterType.XP:
@@ -3968,9 +3968,9 @@ namespace UnturnedBlackout.Managers
                 }
 
                 await new MySqlCommand($"UPDATE `{PLAYERS}` SET `{coloumnName}` = `{coloumnName}` + {increaseBooster} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-                object obj = await new MySqlCommand($"SELECT `{coloumnName}` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                var obj = await new MySqlCommand($"SELECT `{coloumnName}` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
 
-                if (PlayerData.TryGetValue(steamID, out PlayerData data) && float.TryParse(obj.ToString(), out float updatedBooster))
+                if (PlayerData.TryGetValue(steamID, out var data) && float.TryParse(obj.ToString(), out var updatedBooster))
                 {
                     data.SetPersonalBooster(boosterType, updatedBooster);
                 }
@@ -3992,13 +3992,13 @@ namespace UnturnedBlackout.Managers
             try
             {
                 await Conn.OpenAsync();
-                DateTimeOffset expiryDate = DateTimeOffset.UtcNow.AddDays(days);
-                DateTimeOffset primeLastDailyReward = DateTimeOffset.UtcNow;
+                var expiryDate = DateTimeOffset.UtcNow.AddDays(days);
+                var primeLastDailyReward = DateTimeOffset.UtcNow;
                 await new MySqlCommand($"UPDATE `{PLAYERS}` SET `PrimeExpiry` = `PrimeExpiry` + {days * 24 * 60 * 60} WHERE `HasPrime` = true AND `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
                 await new MySqlCommand($"UPDATE `{PLAYERS}` SET `HasPrime` = true, `PrimeExpiry` = {expiryDate.ToUnixTimeSeconds()} , `PrimeLastDailyReward` = {primeLastDailyReward.ToUnixTimeSeconds()} WHERE `HasPrime` = false AND `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
                 R.Permissions.AddPlayerToGroup("Prime", new RocketPlayer(steamID.ToString()));
 
-                if (!PlayerData.TryGetValue(steamID, out PlayerData data))
+                if (!PlayerData.TryGetValue(steamID, out var data))
                 {
                     Logging.Debug($"Could'nt find player data for player with steam id {steamID}, probably player is offline");
                     return;
@@ -4035,7 +4035,7 @@ namespace UnturnedBlackout.Managers
             try
             {
                 await Conn.OpenAsync();
-                if (!Guns.TryGetValue(gunID, out Gun gun))
+                if (!Guns.TryGetValue(gunID, out var gun))
                 {
                     Logging.Debug($"Error finding gun with id {gunID} to add to {steamID}");
                     return;
@@ -4043,14 +4043,14 @@ namespace UnturnedBlackout.Managers
 
                 await new MySqlCommand($"INSERT INTO `{PLAYERS_GUNS}` (`SteamID` , `GunID` , `Level` , `XP` , `GunKills` , `IsBought` , `Attachments`) VALUES ({steamID} , {gunID} , 1 , 0 , 0 , {isBought} , '{Utility.CreateStringFromDefaultAttachments(gun.DefaultAttachments) + Utility.CreateStringFromRewardAttachments(gun.RewardAttachments.Values.ToList())}') ON DUPLICATE KEY UPDATE `IsBought` = {isBought};", Conn).ExecuteScalarAsync();
 
-                if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
                 {
                     Logging.Debug($"Couldnt finding loadout for player with steam id {steamID}");
                     return;
                 }
 
                 Dictionary<ushort, LoadoutAttachment> loadoutAttachments = new();
-                foreach (GunAttachment attachment in gun.DefaultAttachments)
+                foreach (var attachment in gun.DefaultAttachments)
                 {
                     if (loadoutAttachments.ContainsKey(attachment.AttachmentID))
                     {
@@ -4060,7 +4060,7 @@ namespace UnturnedBlackout.Managers
                     loadoutAttachments.Add(attachment.AttachmentID, new LoadoutAttachment(attachment, 0, true, false));
                 }
 
-                foreach (KeyValuePair<int, GunAttachment> attachment in gun.RewardAttachments)
+                foreach (var attachment in gun.RewardAttachments)
                 {
                     if (loadoutAttachments.ContainsKey(attachment.Value.AttachmentID))
                     {
@@ -4100,24 +4100,24 @@ namespace UnturnedBlackout.Managers
             {
                 await Conn.OpenAsync();
                 await new MySqlCommand($"UPDATE `{PLAYERS_GUNS}` SET `XP` = `XP` + {xp} WHERE `SteamID` = {steamID} AND `GunID` = {gunID};", Conn).ExecuteScalarAsync();
-                object obj = await new MySqlCommand($"SELECT `XP` FROM `{PLAYERS_GUNS}` WHERE `SteamID` = {steamID} AND `GunID` = {gunID};", Conn).ExecuteScalarAsync();
+                var obj = await new MySqlCommand($"SELECT `XP` FROM `{PLAYERS_GUNS}` WHERE `SteamID` = {steamID} AND `GunID` = {gunID};", Conn).ExecuteScalarAsync();
                 if (obj is int newXP)
                 {
-                    if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                    if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
                     {
                         Logging.Debug($"Error finding loadout for player with steam id {steamID}");
                         return;
                     }
-                    if (!loadout.Guns.TryGetValue(gunID, out LoadoutGun gun))
+                    if (!loadout.Guns.TryGetValue(gunID, out var gun))
                     {
                         Logging.Debug($"Error finding loadout gun with id {gunID} for player with steam id {steamID}");
                         return;
                     }
 
                     gun.XP = newXP;
-                    while (gun.TryGetNeededXP(out int neededXP) && gun.XP >= neededXP)
+                    while (gun.TryGetNeededXP(out var neededXP) && gun.XP >= neededXP)
                     {
-                        int updatedXP = gun.XP - neededXP;
+                        var updatedXP = gun.XP - neededXP;
                         await new MySqlCommand($"UPDATE `{PLAYERS_GUNS}` SET `XP` = {updatedXP}, `Level` = `Level` + 1 WHERE `SteamID` = {steamID} AND `GunID` = {gunID};", Conn).ExecuteScalarAsync();
                         obj = await new MySqlCommand($"SELECT `Level` FROM `{PLAYERS_GUNS}` WHERE `SteamID` = {steamID} AND `GunID` = {gunID};", Conn).ExecuteScalarAsync();
                         if (obj is int newLevel)
@@ -4128,10 +4128,10 @@ namespace UnturnedBlackout.Managers
 
                         TaskDispatcher.QueueOnMainThread(() =>
                         {
-                            Models.Global.GamePlayer player = Plugin.Instance.Game.GetGamePlayer(steamID);
+                            var player = Plugin.Instance.Game.GetGamePlayer(steamID);
                             if (player != null)
                             {
-                                string icon = gun.Gun.IconLink;
+                                var icon = gun.Gun.IconLink;
                                 if ((player.ActiveLoadout?.Primary?.Gun?.GunID ?? 0) == gun.Gun.GunID && (player.ActiveLoadout?.PrimarySkin?.Gun?.GunID ?? 0) == gun.Gun.GunID)
                                 {
                                     icon = player.ActiveLoadout.PrimarySkin.IconLink;
@@ -4142,7 +4142,7 @@ namespace UnturnedBlackout.Managers
                                 }
 
                                 Plugin.Instance.UI.SendAnimation(player, new AnimationInfo(EAnimationType.GunLevelUp, new AnimationItemUnlock(icon, gun.Level.ToString(), gun.Gun.GunName)));
-                                if (gun.Gun.RewardAttachments.TryGetValue(gun.Level, out GunAttachment attachment))
+                                if (gun.Gun.RewardAttachments.TryGetValue(gun.Level, out var attachment))
                                 {
                                     Plugin.Instance.UI.SendAnimation(player, new AnimationInfo(EAnimationType.ItemUnlock, new AnimationItemUnlock(attachment.IconLink, "", $"{attachment.AttachmentName} [{gun.Gun.GunName}]")));
                                 }
@@ -4169,16 +4169,16 @@ namespace UnturnedBlackout.Managers
             {
                 await Conn.OpenAsync();
                 await new MySqlCommand($"UPDATE `{PLAYERS_GUNS}` SET `GunKills` = `GunKills` + {kills} WHERE `SteamID` = {steamID} AND `GunID` = {gunID};", Conn).ExecuteScalarAsync();
-                object obj = await new MySqlCommand($"SELECT `GunKills` FROM `{PLAYERS_GUNS}` WHERE `SteamID` = {steamID} AND `GunID` = {gunID};", Conn).ExecuteScalarAsync();
+                var obj = await new MySqlCommand($"SELECT `GunKills` FROM `{PLAYERS_GUNS}` WHERE `SteamID` = {steamID} AND `GunID` = {gunID};", Conn).ExecuteScalarAsync();
                 if (obj is int newKills)
                 {
-                    if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                    if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
                     {
                         Logging.Debug($"Error finding loadout for player with steam id {steamID}");
                         return;
                     }
 
-                    if (!loadout.Guns.TryGetValue(gunID, out LoadoutGun gun))
+                    if (!loadout.Guns.TryGetValue(gunID, out var gun))
                     {
                         Logging.Debug($"Error finding loadout gun with id {gunID} for player with steam id {steamID}");
                         return;
@@ -4206,13 +4206,13 @@ namespace UnturnedBlackout.Managers
                 await Conn.OpenAsync();
                 await new MySqlCommand($"UPDATE `{PLAYERS_GUNS}` SET `IsBought` = {isBought} WHERE `SteamID` = {steamID} AND `GunID` = {gunID};", Conn).ExecuteScalarAsync();
 
-                if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
                 {
                     Logging.Debug($"Error finding loadout for player with steam id {steamID}");
                     return;
                 }
 
-                if (!loadout.Guns.TryGetValue(gunID, out LoadoutGun gun))
+                if (!loadout.Guns.TryGetValue(gunID, out var gun))
                 {
                     Logging.Debug($"Error finding loadout gun with id {gunID} for player with steam id {steamID}");
                     return;
@@ -4239,13 +4239,13 @@ namespace UnturnedBlackout.Managers
                 await Conn.OpenAsync();
                 await new MySqlCommand($"UPDATE `{PLAYERS_GUNS}` SET `IsUnlocked` = {isUnlocked} WHERE `SteamID` = {steamID} AND `GunID` = {gunID};", Conn).ExecuteScalarAsync();
 
-                if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
                 {
                     Logging.Debug($"Error finding loadout for player with steam id {steamID}");
                     return;
                 }
 
-                if (!loadout.Guns.TryGetValue(gunID, out LoadoutGun gun))
+                if (!loadout.Guns.TryGetValue(gunID, out var gun))
                 {
                     Logging.Debug($"Error finding loadout gun with id {gunID} for player with steam id {steamID}");
                     return;
@@ -4273,19 +4273,19 @@ namespace UnturnedBlackout.Managers
             {
                 await Conn.OpenAsync();
 
-                if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
                 {
                     Logging.Debug($"Error finding loadout for player with steam id {steamID}");
                     return;
                 }
 
-                if (!loadout.Guns.TryGetValue(gunID, out LoadoutGun gun))
+                if (!loadout.Guns.TryGetValue(gunID, out var gun))
                 {
                     Logging.Debug($"Error finding loadout gun with id {gunID} for player with steam id {steamID}");
                     return;
                 }
 
-                if (!gun.Attachments.TryGetValue(attachmentID, out LoadoutAttachment attachment))
+                if (!gun.Attachments.TryGetValue(attachmentID, out var attachment))
                 {
                     Logging.Debug($"Error finding loadout attachment with id {attachmentID} for loadout gun with id {gunID} for player with steam id {steamID}");
                     return;
@@ -4312,19 +4312,19 @@ namespace UnturnedBlackout.Managers
             {
                 await Conn.OpenAsync();
 
-                if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
                 {
                     Logging.Debug($"Error finding loadout for player with steam id {steamID}");
                     return;
                 }
 
-                if (!loadout.Guns.TryGetValue(gunID, out LoadoutGun gun))
+                if (!loadout.Guns.TryGetValue(gunID, out var gun))
                 {
                     Logging.Debug($"Error finding loadout gun with id {gunID} for player with steam id {steamID}");
                     return;
                 }
 
-                if (!gun.Attachments.TryGetValue(attachmentID, out LoadoutAttachment attachment))
+                if (!gun.Attachments.TryGetValue(attachmentID, out var attachment))
                 {
                     Logging.Debug($"Error finding loadout attachment with id {attachmentID} for loadout gun with id {gunID} for player with steam id {steamID}");
                     return;
@@ -4352,20 +4352,20 @@ namespace UnturnedBlackout.Managers
             try
             {
                 await Conn.OpenAsync();
-                if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
                 {
-                    object skins = await new MySqlCommand($"SELECT `SkinIDs` FROM `{PLAYERS_GUNS_SKINS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-                    List<int> ids = skins.GetIntListFromReaderResult();
+                    var skins = await new MySqlCommand($"SELECT `SkinIDs` FROM `{PLAYERS_GUNS_SKINS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                    var ids = skins.GetIntListFromReaderResult();
                     if (!ids.Contains(id))
                     {
                         ids.Add(id);
-                        string newSkins = ids.GetStringFromIntList();
+                        var newSkins = ids.GetStringFromIntList();
                         await new MySqlCommand($"UPDATE `{PLAYERS_GUNS_SKINS}` SET `SkinIDs` = '{newSkins}' WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
                     }
                     return;
                 }
 
-                if (!GunSkinsSearchByID.TryGetValue(id, out GunSkin skin))
+                if (!GunSkinsSearchByID.TryGetValue(id, out var skin))
                 {
                     Logging.Debug($"Error finding gun skin with id {id}");
                     return;
@@ -4378,14 +4378,14 @@ namespace UnturnedBlackout.Managers
                 }
 
                 loadout.GunSkinsSearchByID.Add(id, skin);
-                if (!loadout.GunSkinsSearchByGunID.TryGetValue(skin.Gun.GunID, out List<GunSkin> gunSkins))
+                if (!loadout.GunSkinsSearchByGunID.TryGetValue(skin.Gun.GunID, out var gunSkins))
                 {
                     loadout.GunSkinsSearchByGunID.Add(skin.Gun.GunID, new());
                 }
                 loadout.GunSkinsSearchByGunID[skin.Gun.GunID].Add(skin);
                 loadout.GunSkinsSearchBySkinID.Add(skin.SkinID, skin);
 
-                string skinsString = loadout.GunSkinsSearchByID.Keys.ToList().GetStringFromIntList();
+                var skinsString = loadout.GunSkinsSearchByID.Keys.ToList().GetStringFromIntList();
                 await new MySqlCommand($"UPDATE `{PLAYERS_GUNS_SKINS}` SET `SkinIDs` = '{skinsString}' WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
 
                 Plugin.Instance.UI.OnUIUpdated(steamID, EUIPage.GunSkin);
@@ -4407,14 +4407,14 @@ namespace UnturnedBlackout.Managers
 
             try
             {
-                if (!GunSkinsSearchByID.TryGetValue(id, out GunSkin skin))
+                if (!GunSkinsSearchByID.TryGetValue(id, out var skin))
                 {
                     Logging.Debug($"Error finding gun skin with id {id}");
                     return;
                 }
 
                 await new MySqlCommand($"UPDATE `{GUNS_SKINS}` SET `UnboxedAmount` = `UnboxedAmount` + {amount} WHERE `ID` = {id};", Conn).ExecuteScalarAsync();
-                object obj = await new MySqlCommand($"SELECT `UnboxedAmount` FROM `{GUNS_SKINS}` WHERE `ID` = {id};", Conn).ExecuteScalarAsync();
+                var obj = await new MySqlCommand($"SELECT `UnboxedAmount` FROM `{GUNS_SKINS}` WHERE `ID` = {id};", Conn).ExecuteScalarAsync();
                 if (obj is int unboxedAmount)
                 {
                     skin.UnboxedAmount = unboxedAmount;
@@ -4441,13 +4441,13 @@ namespace UnturnedBlackout.Managers
                 await Conn.OpenAsync();
 
                 await new MySqlCommand($"INSERT INTO `{PLAYERS_GUNS_CHARMS}` (`SteamID` , `CharmID` , `IsBought`) VALUES ({steamID} , {gunCharmID} , {isBought}) ON DUPLICATE KEY UPDATE `IsBought` = {isBought};", Conn).ExecuteScalarAsync();
-                if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
                 {
                     Logging.Debug($"Couldnt find loadout for player with steam id {steamID}");
                     return;
                 }
 
-                if (!GunCharms.TryGetValue(gunCharmID, out GunCharm gunCharm))
+                if (!GunCharms.TryGetValue(gunCharmID, out var gunCharm))
                 {
                     Logging.Debug($"Error finding gun charm with id {gunCharmID}");
                     return;
@@ -4484,13 +4484,13 @@ namespace UnturnedBlackout.Managers
                 await Conn.OpenAsync();
 
                 await new MySqlCommand($"DELETE FROM `{PLAYERS_GUNS_CHARMS}` WHERE `SteamID` = {steamID} AND `CharmID` = {gunCharmID};", Conn).ExecuteScalarAsync();
-                if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
                 {
                     Logging.Debug($"Couldnt find loadout for player with steam id {steamID}");
                     return;
                 }
 
-                if (!GunCharms.TryGetValue(gunCharmID, out GunCharm gunCharm))
+                if (!GunCharms.TryGetValue(gunCharmID, out var gunCharm))
                 {
                     Logging.Debug($"Error finding gun charm with id {gunCharmID}");
                     return;
@@ -4515,13 +4515,13 @@ namespace UnturnedBlackout.Managers
             try
             {
                 await Conn.OpenAsync();
-                if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
                 {
                     Logging.Debug($"Error finding loadout for player with steam id {steamID}");
                     return;
                 }
 
-                if (!loadout.GunCharms.TryGetValue(gunCharmID, out LoadoutGunCharm gunCharm))
+                if (!loadout.GunCharms.TryGetValue(gunCharmID, out var gunCharm))
                 {
                     Logging.Debug($"Error finding loadout gun charm with id {gunCharmID} for player with steam id {steamID}");
                     return;
@@ -4547,13 +4547,13 @@ namespace UnturnedBlackout.Managers
             try
             {
                 await Conn.OpenAsync();
-                if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
                 {
                     Logging.Debug($"Error finding loadout for player with steam id {steamID}");
                     return;
                 }
 
-                if (!loadout.GunCharms.TryGetValue(gunCharmID, out LoadoutGunCharm gunCharm))
+                if (!loadout.GunCharms.TryGetValue(gunCharmID, out var gunCharm))
                 {
                     Logging.Debug($"Error finding loadout gun charm with id {gunCharmID} for player with steam id {steamID}");
                     return;
@@ -4581,7 +4581,7 @@ namespace UnturnedBlackout.Managers
             try
             {
                 await Conn.OpenAsync();
-                if (!Knives.TryGetValue(knifeID, out Knife knife))
+                if (!Knives.TryGetValue(knifeID, out var knife))
                 {
                     Logging.Debug($"Error finding knife with id {knifeID}");
                     return;
@@ -4590,7 +4590,7 @@ namespace UnturnedBlackout.Managers
                 await new MySqlCommand($"INSERT INTO `{PLAYERS_KNIVES}` (`SteamID` , `KnifeID` , `KnifeKills` , `IsBought`) VALUES ({steamID} , {knifeID} , 0 , {isBought}) ON DUPLICATE KEY UPDATE `IsBought` = {isBought};", Conn).ExecuteScalarAsync();
 
                 LoadoutKnife loadoutKnife = new(knife, 0, isBought, false);
-                if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
                 {
                     Logging.Debug($"Couldnt finding loadout for player with steam id {steamID}");
                     return;
@@ -4624,20 +4624,20 @@ namespace UnturnedBlackout.Managers
             try
             {
                 await Conn.OpenAsync();
-                if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
                 {
                     Logging.Debug($"Error finding loadout for player with steam id {steamID}");
                     return;
                 }
 
-                if (!loadout.Knives.TryGetValue(knifeID, out LoadoutKnife knife))
+                if (!loadout.Knives.TryGetValue(knifeID, out var knife))
                 {
                     Logging.Debug($"Error finding loadout knife with id {knifeID} for player with steam id {steamID}");
                     return;
                 }
 
                 await new MySqlCommand($"UPDATE `{PLAYERS_KNIVES}` SET `KnifeKills` = `KnifeKills` + {kills} WHERE `SteamID` = {steamID} AND `KnifeID` = {knifeID};", Conn).ExecuteScalarAsync();
-                object obj = await new MySqlCommand($"SELECT `KnifeKills` FROM `{PLAYERS_KNIVES}` WHERE `SteamID` = {steamID} AND `KnifeID` = {knifeID};", Conn).ExecuteScalarAsync();
+                var obj = await new MySqlCommand($"SELECT `KnifeKills` FROM `{PLAYERS_KNIVES}` WHERE `SteamID` = {steamID} AND `KnifeID` = {knifeID};", Conn).ExecuteScalarAsync();
                 if (obj is int newKills)
                 {
                     knife.KnifeKills = newKills;
@@ -4660,13 +4660,13 @@ namespace UnturnedBlackout.Managers
             try
             {
                 await Conn.OpenAsync();
-                if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
                 {
                     Logging.Debug($"Error finding loadout for player with steam id {steamID}");
                     return;
                 }
 
-                if (!loadout.Knives.TryGetValue(knifeID, out LoadoutKnife knife))
+                if (!loadout.Knives.TryGetValue(knifeID, out var knife))
                 {
                     Logging.Debug($"Error finding loadout knife with id {knifeID} for player with steam id {steamID}");
                     return;
@@ -4692,13 +4692,13 @@ namespace UnturnedBlackout.Managers
             try
             {
                 await Conn.OpenAsync();
-                if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
                 {
                     Logging.Debug($"Error finding loadout for player with steam id {steamID}");
                     return;
                 }
 
-                if (!loadout.Knives.TryGetValue(knifeID, out LoadoutKnife knife))
+                if (!loadout.Knives.TryGetValue(knifeID, out var knife))
                 {
                     Logging.Debug($"Error finding loadout knife with id {knifeID} for player with steam id {steamID}");
                     return;
@@ -4726,14 +4726,14 @@ namespace UnturnedBlackout.Managers
             {
                 await Conn.OpenAsync();
 
-                if (!Knives.TryGetValue(knifeID, out Knife knife))
+                if (!Knives.TryGetValue(knifeID, out var knife))
                 {
                     Logging.Debug($"Error finding knife with id {knifeID}");
                     return;
                 }
 
                 await new MySqlCommand($"UPDATE `{KNIVES}` SET `UnboxedAmount` = `UnboxedAmount` + {amount} WHERE `KnifeID` = {knifeID};", Conn).ExecuteScalarAsync();
-                object obj = await new MySqlCommand($"SELECT `UnboxedAmount` FROM `{KNIVES}` WHERE `KnifeID` = {knifeID};", Conn).ExecuteScalarAsync();
+                var obj = await new MySqlCommand($"SELECT `UnboxedAmount` FROM `{KNIVES}` WHERE `KnifeID` = {knifeID};", Conn).ExecuteScalarAsync();
                 if (obj is int unboxedAmount)
                 {
                     knife.UnboxedAmount = unboxedAmount;
@@ -4759,13 +4759,13 @@ namespace UnturnedBlackout.Managers
             {
                 await Conn.OpenAsync();
                 await new MySqlCommand($"INSERT INTO `{PLAYERS_PERKS}` (`SteamID` , `PerkID` , `IsBought`) VALUES ({steamID} , {perkID} , {isBought}) ON DUPLICATE KEY UPDATE `IsBought` = {isBought};", Conn).ExecuteScalarAsync();
-                if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
                 {
                     Logging.Debug($"Couldnt finding loadout for player with steam id {steamID}");
                     return;
                 }
 
-                if (!Perks.TryGetValue(perkID, out Perk perk))
+                if (!Perks.TryGetValue(perkID, out var perk))
                 {
                     Logging.Debug($"Error finding perk with id {perkID}");
                     return;
@@ -4801,13 +4801,13 @@ namespace UnturnedBlackout.Managers
             try
             {
                 await Conn.OpenAsync();
-                if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
                 {
                     Logging.Debug($"Error finding loadout for player with steam id {steamID}");
                     return;
                 }
 
-                if (!loadout.Perks.TryGetValue(perkID, out LoadoutPerk perk))
+                if (!loadout.Perks.TryGetValue(perkID, out var perk))
                 {
                     Logging.Debug($"Error finding loadout perk with id {perkID} for player with steam id {steamID}");
                     return;
@@ -4833,13 +4833,13 @@ namespace UnturnedBlackout.Managers
             try
             {
                 await Conn.OpenAsync();
-                if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
                 {
                     Logging.Debug($"Error finding loadout for player with steam id {steamID}");
                     return;
                 }
 
-                if (!loadout.Perks.TryGetValue(perkID, out LoadoutPerk perk))
+                if (!loadout.Perks.TryGetValue(perkID, out var perk))
                 {
                     Logging.Debug($"Error finding loadout perk with id {perkID} for player with steam id {steamID}");
                     return;
@@ -4868,13 +4868,13 @@ namespace UnturnedBlackout.Managers
             {
                 await Conn.OpenAsync();
                 await new MySqlCommand($"INSERT INTO `{PLAYERS_GADGETS}` (`SteamID` , `GadgetID` , `GadgetKills` , `IsBought) VALUES ({steamID} , {gadgetID} , 0 , {isBought}) ON DUPLICATE KEY UPDATE `IsBought` = {isBought};", Conn).ExecuteScalarAsync();
-                if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
                 {
                     Logging.Debug($"Couldnt finding loadout for player with steam id {steamID}");
                     return;
                 }
 
-                if (!Gadgets.TryGetValue(gadgetID, out Gadget gadget))
+                if (!Gadgets.TryGetValue(gadgetID, out var gadget))
                 {
                     Logging.Debug($"Error finding gadget with id {gadgetID}");
                     return;
@@ -4909,20 +4909,20 @@ namespace UnturnedBlackout.Managers
             try
             {
                 await Conn.OpenAsync();
-                if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
                 {
                     Logging.Debug($"Error finding loadout for player with steam id {steamID}");
                     return;
                 }
 
-                if (!loadout.Gadgets.TryGetValue(gadgetID, out LoadoutGadget gadget))
+                if (!loadout.Gadgets.TryGetValue(gadgetID, out var gadget))
                 {
                     Logging.Debug($"Error finding loadout gadget with id {gadgetID} for player with steam id {steamID}");
                     return;
                 }
 
                 await new MySqlCommand($"UPDATE `{PLAYERS_GADGETS}` SET `GadgetKills` = `GadgetKills` + {kills} WHERE `SteamID` = {steamID} AND `GadgetID` = {gadgetID};", Conn).ExecuteScalarAsync();
-                object obj = await new MySqlCommand($"SELECT `GadgetKills` FROM `{PLAYERS_GADGETS}` WHERE `SteamID` = {steamID} AND `GadgetID` = {gadgetID};", Conn).ExecuteScalarAsync();
+                var obj = await new MySqlCommand($"SELECT `GadgetKills` FROM `{PLAYERS_GADGETS}` WHERE `SteamID` = {steamID} AND `GadgetID` = {gadgetID};", Conn).ExecuteScalarAsync();
                 if (obj is int newKills)
                 {
                     gadget.GadgetKills = newKills;
@@ -4945,13 +4945,13 @@ namespace UnturnedBlackout.Managers
             try
             {
                 await Conn.OpenAsync();
-                if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
                 {
                     Logging.Debug($"Error finding loadout for player with steam id {steamID}");
                     return;
                 }
 
-                if (!loadout.Gadgets.TryGetValue(gadgetID, out LoadoutGadget gadget))
+                if (!loadout.Gadgets.TryGetValue(gadgetID, out var gadget))
                 {
                     Logging.Debug($"Error finding loadout gadget with id {gadgetID} for player with steam id {steamID}");
                     return;
@@ -4977,13 +4977,13 @@ namespace UnturnedBlackout.Managers
             try
             {
                 await Conn.OpenAsync();
-                if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
                 {
                     Logging.Debug($"Error finding loadout for player with steam id {steamID}");
                     return;
                 }
 
-                if (!loadout.Gadgets.TryGetValue(gadgetID, out LoadoutGadget gadget))
+                if (!loadout.Gadgets.TryGetValue(gadgetID, out var gadget))
                 {
                     Logging.Debug($"Error finding loadout gadget with id {gadgetID} for player with steam id {steamID}");
                     return;
@@ -5012,13 +5012,13 @@ namespace UnturnedBlackout.Managers
             {
                 await Conn.OpenAsync();
                 await new MySqlCommand($"INSERT INTO `{PLAYERS_KILLSTREAKS}` (`SteamID` , `KillstreakID` , `KillstreakKills` , `IsBought) VALUES ({steamID} , {killstreakID} , 0 , {isBought}) ON DUPLICATE KEY UPDATE `IsBought` = {isBought};", Conn).ExecuteScalarAsync();
-                if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
                 {
                     Logging.Debug($"Couldnt finding loadout for player with steam id {steamID}");
                     return;
                 }
 
-                if (!Killstreaks.TryGetValue(killstreakID, out Killstreak killstreak))
+                if (!Killstreaks.TryGetValue(killstreakID, out var killstreak))
                 {
                     Logging.Debug($"Error finding killstreak with id {killstreakID}");
                     return;
@@ -5053,20 +5053,20 @@ namespace UnturnedBlackout.Managers
             try
             {
                 await Conn.OpenAsync();
-                if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
                 {
                     Logging.Debug($"Error finding loadout for player with steam id {steamID}");
                     return;
                 }
 
-                if (!loadout.Killstreaks.TryGetValue(killstreakID, out LoadoutKillstreak killstreak))
+                if (!loadout.Killstreaks.TryGetValue(killstreakID, out var killstreak))
                 {
                     Logging.Debug($"Error finding loadout killstreak with id {killstreakID} for player with steam id {steamID}");
                     return;
                 }
 
                 await new MySqlCommand($"UPDATE `{PLAYERS_KILLSTREAKS}` SET `KillstreakKills` = `KillstreakKills` + {kills} WHERE `SteamID` = {steamID} AND `KillstreakID` = {killstreakID};", Conn).ExecuteScalarAsync();
-                object obj = await new MySqlCommand($"SELECT `KillstreakKills` FROM `{PLAYERS_KILLSTREAKS}` WHERE `SteamID` = {steamID} AND `KillstreakID` = {killstreakID};", Conn).ExecuteScalarAsync();
+                var obj = await new MySqlCommand($"SELECT `KillstreakKills` FROM `{PLAYERS_KILLSTREAKS}` WHERE `SteamID` = {steamID} AND `KillstreakID` = {killstreakID};", Conn).ExecuteScalarAsync();
                 if (obj is int newKills)
                 {
                     killstreak.KillstreakKills = newKills;
@@ -5089,13 +5089,13 @@ namespace UnturnedBlackout.Managers
             try
             {
                 await Conn.OpenAsync();
-                if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
                 {
                     Logging.Debug($"Error finding loadout for player with steam id {steamID}");
                     return;
                 }
 
-                if (!loadout.Killstreaks.TryGetValue(killstreakID, out LoadoutKillstreak killstreak))
+                if (!loadout.Killstreaks.TryGetValue(killstreakID, out var killstreak))
                 {
                     Logging.Debug($"Error finding loadout killstreak with id {killstreakID} for player with steam id {steamID}");
                     return;
@@ -5121,13 +5121,13 @@ namespace UnturnedBlackout.Managers
             try
             {
                 await Conn.OpenAsync();
-                if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
                 {
                     Logging.Debug($"Error finding loadout for player with steam id {steamID}");
                     return;
                 }
 
-                if (!loadout.Killstreaks.TryGetValue(killstreakID, out LoadoutKillstreak killstreak))
+                if (!loadout.Killstreaks.TryGetValue(killstreakID, out var killstreak))
                 {
                     Logging.Debug($"Error finding loadout killstreak with id {killstreakID} for player with steam id {steamID}");
                     return;
@@ -5156,13 +5156,13 @@ namespace UnturnedBlackout.Managers
             {
                 await Conn.OpenAsync();
                 await new MySqlCommand($"INSERT INTO `{PLAYERS_CARDS}` (`SteamID` , `CardID` , `IsBought`) VALUES ({steamID} , {cardID} , {isBought}) ON DUPLICATE KEY UPDATE `IsBought` = {isBought};", Conn).ExecuteScalarAsync();
-                if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
                 {
                     Logging.Debug($"Couldnt finding loadout for player with steam id {steamID}");
                     return;
                 }
 
-                if (!Cards.TryGetValue(cardID, out Card card))
+                if (!Cards.TryGetValue(cardID, out var card))
                 {
                     Logging.Debug($"Error finding card with id {cardID}");
                     return;
@@ -5197,13 +5197,13 @@ namespace UnturnedBlackout.Managers
             try
             {
                 await Conn.OpenAsync();
-                if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
                 {
                     Logging.Debug($"Error finding loadout for player with steam id {steamID}");
                     return;
                 }
 
-                if (!loadout.Cards.TryGetValue(cardID, out LoadoutCard card))
+                if (!loadout.Cards.TryGetValue(cardID, out var card))
                 {
                     Logging.Debug($"Error finding loadout card with id {cardID} for player with steam id {steamID}");
                     return;
@@ -5229,13 +5229,13 @@ namespace UnturnedBlackout.Managers
             try
             {
                 await Conn.OpenAsync();
-                if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
                 {
                     Logging.Debug($"Error finding loadout for player with steam id {steamID}");
                     return;
                 }
 
-                if (!loadout.Cards.TryGetValue(cardID, out LoadoutCard card))
+                if (!loadout.Cards.TryGetValue(cardID, out var card))
                 {
                     Logging.Debug($"Error finding loadout card with id {cardID} for player with steam id {steamID}");
                     return;
@@ -5262,13 +5262,13 @@ namespace UnturnedBlackout.Managers
             {
                 await Conn.OpenAsync();
                 await new MySqlCommand($"DELETE FROM `{PLAYERS_CARDS}` WHERE `SteamID` = {steamID} AND `CardID` = {cardID};", Conn).ExecuteScalarAsync();
-                if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
                 {
                     Logging.Debug($"Error finding loadout for player with steam id {steamID}");
                     return;
                 }
 
-                if (!loadout.Cards.TryGetValue(cardID, out LoadoutCard card))
+                if (!loadout.Cards.TryGetValue(cardID, out var card))
                 {
                     Logging.Debug($"Error finding loadout card with id {cardID} for player with steam id {steamID}");
                     return;
@@ -5295,13 +5295,13 @@ namespace UnturnedBlackout.Managers
             {
                 await Conn.OpenAsync();
                 await new MySqlCommand($"INSERT INTO `{PLAYERS_GLOVES}` (`SteamID` , `GloveID` , `IsBought`) VALUES ({steamID} , {gloveID} , {isBought}) ON DUPLICATE KEY UPDATE `IsBought` = {isBought};", Conn).ExecuteScalarAsync();
-                if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
                 {
                     Logging.Debug($"Couldnt finding loadout for player with steam id {steamID}");
                     return;
                 }
 
-                if (!Gloves.TryGetValue(gloveID, out Glove glove))
+                if (!Gloves.TryGetValue(gloveID, out var glove))
                 {
                     Logging.Debug($"Error finding glove with id {gloveID}");
                     return;
@@ -5336,13 +5336,13 @@ namespace UnturnedBlackout.Managers
             try
             {
                 await Conn.OpenAsync();
-                if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
                 {
                     Logging.Debug($"Error finding loadout for player with steam id {steamID}");
                     return;
                 }
 
-                if (!loadout.Gloves.TryGetValue(gloveID, out LoadoutGlove glove))
+                if (!loadout.Gloves.TryGetValue(gloveID, out var glove))
                 {
                     Logging.Debug($"Error finding loadout glove with id {gloveID} for player with steam id {steamID}");
                     return;
@@ -5368,13 +5368,13 @@ namespace UnturnedBlackout.Managers
             try
             {
                 await Conn.OpenAsync();
-                if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
                 {
                     Logging.Debug($"Error finding loadout for player with steam id {steamID}");
                     return;
                 }
 
-                if (!loadout.Gloves.TryGetValue(gloveID, out LoadoutGlove glove))
+                if (!loadout.Gloves.TryGetValue(gloveID, out var glove))
                 {
                     Logging.Debug($"Error finding loadout glove with id {gloveID} for player with steam id {steamID}");
                     return;
@@ -5400,14 +5400,14 @@ namespace UnturnedBlackout.Managers
 
             try
             {
-                if (!Gloves.TryGetValue(gloveID, out Glove glove))
+                if (!Gloves.TryGetValue(gloveID, out var glove))
                 {
                     Logging.Debug($"Error finding glove with id {gloveID}");
                     return;
                 }
 
                 await new MySqlCommand($"UPDATE `{GLOVES}` SET `UnboxedAmount` = `UnboxedAmount` + {amount} WHERE `GloveID` = {gloveID};", Conn).ExecuteScalarAsync();
-                object obj = await new MySqlCommand($"SELECT `UnboxedAmount` FROM `{GLOVES}` WHERE `GloveID` = {gloveID};", Conn).ExecuteScalarAsync();
+                var obj = await new MySqlCommand($"SELECT `UnboxedAmount` FROM `{GLOVES}` WHERE `GloveID` = {gloveID};", Conn).ExecuteScalarAsync();
                 if (obj is int unboxedAmount)
                 {
                     glove.UnboxedAmount = unboxedAmount;
@@ -5431,13 +5431,13 @@ namespace UnturnedBlackout.Managers
             try
             {
                 await Conn.OpenAsync();
-                if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
                 {
                     Logging.Debug($"Error finding loadout for player with steam id {steamID}");
                     return;
                 }
 
-                if (!loadout.Loadouts.TryGetValue(loadoutID, out Loadout playerLoadout))
+                if (!loadout.Loadouts.TryGetValue(loadoutID, out var playerLoadout))
                 {
                     Logging.Debug($"Error finding loadout with id {loadoutID} for player with steam id {steamID}");
                     return;
@@ -5463,13 +5463,13 @@ namespace UnturnedBlackout.Managers
             try
             {
                 await Conn.OpenAsync();
-                if (!PlayerLoadouts.TryGetValue(steamID, out PlayerLoadout loadout))
+                if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
                 {
                     Logging.Debug($"Error finding loadout for player with steam id {steamID}");
                     return;
                 }
 
-                if (!loadout.Loadouts.TryGetValue(loadoutID, out Loadout playerLoadout))
+                if (!loadout.Loadouts.TryGetValue(loadoutID, out var playerLoadout))
                 {
                     Logging.Debug($"Error finding loadout for player with id {loadoutID}");
                     return;
@@ -5505,66 +5505,66 @@ namespace UnturnedBlackout.Managers
                     while (rdr.Read())
                     {
 
-                        if (!long.TryParse(rdr[0].ToString(), out long dailyLeaderboardWipeUnix))
+                        if (!long.TryParse(rdr[0].ToString(), out var dailyLeaderboardWipeUnix))
                         {
                             continue;
                         }
 
-                        DateTimeOffset dailyLeaderboardWipe = DateTimeOffset.FromUnixTimeSeconds(dailyLeaderboardWipeUnix);
+                        var dailyLeaderboardWipe = DateTimeOffset.FromUnixTimeSeconds(dailyLeaderboardWipeUnix);
 
-                        if (!long.TryParse(rdr[1].ToString(), out long weeklyLeaderboardWipeUnix))
+                        if (!long.TryParse(rdr[1].ToString(), out var weeklyLeaderboardWipeUnix))
                         {
                             continue;
                         }
 
-                        DateTimeOffset weeklyLeaderboardWipe = DateTimeOffset.FromUnixTimeSeconds(weeklyLeaderboardWipeUnix);
+                        var weeklyLeaderboardWipe = DateTimeOffset.FromUnixTimeSeconds(weeklyLeaderboardWipeUnix);
 
-                        Dictionary<int, List<Reward>> dailyRanked = Utility.GetRankedRewardsFromString(rdr[2].ToString());
-                        List<PercentileReward> dailyPercentile = Utility.GetPercentileRewardsFromString(rdr[3].ToString());
+                        var dailyRanked = Utility.GetRankedRewardsFromString(rdr[2].ToString());
+                        var dailyPercentile = Utility.GetPercentileRewardsFromString(rdr[3].ToString());
 
-                        Dictionary<int, List<Reward>> weeklyRanked = Utility.GetRankedRewardsFromString(rdr[4].ToString());
-                        List<PercentileReward> weeklyPercentile = Utility.GetPercentileRewardsFromString(rdr[5].ToString());
+                        var weeklyRanked = Utility.GetRankedRewardsFromString(rdr[4].ToString());
+                        var weeklyPercentile = Utility.GetPercentileRewardsFromString(rdr[5].ToString());
 
-                        Dictionary<int, List<Reward>> seasonalRanked = Utility.GetRankedRewardsFromString(rdr[6].ToString());
-                        List<PercentileReward> seasonalPercentile = Utility.GetPercentileRewardsFromString(rdr[7].ToString());
+                        var seasonalRanked = Utility.GetRankedRewardsFromString(rdr[6].ToString());
+                        var seasonalPercentile = Utility.GetPercentileRewardsFromString(rdr[7].ToString());
 
-                        if (!float.TryParse(rdr[8].ToString(), out float xpBooster))
+                        if (!float.TryParse(rdr[8].ToString(), out var xpBooster))
                         {
                             continue;
                         }
 
-                        if (!float.TryParse(rdr[9].ToString(), out float bpBooster))
+                        if (!float.TryParse(rdr[9].ToString(), out var bpBooster))
                         {
                             continue;
                         }
 
-                        if (!float.TryParse(rdr[10].ToString(), out float gunXPBooster))
+                        if (!float.TryParse(rdr[10].ToString(), out var gunXPBooster))
                         {
                             continue;
                         }
 
-                        if (!long.TryParse(rdr[11].ToString(), out long xpBoosterWipeUnix))
+                        if (!long.TryParse(rdr[11].ToString(), out var xpBoosterWipeUnix))
                         {
                             continue;
                         }
 
-                        DateTimeOffset xpBoosterWipe = DateTimeOffset.FromUnixTimeSeconds(xpBoosterWipeUnix);
-                        if (!long.TryParse(rdr[12].ToString(), out long bpBoosterWipeUnix))
+                        var xpBoosterWipe = DateTimeOffset.FromUnixTimeSeconds(xpBoosterWipeUnix);
+                        if (!long.TryParse(rdr[12].ToString(), out var bpBoosterWipeUnix))
                         {
                             continue;
                         }
 
-                        DateTimeOffset bpBoosterWipe = DateTimeOffset.FromUnixTimeSeconds(bpBoosterWipeUnix);
-                        if (!long.TryParse(rdr[13].ToString(), out long gunXPBoosterWipeUnix))
+                        var bpBoosterWipe = DateTimeOffset.FromUnixTimeSeconds(bpBoosterWipeUnix);
+                        if (!long.TryParse(rdr[13].ToString(), out var gunXPBoosterWipeUnix))
                         {
                             continue;
                         }
 
-                        DateTimeOffset gunXPBoosterWipe = DateTimeOffset.FromUnixTimeSeconds(gunXPBoosterWipeUnix);
+                        var gunXPBoosterWipe = DateTimeOffset.FromUnixTimeSeconds(gunXPBoosterWipeUnix);
 
-                        List<string> gameTips = rdr[14].ToString().Split(',').ToList();
-                        List<Reward> primeRewards = Utility.GetRewardsFromString(rdr[15].ToString());
-                        List<Reward> primeDailyRewards = Utility.GetRewardsFromString(rdr[16].ToString());
+                        var gameTips = rdr[14].ToString().Split(',').ToList();
+                        var primeRewards = Utility.GetRewardsFromString(rdr[15].ToString());
+                        var primeDailyRewards = Utility.GetRewardsFromString(rdr[16].ToString());
 
                         ServerOptions = new Options(dailyLeaderboardWipe, weeklyLeaderboardWipe, dailyRanked, dailyPercentile, weeklyRanked, weeklyPercentile, seasonalRanked, seasonalPercentile, xpBooster, bpBooster, gunXPBooster, xpBoosterWipe, bpBoosterWipe, gunXPBoosterWipe, gameTips, primeRewards, primeDailyRewards);
                     }
@@ -5587,41 +5587,41 @@ namespace UnturnedBlackout.Managers
 
                     while (rdr.Read())
                     {
-                        if (!ulong.TryParse(rdr[0].ToString(), out ulong steamid))
+                        if (!ulong.TryParse(rdr[0].ToString(), out var steamid))
                         {
                             continue;
                         }
 
-                        string steamName = rdr[1].ToString();
-                        string countryCode = rdr[2].ToString();
-                        
-                        if (!bool.TryParse(rdr[3].ToString(), out bool hideFlag))
+                        var steamName = rdr[1].ToString();
+                        var countryCode = rdr[2].ToString();
+
+                        if (!bool.TryParse(rdr[3].ToString(), out var hideFlag))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[4].ToString(), out int level))
+                        if (!int.TryParse(rdr[4].ToString(), out var level))
                         {
                             continue;
                         }
 
-                        if (!bool.TryParse(rdr[5].ToString(), out bool hasPrime))
+                        if (!bool.TryParse(rdr[5].ToString(), out var hasPrime))
                         {
                             continue;
                         }
 
                         CSteamID steamID = new(steamid);
-                        if (!int.TryParse(rdr[6].ToString(), out int kills))
+                        if (!int.TryParse(rdr[6].ToString(), out var kills))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[7].ToString(), out int headshotKills))
+                        if (!int.TryParse(rdr[7].ToString(), out var headshotKills))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[8].ToString(), out int deaths))
+                        if (!int.TryParse(rdr[8].ToString(), out var deaths))
                         {
                             continue;
                         }
@@ -5653,41 +5653,41 @@ namespace UnturnedBlackout.Managers
 
                     while (rdr.Read())
                     {
-                        if (!ulong.TryParse(rdr[0].ToString(), out ulong steamid))
+                        if (!ulong.TryParse(rdr[0].ToString(), out var steamid))
                         {
                             continue;
                         }
 
-                        string steamName = rdr[1].ToString();
-                        string countryCode = rdr[2].ToString();
+                        var steamName = rdr[1].ToString();
+                        var countryCode = rdr[2].ToString();
 
-                        if (!bool.TryParse(rdr[3].ToString(), out bool hideFlag))
+                        if (!bool.TryParse(rdr[3].ToString(), out var hideFlag))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[4].ToString(), out int level))
+                        if (!int.TryParse(rdr[4].ToString(), out var level))
                         {
                             continue;
                         }
 
-                        if (!bool.TryParse(rdr[5].ToString(), out bool hasPrime))
+                        if (!bool.TryParse(rdr[5].ToString(), out var hasPrime))
                         {
                             continue;
                         }
 
                         CSteamID steamID = new(steamid);
-                        if (!int.TryParse(rdr[6].ToString(), out int kills))
+                        if (!int.TryParse(rdr[6].ToString(), out var kills))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[7].ToString(), out int headshotKills))
+                        if (!int.TryParse(rdr[7].ToString(), out var headshotKills))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[8].ToString(), out int deaths))
+                        if (!int.TryParse(rdr[8].ToString(), out var deaths))
                         {
                             continue;
                         }
@@ -5711,7 +5711,7 @@ namespace UnturnedBlackout.Managers
                     rdr.Close();
                 }
 
-                foreach (PlayerData data in PlayerData.Values)
+                foreach (var data in PlayerData.Values)
                 {
                     if (!PlayerDailyLeaderboardLookup.ContainsKey(data.SteamID))
                     {
@@ -5738,41 +5738,41 @@ namespace UnturnedBlackout.Managers
 
                     while (rdr.Read())
                     {
-                        if (!ulong.TryParse(rdr[0].ToString(), out ulong steamid))
+                        if (!ulong.TryParse(rdr[0].ToString(), out var steamid))
                         {
                             continue;
                         }
 
-                        string steamName = rdr[1].ToString();
-                        string countryCode = rdr[2].ToString();
+                        var steamName = rdr[1].ToString();
+                        var countryCode = rdr[2].ToString();
 
-                        if (!bool.TryParse(rdr[3].ToString(), out bool hideFlag))
+                        if (!bool.TryParse(rdr[3].ToString(), out var hideFlag))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[4].ToString(), out int level))
+                        if (!int.TryParse(rdr[4].ToString(), out var level))
                         {
                             continue;
                         }
 
-                        if (!bool.TryParse(rdr[5].ToString(), out bool hasPrime))
+                        if (!bool.TryParse(rdr[5].ToString(), out var hasPrime))
                         {
                             continue;
                         }
 
                         CSteamID steamID = new(steamid);
-                        if (!int.TryParse(rdr[6].ToString(), out int kills))
+                        if (!int.TryParse(rdr[6].ToString(), out var kills))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[7].ToString(), out int headshotKills))
+                        if (!int.TryParse(rdr[7].ToString(), out var headshotKills))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[8].ToString(), out int deaths))
+                        if (!int.TryParse(rdr[8].ToString(), out var deaths))
                         {
                             continue;
                         }
@@ -5804,41 +5804,41 @@ namespace UnturnedBlackout.Managers
                     List<LeaderboardData> playerAllTimeLevel = new();
                     while (rdr.Read())
                     {
-                        if (!ulong.TryParse(rdr[0].ToString(), out ulong steamid))
+                        if (!ulong.TryParse(rdr[0].ToString(), out var steamid))
                         {
                             continue;
                         }
 
                         CSteamID steamID = new(steamid);
-                        string steamName = rdr[1].ToString();
-                        string countryCode = rdr[2].ToString();
+                        var steamName = rdr[1].ToString();
+                        var countryCode = rdr[2].ToString();
 
-                        if (!bool.TryParse(rdr[3].ToString(), out bool hideFlag))
+                        if (!bool.TryParse(rdr[3].ToString(), out var hideFlag))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[4].ToString(), out int level))
+                        if (!int.TryParse(rdr[4].ToString(), out var level))
                         {
                             continue;
                         }
 
-                        if (!bool.TryParse(rdr[5].ToString(), out bool hasPrime))
+                        if (!bool.TryParse(rdr[5].ToString(), out var hasPrime))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[6].ToString(), out int kills))
+                        if (!int.TryParse(rdr[6].ToString(), out var kills))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[7].ToString(), out int headshotKills))
+                        if (!int.TryParse(rdr[7].ToString(), out var headshotKills))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[8].ToString(), out int deaths))
+                        if (!int.TryParse(rdr[8].ToString(), out var deaths))
                         {
                             continue;
                         }
@@ -5876,14 +5876,14 @@ namespace UnturnedBlackout.Managers
                     new Field[] { new Field($"Ranked:", "", false), new Field("Percentile:", "", false) },
                     null, null);
 
-                    foreach (KeyValuePair<int, List<Reward>> rankedReward in ServerOptions.DailyRankedRewards)
+                    foreach (var rankedReward in ServerOptions.DailyRankedRewards)
                     {
                         if (PlayerDailyLeaderboard.Count < (rankedReward.Key + 1))
                         {
                             break;
                         }
 
-                        LeaderboardData leaderboardData = PlayerDailyLeaderboard[rankedReward.Key];
+                        var leaderboardData = PlayerDailyLeaderboard[rankedReward.Key];
                         bulkRewards.Add(new(leaderboardData.SteamID, rankedReward.Value));
                         embed.fields[0].value += $"{Utility.GetDiscordEmoji(rankedReward.Key + 1)} [{leaderboardData.SteamName}](https://steamcommunity.com/profiles/{leaderboardData.SteamID}/) | {leaderboardData.Kills + leaderboardData.HeadshotKills} Kills \n";
                         if (rankedReward.Key == 2)
@@ -5893,19 +5893,19 @@ namespace UnturnedBlackout.Managers
                     }
 
                     // Give all percentile rewards
-                    foreach (PercentileReward percentileReward in ServerOptions.DailyPercentileRewards)
+                    foreach (var percentileReward in ServerOptions.DailyPercentileRewards)
                     {
-                        int lowerIndex = percentileReward.LowerPercentile == 0 ? 0 : (percentileReward.LowerPercentile * PlayerDailyLeaderboard.Count / 100);
-                        int upperIndex = percentileReward.UpperPercentile * PlayerDailyLeaderboard.Count / 100;
+                        var lowerIndex = percentileReward.LowerPercentile == 0 ? 0 : (percentileReward.LowerPercentile * PlayerDailyLeaderboard.Count / 100);
+                        var upperIndex = percentileReward.UpperPercentile * PlayerDailyLeaderboard.Count / 100;
 
-                        for (int i = lowerIndex; i < upperIndex; i++)
+                        for (var i = lowerIndex; i < upperIndex; i++)
                         {
                             if (PlayerDailyLeaderboard.Count < (i + 1))
                             {
                                 break;
                             }
 
-                            LeaderboardData leaderboardData = PlayerDailyLeaderboard[i];
+                            var leaderboardData = PlayerDailyLeaderboard[i];
                             bulkRewards.Add(new(leaderboardData.SteamID, percentileReward.Rewards));
                         }
 
@@ -5931,7 +5931,7 @@ namespace UnturnedBlackout.Managers
                     PlayerDailyLeaderboard.Clear();
                     PlayerDailyLeaderboardLookup.Clear();
 
-                    foreach (PlayerData data in PlayerData.Values)
+                    foreach (var data in PlayerData.Values)
                     {
                         LeaderboardData leaderboardData = new(data.SteamID, data.SteamName, data.CountryCode, data.HideFlag, data.Level, data.HasPrime, 0, 0, 0);
                         PlayerDailyLeaderboard.Add(leaderboardData);
@@ -5940,8 +5940,8 @@ namespace UnturnedBlackout.Managers
                     }
 
                     // Change the wipe date
-                    int hourTarget = ServerOptions.DailyLeaderboardWipe.Hour;
-                    DateTime now = DateTime.UtcNow;
+                    var hourTarget = ServerOptions.DailyLeaderboardWipe.Hour;
+                    var now = DateTime.UtcNow;
                     DateTimeOffset newWipeDate = new(now.Year, now.Month, now.Day, hourTarget, 0, 0, new TimeSpan(0));
                     if (now.Hour >= hourTarget)
                     {
@@ -5961,14 +5961,14 @@ namespace UnturnedBlackout.Managers
                     new Field[] { new Field($"Ranked:", "", false), new Field("Percentile:", "", false) },
                     null, null);
 
-                    foreach (KeyValuePair<int, List<Reward>> rankedReward in ServerOptions.WeeklyRankedRewards)
+                    foreach (var rankedReward in ServerOptions.WeeklyRankedRewards)
                     {
                         if (PlayerWeeklyLeaderboard.Count < (rankedReward.Key + 1))
                         {
                             break;
                         }
 
-                        LeaderboardData leaderboardData = PlayerWeeklyLeaderboard[rankedReward.Key];
+                        var leaderboardData = PlayerWeeklyLeaderboard[rankedReward.Key];
                         bulkRewards.Add(new(leaderboardData.SteamID, rankedReward.Value));
                         embed.fields[0].value += $"{Utility.GetDiscordEmoji(rankedReward.Key + 1)} [{leaderboardData.SteamName}](https://steamcommunity.com/profiles/{leaderboardData.SteamID}/) | {leaderboardData.Kills + leaderboardData.HeadshotKills} Kills \n";
                         if (rankedReward.Key == 2)
@@ -5978,19 +5978,19 @@ namespace UnturnedBlackout.Managers
                     }
 
                     // Give all percentile rewards
-                    foreach (PercentileReward percentileReward in ServerOptions.WeeklyPercentileRewards)
+                    foreach (var percentileReward in ServerOptions.WeeklyPercentileRewards)
                     {
-                        int lowerIndex = percentileReward.LowerPercentile == 0 ? 0 : (percentileReward.LowerPercentile * PlayerWeeklyLeaderboard.Count / 100);
-                        int upperIndex = percentileReward.UpperPercentile * PlayerWeeklyLeaderboard.Count / 100;
+                        var lowerIndex = percentileReward.LowerPercentile == 0 ? 0 : (percentileReward.LowerPercentile * PlayerWeeklyLeaderboard.Count / 100);
+                        var upperIndex = percentileReward.UpperPercentile * PlayerWeeklyLeaderboard.Count / 100;
 
-                        for (int i = lowerIndex; i < upperIndex; i++)
+                        for (var i = lowerIndex; i < upperIndex; i++)
                         {
                             if (PlayerWeeklyLeaderboard.Count < (i + 1))
                             {
                                 break;
                             }
 
-                            LeaderboardData leaderboardData = PlayerWeeklyLeaderboard[i];
+                            var leaderboardData = PlayerWeeklyLeaderboard[i];
                             bulkRewards.Add(new(leaderboardData.SteamID, percentileReward.Rewards));
                         }
 
@@ -6016,7 +6016,7 @@ namespace UnturnedBlackout.Managers
                     PlayerWeeklyLeaderboard.Clear();
                     PlayerWeeklyLeaderboardLookup.Clear();
 
-                    foreach (PlayerData data in PlayerData.Values)
+                    foreach (var data in PlayerData.Values)
                     {
                         LeaderboardData leaderboardData = new(data.SteamID, data.SteamName, data.CountryCode, data.HideFlag, data.Level, data.HasPrime, 0, 0, 0);
                         PlayerWeeklyLeaderboard.Add(leaderboardData);
@@ -6025,7 +6025,7 @@ namespace UnturnedBlackout.Managers
                     }
 
                     // Change the wipe date
-                    DateTimeOffset newWipeDate = DateTimeOffset.UtcNow.AddDays(7);
+                    var newWipeDate = DateTimeOffset.UtcNow.AddDays(7);
                     newWipeDate = new DateTimeOffset(newWipeDate.Year, newWipeDate.Month, newWipeDate.Day, ServerOptions.WeeklyLeaderboardWipe.Hour, 0, 0, new TimeSpan(0));
                     new MySqlCommand($"UPDATE `{OPTIONS}` SET `WeeklyLeaderboardWipe` = {newWipeDate.ToUnixTimeSeconds()};", Conn).ExecuteScalar();
                     ServerOptions.WeeklyLeaderboardWipe = newWipeDate;
@@ -6042,14 +6042,14 @@ namespace UnturnedBlackout.Managers
                     new Field[] { new Field($"Ranked:", "", false), new Field("Percentile:", "", false) },
                     null, null);
 
-                    foreach (KeyValuePair<int, List<Reward>> rankedReward in ServerOptions.SeasonalRankedRewards)
+                    foreach (var rankedReward in ServerOptions.SeasonalRankedRewards)
                     {
                         if (PlayerSeasonalLeaderboard.Count < (rankedReward.Key + 1))
                         {
                             break;
                         }
 
-                        LeaderboardData leaderboardData = PlayerSeasonalLeaderboard[rankedReward.Key];
+                        var leaderboardData = PlayerSeasonalLeaderboard[rankedReward.Key];
                         bulkRewards.Add(new(leaderboardData.SteamID, rankedReward.Value));
                         embed.fields[0].value += $"{Utility.GetDiscordEmoji(rankedReward.Key + 1)} [{leaderboardData.SteamName}](https://steamcommunity.com/profiles/{leaderboardData.SteamID}/) | {leaderboardData.Kills + leaderboardData.HeadshotKills} Kills \n";
                         if (rankedReward.Key == 2)
@@ -6059,19 +6059,19 @@ namespace UnturnedBlackout.Managers
                     }
 
                     // Give all percentile rewards
-                    foreach (PercentileReward percentileReward in ServerOptions.SeasonalPercentileRewards)
+                    foreach (var percentileReward in ServerOptions.SeasonalPercentileRewards)
                     {
-                        int lowerIndex = percentileReward.LowerPercentile == 0 ? 0 : (percentileReward.LowerPercentile * PlayerSeasonalLeaderboard.Count / 100);
-                        int upperIndex = percentileReward.UpperPercentile * PlayerSeasonalLeaderboard.Count / 100;
+                        var lowerIndex = percentileReward.LowerPercentile == 0 ? 0 : (percentileReward.LowerPercentile * PlayerSeasonalLeaderboard.Count / 100);
+                        var upperIndex = percentileReward.UpperPercentile * PlayerSeasonalLeaderboard.Count / 100;
 
-                        for (int i = lowerIndex; i < upperIndex; i++)
+                        for (var i = lowerIndex; i < upperIndex; i++)
                         {
                             if (PlayerSeasonalLeaderboard.Count < (i + 1))
                             {
                                 break;
                             }
 
-                            LeaderboardData leaderboardData = PlayerSeasonalLeaderboard[i];
+                            var leaderboardData = PlayerSeasonalLeaderboard[i];
                             bulkRewards.Add(new(leaderboardData.SteamID, percentileReward.Rewards));
                         }
 
@@ -6095,7 +6095,7 @@ namespace UnturnedBlackout.Managers
                 if (bulkRewards.Count > 0)
                     Plugin.Instance.Reward.GiveBulkRewards(bulkRewards);
 
-                foreach (PlayerData data in PlayerData.Values)
+                foreach (var data in PlayerData.Values)
                 {
                     if (data.Quests[0].QuestEnd > DateTimeOffset.UtcNow)
                     {
@@ -6107,16 +6107,16 @@ namespace UnturnedBlackout.Managers
                     Dictionary<EQuestType, List<PlayerQuest>> playerQuestsSearchByType = new();
 
                     new MySqlCommand($"DELETE FROM `{PLAYERS_QUESTS}` WHERE `SteamID` = {data.SteamID};", Conn).ExecuteScalar();
-                    DateTimeOffset expiryDate = ServerOptions.DailyLeaderboardWipe;
+                    var expiryDate = ServerOptions.DailyLeaderboardWipe;
                     List<Quest> questsToAdd = new();
-                    for (int i = 0; i < 6; i++)
+                    for (var i = 0; i < 6; i++)
                     {
-                        List<Quest> randomQuests = Quests.Where(k => (int)k.QuestTier == i).ToList();
-                        Quest randomQuest = randomQuests[UnityEngine.Random.Range(0, randomQuests.Count)];
+                        var randomQuests = Quests.Where(k => (int)k.QuestTier == i).ToList();
+                        var randomQuest = randomQuests[UnityEngine.Random.Range(0, randomQuests.Count)];
                         questsToAdd.Add(randomQuest);
                     }
 
-                    foreach (Quest quest in questsToAdd)
+                    foreach (var quest in questsToAdd)
                     {
                         PlayerQuest playerQuest = new(data.SteamID, quest, 0, expiryDate);
                         playerQuests.Add(playerQuest);
@@ -6151,7 +6151,7 @@ namespace UnturnedBlackout.Managers
                     new MySqlCommand($"UPDATE `{OPTIONS} SET `GunXPBooster` = 0;", Conn).ExecuteScalar();
                 }
 
-                foreach (PlayerData data in PlayerData.Values)
+                foreach (var data in PlayerData.Values)
                 {
                     new MySqlCommand($"DELETE FROM `{PLAYERS_BOOSTERS}` WHERE `SteamID` = {data.SteamID} AND `BoosterExpiration` < {DateTimeOffset.UtcNow.ToUnixTimeSeconds()};", Conn).ExecuteScalar();
                     rdr = new MySqlCommand($"SELECT * FROM `{PLAYERS_BOOSTERS}` WHERE `SteamID` = {data.SteamID};", Conn).ExecuteReader();
@@ -6165,17 +6165,17 @@ namespace UnturnedBlackout.Managers
                                 return;
                             }
 
-                            if (!float.TryParse(rdr[2].ToString(), out float boosterValue))
+                            if (!float.TryParse(rdr[2].ToString(), out var boosterValue))
                             {
                                 return;
                             }
 
-                            if (!long.TryParse(rdr[3].ToString(), out long boosterExpirationUnix))
+                            if (!long.TryParse(rdr[3].ToString(), out var boosterExpirationUnix))
                             {
                                 return;
                             }
 
-                            DateTimeOffset boosterExpiration = DateTimeOffset.FromUnixTimeSeconds(boosterExpirationUnix);
+                            var boosterExpiration = DateTimeOffset.FromUnixTimeSeconds(boosterExpirationUnix);
                             PlayerBooster booster = new(data.SteamID, boosterType, boosterValue, boosterExpiration);
 
                             boosters.Add(booster);
@@ -6199,7 +6199,7 @@ namespace UnturnedBlackout.Managers
 
                     if (data.HasPrime)
                     {
-                        DateTime maxRewardDate = DateTime.UtcNow;
+                        var maxRewardDate = DateTime.UtcNow;
                         if (DateTime.UtcNow > data.PrimeExpiry.UtcDateTime)
                         {
                             maxRewardDate = data.PrimeExpiry.UtcDateTime;
@@ -6209,20 +6209,20 @@ namespace UnturnedBlackout.Managers
                             R.Permissions.RemovePlayerFromGroup("Prime", new RocketPlayer(data.SteamID.ToString()));
                         }
 
-                        int daysWorthReward = (int)(maxRewardDate - data.PrimeLastDailyReward.UtcDateTime).TotalDays;
+                        var daysWorthReward = (int)(maxRewardDate - data.PrimeLastDailyReward.UtcDateTime).TotalDays;
                         if (daysWorthReward == 0)
                         {
                             continue;
                         }
 
-                        List<Reward> dailyRewards = ServerOptions.PrimeDailyRewards.ToList();
+                        var dailyRewards = ServerOptions.PrimeDailyRewards.ToList();
                         if (daysWorthReward > 1)
                         {
                             Plugin.Instance.Reward.MultiplyRewards(dailyRewards, daysWorthReward);
                         }
 
                         Plugin.Instance.Reward.GiveRewards(data.SteamID, dailyRewards);
-                        DateTimeOffset lastDailyRewardDate = data.PrimeLastDailyReward.AddDays(daysWorthReward);
+                        var lastDailyRewardDate = data.PrimeLastDailyReward.AddDays(daysWorthReward);
                         data.PrimeLastDailyReward = lastDailyRewardDate;
                         new MySqlCommand($"UPDATE `{PLAYERS}` SET `PrimeLastDailyReward` = {lastDailyRewardDate.ToUnixTimeSeconds()} WHERE `SteamID` = {data.SteamID};", Conn).ExecuteScalar();
                     }
@@ -6262,17 +6262,17 @@ namespace UnturnedBlackout.Managers
                 {
                     while (rdr.Read())
                     {
-                        if (!int.TryParse(rdr[0].ToString(), out int id))
+                        if (!int.TryParse(rdr[0].ToString(), out var id))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[1].ToString(), out int unboxedAmount))
+                        if (!int.TryParse(rdr[1].ToString(), out var unboxedAmount))
                         {
                             continue;
                         }
 
-                        if (!GunSkinsSearchByID.TryGetValue(id, out GunSkin skin))
+                        if (!GunSkinsSearchByID.TryGetValue(id, out var skin))
                         {
                             continue;
                         }
@@ -6295,17 +6295,17 @@ namespace UnturnedBlackout.Managers
                 {
                     while (rdr.Read())
                     {
-                        if (!ushort.TryParse(rdr[0].ToString(), out ushort knifeID))
+                        if (!ushort.TryParse(rdr[0].ToString(), out var knifeID))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[1].ToString(), out int unboxedAmount))
+                        if (!int.TryParse(rdr[1].ToString(), out var unboxedAmount))
                         {
                             continue;
                         }
 
-                        if (!Knives.TryGetValue(knifeID, out Knife knife))
+                        if (!Knives.TryGetValue(knifeID, out var knife))
                         {
                             continue;
                         }
@@ -6328,17 +6328,17 @@ namespace UnturnedBlackout.Managers
                 {
                     while (rdr.Read())
                     {
-                        if (!int.TryParse(rdr[0].ToString(), out int gloveID))
+                        if (!int.TryParse(rdr[0].ToString(), out var gloveID))
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(rdr[1].ToString(), out int unboxedAmount))
+                        if (!int.TryParse(rdr[1].ToString(), out var unboxedAmount))
                         {
                             continue;
                         }
 
-                        if (!Gloves.TryGetValue(gloveID, out Glove glove))
+                        if (!Gloves.TryGetValue(gloveID, out var glove))
                         {
                             continue;
                         }
@@ -6356,11 +6356,11 @@ namespace UnturnedBlackout.Managers
                     rdr.Close();
                 }
 
-                foreach (Server server in Plugin.Instance.DB.Servers)
+                foreach (var server in Plugin.Instance.DB.Servers)
                 {
                     try
                     {
-                        ServerInfo info = SteamServer.QueryServer(server.IP, server.PortNo, 1000);
+                        var info = SteamServer.QueryServer(server.IP, server.PortNo, 1000);
                         server.Players = info.Players;
                         server.MaxPlayers = info.MaxPlayers;
                         server.Name = info.Name;
@@ -6397,17 +6397,17 @@ namespace UnturnedBlackout.Managers
             {
                 await Conn.OpenAsync();
                 await new MySqlCommand($"UPDATE `{PLAYERS_QUESTS}` SET `Amount` = `Amount` + {amount} WHERE `SteamID` = {steamID} AND `QuestID` = {questID};", Conn).ExecuteScalarAsync();
-                object obj = await new MySqlCommand($"SELECT `Amount` FROM `{PLAYERS_QUESTS}` WHERE `SteamID` = {steamID} AND `QuestID` = {questID};", Conn).ExecuteScalarAsync();
+                var obj = await new MySqlCommand($"SELECT `Amount` FROM `{PLAYERS_QUESTS}` WHERE `SteamID` = {steamID} AND `QuestID` = {questID};", Conn).ExecuteScalarAsync();
 
                 if (obj is int newAmount)
                 {
-                    if (!PlayerData.TryGetValue(steamID, out PlayerData data))
+                    if (!PlayerData.TryGetValue(steamID, out var data))
                     {
                         Logger.Log($"Error finding player data for player with steam id {steamID}");
                         return;
                     }
 
-                    PlayerQuest quest = data.Quests.FirstOrDefault(k => k.Quest.QuestID == questID);
+                    var quest = data.Quests.FirstOrDefault(k => k.Quest.QuestID == questID);
                     if (quest == null)
                     {
                         Logger.Log($"Error finding quest with id {questID} for player with steam id {steamID}");
@@ -6455,17 +6455,17 @@ namespace UnturnedBlackout.Managers
             {
                 await Conn.OpenAsync();
                 await new MySqlCommand($"UPDATE `{PLAYERS_ACHIEVEMENTS}` SET `Amount` = `Amount` + {amount} WHERE `SteamID` = {steamID} AND `AchievementID` = {achievementID};", Conn).ExecuteScalarAsync();
-                object obj = await new MySqlCommand($"SELECT `Amount` FROM `{PLAYERS_ACHIEVEMENTS}` WHERE `SteamID` = {steamID} AND `AchievementID` = {achievementID};", Conn).ExecuteScalarAsync();
+                var obj = await new MySqlCommand($"SELECT `Amount` FROM `{PLAYERS_ACHIEVEMENTS}` WHERE `SteamID` = {steamID} AND `AchievementID` = {achievementID};", Conn).ExecuteScalarAsync();
 
                 if (obj is int newAmount)
                 {
-                    if (!PlayerData.TryGetValue(steamID, out PlayerData data))
+                    if (!PlayerData.TryGetValue(steamID, out var data))
                     {
                         Logger.Log($"Error finding player data for player with steam id {steamID}");
                         return;
                     }
 
-                    if (!data.AchievementsSearchByID.TryGetValue(achievementID, out PlayerAchievement achievement))
+                    if (!data.AchievementsSearchByID.TryGetValue(achievementID, out var achievement))
                     {
                         Logger.Log($"Error finding achievement with id {achievementID} for player with steam id {steamID}");
                         return;
@@ -6491,10 +6491,10 @@ namespace UnturnedBlackout.Managers
             try
             {
                 await Conn.OpenAsync();
-                for (int i = 0; i <= 4; i++)
+                for (var i = 0; i <= 4; i++)
                 {
-                    int targetAmount = 0;
-                    string color = "";
+                    var targetAmount = 0;
+                    var color = "";
 
                     switch (i)
                     {
@@ -6540,18 +6540,18 @@ namespace UnturnedBlackout.Managers
                 await Conn.OpenAsync();
 
                 await new MySqlCommand($"UPDATE `{PLAYERS_BATTLEPASS}` SET `XP` = `XP` + {xp} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-                object obj = await new MySqlCommand($"Select `XP` FROM `{PLAYERS_BATTLEPASS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                var obj = await new MySqlCommand($"Select `XP` FROM `{PLAYERS_BATTLEPASS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
 
-                if (PlayerData.TryGetValue(steamID, out PlayerData data))
+                if (PlayerData.TryGetValue(steamID, out var data))
                 {
                     if (obj is int newXp)
                     {
                         data.Battlepass.XP = newXp;
                     }
 
-                    while (data.Battlepass.TryGetNeededXP(out int neededXP) && data.Battlepass.XP >= neededXP)
+                    while (data.Battlepass.TryGetNeededXP(out var neededXP) && data.Battlepass.XP >= neededXP)
                     {
-                        int newXP = data.Battlepass.XP - neededXP;
+                        var newXP = data.Battlepass.XP - neededXP;
                         await new MySqlCommand($"UPDATE `{PLAYERS_BATTLEPASS}` SET `XP` = {newXP}, `CurrentTier` = `CurrentTier` + 1 WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
                         obj = await new MySqlCommand($"Select `CurrentTier` FROM `{PLAYERS_BATTLEPASS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
                         if (obj is int tier)
@@ -6559,7 +6559,7 @@ namespace UnturnedBlackout.Managers
                             data.Battlepass.CurrentTier = tier;
                             TaskDispatcher.QueueOnMainThread(() =>
                             {
-                                Models.Global.GamePlayer player = Plugin.Instance.Game.GetGamePlayer(data.SteamID);
+                                var player = Plugin.Instance.Game.GetGamePlayer(data.SteamID);
                                 if (player != null)
                                 {
                                     // Code to send battlepass level up
@@ -6606,7 +6606,7 @@ namespace UnturnedBlackout.Managers
             try
             {
                 await Conn.OpenAsync();
-                if (!PlayerData.TryGetValue(steamID, out PlayerData data))
+                if (!PlayerData.TryGetValue(steamID, out var data))
                 {
                     Logging.Debug($"Error finding player data for steam id {steamID}");
                     return;
@@ -6632,7 +6632,7 @@ namespace UnturnedBlackout.Managers
             try
             {
                 await Conn.OpenAsync();
-                if (!PlayerData.TryGetValue(steamID, out PlayerData data))
+                if (!PlayerData.TryGetValue(steamID, out var data))
                 {
                     Logging.Debug($"Error finding player data for steam id {steamID}");
                     return;
@@ -6659,7 +6659,7 @@ namespace UnturnedBlackout.Managers
             {
                 await Conn.OpenAsync();
                 await new MySqlCommand($"INSERT INTO `{PLAYERS_CASES}` ( `SteamID` , `CaseID` , `Amount` ) VALUES ({steamID}, {caseID}, {amount}) ON DUPLICATE KEY UPDATE `Amount` = `Amount` + {amount};", Conn).ExecuteScalarAsync();
-                object obj = await new MySqlCommand($"SELECT `Amount` FROM `{PLAYERS_CASES}` WHERE `SteamID` = {steamID} AND `CaseID` = {caseID};", Conn).ExecuteScalarAsync();
+                var obj = await new MySqlCommand($"SELECT `Amount` FROM `{PLAYERS_CASES}` WHERE `SteamID` = {steamID} AND `CaseID` = {caseID};", Conn).ExecuteScalarAsync();
 
                 if (obj is not int updatedAmount)
                 {
@@ -6667,19 +6667,19 @@ namespace UnturnedBlackout.Managers
                     return;
                 }
 
-                if (!PlayerData.TryGetValue(steamID, out PlayerData data))
+                if (!PlayerData.TryGetValue(steamID, out var data))
                 {
                     Logging.Debug($"Error getting data for player with steam id {steamID}, maybe the player is offline");
                     return;
                 }
 
-                if (!Cases.TryGetValue(caseID, out Case @case))
+                if (!Cases.TryGetValue(caseID, out var @case))
                 {
                     Logging.Debug($"Error finding case with id {caseID} for player with steam id {steamID}");
                     return;
                 }
 
-                if (data.CasesSearchByID.TryGetValue(caseID, out PlayerCase playerCase))
+                if (data.CasesSearchByID.TryGetValue(caseID, out var playerCase))
                 {
                     playerCase.Amount = updatedAmount;
                     return;
@@ -6711,7 +6711,7 @@ namespace UnturnedBlackout.Managers
             {
                 await Conn.OpenAsync();
                 await new MySqlCommand($"UPDATE `{PLAYERS_CASES}` SET `Amount` = `Amount` - {amount} WHERE `SteamID` = {steamID} AND `CaseID` = {caseID};", Conn).ExecuteScalarAsync();
-                object obj = await new MySqlCommand($"SELECT `Amount` FROM `{PLAYERS_CASES}` WHERE `SteamID` = {steamID} AND `CaseID` = {caseID};", Conn).ExecuteScalarAsync();
+                var obj = await new MySqlCommand($"SELECT `Amount` FROM `{PLAYERS_CASES}` WHERE `SteamID` = {steamID} AND `CaseID` = {caseID};", Conn).ExecuteScalarAsync();
 
                 if (obj is not int updatedAmount)
                 {
@@ -6724,13 +6724,13 @@ namespace UnturnedBlackout.Managers
                     await new MySqlCommand($"DELETE FROM `{PLAYERS_CASES}` WHERE `SteamID` = {steamID} AND `CaseID` = {caseID};", Conn).ExecuteScalarAsync();
                 }
 
-                if (!PlayerData.TryGetValue(steamID, out PlayerData data))
+                if (!PlayerData.TryGetValue(steamID, out var data))
                 {
                     Logging.Debug($"Error getting data for player with steam id {steamID}, maybe the player is offline");
                     return;
                 }
 
-                if (!data.CasesSearchByID.TryGetValue(caseID, out PlayerCase playerCase))
+                if (!data.CasesSearchByID.TryGetValue(caseID, out var playerCase))
                 {
                     Logging.Debug($"Error finding case with id {caseID} to decrease amount of for player with steam id {steamID}");
                     return;
@@ -6767,16 +6767,16 @@ namespace UnturnedBlackout.Managers
             try
             {
                 await Conn.OpenAsync();
-                DateTimeOffset expiryDate = DateTimeOffset.UtcNow.AddDays(days);
+                var expiryDate = DateTimeOffset.UtcNow.AddDays(days);
                 await new MySqlCommand($"INSERT INTO `{PLAYERS_BOOSTERS}` (`SteamID` , `BoosterType` , `BoosterValue` , `BoosterExpiration`) VALUES ({steamID} , '{boosterType}' , {boosterValue} , {expiryDate.ToUnixTimeSeconds()}) ON DUPLICATE KEY UPDATE `BoosterExpiration` = `BoosterExpiration` + {days * 24 * 60 * 60};", Conn).ExecuteScalarAsync();
 
-                if (!PlayerData.TryGetValue(steamID, out PlayerData data))
+                if (!PlayerData.TryGetValue(steamID, out var data))
                 {
                     Logging.Debug($"Could'nt find player data for player with steam id {steamID}, probably player is offline");
                     return;
                 }
 
-                PlayerBooster booster = data.ActiveBoosters.FirstOrDefault(k => k.BoosterType == boosterType && k.BoosterValue == boosterValue);
+                var booster = data.ActiveBoosters.FirstOrDefault(k => k.BoosterType == boosterType && k.BoosterValue == boosterValue);
                 if (booster != null)
                 {
                     booster.BoosterExpiration = booster.BoosterExpiration.AddDays(days);

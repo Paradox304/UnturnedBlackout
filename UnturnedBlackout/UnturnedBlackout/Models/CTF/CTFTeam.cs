@@ -47,7 +47,7 @@ namespace UnturnedBlackout.Models.CTF
 
         public void AddPlayer(CSteamID steamID)
         {
-            Player player = PlayerTool.getPlayer(steamID);
+            var player = PlayerTool.getPlayer(steamID);
             Players.Add(steamID, DateTime.UtcNow);
 
             player.quests.ServerAssignToGroup(IngameGroup.groupID, EPlayerGroupRank.MEMBER, true);
@@ -56,7 +56,7 @@ namespace UnturnedBlackout.Models.CTF
 
         public void RemovePlayer(CSteamID steamID)
         {
-            Player player = PlayerTool.getPlayer(steamID);
+            var player = PlayerTool.getPlayer(steamID);
             Players.Remove(steamID);
             player.quests.leaveGroup(true);
             player.quests.askSetRadioFrequency(CSteamID.Nil, 0);

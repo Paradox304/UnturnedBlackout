@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using System.Text;
-using UnturnedBlackout.Models.Webhook;
 using System.Text.Json;
+using UnturnedBlackout.Models.Webhook;
 
 namespace UnturnedBlackout.Managers
 {
@@ -15,9 +15,9 @@ namespace UnturnedBlackout.Managers
 
         public static void SendHook(Message embed, string webhookUrl)
         {
-            byte[] bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(embed));
+            var bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(embed));
             using WebClient webClient = new();
-            WebHeaderCollection headers = webClient.Headers;
+            var headers = webClient.Headers;
             headers.Set(HttpRequestHeader.ContentType, "application/json");
             webClient.UploadData(webhookUrl, bytes);
         }

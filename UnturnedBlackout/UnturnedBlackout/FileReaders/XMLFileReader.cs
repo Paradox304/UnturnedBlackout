@@ -33,21 +33,21 @@ namespace UnturnedBlackout.FileReaders
         {
             try
             {
-                string file = LoadURL();
+                var file = LoadURL();
                 if (string.IsNullOrEmpty(file))
                 {
                     if (!File.Exists(FilePath))
                         Save();
 
-                    using FileStream reader = File.OpenRead(FilePath);
-                    object deserializedData = Serializer.Deserialize(reader);
+                    using var reader = File.OpenRead(FilePath);
+                    var deserializedData = Serializer.Deserialize(reader);
                     if (deserializedData is T t)
                         FileData = t;
                 }
                 else
                 {
                     using StringReader reader = new(file);
-                    object deserializedData = Serializer.Deserialize(reader);
+                    var deserializedData = Serializer.Deserialize(reader);
                     if (deserializedData is T t)
                         FileData = t;
                     Save();
@@ -77,12 +77,12 @@ namespace UnturnedBlackout.FileReaders
         {
             try
             {
-                string directoryName = Path.GetDirectoryName(FilePath);
+                var directoryName = Path.GetDirectoryName(FilePath);
 
                 if (!string.IsNullOrWhiteSpace(directoryName) && !Directory.Exists(directoryName))
                     Directory.CreateDirectory(directoryName);
 
-                using FileStream writer = File.Open(FilePath, FileMode.Create);
+                using var writer = File.Open(FilePath, FileMode.Create);
                 Serializer.Serialize(writer, FileData);
             }
             catch (Exception ex)

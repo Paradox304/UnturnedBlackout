@@ -67,7 +67,7 @@ namespace UnturnedBlackout.Models.KC
 
         public void CheckKills()
         {
-            Database.Data.PlayerData data = GamePlayer.Data;
+            var data = GamePlayer.Data;
             data.CheckKillstreak(Killstreak);
             data.CheckMultipleKills(MultipleKills);
         }

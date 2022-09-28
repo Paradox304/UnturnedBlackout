@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Rocket.API;
+﻿using Rocket.API;
 using Rocket.Core.Steam;
 using Rocket.Core.Utils;
 using Rocket.Unturned.Player;
 using SDG.Unturned;
 using Steamworks;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnturnedBlackout.Managers;
 using UnturnedBlackout.Models.Webhook;
 
@@ -34,8 +34,8 @@ namespace UnturnedBlackout.Commands
                 return;
             }
 
-            CSteamID steamID = CSteamID.Nil;
-            if (!ulong.TryParse(command[0], out ulong steamid))
+            var steamID = CSteamID.Nil;
+            if (!ulong.TryParse(command[0], out var steamid))
             {
                 steamID = PlayerTool.getPlayer(command[0])?.channel?.owner?.playerID?.steamID ?? CSteamID.Nil;
             }

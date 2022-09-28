@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using UnturnedBlackout.Models.Global;
+﻿using UnturnedBlackout.Models.Global;
 
 namespace UnturnedBlackout.Models.FFA
 {

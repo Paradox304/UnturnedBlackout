@@ -122,12 +122,12 @@ namespace UnturnedBlackout.Instances
             Player = player;
             TransportConnection = player.Player.channel.GetOwnerTransportConnection();
             DB = Plugin.Instance.DB;
-            if (!DB.PlayerLoadouts.TryGetValue(player.CSteamID, out PlayerLoadout loadout))
+            if (!DB.PlayerLoadouts.TryGetValue(player.CSteamID, out var loadout))
             {
                 Logging.Debug($"Error finding player loadout for {player.CharacterName}, failed to initialize UIHandler for player");
                 return;
             }
-            if (!DB.PlayerData.TryGetValue(player.CSteamID, out PlayerData data))
+            if (!DB.PlayerData.TryGetValue(player.CSteamID, out var data))
             {
                 Logging.Debug($"Error finding player data for {player.CharacterName}, failed to initialize UIHandler for player");
                 return;
@@ -195,11 +195,11 @@ namespace UnturnedBlackout.Instances
         public void BuildLoadoutPages()
         {
             LoadoutPages = new Dictionary<int, PageLoadout>();
-            int index = 0;
-            int page = 1;
+            var index = 0;
+            var page = 1;
             Dictionary<int, Loadout> loadouts = new();
 
-            foreach (KeyValuePair<int, Loadout> loadout in PlayerLoadout.Loadouts)
+            foreach (var loadout in PlayerLoadout.Loadouts)
             {
                 loadouts.Add(index, loadout.Value);
                 if (index == MAX_LOADOUTS_PER_PAGE)
@@ -220,13 +220,13 @@ namespace UnturnedBlackout.Instances
 
         public void BuildPistolPages()
         {
-            List<LoadoutGun> guns = PlayerLoadout.Guns.Values.Where(k => k.Gun.GunType == EGun.PISTOL).OrderBy(k => k.Gun.LevelRequirement).ToList();
+            var guns = PlayerLoadout.Guns.Values.Where(k => k.Gun.GunType == EGun.PISTOL).OrderBy(k => k.Gun.LevelRequirement).ToList();
             Dictionary<int, LoadoutGun> gunItems = new();
             PistolPages = new Dictionary<int, PageGun>();
-            int index = 0;
-            int page = 1;
+            var index = 0;
+            var page = 1;
 
-            foreach (LoadoutGun gun in guns)
+            foreach (var gun in guns)
             {
                 gunItems.Add(index, gun);
                 if (index == MAX_ITEMS_PER_PAGE)
@@ -247,13 +247,13 @@ namespace UnturnedBlackout.Instances
 
         public void BuildSMGPages()
         {
-            List<LoadoutGun> guns = PlayerLoadout.Guns.Values.Where(k => k.Gun.GunType == EGun.SUBMACHINE_GUNS).OrderBy(k => k.Gun.LevelRequirement).ToList();
+            var guns = PlayerLoadout.Guns.Values.Where(k => k.Gun.GunType == EGun.SUBMACHINE_GUNS).OrderBy(k => k.Gun.LevelRequirement).ToList();
             Dictionary<int, LoadoutGun> gunItems = new();
             SMGPages = new Dictionary<int, PageGun>();
-            int index = 0;
-            int page = 1;
+            var index = 0;
+            var page = 1;
 
-            foreach (LoadoutGun gun in guns)
+            foreach (var gun in guns)
             {
                 gunItems.Add(index, gun);
                 if (index == MAX_ITEMS_PER_PAGE)
@@ -274,13 +274,13 @@ namespace UnturnedBlackout.Instances
 
         public void BuildShotgunPages()
         {
-            List<LoadoutGun> guns = PlayerLoadout.Guns.Values.Where(k => k.Gun.GunType == EGun.SHOTGUNS).OrderBy(k => k.Gun.LevelRequirement).ToList();
+            var guns = PlayerLoadout.Guns.Values.Where(k => k.Gun.GunType == EGun.SHOTGUNS).OrderBy(k => k.Gun.LevelRequirement).ToList();
             Dictionary<int, LoadoutGun> gunItems = new();
             ShotgunPages = new Dictionary<int, PageGun>();
-            int index = 0;
-            int page = 1;
+            var index = 0;
+            var page = 1;
 
-            foreach (LoadoutGun gun in guns)
+            foreach (var gun in guns)
             {
                 gunItems.Add(index, gun);
                 if (index == MAX_ITEMS_PER_PAGE)
@@ -301,13 +301,13 @@ namespace UnturnedBlackout.Instances
 
         public void BuildLMGPages()
         {
-            List<LoadoutGun> guns = PlayerLoadout.Guns.Values.Where(k => k.Gun.GunType == EGun.LIGHT_MACHINE_GUNS).OrderBy(k => k.Gun.LevelRequirement).ToList();
+            var guns = PlayerLoadout.Guns.Values.Where(k => k.Gun.GunType == EGun.LIGHT_MACHINE_GUNS).OrderBy(k => k.Gun.LevelRequirement).ToList();
             Dictionary<int, LoadoutGun> gunItems = new();
             LMGPages = new Dictionary<int, PageGun>();
-            int index = 0;
-            int page = 1;
+            var index = 0;
+            var page = 1;
 
-            foreach (LoadoutGun gun in guns)
+            foreach (var gun in guns)
             {
                 gunItems.Add(index, gun);
                 if (index == MAX_ITEMS_PER_PAGE)
@@ -328,13 +328,13 @@ namespace UnturnedBlackout.Instances
 
         public void BuildARPages()
         {
-            List<LoadoutGun> guns = PlayerLoadout.Guns.Values.Where(k => k.Gun.GunType == EGun.ASSAULT_RIFLES).OrderBy(k => k.Gun.LevelRequirement).ToList();
+            var guns = PlayerLoadout.Guns.Values.Where(k => k.Gun.GunType == EGun.ASSAULT_RIFLES).OrderBy(k => k.Gun.LevelRequirement).ToList();
             Dictionary<int, LoadoutGun> gunItems = new();
             ARPages = new Dictionary<int, PageGun>();
-            int index = 0;
-            int page = 1;
+            var index = 0;
+            var page = 1;
 
-            foreach (LoadoutGun gun in guns)
+            foreach (var gun in guns)
             {
                 gunItems.Add(index, gun);
                 if (index == MAX_ITEMS_PER_PAGE)
@@ -355,13 +355,13 @@ namespace UnturnedBlackout.Instances
 
         public void BuildSniperPages()
         {
-            List<LoadoutGun> guns = PlayerLoadout.Guns.Values.Where(k => k.Gun.GunType == EGun.SNIPER_RIFLES).OrderBy(k => k.Gun.LevelRequirement).ToList();
+            var guns = PlayerLoadout.Guns.Values.Where(k => k.Gun.GunType == EGun.SNIPER_RIFLES).OrderBy(k => k.Gun.LevelRequirement).ToList();
             Dictionary<int, LoadoutGun> gunItems = new();
             SniperPages = new Dictionary<int, PageGun>();
-            int index = 0;
-            int page = 1;
+            var index = 0;
+            var page = 1;
 
-            foreach (LoadoutGun gun in guns)
+            foreach (var gun in guns)
             {
                 gunItems.Add(index, gun);
                 if (index == MAX_ITEMS_PER_PAGE)
@@ -382,13 +382,13 @@ namespace UnturnedBlackout.Instances
 
         public void BuildCarbinePages()
         {
-            List<LoadoutGun> guns = PlayerLoadout.Guns.Values.Where(k => k.Gun.GunType == EGun.CARBINES).OrderBy(k => k.Gun.LevelRequirement).ToList();
+            var guns = PlayerLoadout.Guns.Values.Where(k => k.Gun.GunType == EGun.CARBINES).OrderBy(k => k.Gun.LevelRequirement).ToList();
             Dictionary<int, LoadoutGun> gunItems = new();
             CarbinePages = new Dictionary<int, PageGun>();
-            int index = 0;
-            int page = 1;
+            var index = 0;
+            var page = 1;
 
-            foreach (LoadoutGun gun in guns)
+            foreach (var gun in guns)
             {
                 gunItems.Add(index, gun);
                 if (index == MAX_ITEMS_PER_PAGE)
@@ -410,13 +410,13 @@ namespace UnturnedBlackout.Instances
         public void BuildGunSkinPages()
         {
             GunSkinPages = new Dictionary<ushort, Dictionary<int, PageGunSkin>>();
-            foreach (KeyValuePair<ushort, List<GunSkin>> gun in PlayerLoadout.GunSkinsSearchByGunID)
+            foreach (var gun in PlayerLoadout.GunSkinsSearchByGunID)
             {
-                int index = 0;
-                int page = 1;
+                var index = 0;
+                var page = 1;
                 Dictionary<int, GunSkin> gunSkins = new();
                 GunSkinPages.Add(gun.Key, new Dictionary<int, PageGunSkin>());
-                foreach (GunSkin gunSkin in gun.Value.OrderByDescending(k => (byte)k.SkinRarity))
+                foreach (var gunSkin in gun.Value.OrderByDescending(k => (byte)k.SkinRarity))
                 {
                     gunSkins.Add(index, gunSkin);
                     if (index == MAX_ITEMS_PER_GRID)
@@ -439,7 +439,7 @@ namespace UnturnedBlackout.Instances
         public void BuildAttachmentPages()
         {
             AttachmentPages = new Dictionary<ushort, Dictionary<EAttachment, Dictionary<int, PageAttachment>>>();
-            foreach (KeyValuePair<ushort, LoadoutGun> gun in PlayerLoadout.Guns)
+            foreach (var gun in PlayerLoadout.Guns)
             {
                 BuildAttachmentPages(gun.Value);
             }
@@ -453,14 +453,14 @@ namespace UnturnedBlackout.Instances
             }
             AttachmentPages.Add(gun.Gun.GunID, new Dictionary<EAttachment, Dictionary<int, PageAttachment>>());
 
-            for (int i = 0; i <= 3; i++)
+            for (var i = 0; i <= 3; i++)
             {
-                EAttachment attachmentType = (EAttachment)i;
-                int index = 0;
-                int page = 1;
+                var attachmentType = (EAttachment)i;
+                var index = 0;
+                var page = 1;
                 Dictionary<int, LoadoutAttachment> attachments = new();
                 AttachmentPages[gun.Gun.GunID].Add(attachmentType, new Dictionary<int, PageAttachment>());
-                foreach (LoadoutAttachment attachment in gun.Attachments.Values.Where(k => k.Attachment.AttachmentType == attachmentType).OrderBy(k => k.LevelRequirement))
+                foreach (var attachment in gun.Attachments.Values.Where(k => k.Attachment.AttachmentType == attachmentType).OrderBy(k => k.LevelRequirement))
                 {
                     attachments.Add(index, attachment);
                     if (index == MAX_ITEMS_PER_PAGE)
@@ -483,10 +483,10 @@ namespace UnturnedBlackout.Instances
         public void BuildGunCharmPages()
         {
             GunCharmPages = new Dictionary<int, PageGunCharm>();
-            int index = 0;
-            int page = 1;
+            var index = 0;
+            var page = 1;
             Dictionary<int, LoadoutGunCharm> gunCharms = new();
-            foreach (LoadoutGunCharm gunCharm in PlayerLoadout.GunCharms.Values.OrderByDescending(k => (byte)k.GunCharm.CharmRarity))
+            foreach (var gunCharm in PlayerLoadout.GunCharms.Values.OrderByDescending(k => (byte)k.GunCharm.CharmRarity))
             {
                 gunCharms.Add(index, gunCharm);
                 if (index == MAX_ITEMS_PER_GRID)
@@ -508,10 +508,10 @@ namespace UnturnedBlackout.Instances
         public void BuildKnifePages()
         {
             KnifePages = new Dictionary<int, PageKnife>();
-            int index = 0;
-            int page = 1;
+            var index = 0;
+            var page = 1;
             Dictionary<int, LoadoutKnife> knives = new();
-            foreach (LoadoutKnife knife in PlayerLoadout.Knives.Values.OrderByDescending(k => (byte)k.Knife.KnifeRarity))
+            foreach (var knife in PlayerLoadout.Knives.Values.OrderByDescending(k => (byte)k.Knife.KnifeRarity))
             {
                 knives.Add(index, knife);
                 if (index == MAX_ITEMS_PER_GRID)
@@ -533,13 +533,13 @@ namespace UnturnedBlackout.Instances
         public void BuildPerkPages()
         {
             PerkPages = new Dictionary<int, Dictionary<int, PagePerk>>();
-            for (int i = 1; i <= 3; i++)
+            for (var i = 1; i <= 3; i++)
             {
                 PerkPages.Add(i, new Dictionary<int, PagePerk>());
-                int index = 0;
-                int page = 1;
+                var index = 0;
+                var page = 1;
                 Dictionary<int, LoadoutPerk> perks = new();
-                foreach (LoadoutPerk perk in PlayerLoadout.Perks.Values.Where(k => k.Perk.PerkType == i).OrderBy(k => k.Perk.LevelRequirement))
+                foreach (var perk in PlayerLoadout.Perks.Values.Where(k => k.Perk.PerkType == i).OrderBy(k => k.Perk.LevelRequirement))
                 {
                     perks.Add(index, perk);
                     if (index == MAX_ITEMS_PER_PAGE)
@@ -562,11 +562,11 @@ namespace UnturnedBlackout.Instances
         public void BuildTacticalPages()
         {
             TacticalPages = new Dictionary<int, PageGadget>();
-            List<LoadoutGadget> gadgets = PlayerLoadout.Gadgets.Values.Where(k => k.Gadget.IsTactical).OrderBy(k => k.Gadget.LevelRequirement).ToList();
-            int index = 0;
-            int page = 1;
+            var gadgets = PlayerLoadout.Gadgets.Values.Where(k => k.Gadget.IsTactical).OrderBy(k => k.Gadget.LevelRequirement).ToList();
+            var index = 0;
+            var page = 1;
             Dictionary<int, LoadoutGadget> gadgetItems = new();
-            foreach (LoadoutGadget gadget in gadgets)
+            foreach (var gadget in gadgets)
             {
                 gadgetItems.Add(index, gadget);
                 if (index == MAX_ITEMS_PER_PAGE)
@@ -588,11 +588,11 @@ namespace UnturnedBlackout.Instances
         public void BuildLethalPages()
         {
             LethalPages = new Dictionary<int, PageGadget>();
-            List<LoadoutGadget> gadgets = PlayerLoadout.Gadgets.Values.Where(k => !k.Gadget.IsTactical).OrderBy(k => k.Gadget.LevelRequirement).ToList();
-            int index = 0;
-            int page = 1;
+            var gadgets = PlayerLoadout.Gadgets.Values.Where(k => !k.Gadget.IsTactical).OrderBy(k => k.Gadget.LevelRequirement).ToList();
+            var index = 0;
+            var page = 1;
             Dictionary<int, LoadoutGadget> gadgetItems = new();
-            foreach (LoadoutGadget gadget in gadgets)
+            foreach (var gadget in gadgets)
             {
                 gadgetItems.Add(index, gadget);
                 if (index == MAX_ITEMS_PER_PAGE)
@@ -614,10 +614,10 @@ namespace UnturnedBlackout.Instances
         public void BuildCardPages()
         {
             CardPages = new Dictionary<int, PageCard>();
-            int index = 0;
-            int page = 1;
+            var index = 0;
+            var page = 1;
             Dictionary<int, LoadoutCard> cards = new();
-            foreach (LoadoutCard card in PlayerLoadout.Cards.Values.OrderByDescending(k => (byte)k.Card.CardRarity))
+            foreach (var card in PlayerLoadout.Cards.Values.OrderByDescending(k => (byte)k.Card.CardRarity))
             {
                 cards.Add(index, card);
                 if (index == MAX_ITEMS_PER_GRID)
@@ -639,10 +639,10 @@ namespace UnturnedBlackout.Instances
         public void BuildGlovePages()
         {
             GlovePages = new Dictionary<int, PageGlove>();
-            int index = 0;
-            int page = 1;
+            var index = 0;
+            var page = 1;
             Dictionary<int, LoadoutGlove> gloves = new();
-            foreach (LoadoutGlove glove in PlayerLoadout.Gloves.Values.OrderByDescending(k => (byte)k.Glove.GloveRarity))
+            foreach (var glove in PlayerLoadout.Gloves.Values.OrderByDescending(k => (byte)k.Glove.GloveRarity))
             {
                 gloves.Add(index, glove);
                 if (index == MAX_ITEMS_PER_GRID)
@@ -664,11 +664,11 @@ namespace UnturnedBlackout.Instances
         public void BuildKillstreakPages()
         {
             KillstreakPages = new Dictionary<int, PageKillstreak>();
-            int index = 0;
-            int page = 1;
+            var index = 0;
+            var page = 1;
             Dictionary<int, LoadoutKillstreak> killstreaks = new();
 
-            foreach (LoadoutKillstreak killstreak in PlayerLoadout.Killstreaks.Values.OrderBy(k => k.Killstreak.LevelRequirement))
+            foreach (var killstreak in PlayerLoadout.Killstreaks.Values.OrderBy(k => k.Killstreak.LevelRequirement))
             {
                 killstreaks.Add(index, killstreak);
                 if (index == MAX_ITEMS_PER_GRID)
@@ -691,14 +691,14 @@ namespace UnturnedBlackout.Instances
         public void BuildAchievementPages()
         {
             AchievementPages = new Dictionary<int, Dictionary<int, PageAchievement>>();
-            for (int i = 1; i <= 5; i++)
+            for (var i = 1; i <= 5; i++)
             {
                 Logging.Debug($"Creating achievement pages for main page {i} for {Player.CharacterName}");
                 AchievementPages.Add(i, new Dictionary<int, PageAchievement>());
-                int index = 0;
-                int page = 1;
+                var index = 0;
+                var page = 1;
                 Dictionary<int, PlayerAchievement> achievements = new();
-                foreach (PlayerAchievement achievement in PlayerData.Achievements.Where(k => k.Achievement.PageID == i).OrderByDescending(k => k.CurrentTier).ThenByDescending(k => k.TryGetNextTier(out AchievementTier nextTier) ? (k.Amount * 100 / nextTier.TargetAmount) : 100))
+                foreach (var achievement in PlayerData.Achievements.Where(k => k.Achievement.PageID == i).OrderByDescending(k => k.CurrentTier).ThenByDescending(k => k.TryGetNextTier(out var nextTier) ? (k.Amount * 100 / nextTier.TargetAmount) : 100))
                 {
                     achievements.Add(index, achievement);
                     if (index == MAX_ACHIEVEMENTS_PER_PAGE)
@@ -721,10 +721,10 @@ namespace UnturnedBlackout.Instances
         public void BuildUnboxingInventoryPages()
         {
             UnboxInventoryPages = new Dictionary<int, PageUnboxInventory>();
-            int index = 0;
-            int page = 1;
+            var index = 0;
+            var page = 1;
             Dictionary<int, PlayerCase> cases = new();
-            foreach (PlayerCase @case in PlayerData.Cases)
+            foreach (var @case in PlayerData.Cases)
             {
                 cases.Add(index, @case);
                 if (index == MAX_CASES_PER_INVENTORY_PAGE)
@@ -746,10 +746,10 @@ namespace UnturnedBlackout.Instances
         public void BuildUnboxingStorePages()
         {
             UnboxStorePages = new Dictionary<int, PageUnboxStore>();
-            int index = 0;
-            int page = 1;
+            var index = 0;
+            var page = 1;
             Dictionary<int, Case> cases = new();
-            foreach (KeyValuePair<int, Case> @case in DB.Cases)
+            foreach (var @case in DB.Cases)
             {
                 cases.Add(index, @case.Value);
                 if (index == MAX_CASES_PER_STORE_PAGE)
@@ -817,9 +817,9 @@ namespace UnturnedBlackout.Instances
         public void ShowXP()
         {
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER XP Num", Plugin.Instance.Translate("Level_Show", PlayerData.Level).ToRich());
-            EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER XP Icon", Plugin.Instance.DB.Levels.TryGetValue(PlayerData.Level, out XPLevel level) ? level.IconLinkMedium : "");
-            int spaces = 0;
-            if (PlayerData.TryGetNeededXP(out int neededXP))
+            EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER XP Icon", Plugin.Instance.DB.Levels.TryGetValue(PlayerData.Level, out var level) ? level.IconLinkMedium : "");
+            var spaces = 0;
+            if (PlayerData.TryGetNeededXP(out var neededXP))
             {
                 spaces = Math.Min(176, neededXP == 0 ? 0 : PlayerData.XP * 176 / neededXP);
             }
@@ -828,8 +828,8 @@ namespace UnturnedBlackout.Instances
 
         public void ClearChat()
         {
-            SteamPlayer steamPlayer = Player.SteamPlayer();
-            for (int i = 0; i <= 10; i++)
+            var steamPlayer = Player.SteamPlayer();
+            for (var i = 0; i <= 10; i++)
             {
                 ChatManager.serverSendMessage("", Color.white, toPlayer: steamPlayer);
             }
@@ -865,8 +865,8 @@ namespace UnturnedBlackout.Instances
 
         public void SelectedPlayButton(int selected)
         {
-            List<Game> games = Plugin.Instance.Game.Games;
-            List<Server> servers = Plugin.Instance.DB.Servers;
+            var games = Plugin.Instance.Game.Games;
+            var servers = Plugin.Instance.DB.Servers;
             if (PlayPage == EPlayPage.Games)
             {
                 if ((selected + 1) > games.Count)
@@ -895,7 +895,7 @@ namespace UnturnedBlackout.Instances
             }
             else if (PlayPage == EPlayPage.Servers)
             {
-                Server server = Plugin.Instance.DB.Servers[SelectedGameID];
+                var server = Plugin.Instance.DB.Servers[SelectedGameID];
                 if (server.IsOnline)
                 {
                     Player.Player.sendRelayToServer(server.IPNo, server.PortNo, "", shouldShowMenu: false);
@@ -907,20 +907,20 @@ namespace UnturnedBlackout.Instances
         #region PlayGamesPage
         public void ShowGames()
         {
-            List<Game> games = Plugin.Instance.Game.Games;
+            var games = Plugin.Instance.Game.Games;
             PlayPage = EPlayPage.Games;
 
-            for (int i = 0; i <= 13; i++)
+            for (var i = 0; i <= 13; i++)
             {
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Play BUTTON {i}", false);
             }
 
-            int maxCount = Math.Min(14, games.Count);
+            var maxCount = Math.Min(14, games.Count);
 
-            for (int index = 0; index < maxCount; index++)
+            for (var index = 0; index < maxCount; index++)
             {
-                Game game = games[index];
-                GamemodeOption gameMode = Config.Gamemode.FileData.GamemodeOptions.FirstOrDefault(k => k.GameType == game.GameMode);
+                var game = games[index];
+                var gameMode = Config.Gamemode.FileData.GamemodeOptions.FirstOrDefault(k => k.GameType == game.GameMode);
                 if (gameMode == null)
                 {
                     return;
@@ -938,7 +938,7 @@ namespace UnturnedBlackout.Instances
 
         public void ShowGame(Game game)
         {
-            GamemodeOption gameMode = Config.Gamemode.FileData.GamemodeOptions.FirstOrDefault(k => k.GameType == game.GameMode);
+            var gameMode = Config.Gamemode.FileData.GamemodeOptions.FirstOrDefault(k => k.GameType == game.GameMode);
             if (gameMode == null)
             {
                 return;
@@ -954,7 +954,7 @@ namespace UnturnedBlackout.Instances
 
         public void UpdateGamePlayerCount(Game game)
         {
-            int index = Plugin.Instance.Game.Games.IndexOf(game);
+            var index = Plugin.Instance.Game.Games.IndexOf(game);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Play Players TEXT {index}", $"{game.GetPlayerCount()}/{game.Location.GetMaxPlayers(game.GameMode)}");
         }
         #endregion
@@ -963,19 +963,19 @@ namespace UnturnedBlackout.Instances
         public void ShowServers()
         {
             PlayPage = EPlayPage.Servers;
-            for (int i = 0; i <= 13; i++)
+            for (var i = 0; i <= 13; i++)
             {
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Play BUTTON {i}", false);
             }
 
-            List<Server> servers = DB.Servers;
-            int maxCount = Math.Min(14, servers.Count);
+            var servers = DB.Servers;
+            var maxCount = Math.Min(14, servers.Count);
 
-            for (int index = 0; index < maxCount; index++)
+            for (var index = 0; index < maxCount; index++)
             {
-                Server server = servers[index];
+                var server = servers[index];
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Play BUTTON {index}", true);
-                string name = string.IsNullOrEmpty(server.Name) ? server.ServerName : server.Name;
+                var name = string.IsNullOrEmpty(server.Name) ? server.ServerName : server.Name;
                 if (server.IsCurrentServer)
                 {
                     name = $"<color=#FFFF00>{name}</color>";
@@ -1034,7 +1034,7 @@ namespace UnturnedBlackout.Instances
         {
             MainPage = EMainPage.Loadout;
 
-            if (!LoadoutPages.TryGetValue(1, out PageLoadout firstPage))
+            if (!LoadoutPages.TryGetValue(1, out var firstPage))
             {
                 Logging.Debug($"Error finding first page of loadouts for {Player.CharacterName}");
                 LoadoutPageID = 0;
@@ -1057,7 +1057,7 @@ namespace UnturnedBlackout.Instances
                 return;
             }
 
-            if (!LoadoutPages.TryGetValue(LoadoutPageID + 1, out PageLoadout nextPage) && !LoadoutPages.TryGetValue(1, out nextPage))
+            if (!LoadoutPages.TryGetValue(LoadoutPageID + 1, out var nextPage) && !LoadoutPages.TryGetValue(1, out nextPage))
             {
                 ShowLoadouts();
                 return;
@@ -1073,7 +1073,7 @@ namespace UnturnedBlackout.Instances
                 return;
             }
 
-            if (!LoadoutPages.TryGetValue(LoadoutPageID - 1, out PageLoadout prevPage) && !LoadoutPages.TryGetValue(LoadoutPages.Keys.Max(), out prevPage))
+            if (!LoadoutPages.TryGetValue(LoadoutPageID - 1, out var prevPage) && !LoadoutPages.TryGetValue(LoadoutPages.Keys.Max(), out prevPage))
             {
                 ShowLoadouts();
                 return;
@@ -1084,7 +1084,7 @@ namespace UnturnedBlackout.Instances
 
         public void ReloadLoadoutPage()
         {
-            if (!LoadoutPages.TryGetValue(LoadoutPageID, out PageLoadout page))
+            if (!LoadoutPages.TryGetValue(LoadoutPageID, out var page))
             {
                 Logging.Debug($"Error finding current loadout page with page id {LoadoutPageID} for {Player.CharacterName}");
                 return;
@@ -1097,9 +1097,9 @@ namespace UnturnedBlackout.Instances
         {
             LoadoutPageID = page.PageID;
 
-            for (int i = 0; i <= MAX_LOADOUTS_PER_PAGE; i++)
+            for (var i = 0; i <= MAX_LOADOUTS_PER_PAGE; i++)
             {
-                if (!page.Loadouts.TryGetValue(i, out Loadout loadout))
+                if (!page.Loadouts.TryGetValue(i, out var loadout))
                 {
                     EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout BUTTON {i}", false);
                     continue;
@@ -1113,7 +1113,7 @@ namespace UnturnedBlackout.Instances
 
         public void ReloadLoadout()
         {
-            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout currentLoadout))
+            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out var currentLoadout))
             {
                 Logging.Debug($"Couldnt find the current selected loadout");
                 return;
@@ -1124,13 +1124,13 @@ namespace UnturnedBlackout.Instances
 
         public void SelectedLoadout(int selected)
         {
-            if (!LoadoutPages.TryGetValue(LoadoutPageID, out PageLoadout currentPage))
+            if (!LoadoutPages.TryGetValue(LoadoutPageID, out var currentPage))
             {
                 Logging.Debug($"Couldnt find the current selected page at {LoadoutPageID}");
                 return;
             }
 
-            if (!currentPage.Loadouts.TryGetValue(selected, out Loadout currentLoadout))
+            if (!currentPage.Loadouts.TryGetValue(selected, out var currentLoadout))
             {
                 Logging.Debug($"Couldnt find the selected loadout at {selected}");
                 return;
@@ -1148,10 +1148,10 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Loadout Primary IMAGE", loadout.PrimarySkin == null ? (loadout.Primary == null ? "" : loadout.Primary.Gun.IconLink) : loadout.PrimarySkin.IconLink);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Loadout Primary TEXT", loadout.Primary == null ? "" : loadout.Primary.Gun.GunName);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Loadout Primary Level TEXT", loadout.Primary == null ? "" : loadout.Primary.Level.ToString());
-            for (int i = 0; i <= 3; i++)
+            for (var i = 0; i <= 3; i++)
             {
-                EAttachment attachmentType = (EAttachment)i;
-                loadout.PrimaryAttachments.TryGetValue(attachmentType, out LoadoutAttachment attachment);
+                var attachmentType = (EAttachment)i;
+                loadout.PrimaryAttachments.TryGetValue(attachmentType, out var attachment);
                 EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout Primary {attachmentType} IMAGE", attachment == null ? Utility.GetDefaultAttachmentImage(attachmentType.ToString()) : attachment.Attachment.IconLink);
             }
             EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Loadout Primary Charm IMAGE", loadout.PrimaryGunCharm == null ? Utility.GetDefaultAttachmentImage("charm") : loadout.PrimaryGunCharm.GunCharm.IconLink);
@@ -1161,10 +1161,10 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Loadout Secondary IMAGE", loadout.SecondarySkin == null ? (loadout.Secondary == null ? "" : loadout.Secondary.Gun.IconLink) : loadout.SecondarySkin.IconLink);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Loadout Secondary TEXT", loadout.Secondary == null ? "" : loadout.Secondary.Gun.GunName);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Loadout Secondary Level TEXT", loadout.Secondary == null ? "" : loadout.Secondary.Level.ToString());
-            for (int i = 0; i <= 3; i++)
+            for (var i = 0; i <= 3; i++)
             {
-                EAttachment attachmentType = (EAttachment)i;
-                loadout.SecondaryAttachments.TryGetValue(attachmentType, out LoadoutAttachment attachment);
+                var attachmentType = (EAttachment)i;
+                loadout.SecondaryAttachments.TryGetValue(attachmentType, out var attachment);
                 EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout Secondary {attachmentType} IMAGE", attachment == null ? Utility.GetDefaultAttachmentImage(attachmentType.ToString()) : attachment.Attachment.IconLink);
             }
             EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Loadout Secondary Charm IMAGE", loadout.SecondaryGunCharm == null ? Utility.GetDefaultAttachmentImage("charm") : loadout.SecondaryGunCharm.GunCharm.IconLink);
@@ -1183,15 +1183,15 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Loadout Lethal TEXT", loadout.Lethal == null ? "" : loadout.Lethal.Gadget.GadgetName);
 
             // Perk
-            for (int i = 1; i <= 3; i++)
+            for (var i = 1; i <= 3; i++)
             {
-                loadout.Perks.TryGetValue(i, out LoadoutPerk perk);
+                loadout.Perks.TryGetValue(i, out var perk);
                 EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout Perk IMAGE {i}", perk == null ? "" : loadout.Perks[i].Perk.IconLink);
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout Perk TEXT {i}", perk == null ? "" : loadout.Perks[i].Perk.PerkName);
             }
 
             // Killstreak
-            for (int i = 0; i <= 2; i++)
+            for (var i = 0; i <= 2; i++)
             {
                 EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout Killstreak IMAGE {i}", loadout.Killstreaks.Count < (i + 1) ? "" : loadout.Killstreaks[i].Killstreak.IconLink);
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout Killstreak TEXT {i}", loadout.Killstreaks.Count < (i + 1) ? "" : loadout.Killstreaks[i].Killstreak.KillstreakRequired.ToString());
@@ -1208,7 +1208,7 @@ namespace UnturnedBlackout.Instances
 
         public void EquipLoadout()
         {
-            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
+            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out var loadout))
             {
                 Logging.Debug($"Error finding loadout with id {LoadoutID} for {Player.CharacterName}");
                 return;
@@ -1218,7 +1218,7 @@ namespace UnturnedBlackout.Instances
             Task.Run(async () =>
             {
                 Logging.Debug($"TASK ENTERED LOADOUT CHECK {Player.CharacterName}");
-                foreach (Loadout activeLoadout in PlayerLoadout.Loadouts.Values.Where(k => k.IsActive))
+                foreach (var activeLoadout in PlayerLoadout.Loadouts.Values.Where(k => k.IsActive))
                 {
                     await DB.UpdatePlayerLoadoutActiveAsync(Player.CSteamID, activeLoadout.LoadoutID, false);
                 }
@@ -1240,7 +1240,7 @@ namespace UnturnedBlackout.Instances
 
         public void RenameLoadout()
         {
-            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
+            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out var loadout))
             {
                 Logging.Debug($"Error getting current loadout with id {LoadoutID} for {Player.CharacterName}");
                 return;
@@ -1274,7 +1274,7 @@ namespace UnturnedBlackout.Instances
 
             Player.Player.enablePluginWidgetFlag(EPluginWidgetFlags.Modal);
             EffectManager.sendUIEffect(MIDGAME_LOADOUT_ID, MIDGAME_LOADOUT_KEY, TransportConnection, true);
-            if (!LoadoutPages.TryGetValue(1, out PageLoadout firstPage))
+            if (!LoadoutPages.TryGetValue(1, out var firstPage))
             {
                 Logging.Debug($"Error finding first page of loadouts midgame for {Player.CharacterName}");
                 LoadoutPageID = 0;
@@ -1297,7 +1297,7 @@ namespace UnturnedBlackout.Instances
                 return;
             }
 
-            if (!LoadoutPages.TryGetValue(LoadoutPageID + 1, out PageLoadout nextPage) && !LoadoutPages.TryGetValue(1, out nextPage))
+            if (!LoadoutPages.TryGetValue(LoadoutPageID + 1, out var nextPage) && !LoadoutPages.TryGetValue(1, out nextPage))
             {
                 ShowLoadouts();
                 return;
@@ -1313,7 +1313,7 @@ namespace UnturnedBlackout.Instances
                 return;
             }
 
-            if (!LoadoutPages.TryGetValue(LoadoutPageID - 1, out PageLoadout prevPage) && !LoadoutPages.TryGetValue(LoadoutPages.Keys.Max(), out prevPage))
+            if (!LoadoutPages.TryGetValue(LoadoutPageID - 1, out var prevPage) && !LoadoutPages.TryGetValue(LoadoutPages.Keys.Max(), out prevPage))
             {
                 ShowLoadouts();
                 return;
@@ -1326,9 +1326,9 @@ namespace UnturnedBlackout.Instances
         {
             LoadoutPageID = page.PageID;
 
-            for (int i = 0; i <= 9; i++)
+            for (var i = 0; i <= 9; i++)
             {
-                if (!page.Loadouts.TryGetValue(i, out Loadout loadout))
+                if (!page.Loadouts.TryGetValue(i, out var loadout))
                 {
                     EffectManager.sendUIEffectVisibility(MIDGAME_LOADOUT_KEY, TransportConnection, true, $"SERVER Loadout BUTTON {i}", false);
                     continue;
@@ -1342,13 +1342,13 @@ namespace UnturnedBlackout.Instances
 
         public void SelectedMidgameLoadout(int selected)
         {
-            if (!LoadoutPages.TryGetValue(LoadoutPageID, out PageLoadout currentPage))
+            if (!LoadoutPages.TryGetValue(LoadoutPageID, out var currentPage))
             {
                 Logging.Debug($"Couldnt find the current selected page at {LoadoutPageID}");
                 return;
             }
 
-            if (!currentPage.Loadouts.TryGetValue(selected, out Loadout currentLoadout))
+            if (!currentPage.Loadouts.TryGetValue(selected, out var currentLoadout))
             {
                 Logging.Debug($"Couldnt find the selected loadout at {selected}");
                 return;
@@ -1366,10 +1366,10 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectImageURL(MIDGAME_LOADOUT_KEY, TransportConnection, true, "SERVER Loadout Primary IMAGE", loadout.PrimarySkin == null ? (loadout.Primary == null ? "" : loadout.Primary.Gun.IconLink) : loadout.PrimarySkin.IconLink);
             EffectManager.sendUIEffectText(MIDGAME_LOADOUT_KEY, TransportConnection, true, "SERVER Loadout Primary TEXT", loadout.Primary == null ? "" : loadout.Primary.Gun.GunName);
             EffectManager.sendUIEffectText(MIDGAME_LOADOUT_KEY, TransportConnection, true, "SERVER Loadout Primary Level TEXT", loadout.Primary == null ? "" : loadout.Primary.Level.ToString());
-            for (int i = 0; i <= 3; i++)
+            for (var i = 0; i <= 3; i++)
             {
-                EAttachment attachmentType = (EAttachment)i;
-                loadout.PrimaryAttachments.TryGetValue(attachmentType, out LoadoutAttachment attachment);
+                var attachmentType = (EAttachment)i;
+                loadout.PrimaryAttachments.TryGetValue(attachmentType, out var attachment);
                 EffectManager.sendUIEffectImageURL(MIDGAME_LOADOUT_KEY, TransportConnection, true, $"SERVER Loadout Primary {attachmentType} IMAGE", attachment == null ? Utility.GetDefaultAttachmentImage(attachmentType.ToString()) : attachment.Attachment.IconLink);
             }
             EffectManager.sendUIEffectImageURL(MIDGAME_LOADOUT_KEY, TransportConnection, true, "SERVER Loadout Primary Charm IMAGE", loadout.PrimaryGunCharm == null ? Utility.GetDefaultAttachmentImage("charm") : loadout.PrimaryGunCharm.GunCharm.IconLink);
@@ -1379,10 +1379,10 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectImageURL(MIDGAME_LOADOUT_KEY, TransportConnection, true, "SERVER Loadout Secondary IMAGE", loadout.SecondarySkin == null ? (loadout.Secondary == null ? "" : loadout.Secondary.Gun.IconLink) : loadout.SecondarySkin.IconLink);
             EffectManager.sendUIEffectText(MIDGAME_LOADOUT_KEY, TransportConnection, true, "SERVER Loadout Secondary TEXT", loadout.Secondary == null ? "" : loadout.Secondary.Gun.GunName);
             EffectManager.sendUIEffectText(MIDGAME_LOADOUT_KEY, TransportConnection, true, "SERVER Loadout Secondary Level TEXT", loadout.Secondary == null ? "" : loadout.Secondary.Level.ToString());
-            for (int i = 0; i <= 3; i++)
+            for (var i = 0; i <= 3; i++)
             {
-                EAttachment attachmentType = (EAttachment)i;
-                loadout.SecondaryAttachments.TryGetValue(attachmentType, out LoadoutAttachment attachment);
+                var attachmentType = (EAttachment)i;
+                loadout.SecondaryAttachments.TryGetValue(attachmentType, out var attachment);
                 EffectManager.sendUIEffectImageURL(MIDGAME_LOADOUT_KEY, TransportConnection, true, $"SERVER Loadout Secondary {attachmentType} IMAGE", attachment == null ? Utility.GetDefaultAttachmentImage(attachmentType.ToString()) : attachment.Attachment.IconLink);
             }
             EffectManager.sendUIEffectImageURL(MIDGAME_LOADOUT_KEY, TransportConnection, true, "SERVER Loadout Secondary Charm IMAGE", loadout.SecondaryGunCharm == null ? Utility.GetDefaultAttachmentImage("charm") : loadout.SecondaryGunCharm.GunCharm.IconLink);
@@ -1401,15 +1401,15 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectText(MIDGAME_LOADOUT_KEY, TransportConnection, true, "SERVER Loadout Lethal TEXT", loadout.Lethal == null ? "" : loadout.Lethal.Gadget.GadgetName);
 
             // Perk
-            for (int i = 1; i <= 3; i++)
+            for (var i = 1; i <= 3; i++)
             {
-                loadout.Perks.TryGetValue(i, out LoadoutPerk perk);
+                loadout.Perks.TryGetValue(i, out var perk);
                 EffectManager.sendUIEffectImageURL(MIDGAME_LOADOUT_KEY, TransportConnection, true, $"SERVER Loadout Perk IMAGE {i}", perk == null ? "" : loadout.Perks[i].Perk.IconLink);
                 EffectManager.sendUIEffectText(MIDGAME_LOADOUT_KEY, TransportConnection, true, $"SERVER Loadout Perk TEXT {i}", perk == null ? "" : loadout.Perks[i].Perk.PerkName);
             }
 
             // Killstreak
-            for (int i = 0; i <= 2; i++)
+            for (var i = 0; i <= 2; i++)
             {
                 EffectManager.sendUIEffectImageURL(MIDGAME_LOADOUT_KEY, TransportConnection, true, $"SERVER Loadout Killstreak IMAGE {i}", loadout.Killstreaks.Count < (i + 1) ? "" : loadout.Killstreaks[i].Killstreak.IconLink);
                 EffectManager.sendUIEffectText(MIDGAME_LOADOUT_KEY, TransportConnection, true, $"SERVER Loadout Killstreak TEXT {i}", loadout.Killstreaks.Count < (i + 1) ? "" : loadout.Killstreaks[i].Killstreak.KillstreakRequired.ToString());
@@ -1426,7 +1426,7 @@ namespace UnturnedBlackout.Instances
 
         public void EquipMidgameLoadout()
         {
-            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
+            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out var loadout))
             {
                 Logging.Debug($"Error finding loadout with id {LoadoutID} for {Player.CharacterName}");
                 return;
@@ -1436,7 +1436,7 @@ namespace UnturnedBlackout.Instances
             Task.Run(async () =>
             {
                 Logging.Debug($"TASK ENTERED LOADOUT CHECK {Player.CharacterName}");
-                foreach (Loadout activeLoadout in PlayerLoadout.Loadouts.Values.Where(k => k.IsActive))
+                foreach (var activeLoadout in PlayerLoadout.Loadouts.Values.Where(k => k.IsActive))
                 {
                     await DB.UpdatePlayerLoadoutActiveAsync(Player.CSteamID, activeLoadout.LoadoutID, false);
                 }
@@ -1446,7 +1446,7 @@ namespace UnturnedBlackout.Instances
                 TaskDispatcher.QueueOnMainThread(() =>
                 {
                     ClearMidgameLoadouts();
-                    GamePlayer gPlayer = Plugin.Instance.Game.GetGamePlayer(Player);
+                    var gPlayer = Plugin.Instance.Game.GetGamePlayer(Player);
                     if (gPlayer != null)
                     {
                         gPlayer.IsPendingLoadoutChange = true;
@@ -1457,7 +1457,7 @@ namespace UnturnedBlackout.Instances
 
         public void ClearMidgameLoadouts()
         {
-            GamePlayer gPlayer = Plugin.Instance.Game.GetGamePlayer(Player);
+            var gPlayer = Plugin.Instance.Game.GetGamePlayer(Player);
             if (gPlayer != null)
             {
                 gPlayer.HasMidgameLoadout = false;
@@ -1495,18 +1495,18 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Previous BUTTON", false);
 
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Page TEXT", "");
-            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
+            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out var loadout))
             {
                 Logging.Debug($"Error finding current loadout with id {LoadoutID} for {Player.CharacterName}");
                 return;
             }
 
-            for (int i = 0; i <= MAX_ITEMS_PER_PAGE; i++)
+            for (var i = 0; i <= MAX_ITEMS_PER_PAGE; i++)
             {
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item BUTTON {i}", false);
             }
 
-            for (int i = 0; i <= MAX_ITEMS_PER_GRID; i++)
+            for (var i = 0; i <= MAX_ITEMS_PER_GRID; i++)
             {
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Grid BUTTON {i}", false);
             }
@@ -1519,13 +1519,13 @@ namespace UnturnedBlackout.Instances
                         {
                             case ELoadoutPage.PrimarySkin:
                                 {
-                                    if (!GunSkinPages.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out Dictionary<int, PageGunSkin> gunSkinPages))
+                                    if (!GunSkinPages.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out var gunSkinPages))
                                     {
                                         Logging.Debug($"Error getting gun skin pages for gun with id {loadout.Primary?.Gun?.GunID ?? 0}");
                                         return;
                                     }
 
-                                    if (!gunSkinPages.TryGetValue(1, out PageGunSkin firstPage))
+                                    if (!gunSkinPages.TryGetValue(1, out var firstPage))
                                     {
                                         Logging.Debug($"Error finding the first page for gun skins for gun with id {loadout.Primary.Gun.GunID} for {Player.CharacterName}");
                                         return;
@@ -1539,13 +1539,13 @@ namespace UnturnedBlackout.Instances
 
                             case ELoadoutPage.SecondarySkin:
                                 {
-                                    if (!GunSkinPages.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out Dictionary<int, PageGunSkin> gunSkinPages))
+                                    if (!GunSkinPages.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out var gunSkinPages))
                                     {
                                         Logging.Debug($"Error getting gun skin pages for gun with id {loadout.Secondary?.Gun?.GunID ?? 0}");
                                         return;
                                     }
 
-                                    if (!gunSkinPages.TryGetValue(1, out PageGunSkin firstPage))
+                                    if (!gunSkinPages.TryGetValue(1, out var firstPage))
                                     {
                                         Logging.Debug($"Error finding the first page for gun skins for gun with id {loadout.Secondary.Gun.GunID} for {Player.CharacterName}");
                                         return;
@@ -1568,25 +1568,25 @@ namespace UnturnedBlackout.Instances
                                         return;
                                     }
 
-                                    if (!PlayerLoadout.Guns.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out LoadoutGun gun))
+                                    if (!PlayerLoadout.Guns.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out var gun))
                                     {
                                         Logging.Debug($"Error finding primary that has been selected with id {loadout.Primary?.Gun?.GunID ?? 0} for {Player.CharacterName}");
                                         return;
                                     }
 
-                                    if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out Dictionary<EAttachment, Dictionary<int, PageAttachment>> attachmentTypePages))
+                                    if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out var attachmentTypePages))
                                     {
                                         Logging.Debug($"Error finding primary attachments for {gun.Gun.GunID} for {Player.CharacterName}");
                                         return;
                                     }
 
-                                    if (!attachmentTypePages.TryGetValue(attachmentType, out Dictionary<int, PageAttachment> attachmentPages))
+                                    if (!attachmentTypePages.TryGetValue(attachmentType, out var attachmentPages))
                                     {
                                         Logging.Debug($"Error finding attachments with type {attachmentType} for {Player.CharacterName}");
                                         return;
                                     }
 
-                                    if (!attachmentPages.TryGetValue(1, out PageAttachment firstPage))
+                                    if (!attachmentPages.TryGetValue(1, out var firstPage))
                                     {
                                         Logging.Debug($"Error finding first page of attachment with type {attachmentType} for gun with id {gun.Gun.GunID} for {Player.CharacterName}");
                                         return;
@@ -1599,7 +1599,7 @@ namespace UnturnedBlackout.Instances
                             case ELoadoutPage.AttachmentPrimaryCharm:
                             case ELoadoutPage.AttachmentSecondaryCharm:
                                 {
-                                    if (!GunCharmPages.TryGetValue(1, out PageGunCharm firstPage))
+                                    if (!GunCharmPages.TryGetValue(1, out var firstPage))
                                     {
                                         Logging.Debug($"Error getting first page for gun charms for {Player.CharacterName}");
                                         return;
@@ -1622,25 +1622,25 @@ namespace UnturnedBlackout.Instances
                                         return;
                                     }
 
-                                    if (!PlayerLoadout.Guns.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out LoadoutGun gun))
+                                    if (!PlayerLoadout.Guns.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out var gun))
                                     {
                                         Logging.Debug($"Error finding secondary that has been selected with id {loadout.Secondary?.Gun?.GunID ?? 0} for {Player.CharacterName}");
                                         return;
                                     }
 
-                                    if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out Dictionary<EAttachment, Dictionary<int, PageAttachment>> attachmentTypePages))
+                                    if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out var attachmentTypePages))
                                     {
                                         Logging.Debug($"Error finding secondary attachments for {gun.Gun.GunID} for {Player.CharacterName}");
                                         return;
                                     }
 
-                                    if (!attachmentTypePages.TryGetValue(attachmentType, out Dictionary<int, PageAttachment> attachmentPages))
+                                    if (!attachmentTypePages.TryGetValue(attachmentType, out var attachmentPages))
                                     {
                                         Logging.Debug($"Error finding attachments with type {attachmentType} for {Player.CharacterName}");
                                         return;
                                     }
 
-                                    if (!attachmentPages.TryGetValue(1, out PageAttachment firstPage))
+                                    if (!attachmentPages.TryGetValue(1, out var firstPage))
                                     {
                                         Logging.Debug($"Error finding first page of attachment with type {attachmentType} for gun with id {gun.Gun.GunID} for {Player.CharacterName}");
                                         return;
@@ -1654,13 +1654,13 @@ namespace UnturnedBlackout.Instances
                             case ELoadoutPage.Perk2:
                             case ELoadoutPage.Perk3:
                                 {
-                                    if (!int.TryParse(LoadoutPage.ToString().Replace("Perk", ""), out int perkType))
+                                    if (!int.TryParse(LoadoutPage.ToString().Replace("Perk", ""), out var perkType))
                                     {
                                         Logging.Debug($"Error getting perk type from {LoadoutPage}");
                                         return;
                                     }
 
-                                    if (!PerkPages[perkType].TryGetValue(1, out PagePerk firstPage))
+                                    if (!PerkPages[perkType].TryGetValue(1, out var firstPage))
                                     {
                                         Logging.Debug($"Error getting first page for perks for {Player.CharacterName}");
                                         return;
@@ -1672,7 +1672,7 @@ namespace UnturnedBlackout.Instances
 
                             case ELoadoutPage.Lethal:
                                 {
-                                    if (!LethalPages.TryGetValue(1, out PageGadget firstPage))
+                                    if (!LethalPages.TryGetValue(1, out var firstPage))
                                     {
                                         Logging.Debug($"Error finding the first page for lethals for {Player.CharacterName}");
                                         return;
@@ -1684,7 +1684,7 @@ namespace UnturnedBlackout.Instances
 
                             case ELoadoutPage.Tactical:
                                 {
-                                    if (!TacticalPages.TryGetValue(1, out PageGadget firstPage))
+                                    if (!TacticalPages.TryGetValue(1, out var firstPage))
                                     {
                                         Logging.Debug($"Error finding the first page for tacticals for {Player.CharacterName}");
                                         return;
@@ -1696,7 +1696,7 @@ namespace UnturnedBlackout.Instances
 
                             case ELoadoutPage.Knife:
                                 {
-                                    if (!KnifePages.TryGetValue(1, out PageKnife firstPage))
+                                    if (!KnifePages.TryGetValue(1, out var firstPage))
                                     {
                                         Logging.Debug($"Error finding the first page for knives for {Player.CharacterName}");
                                         return;
@@ -1710,7 +1710,7 @@ namespace UnturnedBlackout.Instances
 
                             case ELoadoutPage.Killstreak:
                                 {
-                                    if (!KillstreakPages.TryGetValue(1, out PageKillstreak firstPage))
+                                    if (!KillstreakPages.TryGetValue(1, out var firstPage))
                                     {
                                         Logging.Debug($"Error finding the first page for killstreaks for {Player.CharacterName}");
                                         return;
@@ -1725,7 +1725,7 @@ namespace UnturnedBlackout.Instances
 
                             case ELoadoutPage.Glove:
                                 {
-                                    if (!GlovePages.TryGetValue(1, out PageGlove firstPage))
+                                    if (!GlovePages.TryGetValue(1, out var firstPage))
                                     {
                                         Logging.Debug($"Error finding the first page for gloves for {Player.CharacterName}");
                                         return;
@@ -1739,7 +1739,7 @@ namespace UnturnedBlackout.Instances
 
                             case ELoadoutPage.Card:
                                 {
-                                    if (!CardPages.TryGetValue(1, out PageCard firstPage))
+                                    if (!CardPages.TryGetValue(1, out var firstPage))
                                     {
                                         Logging.Debug($"Error finding the first page for cards for {Player.CharacterName}");
                                         return;
@@ -1757,7 +1757,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutTab.PISTOLS:
                     {
-                        if (!PistolPages.TryGetValue(1, out PageGun firstPage))
+                        if (!PistolPages.TryGetValue(1, out var firstPage))
                         {
                             Logging.Debug($"Error finding first page for pistols for {Player.CharacterName}");
                             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Page TEXT", "");
@@ -1770,7 +1770,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutTab.SUBMACHINE_GUNS:
                     {
-                        if (!SMGPages.TryGetValue(1, out PageGun firstPage))
+                        if (!SMGPages.TryGetValue(1, out var firstPage))
                         {
                             Logging.Debug($"Error finding first page for smgs for {Player.CharacterName}");
                             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Page TEXT", "");
@@ -1783,7 +1783,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutTab.SHOTGUNS:
                     {
-                        if (!ShotgunPages.TryGetValue(1, out PageGun firstPage))
+                        if (!ShotgunPages.TryGetValue(1, out var firstPage))
                         {
                             Logging.Debug($"Error finding first page for shotguns for {Player.CharacterName}");
                             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Page TEXT", "");
@@ -1796,7 +1796,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutTab.LIGHT_MACHINE_GUNS:
                     {
-                        if (!LMGPages.TryGetValue(1, out PageGun firstPage))
+                        if (!LMGPages.TryGetValue(1, out var firstPage))
                         {
                             Logging.Debug($"Error finding first page for lmgs for {Player.CharacterName}");
                             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Page TEXT", "");
@@ -1809,7 +1809,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutTab.ASSAULT_RIFLES:
                     {
-                        if (!ARPages.TryGetValue(1, out PageGun firstPage))
+                        if (!ARPages.TryGetValue(1, out var firstPage))
                         {
                             Logging.Debug($"Error finding first page for ARs for {Player.CharacterName}");
                             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Page TEXT", "");
@@ -1822,7 +1822,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutTab.SNIPER_RIFLES:
                     {
-                        if (!SniperPages.TryGetValue(1, out PageGun firstPage))
+                        if (!SniperPages.TryGetValue(1, out var firstPage))
                         {
                             Logging.Debug($"Error finding first page for snipers for {Player.CharacterName}");
                             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Page TEXT", "");
@@ -1835,7 +1835,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutTab.CARBINES:
                     {
-                        if (!CarbinePages.TryGetValue(1, out PageGun firstPage))
+                        if (!CarbinePages.TryGetValue(1, out var firstPage))
                         {
                             Logging.Debug($"Error finding first page for carbines for {Player.CharacterName}");
                             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Page TEXT", "");
@@ -1850,7 +1850,7 @@ namespace UnturnedBlackout.Instances
 
         public void ForwardLoadoutTab()
         {
-            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
+            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out var loadout))
             {
                 Logging.Debug($"Error finding loadout with id {LoadoutID} for {Player.CharacterName}");
                 return;
@@ -1864,13 +1864,13 @@ namespace UnturnedBlackout.Instances
                         {
                             case ELoadoutPage.PrimarySkin:
                                 {
-                                    if (!GunSkinPages.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out Dictionary<int, PageGunSkin> gunSkinPages))
+                                    if (!GunSkinPages.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out var gunSkinPages))
                                     {
                                         Logging.Debug($"Error getting gun skin pages for gun with id {loadout.Primary?.Gun?.GunID ?? 0}");
                                         return;
                                     }
 
-                                    if (!gunSkinPages.TryGetValue(LoadoutTabPageID + 1, out PageGunSkin nextPage) && !gunSkinPages.TryGetValue(1, out nextPage))
+                                    if (!gunSkinPages.TryGetValue(LoadoutTabPageID + 1, out var nextPage) && !gunSkinPages.TryGetValue(1, out nextPage))
                                     {
                                         Logging.Debug($"Error finding the next page for gun skins for gun with id {loadout.Primary.Gun.GunID} for {Player.CharacterName}");
                                         return;
@@ -1882,13 +1882,13 @@ namespace UnturnedBlackout.Instances
 
                             case ELoadoutPage.SecondarySkin:
                                 {
-                                    if (!GunSkinPages.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out Dictionary<int, PageGunSkin> gunSkinPages))
+                                    if (!GunSkinPages.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out var gunSkinPages))
                                     {
                                         Logging.Debug($"Error getting gun skin pages for gun with id {loadout.Secondary?.Gun?.GunID ?? 0}");
                                         return;
                                     }
 
-                                    if (!gunSkinPages.TryGetValue(LoadoutTabPageID + 1, out PageGunSkin nextPage) && !gunSkinPages.TryGetValue(1, out nextPage))
+                                    if (!gunSkinPages.TryGetValue(LoadoutTabPageID + 1, out var nextPage) && !gunSkinPages.TryGetValue(1, out nextPage))
                                     {
                                         Logging.Debug($"Error finding the next page for gun skins for gun with id {loadout.Secondary.Gun.GunID} for {Player.CharacterName}");
                                         return;
@@ -1909,25 +1909,25 @@ namespace UnturnedBlackout.Instances
                                         return;
                                     }
 
-                                    if (!PlayerLoadout.Guns.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out LoadoutGun gun))
+                                    if (!PlayerLoadout.Guns.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out var gun))
                                     {
                                         Logging.Debug($"Error finding primary that has been selected with id {loadout.Primary?.Gun?.GunID ?? 0} for {Player.CharacterName}");
                                         return;
                                     }
 
-                                    if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out Dictionary<EAttachment, Dictionary<int, PageAttachment>> attachmentTypePages))
+                                    if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out var attachmentTypePages))
                                     {
                                         Logging.Debug($"Error finding primary attachments for {gun.Gun.GunID} for {Player.CharacterName}");
                                         return;
                                     }
 
-                                    if (!attachmentTypePages.TryGetValue(attachmentType, out Dictionary<int, PageAttachment> attachmentPages))
+                                    if (!attachmentTypePages.TryGetValue(attachmentType, out var attachmentPages))
                                     {
                                         Logging.Debug($"Error finding attachments with type {attachmentType} for {Player.CharacterName}");
                                         return;
                                     }
 
-                                    if (!attachmentPages.TryGetValue(LoadoutTabPageID + 1, out PageAttachment nextPage) && !attachmentPages.TryGetValue(1, out nextPage))
+                                    if (!attachmentPages.TryGetValue(LoadoutTabPageID + 1, out var nextPage) && !attachmentPages.TryGetValue(1, out nextPage))
                                     {
                                         Logging.Debug($"Error finding next page of attachment with type {attachmentType} for gun with id {gun.Gun.GunID} for {Player.CharacterName}");
                                         return;
@@ -1940,7 +1940,7 @@ namespace UnturnedBlackout.Instances
                             case ELoadoutPage.AttachmentPrimaryCharm:
                             case ELoadoutPage.AttachmentSecondaryCharm:
                                 {
-                                    if (!GunCharmPages.TryGetValue(LoadoutTabPageID + 1, out PageGunCharm nextPage) && !GunCharmPages.TryGetValue(1, out nextPage))
+                                    if (!GunCharmPages.TryGetValue(LoadoutTabPageID + 1, out var nextPage) && !GunCharmPages.TryGetValue(1, out nextPage))
                                     {
                                         Logging.Debug($"Error getting next page for gun charms for {Player.CharacterName}");
                                         return;
@@ -1960,25 +1960,25 @@ namespace UnturnedBlackout.Instances
                                         return;
                                     }
 
-                                    if (!PlayerLoadout.Guns.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out LoadoutGun gun))
+                                    if (!PlayerLoadout.Guns.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out var gun))
                                     {
                                         Logging.Debug($"Error finding secondary that has been selected with id {loadout.Secondary?.Gun?.GunID ?? 0} for {Player.CharacterName}");
                                         return;
                                     }
 
-                                    if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out Dictionary<EAttachment, Dictionary<int, PageAttachment>> attachmentTypePages))
+                                    if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out var attachmentTypePages))
                                     {
                                         Logging.Debug($"Error finding secondary attachments for {gun.Gun.GunID} for {Player.CharacterName}");
                                         return;
                                     }
 
-                                    if (!attachmentTypePages.TryGetValue(attachmentType, out Dictionary<int, PageAttachment> attachmentPages))
+                                    if (!attachmentTypePages.TryGetValue(attachmentType, out var attachmentPages))
                                     {
                                         Logging.Debug($"Error finding attachments with type {attachmentType} for {Player.CharacterName}");
                                         return;
                                     }
 
-                                    if (!attachmentPages.TryGetValue(LoadoutTabPageID + 1, out PageAttachment nextPage) && !attachmentPages.TryGetValue(1, out nextPage))
+                                    if (!attachmentPages.TryGetValue(LoadoutTabPageID + 1, out var nextPage) && !attachmentPages.TryGetValue(1, out nextPage))
                                     {
                                         Logging.Debug($"Error finding next page of attachment with type {attachmentType} for gun with id {gun.Gun.GunID} for {Player.CharacterName}");
                                         return;
@@ -1992,13 +1992,13 @@ namespace UnturnedBlackout.Instances
                             case ELoadoutPage.Perk2:
                             case ELoadoutPage.Perk3:
                                 {
-                                    if (!int.TryParse(LoadoutPage.ToString().Replace("Perk", ""), out int perkType))
+                                    if (!int.TryParse(LoadoutPage.ToString().Replace("Perk", ""), out var perkType))
                                     {
                                         Logging.Debug($"Error getting perk type from {LoadoutPage}");
                                         return;
                                     }
 
-                                    if (!PerkPages[perkType].TryGetValue(LoadoutTabPageID + 1, out PagePerk nextPage) && !PerkPages[perkType].TryGetValue(1, out nextPage))
+                                    if (!PerkPages[perkType].TryGetValue(LoadoutTabPageID + 1, out var nextPage) && !PerkPages[perkType].TryGetValue(1, out nextPage))
                                     {
                                         Logging.Debug($"Error getting next page for perks for {Player.CharacterName}");
                                         return;
@@ -2010,7 +2010,7 @@ namespace UnturnedBlackout.Instances
 
                             case ELoadoutPage.Lethal:
                                 {
-                                    if (!LethalPages.TryGetValue(LoadoutTabPageID + 1, out PageGadget nextPage) && !LethalPages.TryGetValue(1, out nextPage))
+                                    if (!LethalPages.TryGetValue(LoadoutTabPageID + 1, out var nextPage) && !LethalPages.TryGetValue(1, out nextPage))
                                     {
                                         Logging.Debug($"Error finding the next page for lethals for {Player.CharacterName}");
                                         return;
@@ -2022,7 +2022,7 @@ namespace UnturnedBlackout.Instances
 
                             case ELoadoutPage.Tactical:
                                 {
-                                    if (!TacticalPages.TryGetValue(LoadoutTabPageID + 1, out PageGadget nextPage) && !TacticalPages.TryGetValue(1, out nextPage))
+                                    if (!TacticalPages.TryGetValue(LoadoutTabPageID + 1, out var nextPage) && !TacticalPages.TryGetValue(1, out nextPage))
                                     {
                                         Logging.Debug($"Error finding the next page for tacticals for {Player.CharacterName}");
                                         return;
@@ -2034,7 +2034,7 @@ namespace UnturnedBlackout.Instances
 
                             case ELoadoutPage.Knife:
                                 {
-                                    if (!KnifePages.TryGetValue(LoadoutTabPageID + 1, out PageKnife nextPage) && !KnifePages.TryGetValue(1, out nextPage))
+                                    if (!KnifePages.TryGetValue(LoadoutTabPageID + 1, out var nextPage) && !KnifePages.TryGetValue(1, out nextPage))
                                     {
                                         Logging.Debug($"Error finding the next page for knives for {Player.CharacterName}");
                                         return;
@@ -2046,7 +2046,7 @@ namespace UnturnedBlackout.Instances
 
                             case ELoadoutPage.Killstreak:
                                 {
-                                    if (!KillstreakPages.TryGetValue(LoadoutTabPageID + 1, out PageKillstreak nextPage) && !KillstreakPages.TryGetValue(1, out nextPage))
+                                    if (!KillstreakPages.TryGetValue(LoadoutTabPageID + 1, out var nextPage) && !KillstreakPages.TryGetValue(1, out nextPage))
                                     {
                                         Logging.Debug($"Error finding the next page for killstreaks for {Player.CharacterName}");
                                         return;
@@ -2058,7 +2058,7 @@ namespace UnturnedBlackout.Instances
 
                             case ELoadoutPage.Glove:
                                 {
-                                    if (!GlovePages.TryGetValue(LoadoutTabPageID + 1, out PageGlove nextPage) && !GlovePages.TryGetValue(1, out nextPage))
+                                    if (!GlovePages.TryGetValue(LoadoutTabPageID + 1, out var nextPage) && !GlovePages.TryGetValue(1, out nextPage))
                                     {
                                         Logging.Debug($"Error finding the next page for gloves for {Player.CharacterName}");
                                         return;
@@ -2070,7 +2070,7 @@ namespace UnturnedBlackout.Instances
 
                             case ELoadoutPage.Card:
                                 {
-                                    if (!CardPages.TryGetValue(LoadoutTabPageID + 1, out PageCard nextPage) && !CardPages.TryGetValue(1, out nextPage))
+                                    if (!CardPages.TryGetValue(LoadoutTabPageID + 1, out var nextPage) && !CardPages.TryGetValue(1, out nextPage))
                                     {
                                         Logging.Debug($"Error finding the next page for cards for {Player.CharacterName}");
                                         return;
@@ -2086,7 +2086,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutTab.PISTOLS:
                     {
-                        if (!PistolPages.TryGetValue(LoadoutTabPageID + 1, out PageGun nextPage) && !PistolPages.TryGetValue(1, out nextPage))
+                        if (!PistolPages.TryGetValue(LoadoutTabPageID + 1, out var nextPage) && !PistolPages.TryGetValue(1, out nextPage))
                         {
                             Logging.Debug($"Error finding next page for pistols for {Player.CharacterName}");
                             return;
@@ -2098,7 +2098,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutTab.SUBMACHINE_GUNS:
                     {
-                        if (!SMGPages.TryGetValue(LoadoutTabPageID + 1, out PageGun nextPage) && !SMGPages.TryGetValue(1, out nextPage))
+                        if (!SMGPages.TryGetValue(LoadoutTabPageID + 1, out var nextPage) && !SMGPages.TryGetValue(1, out nextPage))
                         {
                             Logging.Debug($"Error finding next page for smgs for {Player.CharacterName}");
                             return;
@@ -2110,7 +2110,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutTab.SHOTGUNS:
                     {
-                        if (!ShotgunPages.TryGetValue(LoadoutTabPageID + 1, out PageGun nextPage) && !ShotgunPages.TryGetValue(1, out nextPage))
+                        if (!ShotgunPages.TryGetValue(LoadoutTabPageID + 1, out var nextPage) && !ShotgunPages.TryGetValue(1, out nextPage))
                         {
                             Logging.Debug($"Error finding next page for shotguns for {Player.CharacterName}");
                             return;
@@ -2122,7 +2122,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutTab.LIGHT_MACHINE_GUNS:
                     {
-                        if (!LMGPages.TryGetValue(LoadoutTabPageID + 1, out PageGun nextPage) && !LMGPages.TryGetValue(1, out nextPage))
+                        if (!LMGPages.TryGetValue(LoadoutTabPageID + 1, out var nextPage) && !LMGPages.TryGetValue(1, out nextPage))
                         {
                             Logging.Debug($"Error finding next page for lmgs for {Player.CharacterName}");
                             return;
@@ -2134,7 +2134,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutTab.ASSAULT_RIFLES:
                     {
-                        if (!ARPages.TryGetValue(LoadoutTabPageID + 1, out PageGun nextPage) && !ARPages.TryGetValue(1, out nextPage))
+                        if (!ARPages.TryGetValue(LoadoutTabPageID + 1, out var nextPage) && !ARPages.TryGetValue(1, out nextPage))
                         {
                             Logging.Debug($"Error finding next page for ARs for {Player.CharacterName}");
                             return;
@@ -2146,7 +2146,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutTab.SNIPER_RIFLES:
                     {
-                        if (!SniperPages.TryGetValue(LoadoutTabPageID + 1, out PageGun nextPage) && !SniperPages.TryGetValue(1, out nextPage))
+                        if (!SniperPages.TryGetValue(LoadoutTabPageID + 1, out var nextPage) && !SniperPages.TryGetValue(1, out nextPage))
                         {
                             Logging.Debug($"Error finding next page for snipers for {Player.CharacterName}");
                             return;
@@ -2158,7 +2158,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutTab.CARBINES:
                     {
-                        if (!CarbinePages.TryGetValue(LoadoutTabPageID + 1, out PageGun nextPage) && !CarbinePages.TryGetValue(1, out nextPage))
+                        if (!CarbinePages.TryGetValue(LoadoutTabPageID + 1, out var nextPage) && !CarbinePages.TryGetValue(1, out nextPage))
                         {
                             Logging.Debug($"Error finding next page for carbines for {Player.CharacterName}");
                             return;
@@ -2173,7 +2173,7 @@ namespace UnturnedBlackout.Instances
         public void BackwardLoadoutTab()
         {
 
-            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
+            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out var loadout))
             {
                 Logging.Debug($"Error finding current loadout with id {LoadoutID} for {Player.CharacterName}");
                 return;
@@ -2187,13 +2187,13 @@ namespace UnturnedBlackout.Instances
                         {
                             case ELoadoutPage.PrimarySkin:
                                 {
-                                    if (!GunSkinPages.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out Dictionary<int, PageGunSkin> gunSkinPages))
+                                    if (!GunSkinPages.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out var gunSkinPages))
                                     {
                                         Logging.Debug($"Error getting gun skin pages for gun with id {loadout.Primary?.Gun?.GunID ?? 0}");
                                         return;
                                     }
 
-                                    if (!gunSkinPages.TryGetValue(LoadoutTabPageID - 1, out PageGunSkin prevPage) && !gunSkinPages.TryGetValue(gunSkinPages.Keys.Max(), out prevPage))
+                                    if (!gunSkinPages.TryGetValue(LoadoutTabPageID - 1, out var prevPage) && !gunSkinPages.TryGetValue(gunSkinPages.Keys.Max(), out prevPage))
                                     {
                                         Logging.Debug($"Error finding the prev page for gun skins for gun with id {loadout.Primary.Gun.GunID} for {Player.CharacterName}");
                                         return;
@@ -2205,13 +2205,13 @@ namespace UnturnedBlackout.Instances
 
                             case ELoadoutPage.SecondarySkin:
                                 {
-                                    if (!GunSkinPages.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out Dictionary<int, PageGunSkin> gunSkinPages))
+                                    if (!GunSkinPages.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out var gunSkinPages))
                                     {
                                         Logging.Debug($"Error getting gun skin pages for gun with id {loadout.Secondary?.Gun?.GunID ?? 0}");
                                         return;
                                     }
 
-                                    if (!gunSkinPages.TryGetValue(LoadoutTabPageID - 1, out PageGunSkin prevPage) && !gunSkinPages.TryGetValue(gunSkinPages.Keys.Max(), out prevPage))
+                                    if (!gunSkinPages.TryGetValue(LoadoutTabPageID - 1, out var prevPage) && !gunSkinPages.TryGetValue(gunSkinPages.Keys.Max(), out prevPage))
                                     {
                                         Logging.Debug($"Error finding the prev page for gun skins for gun with id {loadout.Secondary.Gun.GunID} for {Player.CharacterName}");
                                         return;
@@ -2232,25 +2232,25 @@ namespace UnturnedBlackout.Instances
                                         return;
                                     }
 
-                                    if (!PlayerLoadout.Guns.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out LoadoutGun gun))
+                                    if (!PlayerLoadout.Guns.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out var gun))
                                     {
                                         Logging.Debug($"Error finding primary that has been selected with id {loadout.Primary?.Gun?.GunID ?? 0} for {Player.CharacterName}");
                                         return;
                                     }
 
-                                    if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out Dictionary<EAttachment, Dictionary<int, PageAttachment>> attachmentTypePages))
+                                    if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out var attachmentTypePages))
                                     {
                                         Logging.Debug($"Error finding primary attachments for {gun.Gun.GunID} for {Player.CharacterName}");
                                         return;
                                     }
 
-                                    if (!attachmentTypePages.TryGetValue(attachmentType, out Dictionary<int, PageAttachment> attachmentPages))
+                                    if (!attachmentTypePages.TryGetValue(attachmentType, out var attachmentPages))
                                     {
                                         Logging.Debug($"Error finding attachments with type {attachmentType} for {Player.CharacterName}");
                                         return;
                                     }
 
-                                    if (!attachmentPages.TryGetValue(LoadoutTabPageID - 1, out PageAttachment prevPage) && !attachmentPages.TryGetValue(attachmentPages.Keys.Max(), out prevPage))
+                                    if (!attachmentPages.TryGetValue(LoadoutTabPageID - 1, out var prevPage) && !attachmentPages.TryGetValue(attachmentPages.Keys.Max(), out prevPage))
                                     {
                                         Logging.Debug($"Error finding previous page of attachment with type {attachmentType} for gun with id {gun.Gun.GunID} for {Player.CharacterName}");
                                         return;
@@ -2264,7 +2264,7 @@ namespace UnturnedBlackout.Instances
                             case ELoadoutPage.AttachmentPrimaryCharm:
                             case ELoadoutPage.AttachmentSecondaryCharm:
                                 {
-                                    if (!GunCharmPages.TryGetValue(LoadoutTabPageID - 1, out PageGunCharm prevPage) && !GunCharmPages.TryGetValue(GunCharmPages.Keys.Max(), out prevPage))
+                                    if (!GunCharmPages.TryGetValue(LoadoutTabPageID - 1, out var prevPage) && !GunCharmPages.TryGetValue(GunCharmPages.Keys.Max(), out prevPage))
                                     {
                                         Logging.Debug($"Error getting prev page for gun charms for {Player.CharacterName}");
                                         return;
@@ -2284,25 +2284,25 @@ namespace UnturnedBlackout.Instances
                                         return;
                                     }
 
-                                    if (!PlayerLoadout.Guns.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out LoadoutGun gun))
+                                    if (!PlayerLoadout.Guns.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out var gun))
                                     {
                                         Logging.Debug($"Error finding Secondary that has been selected with id {loadout.Secondary?.Gun?.GunID ?? 0} for {Player.CharacterName}");
                                         return;
                                     }
 
-                                    if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out Dictionary<EAttachment, Dictionary<int, PageAttachment>> attachmentTypePages))
+                                    if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out var attachmentTypePages))
                                     {
                                         Logging.Debug($"Error finding Secondary attachments for {gun.Gun.GunID} for {Player.CharacterName}");
                                         return;
                                     }
 
-                                    if (!attachmentTypePages.TryGetValue(attachmentType, out Dictionary<int, PageAttachment> attachmentPages))
+                                    if (!attachmentTypePages.TryGetValue(attachmentType, out var attachmentPages))
                                     {
                                         Logging.Debug($"Error finding attachments with type {attachmentType} for {Player.CharacterName}");
                                         return;
                                     }
 
-                                    if (!attachmentPages.TryGetValue(LoadoutTabPageID - 1, out PageAttachment prevPage) && !attachmentPages.TryGetValue(attachmentPages.Keys.Max(), out prevPage))
+                                    if (!attachmentPages.TryGetValue(LoadoutTabPageID - 1, out var prevPage) && !attachmentPages.TryGetValue(attachmentPages.Keys.Max(), out prevPage))
                                     {
                                         Logging.Debug($"Error finding previous page of attachment with type {attachmentType} for gun with id {gun.Gun.GunID} for {Player.CharacterName}");
                                         return;
@@ -2317,13 +2317,13 @@ namespace UnturnedBlackout.Instances
                             case ELoadoutPage.Perk2:
                             case ELoadoutPage.Perk3:
                                 {
-                                    if (!int.TryParse(LoadoutPage.ToString().Replace("Perk", ""), out int perkType))
+                                    if (!int.TryParse(LoadoutPage.ToString().Replace("Perk", ""), out var perkType))
                                     {
                                         Logging.Debug($"Error getting perk type from {LoadoutPage}");
                                         return;
                                     }
 
-                                    if (!PerkPages[perkType].TryGetValue(LoadoutTabPageID - 1, out PagePerk prevPage) && !PerkPages[perkType].TryGetValue(PerkPages.Keys.Max(), out prevPage))
+                                    if (!PerkPages[perkType].TryGetValue(LoadoutTabPageID - 1, out var prevPage) && !PerkPages[perkType].TryGetValue(PerkPages.Keys.Max(), out prevPage))
                                     {
                                         Logging.Debug($"Error getting prev page for perks for {Player.CharacterName}");
                                         return;
@@ -2335,7 +2335,7 @@ namespace UnturnedBlackout.Instances
 
                             case ELoadoutPage.Lethal:
                                 {
-                                    if (!LethalPages.TryGetValue(LoadoutTabPageID - 1, out PageGadget prevPage) && !LethalPages.TryGetValue(LethalPages.Keys.Max(), out prevPage))
+                                    if (!LethalPages.TryGetValue(LoadoutTabPageID - 1, out var prevPage) && !LethalPages.TryGetValue(LethalPages.Keys.Max(), out prevPage))
                                     {
                                         Logging.Debug($"Error finding the prev page for lethals for {Player.CharacterName}");
                                         return;
@@ -2347,7 +2347,7 @@ namespace UnturnedBlackout.Instances
 
                             case ELoadoutPage.Tactical:
                                 {
-                                    if (!TacticalPages.TryGetValue(LoadoutTabPageID - 1, out PageGadget prevPage) && !TacticalPages.TryGetValue(TacticalPages.Keys.Max(), out prevPage))
+                                    if (!TacticalPages.TryGetValue(LoadoutTabPageID - 1, out var prevPage) && !TacticalPages.TryGetValue(TacticalPages.Keys.Max(), out prevPage))
                                     {
                                         Logging.Debug($"Error finding the prev page for tacticals for {Player.CharacterName}");
                                         return;
@@ -2359,7 +2359,7 @@ namespace UnturnedBlackout.Instances
 
                             case ELoadoutPage.Knife:
                                 {
-                                    if (!KnifePages.TryGetValue(LoadoutTabPageID - 1, out PageKnife prevPage) && !KnifePages.TryGetValue(KnifePages.Keys.Max(), out prevPage))
+                                    if (!KnifePages.TryGetValue(LoadoutTabPageID - 1, out var prevPage) && !KnifePages.TryGetValue(KnifePages.Keys.Max(), out prevPage))
                                     {
                                         Logging.Debug($"Error finding the prev page for knives for {Player.CharacterName}");
                                         return;
@@ -2371,7 +2371,7 @@ namespace UnturnedBlackout.Instances
 
                             case ELoadoutPage.Killstreak:
                                 {
-                                    if (!KillstreakPages.TryGetValue(LoadoutTabPageID - 1, out PageKillstreak prevPage) && !KillstreakPages.TryGetValue(KillstreakPages.Keys.Max(), out prevPage))
+                                    if (!KillstreakPages.TryGetValue(LoadoutTabPageID - 1, out var prevPage) && !KillstreakPages.TryGetValue(KillstreakPages.Keys.Max(), out prevPage))
                                     {
                                         Logging.Debug($"Error finding the prev page for killstreaks for {Player.CharacterName}");
                                         return;
@@ -2383,7 +2383,7 @@ namespace UnturnedBlackout.Instances
 
                             case ELoadoutPage.Glove:
                                 {
-                                    if (!GlovePages.TryGetValue(LoadoutTabPageID - 1, out PageGlove prevPage) && !GlovePages.TryGetValue(GlovePages.Keys.Max(), out prevPage))
+                                    if (!GlovePages.TryGetValue(LoadoutTabPageID - 1, out var prevPage) && !GlovePages.TryGetValue(GlovePages.Keys.Max(), out prevPage))
                                     {
                                         Logging.Debug($"Error finding the prev page for gloves for {Player.CharacterName}");
                                         return;
@@ -2395,7 +2395,7 @@ namespace UnturnedBlackout.Instances
 
                             case ELoadoutPage.Card:
                                 {
-                                    if (!CardPages.TryGetValue(LoadoutTabPageID - 1, out PageCard prevPage) && !CardPages.TryGetValue(CardPages.Keys.Max(), out prevPage))
+                                    if (!CardPages.TryGetValue(LoadoutTabPageID - 1, out var prevPage) && !CardPages.TryGetValue(CardPages.Keys.Max(), out prevPage))
                                     {
                                         Logging.Debug($"Error finding the prev page for cards for {Player.CharacterName}");
                                         return;
@@ -2411,7 +2411,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutTab.PISTOLS:
                     {
-                        if (!PistolPages.TryGetValue(LoadoutTabPageID - 1, out PageGun prevPage) && !PistolPages.TryGetValue(PistolPages.Keys.Max(), out prevPage))
+                        if (!PistolPages.TryGetValue(LoadoutTabPageID - 1, out var prevPage) && !PistolPages.TryGetValue(PistolPages.Keys.Max(), out prevPage))
                         {
                             Logging.Debug($"Error finding next page for pistols for {Player.CharacterName}");
                             return;
@@ -2423,7 +2423,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutTab.SUBMACHINE_GUNS:
                     {
-                        if (!SMGPages.TryGetValue(LoadoutTabPageID - 1, out PageGun prevPage) && !SMGPages.TryGetValue(SMGPages.Keys.Max(), out prevPage))
+                        if (!SMGPages.TryGetValue(LoadoutTabPageID - 1, out var prevPage) && !SMGPages.TryGetValue(SMGPages.Keys.Max(), out prevPage))
                         {
                             Logging.Debug($"Error finding next page for smgs for {Player.CharacterName}");
                             return;
@@ -2435,7 +2435,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutTab.SHOTGUNS:
                     {
-                        if (!ShotgunPages.TryGetValue(LoadoutTabPageID - 1, out PageGun prevPage) && !ShotgunPages.TryGetValue(ShotgunPages.Keys.Max(), out prevPage))
+                        if (!ShotgunPages.TryGetValue(LoadoutTabPageID - 1, out var prevPage) && !ShotgunPages.TryGetValue(ShotgunPages.Keys.Max(), out prevPage))
                         {
                             Logging.Debug($"Error finding next page for shotguns for {Player.CharacterName}");
                             return;
@@ -2447,7 +2447,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutTab.LIGHT_MACHINE_GUNS:
                     {
-                        if (!LMGPages.TryGetValue(LoadoutTabPageID - 1, out PageGun prevPage) && !LMGPages.TryGetValue(LMGPages.Keys.Max(), out prevPage))
+                        if (!LMGPages.TryGetValue(LoadoutTabPageID - 1, out var prevPage) && !LMGPages.TryGetValue(LMGPages.Keys.Max(), out prevPage))
                         {
                             Logging.Debug($"Error finding next page for lmgs for {Player.CharacterName}");
                             return;
@@ -2459,7 +2459,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutTab.ASSAULT_RIFLES:
                     {
-                        if (!ARPages.TryGetValue(LoadoutTabPageID - 1, out PageGun prevPage) && !ARPages.TryGetValue(ARPages.Keys.Max(), out prevPage))
+                        if (!ARPages.TryGetValue(LoadoutTabPageID - 1, out var prevPage) && !ARPages.TryGetValue(ARPages.Keys.Max(), out prevPage))
                         {
                             Logging.Debug($"Error finding next page for ARs for {Player.CharacterName}");
                             return;
@@ -2471,7 +2471,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutTab.SNIPER_RIFLES:
                     {
-                        if (!SniperPages.TryGetValue(LoadoutTabPageID - 1, out PageGun prevPage) && !SniperPages.TryGetValue(SniperPages.Keys.Max(), out prevPage))
+                        if (!SniperPages.TryGetValue(LoadoutTabPageID - 1, out var prevPage) && !SniperPages.TryGetValue(SniperPages.Keys.Max(), out prevPage))
                         {
                             Logging.Debug($"Error finding next page for snipers for {Player.CharacterName}");
                             return;
@@ -2483,7 +2483,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutTab.CARBINES:
                     {
-                        if (!CarbinePages.TryGetValue(LoadoutTabPageID - 1, out PageGun prevPage) && !CarbinePages.TryGetValue(CarbinePages.Keys.Max(), out prevPage))
+                        if (!CarbinePages.TryGetValue(LoadoutTabPageID - 1, out var prevPage) && !CarbinePages.TryGetValue(CarbinePages.Keys.Max(), out prevPage))
                         {
                             Logging.Debug($"Error finding next page for carbines for {Player.CharacterName}");
                             return;
@@ -2497,7 +2497,7 @@ namespace UnturnedBlackout.Instances
 
         public void ReloadLoadoutTab()
         {
-            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
+            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out var loadout))
             {
                 Logging.Debug($"Error finding loadout with id {LoadoutID} for {Player.CharacterName}");
                 return;
@@ -2511,13 +2511,13 @@ namespace UnturnedBlackout.Instances
                         {
                             case ELoadoutPage.PrimarySkin:
                                 {
-                                    if (!GunSkinPages.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out Dictionary<int, PageGunSkin> gunSkinPages))
+                                    if (!GunSkinPages.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out var gunSkinPages))
                                     {
                                         Logging.Debug($"Error getting gun skin pages for gun with id {loadout.Primary?.Gun?.GunID ?? 0}");
                                         return;
                                     }
 
-                                    if (!gunSkinPages.TryGetValue(LoadoutTabPageID, out PageGunSkin page))
+                                    if (!gunSkinPages.TryGetValue(LoadoutTabPageID, out var page))
                                     {
                                         Logging.Debug($"Error finding the current page for gun skins for gun with id {loadout.Primary.Gun.GunID} for {Player.CharacterName}");
                                         return;
@@ -2529,13 +2529,13 @@ namespace UnturnedBlackout.Instances
 
                             case ELoadoutPage.SecondarySkin:
                                 {
-                                    if (!GunSkinPages.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out Dictionary<int, PageGunSkin> gunSkinPages))
+                                    if (!GunSkinPages.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out var gunSkinPages))
                                     {
                                         Logging.Debug($"Error getting gun skin pages for gun with id {loadout.Secondary?.Gun?.GunID ?? 0}");
                                         return;
                                     }
 
-                                    if (!gunSkinPages.TryGetValue(LoadoutTabPageID, out PageGunSkin page))
+                                    if (!gunSkinPages.TryGetValue(LoadoutTabPageID, out var page))
                                     {
                                         Logging.Debug($"Error finding the current page for gun skins for gun with id {loadout.Secondary.Gun.GunID} for {Player.CharacterName}");
                                         return;
@@ -2555,25 +2555,25 @@ namespace UnturnedBlackout.Instances
                                         return;
                                     }
 
-                                    if (!PlayerLoadout.Guns.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out LoadoutGun gun))
+                                    if (!PlayerLoadout.Guns.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out var gun))
                                     {
                                         Logging.Debug($"Error finding primary that has been selected with id {loadout.Primary?.Gun?.GunID ?? 0} for {Player.CharacterName}");
                                         return;
                                     }
 
-                                    if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out Dictionary<EAttachment, Dictionary<int, PageAttachment>> attachmentTypePages))
+                                    if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out var attachmentTypePages))
                                     {
                                         Logging.Debug($"Error finding primary attachments for {gun.Gun.GunID} for {Player.CharacterName}");
                                         return;
                                     }
 
-                                    if (!attachmentTypePages.TryGetValue(attachmentType, out Dictionary<int, PageAttachment> attachmentPages))
+                                    if (!attachmentTypePages.TryGetValue(attachmentType, out var attachmentPages))
                                     {
                                         Logging.Debug($"Error finding attachments with type {attachmentType} for {Player.CharacterName}");
                                         return;
                                     }
 
-                                    if (!attachmentPages.TryGetValue(LoadoutTabPageID, out PageAttachment page))
+                                    if (!attachmentPages.TryGetValue(LoadoutTabPageID, out var page))
                                     {
                                         Logging.Debug($"Error finding current page of attachment with type {attachmentType} for gun with id {gun.Gun.GunID} for {Player.CharacterName}");
                                         return;
@@ -2586,7 +2586,7 @@ namespace UnturnedBlackout.Instances
                             case ELoadoutPage.AttachmentPrimaryCharm:
                             case ELoadoutPage.AttachmentSecondaryCharm:
                                 {
-                                    if (!GunCharmPages.TryGetValue(LoadoutTabPageID, out PageGunCharm page))
+                                    if (!GunCharmPages.TryGetValue(LoadoutTabPageID, out var page))
                                     {
                                         Logging.Debug($"Error getting current page for gun charms for {Player.CharacterName}");
                                         return;
@@ -2606,25 +2606,25 @@ namespace UnturnedBlackout.Instances
                                         return;
                                     }
 
-                                    if (!PlayerLoadout.Guns.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out LoadoutGun gun))
+                                    if (!PlayerLoadout.Guns.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out var gun))
                                     {
                                         Logging.Debug($"Error finding secondary that has been selected with id {loadout.Secondary?.Gun?.GunID ?? 0} for {Player.CharacterName}");
                                         return;
                                     }
 
-                                    if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out Dictionary<EAttachment, Dictionary<int, PageAttachment>> attachmentTypePages))
+                                    if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out var attachmentTypePages))
                                     {
                                         Logging.Debug($"Error finding secondary attachments for {gun.Gun.GunID} for {Player.CharacterName}");
                                         return;
                                     }
 
-                                    if (!attachmentTypePages.TryGetValue(attachmentType, out Dictionary<int, PageAttachment> attachmentPages))
+                                    if (!attachmentTypePages.TryGetValue(attachmentType, out var attachmentPages))
                                     {
                                         Logging.Debug($"Error finding attachments with type {attachmentType} for {Player.CharacterName}");
                                         return;
                                     }
 
-                                    if (!attachmentPages.TryGetValue(LoadoutTabPageID, out PageAttachment page))
+                                    if (!attachmentPages.TryGetValue(LoadoutTabPageID, out var page))
                                     {
                                         Logging.Debug($"Error finding current page of attachment with type {attachmentType} for gun with id {gun.Gun.GunID} for {Player.CharacterName}");
                                         return;
@@ -2638,13 +2638,13 @@ namespace UnturnedBlackout.Instances
                             case ELoadoutPage.Perk2:
                             case ELoadoutPage.Perk3:
                                 {
-                                    if (!int.TryParse(LoadoutPage.ToString().Replace("Perk", ""), out int perkType))
+                                    if (!int.TryParse(LoadoutPage.ToString().Replace("Perk", ""), out var perkType))
                                     {
                                         Logging.Debug($"Error getting perk type from {LoadoutPage}");
                                         return;
                                     }
 
-                                    if (!PerkPages[perkType].TryGetValue(LoadoutTabPageID, out PagePerk page))
+                                    if (!PerkPages[perkType].TryGetValue(LoadoutTabPageID, out var page))
                                     {
                                         Logging.Debug($"Error getting current page for perks for {Player.CharacterName}");
                                         return;
@@ -2656,7 +2656,7 @@ namespace UnturnedBlackout.Instances
 
                             case ELoadoutPage.Lethal:
                                 {
-                                    if (!LethalPages.TryGetValue(LoadoutTabPageID, out PageGadget page))
+                                    if (!LethalPages.TryGetValue(LoadoutTabPageID, out var page))
                                     {
                                         Logging.Debug($"Error finding the current page for lethals for {Player.CharacterName}");
                                         return;
@@ -2668,7 +2668,7 @@ namespace UnturnedBlackout.Instances
 
                             case ELoadoutPage.Tactical:
                                 {
-                                    if (!TacticalPages.TryGetValue(LoadoutTabPageID, out PageGadget page))
+                                    if (!TacticalPages.TryGetValue(LoadoutTabPageID, out var page))
                                     {
                                         Logging.Debug($"Error finding the current page for tacticals for {Player.CharacterName}");
                                         return;
@@ -2680,7 +2680,7 @@ namespace UnturnedBlackout.Instances
 
                             case ELoadoutPage.Knife:
                                 {
-                                    if (!KnifePages.TryGetValue(LoadoutTabPageID, out PageKnife page))
+                                    if (!KnifePages.TryGetValue(LoadoutTabPageID, out var page))
                                     {
                                         Logging.Debug($"Error finding the current page for knives for {Player.CharacterName}");
                                         return;
@@ -2692,7 +2692,7 @@ namespace UnturnedBlackout.Instances
 
                             case ELoadoutPage.Killstreak:
                                 {
-                                    if (!KillstreakPages.TryGetValue(LoadoutTabPageID, out PageKillstreak page))
+                                    if (!KillstreakPages.TryGetValue(LoadoutTabPageID, out var page))
                                     {
                                         Logging.Debug($"Error finding the current page for killstreaks for {Player.CharacterName}");
                                         return;
@@ -2704,7 +2704,7 @@ namespace UnturnedBlackout.Instances
 
                             case ELoadoutPage.Glove:
                                 {
-                                    if (!GlovePages.TryGetValue(LoadoutTabPageID, out PageGlove page))
+                                    if (!GlovePages.TryGetValue(LoadoutTabPageID, out var page))
                                     {
                                         Logging.Debug($"Error finding the current page for gloves for {Player.CharacterName}");
                                         return;
@@ -2716,7 +2716,7 @@ namespace UnturnedBlackout.Instances
 
                             case ELoadoutPage.Card:
                                 {
-                                    if (!CardPages.TryGetValue(LoadoutTabPageID, out PageCard page))
+                                    if (!CardPages.TryGetValue(LoadoutTabPageID, out var page))
                                     {
                                         Logging.Debug($"Error finding the current page for cards for {Player.CharacterName}");
                                         return;
@@ -2732,7 +2732,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutTab.PISTOLS:
                     {
-                        if (!PistolPages.TryGetValue(LoadoutTabPageID, out PageGun page))
+                        if (!PistolPages.TryGetValue(LoadoutTabPageID, out var page))
                         {
                             Logging.Debug($"Error finding current page for pistols for {Player.CharacterName}");
                             return;
@@ -2744,7 +2744,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutTab.SUBMACHINE_GUNS:
                     {
-                        if (!SMGPages.TryGetValue(LoadoutTabPageID, out PageGun page))
+                        if (!SMGPages.TryGetValue(LoadoutTabPageID, out var page))
                         {
                             Logging.Debug($"Error finding current page for smgs for {Player.CharacterName}");
                             return;
@@ -2756,7 +2756,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutTab.SHOTGUNS:
                     {
-                        if (!ShotgunPages.TryGetValue(LoadoutTabPageID, out PageGun page))
+                        if (!ShotgunPages.TryGetValue(LoadoutTabPageID, out var page))
                         {
                             Logging.Debug($"Error finding current page for shotguns for {Player.CharacterName}");
                             return;
@@ -2768,7 +2768,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutTab.LIGHT_MACHINE_GUNS:
                     {
-                        if (!LMGPages.TryGetValue(LoadoutTabPageID, out PageGun page))
+                        if (!LMGPages.TryGetValue(LoadoutTabPageID, out var page))
                         {
                             Logging.Debug($"Error finding current page for lmgs for {Player.CharacterName}");
                             return;
@@ -2780,7 +2780,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutTab.ASSAULT_RIFLES:
                     {
-                        if (!ARPages.TryGetValue(LoadoutTabPageID, out PageGun page))
+                        if (!ARPages.TryGetValue(LoadoutTabPageID, out var page))
                         {
                             Logging.Debug($"Error finding current page for ARs for {Player.CharacterName}");
                             return;
@@ -2792,7 +2792,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutTab.SNIPER_RIFLES:
                     {
-                        if (!SniperPages.TryGetValue(LoadoutTabPageID, out PageGun page))
+                        if (!SniperPages.TryGetValue(LoadoutTabPageID, out var page))
                         {
                             Logging.Debug($"Error finding current page for snipers for {Player.CharacterName}");
                             return;
@@ -2804,7 +2804,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutTab.CARBINES:
                     {
-                        if (!CarbinePages.TryGetValue(LoadoutTabPageID, out PageGun page))
+                        if (!CarbinePages.TryGetValue(LoadoutTabPageID, out var page))
                         {
                             Logging.Debug($"Error finding current page for carbines for {Player.CharacterName}");
                             return;
@@ -2820,16 +2820,16 @@ namespace UnturnedBlackout.Instances
         {
             LoadoutTabPageID = page.PageID;
 
-            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout currentLoadout))
+            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out var currentLoadout))
             {
                 Logging.Debug($"Error finding current loadout for {Player.CharacterName} with id {LoadoutID}");
                 return;
             }
 
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Page TEXT", $"Page {page.PageID}");
-            for (int i = 0; i <= MAX_ITEMS_PER_PAGE; i++)
+            for (var i = 0; i <= MAX_ITEMS_PER_PAGE; i++)
             {
-                if (!page.Guns.TryGetValue(i, out LoadoutGun gun))
+                if (!page.Guns.TryGetValue(i, out var gun))
                 {
                     EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item BUTTON {i}", false);
                     continue;
@@ -2849,16 +2849,16 @@ namespace UnturnedBlackout.Instances
         {
             LoadoutTabPageID = page.PageID;
 
-            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout currentLoadout))
+            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out var currentLoadout))
             {
                 Logging.Debug($"Error finding current loadout for {Player.CharacterName} with id {LoadoutID}");
                 return;
             }
 
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Page TEXT", $"Page {page.PageID}");
-            for (int i = 0; i <= MAX_ITEMS_PER_PAGE; i++)
+            for (var i = 0; i <= MAX_ITEMS_PER_PAGE; i++)
             {
-                if (!page.Attachments.TryGetValue(i, out LoadoutAttachment attachment))
+                if (!page.Attachments.TryGetValue(i, out var attachment))
                 {
                     EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item BUTTON {i}", false);
                     continue;
@@ -2878,16 +2878,16 @@ namespace UnturnedBlackout.Instances
         {
             LoadoutTabPageID = page.PageID;
 
-            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout currentLoadout))
+            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out var currentLoadout))
             {
                 Logging.Debug($"Error finding current loadout for {Player.CharacterName} with id {LoadoutID}");
                 return;
             }
 
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Page TEXT", $"Page {page.PageID}");
-            for (int i = 0; i <= MAX_ITEMS_PER_GRID; i++)
+            for (var i = 0; i <= MAX_ITEMS_PER_GRID; i++)
             {
-                if (!page.GunCharms.TryGetValue(i, out LoadoutGunCharm gunCharm))
+                if (!page.GunCharms.TryGetValue(i, out var gunCharm))
                 {
                     EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Grid BUTTON {i}", false);
                     continue;
@@ -2904,16 +2904,16 @@ namespace UnturnedBlackout.Instances
         {
             LoadoutTabPageID = page.PageID;
 
-            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout currentLoadout))
+            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out var currentLoadout))
             {
                 Logging.Debug($"Error finding current loadout for {Player.CharacterName} with id {LoadoutID}");
                 return;
             }
 
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Page TEXT", $"Page {page.PageID}");
-            for (int i = 0; i <= MAX_ITEMS_PER_GRID; i++)
+            for (var i = 0; i <= MAX_ITEMS_PER_GRID; i++)
             {
-                if (!page.GunSkins.TryGetValue(i, out GunSkin skin))
+                if (!page.GunSkins.TryGetValue(i, out var skin))
                 {
                     EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Grid BUTTON {i}", false);
                     continue;
@@ -2930,16 +2930,16 @@ namespace UnturnedBlackout.Instances
         {
             LoadoutTabPageID = page.PageID;
 
-            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout currentLoadout))
+            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out var currentLoadout))
             {
                 Logging.Debug($"Error finding current loadout for {Player.CharacterName} with id {LoadoutID}");
                 return;
             }
 
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Page TEXT", $"Page {page.PageID}");
-            for (int i = 0; i <= MAX_ITEMS_PER_GRID; i++)
+            for (var i = 0; i <= MAX_ITEMS_PER_GRID; i++)
             {
-                if (!page.Knives.TryGetValue(i, out LoadoutKnife knife))
+                if (!page.Knives.TryGetValue(i, out var knife))
                 {
                     EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Grid BUTTON {i}", false);
                     continue;
@@ -2956,16 +2956,16 @@ namespace UnturnedBlackout.Instances
         {
             LoadoutTabPageID = page.PageID;
 
-            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout currentLoadout))
+            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out var currentLoadout))
             {
                 Logging.Debug($"Error finding current loadout for {Player.CharacterName} with id {LoadoutID}");
                 return;
             }
 
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Page TEXT", $"Page {page.PageID}");
-            for (int i = 0; i <= MAX_ITEMS_PER_PAGE; i++)
+            for (var i = 0; i <= MAX_ITEMS_PER_PAGE; i++)
             {
-                if (!page.Perks.TryGetValue(i, out LoadoutPerk perk))
+                if (!page.Perks.TryGetValue(i, out var perk))
                 {
                     EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item BUTTON {i}", false);
                     continue;
@@ -2996,16 +2996,16 @@ namespace UnturnedBlackout.Instances
         {
             LoadoutTabPageID = page.PageID;
 
-            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout currentLoadout))
+            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out var currentLoadout))
             {
                 Logging.Debug($"Error finding current loadout for {Player.CharacterName} with id {LoadoutID}");
                 return;
             }
 
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Page TEXT", $"Page {page.PageID}");
-            for (int i = 0; i <= MAX_ITEMS_PER_PAGE; i++)
+            for (var i = 0; i <= MAX_ITEMS_PER_PAGE; i++)
             {
-                if (!page.Gadgets.TryGetValue(i, out LoadoutGadget gadget))
+                if (!page.Gadgets.TryGetValue(i, out var gadget))
                 {
                     EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item BUTTON {i}", false);
                     continue;
@@ -3025,16 +3025,16 @@ namespace UnturnedBlackout.Instances
         {
             LoadoutTabPageID = page.PageID;
 
-            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout currentLoadout))
+            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out var currentLoadout))
             {
                 Logging.Debug($"Error finding current loadout for {Player.CharacterName} with id {LoadoutID}");
                 return;
             }
 
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Page TEXT", $"Page {page.PageID}");
-            for (int i = 0; i <= MAX_ITEMS_PER_GRID; i++)
+            for (var i = 0; i <= MAX_ITEMS_PER_GRID; i++)
             {
-                if (!page.Cards.TryGetValue(i, out LoadoutCard card))
+                if (!page.Cards.TryGetValue(i, out var card))
                 {
                     EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Grid BUTTON {i}", false);
                     continue;
@@ -3051,16 +3051,16 @@ namespace UnturnedBlackout.Instances
         {
             LoadoutTabPageID = page.PageID;
 
-            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout currentLoadout))
+            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out var currentLoadout))
             {
                 Logging.Debug($"Error finding current loadout for {Player.CharacterName} with id {LoadoutID}");
                 return;
             }
 
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Page TEXT", $"Page {page.PageID}");
-            for (int i = 0; i <= MAX_ITEMS_PER_GRID; i++)
+            for (var i = 0; i <= MAX_ITEMS_PER_GRID; i++)
             {
-                if (!page.Gloves.TryGetValue(i, out LoadoutGlove glove))
+                if (!page.Gloves.TryGetValue(i, out var glove))
                 {
                     EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Grid BUTTON {i}", false);
                     continue;
@@ -3077,16 +3077,16 @@ namespace UnturnedBlackout.Instances
         {
             LoadoutTabPageID = page.PageID;
 
-            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout currentLoadout))
+            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out var currentLoadout))
             {
                 Logging.Debug($"Error finding current loadout for {Player.CharacterName} with id {LoadoutID}");
                 return;
             }
 
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Page TEXT", $"Page {page.PageID}");
-            for (int i = 0; i <= MAX_ITEMS_PER_GRID; i++)
+            for (var i = 0; i <= MAX_ITEMS_PER_GRID; i++)
             {
-                if (!page.Killstreaks.TryGetValue(i, out LoadoutKillstreak killstreak))
+                if (!page.Killstreaks.TryGetValue(i, out var killstreak))
                 {
                     EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item BUTTON {i}", false);
                     continue;
@@ -3101,7 +3101,7 @@ namespace UnturnedBlackout.Instances
 
         public void ReloadSelectedItem()
         {
-            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
+            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out var loadout))
             {
                 Logging.Debug($"Error finding current loadout with id {LoadoutID} for {Player.CharacterName}");
                 return;
@@ -3111,7 +3111,7 @@ namespace UnturnedBlackout.Instances
             {
                 case ELoadoutPage.Primary:
                     {
-                        if (!PlayerLoadout.Guns.TryGetValue((ushort)SelectedItemID, out LoadoutGun gun))
+                        if (!PlayerLoadout.Guns.TryGetValue((ushort)SelectedItemID, out var gun))
                         {
                             Logging.Debug($"Error finding gun at {SelectedItemID} for {Player.CharacterName}");
                             return;
@@ -3123,7 +3123,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutPage.Secondary:
                     {
-                        if (!PlayerLoadout.Guns.TryGetValue((ushort)SelectedItemID, out LoadoutGun gun))
+                        if (!PlayerLoadout.Guns.TryGetValue((ushort)SelectedItemID, out var gun))
                         {
                             Logging.Debug($"Error finding gun at {SelectedItemID} for {Player.CharacterName}");
                             return;
@@ -3138,13 +3138,13 @@ namespace UnturnedBlackout.Instances
                 case ELoadoutPage.AttachmentPrimaryMagazine:
                 case ELoadoutPage.AttachmentPrimarySights:
                     {
-                        if (!PlayerLoadout.Guns.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out LoadoutGun gun))
+                        if (!PlayerLoadout.Guns.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out var gun))
                         {
                             Logging.Debug($"Error finding primary that has been selected with id {loadout.Primary?.Gun?.GunID ?? 0} for {Player.CharacterName}");
                             return;
                         }
 
-                        if (!gun.Attachments.TryGetValue((ushort)SelectedItemID, out LoadoutAttachment attachment))
+                        if (!gun.Attachments.TryGetValue((ushort)SelectedItemID, out var attachment))
                         {
                             Logging.Debug($"Error finding attachment with attachment id {SelectedItemID} for gun {gun.Gun.GunName}");
                             return;
@@ -3158,13 +3158,13 @@ namespace UnturnedBlackout.Instances
                 case ELoadoutPage.AttachmentSecondaryMagazine:
                 case ELoadoutPage.AttachmentSecondarySights:
                     {
-                        if (!PlayerLoadout.Guns.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out LoadoutGun gun))
+                        if (!PlayerLoadout.Guns.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out var gun))
                         {
                             Logging.Debug($"Error finding secondary that has been selected with id {loadout.Secondary?.Gun?.GunID ?? 0} for {Player.CharacterName}");
                             return;
                         }
 
-                        if (!gun.Attachments.TryGetValue((ushort)SelectedItemID, out LoadoutAttachment attachment))
+                        if (!gun.Attachments.TryGetValue((ushort)SelectedItemID, out var attachment))
                         {
                             Logging.Debug($"Error finding attachment with attachment id {SelectedItemID} for gun {gun.Gun.GunName}");
                             return;
@@ -3177,7 +3177,7 @@ namespace UnturnedBlackout.Instances
                 case ELoadoutPage.AttachmentPrimaryCharm:
                 case ELoadoutPage.AttachmentSecondaryCharm:
                     {
-                        if (!PlayerLoadout.GunCharms.TryGetValue((ushort)SelectedItemID, out LoadoutGunCharm gunCharm))
+                        if (!PlayerLoadout.GunCharms.TryGetValue((ushort)SelectedItemID, out var gunCharm))
                         {
                             Logging.Debug($"Error finding gun charm with id {SelectedItemID} for {Player.CharacterName}");
                             return;
@@ -3189,7 +3189,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutPage.Lethal:
                     {
-                        if (!PlayerLoadout.Gadgets.TryGetValue((ushort)SelectedItemID, out LoadoutGadget gadget))
+                        if (!PlayerLoadout.Gadgets.TryGetValue((ushort)SelectedItemID, out var gadget))
                         {
                             Logging.Debug($"Error finding gadget with id {SelectedItemID} for {Player.CharacterName}");
                             return;
@@ -3201,7 +3201,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutPage.Tactical:
                     {
-                        if (!PlayerLoadout.Gadgets.TryGetValue((ushort)SelectedItemID, out LoadoutGadget gadget))
+                        if (!PlayerLoadout.Gadgets.TryGetValue((ushort)SelectedItemID, out var gadget))
                         {
                             Logging.Debug($"Error finding gadget with id {SelectedItemID} for {Player.CharacterName}");
                             return;
@@ -3215,7 +3215,7 @@ namespace UnturnedBlackout.Instances
                 case ELoadoutPage.Perk2:
                 case ELoadoutPage.Perk3:
                     {
-                        if (!PlayerLoadout.Perks.TryGetValue((int)SelectedItemID, out LoadoutPerk perk))
+                        if (!PlayerLoadout.Perks.TryGetValue((int)SelectedItemID, out var perk))
                         {
                             Logging.Debug($"Error finding perk with id {SelectedItemID} for {Player.CharacterName}");
                             return;
@@ -3227,7 +3227,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutPage.Knife:
                     {
-                        if (!PlayerLoadout.Knives.TryGetValue((ushort)SelectedItemID, out LoadoutKnife knife))
+                        if (!PlayerLoadout.Knives.TryGetValue((ushort)SelectedItemID, out var knife))
                         {
                             Logging.Debug($"Error finding knife with id {SelectedItemID} for {Player.CharacterName}");
                             return;
@@ -3239,7 +3239,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutPage.Killstreak:
                     {
-                        if (!PlayerLoadout.Killstreaks.TryGetValue((int)SelectedItemID, out LoadoutKillstreak killstreak))
+                        if (!PlayerLoadout.Killstreaks.TryGetValue((int)SelectedItemID, out var killstreak))
                         {
                             Logging.Debug($"Error finding kilsltreak with id {SelectedItemID} for {Player.CharacterName}");
                             return;
@@ -3251,7 +3251,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutPage.Glove:
                     {
-                        if (!PlayerLoadout.Gloves.TryGetValue((int)SelectedItemID, out LoadoutGlove glove))
+                        if (!PlayerLoadout.Gloves.TryGetValue((int)SelectedItemID, out var glove))
                         {
                             Logging.Debug($"Error finding glove with id {SelectedItemID} for {Player.CharacterName}");
                             return;
@@ -3263,7 +3263,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutPage.Card:
                     {
-                        if (!PlayerLoadout.Cards.TryGetValue((int)SelectedItemID, out LoadoutCard card))
+                        if (!PlayerLoadout.Cards.TryGetValue((int)SelectedItemID, out var card))
                         {
                             Logging.Debug($"Error finding card with id {SelectedItemID} for {Player.CharacterName}");
                             return;
@@ -3277,7 +3277,7 @@ namespace UnturnedBlackout.Instances
 
         public void SelectedItem(int selected)
         {
-            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
+            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out var loadout))
             {
                 Logging.Debug($"Error finding current loadout with id {LoadoutID} for {Player.CharacterName}");
                 return;
@@ -3291,19 +3291,19 @@ namespace UnturnedBlackout.Instances
                         {
                             case ELoadoutPage.PrimarySkin:
                                 {
-                                    if (!GunSkinPages.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out Dictionary<int, PageGunSkin> skinsPage))
+                                    if (!GunSkinPages.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out var skinsPage))
                                     {
                                         Logging.Debug($"Error finding gun skin pages for primary with id {loadout.Primary?.Gun?.GunID ?? 0} for {Player.CharacterName}");
                                         return;
                                     }
 
-                                    if (!skinsPage.TryGetValue(LoadoutTabPageID, out PageGunSkin pageSkin))
+                                    if (!skinsPage.TryGetValue(LoadoutTabPageID, out var pageSkin))
                                     {
                                         Logging.Debug($"Error finding gun skin page at id {LoadoutTabPageID} for {Player.CharacterName}");
                                         return;
                                     }
 
-                                    if (!pageSkin.GunSkins.TryGetValue(selected, out GunSkin skin))
+                                    if (!pageSkin.GunSkins.TryGetValue(selected, out var skin))
                                     {
                                         Logging.Debug($"Error finding skin at {selected} at page with id {LoadoutTabPageID} for {Player.CharacterName}");
                                         return;
@@ -3315,19 +3315,19 @@ namespace UnturnedBlackout.Instances
 
                             case ELoadoutPage.SecondarySkin:
                                 {
-                                    if (!GunSkinPages.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out Dictionary<int, PageGunSkin> skinsPage))
+                                    if (!GunSkinPages.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out var skinsPage))
                                     {
                                         Logging.Debug($"Error finding gun skin pages for secondary with id {loadout.Secondary?.Gun?.GunID ?? 0} for {Player.CharacterName}");
                                         return;
                                     }
 
-                                    if (!skinsPage.TryGetValue(LoadoutTabPageID, out PageGunSkin pageSkin))
+                                    if (!skinsPage.TryGetValue(LoadoutTabPageID, out var pageSkin))
                                     {
                                         Logging.Debug($"Error finding gun skin page at id {LoadoutTabPageID} for {Player.CharacterName}");
                                         return;
                                     }
 
-                                    if (!pageSkin.GunSkins.TryGetValue(selected, out GunSkin skin))
+                                    if (!pageSkin.GunSkins.TryGetValue(selected, out var skin))
                                     {
                                         Logging.Debug($"Error finding skin at {selected} at page with id {LoadoutTabPageID} for {Player.CharacterName}");
                                         return;
@@ -3348,31 +3348,31 @@ namespace UnturnedBlackout.Instances
                                         return;
                                     }
 
-                                    if (!PlayerLoadout.Guns.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out LoadoutGun gun))
+                                    if (!PlayerLoadout.Guns.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out var gun))
                                     {
                                         Logging.Debug($"Error finding primary that has been selected with id {loadout.Primary?.Gun?.GunID ?? 0} for {Player.CharacterName}");
                                         return;
                                     }
 
-                                    if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out Dictionary<EAttachment, Dictionary<int, PageAttachment>> attachmentTypePages))
+                                    if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out var attachmentTypePages))
                                     {
                                         Logging.Debug($"Error finding primary attachments for {gun.Gun.GunID} for {Player.CharacterName}");
                                         return;
                                     }
 
-                                    if (!attachmentTypePages.TryGetValue(attachmentType, out Dictionary<int, PageAttachment> attachmentPages))
+                                    if (!attachmentTypePages.TryGetValue(attachmentType, out var attachmentPages))
                                     {
                                         Logging.Debug($"Error finding attachments with type {attachmentType} for {Player.CharacterName}");
                                         return;
                                     }
 
-                                    if (!attachmentPages.TryGetValue(LoadoutTabPageID, out PageAttachment page))
+                                    if (!attachmentPages.TryGetValue(LoadoutTabPageID, out var page))
                                     {
                                         Logging.Debug($"Error finding page {LoadoutTabPageID} of attachment with type {attachmentType} for gun with id {gun.Gun.GunID} for {Player.CharacterName}");
                                         return;
                                     }
 
-                                    if (!page.Attachments.TryGetValue(selected, out LoadoutAttachment attachment))
+                                    if (!page.Attachments.TryGetValue(selected, out var attachment))
                                     {
                                         Logging.Debug($"Error finding attachment at page id {LoadoutTabPageID} with position {selected} for {Player.CharacterName}");
                                         return;
@@ -3385,13 +3385,13 @@ namespace UnturnedBlackout.Instances
                             case ELoadoutPage.AttachmentPrimaryCharm:
                             case ELoadoutPage.AttachmentSecondaryCharm:
                                 {
-                                    if (!GunCharmPages.TryGetValue(LoadoutTabPageID, out PageGunCharm page))
+                                    if (!GunCharmPages.TryGetValue(LoadoutTabPageID, out var page))
                                     {
                                         Logging.Debug($"Error finding gun charm page with id {LoadoutTabPageID} for {Player.CharacterName}");
                                         return;
                                     }
 
-                                    if (!page.GunCharms.TryGetValue(selected, out LoadoutGunCharm gunCharm))
+                                    if (!page.GunCharms.TryGetValue(selected, out var gunCharm))
                                     {
                                         Logging.Debug($"Error finding gun charm at {selected} at page {LoadoutTabPageID} for {Player.CharacterName}");
                                         return;
@@ -3411,31 +3411,31 @@ namespace UnturnedBlackout.Instances
                                         return;
                                     }
 
-                                    if (!PlayerLoadout.Guns.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out LoadoutGun gun))
+                                    if (!PlayerLoadout.Guns.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out var gun))
                                     {
                                         Logging.Debug($"Error finding Secondary that has been selected with id {loadout.Secondary?.Gun?.GunID ?? 0} for {Player.CharacterName}");
                                         return;
                                     }
 
-                                    if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out Dictionary<EAttachment, Dictionary<int, PageAttachment>> attachmentTypePages))
+                                    if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out var attachmentTypePages))
                                     {
                                         Logging.Debug($"Error finding Secondary attachments for {gun.Gun.GunID} for {Player.CharacterName}");
                                         return;
                                     }
 
-                                    if (!attachmentTypePages.TryGetValue(attachmentType, out Dictionary<int, PageAttachment> attachmentPages))
+                                    if (!attachmentTypePages.TryGetValue(attachmentType, out var attachmentPages))
                                     {
                                         Logging.Debug($"Error finding attachments with type {attachmentType} for {Player.CharacterName}");
                                         return;
                                     }
 
-                                    if (!attachmentPages.TryGetValue(LoadoutTabPageID, out PageAttachment page))
+                                    if (!attachmentPages.TryGetValue(LoadoutTabPageID, out var page))
                                     {
                                         Logging.Debug($"Error finding page {LoadoutTabPageID} of attachment with type {attachmentType} for gun with id {gun.Gun.GunID} for {Player.CharacterName}");
                                         return;
                                     }
 
-                                    if (!page.Attachments.TryGetValue(selected, out LoadoutAttachment attachment))
+                                    if (!page.Attachments.TryGetValue(selected, out var attachment))
                                     {
                                         Logging.Debug($"Error finding attachment at page id {LoadoutTabPageID} with position {selected} for {Player.CharacterName}");
                                         return;
@@ -3449,19 +3449,19 @@ namespace UnturnedBlackout.Instances
                             case ELoadoutPage.Perk2:
                             case ELoadoutPage.Perk3:
                                 {
-                                    if (!int.TryParse(LoadoutPage.ToString().Replace("Perk", ""), out int perkType))
+                                    if (!int.TryParse(LoadoutPage.ToString().Replace("Perk", ""), out var perkType))
                                     {
                                         Logging.Debug($"Error getting perk type from {LoadoutPage}");
                                         return;
                                     }
 
-                                    if (!PerkPages[perkType].TryGetValue(LoadoutTabPageID, out PagePerk page))
+                                    if (!PerkPages[perkType].TryGetValue(LoadoutTabPageID, out var page))
                                     {
                                         Logging.Debug($"Error finding perk page with id {LoadoutTabPageID} for {Player.CharacterName}");
                                         return;
                                     }
 
-                                    if (!page.Perks.TryGetValue(selected, out LoadoutPerk perk))
+                                    if (!page.Perks.TryGetValue(selected, out var perk))
                                     {
                                         Logging.Debug($"Error finding perk at {selected} at page {LoadoutTabPageID} for {Player.CharacterName}");
                                         return;
@@ -3473,13 +3473,13 @@ namespace UnturnedBlackout.Instances
 
                             case ELoadoutPage.Lethal:
                                 {
-                                    if (!LethalPages.TryGetValue(LoadoutTabPageID, out PageGadget page))
+                                    if (!LethalPages.TryGetValue(LoadoutTabPageID, out var page))
                                     {
                                         Logging.Debug($"Error finding lethal page with id {LoadoutTabPageID} for {Player.CharacterName}");
                                         return;
                                     }
 
-                                    if (!page.Gadgets.TryGetValue(selected, out LoadoutGadget gadget))
+                                    if (!page.Gadgets.TryGetValue(selected, out var gadget))
                                     {
                                         Logging.Debug($"Error finding lethal at {selected} at page {LoadoutTabPageID} for {Player.CharacterName}");
                                         return;
@@ -3491,13 +3491,13 @@ namespace UnturnedBlackout.Instances
 
                             case ELoadoutPage.Tactical:
                                 {
-                                    if (!TacticalPages.TryGetValue(LoadoutTabPageID, out PageGadget page))
+                                    if (!TacticalPages.TryGetValue(LoadoutTabPageID, out var page))
                                     {
                                         Logging.Debug($"Error finding tactical page with id {LoadoutTabPageID} for {Player.CharacterName}");
                                         return;
                                     }
 
-                                    if (!page.Gadgets.TryGetValue(selected, out LoadoutGadget gadget))
+                                    if (!page.Gadgets.TryGetValue(selected, out var gadget))
                                     {
                                         Logging.Debug($"Error finding tactical at {selected} at page {LoadoutTabPageID} for {Player.CharacterName}");
                                         return;
@@ -3509,13 +3509,13 @@ namespace UnturnedBlackout.Instances
 
                             case ELoadoutPage.Knife:
                                 {
-                                    if (!KnifePages.TryGetValue(LoadoutTabPageID, out PageKnife page))
+                                    if (!KnifePages.TryGetValue(LoadoutTabPageID, out var page))
                                     {
                                         Logging.Debug($"Error finding knife page with id {LoadoutTabPageID} for {Player.CharacterName}");
                                         return;
                                     }
 
-                                    if (!page.Knives.TryGetValue(selected, out LoadoutKnife knife))
+                                    if (!page.Knives.TryGetValue(selected, out var knife))
                                     {
                                         Logging.Debug($"Error finding knife at {selected} at page {LoadoutTabPageID} for {Player.CharacterName}");
                                         return;
@@ -3527,13 +3527,13 @@ namespace UnturnedBlackout.Instances
 
                             case ELoadoutPage.Killstreak:
                                 {
-                                    if (!KillstreakPages.TryGetValue(LoadoutTabPageID, out PageKillstreak page))
+                                    if (!KillstreakPages.TryGetValue(LoadoutTabPageID, out var page))
                                     {
                                         Logging.Debug($"Error finding killstreak page with id {LoadoutTabPageID} for {Player.CharacterName}");
                                         return;
                                     }
 
-                                    if (!page.Killstreaks.TryGetValue(selected, out LoadoutKillstreak killstreak))
+                                    if (!page.Killstreaks.TryGetValue(selected, out var killstreak))
                                     {
                                         Logging.Debug($"Error finding killstreak at {selected} at page {LoadoutTabPageID} for {Player.CharacterName}");
                                         return;
@@ -3545,13 +3545,13 @@ namespace UnturnedBlackout.Instances
 
                             case ELoadoutPage.Glove:
                                 {
-                                    if (!GlovePages.TryGetValue(LoadoutTabPageID, out PageGlove page))
+                                    if (!GlovePages.TryGetValue(LoadoutTabPageID, out var page))
                                     {
                                         Logging.Debug($"Error finding glove page with id {LoadoutTabPageID} for {Player.CharacterName}");
                                         return;
                                     }
 
-                                    if (!page.Gloves.TryGetValue(selected, out LoadoutGlove glove))
+                                    if (!page.Gloves.TryGetValue(selected, out var glove))
                                     {
                                         Logging.Debug($"Error finding glove at {selected} at page {LoadoutTabPageID} for {Player.CharacterName}");
                                         return;
@@ -3563,13 +3563,13 @@ namespace UnturnedBlackout.Instances
 
                             case ELoadoutPage.Card:
                                 {
-                                    if (!CardPages.TryGetValue(LoadoutTabPageID, out PageCard page))
+                                    if (!CardPages.TryGetValue(LoadoutTabPageID, out var page))
                                     {
                                         Logging.Debug($"Error finding card page with id {LoadoutTabPageID} for {Player.CharacterName}");
                                         return;
                                     }
 
-                                    if (!page.Cards.TryGetValue(selected, out LoadoutCard card))
+                                    if (!page.Cards.TryGetValue(selected, out var card))
                                     {
                                         Logging.Debug($"Error finding card at {selected} at page {LoadoutTabPageID} for {Player.CharacterName}");
                                         return;
@@ -3584,13 +3584,13 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutTab.PISTOLS:
                     {
-                        if (!PistolPages.TryGetValue(LoadoutTabPageID, out PageGun page))
+                        if (!PistolPages.TryGetValue(LoadoutTabPageID, out var page))
                         {
                             Logging.Debug($"Error finding pistol page {LoadoutTabPageID} for {Player.CharacterName}");
                             return;
                         }
 
-                        if (!page.Guns.TryGetValue(selected, out LoadoutGun gun))
+                        if (!page.Guns.TryGetValue(selected, out var gun))
                         {
                             Logging.Debug($"Error finding gun at {selected} for page with id {LoadoutTabPageID} for {Player.CharacterName}");
                             return;
@@ -3602,13 +3602,13 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutTab.SUBMACHINE_GUNS:
                     {
-                        if (!SMGPages.TryGetValue(LoadoutTabPageID, out PageGun page))
+                        if (!SMGPages.TryGetValue(LoadoutTabPageID, out var page))
                         {
                             Logging.Debug($"Error finding smg page {LoadoutTabPageID} for {Player.CharacterName}");
                             return;
                         }
 
-                        if (!page.Guns.TryGetValue(selected, out LoadoutGun gun))
+                        if (!page.Guns.TryGetValue(selected, out var gun))
                         {
                             Logging.Debug($"Error finding gun at {selected} for page with id {LoadoutTabPageID} for {Player.CharacterName}");
                             return;
@@ -3620,13 +3620,13 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutTab.SHOTGUNS:
                     {
-                        if (!ShotgunPages.TryGetValue(LoadoutTabPageID, out PageGun page))
+                        if (!ShotgunPages.TryGetValue(LoadoutTabPageID, out var page))
                         {
                             Logging.Debug($"Error finding shotgun page {LoadoutTabPageID} for {Player.CharacterName}");
                             return;
                         }
 
-                        if (!page.Guns.TryGetValue(selected, out LoadoutGun gun))
+                        if (!page.Guns.TryGetValue(selected, out var gun))
                         {
                             Logging.Debug($"Error finding gun at {selected} for page with id {LoadoutTabPageID} for {Player.CharacterName}");
                             return;
@@ -3638,13 +3638,13 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutTab.SNIPER_RIFLES:
                     {
-                        if (!SniperPages.TryGetValue(LoadoutTabPageID, out PageGun page))
+                        if (!SniperPages.TryGetValue(LoadoutTabPageID, out var page))
                         {
                             Logging.Debug($"Error finding sniper page {LoadoutTabPageID} for {Player.CharacterName}");
                             return;
                         }
 
-                        if (!page.Guns.TryGetValue(selected, out LoadoutGun gun))
+                        if (!page.Guns.TryGetValue(selected, out var gun))
                         {
                             Logging.Debug($"Error finding gun at {selected} for page with id {LoadoutTabPageID} for {Player.CharacterName}");
                             return;
@@ -3656,13 +3656,13 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutTab.LIGHT_MACHINE_GUNS:
                     {
-                        if (!LMGPages.TryGetValue(LoadoutTabPageID, out PageGun page))
+                        if (!LMGPages.TryGetValue(LoadoutTabPageID, out var page))
                         {
                             Logging.Debug($"Error finding lmg page {LoadoutTabPageID} for {Player.CharacterName}");
                             return;
                         }
 
-                        if (!page.Guns.TryGetValue(selected, out LoadoutGun gun))
+                        if (!page.Guns.TryGetValue(selected, out var gun))
                         {
                             Logging.Debug($"Error finding gun at {selected} for page with id {LoadoutTabPageID} for {Player.CharacterName}");
                             return;
@@ -3674,13 +3674,13 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutTab.ASSAULT_RIFLES:
                     {
-                        if (!ARPages.TryGetValue(LoadoutTabPageID, out PageGun page))
+                        if (!ARPages.TryGetValue(LoadoutTabPageID, out var page))
                         {
                             Logging.Debug($"Error finding ar page {LoadoutTabPageID} for {Player.CharacterName}");
                             return;
                         }
 
-                        if (!page.Guns.TryGetValue(selected, out LoadoutGun gun))
+                        if (!page.Guns.TryGetValue(selected, out var gun))
                         {
                             Logging.Debug($"Error finding gun at {selected} for page with id {LoadoutTabPageID} for {Player.CharacterName}");
                             return;
@@ -3692,13 +3692,13 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutTab.CARBINES:
                     {
-                        if (!CarbinePages.TryGetValue(LoadoutTabPageID, out PageGun page))
+                        if (!CarbinePages.TryGetValue(LoadoutTabPageID, out var page))
                         {
                             Logging.Debug($"Error finding carbine page {LoadoutTabPageID} for {Player.CharacterName}");
                             return;
                         }
 
-                        if (!page.Guns.TryGetValue(selected, out LoadoutGun gun))
+                        if (!page.Guns.TryGetValue(selected, out var gun))
                         {
                             Logging.Debug($"Error finding gun at {selected} for page with id {LoadoutTabPageID} for {Player.CharacterName}");
                             return;
@@ -3713,7 +3713,7 @@ namespace UnturnedBlackout.Instances
         public void ShowGun(LoadoutGun gun)
         {
             SelectedItemID = gun.Gun.GunID;
-            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
+            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out var loadout))
             {
                 Logging.Debug($"Error finding loadout with id {LoadoutID} for {Player.CharacterName}");
                 return;
@@ -3723,7 +3723,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy Locked", !gun.IsUnlocked && gun.Gun.LevelRequirement > PlayerData.Level);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.Credits)} <color={(PlayerData.Credits >= gun.Gun.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{gun.Gun.BuyPrice}</color>");
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !gun.IsBought && !gun.IsUnlocked && gun.Gun.LevelRequirement > PlayerData.Level);
-            int coins = gun.Gun.GetCoins(PlayerData.Level);
+            var coins = gun.Gun.GetCoins(PlayerData.Level);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.Coins)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Equip BUTTON", gun.IsBought && ((LoadoutPage == ELoadoutPage.Primary && loadout.Primary != gun) || (LoadoutPage == ELoadoutPage.Secondary && loadout.Secondary != gun)));
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Dequip BUTTON", gun.IsBought && ((LoadoutPage == ELoadoutPage.Primary && loadout.Primary == gun) || (LoadoutPage == ELoadoutPage.Secondary && loadout.Secondary == gun)));
@@ -3734,8 +3734,8 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item ProsCons", false);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Description TEXT", true);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Credits", false);
-            gun.TryGetNeededXP(out int neededXP);
-            int spaces = neededXP != 0 ? (gun.XP * 188 / neededXP) : 0;
+            gun.TryGetNeededXP(out var neededXP);
+            var spaces = neededXP != 0 ? (gun.XP * 188 / neededXP) : 0;
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item XP Bar Fill", spaces == 0 ? UIManager.HAIRSPACE_SYMBOL_STRING : new string(UIManager.HAIRSPACE_SYMBOL_CHAR, spaces));
             SendRarityName("SERVER Item Rarity TEXT", gun.Gun.GunRarity);
         }
@@ -3743,7 +3743,7 @@ namespace UnturnedBlackout.Instances
         public void ShowAttachment(LoadoutAttachment attachment, LoadoutGun gun)
         {
             SelectedItemID = attachment.Attachment.AttachmentID;
-            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
+            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out var loadout))
             {
                 Logging.Debug($"Error finding loadout with id {LoadoutID} for {Player.CharacterName}");
                 return;
@@ -3753,7 +3753,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy Locked", !attachment.IsUnlocked && attachment.LevelRequirement > gun.Level);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.Credits)} <color={(PlayerData.Credits >= attachment.Attachment.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{attachment.Attachment.BuyPrice}</color>");
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !attachment.IsBought && !attachment.IsUnlocked && attachment.LevelRequirement > gun.Level);
-            int coins = attachment.GetCoins(gun.Level);
+            var coins = attachment.GetCoins(gun.Level);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.Coins)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Equip BUTTON", attachment.IsBought && ((LoadoutPage.ToString().StartsWith("AttachmentPrimary") && !loadout.PrimaryAttachments.ContainsValue(attachment)) || (LoadoutPage.ToString().StartsWith("AttachmentSecondary") && !loadout.SecondaryAttachments.ContainsValue(attachment))));
             if (attachment.Attachment.AttachmentType != EAttachment.Magazine)
@@ -3771,7 +3771,7 @@ namespace UnturnedBlackout.Instances
             SendRarityName("SERVER Item Rarity TEXT", attachment.Attachment.AttachmentRarity);
 
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item ProsCons", !(attachment.Attachment.AttachmentPros.Count == 0 && attachment.Attachment.AttachmentCons.Count == 0));
-            for (int i = 0; i <= 2; i++)
+            for (var i = 0; i <= 2; i++)
             {
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Pro {i}", attachment.Attachment.AttachmentPros.Count > i);
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Pro TEXT {i}", attachment.Attachment.AttachmentPros.Count > i ? attachment.Attachment.AttachmentPros[i].Trim() : "");
@@ -3785,7 +3785,7 @@ namespace UnturnedBlackout.Instances
         public void ShowGunCharm(LoadoutGunCharm gunCharm)
         {
             SelectedItemID = gunCharm.GunCharm.CharmID;
-            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
+            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out var loadout))
             {
                 Logging.Debug($"Error finding loadout with id {LoadoutID} for {Player.CharacterName}");
                 return;
@@ -3795,7 +3795,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy Locked", !gunCharm.IsUnlocked && gunCharm.GunCharm.LevelRequirement > PlayerData.Level);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.Credits)} <color={(PlayerData.Credits >= gunCharm.GunCharm.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{gunCharm.GunCharm.BuyPrice}</color>");
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !gunCharm.IsBought && !gunCharm.IsUnlocked && gunCharm.GunCharm.LevelRequirement > PlayerData.Level);
-            int coins = gunCharm.GunCharm.GetCoins(PlayerData.Level);
+            var coins = gunCharm.GunCharm.GetCoins(PlayerData.Level);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.Coins)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.Coins)} {gunCharm.GunCharm.GetCoins(PlayerData.Level)}");
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Equip BUTTON", gunCharm.IsBought && ((LoadoutPage.ToString().StartsWith("AttachmentPrimary") && loadout.PrimaryGunCharm != gunCharm) || (LoadoutPage.ToString().StartsWith("AttachmentSecondary") && loadout.SecondaryGunCharm != gunCharm)));
@@ -3814,7 +3814,7 @@ namespace UnturnedBlackout.Instances
         public void ShowGunSkin(GunSkin skin)
         {
             SelectedItemID = skin.ID;
-            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
+            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out var loadout))
             {
                 Logging.Debug($"Error finding loadout with id {LoadoutID} for {Player.CharacterName}");
                 return;
@@ -3836,7 +3836,7 @@ namespace UnturnedBlackout.Instances
         public void ShowKnife(LoadoutKnife knife)
         {
             SelectedItemID = knife.Knife.KnifeID;
-            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
+            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out var loadout))
             {
                 Logging.Debug($"Error finding loadout with id {LoadoutID} for {Player.CharacterName}");
                 return;
@@ -3846,7 +3846,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy Locked", !knife.IsUnlocked && knife.Knife.LevelRequirement > PlayerData.Level);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.Credits)} <color={(PlayerData.Credits >= knife.Knife.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{knife.Knife.BuyPrice}</color>");
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !knife.IsBought && !knife.IsUnlocked && knife.Knife.LevelRequirement > PlayerData.Level);
-            int coins = knife.Knife.GetCoins(PlayerData.Level);
+            var coins = knife.Knife.GetCoins(PlayerData.Level);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.Coins)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Equip BUTTON", knife.IsBought && loadout.Knife != knife);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Dequip BUTTON", false);
@@ -3862,7 +3862,7 @@ namespace UnturnedBlackout.Instances
         public void ShowPerk(LoadoutPerk perk)
         {
             SelectedItemID = perk.Perk.PerkID;
-            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
+            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out var loadout))
             {
                 Logging.Debug($"Error finding loadout with id {LoadoutID} for {Player.CharacterName}");
                 return;
@@ -3872,7 +3872,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy Locked", !perk.IsUnlocked && perk.Perk.LevelRequirement > PlayerData.Level);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.Credits)} <color={(PlayerData.Credits >= perk.Perk.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{perk.Perk.BuyPrice}</color>");
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !perk.IsBought && !perk.IsUnlocked && perk.Perk.LevelRequirement > PlayerData.Level);
-            int coins = perk.Perk.GetCoins(PlayerData.Level);
+            var coins = perk.Perk.GetCoins(PlayerData.Level);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.Coins)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Equip BUTTON", perk.IsBought && !loadout.Perks.ContainsValue(perk));
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Dequip BUTTON", perk.IsBought && loadout.Perks.ContainsValue(perk));
@@ -3899,7 +3899,7 @@ namespace UnturnedBlackout.Instances
         public void ShowGadget(LoadoutGadget gadget)
         {
             SelectedItemID = gadget.Gadget.GadgetID;
-            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
+            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out var loadout))
             {
                 Logging.Debug($"Error finding loadout with id {LoadoutID} for {Player.CharacterName}");
                 return;
@@ -3909,7 +3909,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy Locked", !gadget.IsUnlocked && gadget.Gadget.LevelRequirement > PlayerData.Level);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.Credits)} <color={(PlayerData.Credits >= gadget.Gadget.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{gadget.Gadget.BuyPrice}</color>");
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !gadget.IsBought && !gadget.IsUnlocked && gadget.Gadget.LevelRequirement > PlayerData.Level);
-            int coins = gadget.Gadget.GetCoins(PlayerData.Level);
+            var coins = gadget.Gadget.GetCoins(PlayerData.Level);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.Coins)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Equip BUTTON", gadget.IsBought && ((LoadoutPage == ELoadoutPage.Tactical && loadout.Tactical != gadget) || (LoadoutPage == ELoadoutPage.Lethal && loadout.Lethal != gadget)));
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Dequip BUTTON", gadget.IsBought && ((LoadoutPage == ELoadoutPage.Tactical && loadout.Tactical == gadget) || (LoadoutPage == ELoadoutPage.Lethal && loadout.Lethal == gadget)));
@@ -3925,7 +3925,7 @@ namespace UnturnedBlackout.Instances
         public void ShowCard(LoadoutCard card)
         {
             SelectedItemID = card.Card.CardID;
-            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
+            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out var loadout))
             {
                 Logging.Debug($"Error finding loadout with id {LoadoutID} for {Player.CharacterName}");
                 return;
@@ -3935,7 +3935,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy Locked", !card.IsUnlocked && card.Card.LevelRequirement > PlayerData.Level);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.Credits)} <color={(PlayerData.Credits >= card.Card.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{card.Card.BuyPrice}</color>");
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !card.IsBought && !card.IsUnlocked && card.Card.LevelRequirement > PlayerData.Level);
-            int coins = card.Card.GetCoins(PlayerData.Level);
+            var coins = card.Card.GetCoins(PlayerData.Level);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.Coins)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Equip BUTTON", card.IsBought && loadout.Card != card);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Dequip BUTTON", card.IsBought && loadout.Card == card);
@@ -3952,7 +3952,7 @@ namespace UnturnedBlackout.Instances
         public void ShowGlove(LoadoutGlove glove)
         {
             SelectedItemID = glove.Glove.GloveID;
-            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
+            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out var loadout))
             {
                 Logging.Debug($"Error finding loadout with id {LoadoutID} for {Player.CharacterName}");
                 return;
@@ -3962,7 +3962,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy Locked", !glove.IsUnlocked && glove.Glove.LevelRequirement > PlayerData.Level);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.Credits)} <color={(PlayerData.Credits >= glove.Glove.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{glove.Glove.BuyPrice}</color>");
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !glove.IsBought && !glove.IsUnlocked && glove.Glove.LevelRequirement > PlayerData.Level);
-            int coins = glove.Glove.GetCoins(PlayerData.Level);
+            var coins = glove.Glove.GetCoins(PlayerData.Level);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.Coins)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Equip BUTTON", glove.IsBought && loadout.Glove != glove);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Dequip BUTTON", glove.IsBought && loadout.Glove == glove);
@@ -3978,7 +3978,7 @@ namespace UnturnedBlackout.Instances
         public void ShowKillstreak(LoadoutKillstreak killstreak)
         {
             SelectedItemID = killstreak.Killstreak.KillstreakID;
-            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
+            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out var loadout))
             {
                 Logging.Debug($"Error finding loadout with id {LoadoutID} for {Player.CharacterName}");
                 return;
@@ -3988,7 +3988,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy Locked", !killstreak.IsUnlocked && killstreak.Killstreak.LevelRequirement > PlayerData.Level);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.Credits)} <color={(PlayerData.Credits >= killstreak.Killstreak.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{killstreak.Killstreak.BuyPrice}</color>");
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !killstreak.IsBought && !killstreak.IsUnlocked && killstreak.Killstreak.LevelRequirement > PlayerData.Level);
-            int coins = killstreak.Killstreak.GetCoins(PlayerData.Level);
+            var coins = killstreak.Killstreak.GetCoins(PlayerData.Level);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.Coins)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Equip BUTTON", killstreak.IsBought && !loadout.Killstreaks.Contains(killstreak));
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Dequip BUTTON", killstreak.IsBought && loadout.Killstreaks.Contains(killstreak));
@@ -4016,7 +4016,7 @@ namespace UnturnedBlackout.Instances
 
         public void BuySelectedItem()
         {
-            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
+            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out var loadout))
             {
                 Logging.Debug($"Error finding loadout with id {LoadoutID} for {Player.CharacterName}");
                 return;
@@ -4026,7 +4026,7 @@ namespace UnturnedBlackout.Instances
             {
                 case ELoadoutPage.Primary:
                     {
-                        if (!PlayerLoadout.Guns.TryGetValue((ushort)SelectedItemID, out LoadoutGun gun))
+                        if (!PlayerLoadout.Guns.TryGetValue((ushort)SelectedItemID, out var gun))
                         {
                             Logging.Debug($"Error finding gun with id {SelectedItemID} for {Player.CharacterName}");
                             return;
@@ -4057,13 +4057,13 @@ namespace UnturnedBlackout.Instances
                 case ELoadoutPage.AttachmentPrimaryMagazine:
                 case ELoadoutPage.AttachmentPrimarySights:
                     {
-                        if (!PlayerLoadout.Guns.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out LoadoutGun gun))
+                        if (!PlayerLoadout.Guns.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out var gun))
                         {
                             Logging.Debug($"Error finding primary with id {SelectedItemID} for {Player.CharacterName}");
                             return;
                         }
 
-                        if (!gun.Attachments.TryGetValue((ushort)SelectedItemID, out LoadoutAttachment attachment))
+                        if (!gun.Attachments.TryGetValue((ushort)SelectedItemID, out var attachment))
                         {
                             Logging.Debug($"Error finding attachment with id {SelectedItemID} for {Player.CharacterName}");
                             return;
@@ -4091,7 +4091,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutPage.Secondary:
                     {
-                        if (!PlayerLoadout.Guns.TryGetValue((ushort)SelectedItemID, out LoadoutGun gun))
+                        if (!PlayerLoadout.Guns.TryGetValue((ushort)SelectedItemID, out var gun))
                         {
                             Logging.Debug($"Error finding gun with id {SelectedItemID} for {Player.CharacterName}");
                             return;
@@ -4121,13 +4121,13 @@ namespace UnturnedBlackout.Instances
                 case ELoadoutPage.AttachmentSecondaryMagazine:
                 case ELoadoutPage.AttachmentSecondarySights:
                     {
-                        if (!PlayerLoadout.Guns.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out LoadoutGun gun))
+                        if (!PlayerLoadout.Guns.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out var gun))
                         {
                             Logging.Debug($"Error finding secondary with id {SelectedItemID} for {Player.CharacterName}");
                             return;
                         }
 
-                        if (!gun.Attachments.TryGetValue((ushort)SelectedItemID, out LoadoutAttachment attachment))
+                        if (!gun.Attachments.TryGetValue((ushort)SelectedItemID, out var attachment))
                         {
                             Logging.Debug($"Error finding attachment with id {SelectedItemID} for {Player.CharacterName}");
                             return;
@@ -4156,7 +4156,7 @@ namespace UnturnedBlackout.Instances
                 case ELoadoutPage.AttachmentPrimaryCharm:
                 case ELoadoutPage.AttachmentSecondaryCharm:
                     {
-                        if (!PlayerLoadout.GunCharms.TryGetValue((ushort)SelectedItemID, out LoadoutGunCharm gunCharm))
+                        if (!PlayerLoadout.GunCharms.TryGetValue((ushort)SelectedItemID, out var gunCharm))
                         {
                             Logging.Debug($"Error finding gun charm with id {SelectedItemID} for {Player.CharacterName}");
                             return;
@@ -4184,7 +4184,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutPage.Knife:
                     {
-                        if (!PlayerLoadout.Knives.TryGetValue((ushort)SelectedItemID, out LoadoutKnife knife))
+                        if (!PlayerLoadout.Knives.TryGetValue((ushort)SelectedItemID, out var knife))
                         {
                             Logging.Debug($"Error finding knife with id {SelectedItemID} for {Player.CharacterName}");
                             return;
@@ -4212,7 +4212,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutPage.Tactical:
                     {
-                        if (!PlayerLoadout.Gadgets.TryGetValue((ushort)SelectedItemID, out LoadoutGadget gadget))
+                        if (!PlayerLoadout.Gadgets.TryGetValue((ushort)SelectedItemID, out var gadget))
                         {
                             Logging.Debug($"Error finding gadget with id {SelectedItemID} for {Player.CharacterName}");
                             return;
@@ -4240,7 +4240,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutPage.Lethal:
                     {
-                        if (!PlayerLoadout.Gadgets.TryGetValue((ushort)SelectedItemID, out LoadoutGadget gadget))
+                        if (!PlayerLoadout.Gadgets.TryGetValue((ushort)SelectedItemID, out var gadget))
                         {
                             Logging.Debug($"Error finding gadget with id {SelectedItemID} for {Player.CharacterName}");
                             return;
@@ -4270,7 +4270,7 @@ namespace UnturnedBlackout.Instances
                 case ELoadoutPage.Perk2:
                 case ELoadoutPage.Perk3:
                     {
-                        if (!PlayerLoadout.Perks.TryGetValue((int)SelectedItemID, out LoadoutPerk perk))
+                        if (!PlayerLoadout.Perks.TryGetValue((int)SelectedItemID, out var perk))
                         {
                             Logging.Debug($"Error finding perk with id {SelectedItemID} for {Player.CharacterName}");
                             return;
@@ -4298,7 +4298,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutPage.Killstreak:
                     {
-                        if (!PlayerLoadout.Killstreaks.TryGetValue((int)SelectedItemID, out LoadoutKillstreak killstreak))
+                        if (!PlayerLoadout.Killstreaks.TryGetValue((int)SelectedItemID, out var killstreak))
                         {
                             Logging.Debug($"Error finding killstreak with id {SelectedItemID} for {Player.CharacterName}");
                             return;
@@ -4327,7 +4327,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutPage.Card:
                     {
-                        if (!PlayerLoadout.Cards.TryGetValue((int)SelectedItemID, out LoadoutCard card))
+                        if (!PlayerLoadout.Cards.TryGetValue((int)SelectedItemID, out var card))
                         {
                             Logging.Debug($"Error finding card with id {SelectedItemID} for {Player.CharacterName}");
                             return;
@@ -4355,7 +4355,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutPage.Glove:
                     {
-                        if (!PlayerLoadout.Gloves.TryGetValue((int)SelectedItemID, out LoadoutGlove glove))
+                        if (!PlayerLoadout.Gloves.TryGetValue((int)SelectedItemID, out var glove))
                         {
                             Logging.Debug($"Error finding glove with id {SelectedItemID} for {Player.CharacterName}");
                             return;
@@ -4385,7 +4385,7 @@ namespace UnturnedBlackout.Instances
 
         public void UnlockSelectedItem()
         {
-            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
+            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out var loadout))
             {
                 Logging.Debug($"Error finding loadout with id {LoadoutID} for {Player.CharacterName}");
                 return;
@@ -4396,7 +4396,7 @@ namespace UnturnedBlackout.Instances
                 case ELoadoutPage.Primary:
                 case ELoadoutPage.Secondary:
                     {
-                        if (!PlayerLoadout.Guns.TryGetValue((ushort)SelectedItemID, out LoadoutGun gun))
+                        if (!PlayerLoadout.Guns.TryGetValue((ushort)SelectedItemID, out var gun))
                         {
                             Logging.Debug($"Error finding gun with id {SelectedItemID} for {Player.CharacterName}");
                             return;
@@ -4404,7 +4404,7 @@ namespace UnturnedBlackout.Instances
 
                         Task.Run(async () =>
                         {
-                            int cost = gun.Gun.GetCoins(PlayerData.Level);
+                            var cost = gun.Gun.GetCoins(PlayerData.Level);
                             if (PlayerData.Coins >= cost && !gun.IsBought && !gun.IsUnlocked && gun.Gun.LevelRequirement > PlayerData.Level)
                             {
                                 await DB.DecreasePlayerCoinsAsync(Player.CSteamID, cost);
@@ -4429,13 +4429,13 @@ namespace UnturnedBlackout.Instances
                 case ELoadoutPage.AttachmentPrimaryMagazine:
                 case ELoadoutPage.AttachmentPrimarySights:
                     {
-                        if (!PlayerLoadout.Guns.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out LoadoutGun gun))
+                        if (!PlayerLoadout.Guns.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out var gun))
                         {
                             Logging.Debug($"Error finding primary with id {SelectedItemID} for {Player.CharacterName}");
                             return;
                         }
 
-                        if (!gun.Attachments.TryGetValue((ushort)SelectedItemID, out LoadoutAttachment attachment))
+                        if (!gun.Attachments.TryGetValue((ushort)SelectedItemID, out var attachment))
                         {
                             Logging.Debug($"Error finding attachment with id {SelectedItemID} for {Player.CharacterName}");
                             return;
@@ -4443,7 +4443,7 @@ namespace UnturnedBlackout.Instances
 
                         Task.Run(async () =>
                         {
-                            int cost = attachment.GetCoins(gun.Level);
+                            var cost = attachment.GetCoins(gun.Level);
                             if (PlayerData.Coins >= cost && !attachment.IsBought && !attachment.IsUnlocked && attachment.LevelRequirement > gun.Level)
                             {
                                 await DB.DecreasePlayerCoinsAsync(Player.CSteamID, cost);
@@ -4467,13 +4467,13 @@ namespace UnturnedBlackout.Instances
                 case ELoadoutPage.AttachmentSecondaryMagazine:
                 case ELoadoutPage.AttachmentSecondarySights:
                     {
-                        if (!PlayerLoadout.Guns.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out LoadoutGun gun))
+                        if (!PlayerLoadout.Guns.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out var gun))
                         {
                             Logging.Debug($"Error finding secondary with id {SelectedItemID} for {Player.CharacterName}");
                             return;
                         }
 
-                        if (!gun.Attachments.TryGetValue((ushort)SelectedItemID, out LoadoutAttachment attachment))
+                        if (!gun.Attachments.TryGetValue((ushort)SelectedItemID, out var attachment))
                         {
                             Logging.Debug($"Error finding attachment with id {SelectedItemID} for {Player.CharacterName}");
                             return;
@@ -4481,7 +4481,7 @@ namespace UnturnedBlackout.Instances
 
                         Task.Run(async () =>
                         {
-                            int cost = attachment.GetCoins(gun.Level);
+                            var cost = attachment.GetCoins(gun.Level);
                             if (PlayerData.Coins >= cost && !attachment.IsBought && !attachment.IsUnlocked && attachment.LevelRequirement > gun.Level)
                             {
                                 await DB.DecreasePlayerCoinsAsync(Player.CSteamID, cost);
@@ -4504,7 +4504,7 @@ namespace UnturnedBlackout.Instances
                 case ELoadoutPage.AttachmentPrimaryCharm:
                 case ELoadoutPage.AttachmentSecondaryCharm:
                     {
-                        if (!PlayerLoadout.GunCharms.TryGetValue((ushort)SelectedItemID, out LoadoutGunCharm gunCharm))
+                        if (!PlayerLoadout.GunCharms.TryGetValue((ushort)SelectedItemID, out var gunCharm))
                         {
                             Logging.Debug($"Error finding gun charm with id {SelectedItemID} for {Player.CharacterName}");
                             return;
@@ -4512,7 +4512,7 @@ namespace UnturnedBlackout.Instances
 
                         Task.Run(async () =>
                         {
-                            int cost = gunCharm.GunCharm.GetCoins(PlayerData.Level);
+                            var cost = gunCharm.GunCharm.GetCoins(PlayerData.Level);
                             if (PlayerData.Coins >= cost && !gunCharm.IsBought && !gunCharm.IsUnlocked && gunCharm.GunCharm.LevelRequirement > PlayerData.Level)
                             {
                                 await DB.DecreasePlayerCoinsAsync(Player.CSteamID, cost);
@@ -4534,7 +4534,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutPage.Knife:
                     {
-                        if (!PlayerLoadout.Knives.TryGetValue((ushort)SelectedItemID, out LoadoutKnife knife))
+                        if (!PlayerLoadout.Knives.TryGetValue((ushort)SelectedItemID, out var knife))
                         {
                             Logging.Debug($"Error finding knife with id {SelectedItemID} for {Player.CharacterName}");
                             return;
@@ -4542,7 +4542,7 @@ namespace UnturnedBlackout.Instances
 
                         Task.Run(async () =>
                         {
-                            int cost = knife.Knife.GetCoins(PlayerData.Level);
+                            var cost = knife.Knife.GetCoins(PlayerData.Level);
                             if (PlayerData.Coins >= cost && !knife.IsBought && !knife.IsUnlocked && knife.Knife.LevelRequirement > PlayerData.Level)
                             {
                                 await DB.DecreasePlayerCoinsAsync(Player.CSteamID, cost);
@@ -4565,7 +4565,7 @@ namespace UnturnedBlackout.Instances
                 case ELoadoutPage.Tactical:
                 case ELoadoutPage.Lethal:
                     {
-                        if (!PlayerLoadout.Gadgets.TryGetValue((ushort)SelectedItemID, out LoadoutGadget gadget))
+                        if (!PlayerLoadout.Gadgets.TryGetValue((ushort)SelectedItemID, out var gadget))
                         {
                             Logging.Debug($"Error finding gadget with id {SelectedItemID} for {Player.CharacterName}");
                             return;
@@ -4573,7 +4573,7 @@ namespace UnturnedBlackout.Instances
 
                         Task.Run(async () =>
                         {
-                            int cost = gadget.Gadget.GetCoins(PlayerData.Level);
+                            var cost = gadget.Gadget.GetCoins(PlayerData.Level);
                             if (PlayerData.Coins >= cost && !gadget.IsBought && !gadget.IsUnlocked && gadget.Gadget.LevelRequirement > PlayerData.Level)
                             {
                                 await DB.DecreasePlayerCoinsAsync(Player.CSteamID, cost);
@@ -4597,7 +4597,7 @@ namespace UnturnedBlackout.Instances
                 case ELoadoutPage.Perk2:
                 case ELoadoutPage.Perk3:
                     {
-                        if (!PlayerLoadout.Perks.TryGetValue((int)SelectedItemID, out LoadoutPerk perk))
+                        if (!PlayerLoadout.Perks.TryGetValue((int)SelectedItemID, out var perk))
                         {
                             Logging.Debug($"Error finding perk with id {SelectedItemID} for {Player.CharacterName}");
                             return;
@@ -4605,7 +4605,7 @@ namespace UnturnedBlackout.Instances
 
                         Task.Run(async () =>
                         {
-                            int cost = perk.Perk.GetCoins(PlayerData.Level);
+                            var cost = perk.Perk.GetCoins(PlayerData.Level);
                             if (PlayerData.Coins >= cost && !perk.IsBought && !perk.IsUnlocked && perk.Perk.LevelRequirement > PlayerData.Level)
                             {
                                 await DB.DecreasePlayerCoinsAsync(Player.CSteamID, perk.Perk.GetCoins(PlayerData.Level));
@@ -4627,7 +4627,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutPage.Killstreak:
                     {
-                        if (!PlayerLoadout.Killstreaks.TryGetValue((int)SelectedItemID, out LoadoutKillstreak killstreak))
+                        if (!PlayerLoadout.Killstreaks.TryGetValue((int)SelectedItemID, out var killstreak))
                         {
                             Logging.Debug($"Error finding killstreak with id {SelectedItemID} for {Player.CharacterName}");
                             return;
@@ -4635,7 +4635,7 @@ namespace UnturnedBlackout.Instances
 
                         Task.Run(async () =>
                         {
-                            int cost = killstreak.Killstreak.GetCoins(PlayerData.Level);
+                            var cost = killstreak.Killstreak.GetCoins(PlayerData.Level);
                             if (PlayerData.Coins >= cost && !killstreak.IsBought && !killstreak.IsUnlocked && killstreak.Killstreak.LevelRequirement > PlayerData.Level)
                             {
                                 await DB.DecreasePlayerCoinsAsync(Player.CSteamID, cost);
@@ -4657,7 +4657,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutPage.Card:
                     {
-                        if (!PlayerLoadout.Cards.TryGetValue((int)SelectedItemID, out LoadoutCard card))
+                        if (!PlayerLoadout.Cards.TryGetValue((int)SelectedItemID, out var card))
                         {
                             Logging.Debug($"Error finding card with id {SelectedItemID} for {Player.CharacterName}");
                             return;
@@ -4665,7 +4665,7 @@ namespace UnturnedBlackout.Instances
 
                         Task.Run(async () =>
                         {
-                            int cost = card.Card.GetCoins(PlayerData.Level);
+                            var cost = card.Card.GetCoins(PlayerData.Level);
                             if (PlayerData.Coins >= cost && !card.IsBought && !card.IsUnlocked && card.Card.LevelRequirement > PlayerData.Level)
                             {
                                 await DB.DecreasePlayerCoinsAsync(Player.CSteamID, cost);
@@ -4687,7 +4687,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutPage.Glove:
                     {
-                        if (!PlayerLoadout.Gloves.TryGetValue((int)SelectedItemID, out LoadoutGlove glove))
+                        if (!PlayerLoadout.Gloves.TryGetValue((int)SelectedItemID, out var glove))
                         {
                             Logging.Debug($"Error finding glove with id {SelectedItemID} for {Player.CharacterName}");
                             return;
@@ -4695,7 +4695,7 @@ namespace UnturnedBlackout.Instances
 
                         Task.Run(async () =>
                         {
-                            int cost = glove.Glove.GetCoins(PlayerData.Level);
+                            var cost = glove.Glove.GetCoins(PlayerData.Level);
                             if (PlayerData.Coins >= cost && !glove.IsBought && !glove.IsUnlocked && glove.Glove.LevelRequirement > PlayerData.Level)
                             {
                                 await DB.DecreasePlayerCoinsAsync(Player.CSteamID, cost);
@@ -4719,8 +4719,8 @@ namespace UnturnedBlackout.Instances
 
         public void EquipSelectedItem()
         {
-            LoadoutManager loadoutManager = Plugin.Instance.Loadout;
-            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
+            var loadoutManager = Plugin.Instance.Loadout;
+            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out var loadout))
             {
                 Logging.Debug($"Error finding selected loadout with id {LoadoutID} for {Player.CharacterName}");
                 return;
@@ -4730,7 +4730,7 @@ namespace UnturnedBlackout.Instances
             {
                 case ELoadoutPage.PrimarySkin:
                     {
-                        if (!PlayerLoadout.GunSkinsSearchByID.TryGetValue((int)SelectedItemID, out GunSkin skin))
+                        if (!PlayerLoadout.GunSkinsSearchByID.TryGetValue((int)SelectedItemID, out var skin))
                         {
                             Logging.Debug($"Error finding gun skin with id {SelectedItemID} for {Player.CharacterName}");
                             return;
@@ -4743,7 +4743,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutPage.SecondarySkin:
                     {
-                        if (!PlayerLoadout.GunSkinsSearchByID.TryGetValue((int)SelectedItemID, out GunSkin skin))
+                        if (!PlayerLoadout.GunSkinsSearchByID.TryGetValue((int)SelectedItemID, out var skin))
                         {
                             Logging.Debug($"Error finding gun skin with id {SelectedItemID} for {Player.CharacterName}");
                             return;
@@ -4756,7 +4756,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutPage.Primary:
                     {
-                        if (!PlayerLoadout.Guns.TryGetValue((ushort)SelectedItemID, out LoadoutGun gun))
+                        if (!PlayerLoadout.Guns.TryGetValue((ushort)SelectedItemID, out var gun))
                         {
                             Logging.Debug($"Error finding gun with id {SelectedItemID} for {Player.CharacterName}");
                             return;
@@ -4776,13 +4776,13 @@ namespace UnturnedBlackout.Instances
                 case ELoadoutPage.AttachmentPrimaryMagazine:
                 case ELoadoutPage.AttachmentPrimarySights:
                     {
-                        if (!PlayerLoadout.Guns.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out LoadoutGun gun))
+                        if (!PlayerLoadout.Guns.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out var gun))
                         {
                             Logging.Debug($"Error finding gun with id {loadout.Primary?.Gun?.GunID ?? 0} for {Player.CharacterName}");
                             return;
                         }
 
-                        if (!gun.Attachments.TryGetValue((ushort)SelectedItemID, out LoadoutAttachment attachment))
+                        if (!gun.Attachments.TryGetValue((ushort)SelectedItemID, out var attachment))
                         {
                             Logging.Debug($"Error finding attachment with id {SelectedItemID} for {Player.CharacterName}");
                             return;
@@ -4799,7 +4799,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutPage.Secondary:
                     {
-                        if (!PlayerLoadout.Guns.TryGetValue((ushort)SelectedItemID, out LoadoutGun gun))
+                        if (!PlayerLoadout.Guns.TryGetValue((ushort)SelectedItemID, out var gun))
                         {
                             Logging.Debug($"Error finding primary with id {SelectedItemID} for {Player.CharacterName}");
                             return;
@@ -4818,13 +4818,13 @@ namespace UnturnedBlackout.Instances
                 case ELoadoutPage.AttachmentSecondaryMagazine:
                 case ELoadoutPage.AttachmentSecondarySights:
                     {
-                        if (!PlayerLoadout.Guns.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out LoadoutGun gun))
+                        if (!PlayerLoadout.Guns.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out var gun))
                         {
                             Logging.Debug($"Error finding secondary with id {loadout.Secondary?.Gun?.GunID ?? 0} for {Player.CharacterName}");
                             return;
                         }
 
-                        if (!gun.Attachments.TryGetValue((ushort)SelectedItemID, out LoadoutAttachment attachment))
+                        if (!gun.Attachments.TryGetValue((ushort)SelectedItemID, out var attachment))
                         {
                             Logging.Debug($"Error finding attachment with id {SelectedItemID} for {Player.CharacterName}");
                             return;
@@ -4842,7 +4842,7 @@ namespace UnturnedBlackout.Instances
                 case ELoadoutPage.AttachmentPrimaryCharm:
                 case ELoadoutPage.AttachmentSecondaryCharm:
                     {
-                        if (!PlayerLoadout.GunCharms.TryGetValue((ushort)SelectedItemID, out LoadoutGunCharm gunCharm))
+                        if (!PlayerLoadout.GunCharms.TryGetValue((ushort)SelectedItemID, out var gunCharm))
                         {
                             Logging.Debug($"Error finding gun charm with id {SelectedItemID} for {Player.CharacterName}");
                             return;
@@ -4859,7 +4859,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutPage.Tactical:
                     {
-                        if (!PlayerLoadout.Gadgets.TryGetValue((ushort)SelectedItemID, out LoadoutGadget gadget))
+                        if (!PlayerLoadout.Gadgets.TryGetValue((ushort)SelectedItemID, out var gadget))
                         {
                             Logging.Debug($"Error finding tactical with id {SelectedItemID} for {Player.CharacterName}");
                             return;
@@ -4876,7 +4876,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutPage.Lethal:
                     {
-                        if (!PlayerLoadout.Gadgets.TryGetValue((ushort)SelectedItemID, out LoadoutGadget gadget))
+                        if (!PlayerLoadout.Gadgets.TryGetValue((ushort)SelectedItemID, out var gadget))
                         {
                             Logging.Debug($"Error finding lethal with id {SelectedItemID} for {Player.CharacterName}");
                             return;
@@ -4895,7 +4895,7 @@ namespace UnturnedBlackout.Instances
                 case ELoadoutPage.Perk2:
                 case ELoadoutPage.Perk3:
                     {
-                        if (!PlayerLoadout.Perks.TryGetValue((int)SelectedItemID, out LoadoutPerk perk))
+                        if (!PlayerLoadout.Perks.TryGetValue((int)SelectedItemID, out var perk))
                         {
                             Logging.Debug($"Error finding perk with id {SelectedItemID} for {Player.CharacterName}");
                             return;
@@ -4912,7 +4912,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutPage.Knife:
                     {
-                        if (!PlayerLoadout.Knives.TryGetValue((ushort)SelectedItemID, out LoadoutKnife knife))
+                        if (!PlayerLoadout.Knives.TryGetValue((ushort)SelectedItemID, out var knife))
                         {
                             Logging.Debug($"Error finding knife with id {SelectedItemID} for {Player.CharacterName}");
                             return;
@@ -4929,7 +4929,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutPage.Killstreak:
                     {
-                        if (!PlayerLoadout.Killstreaks.TryGetValue((int)SelectedItemID, out LoadoutKillstreak killstreak))
+                        if (!PlayerLoadout.Killstreaks.TryGetValue((int)SelectedItemID, out var killstreak))
                         {
                             Logging.Debug($"Error finding killstreak with id {SelectedItemID} for {Player.CharacterName}");
                             return;
@@ -4947,7 +4947,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutPage.Glove:
                     {
-                        if (!PlayerLoadout.Gloves.TryGetValue((int)SelectedItemID, out LoadoutGlove glove))
+                        if (!PlayerLoadout.Gloves.TryGetValue((int)SelectedItemID, out var glove))
                         {
                             Logging.Debug($"Error finding glove with id {SelectedItemID} for {Player.CharacterName}");
                             return;
@@ -4964,7 +4964,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutPage.Card:
                     {
-                        if (!PlayerLoadout.Cards.TryGetValue((int)SelectedItemID, out LoadoutCard card))
+                        if (!PlayerLoadout.Cards.TryGetValue((int)SelectedItemID, out var card))
                         {
                             Logging.Debug($"Error finding card with id {SelectedItemID} for {Player.CharacterName}");
                             return;
@@ -4979,14 +4979,14 @@ namespace UnturnedBlackout.Instances
                         break;
                     }
             }
-            
+
             ReloadLoadout();
         }
 
         public void DequipSelectedItem()
         {
-            LoadoutManager loadoutManager = Plugin.Instance.Loadout;
-            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out Loadout loadout))
+            var loadoutManager = Plugin.Instance.Loadout;
+            if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out var loadout))
             {
                 Logging.Debug($"Error finding selected loadout with id {LoadoutID} for {Player.CharacterName}");
                 return;
@@ -5021,13 +5021,13 @@ namespace UnturnedBlackout.Instances
                 case ELoadoutPage.AttachmentPrimaryMagazine:
                 case ELoadoutPage.AttachmentPrimarySights:
                     {
-                        if (!PlayerLoadout.Guns.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out LoadoutGun gun))
+                        if (!PlayerLoadout.Guns.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out var gun))
                         {
                             Logging.Debug($"Error finding gun with id {loadout.Primary?.Gun?.GunID ?? 0} for {Player.CharacterName}");
                             return;
                         }
 
-                        if (!gun.Attachments.TryGetValue((ushort)SelectedItemID, out LoadoutAttachment attachment))
+                        if (!gun.Attachments.TryGetValue((ushort)SelectedItemID, out var attachment))
                         {
                             Logging.Debug($"Error finding attachment with id {SelectedItemID} for {Player.CharacterName}");
                             return;
@@ -5049,13 +5049,13 @@ namespace UnturnedBlackout.Instances
                 case ELoadoutPage.AttachmentSecondaryMagazine:
                 case ELoadoutPage.AttachmentSecondarySights:
                     {
-                        if (!PlayerLoadout.Guns.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out LoadoutGun gun))
+                        if (!PlayerLoadout.Guns.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out var gun))
                         {
                             Logging.Debug($"Error finding secondary with id {loadout.Secondary?.Gun?.GunID ?? 0} for {Player.CharacterName}");
                             return;
                         }
 
-                        if (!gun.Attachments.TryGetValue((ushort)SelectedItemID, out LoadoutAttachment attachment))
+                        if (!gun.Attachments.TryGetValue((ushort)SelectedItemID, out var attachment))
                         {
                             Logging.Debug($"Error finding attachment with id {SelectedItemID} for {Player.CharacterName}");
                             return;
@@ -5096,7 +5096,7 @@ namespace UnturnedBlackout.Instances
                 case ELoadoutPage.Perk2:
                 case ELoadoutPage.Perk3:
                     {
-                        if (!PlayerLoadout.Perks.TryGetValue((int)SelectedItemID, out LoadoutPerk perk))
+                        if (!PlayerLoadout.Perks.TryGetValue((int)SelectedItemID, out var perk))
                         {
                             Logging.Debug($"Error finding perk with id {SelectedItemID} for {Player.CharacterName}");
                             return;
@@ -5118,7 +5118,7 @@ namespace UnturnedBlackout.Instances
 
                 case ELoadoutPage.Killstreak:
                     {
-                        if (!PlayerLoadout.Killstreaks.TryGetValue((int)SelectedItemID, out LoadoutKillstreak killstreak))
+                        if (!PlayerLoadout.Killstreaks.TryGetValue((int)SelectedItemID, out var killstreak))
                         {
                             Logging.Debug($"Error finding killstreak with id {SelectedItemID} for {Player.CharacterName}");
                             return;
@@ -5161,7 +5161,7 @@ namespace UnturnedBlackout.Instances
             MainPage = EMainPage.Leaderboard;
 
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Leaderboards Level TEXT 10", PlayerData.Level.ToString());
-            EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Leaderboards Level IMAGE 10", Plugin.Instance.DB.Levels.TryGetValue(PlayerData.Level, out XPLevel level) ? level.IconLinkMedium : "");
+            EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Leaderboards Level IMAGE 10", Plugin.Instance.DB.Levels.TryGetValue(PlayerData.Level, out var level) ? level.IconLinkMedium : "");
             Logging.Debug($"Sending link for {PlayerData.SteamName} {Utility.GetFlag(PlayerData.CountryCode)}");
             EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Leaderboards Flag IMAGE 10", PlayerData.HideFlag ? Config.Icons.FileData.HiddenFlagIconLink : Utility.GetFlag(PlayerData.CountryCode));
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Leaderboards Name TEXT 10", (PlayerData.HasPrime ? UIManager.PRIME_SYMBOL : "") + PlayerData.SteamName);
@@ -5183,32 +5183,33 @@ namespace UnturnedBlackout.Instances
 
         public void ShowLeaderboard()
         {
-            List<LeaderboardData> data = GetLeaderboardData();
-            Dictionary<CSteamID, LeaderboardData> dataLookup = GetLeaderboardDataLookup();
+            var data = GetLeaderboardData();
+            var dataLookup = GetLeaderboardDataLookup();
 
-            for (int i = 0; i <= 9; i++)
+            for (var i = 0; i <= 9; i++)
             {
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards BUTTON {i}", false);
             }
-            
+
             if (data.Count == 0)
             {
                 return;
             }
 
-            if (dataLookup.TryGetValue(SteamID, out LeaderboardData playerData))
+            if (dataLookup.TryGetValue(SteamID, out var playerData))
             {
                 decimal kills = playerData.Kills + playerData.HeadshotKills;
                 decimal deaths = playerData.Deaths;
 
-                string ratio = playerData.Deaths == 0 ? String.Format("{0:n}", kills) : String.Format("{0:n}", Math.Round(kills / deaths, 2));
+                var ratio = playerData.Deaths == 0 ? String.Format("{0:n}", kills) : String.Format("{0:n}", Math.Round(kills / deaths, 2));
 
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards BUTTON 10", true);
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Leaderboards Rank TEXT 10", $"#{data.IndexOf(playerData) + 1}");
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Leaderboards Kills TEXT 10", (playerData.Kills + playerData.HeadshotKills).ToString());
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Leaderboards Deaths TEXT 10", playerData.Deaths.ToString());
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Leaderboards KDR TEXT 10", ratio.ToString());
-            } else
+            }
+            else
             {
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards BUTTON 10", false);
             }
@@ -5219,9 +5220,9 @@ namespace UnturnedBlackout.Instances
         public void ShowLeaderboardPage(int pageNum)
         {
             LeaderboardPageID = pageNum;
-            List<LeaderboardData> data = GetLeaderboardData();
+            var data = GetLeaderboardData();
 
-            for (int i = 0; i <= 9; i++)
+            for (var i = 0; i <= 9; i++)
             {
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards BUTTON {i}", false);
             }
@@ -5229,22 +5230,22 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Leaderboards Page TEXT", $"Page {pageNum}");
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Leaderboards Reset TEXT", GetLeaderboardRefreshTime());
 
-            int lowerIndex = 10 * (pageNum - 1);
-            int upperIndex = Math.Min(lowerIndex + 9, data.Count - 1);
+            var lowerIndex = 10 * (pageNum - 1);
+            var upperIndex = Math.Min(lowerIndex + 9, data.Count - 1);
 
-            int index = 0;
-            for (int i = lowerIndex; i <= upperIndex; i++)
+            var index = 0;
+            for (var i = lowerIndex; i <= upperIndex; i++)
             {
-                LeaderboardData playerData = data[i];
+                var playerData = data[i];
                 decimal kills = playerData.Kills + playerData.HeadshotKills;
                 decimal deaths = playerData.Deaths;
 
-                string ratio = playerData.Deaths == 0 ? String.Format("{0:n}", kills) : String.Format("{0:n}", Math.Round(kills / deaths, 2));
+                var ratio = playerData.Deaths == 0 ? String.Format("{0:n}", kills) : String.Format("{0:n}", Math.Round(kills / deaths, 2));
 
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards BUTTON {index}", true);
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Rank TEXT {index}", $"#{i + 1}");
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Level TEXT {index}", playerData.Level.ToString());
-                EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Level IMAGE {index}", Plugin.Instance.DB.Levels.TryGetValue(playerData.Level, out XPLevel level) ? level.IconLinkMedium : "");
+                EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Level IMAGE {index}", Plugin.Instance.DB.Levels.TryGetValue(playerData.Level, out var level) ? level.IconLinkMedium : "");
                 Logging.Debug($"Sending flag for {playerData.SteamName} {Utility.GetFlag(playerData.CountryCode)}");
                 EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Flag IMAGE {index}", playerData.HideFlag ? Config.Icons.FileData.HiddenFlagIconLink : Utility.GetFlag(playerData.CountryCode));
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Name TEXT {index}", (playerData.HasPrime ? UIManager.PRIME_SYMBOL : "") + playerData.SteamName);
@@ -5257,7 +5258,7 @@ namespace UnturnedBlackout.Instances
 
         public void ForwardLeaderboardPage()
         {
-            List<LeaderboardData> data = GetLeaderboardData();
+            var data = GetLeaderboardData();
 
             if ((data.Count - 1) < LeaderboardPageID * 8)
             {
@@ -5280,32 +5281,32 @@ namespace UnturnedBlackout.Instances
 
         public void SearchLeaderboardPlayer(string input)
         {
-            List<LeaderboardData> data = GetLeaderboardData();
+            var data = GetLeaderboardData();
 
-            for (int i = 0; i <= 9; i++)
+            for (var i = 0; i <= 9; i++)
             {
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards BUTTON {i}", false);
             }
 
             Task.Run(() =>
             {
-                string inputLower = input.ToLower();
-                List<LeaderboardData> searchPlayers = data.Where(k => k.SteamName.ToLower().Contains(inputLower)).Take(10).ToList();
+                var inputLower = input.ToLower();
+                var searchPlayers = data.Where(k => k.SteamName.ToLower().Contains(inputLower)).Take(10).ToList();
                 TaskDispatcher.QueueOnMainThread(() =>
                 {
-                    int maxCount = Math.Min(10, searchPlayers.Count);
-                    for (int i = 0; i < maxCount; i++)
+                    var maxCount = Math.Min(10, searchPlayers.Count);
+                    for (var i = 0; i < maxCount; i++)
                     {
-                        LeaderboardData playerData = searchPlayers[i];
+                        var playerData = searchPlayers[i];
                         decimal kills = playerData.Kills + playerData.HeadshotKills;
                         decimal deaths = playerData.Deaths;
 
-                        string ratio = playerData.Deaths == 0 ? String.Format("{0:n}", kills) : String.Format("{0:n}", Math.Round(kills / deaths, 2));
+                        var ratio = playerData.Deaths == 0 ? String.Format("{0:n}", kills) : String.Format("{0:n}", Math.Round(kills / deaths, 2));
 
                         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards BUTTON {i}", true);
                         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Rank TEXT {i}", $"#{data.IndexOf(playerData) + 1}");
                         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Level TEXT {i}", playerData.Level.ToString());
-                        EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Level IMAGE {i}", Plugin.Instance.DB.Levels.TryGetValue(playerData.Level, out XPLevel level) ? level.IconLinkMedium : "");
+                        EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Level IMAGE {i}", Plugin.Instance.DB.Levels.TryGetValue(playerData.Level, out var level) ? level.IconLinkMedium : "");
                         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Flag IMAGE {i}", playerData.HideFlag ? Config.Icons.FileData.HiddenFlagIconLink : Utility.GetFlag(playerData.CountryCode));
                         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Name TEXT {i}", playerData.SteamName);
                         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Kills TEXT {i}", (playerData.Kills + playerData.HeadshotKills).ToString());
@@ -5348,11 +5349,11 @@ namespace UnturnedBlackout.Instances
         #region QuestPage
         public void ShowQuests()
         {
-            List<Database.Data.PlayerQuest> quests = PlayerData.Quests.OrderBy(k => (int)k.Quest.QuestTier).ToList();
-            int maxCount = Math.Min(6, quests.Count);
-            for (int i = 0; i < maxCount; i++)
+            var quests = PlayerData.Quests.OrderBy(k => (int)k.Quest.QuestTier).ToList();
+            var maxCount = Math.Min(6, quests.Count);
+            for (var i = 0; i < maxCount; i++)
             {
-                Database.Data.PlayerQuest quest = quests[i];
+                var quest = quests[i];
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Quest Complete {i} Toggler", quest.Amount >= quest.Quest.TargetAmount);
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Quest Description TEXT {i}", quest.Quest.QuestDesc);
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Quest Title TEXT {i}", quest.Quest.QuestTitle);
@@ -5364,8 +5365,8 @@ namespace UnturnedBlackout.Instances
 
         public void ShowQuestCompletion()
         {
-            int completedQuests = PlayerData.Quests.Count(k => k.Amount >= k.Quest.TargetAmount);
-            int totalQuests = PlayerData.Quests.Count;
+            var completedQuests = PlayerData.Quests.Count(k => k.Amount >= k.Quest.TargetAmount);
+            var totalQuests = PlayerData.Quests.Count;
 
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Quest Complete", completedQuests == totalQuests);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Quest Complete Count TEXT", $"{completedQuests}/{totalQuests}");
@@ -5397,13 +5398,13 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements Previous BUTTON", false);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements Next BUTTON", false);
 
-            if (!AchievementPages.TryGetValue(mainPage, out Dictionary<int, PageAchievement> achievementPages))
+            if (!AchievementPages.TryGetValue(mainPage, out var achievementPages))
             {
                 Logging.Debug($"Error finding achievement pages for main page {mainPage}");
                 return;
             }
 
-            if (!achievementPages.TryGetValue(1, out PageAchievement firstPage))
+            if (!achievementPages.TryGetValue(1, out var firstPage))
             {
                 Logging.Debug($"Error finding first page of achievement of main page {mainPage}");
                 return;
@@ -5423,16 +5424,16 @@ namespace UnturnedBlackout.Instances
 
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements Page TEXT", $"Page {page.PageID}");
 
-            for (int i = 0; i <= 48; i++)
+            for (var i = 0; i <= 48; i++)
             {
                 yield return new WaitForSeconds(0.01f);
-                if (!page.Achievements.TryGetValue(i, out PlayerAchievement achievement))
+                if (!page.Achievements.TryGetValue(i, out var achievement))
                 {
                     break;
                 }
 
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Achievements BUTTON {i}", true);
-                AchievementTier tier = achievement.GetCurrentTier();
+                var tier = achievement.GetCurrentTier();
                 if (tier != null)
                 {
                     EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Achievements IMAGE {i}", tier.TierPrevLarge);
@@ -5443,10 +5444,10 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Achievements Silver {i}", achievement.CurrentTier == 2);
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Achievements Gold {i}", achievement.CurrentTier == 3);
 
-                if (achievement.TryGetNextTier(out AchievementTier nextTier))
+                if (achievement.TryGetNextTier(out var nextTier))
                 {
 
-                    string fillTxt = achievement.Amount == 0 ? UIManager.VERY_SMALL_SQUARE : new string(UIManager.HAIRSPACE_SYMBOL_CHAR, Math.Min(68, achievement.Amount * 68 / nextTier.TargetAmount));
+                    var fillTxt = achievement.Amount == 0 ? UIManager.VERY_SMALL_SQUARE : new string(UIManager.HAIRSPACE_SYMBOL_CHAR, Math.Min(68, achievement.Amount * 68 / nextTier.TargetAmount));
 
                     switch (achievement.CurrentTier)
                     {
@@ -5471,14 +5472,14 @@ namespace UnturnedBlackout.Instances
 
         public void ForwardAchievementSubPage()
         {
-            if (!AchievementPages.TryGetValue(AchievementMainPage, out Dictionary<int, PageAchievement> achievementPages))
+            if (!AchievementPages.TryGetValue(AchievementMainPage, out var achievementPages))
             {
                 Logging.Debug($"Error finding achievement pages for main page {AchievementMainPage}");
                 ShowAchievements();
                 return;
             }
 
-            if (!achievementPages.TryGetValue(AchievementSubPage + 1, out PageAchievement nextPage) && !achievementPages.TryGetValue(1, out nextPage))
+            if (!achievementPages.TryGetValue(AchievementSubPage + 1, out var nextPage) && !achievementPages.TryGetValue(1, out nextPage))
             {
                 Logging.Debug($"Error finding next achievement page");
                 SelectedAchievementMainPage(AchievementMainPage);
@@ -5494,14 +5495,14 @@ namespace UnturnedBlackout.Instances
 
         public void BackwardAchievementSubPage()
         {
-            if (!AchievementPages.TryGetValue(AchievementMainPage, out Dictionary<int, PageAchievement> achievementPages))
+            if (!AchievementPages.TryGetValue(AchievementMainPage, out var achievementPages))
             {
                 Logging.Debug($"Error finding achievement pages for main page {AchievementMainPage}");
                 ShowAchievements();
                 return;
             }
 
-            if (!achievementPages.TryGetValue(AchievementSubPage - 1, out PageAchievement nextPage) && !achievementPages.TryGetValue(achievementPages.Keys.Max(), out nextPage))
+            if (!achievementPages.TryGetValue(AchievementSubPage - 1, out var nextPage) && !achievementPages.TryGetValue(achievementPages.Keys.Max(), out nextPage))
             {
                 Logging.Debug("Error finding next achievement page");
                 SelectedAchievementMainPage(AchievementMainPage);
@@ -5517,7 +5518,7 @@ namespace UnturnedBlackout.Instances
 
         public void ReloadAchievementSubPage()
         {
-            if (!AchievementPages.TryGetValue(AchievementMainPage, out Dictionary<int, PageAchievement> achievementPages) || !achievementPages.TryGetValue(AchievementSubPage, out PageAchievement page))
+            if (!AchievementPages.TryGetValue(AchievementMainPage, out var achievementPages) || !achievementPages.TryGetValue(AchievementSubPage, out var page))
             {
                 Logging.Debug($"Unable to find selected page with main page {AchievementMainPage} and sub page {AchievementSubPage}");
                 return;
@@ -5532,13 +5533,13 @@ namespace UnturnedBlackout.Instances
 
         public void SelectedAchievement(int selected)
         {
-            if (!AchievementPages.TryGetValue(AchievementMainPage, out Dictionary<int, PageAchievement> achievementPages) || !achievementPages.TryGetValue(AchievementSubPage, out PageAchievement page))
+            if (!AchievementPages.TryGetValue(AchievementMainPage, out var achievementPages) || !achievementPages.TryGetValue(AchievementSubPage, out var page))
             {
                 Logging.Debug($"Error getting current page of achievement for {Player.CharacterName}");
                 return;
             }
 
-            if (!page.Achievements.TryGetValue(selected, out PlayerAchievement achievement))
+            if (!page.Achievements.TryGetValue(selected, out var achievement))
             {
                 Logging.Debug($"Error getting selected achievement with id {selected} for {Player.CharacterName}");
                 return;
@@ -5551,18 +5552,18 @@ namespace UnturnedBlackout.Instances
         {
             SelectedAchievementID = achievement.Achievement.AchievementID;
 
-            AchievementTier tier = achievement.GetCurrentTier();
+            var tier = achievement.GetCurrentTier();
             if (tier != null)
             {
                 EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements IMAGE", tier.TierPrevLarge);
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements TEXT", tier.TierTitle);
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements Description TEXT", tier.TierDesc);
 
-                int targetAmount = tier.TargetAmount;
-                if (achievement.TryGetNextTier(out AchievementTier nextTier))
+                var targetAmount = tier.TargetAmount;
+                if (achievement.TryGetNextTier(out var nextTier))
                 {
                     targetAmount = nextTier.TargetAmount;
-                    if (nextTier.Rewards.Count >= 1 && TryGetAchievementRewardInfo(nextTier.Rewards[0], out string rewardName, out _, out _))
+                    if (nextTier.Rewards.Count >= 1 && TryGetAchievementRewardInfo(nextTier.Rewards[0], out var rewardName, out _, out _))
                     {
                         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements Item TEXT", rewardName);
                     }
@@ -5579,15 +5580,15 @@ namespace UnturnedBlackout.Instances
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements Claim BUTTON", nextTier != null && achievement.Amount >= targetAmount);
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements Target TEXT", $"{achievement.Amount}/{targetAmount}");
 
-                string fill = achievement.Amount == 0 ? UIManager.HAIRSPACE_SYMBOL_STRING : new string(UIManager.HAIRSPACE_SYMBOL_CHAR, Math.Min(291, achievement.Amount * 291 / targetAmount));
+                var fill = achievement.Amount == 0 ? UIManager.HAIRSPACE_SYMBOL_STRING : new string(UIManager.HAIRSPACE_SYMBOL_CHAR, Math.Min(291, achievement.Amount * 291 / targetAmount));
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements Fill 0", fill);
             }
 
-            for (int i = 1; i <= 4; i++)
+            for (var i = 1; i <= 4; i++)
             {
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Achievements Reward Claimed {i}", achievement.CurrentTier >= i);
 
-                if (!achievement.Achievement.TiersLookup.TryGetValue(i, out AchievementTier rewardTier) || rewardTier.Rewards.Count == 0 || !TryGetAchievementRewardInfo(rewardTier.Rewards[0], out _, out string rewardImage, out _))
+                if (!achievement.Achievement.TiersLookup.TryGetValue(i, out var rewardTier) || rewardTier.Rewards.Count == 0 || !TryGetAchievementRewardInfo(rewardTier.Rewards[0], out _, out var rewardImage, out _))
                 {
                     EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Achievements Reward IMAGE {i}", "");
                     continue;
@@ -5599,7 +5600,7 @@ namespace UnturnedBlackout.Instances
 
         public void ReloadSelectedAchievement()
         {
-            if (!PlayerData.AchievementsSearchByID.TryGetValue(SelectedAchievementID, out PlayerAchievement achievement))
+            if (!PlayerData.AchievementsSearchByID.TryGetValue(SelectedAchievementID, out var achievement))
             {
                 Logging.Debug($"Unable to find selected achievement with id {SelectedAchievementID} for {Player.CharacterName}");
                 return;
@@ -5617,7 +5618,7 @@ namespace UnturnedBlackout.Instances
             switch (reward.RewardType)
             {
                 case ERewardType.Card:
-                    if (!DB.Cards.TryGetValue(Convert.ToInt32(reward.RewardValue), out Card card))
+                    if (!DB.Cards.TryGetValue(Convert.ToInt32(reward.RewardValue), out var card))
                     {
                         return false;
                     }
@@ -5626,7 +5627,7 @@ namespace UnturnedBlackout.Instances
                     rewardRarity = card.CardRarity;
                     return true;
                 case ERewardType.GunSkin:
-                    if (!DB.GunSkinsSearchByID.TryGetValue(Convert.ToInt32(reward.RewardValue), out GunSkin skin))
+                    if (!DB.GunSkinsSearchByID.TryGetValue(Convert.ToInt32(reward.RewardValue), out var skin))
                     {
                         return false;
                     }
@@ -5635,7 +5636,7 @@ namespace UnturnedBlackout.Instances
                     rewardRarity = skin.SkinRarity;
                     return true;
                 case ERewardType.Glove:
-                    if (!DB.Gloves.TryGetValue(Convert.ToUInt16(reward.RewardValue), out Glove glove))
+                    if (!DB.Gloves.TryGetValue(Convert.ToUInt16(reward.RewardValue), out var glove))
                     {
                         return false;
                     }
@@ -5644,7 +5645,7 @@ namespace UnturnedBlackout.Instances
                     rewardRarity = glove.GloveRarity;
                     return true;
                 case ERewardType.Gun:
-                    if (!DB.Guns.TryGetValue(Convert.ToUInt16(reward.RewardValue), out Gun gun))
+                    if (!DB.Guns.TryGetValue(Convert.ToUInt16(reward.RewardValue), out var gun))
                     {
                         return false;
                     }
@@ -5653,7 +5654,7 @@ namespace UnturnedBlackout.Instances
                     rewardRarity = gun.GunRarity;
                     return true;
                 case ERewardType.GunCharm:
-                    if (!DB.GunCharms.TryGetValue(Convert.ToUInt16(reward.RewardValue), out GunCharm gunCharm))
+                    if (!DB.GunCharms.TryGetValue(Convert.ToUInt16(reward.RewardValue), out var gunCharm))
                     {
                         return false;
                     }
@@ -5701,7 +5702,7 @@ namespace UnturnedBlackout.Instances
             MainPage = EMainPage.Battlepass;
             ShowBattlepass();
             // Setup all 50 objects
-            for (int i = 1; i <= 50; i++)
+            for (var i = 1; i <= 50; i++)
             {
                 if (i > 12)
                 {
@@ -5716,21 +5717,21 @@ namespace UnturnedBlackout.Instances
         public void ShowBattlepass()
         {
             Logging.Debug($"Showing bp for {Player.CharacterName}");
-            PlayerBattlepass bp = PlayerData.Battlepass;
+            var bp = PlayerData.Battlepass;
 
-            if (!DB.BattlepassTiersSearchByID.TryGetValue(bp.CurrentTier, out BattlepassTier currentTier))
+            if (!DB.BattlepassTiersSearchByID.TryGetValue(bp.CurrentTier, out var currentTier))
             {
                 Logging.Debug($"Error finding current battlepass tier for {Player.CharacterName}, returning");
                 return;
             }
 
-            bool isBattlePassCompleted = !DB.BattlepassTiersSearchByID.TryGetValue(bp.CurrentTier + 1, out BattlepassTier nextTier);
+            var isBattlePassCompleted = !DB.BattlepassTiersSearchByID.TryGetValue(bp.CurrentTier + 1, out var nextTier);
             Logging.Debug($"Is Battlepass Completed: {isBattlePassCompleted}, next tier null: {nextTier == null}, current xp: {bp.XP}, current tier xp: {currentTier.XP}, next tier xp: {nextTier?.XP ?? 0}");
 
             // Setup the XP bar
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass Tier Target TEXT", $"{bp.XP}/{(isBattlePassCompleted ? currentTier.XP : nextTier.XP)}★");
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass Tier TEXT", $"{bp.CurrentTier}");
-            string fill = bp.XP == 0 ? UIManager.VERY_SMALL_SQUARE : new string(' ', Math.Min(72, bp.XP * 72 / (isBattlePassCompleted ? currentTier.XP : nextTier.XP)));
+            var fill = bp.XP == 0 ? UIManager.VERY_SMALL_SQUARE : new string(' ', Math.Min(72, bp.XP * 72 / (isBattlePassCompleted ? currentTier.XP : nextTier.XP)));
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass Tier XP Fill", fill);
             EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass IMAGE", "");
 
@@ -5745,19 +5746,19 @@ namespace UnturnedBlackout.Instances
 
         public void ShowBattlepassTier(int tierID)
         {
-            PlayerBattlepass bp = PlayerData.Battlepass;
-            if (!DB.BattlepassTiersSearchByID.TryGetValue(tierID, out BattlepassTier tier))
+            var bp = PlayerData.Battlepass;
+            if (!DB.BattlepassTiersSearchByID.TryGetValue(tierID, out var tier))
             {
                 return;
             }
-            bool isTierUnlocked = bp.CurrentTier >= tierID;
+            var isTierUnlocked = bp.CurrentTier >= tierID;
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass Tier Completed Toggler {tierID}", isTierUnlocked);
-            int spaces = bp.CurrentTier > tierID ? 70 : (bp.CurrentTier == tierID ? Math.Min(70, bp.XP * 70 / (DB.BattlepassTiersSearchByID.TryGetValue(tierID + 1, out BattlepassTier nextTier) ? nextTier.XP : tier.XP)) : 0);
+            var spaces = bp.CurrentTier > tierID ? 70 : (bp.CurrentTier == tierID ? Math.Min(70, bp.XP * 70 / (DB.BattlepassTiersSearchByID.TryGetValue(tierID + 1, out var nextTier) ? nextTier.XP : tier.XP)) : 0);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass Tier Fill {tierID}", spaces == 0 ? UIManager.VERY_SMALL_SQUARE : new string(UIManager.HAIRSPACE_SYMBOL_CHAR, spaces));
 
             // Setup top reward (free reward)
-            bool isRewardClaimed = bp.ClaimedFreeRewards.Contains(tierID);
-            if (tier.FreeReward != null && TryGetBattlepassRewardInfo(tier.FreeReward, out string topRewardName, out string topRewardImage, out ERarity topRewardRarity))
+            var isRewardClaimed = bp.ClaimedFreeRewards.Contains(tierID);
+            if (tier.FreeReward != null && TryGetBattlepassRewardInfo(tier.FreeReward, out var topRewardName, out var topRewardImage, out var topRewardRarity))
             {
                 EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass T IMAGE {tierID}", topRewardImage);
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass T TEXT {tierID}", topRewardName);
@@ -5778,7 +5779,7 @@ namespace UnturnedBlackout.Instances
 
             // Setup bottom reward (premium reward)
             isRewardClaimed = bp.ClaimedPremiumRewards.Contains(tierID);
-            if (tier.PremiumReward != null && TryGetBattlepassRewardInfo(tier.PremiumReward, out string bottomRewardName, out string bottomRewardImage, out ERarity bottomRewardRarity))
+            if (tier.PremiumReward != null && TryGetBattlepassRewardInfo(tier.PremiumReward, out var bottomRewardName, out var bottomRewardImage, out var bottomRewardRarity))
             {
                 EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass B IMAGE {tierID}", bottomRewardImage);
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass B TEXT {tierID}", bottomRewardName);
@@ -5804,14 +5805,14 @@ namespace UnturnedBlackout.Instances
             Logging.Debug($"{Player.CharacterName} clicked top button: {isTop}, id: {tierID}");
             SelectedBattlepassTierID = (isTop, tierID);
 
-            if (!DB.BattlepassTiersSearchByID.TryGetValue(tierID, out BattlepassTier tier))
+            if (!DB.BattlepassTiersSearchByID.TryGetValue(tierID, out var tier))
             {
                 Logging.Debug($"Error finding selected battlepass tier for {Player.CharacterName} with selected {tierID}");
                 return;
             }
 
-            Reward reward = isTop ? tier.FreeReward : tier.PremiumReward;
-            if (reward != null && TryGetBattlepassRewardInfo(reward, out _, out string rewardImage, out _))
+            var reward = isTop ? tier.FreeReward : tier.PremiumReward;
+            if (reward != null && TryGetBattlepassRewardInfo(reward, out _, out var rewardImage, out _))
             {
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass IMAGE", reward.RewardType != ERewardType.Card);
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass Card IMAGE", reward.RewardType == ERewardType.Card);
@@ -5830,7 +5831,7 @@ namespace UnturnedBlackout.Instances
             switch (reward.RewardType)
             {
                 case ERewardType.Card:
-                    if (!DB.Cards.TryGetValue(Convert.ToInt32(reward.RewardValue), out Card card))
+                    if (!DB.Cards.TryGetValue(Convert.ToInt32(reward.RewardValue), out var card))
                     {
                         return false;
                     }
@@ -5838,7 +5839,7 @@ namespace UnturnedBlackout.Instances
                     rewardRarity = card.CardRarity;
                     return true;
                 case ERewardType.GunSkin:
-                    if (!DB.GunSkinsSearchByID.TryGetValue(Convert.ToInt32(reward.RewardValue), out GunSkin skin))
+                    if (!DB.GunSkinsSearchByID.TryGetValue(Convert.ToInt32(reward.RewardValue), out var skin))
                     {
                         return false;
                     }
@@ -5846,7 +5847,7 @@ namespace UnturnedBlackout.Instances
                     rewardRarity = skin.SkinRarity;
                     return true;
                 case ERewardType.Glove:
-                    if (!DB.Gloves.TryGetValue(Convert.ToUInt16(reward.RewardValue), out Glove glove))
+                    if (!DB.Gloves.TryGetValue(Convert.ToUInt16(reward.RewardValue), out var glove))
                     {
                         return false;
                     }
@@ -5854,7 +5855,7 @@ namespace UnturnedBlackout.Instances
                     rewardRarity = glove.GloveRarity;
                     return true;
                 case ERewardType.Gun:
-                    if (!DB.Guns.TryGetValue(Convert.ToUInt16(reward.RewardValue), out Gun gun))
+                    if (!DB.Guns.TryGetValue(Convert.ToUInt16(reward.RewardValue), out var gun))
                     {
                         return false;
                     }
@@ -5862,7 +5863,7 @@ namespace UnturnedBlackout.Instances
                     rewardRarity = gun.GunRarity;
                     return true;
                 case ERewardType.GunCharm:
-                    if (!DB.GunCharms.TryGetValue(Convert.ToUInt16(reward.RewardValue), out GunCharm gunCharm))
+                    if (!DB.GunCharms.TryGetValue(Convert.ToUInt16(reward.RewardValue), out var gunCharm))
                     {
                         return false;
                     }
@@ -5870,7 +5871,7 @@ namespace UnturnedBlackout.Instances
                     rewardRarity = gunCharm.CharmRarity;
                     return true;
                 case ERewardType.Knife:
-                    if (!DB.Knives.TryGetValue(Convert.ToUInt16(reward.RewardValue), out Knife knife))
+                    if (!DB.Knives.TryGetValue(Convert.ToUInt16(reward.RewardValue), out var knife))
                     {
                         return false;
                     }
@@ -5878,7 +5879,7 @@ namespace UnturnedBlackout.Instances
                     rewardRarity = knife.KnifeRarity;
                     return true;
                 case ERewardType.Case:
-                    if (!DB.Cases.TryGetValue(Convert.ToInt32(reward.RewardValue), out Case @case))
+                    if (!DB.Cases.TryGetValue(Convert.ToInt32(reward.RewardValue), out var @case))
                     {
                         return false;
                     }
@@ -5943,10 +5944,10 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Inventory Next BUTTON", UnboxInventoryPages.Count > 1);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Inventory Previous BUTTON", UnboxInventoryPages.Count > 1);
 
-            if (!UnboxInventoryPages.TryGetValue(1, out PageUnboxInventory firstPage))
+            if (!UnboxInventoryPages.TryGetValue(1, out var firstPage))
             {
                 Logging.Debug($"Unable to find first page of unboxing inventory for {Player.CharacterName}");
-                for (int i = 0; i <= MAX_CASES_PER_INVENTORY_PAGE; i++)
+                for (var i = 0; i <= MAX_CASES_PER_INVENTORY_PAGE; i++)
                 {
                     EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Crate BUTTON {i}", false);
                 }
@@ -5961,9 +5962,9 @@ namespace UnturnedBlackout.Instances
         {
             UnboxingPageID = page.PageID;
 
-            for (int i = 0; i <= MAX_CASES_PER_INVENTORY_PAGE; i++)
+            for (var i = 0; i <= MAX_CASES_PER_INVENTORY_PAGE; i++)
             {
-                if (!page.Cases.TryGetValue(i, out PlayerCase @case))
+                if (!page.Cases.TryGetValue(i, out var @case))
                 {
                     EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Crate BUTTON {i}", false);
                     continue;
@@ -5980,7 +5981,7 @@ namespace UnturnedBlackout.Instances
 
         public void ForwardUnboxingInventoryPage()
         {
-            if (!UnboxInventoryPages.TryGetValue(UnboxingPageID + 1, out PageUnboxInventory nextPage) && !UnboxInventoryPages.TryGetValue(1, out nextPage))
+            if (!UnboxInventoryPages.TryGetValue(UnboxingPageID + 1, out var nextPage) && !UnboxInventoryPages.TryGetValue(1, out nextPage))
             {
                 Logging.Debug($"Unable to find the next or first unboxing inventory page for {Player.CharacterName}");
                 ShowUnboxingInventoryPage();
@@ -5992,7 +5993,7 @@ namespace UnturnedBlackout.Instances
 
         public void BackwardUnboxingInventoryPage()
         {
-            if (!UnboxInventoryPages.TryGetValue(UnboxingPageID - 1, out PageUnboxInventory nextPage) && !UnboxInventoryPages.TryGetValue(UnboxInventoryPages.Keys.Max(), out nextPage))
+            if (!UnboxInventoryPages.TryGetValue(UnboxingPageID - 1, out var nextPage) && !UnboxInventoryPages.TryGetValue(UnboxInventoryPages.Keys.Max(), out nextPage))
             {
                 Logging.Debug($"Unable to find the previous or max unboxing inventory page for {Player.CharacterName}");
                 ShowUnboxingInventoryPage();
@@ -6004,13 +6005,13 @@ namespace UnturnedBlackout.Instances
 
         public void UnboxInventoryCase(int selected)
         {
-            if (!UnboxInventoryPages.TryGetValue(UnboxingPageID, out PageUnboxInventory page))
+            if (!UnboxInventoryPages.TryGetValue(UnboxingPageID, out var page))
             {
                 Logging.Debug($"Error finding the unbox inventory page with id {UnboxingPageID} for {Player.CharacterName}");
                 return;
             }
 
-            if (!page.Cases.TryGetValue(selected, out PlayerCase @case))
+            if (!page.Cases.TryGetValue(selected, out var @case))
             {
                 Logging.Debug($"Error finding the selected case at id {selected} for page with id {UnboxingPage} for {Player.CharacterName}");
                 return;
@@ -6025,13 +6026,13 @@ namespace UnturnedBlackout.Instances
         private ECaseRarity CalculateCaseRarity(List<(ECaseRarity, int)> weights, int poolSize)
         {
             Logging.Debug($"Calculating reward rarities, found {weights.Count} weights to look from");
-            int randInt = UnityEngine.Random.Range(0, poolSize) + 1;
+            var randInt = UnityEngine.Random.Range(0, poolSize) + 1;
 
             Logging.Debug($"Total Poolsize: {poolSize}, random int: {randInt}");
-            int accumulatedProbability = 0;
-            for (int i = 0; i < weights.Count; i++)
+            var accumulatedProbability = 0;
+            for (var i = 0; i < weights.Count; i++)
             {
-                (ECaseRarity, int) weight = weights[i];
+                var weight = weights[i];
                 Logging.Debug($"i: {i}, rarity: {weight.Item1}, weight: {weight.Item2}");
                 accumulatedProbability += weight.Item2;
                 Logging.Debug($"accumulated probability: {accumulatedProbability}, rand int: {randInt}");
@@ -6045,14 +6046,14 @@ namespace UnturnedBlackout.Instances
         public IEnumerator UnboxCase()
         {
             IsUnboxing = true;
-            if (!PlayerData.CasesSearchByID.TryGetValue(SelectedCaseID, out PlayerCase @case))
+            if (!PlayerData.CasesSearchByID.TryGetValue(SelectedCaseID, out var @case))
             {
                 Logging.Debug($"Error finding selected case with id {SelectedCaseID} for unboxing for {Player.CharacterName}");
                 IsUnboxing = false;
                 yield break;
             }
 
-            if (!Plugin.Instance.Unbox.TryCalculateReward(@case.Case, Player, out Reward reward, out string rewardImage, out string rewardName, out string rewardDesc, out ERarity rewardRarity, out bool isDuplicate, out int duplicateScrapAmount))
+            if (!Plugin.Instance.Unbox.TryCalculateReward(@case.Case, Player, out var reward, out var rewardImage, out var rewardName, out var rewardDesc, out var rewardRarity, out var isDuplicate, out var duplicateScrapAmount))
             {
                 Logging.Debug($"Unable to calculate reward for unboxing case {SelectedCaseID} for {Player.CharacterName}");
                 IsUnboxing = false;
@@ -6060,10 +6061,10 @@ namespace UnturnedBlackout.Instances
             }
 
 
-            int poolSize = 0;
-            foreach ((ECaseRarity, int) weight in @case.Case.Weights) poolSize += weight.Item2;
+            var poolSize = 0;
+            foreach (var weight in @case.Case.Weights) poolSize += weight.Item2;
 
-            for (int i = 0; i <= MAX_ROLLING_CONTENT_PER_CASE; i++)
+            for (var i = 0; i <= MAX_ROLLING_CONTENT_PER_CASE; i++)
             {
                 if (i == 20)
                 {
@@ -6072,7 +6073,7 @@ namespace UnturnedBlackout.Instances
                     continue;
                 }
 
-                ECaseRarity caseRarity = CalculateCaseRarity(@case.Case.Weights, poolSize);
+                var caseRarity = CalculateCaseRarity(@case.Case.Weights, poolSize);
 
                 switch (caseRarity)
                 {
@@ -6091,20 +6092,20 @@ namespace UnturnedBlackout.Instances
                             break;
                         }
 
-                        if (!@case.Case.AvailableSkinsSearchByRarity.TryGetValue(skinRarity, out List<GunSkin> raritySkins))
+                        if (!@case.Case.AvailableSkinsSearchByRarity.TryGetValue(skinRarity, out var raritySkins))
                         {
                             Logging.Debug($"Error getting skins with {skinRarity} for rolling for case with id {SelectedCaseID}");
                             break;
                         }
 
-                        GunSkin randomSkin = raritySkins[UnityEngine.Random.Range(0, raritySkins.Count)];
+                        var randomSkin = raritySkins[UnityEngine.Random.Range(0, raritySkins.Count)];
 
                         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Rolling IMAGE {i}", randomSkin.IconLink);
                         SendRarity("SERVER Unbox Content Rolling", randomSkin.SkinRarity, i);
                         continue;
                 }
 
-                GunSkin randomS = @case.Case.AvailableSkins[UnityEngine.Random.Range(0, @case.Case.AvailableSkins.Count)];
+                var randomS = @case.Case.AvailableSkins[UnityEngine.Random.Range(0, @case.Case.AvailableSkins.Count)];
 
                 EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Rolling IMAGE {i}", randomS.IconLink);
                 SendRarity("SERVER Unbox Content Rolling", randomS.SkinRarity, i);
@@ -6153,10 +6154,10 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Buy Next BUTTON", UnboxStorePages.Count > 1);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Buy Previous BUTTON", UnboxStorePages.Count > 1);
 
-            if (!UnboxStorePages.TryGetValue(1, out PageUnboxStore firstPage))
+            if (!UnboxStorePages.TryGetValue(1, out var firstPage))
             {
                 Logging.Debug($"Unable to find the first unboxing store page for {Player.CharacterName}");
-                for (int i = 0; i <= MAX_CASES_PER_STORE_PAGE; i++)
+                for (var i = 0; i <= MAX_CASES_PER_STORE_PAGE; i++)
                 {
                     EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Buy BUTTON {i}", false);
                 }
@@ -6180,9 +6181,9 @@ namespace UnturnedBlackout.Instances
         {
             UnboxingPageID = page.PageID;
 
-            for (int i = 0; i <= MAX_CASES_PER_STORE_PAGE; i++)
+            for (var i = 0; i <= MAX_CASES_PER_STORE_PAGE; i++)
             {
-                if (!page.Cases.TryGetValue(i, out Case @case))
+                if (!page.Cases.TryGetValue(i, out var @case))
                 {
                     EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Buy BUTTON {i}", false);
                     continue;
@@ -6198,7 +6199,7 @@ namespace UnturnedBlackout.Instances
 
         public void ForwardUnboxingStorePage()
         {
-            if (!UnboxStorePages.TryGetValue(UnboxingPageID + 1, out PageUnboxStore nextPage) && !UnboxStorePages.TryGetValue(1, out nextPage))
+            if (!UnboxStorePages.TryGetValue(UnboxingPageID + 1, out var nextPage) && !UnboxStorePages.TryGetValue(1, out nextPage))
             {
                 Logging.Debug($"Unable to find the next or first page for unboxing store for {Player.CharacterName}");
                 ShowUnboxingStorePage();
@@ -6210,7 +6211,7 @@ namespace UnturnedBlackout.Instances
 
         public void BackwardUnboxingStorePage()
         {
-            if (!UnboxStorePages.TryGetValue(UnboxingPageID - 1, out PageUnboxStore nextPage) && !UnboxStorePages.TryGetValue(UnboxStorePages.Keys.Max(), out nextPage))
+            if (!UnboxStorePages.TryGetValue(UnboxingPageID - 1, out var nextPage) && !UnboxStorePages.TryGetValue(UnboxStorePages.Keys.Max(), out nextPage))
             {
                 Logging.Debug($"Unable to find previous or max page for unboxing store for {Player.CharacterName}");
                 ShowUnboxingStorePage();
@@ -6222,13 +6223,13 @@ namespace UnturnedBlackout.Instances
 
         public void SelectedUnboxingStoreCase(int selected)
         {
-            if (!UnboxStorePages.TryGetValue(UnboxingPageID, out PageUnboxStore page))
+            if (!UnboxStorePages.TryGetValue(UnboxingPageID, out var page))
             {
                 Logging.Debug($"Unable to find the selected page with id {UnboxingPageID} for {Player.CharacterName}");
                 return;
             }
 
-            if (!page.Cases.TryGetValue(selected, out Case @case))
+            if (!page.Cases.TryGetValue(selected, out var @case))
             {
                 Logging.Debug($"Unable to find the case at the selected position {selected} for page with id {UnboxingPageID} for {Player.CharacterName}");
                 return;
@@ -6250,7 +6251,7 @@ namespace UnturnedBlackout.Instances
 
         public void PreviewUnboxingStoreCase()
         {
-            if (!DB.Cases.TryGetValue(SelectedCaseID, out Case @case))
+            if (!DB.Cases.TryGetValue(SelectedCaseID, out var @case))
             {
                 Logging.Debug($"Could'nt find selected case id with id {SelectedCaseID} for preview for {Player.CharacterName}");
                 return;
@@ -6260,8 +6261,8 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Crate EXAMPLE Drop ANIM", true);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Description TEXT", @case.CaseName);
 
-            List<GunSkin> skins = @case.AvailableSkins.Where(k => k.MaxAmount == 0).ToList();
-            for (int i = 0; i <= MAX_PREVIEW_CONTENT_PER_CASE; i++)
+            var skins = @case.AvailableSkins.Where(k => k.MaxAmount == 0).ToList();
+            for (var i = 0; i <= MAX_PREVIEW_CONTENT_PER_CASE; i++)
             {
                 if (i == 18 && @case.Weights.Exists(k => k.Item1 == ECaseRarity.GLOVE || k.Item1 == ECaseRarity.LIMITED_GLOVE))
                 {
@@ -6289,7 +6290,7 @@ namespace UnturnedBlackout.Instances
                     continue;
                 }
 
-                GunSkin skin = skins[i];
+                var skin = skins[i];
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content BUTTON {i}", true);
                 EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content IMAGE {i}", skin.IconLink);
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Name TEXT {i}", skin.SkinName);
@@ -6301,7 +6302,7 @@ namespace UnturnedBlackout.Instances
 
         public void BuyUnboxingStoreCase(ECurrency currency)
         {
-            if (!DB.Cases.TryGetValue(SelectedCaseID, out Case @case))
+            if (!DB.Cases.TryGetValue(SelectedCaseID, out var @case))
             {
                 Logging.Debug($"Could'nt find selected case id with id {SelectedCaseID} for buying case for {Player.CharacterName}");
                 return;
@@ -6313,13 +6314,13 @@ namespace UnturnedBlackout.Instances
 
         public void ConfirmUnboxingStoreCase()
         {
-            if (!DB.Cases.TryGetValue(SelectedCaseID, out Case @case))
+            if (!DB.Cases.TryGetValue(SelectedCaseID, out var @case))
             {
                 Logging.Debug($"Could'nt find selected case id with id {SelectedCaseID} for buying case for {Player.CharacterName}");
                 return;
             }
 
-            int buyPrice = @case.GetBuyPrice(SelectedCaseBuyMethod);
+            var buyPrice = @case.GetBuyPrice(SelectedCaseBuyMethod);
             if (buyPrice > PlayerData.GetCurrency(SelectedCaseBuyMethod))
             {
                 SendNotEnoughCurrencyModal(SelectedCaseBuyMethod);
@@ -6352,7 +6353,7 @@ namespace UnturnedBlackout.Instances
             switch (reward.RewardType)
             {
                 case ERewardType.Card:
-                    if (!DB.Cards.TryGetValue(Convert.ToInt32(reward.RewardValue), out Card card))
+                    if (!DB.Cards.TryGetValue(Convert.ToInt32(reward.RewardValue), out var card))
                     {
                         return false;
                     }
@@ -6361,7 +6362,7 @@ namespace UnturnedBlackout.Instances
                     rewardRarity = card.CardRarity;
                     return true;
                 case ERewardType.GunSkin:
-                    if (!DB.GunSkinsSearchByID.TryGetValue(Convert.ToInt32(reward.RewardValue), out GunSkin skin))
+                    if (!DB.GunSkinsSearchByID.TryGetValue(Convert.ToInt32(reward.RewardValue), out var skin))
                     {
                         return false;
                     }
@@ -6370,7 +6371,7 @@ namespace UnturnedBlackout.Instances
                     rewardRarity = skin.SkinRarity;
                     return true;
                 case ERewardType.Glove:
-                    if (!DB.Gloves.TryGetValue(Convert.ToUInt16(reward.RewardValue), out Glove glove))
+                    if (!DB.Gloves.TryGetValue(Convert.ToUInt16(reward.RewardValue), out var glove))
                     {
                         return false;
                     }
@@ -6379,7 +6380,7 @@ namespace UnturnedBlackout.Instances
                     rewardRarity = glove.GloveRarity;
                     return true;
                 case ERewardType.Gun:
-                    if (!DB.Guns.TryGetValue(Convert.ToUInt16(reward.RewardValue), out Gun gun))
+                    if (!DB.Guns.TryGetValue(Convert.ToUInt16(reward.RewardValue), out var gun))
                     {
                         return false;
                     }
@@ -6388,7 +6389,7 @@ namespace UnturnedBlackout.Instances
                     rewardRarity = gun.GunRarity;
                     return true;
                 case ERewardType.GunCharm:
-                    if (!DB.GunCharms.TryGetValue(Convert.ToUInt16(reward.RewardValue), out GunCharm gunCharm))
+                    if (!DB.GunCharms.TryGetValue(Convert.ToUInt16(reward.RewardValue), out var gunCharm))
                     {
                         return false;
                     }
@@ -6417,9 +6418,9 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary", true);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary XP Toggle", true);
             // Set the current level, xp and next level xp to animate the bar
-            int currentLevel = summary.StartingLevel;
-            int currentXP = summary.StartingXP;
-            int nextLevelXP = DB.Levels.TryGetValue(currentLevel + 1, out XPLevel level) ? level.XPNeeded : 0;
+            var currentLevel = summary.StartingLevel;
+            var currentXP = summary.StartingXP;
+            var nextLevelXP = DB.Levels.TryGetValue(currentLevel + 1, out var level) ? level.XPNeeded : 0;
 
             // Send the filled amount of bar and set the toggle to true and animate the text
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP 1 TEXT", $"Match <color=#AD6816>{summary.MatchXP}</color> XP");
@@ -6431,7 +6432,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Level 1 TEXT", nextLevelXP == 0 ? "MAX" : (currentLevel + 1).ToString("D3"));
             // Animate Match XP
 
-            int boldSpaces = currentXP == 0 ? 1 : Math.Max(1, Math.Min(MAX_SPACES_MATCH_END_SUMMARY, currentXP * MAX_SPACES_MATCH_END_SUMMARY / (nextLevelXP == 0 ? 1 : nextLevelXP)));
+            var boldSpaces = currentXP == 0 ? 1 : Math.Max(1, Math.Min(MAX_SPACES_MATCH_END_SUMMARY, currentXP * MAX_SPACES_MATCH_END_SUMMARY / (nextLevelXP == 0 ? 1 : nextLevelXP)));
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", UIManager.HAIRSPACE_SYMBOL_STRING);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 0", new string(' ', boldSpaces));
             yield return new WaitForSeconds(0.7f);
@@ -6439,7 +6440,7 @@ namespace UnturnedBlackout.Instances
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP 0 TEXT", $"+{summary.MatchXP} XP");
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary XP 0 Toggle", true);
 
-            int b = summary.MatchXP;
+            var b = summary.MatchXP;
             while (nextLevelXP != 0 && (currentXP + b) >= nextLevelXP)
             {
                 // Level has changed
@@ -6461,7 +6462,7 @@ namespace UnturnedBlackout.Instances
                 boldSpaces = 0;
             }
 
-            int highlightedSpaces = Math.Max(1, Math.Min(MAX_SPACES_MATCH_END_SUMMARY - boldSpaces, b * (MAX_SPACES_MATCH_END_SUMMARY - boldSpaces) / (nextLevelXP - currentXP)));
+            var highlightedSpaces = Math.Max(1, Math.Min(MAX_SPACES_MATCH_END_SUMMARY - boldSpaces, b * (MAX_SPACES_MATCH_END_SUMMARY - boldSpaces) / (nextLevelXP - currentXP)));
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", new string(' ', highlightedSpaces));
             currentXP += b;
             yield return new WaitForSeconds(0.7f);

@@ -20,7 +20,7 @@ namespace UnturnedBlackout.Commands
 
         public void Execute(IRocketPlayer caller, string[] command)
         {
-            UnturnedPlayer player = caller as UnturnedPlayer;
+            var player = caller as UnturnedPlayer;
 
             Plugin.Instance.Config.Base.FileData.LobbySpawn = player.Player.transform.position;
             Plugin.Instance.Config.Base.FileData.LobbyYaw = player.Player.transform.eulerAngles.y;

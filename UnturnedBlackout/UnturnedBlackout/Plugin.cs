@@ -8,7 +8,6 @@ using System.Collections;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
-using UnturnedBlackout.Database.Data;
 using UnturnedBlackout.Managers;
 using Logger = Rocket.Core.Logging.Logger;
 
@@ -68,11 +67,11 @@ namespace UnturnedBlackout
 
         private void OnJoining(CSteamID player, ref ESteamRejection? rejectionReason)
         {
-            SteamPending ply = Provider.pending.FirstOrDefault(k => k.playerID.steamID == player);
+            var ply = Provider.pending.FirstOrDefault(k => k.playerID.steamID == player);
             if (ply == null) return;
 
-            string newName = ply.playerID.characterName.ToUnrich().Trim();
-            int chars = newName.Count();
+            var newName = ply.playerID.characterName.ToUnrich().Trim();
+            var chars = newName.Count();
 
             if (chars == 0)
             {
@@ -111,13 +110,13 @@ namespace UnturnedBlackout
                 return;
             }
 
-            Models.Global.GamePlayer gPlayer = Game.GetGamePlayer(player);
+            var gPlayer = Game.GetGamePlayer(player);
             if (gPlayer == null)
             {
                 return;
             }
 
-            GameTypes.Game game = gPlayer.CurrentGame;
+            var game = gPlayer.CurrentGame;
             if (game == null)
             {
                 return;
@@ -168,7 +167,7 @@ namespace UnturnedBlackout
 
         private void OnVoice(PlayerVoice speaker, bool wantsToUseWalkieTalkie, ref bool shouldAllow, ref bool shouldBroadcastOverRadio, ref PlayerVoice.RelayVoiceCullingHandler cullingHandler)
         {
-            if (!DB.PlayerData.TryGetValue(speaker.channel.owner.playerID.steamID, out PlayerData data) || data.IsMuted)
+            if (!DB.PlayerData.TryGetValue(speaker.channel.owner.playerID.steamID, out var data) || data.IsMuted)
             {
                 shouldAllow = false;
                 return;
@@ -205,10 +204,10 @@ namespace UnturnedBlackout
 
             StartCoroutine(Day());
 
-            System.Collections.Generic.IEnumerable<ushort> ignoreMags = Config.Killstreaks.FileData.KillstreaksData.Where(k => k.MagID != 0).Select(k => k.MagID);
-            PropertyInfo shouldFillAfterDetach = typeof(ItemMagazineAsset).GetProperty("shouldFillAfterDetach", BindingFlags.Public | BindingFlags.Instance);
-            System.Collections.Generic.IEnumerable<ItemMagazineAsset> magazines = Assets.find(EAssetType.ITEM).OfType<ItemMagazineAsset>();
-            foreach (ItemMagazineAsset mag in magazines)
+            var ignoreMags = Config.Killstreaks.FileData.KillstreaksData.Where(k => k.MagID != 0).Select(k => k.MagID);
+            var shouldFillAfterDetach = typeof(ItemMagazineAsset).GetProperty("shouldFillAfterDetach", BindingFlags.Public | BindingFlags.Instance);
+            var magazines = Assets.find(EAssetType.ITEM).OfType<ItemMagazineAsset>();
+            foreach (var mag in magazines)
             {
                 if (ignoreMags.Contains(mag.id))
                 {
@@ -218,9 +217,9 @@ namespace UnturnedBlackout
                 shouldFillAfterDetach.GetSetMethod(true).Invoke(mag, new object[] { true });
             }
 
-            FieldInfo isEarpiece = typeof(ItemMaskAsset).GetField("_isEarpiece", BindingFlags.NonPublic | BindingFlags.Instance);
-            System.Collections.Generic.IEnumerable<ItemMaskAsset> masks = Assets.find(EAssetType.ITEM).OfType<ItemMaskAsset>();
-            foreach (ItemMaskAsset mask in masks)
+            var isEarpiece = typeof(ItemMaskAsset).GetField("_isEarpiece", BindingFlags.NonPublic | BindingFlags.Instance);
+            var masks = Assets.find(EAssetType.ITEM).OfType<ItemMaskAsset>();
+            foreach (var mask in masks)
             {
                 isEarpiece.SetValue(mask, true);
             }
