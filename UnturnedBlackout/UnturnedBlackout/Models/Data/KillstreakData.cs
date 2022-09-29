@@ -26,6 +26,5 @@ public class KillstreakData
 
     public KillstreakData()
     {
-
     }
 }

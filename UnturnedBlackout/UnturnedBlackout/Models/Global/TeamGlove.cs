@@ -7,7 +7,6 @@ public class TeamGlove
 
     public TeamGlove()
     {
-
     }
 
     public TeamGlove(int gloveID, ushort itemID)

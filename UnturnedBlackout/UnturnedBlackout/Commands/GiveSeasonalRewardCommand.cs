@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace UnturnedBlackout.Commands;
 
-class GiveSeasonalRewardCommand : IRocketCommand
+internal class GiveSeasonalRewardCommand : IRocketCommand
 {
     public AllowedCaller AllowedCaller => AllowedCaller.Player;
 

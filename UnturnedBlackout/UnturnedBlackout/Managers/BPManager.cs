@@ -32,7 +32,8 @@ public class BPManager
         var bp = player.Data.Battlepass;
         if ((isTop && bp.ClaimedFreeRewards.Contains(tierID)) || (!isTop && bp.ClaimedPremiumRewards.Contains(tierID)))
         {
-            Logging.Debug($"{player.Player.CharacterName} has already claimed the reward for IsTop {isTop} and selected {tierID}, why is the plugin asking again?");
+            Logging.Debug(
+                $"{player.Player.CharacterName} has already claimed the reward for IsTop {isTop} and selected {tierID}, why is the plugin asking again?");
             return;
         }
 
@@ -56,7 +57,7 @@ public class BPManager
             _ = bp.ClaimedPremiumRewards.Add(tierID);
         }
 
-        Plugin.Instance.Reward.GiveRewards(player.SteamID, new List<Reward> { reward });
+        Plugin.Instance.Reward.GiveRewards(player.SteamID, new() { reward });
         Plugin.Instance.UI.OnBattlepassTierUpdated(player.SteamID, tierID);
 
         _ = PendingWork.Remove(player.SteamID);
@@ -105,9 +106,8 @@ public class BPManager
                 });
             }
             else
-            {
-                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.SendNotEnoughCurrencyModal(player.SteamID, ECurrency.Coins));
-            }
+                TaskDispatcher.QueueOnMainThread(() =>
+                    Plugin.Instance.UI.SendNotEnoughCurrencyModal(player.SteamID, ECurrency.Coins));
 
             _ = PendingWork.Remove(player.SteamID);
         });

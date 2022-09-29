@@ -7,7 +7,7 @@ using UnturnedBlackout.Enums;
 
 namespace UnturnedBlackout.Commands;
 
-class AddBoosterCommand : IRocketCommand
+internal class AddBoosterCommand : IRocketCommand
 {
     public AllowedCaller AllowedCaller => AllowedCaller.Both;
 
@@ -55,8 +55,10 @@ class AddBoosterCommand : IRocketCommand
             return;
         }
 
-        _ = Task.Run(async () => await Plugin.Instance.DB.AddPlayerBoosterAsync(steamID, boosterType, boosterValue, expirationDays));
+        _ = Task.Run(async () =>
+            await Plugin.Instance.DB.AddPlayerBoosterAsync(steamID, boosterType, boosterValue, expirationDays));
 
-        Utility.Say(caller, $"<color=green>Added booster with type {boosterType}, value {boosterValue}, days {expirationDays} to {steamID}</color>");
+        Utility.Say(caller,
+            $"<color=green>Added booster with type {boosterType}, value {boosterValue}, days {expirationDays} to {steamID}</color>");
     }
 }

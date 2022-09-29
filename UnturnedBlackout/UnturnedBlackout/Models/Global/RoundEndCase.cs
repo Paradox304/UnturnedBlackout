@@ -7,6 +7,5 @@ public class RoundEndCase
 
     public RoundEndCase()
     {
-
     }
 }

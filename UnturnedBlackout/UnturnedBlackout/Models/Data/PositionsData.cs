@@ -13,8 +13,8 @@ public class PositionsData
 
     public PositionsData()
     {
-        FFASpawnPoints = new List<FFASpawnPoint>();
-        TDMSpawnPoints = new List<TDMSpawnPoint>();
-        CTFSpawnPoints = new List<CTFSpawnPoint>();
+        FFASpawnPoints = new();
+        TDMSpawnPoints = new();
+        CTFSpawnPoints = new();
     }
 }

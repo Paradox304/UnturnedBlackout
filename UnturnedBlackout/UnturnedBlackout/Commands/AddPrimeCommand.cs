@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace UnturnedBlackout.Commands;
 
-class AddPrimeCommand : IRocketCommand
+internal class AddPrimeCommand : IRocketCommand
 {
     public AllowedCaller AllowedCaller => AllowedCaller.Both;
 

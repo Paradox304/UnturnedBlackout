@@ -2,7 +2,6 @@
 
 public class IconsConfig
 {
-
     public string BlacktagsSmallIconLink { get; set; }
     public string PointsSmallIconLink { get; set; }
     public string ScrapSmallIconLink { get; set; }
@@ -25,6 +24,5 @@ public class IconsConfig
 
     public IconsConfig()
     {
-
     }
 }

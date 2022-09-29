@@ -16,7 +16,6 @@ public class CTFSpawnPoint
 
     public CTFSpawnPoint()
     {
-
     }
 
     public CTFSpawnPoint(int locationID, int groupID, float x, float y, float z, float yaw, bool isFlagSP)

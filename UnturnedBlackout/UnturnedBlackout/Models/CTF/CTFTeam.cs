@@ -33,7 +33,7 @@ public class CTFTeam
         if (!isDummy)
         {
             Info = info;
-            Players = new Dictionary<CSteamID, DateTime>();
+            Players = new();
             Score = 0;
             SpawnPoint = teamID;
             SpawnThreshold = 0;

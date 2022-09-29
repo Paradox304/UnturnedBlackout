@@ -17,7 +17,18 @@ public class Killstreak
     public int LevelRequirement { get; set; }
     public KillstreakData KillstreakInfo { get; set; }
 
-    public Killstreak(int killstreakID, string killstreakName, string killstreakDesc, ERarity killstreakRarity, string iconLink, int killstreakRequired, int buyPrice, int coins, int scrapAmount, int levelRequirement, KillstreakData killstreakInfo)
+    public Killstreak(
+        int killstreakID,
+        string killstreakName,
+        string killstreakDesc,
+        ERarity killstreakRarity,
+        string iconLink,
+        int killstreakRequired,
+        int buyPrice,
+        int coins,
+        int scrapAmount,
+        int levelRequirement,
+        KillstreakData killstreakInfo)
     {
         KillstreakID = killstreakID;
         KillstreakName = killstreakName;

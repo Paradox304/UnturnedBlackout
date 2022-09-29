@@ -16,7 +16,18 @@ public class GunSkin
     public int MaxAmount { get; set; }
     public int UnboxedAmount { get; set; }
 
-    public GunSkin(int iD, Gun gun, ushort skinID, string skinName, string skinDesc, ERarity skinRarity, string patternLink, string iconLink, int scrapAmount, int maxAmount, int unboxedAmount)
+    public GunSkin(
+        int iD,
+        Gun gun,
+        ushort skinID,
+        string skinName,
+        string skinDesc,
+        ERarity skinRarity,
+        string patternLink,
+        string iconLink,
+        int scrapAmount,
+        int maxAmount,
+        int unboxedAmount)
     {
         ID = iD;
         Gun = gun;

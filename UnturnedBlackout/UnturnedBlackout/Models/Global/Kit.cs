@@ -8,7 +8,6 @@ public class Kit
 
     public Kit()
     {
-
     }
 
     public Kit(List<ushort> itemIDs)

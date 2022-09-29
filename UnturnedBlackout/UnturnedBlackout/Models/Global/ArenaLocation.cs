@@ -25,10 +25,24 @@ public class ArenaLocation
 
     public ArenaLocation()
     {
-
     }
 
-    public ArenaLocation(int locationID, string locationName, string imageLink, int navMesh, int blueTeamID, int redTeamID, int fFACount, int tDMCount, int kCCount, int cTFCount, int fFAMinCount, int tDMMinCount, int kCMinCount, int cTFMinCount, float positionCheck)
+    public ArenaLocation(
+        int locationID,
+        string locationName,
+        string imageLink,
+        int navMesh,
+        int blueTeamID,
+        int redTeamID,
+        int fFACount,
+        int tDMCount,
+        int kCCount,
+        int cTFCount,
+        int fFAMinCount,
+        int tDMMinCount,
+        int kCMinCount,
+        int cTFMinCount,
+        float positionCheck)
     {
         LocationID = locationID;
         LocationName = locationName;
@@ -55,7 +69,7 @@ public class ArenaLocation
             EGameType.TDM => TDMCount,
             EGameType.KC => KCCount,
             EGameType.CTF => CTFCount,
-            _ => 0,
+            _ => 0
         };
     }
 
@@ -67,7 +81,7 @@ public class ArenaLocation
             EGameType.TDM => TDMMinCount,
             EGameType.KC => KCMinCount,
             EGameType.CTF => CTFMinCount,
-            _ => 0,
+            _ => 0
         };
     }
 }

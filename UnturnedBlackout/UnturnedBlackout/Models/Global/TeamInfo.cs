@@ -16,6 +16,5 @@ public class TeamInfo
 
     public TeamInfo()
     {
-
     }
 }

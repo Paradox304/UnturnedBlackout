@@ -17,7 +17,17 @@ public class Case
     public List<GunSkin> AvailableSkins { get; set; }
     public Dictionary<ERarity, List<GunSkin>> AvailableSkinsSearchByRarity { get; set; }
 
-    public Case(int caseID, string caseName, string iconLink, ERarity caseRarity, bool isBuyable, int scrapPrice, int coinPrice, List<(ECaseRarity, int)> weights, List<GunSkin> availableSkins, Dictionary<ERarity, List<GunSkin>> availableSkinsSearchByRarity)
+    public Case(
+        int caseID,
+        string caseName,
+        string iconLink,
+        ERarity caseRarity,
+        bool isBuyable,
+        int scrapPrice,
+        int coinPrice,
+        List<(ECaseRarity, int)> weights,
+        List<GunSkin> availableSkins,
+        Dictionary<ERarity, List<GunSkin>> availableSkinsSearchByRarity)
     {
         CaseID = caseID;
         CaseName = caseName;

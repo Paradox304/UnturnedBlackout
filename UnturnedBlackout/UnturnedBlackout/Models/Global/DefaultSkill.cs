@@ -7,7 +7,6 @@ public class DefaultSkill
 
     public DefaultSkill()
     {
-
     }
 
     public DefaultSkill(string skillName, int skillLevel)

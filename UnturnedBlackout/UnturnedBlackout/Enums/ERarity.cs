@@ -12,5 +12,5 @@ public enum ERarity
     YELLOW,
     CYAN,
     NONE,
-    ORANGE,
+    ORANGE
 }

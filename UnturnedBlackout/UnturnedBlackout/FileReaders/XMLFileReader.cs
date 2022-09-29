@@ -19,13 +19,15 @@ public class XmlFileReader<T> : IFileReader<T> where T : class, new()
     public XmlFileReader(string filePath, string urlPath, params Type[] extraTypes)
     {
         if (string.IsNullOrWhiteSpace(filePath))
+        {
             throw new ArgumentNullException(nameof(filePath),
                 "Parameter 'fileName' either null or empty. This is not allowed.");
+        }
 
-        FileData = new T();
+        FileData = new();
         FilePath = Path.ChangeExtension(filePath, "xml");
         URLPath = urlPath;
-        Serializer = new XmlSerializer(typeof(T), extraTypes);
+        Serializer = new(typeof(T), extraTypes);
         Load();
     }
 
@@ -55,7 +57,7 @@ public class XmlFileReader<T> : IFileReader<T> where T : class, new()
         }
         catch (Exception ex)
         {
-            throw new Exception($"Failed to deserialize XML File: {FilePath}", ex);
+            throw new($"Failed to deserialize XML File: {FilePath}", ex);
         }
     }
 
@@ -64,7 +66,7 @@ public class XmlFileReader<T> : IFileReader<T> where T : class, new()
         try
         {
             using HttpClient wc = new();
-            return Task.Run(async Task<string> () => await wc.GetStringAsync(URLPath)).Result;
+            return Task.Run(async Task<string>() => await wc.GetStringAsync(URLPath)).Result;
         }
         catch (Exception ex)
         {
@@ -87,7 +89,7 @@ public class XmlFileReader<T> : IFileReader<T> where T : class, new()
         }
         catch (Exception ex)
         {
-            throw new Exception($"Failed to serialize XML File: {FilePath}", ex);
+            throw new($"Failed to serialize XML File: {FilePath}", ex);
         }
     }
 }

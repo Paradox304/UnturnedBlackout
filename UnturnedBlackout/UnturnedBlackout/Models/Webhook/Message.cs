@@ -10,7 +10,6 @@ public class Message
 
     public Message()
     {
-
     }
 
     public Message(string username, string avatar_url, Embed[] embeds)

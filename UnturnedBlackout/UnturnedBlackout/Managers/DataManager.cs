@@ -12,7 +12,7 @@ public class DataManager
     public DataManager()
     {
         Path = Plugin.Instance.Directory + "/Positions.json";
-        Data = new PositionsData();
+        Data = new();
 
         InitiateData();
     }
@@ -26,9 +26,7 @@ public class DataManager
             SaveJson();
         }
         else
-        {
             LoadJson();
-        }
     }
 
     public void SaveJson()

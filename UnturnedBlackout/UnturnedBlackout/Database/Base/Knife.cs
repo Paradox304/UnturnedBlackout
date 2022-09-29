@@ -18,7 +18,20 @@ public class Knife
     public int MaxAmount { get; set; }
     public int UnboxedAmount { get; set; }
 
-    public Knife(ushort knifeID, string knifeName, string knifeDesc, ERarity knifeRarity, float movementChange, string iconLink, int scrapAmount, int coins, int buyPrice, int levelRequirement, int knifeWeight, int maxAmount, int unboxedAmount)
+    public Knife(
+        ushort knifeID,
+        string knifeName,
+        string knifeDesc,
+        ERarity knifeRarity,
+        float movementChange,
+        string iconLink,
+        int scrapAmount,
+        int coins,
+        int buyPrice,
+        int levelRequirement,
+        int knifeWeight,
+        int maxAmount,
+        int unboxedAmount)
     {
         KnifeID = knifeID;
         KnifeName = knifeName;

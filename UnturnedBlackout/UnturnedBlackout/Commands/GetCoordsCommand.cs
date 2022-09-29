@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace UnturnedBlackout.Commands;
 
-class GetCoordsCommand : IRocketCommand
+internal class GetCoordsCommand : IRocketCommand
 {
     public AllowedCaller AllowedCaller => AllowedCaller.Player;
 

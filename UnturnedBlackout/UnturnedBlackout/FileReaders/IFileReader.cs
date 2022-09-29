@@ -1,6 +1,6 @@
 ﻿namespace UnturnedBlackout.FileReaders;
-public interface IFileReader<out T>
-    where T : class, new()
+
+public interface IFileReader<out T> where T : class, new()
 {
     public T FileData { get; }
 

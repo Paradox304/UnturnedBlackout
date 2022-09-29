@@ -10,6 +10,5 @@ public class TeamKillstreak
 
     public TeamKillstreak()
     {
-
     }
 }

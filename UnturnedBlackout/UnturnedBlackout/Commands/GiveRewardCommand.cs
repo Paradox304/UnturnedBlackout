@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace UnturnedBlackout.Commands;
 
-class GiveRewardCommand : IRocketCommand
+internal class GiveRewardCommand : IRocketCommand
 {
     public AllowedCaller AllowedCaller => AllowedCaller.Both;
 

@@ -191,7 +191,7 @@ public class DatabaseManager
     public DatabaseManager()
     {
         Config = Plugin.Instance.Configuration.Instance;
-        Builder = new MySqlConnectionStringBuilder()
+        Builder = new()
         {
             Server = Config.DatabaseHost,
             Port = Convert.ToUInt32(Config.DatabasePort),
@@ -201,11 +201,11 @@ public class DatabaseManager
             MaximumPoolSize = 500
         };
 
-        CacheRefresher = new Timer(120 * 1000);
+        CacheRefresher = new(120 * 1000);
         CacheRefresher.Elapsed += RefreshData;
 
-        PlayerData = new Dictionary<CSteamID, PlayerData>();
-        PlayerLoadouts = new Dictionary<CSteamID, PlayerLoadout>();
+        PlayerData = new();
+        PlayerLoadouts = new();
 
         IsPendingSeasonalWipe = false;
 
@@ -230,45 +230,120 @@ public class DatabaseManager
             await Conn.OpenAsync();
 
             // BASE DATA
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{GUNS}` ( `GunID` SMALLINT UNSIGNED NOT NULL , `GunName` VARCHAR(255) NOT NULL , `GunDesc` TEXT NOT NULL , `GunType` ENUM('Pistol','SMG','Shotgun','LMG','AR','SNIPER','CARBINE') NOT NULL , `GunRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `MovementChange` DECIMAL(4,3) NOT NULL , `MovementChangeADS` DECIMAL(4,3) NOT NULL , `IconLink` TEXT NOT NULL , `MagAmount` TINYINT NOT NULL , `Coins` INT NOT NULL , `BuyPrice` INT NOT NULL ,  `ScrapAmount` INT NOT NULL , `LevelRequirement` INT NOT NULL , `IsPrimary` BOOLEAN NOT NULL , `DefaultAttachments` TEXT NOT NULL , `LevelXPNeeded` TEXT NOT NULL , `LevelRewards` TEXT NOT NULL , PRIMARY KEY (`GunID`));", Conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{ATTACHMENTS}` ( `AttachmentID` SMALLINT UNSIGNED NOT NULL , `AttachmentName` VARCHAR(255) NOT NULL , `AttachmentDesc` TEXT NOT NULL , `AttachmentPros` TEXT NOT NULL , `AttachmentCons` TEXT NOT NULL , `AttachmentType` ENUM('Sights','Grip','Barrel','Magazine') NOT NULL , `AttachmentRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `MovementChange` DECIMAL(4,3) NOT NULL , `MovementChangeADS` DECIMAL (4,3) NOT NULL , `IconLink` TEXT NOT NULL , `BuyPrice` INT NOT NULL , `Coins` INT NOT NULL , PRIMARY KEY (`AttachmentID`));", Conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{GUNS_SKINS}` ( `ID` INT NOT NULL AUTO_INCREMENT , `GunID` SMALLINT UNSIGNED NOT NULL , `SkinID` SMALLINT UNSIGNED NOT NULL , `SkinName` VARCHAR(255) NOT NULL , `SkinDesc` TEXT NOT NULL , `SkinRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `PatternLink` TEXT NOT NULL , `IconLink` TEXT NOT NULL , `ScrapAmount` INT  NOT NULL , `MaxAmount` INT NOT NULL , `UnboxedAmount` INT NOT NULL , CONSTRAINT `ub_gun_id` FOREIGN KEY (`GunID`) REFERENCES `{GUNS}` (`GunID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`ID`));", Conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{GUNS_CHARMS}` ( `CharmID` SMALLINT UNSIGNED NOT NULL , `CharmName` VARCHAR(255) NOT NULL , `CharmDesc` TEXT NOT NULL , `CharmRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `IconLink` TEXT NOT NULL , `BuyPrice` INT NOT NULL , `Coins` INT NOT NULL , `ScrapAmount` INT  NOT NULL , `LevelRequirement` INT NOT NULL , `AuthorCredits` TEXT NOT NULL , PRIMARY KEY (`CharmID`));", Conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{KNIVES}` ( `KnifeID` SMALLINT UNSIGNED NOT NULL , `KnifeName` VARCHAR(255) NOT NULL , `KnifeDesc` TEXT NOT NULL , `KnifeRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `MovementChange` DECIMAL(4,3) NOT NULL , `IconLink` TEXT NOT NULL , `ScrapAmount` INT NOT NULL , `Coins` INT NOT NULL , `BuyPrice` INT NOT NULL , `LevelRequirement` INT NOT NULL , `KnifeWeight` INT NOT NULL , `MaxAmount` INT NOT NULL , `UnboxedAmount` INT NOT NULL , PRIMARY KEY (`KnifeID`));", Conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PERKS}` ( `PerkID` INT NOT NULL , `PerkName` VARCHAR(255) NOT NULL , `PerkDesc` TEXT NOT NULL , `PerkType` ENUM('1','2','3') NOT NULL , `PerkRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `IconLink` TEXT NOT NULL , `SkillType` TEXT NOT NULL , `SkillLevel` INT NOT NULL , `Coins` INT NOT NULL , `BuyPrice` INT NOT NULL , `ScrapAmount` INT  NOT NULL , `LevelRequirement` INT NOT NULL , PRIMARY KEY (`PerkID`));", Conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{GADGETS}` ( `GadgetID` SMALLINT UNSIGNED NOT NULL , `GadgetName` VARCHAR(255) NOT NULL , `GadgetDesc` TEXT NOT NULL , `GadgetRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `IconLink` TEXT NOT NULL , `Coins` INT NOT NULL , `BuyPrice` INT NOT NULL , `ScrapAmount` INT NOT NULL , `GiveSeconds` INT  NOT NULL , `LevelRequirement` INT NOT NULL , `IsTactical` BOOLEAN NOT NULL , PRIMARY KEY (`GadgetID`));", Conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{KILLSTREAKS}` ( `KillstreakID` INT NOT NULL , `KillstreakName` VARCHAR(255) NOT NULL , `KillstreakDesc` TEXT NOT NULL , `KillstreakRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `IconLink` TEXT NOT NULL , `KillstreakRequired` INT NOT NULL , `BuyPrice` INT NOT NULL , `Coins` INT  NOT NULL , `ScrapAmount` INT NOT NULL , `LevelRequirement` INT NOT NULL , PRIMARY KEY (`KillstreakID`));", Conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{CARDS}` ( `CardID` INT NOT NULL , `CardName` VARCHAR(255) NOT NULL , `CardDesc` TEXT NOT NULL , `CardRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `IconLink` TEXT NOT NULL , `CardLink` TEXT NOT NULL , `ScrapAmount` INT NOT NULL , `BuyPrice` INT NOT NULL , `Coins` INT NOT NULL , `LevelRequirement` INT NOT NULL , `AuthorCredits` TEXT NOT NULL , PRIMARY KEY (`CardID`));", Conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{GLOVES}` ( `GloveID` INT NOT NULL , `GloveName` VARCHAR(255) NOT NULL , `GloveDesc` TEXT NOT NULL , `GloveRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `IconLink` TEXT NOT NULL , `ScrapAmount` INT NOT NULL , `BuyPrice` INT NOT NULL , `Coins` INT NOT NULL , `LevelRequirement` INT NOT NULL , `GloveWeight` INT NOT NULL , `MaxAmount` INT NOT NULL , `UnboxedAmount` INT NOT NULL , PRIMARY KEY (`GloveID`));", Conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{LEVELS}` ( `Level` INT NOT NULL , `XPNeeded` INT NOT NULL , `IconLinkLarge` TEXT NOT NULL , `IconLinkMedium` TEXT NOT NULL , `IconLinkSmall` TEXT NOT NULL , PRIMARY KEY (`Level`));", Conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{OPTIONS}` ( `DailyLeaderboardWipe` BIGINT NOT NULL , `WeeklyLeaderboardWipe` BIGINT NOT NULL , `DailyLeaderboardRankedRewards` TEXT NOT NULL , `DailyLeaderboardPercentileRewards` TEXT NOT NULL , `WeeklyLeaderboardRankedRewards` TEXT NOT NULL , `WeeklyLeaderboardPercentileRewards` TEXT NOT NULL, `SeasonalLeaderboardRankedRewards` TEXT NOT NULL , `SeasonalLeaderboardPercentileRewards` TEXT NOT NULL , `XPBooster` DECIMAL(6,3) NOT NULL , `BPBooster` DECIMAL(6,3) NOT NULL , `GunXPBooster` DECIMAL(6,3) NOT NULL , `XPBoosterWipe` BIGINT NOT NULL , `BPBoosterWipe` BIGINT NOT NULL , `GunXPBoosterWipe` BIGINT NOT NULL , `GameTips` TEXT NOT NULL , `PrimeRewards` TEXT NOT NULL , `PrimeDailyRewards` TEXT NOT NULL);", Conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{SERVERS}`  ( `IP` TEXT NOT NULL , `Port` TEXT NOT NULL , `ServerName` TEXT NOT NULL , `FriendlyIP` TEXT NOT NULL , `ServerBanner` TEXT NOT NULL , `ServerDesc` TEXT NOT NULL );", Conn).ExecuteScalarAsync(); ;
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{QUESTS}` ( `QuestID` INT NOT NULL AUTO_INCREMENT , `QuestTitle` TEXT NOT NULL , `QuestDesc` TEXT NOT NULL , QuestType ENUM('Kill', 'Death', 'Win', 'FinishMatch', 'MultiKill', 'Killstreak', 'Headshots', 'GadgetsUsed', 'FlagsCaptured', 'FlagsSaved', 'Dogtags', 'Shutdown', 'Domination', 'FlagKiller', 'FlagDenied', 'Revenge', 'FirstKill', 'Longshot', 'Survivor', 'Collector') NOT NULL , `QuestTier` ENUM('Easy1', 'Easy2', 'Easy3', 'Medium1', 'Medium2', 'Hard1') NOT NULL , `QuestConditions` TEXT NOT NULL , `TargetAmount` INT NOT NULL , `XP` INT NOT NULL , PRIMARY KEY (`QuestID`));", Conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{ACHIEVEMENTS}` ( `AchievementID` INT NOT NULL AUTO_INCREMENT , `AchievementType` ENUM('Kill', 'Death', 'Win', 'FinishMatch', 'MultiKill', 'Killstreak', 'Headshots', 'GadgetsUsed', 'FlagsCaptured', 'FlagsSaved', 'Dogtags', 'Shutdown', 'Domination', 'FlagKiller', 'FlagDenied', 'Revenge', 'FirstKill', 'Longshot', 'Survivor', 'Collector') NOT NULL , `AchievementConditions` TEXT NOT NULL , `PageID` INT NOT NULL , PRIMARY KEY (`AchievementID`));", Conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{ACHIEVEMENTS_TIERS}` ( `AchievementID` INT NOT NULL , `TierID` INT NOT NULL , `TierTitle` TEXT NOT NULL , `TierDesc` TEXT NOT NULL , `TierPrevSmall` TEXT NOT NULL , `TierPrevLarge` TEXT NOT NULL , `TargetAmount` INT NOT NULL , `Rewards` TEXT NOT NULL , `RemoveRewards` TEXT NOT NULL , CONSTRAINT `ub_achievement_id` FOREIGN KEY (`AchievementID`) REFERENCES `{ACHIEVEMENTS}` (`AchievementID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`AchievementID`, `TierID`));", Conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{BATTLEPASS}` ( `TierID` INT NOT NULL , `FreeReward` TEXT NOT NULL , `PremiumReward` TEXT NOT NULL , `XP` INT NOT NULL , PRIMARY KEY (`TierID`));", Conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{CASES}` ( `CaseID` INT NOT NULL , `CaseName` TEXT NOT NULL , `IconLink` TEXT NOT NULL , `CaseRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `IsBuyable` BOOLEAN NOT NULL , `ScrapPrice` INT NOT NULL , `CoinPrice` INT NOT NULL , `CommonWeight` INT NOT NULL , `UncommonWeight` INT NOT NULL , `RareWeight` INT NOT NULL , `EpicWeight` INT NOT NULL , `LegendaryWeight` INT NOT NULL , `MythicalWeight` INT NOT NULL , `KnifeWeight` INT NOT NULL , `GloveWeight` INT NOT NULL , `LimitedKnifeWeight` INT NOT NULL , `LimitedGloveWeight` INT NOT NULL , `AvailableSkins` TEXT NOT NULL, PRIMARY KEY (`CaseID`))", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{GUNS}` ( `GunID` SMALLINT UNSIGNED NOT NULL , `GunName` VARCHAR(255) NOT NULL , `GunDesc` TEXT NOT NULL , `GunType` ENUM('Pistol','SMG','Shotgun','LMG','AR','SNIPER','CARBINE') NOT NULL , `GunRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `MovementChange` DECIMAL(4,3) NOT NULL , `MovementChangeADS` DECIMAL(4,3) NOT NULL , `IconLink` TEXT NOT NULL , `MagAmount` TINYINT NOT NULL , `Coins` INT NOT NULL , `BuyPrice` INT NOT NULL ,  `ScrapAmount` INT NOT NULL , `LevelRequirement` INT NOT NULL , `IsPrimary` BOOLEAN NOT NULL , `DefaultAttachments` TEXT NOT NULL , `LevelXPNeeded` TEXT NOT NULL , `LevelRewards` TEXT NOT NULL , PRIMARY KEY (`GunID`));",
+                Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{ATTACHMENTS}` ( `AttachmentID` SMALLINT UNSIGNED NOT NULL , `AttachmentName` VARCHAR(255) NOT NULL , `AttachmentDesc` TEXT NOT NULL , `AttachmentPros` TEXT NOT NULL , `AttachmentCons` TEXT NOT NULL , `AttachmentType` ENUM('Sights','Grip','Barrel','Magazine') NOT NULL , `AttachmentRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `MovementChange` DECIMAL(4,3) NOT NULL , `MovementChangeADS` DECIMAL (4,3) NOT NULL , `IconLink` TEXT NOT NULL , `BuyPrice` INT NOT NULL , `Coins` INT NOT NULL , PRIMARY KEY (`AttachmentID`));",
+                Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{GUNS_SKINS}` ( `ID` INT NOT NULL AUTO_INCREMENT , `GunID` SMALLINT UNSIGNED NOT NULL , `SkinID` SMALLINT UNSIGNED NOT NULL , `SkinName` VARCHAR(255) NOT NULL , `SkinDesc` TEXT NOT NULL , `SkinRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `PatternLink` TEXT NOT NULL , `IconLink` TEXT NOT NULL , `ScrapAmount` INT  NOT NULL , `MaxAmount` INT NOT NULL , `UnboxedAmount` INT NOT NULL , CONSTRAINT `ub_gun_id` FOREIGN KEY (`GunID`) REFERENCES `{GUNS}` (`GunID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`ID`));",
+                Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{GUNS_CHARMS}` ( `CharmID` SMALLINT UNSIGNED NOT NULL , `CharmName` VARCHAR(255) NOT NULL , `CharmDesc` TEXT NOT NULL , `CharmRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `IconLink` TEXT NOT NULL , `BuyPrice` INT NOT NULL , `Coins` INT NOT NULL , `ScrapAmount` INT  NOT NULL , `LevelRequirement` INT NOT NULL , `AuthorCredits` TEXT NOT NULL , PRIMARY KEY (`CharmID`));",
+                Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{KNIVES}` ( `KnifeID` SMALLINT UNSIGNED NOT NULL , `KnifeName` VARCHAR(255) NOT NULL , `KnifeDesc` TEXT NOT NULL , `KnifeRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `MovementChange` DECIMAL(4,3) NOT NULL , `IconLink` TEXT NOT NULL , `ScrapAmount` INT NOT NULL , `Coins` INT NOT NULL , `BuyPrice` INT NOT NULL , `LevelRequirement` INT NOT NULL , `KnifeWeight` INT NOT NULL , `MaxAmount` INT NOT NULL , `UnboxedAmount` INT NOT NULL , PRIMARY KEY (`KnifeID`));",
+                Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{PERKS}` ( `PerkID` INT NOT NULL , `PerkName` VARCHAR(255) NOT NULL , `PerkDesc` TEXT NOT NULL , `PerkType` ENUM('1','2','3') NOT NULL , `PerkRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `IconLink` TEXT NOT NULL , `SkillType` TEXT NOT NULL , `SkillLevel` INT NOT NULL , `Coins` INT NOT NULL , `BuyPrice` INT NOT NULL , `ScrapAmount` INT  NOT NULL , `LevelRequirement` INT NOT NULL , PRIMARY KEY (`PerkID`));",
+                Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{GADGETS}` ( `GadgetID` SMALLINT UNSIGNED NOT NULL , `GadgetName` VARCHAR(255) NOT NULL , `GadgetDesc` TEXT NOT NULL , `GadgetRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `IconLink` TEXT NOT NULL , `Coins` INT NOT NULL , `BuyPrice` INT NOT NULL , `ScrapAmount` INT NOT NULL , `GiveSeconds` INT  NOT NULL , `LevelRequirement` INT NOT NULL , `IsTactical` BOOLEAN NOT NULL , PRIMARY KEY (`GadgetID`));",
+                Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{KILLSTREAKS}` ( `KillstreakID` INT NOT NULL , `KillstreakName` VARCHAR(255) NOT NULL , `KillstreakDesc` TEXT NOT NULL , `KillstreakRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `IconLink` TEXT NOT NULL , `KillstreakRequired` INT NOT NULL , `BuyPrice` INT NOT NULL , `Coins` INT  NOT NULL , `ScrapAmount` INT NOT NULL , `LevelRequirement` INT NOT NULL , PRIMARY KEY (`KillstreakID`));",
+                Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{CARDS}` ( `CardID` INT NOT NULL , `CardName` VARCHAR(255) NOT NULL , `CardDesc` TEXT NOT NULL , `CardRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `IconLink` TEXT NOT NULL , `CardLink` TEXT NOT NULL , `ScrapAmount` INT NOT NULL , `BuyPrice` INT NOT NULL , `Coins` INT NOT NULL , `LevelRequirement` INT NOT NULL , `AuthorCredits` TEXT NOT NULL , PRIMARY KEY (`CardID`));",
+                Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{GLOVES}` ( `GloveID` INT NOT NULL , `GloveName` VARCHAR(255) NOT NULL , `GloveDesc` TEXT NOT NULL , `GloveRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `IconLink` TEXT NOT NULL , `ScrapAmount` INT NOT NULL , `BuyPrice` INT NOT NULL , `Coins` INT NOT NULL , `LevelRequirement` INT NOT NULL , `GloveWeight` INT NOT NULL , `MaxAmount` INT NOT NULL , `UnboxedAmount` INT NOT NULL , PRIMARY KEY (`GloveID`));",
+                Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{LEVELS}` ( `Level` INT NOT NULL , `XPNeeded` INT NOT NULL , `IconLinkLarge` TEXT NOT NULL , `IconLinkMedium` TEXT NOT NULL , `IconLinkSmall` TEXT NOT NULL , PRIMARY KEY (`Level`));",
+                Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{OPTIONS}` ( `DailyLeaderboardWipe` BIGINT NOT NULL , `WeeklyLeaderboardWipe` BIGINT NOT NULL , `DailyLeaderboardRankedRewards` TEXT NOT NULL , `DailyLeaderboardPercentileRewards` TEXT NOT NULL , `WeeklyLeaderboardRankedRewards` TEXT NOT NULL , `WeeklyLeaderboardPercentileRewards` TEXT NOT NULL, `SeasonalLeaderboardRankedRewards` TEXT NOT NULL , `SeasonalLeaderboardPercentileRewards` TEXT NOT NULL , `XPBooster` DECIMAL(6,3) NOT NULL , `BPBooster` DECIMAL(6,3) NOT NULL , `GunXPBooster` DECIMAL(6,3) NOT NULL , `XPBoosterWipe` BIGINT NOT NULL , `BPBoosterWipe` BIGINT NOT NULL , `GunXPBoosterWipe` BIGINT NOT NULL , `GameTips` TEXT NOT NULL , `PrimeRewards` TEXT NOT NULL , `PrimeDailyRewards` TEXT NOT NULL);",
+                Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{SERVERS}`  ( `IP` TEXT NOT NULL , `Port` TEXT NOT NULL , `ServerName` TEXT NOT NULL , `FriendlyIP` TEXT NOT NULL , `ServerBanner` TEXT NOT NULL , `ServerDesc` TEXT NOT NULL );",
+                Conn).ExecuteScalarAsync();
+            ;
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{QUESTS}` ( `QuestID` INT NOT NULL AUTO_INCREMENT , `QuestTitle` TEXT NOT NULL , `QuestDesc` TEXT NOT NULL , QuestType ENUM('Kill', 'Death', 'Win', 'FinishMatch', 'MultiKill', 'Killstreak', 'Headshots', 'GadgetsUsed', 'FlagsCaptured', 'FlagsSaved', 'Dogtags', 'Shutdown', 'Domination', 'FlagKiller', 'FlagDenied', 'Revenge', 'FirstKill', 'Longshot', 'Survivor', 'Collector') NOT NULL , `QuestTier` ENUM('Easy1', 'Easy2', 'Easy3', 'Medium1', 'Medium2', 'Hard1') NOT NULL , `QuestConditions` TEXT NOT NULL , `TargetAmount` INT NOT NULL , `XP` INT NOT NULL , PRIMARY KEY (`QuestID`));",
+                Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{ACHIEVEMENTS}` ( `AchievementID` INT NOT NULL AUTO_INCREMENT , `AchievementType` ENUM('Kill', 'Death', 'Win', 'FinishMatch', 'MultiKill', 'Killstreak', 'Headshots', 'GadgetsUsed', 'FlagsCaptured', 'FlagsSaved', 'Dogtags', 'Shutdown', 'Domination', 'FlagKiller', 'FlagDenied', 'Revenge', 'FirstKill', 'Longshot', 'Survivor', 'Collector') NOT NULL , `AchievementConditions` TEXT NOT NULL , `PageID` INT NOT NULL , PRIMARY KEY (`AchievementID`));",
+                Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{ACHIEVEMENTS_TIERS}` ( `AchievementID` INT NOT NULL , `TierID` INT NOT NULL , `TierTitle` TEXT NOT NULL , `TierDesc` TEXT NOT NULL , `TierPrevSmall` TEXT NOT NULL , `TierPrevLarge` TEXT NOT NULL , `TargetAmount` INT NOT NULL , `Rewards` TEXT NOT NULL , `RemoveRewards` TEXT NOT NULL , CONSTRAINT `ub_achievement_id` FOREIGN KEY (`AchievementID`) REFERENCES `{ACHIEVEMENTS}` (`AchievementID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`AchievementID`, `TierID`));",
+                Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{BATTLEPASS}` ( `TierID` INT NOT NULL , `FreeReward` TEXT NOT NULL , `PremiumReward` TEXT NOT NULL , `XP` INT NOT NULL , PRIMARY KEY (`TierID`));",
+                Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{CASES}` ( `CaseID` INT NOT NULL , `CaseName` TEXT NOT NULL , `IconLink` TEXT NOT NULL , `CaseRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `IsBuyable` BOOLEAN NOT NULL , `ScrapPrice` INT NOT NULL , `CoinPrice` INT NOT NULL , `CommonWeight` INT NOT NULL , `UncommonWeight` INT NOT NULL , `RareWeight` INT NOT NULL , `EpicWeight` INT NOT NULL , `LegendaryWeight` INT NOT NULL , `MythicalWeight` INT NOT NULL , `KnifeWeight` INT NOT NULL , `GloveWeight` INT NOT NULL , `LimitedKnifeWeight` INT NOT NULL , `LimitedGloveWeight` INT NOT NULL , `AvailableSkins` TEXT NOT NULL, PRIMARY KEY (`CaseID`))",
+                Conn).ExecuteScalarAsync();
 
             // PLAYERS DATA
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `SteamName` TEXT NOT NULL , `AvatarLink` VARCHAR(200) NOT NULL , `CountryCode` TEXT NOT NULL , `HideFlag` BOOLEAN NOT NULL DEFAULT FALSE , `XP` INT NOT NULL DEFAULT '0' , `Level` INT NOT NULL DEFAULT '1' , `Credits` INT NOT NULL DEFAULT '0' , `Scrap` INT NOT NULL DEFAULT '0' , `Coins` INT NOT NULL DEFAULT '0' , `Kills` INT NOT NULL DEFAULT '0' , `HeadshotKills` INT NOT NULL DEFAULT '0' , `HighestKillstreak` INT NOT NULL DEFAULT '0' , `HighestMultiKills` INT NOT NULL DEFAULT '0' , `KillsConfirmed` INT NOT NULL DEFAULT '0' , `KillsDenied` INT NOT NULL DEFAULT '0' , `FlagsCaptured` INT NOT NULL DEFAULT '0' , `FlagsSaved` INT NOT NULL DEFAULT '0' , `AreasTaken` INT NOT NULL DEFAULT '0' , `Deaths` INT NOT NULL DEFAULT '0' , `Music` BOOLEAN NOT NULL DEFAULT TRUE , `IsMuted` BOOLEAN NOT NULL DEFAULT FALSE , `MuteExpiry` BIGINT NOT NULL DEFAULT '1' , `HasBattlepass` BOOLEAN NOT NULL DEFAULT FALSE , `XPBooster` DECIMAL(6,3) NOT NULL DEFAULT '0' , `BPBooster` DECIMAL(6,3) NOT NULL DEFAULT '0' , `GunXPBooster` DECIMAL(6,3) NOT NULL DEFAULT '0' , `HasPrime` BOOLEAN NOT NULL DEFAULT FALSE , `PrimeExpiry` BIGINT NOT NULL DEFAULT '1' , `PrimeLastDailyReward` BIGINT NOT NULL DEFAULT '1' ,  PRIMARY KEY (`SteamID`));", Conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_LEADERBOARD_DAILY}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `Kills` INT NOT NULL DEFAULT '0' , `HeadshotKills` INT NOT NULL DEFAULT '0' , `Deaths` INT NOT NULL DEFAULT '0' , CONSTRAINT `ub_steam_id_11` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID`));", Conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_LEADERBOARD_WEEKLY}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `Kills` INT NOT NULL DEFAULT '0' , `HeadshotKills` INT NOT NULL DEFAULT '0' , `Deaths` INT NOT NULL DEFAULT '0' , CONSTRAINT `ub_steam_id_12` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID`));", Conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_LEADERBOARD_SEASONAL}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `Kills` INT NOT NULL DEFAULT '0' , `HeadshotKills` INT NOT NULL DEFAULT '0' , `Deaths` INT NOT NULL DEFAULT '0' , CONSTRAINT `ub_steam_id_13` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID`));", Conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_GUNS}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `GunID` SMALLINT UNSIGNED NOT NULL , `Level` INT NOT NULL , `XP` INT NOT NULL , `GunKills` INT NOT NULL , `IsBought` BOOLEAN NOT NULL , `IsUnlocked` BOOLEAN NOT NULL DEFAULT False , `Attachments` TEXT NOT NULL , CONSTRAINT `ub_steam_id` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_gun_id_1` FOREIGN KEY (`GunID`) REFERENCES `{GUNS}` (`GunID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `GunID`));", Conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_GUNS_SKINS}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `SkinIDs` TEXT NOT NULL , CONSTRAINT `ub_steam_id_1` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID`));", Conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_GUNS_CHARMS}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `CharmID` SMALLINT UNSIGNED NOT NULL , `IsBought` BOOLEAN NOT NULL , `IsUnlocked` BOOLEAN NOT NULL DEFAULT False , CONSTRAINT `ub_steam_id_10` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_charm_id` FOREIGN KEY (`CharmID`) REFERENCES `{GUNS_CHARMS}` (`CharmID`) ON DELETE CASCADE ON UPDATE CASCADE , Primary Key (`SteamID`, `CharmID`));", Conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_KNIVES}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `KnifeID` SMALLINT UNSIGNED NOT NULL , `KnifeKills` INT NOT NULL , `IsBought` BOOLEAN NOT NULL , `IsUnlocked` BOOLEAN NOT NULL DEFAULT False , CONSTRAINT `ub_steam_id_2` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_knife_id` FOREIGN KEY (`KnifeID`) REFERENCES `{KNIVES}` (`KnifeID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `KnifeID`));", Conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_PERKS}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `PerkID` INT NOT NULL , `IsBought` BOOLEAN NOT NULL , `IsUnlocked` BOOLEAN NOT NULL DEFAULT False , CONSTRAINT `ub_steam_id_4` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_perk_id` FOREIGN KEY (`PerkID`) REFERENCES `{PERKS}` (`PerkID`) ON DELETE CASCADE ON UPDATE CASCADE, PRIMARY KEY (`SteamID` , `PerkID`));", Conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_GADGETS}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `GadgetID` SMALLINT UNSIGNED NOT NULL , `GadgetKills` INT NOT NULL , `IsBought` BOOLEAN NOT NULL , `IsUnlocked` BOOLEAN NOT NULL DEFAULT False , CONSTRAINT `ub_steam_id_5` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_gadget_id` FOREIGN KEY (`GadgetID`) REFERENCES `{GADGETS}` (`GadgetID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `GadgetID`));", Conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_KILLSTREAKS}` (`SteamID` BIGINT UNSIGNED NOT NULL , `KillstreakID` INT NOT NULl , `KillstreakKills` INT NOT NULL , `IsBought` BOOLEAN NOT NULL , `IsUnlocked` BOOLEAN NOT NULL DEFAULT False , CONSTRAINT `ub_steam_id_6` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_killstreak_id` FOREIGN KEY (`KillstreakID`) REFERENCES `{KILLSTREAKS}` (`KillstreakID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `KillstreakID`));", Conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_CARDS}` (`SteamID` BIGINT UNSIGNED NOT NULL , `CardID` INT NOT NULL , `IsBought` BOOLEAN NOT NULL , `IsUnlocked` BOOLEAN NOT NULL DEFAULT False , CONSTRAINT `ub_steam_id_7` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_card_id` FOREIGN KEY (`CardID`) REFERENCES `{CARDS}` (`CardID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `CardID`));", Conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_GLOVES}` (`SteamID` BIGINT UNSIGNED NOT NULL , `GloveID` INT NOT NULL , `IsBought` BOOLEAN NOT NULl , `IsUnlocked` BOOLEAN NOT NULL DEFAULT False , CONSTRAINT `ub_steam_id_8` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_glove_id` FOREIGN KEY (`GloveID`) REFERENCES `{GLOVES}` (`GloveID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `GloveID`));", Conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_LOADOUTS}` (`SteamID` BIGINT UNSIGNED NOT NULL , `LoadoutID` INT NOT NULL , `IsActive` BOOLEAN NOT NULL , `Loadout` TEXT NOT NULL , CONSTRAINT `ub_steam_id_9` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID`, `LoadoutID`));", Conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_QUESTS}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `QuestID` INT NOT NULL , `Amount` INT NOT NULL , `QuestEnd` BIGINT NOT NULL , CONSTRAINT `ub_steam_id_14` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_quest_id` FOREIGN KEY (`QuestID`) REFERENCES `{QUESTS}` (`QuestID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `QuestID`));", Conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_ACHIEVEMENTS}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `AchievementID` INT NOT NULL , `CurrentTier` INT NOT NULL DEFAULT '0' , `Amount` INT NOT NULL DEFAULT '0' , CONSTRAINT `ub_steam_id_15` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_achievement_id_2` FOREIGN KEY (`AchievementID`) REFERENCES `{ACHIEVEMENTS}` (`AchievementID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID`, `AchievementID`));", Conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_BATTLEPASS}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `CurrentTier` INT NOT NULL DEFAULT '1' , `XP` INT NOT NULL DEFAULT '0', `ClaimedFreeRewards` TEXT NOT NULL , `ClaimedPremiumRewards` TEXT NOT NULL , CONSTRAINT `ub_steam_id_16` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID`));", Conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_CASES}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `CaseID` INT NOT NULL , `Amount` INT NOT NULL , CONSTRAINT `ub_steam_id_17` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_case_id` FOREIGN KEY (`CaseID`) REFERENCES `{CASES}` (`CaseID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `CaseID`));", Conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_BOOSTERS}` (`SteamID` BIGINT UNSIGNED NOT NULL , `BoosterType` ENUM('XP','BPXP','GUNXP') NOT NULL , `BoosterValue` DECIMAL(6,3) NOT NULL , `BoosterExpiration` BIGINT NOT NULL , CONSTRAINT `ub_steam_id_18` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `BoosterType` , `BoosterValue`));", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{PLAYERS}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `SteamName` TEXT NOT NULL , `AvatarLink` VARCHAR(200) NOT NULL , `CountryCode` TEXT NOT NULL , `HideFlag` BOOLEAN NOT NULL DEFAULT FALSE , `XP` INT NOT NULL DEFAULT '0' , `Level` INT NOT NULL DEFAULT '1' , `Credits` INT NOT NULL DEFAULT '0' , `Scrap` INT NOT NULL DEFAULT '0' , `Coins` INT NOT NULL DEFAULT '0' , `Kills` INT NOT NULL DEFAULT '0' , `HeadshotKills` INT NOT NULL DEFAULT '0' , `HighestKillstreak` INT NOT NULL DEFAULT '0' , `HighestMultiKills` INT NOT NULL DEFAULT '0' , `KillsConfirmed` INT NOT NULL DEFAULT '0' , `KillsDenied` INT NOT NULL DEFAULT '0' , `FlagsCaptured` INT NOT NULL DEFAULT '0' , `FlagsSaved` INT NOT NULL DEFAULT '0' , `AreasTaken` INT NOT NULL DEFAULT '0' , `Deaths` INT NOT NULL DEFAULT '0' , `Music` BOOLEAN NOT NULL DEFAULT TRUE , `IsMuted` BOOLEAN NOT NULL DEFAULT FALSE , `MuteExpiry` BIGINT NOT NULL DEFAULT '1' , `HasBattlepass` BOOLEAN NOT NULL DEFAULT FALSE , `XPBooster` DECIMAL(6,3) NOT NULL DEFAULT '0' , `BPBooster` DECIMAL(6,3) NOT NULL DEFAULT '0' , `GunXPBooster` DECIMAL(6,3) NOT NULL DEFAULT '0' , `HasPrime` BOOLEAN NOT NULL DEFAULT FALSE , `PrimeExpiry` BIGINT NOT NULL DEFAULT '1' , `PrimeLastDailyReward` BIGINT NOT NULL DEFAULT '1' ,  PRIMARY KEY (`SteamID`));",
+                Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{PLAYERS_LEADERBOARD_DAILY}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `Kills` INT NOT NULL DEFAULT '0' , `HeadshotKills` INT NOT NULL DEFAULT '0' , `Deaths` INT NOT NULL DEFAULT '0' , CONSTRAINT `ub_steam_id_11` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID`));",
+                Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{PLAYERS_LEADERBOARD_WEEKLY}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `Kills` INT NOT NULL DEFAULT '0' , `HeadshotKills` INT NOT NULL DEFAULT '0' , `Deaths` INT NOT NULL DEFAULT '0' , CONSTRAINT `ub_steam_id_12` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID`));",
+                Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{PLAYERS_LEADERBOARD_SEASONAL}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `Kills` INT NOT NULL DEFAULT '0' , `HeadshotKills` INT NOT NULL DEFAULT '0' , `Deaths` INT NOT NULL DEFAULT '0' , CONSTRAINT `ub_steam_id_13` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID`));",
+                Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{PLAYERS_GUNS}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `GunID` SMALLINT UNSIGNED NOT NULL , `Level` INT NOT NULL , `XP` INT NOT NULL , `GunKills` INT NOT NULL , `IsBought` BOOLEAN NOT NULL , `IsUnlocked` BOOLEAN NOT NULL DEFAULT False , `Attachments` TEXT NOT NULL , CONSTRAINT `ub_steam_id` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_gun_id_1` FOREIGN KEY (`GunID`) REFERENCES `{GUNS}` (`GunID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `GunID`));",
+                Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{PLAYERS_GUNS_SKINS}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `SkinIDs` TEXT NOT NULL , CONSTRAINT `ub_steam_id_1` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID`));",
+                Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{PLAYERS_GUNS_CHARMS}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `CharmID` SMALLINT UNSIGNED NOT NULL , `IsBought` BOOLEAN NOT NULL , `IsUnlocked` BOOLEAN NOT NULL DEFAULT False , CONSTRAINT `ub_steam_id_10` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_charm_id` FOREIGN KEY (`CharmID`) REFERENCES `{GUNS_CHARMS}` (`CharmID`) ON DELETE CASCADE ON UPDATE CASCADE , Primary Key (`SteamID`, `CharmID`));",
+                Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{PLAYERS_KNIVES}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `KnifeID` SMALLINT UNSIGNED NOT NULL , `KnifeKills` INT NOT NULL , `IsBought` BOOLEAN NOT NULL , `IsUnlocked` BOOLEAN NOT NULL DEFAULT False , CONSTRAINT `ub_steam_id_2` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_knife_id` FOREIGN KEY (`KnifeID`) REFERENCES `{KNIVES}` (`KnifeID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `KnifeID`));",
+                Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{PLAYERS_PERKS}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `PerkID` INT NOT NULL , `IsBought` BOOLEAN NOT NULL , `IsUnlocked` BOOLEAN NOT NULL DEFAULT False , CONSTRAINT `ub_steam_id_4` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_perk_id` FOREIGN KEY (`PerkID`) REFERENCES `{PERKS}` (`PerkID`) ON DELETE CASCADE ON UPDATE CASCADE, PRIMARY KEY (`SteamID` , `PerkID`));",
+                Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{PLAYERS_GADGETS}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `GadgetID` SMALLINT UNSIGNED NOT NULL , `GadgetKills` INT NOT NULL , `IsBought` BOOLEAN NOT NULL , `IsUnlocked` BOOLEAN NOT NULL DEFAULT False , CONSTRAINT `ub_steam_id_5` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_gadget_id` FOREIGN KEY (`GadgetID`) REFERENCES `{GADGETS}` (`GadgetID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `GadgetID`));",
+                Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{PLAYERS_KILLSTREAKS}` (`SteamID` BIGINT UNSIGNED NOT NULL , `KillstreakID` INT NOT NULl , `KillstreakKills` INT NOT NULL , `IsBought` BOOLEAN NOT NULL , `IsUnlocked` BOOLEAN NOT NULL DEFAULT False , CONSTRAINT `ub_steam_id_6` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_killstreak_id` FOREIGN KEY (`KillstreakID`) REFERENCES `{KILLSTREAKS}` (`KillstreakID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `KillstreakID`));",
+                Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{PLAYERS_CARDS}` (`SteamID` BIGINT UNSIGNED NOT NULL , `CardID` INT NOT NULL , `IsBought` BOOLEAN NOT NULL , `IsUnlocked` BOOLEAN NOT NULL DEFAULT False , CONSTRAINT `ub_steam_id_7` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_card_id` FOREIGN KEY (`CardID`) REFERENCES `{CARDS}` (`CardID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `CardID`));",
+                Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{PLAYERS_GLOVES}` (`SteamID` BIGINT UNSIGNED NOT NULL , `GloveID` INT NOT NULL , `IsBought` BOOLEAN NOT NULl , `IsUnlocked` BOOLEAN NOT NULL DEFAULT False , CONSTRAINT `ub_steam_id_8` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_glove_id` FOREIGN KEY (`GloveID`) REFERENCES `{GLOVES}` (`GloveID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `GloveID`));",
+                Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{PLAYERS_LOADOUTS}` (`SteamID` BIGINT UNSIGNED NOT NULL , `LoadoutID` INT NOT NULL , `IsActive` BOOLEAN NOT NULL , `Loadout` TEXT NOT NULL , CONSTRAINT `ub_steam_id_9` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID`, `LoadoutID`));",
+                Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{PLAYERS_QUESTS}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `QuestID` INT NOT NULL , `Amount` INT NOT NULL , `QuestEnd` BIGINT NOT NULL , CONSTRAINT `ub_steam_id_14` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_quest_id` FOREIGN KEY (`QuestID`) REFERENCES `{QUESTS}` (`QuestID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `QuestID`));",
+                Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{PLAYERS_ACHIEVEMENTS}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `AchievementID` INT NOT NULL , `CurrentTier` INT NOT NULL DEFAULT '0' , `Amount` INT NOT NULL DEFAULT '0' , CONSTRAINT `ub_steam_id_15` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_achievement_id_2` FOREIGN KEY (`AchievementID`) REFERENCES `{ACHIEVEMENTS}` (`AchievementID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID`, `AchievementID`));",
+                Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{PLAYERS_BATTLEPASS}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `CurrentTier` INT NOT NULL DEFAULT '1' , `XP` INT NOT NULL DEFAULT '0', `ClaimedFreeRewards` TEXT NOT NULL , `ClaimedPremiumRewards` TEXT NOT NULL , CONSTRAINT `ub_steam_id_16` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID`));",
+                Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{PLAYERS_CASES}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `CaseID` INT NOT NULL , `Amount` INT NOT NULL , CONSTRAINT `ub_steam_id_17` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_case_id` FOREIGN KEY (`CaseID`) REFERENCES `{CASES}` (`CaseID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `CaseID`));",
+                Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{PLAYERS_BOOSTERS}` (`SteamID` BIGINT UNSIGNED NOT NULL , `BoosterType` ENUM('XP','BPXP','GUNXP') NOT NULL , `BoosterValue` DECIMAL(6,3) NOT NULL , `BoosterExpiration` BIGINT NOT NULL , CONSTRAINT `ub_steam_id_18` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `BoosterType` , `BoosterValue`));",
+                Conn).ExecuteScalarAsync();
         }
         catch (Exception ex)
         {
@@ -300,61 +375,40 @@ public class DatabaseManager
 
             Dictionary<int, List<AnimationItemUnlock>> itemsSearchByLevel = new();
 
-            var rdr = (MySqlDataReader)await new MySqlCommand($"SELECT `AttachmentID`, `AttachmentName`, `AttachmentDesc`, `AttachmentPros` , `AttachmentCons` , `AttachmentType`-1, `AttachmentRarity`, `MovementChange`, `MovementChangeADS`, `IconLink`, `BuyPrice`, `Coins` FROM `{ATTACHMENTS}`;", Conn).ExecuteReaderAsync();
+            var rdr = (MySqlDataReader)await new MySqlCommand(
+                $"SELECT `AttachmentID`, `AttachmentName`, `AttachmentDesc`, `AttachmentPros` , `AttachmentCons` , `AttachmentType`-1, `AttachmentRarity`, `MovementChange`, `MovementChangeADS`, `IconLink`, `BuyPrice`, `Coins` FROM `{ATTACHMENTS}`;",
+                Conn).ExecuteReaderAsync();
             try
             {
                 Dictionary<ushort, GunAttachment> gunAttachments = new();
                 while (await rdr.ReadAsync())
                 {
-                    if (!ushort.TryParse(rdr[0].ToString(), out var attachmentID))
-                    {
-                        continue;
-                    }
+                    if (!ushort.TryParse(rdr[0].ToString(), out var attachmentID)) continue;
 
                     var attachmentName = rdr[1].ToString();
                     var attachmentDesc = rdr[2].ToString();
                     var attachmentPros = rdr[3].ToString().Split(',').Where(k => !string.IsNullOrEmpty(k)).ToList();
                     var attachmentCons = rdr[4].ToString().Split(',').Where(k => !string.IsNullOrEmpty(k)).ToList();
-                    if (!int.TryParse(rdr[5].ToString(), out var attachmentTypeInt))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[5].ToString(), out var attachmentTypeInt)) continue;
 
                     var attachmentType = (EAttachment)attachmentTypeInt;
-                    if (!Enum.TryParse(rdr[6].ToString(), true, out ERarity rarity))
-                    {
-                        continue;
-                    }
+                    if (!Enum.TryParse(rdr[6].ToString(), true, out ERarity rarity)) continue;
 
-                    if (!float.TryParse(rdr[7].ToString(), out var movementChange))
-                    {
-                        continue;
-                    }
+                    if (!float.TryParse(rdr[7].ToString(), out var movementChange)) continue;
 
-                    if (!float.TryParse(rdr[8].ToString(), out var movementChangeADS))
-                    {
-                        continue;
-                    }
+                    if (!float.TryParse(rdr[8].ToString(), out var movementChangeADS)) continue;
 
                     var iconLink = rdr[9].ToString();
-                    if (!int.TryParse(rdr[10].ToString(), out var buyPrice))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[10].ToString(), out var buyPrice)) continue;
 
-                    if (!int.TryParse(rdr[11].ToString(), out var coins))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[11].ToString(), out var coins)) continue;
 
                     if (!gunAttachments.ContainsKey(attachmentID))
-                    {
-                        gunAttachments.Add(attachmentID, new GunAttachment(attachmentID, attachmentName, attachmentDesc, attachmentPros, attachmentCons, attachmentType, rarity, movementChange, movementChangeADS, iconLink, buyPrice, coins));
-                    }
+                        gunAttachments.Add(attachmentID,
+                            new(attachmentID, attachmentName, attachmentDesc, attachmentPros, attachmentCons,
+                                attachmentType, rarity, movementChange, movementChangeADS, iconLink, buyPrice, coins));
                     else
-                    {
                         Logging.Debug($"Found a duplicate attachment with id {attachmentID}, ignoring this");
-                    }
                 }
 
                 Logging.Debug($"Successfully read {gunAttachments.Count} attachments from the table");
@@ -371,82 +425,50 @@ public class DatabaseManager
             }
 
             Logging.Debug("Reading guns from the base data");
-            rdr = (MySqlDataReader)await new MySqlCommand($"SELECT `GunID`, `GunName`, `GunDesc`, `GunType`-1, `GunRarity`, `MovementChange`, `MovementChangeADS`, `IconLink`, `MagAmount`, `Coins`, `BuyPrice`, `ScrapAmount`, `LevelRequirement`, `IsPrimary`, `DefaultAttachments`, `LevelXPNeeded`, `LevelRewards` FROM `{GUNS}`;", Conn).ExecuteReaderAsync();
+            rdr = (MySqlDataReader)await new MySqlCommand(
+                $"SELECT `GunID`, `GunName`, `GunDesc`, `GunType`-1, `GunRarity`, `MovementChange`, `MovementChangeADS`, `IconLink`, `MagAmount`, `Coins`, `BuyPrice`, `ScrapAmount`, `LevelRequirement`, `IsPrimary`, `DefaultAttachments`, `LevelXPNeeded`, `LevelRewards` FROM `{GUNS}`;",
+                Conn).ExecuteReaderAsync();
             try
             {
                 Dictionary<ushort, Gun> guns = new();
                 while (await rdr.ReadAsync())
                 {
-                    if (!ushort.TryParse(rdr[0].ToString(), out var gunID))
-                    {
-                        continue;
-                    }
+                    if (!ushort.TryParse(rdr[0].ToString(), out var gunID)) continue;
 
                     var gunName = rdr[1].ToString();
                     var gunDesc = rdr[2].ToString();
-                    if (!byte.TryParse(rdr[3].ToString(), out var gunTypeInt))
-                    {
-                        continue;
-                    }
+                    if (!byte.TryParse(rdr[3].ToString(), out var gunTypeInt)) continue;
 
                     var gunType = (EGun)gunTypeInt;
-                    if (!Enum.TryParse(rdr[4].ToString(), true, out ERarity rarity))
-                    {
-                        continue;
-                    }
+                    if (!Enum.TryParse(rdr[4].ToString(), true, out ERarity rarity)) continue;
 
-                    if (!float.TryParse(rdr[5].ToString(), out var movementChange))
-                    {
-                        continue;
-                    }
+                    if (!float.TryParse(rdr[5].ToString(), out var movementChange)) continue;
 
-                    if (!float.TryParse(rdr[6].ToString(), out var movementChangeADS))
-                    {
-                        continue;
-                    }
+                    if (!float.TryParse(rdr[6].ToString(), out var movementChangeADS)) continue;
 
                     var iconLink = rdr[7].ToString();
-                    if (!int.TryParse(rdr[8].ToString(), out var magAmount))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[8].ToString(), out var magAmount)) continue;
 
-                    if (!int.TryParse(rdr[9].ToString(), out var coins))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[9].ToString(), out var coins)) continue;
 
-                    if (!int.TryParse(rdr[10].ToString(), out var buyPrice))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[10].ToString(), out var buyPrice)) continue;
 
-                    if (!int.TryParse(rdr[11].ToString(), out var scrapAmount))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[11].ToString(), out var scrapAmount)) continue;
 
-                    if (!int.TryParse(rdr[12].ToString(), out var levelRequirement))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[12].ToString(), out var levelRequirement)) continue;
 
-                    if (!bool.TryParse(rdr[13].ToString(), out var isPrimary))
-                    {
-                        continue;
-                    }
+                    if (!bool.TryParse(rdr[13].ToString(), out var isPrimary)) continue;
 
                     List<GunAttachment> defaultAttachments = new();
                     foreach (var id in rdr[14].GetIntListFromReaderResult())
                     {
                         if (GunAttachments.TryGetValue((ushort)id, out var gunAttachment))
-                        {
                             defaultAttachments.Add(gunAttachment);
-                        }
                         else
                         {
                             if (id != 0)
-                                Logging.Debug($"Could'nt find default attachment with id {id} for gun {gunID} with name {gunName}");
+                                Logging.Debug(
+                                    $"Could'nt find default attachment with id {id} for gun {gunID} with name {gunName}");
                         }
                     }
 
@@ -463,13 +485,15 @@ public class DatabaseManager
 
                         if (!GunAttachments.TryGetValue((ushort)id, out var gunAttachment))
                         {
-                            Logging.Debug($"Could'nt find reward attachment with id {id} at level {levelNeededReward} for gun {gunID} with name {gunName}");
+                            Logging.Debug(
+                                $"Could'nt find reward attachment with id {id} at level {levelNeededReward} for gun {gunID} with name {gunName}");
                             continue;
                         }
 
                         if (rewardAttachmentsInverse.TryGetValue(gunAttachment, out var alreadyRegisteredLevel))
                         {
-                            Logging.Debug($"This reward attachment with id {id} was already registered at level {alreadyRegisteredLevel} (trying to register it again at {levelNeededReward}) --- for gun {gunID} with name {gunName}");
+                            Logging.Debug(
+                                $"This reward attachment with id {id} was already registered at level {alreadyRegisteredLevel} (trying to register it again at {levelNeededReward}) --- for gun {gunID} with name {gunName}");
                             continue;
                         }
 
@@ -479,16 +503,17 @@ public class DatabaseManager
 
                     if (Assets.find(EAssetType.ITEM, gunID) is not ItemGunAsset gunAsset)
                     {
-                        Logging.Debug($"Error finding gun asset of the gun with id {gunID} and name {gunName} ignoring the gun");
+                        Logging.Debug(
+                            $"Error finding gun asset of the gun with id {gunID} and name {gunName} ignoring the gun");
                         continue;
                     }
 
                     var longshotRange = Mathf.Pow(gunAsset.damageFalloffRange * 100, 2) * 1.2f;
-                    Gun gun = new(gunID, gunName, gunDesc, gunType, rarity, movementChange, movementChangeADS, iconLink, magAmount, coins, buyPrice, scrapAmount, levelRequirement, isPrimary, defaultAttachments, rewardAttachments, rewardAttachmentsInverse, levelXPNeeded, longshotRange);
+                    Gun gun = new(gunID, gunName, gunDesc, gunType, rarity, movementChange, movementChangeADS, iconLink,
+                        magAmount, coins, buyPrice, scrapAmount, levelRequirement, isPrimary, defaultAttachments,
+                        rewardAttachments, rewardAttachmentsInverse, levelXPNeeded, longshotRange);
                     if (!guns.ContainsKey(gunID))
-                    {
                         guns.Add(gunID, gun);
-                    }
                     else
                     {
                         Logging.Debug($"Found a duplicate with id {gunID}, ignoring this");
@@ -496,17 +521,13 @@ public class DatabaseManager
                     }
 
                     if (levelRequirement == 0)
-                    {
                         defaultGuns.Add(gun);
-                    }
                     else if (levelRequirement > 0)
                     {
                         if (!itemsSearchByLevel.ContainsKey(levelRequirement))
-                        {
                             itemsSearchByLevel.Add(levelRequirement, new());
-                        }
 
-                        itemsSearchByLevel[levelRequirement].Add(new AnimationItemUnlock(gun.IconLink, "GUN", gun.GunName));
+                        itemsSearchByLevel[levelRequirement].Add(new(gun.IconLink, "GUN", gun.GunName));
                     }
                 }
 
@@ -533,15 +554,9 @@ public class DatabaseManager
 
                 while (await rdr.ReadAsync())
                 {
-                    if (!int.TryParse(rdr[0].ToString(), out var id))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[0].ToString(), out var id)) continue;
 
-                    if (!ushort.TryParse(rdr[1].ToString(), out var gunID))
-                    {
-                        continue;
-                    }
+                    if (!ushort.TryParse(rdr[1].ToString(), out var gunID)) continue;
 
                     if (!Guns.TryGetValue(gunID, out var gun))
                     {
@@ -549,45 +564,29 @@ public class DatabaseManager
                         continue;
                     }
 
-                    if (!ushort.TryParse(rdr[2].ToString(), out var skinID))
-                    {
-                        continue;
-                    }
+                    if (!ushort.TryParse(rdr[2].ToString(), out var skinID)) continue;
 
                     var skinName = rdr[3].ToString();
                     var skinDesc = rdr[4].ToString();
-                    if (!Enum.TryParse(rdr[5].ToString(), true, out ERarity rarity))
-                    {
-                        continue;
-                    }
+                    if (!Enum.TryParse(rdr[5].ToString(), true, out ERarity rarity)) continue;
 
                     var patternLink = rdr[6].ToString();
                     var iconLink = rdr[7].ToString();
-                    if (!int.TryParse(rdr[8].ToString(), out var scrapAmount))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[8].ToString(), out var scrapAmount)) continue;
 
-                    if (!int.TryParse(rdr[9].ToString(), out var maxAmount))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[9].ToString(), out var maxAmount)) continue;
 
-                    if (!int.TryParse(rdr[10].ToString(), out var unboxedAmount))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[10].ToString(), out var unboxedAmount)) continue;
 
-                    GunSkin skin = new(id, gun, skinID, skinName, skinDesc, rarity, patternLink, iconLink, scrapAmount, maxAmount, unboxedAmount);
+                    GunSkin skin = new(id, gun, skinID, skinName, skinDesc, rarity, patternLink, iconLink, scrapAmount,
+                        maxAmount, unboxedAmount);
                     if (gunSkinsSearchByID.ContainsKey(id))
                     {
                         Logging.Debug($"Found a duplicate skin with id {id}, ignoring this");
                         continue;
                     }
                     else
-                    {
                         gunSkinsSearchByID.Add(id, skin);
-                    }
 
                     if (gunSkinsSearchByGunID.TryGetValue(gunID, out var skins))
                     {
@@ -597,14 +596,10 @@ public class DatabaseManager
                             continue;
                         }
                         else
-                        {
                             skins.Add(skin);
-                        }
                     }
                     else
-                    {
-                        gunSkinsSearchByGunID.Add(gunID, new List<GunSkin> { skin });
-                    }
+                        gunSkinsSearchByGunID.Add(gunID, new() { skin });
 
                     if (gunSkinsSearchBySkinID.ContainsKey(skinID))
                     {
@@ -612,9 +607,7 @@ public class DatabaseManager
                         continue;
                     }
                     else
-                    {
                         gunSkinsSearchBySkinID.Add(skinID, skin);
-                    }
                 }
 
                 Logging.Debug($"Successfully read {gunSkinsSearchByID.Count} gun skins from the table");
@@ -639,38 +632,20 @@ public class DatabaseManager
                 Dictionary<ushort, GunCharm> gunCharms = new();
                 while (await rdr.ReadAsync())
                 {
-                    if (!ushort.TryParse(rdr[0].ToString(), out var charmID))
-                    {
-                        continue;
-                    }
+                    if (!ushort.TryParse(rdr[0].ToString(), out var charmID)) continue;
 
                     var charmName = rdr[1].ToString();
                     var charmDesc = rdr[2].ToString();
-                    if (!Enum.TryParse(rdr[3].ToString(), true, out ERarity rarity))
-                    {
-                        continue;
-                    }
+                    if (!Enum.TryParse(rdr[3].ToString(), true, out ERarity rarity)) continue;
 
                     var iconLink = rdr[4].ToString();
-                    if (!int.TryParse(rdr[5].ToString(), out var buyPrice))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[5].ToString(), out var buyPrice)) continue;
 
-                    if (!int.TryParse(rdr[6].ToString(), out var coins))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[6].ToString(), out var coins)) continue;
 
-                    if (!int.TryParse(rdr[7].ToString(), out var scrapAmount))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[7].ToString(), out var scrapAmount)) continue;
 
-                    if (!int.TryParse(rdr[8].ToString(), out var levelRequirement))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[8].ToString(), out var levelRequirement)) continue;
 
                     var authorCredits = rdr[9].ToString();
 
@@ -680,7 +655,9 @@ public class DatabaseManager
                         continue;
                     }
 
-                    gunCharms.Add(charmID, new GunCharm(charmID, charmName, charmDesc, rarity, iconLink, buyPrice, coins, scrapAmount, levelRequirement, authorCredits));
+                    gunCharms.Add(charmID,
+                        new(charmID, charmName, charmDesc, rarity, iconLink, buyPrice, coins, scrapAmount,
+                            levelRequirement, authorCredits));
                 }
 
                 Logging.Debug($"Successfully read {gunCharms.Count} gun charms");
@@ -703,74 +680,40 @@ public class DatabaseManager
                 Dictionary<ushort, Knife> knives = new();
                 while (await rdr.ReadAsync())
                 {
-                    if (!ushort.TryParse(rdr[0].ToString(), out var knifeID))
-                    {
-                        continue;
-                    }
+                    if (!ushort.TryParse(rdr[0].ToString(), out var knifeID)) continue;
 
                     var knifeName = rdr[1].ToString();
                     var knifeDesc = rdr[2].ToString();
-                    if (!Enum.TryParse(rdr[3].ToString(), true, out ERarity rarity))
-                    {
-                        continue;
-                    }
+                    if (!Enum.TryParse(rdr[3].ToString(), true, out ERarity rarity)) continue;
 
-                    if (!float.TryParse(rdr[4].ToString(), out var movementChange))
-                    {
-                        continue;
-                    }
+                    if (!float.TryParse(rdr[4].ToString(), out var movementChange)) continue;
 
                     var iconLink = rdr[5].ToString();
-                    if (!int.TryParse(rdr[6].ToString(), out var scrapAmount))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[6].ToString(), out var scrapAmount)) continue;
 
-                    if (!int.TryParse(rdr[7].ToString(), out var coins))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[7].ToString(), out var coins)) continue;
 
-                    if (!int.TryParse(rdr[8].ToString(), out var buyPrice))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[8].ToString(), out var buyPrice)) continue;
 
-                    if (!int.TryParse(rdr[9].ToString(), out var levelRequirement))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[9].ToString(), out var levelRequirement)) continue;
 
-                    if (!int.TryParse(rdr[10].ToString(), out var knifeWeight))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[10].ToString(), out var knifeWeight)) continue;
 
-                    if (!int.TryParse(rdr[11].ToString(), out var maxAmount))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[11].ToString(), out var maxAmount)) continue;
 
-                    if (!int.TryParse(rdr[12].ToString(), out var unboxedAmount))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[12].ToString(), out var unboxedAmount)) continue;
 
-                    Knife knife = new(knifeID, knifeName, knifeDesc, rarity, movementChange, iconLink, scrapAmount, coins, buyPrice, levelRequirement, knifeWeight, maxAmount, unboxedAmount);
+                    Knife knife = new(knifeID, knifeName, knifeDesc, rarity, movementChange, iconLink, scrapAmount,
+                        coins, buyPrice, levelRequirement, knifeWeight, maxAmount, unboxedAmount);
                     if (!knives.ContainsKey(knifeID))
-                    {
                         knives.Add(knifeID, knife);
-                    }
                     else
                     {
                         Logging.Debug($"Found a duplicate knife with id {knifeID}, ignoring this");
                         break;
                     }
 
-                    if (levelRequirement == 0)
-                    {
-                        defaultKnives.Add(knife);
-                    }
+                    if (levelRequirement == 0) defaultKnives.Add(knife);
                 }
 
                 Logging.Debug($"Successfully read {knives.Count} knives from the table");
@@ -793,54 +736,29 @@ public class DatabaseManager
                 Dictionary<ushort, Gadget> gadgets = new();
                 while (await rdr.ReadAsync())
                 {
-                    if (!ushort.TryParse(rdr[0].ToString(), out var gadgetID))
-                    {
-                        continue;
-                    }
+                    if (!ushort.TryParse(rdr[0].ToString(), out var gadgetID)) continue;
 
                     var gadgetName = rdr[1].ToString();
                     var gadgetDesc = rdr[2].ToString();
-                    if (!Enum.TryParse(rdr[3].ToString(), true, out ERarity rarity))
-                    {
-                        continue;
-                    }
+                    if (!Enum.TryParse(rdr[3].ToString(), true, out ERarity rarity)) continue;
 
                     var iconLink = rdr[4].ToString();
-                    if (!int.TryParse(rdr[5].ToString(), out var coins))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[5].ToString(), out var coins)) continue;
 
-                    if (!int.TryParse(rdr[6].ToString(), out var buyPrice))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[6].ToString(), out var buyPrice)) continue;
 
-                    if (!int.TryParse(rdr[7].ToString(), out var scrapAmount))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[7].ToString(), out var scrapAmount)) continue;
 
-                    if (!int.TryParse(rdr[8].ToString(), out var giveSeconds))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[8].ToString(), out var giveSeconds)) continue;
 
-                    if (!int.TryParse(rdr[9].ToString(), out var levelRequirement))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[9].ToString(), out var levelRequirement)) continue;
 
-                    if (!bool.TryParse(rdr[10].ToString(), out var isTactical))
-                    {
-                        continue;
-                    }
+                    if (!bool.TryParse(rdr[10].ToString(), out var isTactical)) continue;
 
-                    Gadget gadget = new(gadgetID, gadgetName, gadgetDesc, rarity, iconLink, coins, buyPrice, scrapAmount, giveSeconds, levelRequirement, isTactical);
+                    Gadget gadget = new(gadgetID, gadgetName, gadgetDesc, rarity, iconLink, coins, buyPrice,
+                        scrapAmount, giveSeconds, levelRequirement, isTactical);
                     if (!gadgets.ContainsKey(gadgetID))
-                    {
                         gadgets.Add(gadgetID, gadget);
-                    }
                     else
                     {
                         Logging.Debug($"Found a duplicate gadget with id {gadgetID}, ignoring this");
@@ -848,17 +766,14 @@ public class DatabaseManager
                     }
 
                     if (levelRequirement == 0)
-                    {
                         defaultGadgets.Add(gadget);
-                    }
                     else if (levelRequirement > 0)
                     {
                         if (!itemsSearchByLevel.ContainsKey(levelRequirement))
-                        {
                             itemsSearchByLevel.Add(levelRequirement, new());
-                        }
 
-                        itemsSearchByLevel[levelRequirement].Add(new AnimationItemUnlock(gadget.IconLink, isTactical ? "TACTICAL" : "LETHAL", gadget.GadgetName));
+                        itemsSearchByLevel[levelRequirement].Add(new(gadget.IconLink,
+                            isTactical ? "TACTICAL" : "LETHAL", gadget.GadgetName));
                     }
                 }
 
@@ -882,56 +797,36 @@ public class DatabaseManager
                 Dictionary<int, Killstreak> killstreaks = new();
                 while (await rdr.ReadAsync())
                 {
-                    if (!int.TryParse(rdr[0].ToString(), out var killstreakID))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[0].ToString(), out var killstreakID)) continue;
 
                     var killstreakName = rdr[1].ToString();
                     var killstreakDesc = rdr[2].ToString();
-                    if (!Enum.TryParse(rdr[3].ToString(), true, out ERarity rarity))
-                    {
-                        continue;
-                    }
+                    if (!Enum.TryParse(rdr[3].ToString(), true, out ERarity rarity)) continue;
 
                     var iconLink = rdr[4].ToString();
-                    if (!int.TryParse(rdr[5].ToString(), out var killstreakRequired))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[5].ToString(), out var killstreakRequired)) continue;
 
-                    if (!int.TryParse(rdr[6].ToString(), out var buyPrice))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[6].ToString(), out var buyPrice)) continue;
 
-                    if (!int.TryParse(rdr[7].ToString(), out var coins))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[7].ToString(), out var coins)) continue;
 
-                    if (!int.TryParse(rdr[8].ToString(), out var scrapAmount))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[8].ToString(), out var scrapAmount)) continue;
 
-                    if (!int.TryParse(rdr[9].ToString(), out var levelRequirement))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[9].ToString(), out var levelRequirement)) continue;
 
-                    var killstreakInfo = Plugin.Instance.Config.Killstreaks.FileData.KillstreaksData.FirstOrDefault(k => k.KillstreakID == killstreakID);
+                    var killstreakInfo =
+                        Plugin.Instance.Config.Killstreaks.FileData.KillstreaksData.FirstOrDefault(k =>
+                            k.KillstreakID == killstreakID);
                     if (killstreakInfo == null)
                     {
                         Logging.Debug($"Error finding killstreak info for killstreak with id {killstreakID}, ignoring");
                         continue;
                     }
 
-                    Killstreak killstreak = new(killstreakID, killstreakName, killstreakDesc, rarity, iconLink, killstreakRequired, buyPrice, coins, scrapAmount, levelRequirement, killstreakInfo);
+                    Killstreak killstreak = new(killstreakID, killstreakName, killstreakDesc, rarity, iconLink,
+                        killstreakRequired, buyPrice, coins, scrapAmount, levelRequirement, killstreakInfo);
                     if (!killstreaks.ContainsKey(killstreakID))
-                    {
                         killstreaks.Add(killstreakID, killstreak);
-                    }
                     else
                     {
                         Logging.Debug($"Found a duplicate killstrea with id {killstreakID}, ignoring it");
@@ -939,17 +834,14 @@ public class DatabaseManager
                     }
 
                     if (levelRequirement == 0)
-                    {
                         defaultKillstreaks.Add(killstreak);
-                    }
                     else if (levelRequirement > 0)
                     {
                         if (!itemsSearchByLevel.ContainsKey(levelRequirement))
-                        {
                             itemsSearchByLevel.Add(levelRequirement, new());
-                        }
 
-                        itemsSearchByLevel[levelRequirement].Add(new AnimationItemUnlock(killstreak.IconLink, "KILLSTREAK", killstreak.KillstreakName));
+                        itemsSearchByLevel[levelRequirement]
+                            .Add(new(killstreak.IconLink, "KILLSTREAK", killstreak.KillstreakName));
                     }
                 }
 
@@ -973,55 +865,30 @@ public class DatabaseManager
                 Dictionary<int, Perk> perks = new();
                 while (await rdr.ReadAsync())
                 {
-                    if (!int.TryParse(rdr[0].ToString(), out var perkID))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[0].ToString(), out var perkID)) continue;
 
                     var perkName = rdr[1].ToString();
                     var perkDesc = rdr[2].ToString();
-                    if (!int.TryParse(rdr[3].ToString(), out var perkType))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[3].ToString(), out var perkType)) continue;
 
-                    if (!Enum.TryParse(rdr[4].ToString(), true, out ERarity rarity))
-                    {
-                        continue;
-                    }
+                    if (!Enum.TryParse(rdr[4].ToString(), true, out ERarity rarity)) continue;
 
                     var iconLink = rdr[5].ToString();
                     var skillType = rdr[6].ToString();
-                    if (!int.TryParse(rdr[7].ToString(), out var skillLevel))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[7].ToString(), out var skillLevel)) continue;
 
-                    if (!int.TryParse(rdr[8].ToString(), out var coins))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[8].ToString(), out var coins)) continue;
 
-                    if (!int.TryParse(rdr[9].ToString(), out var buyPrice))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[9].ToString(), out var buyPrice)) continue;
 
-                    if (!int.TryParse(rdr[10].ToString(), out var scrapAmount))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[10].ToString(), out var scrapAmount)) continue;
 
-                    if (!int.TryParse(rdr[11].ToString(), out var levelRequirement))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[11].ToString(), out var levelRequirement)) continue;
 
-                    Perk perk = new(perkID, perkName, perkDesc, perkType, rarity, iconLink, skillType, skillLevel, coins, buyPrice, scrapAmount, levelRequirement);
+                    Perk perk = new(perkID, perkName, perkDesc, perkType, rarity, iconLink, skillType, skillLevel,
+                        coins, buyPrice, scrapAmount, levelRequirement);
                     if (!perks.ContainsKey(perkID))
-                    {
                         perks.Add(perkID, perk);
-                    }
                     else
                     {
                         Logging.Debug($"Found a duplicate perk with id {perkID}, ignoring this");
@@ -1029,17 +896,13 @@ public class DatabaseManager
                     }
 
                     if (levelRequirement == 0)
-                    {
                         defaultPerks.Add(perk);
-                    }
                     else if (levelRequirement > 0)
                     {
                         if (!itemsSearchByLevel.ContainsKey(levelRequirement))
-                        {
                             itemsSearchByLevel.Add(levelRequirement, new());
-                        }
 
-                        itemsSearchByLevel[levelRequirement].Add(new AnimationItemUnlock(perk.IconLink, "PERK", perk.PerkName));
+                        itemsSearchByLevel[levelRequirement].Add(new(perk.IconLink, "PERK", perk.PerkName));
                     }
                 }
 
@@ -1063,59 +926,31 @@ public class DatabaseManager
                 Dictionary<int, Glove> gloves = new();
                 while (await rdr.ReadAsync())
                 {
-                    if (!int.TryParse(rdr[0].ToString(), out var gloveID))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[0].ToString(), out var gloveID)) continue;
 
                     var gloveName = rdr[1].ToString();
                     var gloveDesc = rdr[2].ToString();
-                    if (!Enum.TryParse(rdr[3].ToString(), true, out ERarity rarity))
-                    {
-                        continue;
-                    }
+                    if (!Enum.TryParse(rdr[3].ToString(), true, out ERarity rarity)) continue;
 
                     var iconLink = rdr[4].ToString();
-                    if (!int.TryParse(rdr[5].ToString(), out var scrapAmount))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[5].ToString(), out var scrapAmount)) continue;
 
-                    if (!int.TryParse(rdr[6].ToString(), out var buyPrice))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[6].ToString(), out var buyPrice)) continue;
 
-                    if (!int.TryParse(rdr[7].ToString(), out var coins))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[7].ToString(), out var coins)) continue;
 
-                    if (!int.TryParse(rdr[8].ToString(), out var levelRequirement))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[8].ToString(), out var levelRequirement)) continue;
 
-                    if (!int.TryParse(rdr[9].ToString(), out var gloveWeight))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[9].ToString(), out var gloveWeight)) continue;
 
-                    if (!int.TryParse(rdr[10].ToString(), out var maxAmount))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[10].ToString(), out var maxAmount)) continue;
 
-                    if (!int.TryParse(rdr[11].ToString(), out var unboxedAmount))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[11].ToString(), out var unboxedAmount)) continue;
 
-                    Glove glove = new(gloveID, gloveName, gloveDesc, rarity, iconLink, scrapAmount, buyPrice, coins, levelRequirement, gloveWeight, maxAmount, unboxedAmount);
+                    Glove glove = new(gloveID, gloveName, gloveDesc, rarity, iconLink, scrapAmount, buyPrice, coins,
+                        levelRequirement, gloveWeight, maxAmount, unboxedAmount);
                     if (!gloves.ContainsKey(gloveID))
-                    {
                         gloves.Add(gloveID, glove);
-                    }
                     else
                     {
                         Logging.Debug($"Found a duplicate glove with id {gloveID}");
@@ -1123,17 +958,13 @@ public class DatabaseManager
                     }
 
                     if (levelRequirement == 0)
-                    {
                         defaultGloves.Add(glove);
-                    }
                     else if (levelRequirement > 0)
                     {
                         if (!itemsSearchByLevel.ContainsKey(levelRequirement))
-                        {
                             itemsSearchByLevel.Add(levelRequirement, new());
-                        }
 
-                        itemsSearchByLevel[levelRequirement].Add(new AnimationItemUnlock(glove.IconLink, "GLOVE", glove.GloveName));
+                        itemsSearchByLevel[levelRequirement].Add(new(glove.IconLink, "GLOVE", glove.GloveName));
                     }
                 }
 
@@ -1157,47 +988,28 @@ public class DatabaseManager
                 Dictionary<int, Card> cards = new();
                 while (await rdr.ReadAsync())
                 {
-                    if (!int.TryParse(rdr[0].ToString(), out var cardID))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[0].ToString(), out var cardID)) continue;
 
                     var cardName = rdr[1].ToString();
                     var cardDesc = rdr[2].ToString();
-                    if (!Enum.TryParse(rdr[3].ToString(), true, out ERarity rarity))
-                    {
-                        continue;
-                    }
+                    if (!Enum.TryParse(rdr[3].ToString(), true, out ERarity rarity)) continue;
 
                     var iconLink = rdr[4].ToString();
                     var cardLink = rdr[5].ToString();
-                    if (!int.TryParse(rdr[6].ToString(), out var scrapAmount))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[6].ToString(), out var scrapAmount)) continue;
 
-                    if (!int.TryParse(rdr[7].ToString(), out var buyPrice))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[7].ToString(), out var buyPrice)) continue;
 
-                    if (!int.TryParse(rdr[8].ToString(), out var coins))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[8].ToString(), out var coins)) continue;
 
-                    if (!int.TryParse(rdr[9].ToString(), out var levelRequirement))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[9].ToString(), out var levelRequirement)) continue;
 
                     var authorCredits = rdr[10].ToString();
 
-                    Card card = new(cardID, cardName, cardDesc, rarity, iconLink, cardLink, scrapAmount, buyPrice, coins, levelRequirement, authorCredits);
+                    Card card = new(cardID, cardName, cardDesc, rarity, iconLink, cardLink, scrapAmount, buyPrice,
+                        coins, levelRequirement, authorCredits);
                     if (!cards.ContainsKey(cardID))
-                    {
                         cards.Add(cardID, card);
-                    }
                     else
                     {
                         Logging.Debug($"Found a duplicate card with id {cardID}, ignoring this");
@@ -1205,17 +1017,13 @@ public class DatabaseManager
                     }
 
                     if (levelRequirement == 0)
-                    {
                         defaultCards.Add(card);
-                    }
                     else if (levelRequirement > 0)
                     {
                         if (!itemsSearchByLevel.ContainsKey(levelRequirement))
-                        {
                             itemsSearchByLevel.Add(levelRequirement, new());
-                        }
 
-                        itemsSearchByLevel[levelRequirement].Add(new AnimationItemUnlock(card.IconLink, "CARD", card.CardName));
+                        itemsSearchByLevel[levelRequirement].Add(new(card.IconLink, "CARD", card.CardName));
                     }
                 }
 
@@ -1241,24 +1049,16 @@ public class DatabaseManager
                 Dictionary<int, XPLevel> levels = new();
                 while (await rdr.ReadAsync())
                 {
-                    if (!int.TryParse(rdr[0].ToString(), out var level))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[0].ToString(), out var level)) continue;
 
-                    if (!int.TryParse(rdr[1].ToString(), out var xpNeeded))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[1].ToString(), out var xpNeeded)) continue;
 
                     var iconLinkLarge = rdr[2].ToString();
                     var iconLinkMedium = rdr[3].ToString();
                     var iconLinkSmall = rdr[4].ToString();
 
                     if (!levels.ContainsKey(level))
-                    {
-                        levels.Add(level, new XPLevel(level, xpNeeded, iconLinkLarge, iconLinkMedium, iconLinkSmall));
-                    }
+                        levels.Add(level, new(level, xpNeeded, iconLinkLarge, iconLinkMedium, iconLinkSmall));
                 }
 
                 Logging.Debug($"Successfully read {levels.Count} levels from the table");
@@ -1275,7 +1075,9 @@ public class DatabaseManager
             }
 
             Logging.Debug("Reading quests from base data");
-            rdr = (MySqlDataReader)await new MySqlCommand($"SELECT `QuestID`, `QuestTitle`, `QuestDesc`, `QuestType`-1, `QuestTier`-1, `QuestConditions`, `TargetAmount`, `XP` FROM `{QUESTS}`;", Conn).ExecuteReaderAsync();
+            rdr = (MySqlDataReader)await new MySqlCommand(
+                $"SELECT `QuestID`, `QuestTitle`, `QuestDesc`, `QuestType`-1, `QuestTier`-1, `QuestConditions`, `TargetAmount`, `XP` FROM `{QUESTS}`;",
+                Conn).ExecuteReaderAsync();
             try
             {
                 Dictionary<int, Quest> questsSearchByID = new();
@@ -1283,51 +1085,35 @@ public class DatabaseManager
 
                 while (await rdr.ReadAsync())
                 {
-                    if (!int.TryParse(rdr[0].ToString(), out var questID))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[0].ToString(), out var questID)) continue;
 
                     var questTitle = rdr[1].ToString();
                     var questDesc = rdr[2].ToString();
 
-                    if (!int.TryParse(rdr[3].ToString(), out var questTypeInt))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[3].ToString(), out var questTypeInt)) continue;
 
                     var questType = (EQuestType)questTypeInt;
 
-                    if (!int.TryParse(rdr[4].ToString(), out var questTierInt))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[4].ToString(), out var questTierInt)) continue;
 
                     var questTier = (EQuestTier)questTierInt;
 
                     var questConditions = rdr[5].ToString();
                     var conditions = Utility.GetQuestConditionsFromString(questConditions);
 
-                    if (!int.TryParse(rdr[6].ToString(), out var targetAmount))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[6].ToString(), out var targetAmount)) continue;
 
-                    if (!int.TryParse(rdr[7].ToString(), out var xp))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[7].ToString(), out var xp)) continue;
 
-                    Quest quest = new(questID, questTitle, questDesc, questType, questTier, conditions, targetAmount, xp);
+                    Quest quest = new(questID, questTitle, questDesc, questType, questTier, conditions, targetAmount,
+                        xp);
                     if (!questsSearchByID.ContainsKey(questID))
                     {
                         questsSearchByID.Add(questID, quest);
                         quests.Add(quest);
                     }
                     else
-                    {
                         Logging.Debug($"Found a duplicate quest with id {questID}, ignoring this");
-                    }
                 }
 
                 QuestsSearchByID = questsSearchByID;
@@ -1346,30 +1132,23 @@ public class DatabaseManager
             }
 
             Logging.Debug("Reading achievements for base data");
-            rdr = (MySqlDataReader)await new MySqlCommand($"SELECT `AchievementID`, `AchievementType`-1, `AchievementConditions`, `PageID` FROM `{ACHIEVEMENTS}`;", Conn).ExecuteReaderAsync();
+            rdr = (MySqlDataReader)await new MySqlCommand(
+                $"SELECT `AchievementID`, `AchievementType`-1, `AchievementConditions`, `PageID` FROM `{ACHIEVEMENTS}`;",
+                Conn).ExecuteReaderAsync();
             try
             {
                 List<Achievement> achievements = new();
                 Dictionary<int, Achievement> achievementsSearchByID = new();
                 while (await rdr.ReadAsync())
                 {
-                    if (!int.TryParse(rdr[0].ToString(), out var achievementID))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[0].ToString(), out var achievementID)) continue;
 
-                    if (!int.TryParse(rdr[1].ToString(), out var achievementTypeInt))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[1].ToString(), out var achievementTypeInt)) continue;
 
                     var achievementType = (EQuestType)achievementTypeInt;
                     var achievementConditions = rdr[2].ToString();
                     var conditions = Utility.GetQuestConditionsFromString(achievementConditions);
-                    if (!int.TryParse(rdr[3].ToString(), out var pageID))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[3].ToString(), out var pageID)) continue;
 
                     Achievement achievement = new(achievementID, achievementType, conditions, new(), new(), pageID);
                     if (!achievementsSearchByID.ContainsKey(achievementID))
@@ -1378,9 +1157,7 @@ public class DatabaseManager
                         achievements.Add(achievement);
                     }
                     else
-                    {
                         Logging.Debug($"Found a duplicate achievement with id {achievementID}, ignoring this");
-                    }
                 }
 
                 AchievementsSearchByID = achievementsSearchByID;
@@ -1399,39 +1176,29 @@ public class DatabaseManager
             }
 
             Logging.Debug("Reading achievements tiers for base data");
-            rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{ACHIEVEMENTS_TIERS}`;", Conn).ExecuteReaderAsync();
+            rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{ACHIEVEMENTS_TIERS}`;", Conn)
+                .ExecuteReaderAsync();
             try
             {
                 while (await rdr.ReadAsync())
                 {
-                    if (!int.TryParse(rdr[0].ToString(), out var achievementID))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[0].ToString(), out var achievementID)) continue;
 
-                    if (!AchievementsSearchByID.TryGetValue(achievementID, out var achievement))
-                    {
-                        continue;
-                    }
+                    if (!AchievementsSearchByID.TryGetValue(achievementID, out var achievement)) continue;
 
-                    if (!int.TryParse(rdr[1].ToString(), out var tierID))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[1].ToString(), out var tierID)) continue;
 
                     var tierTitle = rdr[2].ToString();
                     var tierDesc = rdr[3].ToString();
                     var tierColor = rdr[4].ToString();
                     var tierPrevSmall = rdr[5].ToString();
                     var tierPrevLarge = rdr[6].ToString();
-                    if (!int.TryParse(rdr[7].ToString(), out var targetAmount))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[7].ToString(), out var targetAmount)) continue;
 
                     var rewards = Utility.GetRewardsFromString(rdr[8].ToString());
                     var removeRewards = Utility.GetRewardsFromString(rdr[9].ToString());
-                    AchievementTier achievementTier = new(achievement, tierID, tierTitle, tierDesc, tierColor, tierPrevSmall, tierPrevLarge, targetAmount, rewards, removeRewards);
+                    AchievementTier achievementTier = new(achievement, tierID, tierTitle, tierDesc, tierColor,
+                        tierPrevSmall, tierPrevLarge, targetAmount, rewards, removeRewards);
 
                     if (!achievement.TiersLookup.ContainsKey(tierID))
                     {
@@ -1439,12 +1206,12 @@ public class DatabaseManager
                         achievement.Tiers.Add(achievementTier);
                     }
                     else
-                    {
-                        Logging.Debug($"Found a duplicate achievement tier with id {tierID} for achievement with id {achievementID}, ignoring this");
-                    }
+                        Logging.Debug(
+                            $"Found a duplicate achievement tier with id {tierID} for achievement with id {achievementID}, ignoring this");
                 }
 
-                Logging.Debug($"Loaded total {Achievements.Sum(k => k.Tiers.Count)} for {Achievements.Count} achievements");
+                Logging.Debug(
+                    $"Loaded total {Achievements.Sum(k => k.Tiers.Count)} for {Achievements.Count} achievements");
             }
             catch (Exception ex)
             {
@@ -1464,18 +1231,12 @@ public class DatabaseManager
                 List<BattlepassTier> battlepassTiers = new();
                 while (await rdr.ReadAsync())
                 {
-                    if (!int.TryParse(rdr[0].ToString(), out var tierID))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[0].ToString(), out var tierID)) continue;
 
                     var freeReward = Utility.GetRewardFromString(rdr[1].ToString());
                     var premiumReward = Utility.GetRewardFromString(rdr[2].ToString());
 
-                    if (!int.TryParse(rdr[3].ToString(), out var xp))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[3].ToString(), out var xp)) continue;
 
                     BattlepassTier battlepass = new(tierID, freeReward, premiumReward, xp);
 
@@ -1510,32 +1271,17 @@ public class DatabaseManager
                 Dictionary<int, Case> cases = new();
                 while (await rdr.ReadAsync())
                 {
-                    if (!int.TryParse(rdr[0].ToString(), out var caseID))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[0].ToString(), out var caseID)) continue;
 
                     var caseName = rdr[1].ToString();
                     var iconLink = rdr[2].ToString();
-                    if (!Enum.TryParse(rdr[3].ToString(), true, out ERarity caseRarity))
-                    {
-                        continue;
-                    }
+                    if (!Enum.TryParse(rdr[3].ToString(), true, out ERarity caseRarity)) continue;
 
-                    if (!bool.TryParse(rdr[4].ToString(), out var isBuyable))
-                    {
-                        continue;
-                    }
+                    if (!bool.TryParse(rdr[4].ToString(), out var isBuyable)) continue;
 
-                    if (!int.TryParse(rdr[5].ToString(), out var scrapPrice))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[5].ToString(), out var scrapPrice)) continue;
 
-                    if (!int.TryParse(rdr[6].ToString(), out var coinPrice))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[6].ToString(), out var coinPrice)) continue;
 
                     List<(ECaseRarity, int)> caseRarities = new();
 
@@ -1549,16 +1295,10 @@ public class DatabaseManager
                             break;
                         }
 
-                        if (weight > 0)
-                        {
-                            caseRarities.Add((rarity, weight));
-                        }
+                        if (weight > 0) caseRarities.Add((rarity, weight));
                     }
 
-                    if (!shouldContinue)
-                    {
-                        continue;
-                    }
+                    if (!shouldContinue) continue;
 
                     var availableSkinIDs = rdr[17].GetIntListFromReaderResult();
                     List<GunSkin> availableSkins = new();
@@ -1568,20 +1308,20 @@ public class DatabaseManager
                     {
                         if (!GunSkinsSearchByID.TryGetValue(skinID, out var skin))
                         {
-                            Logging.Debug($"Case with id {caseID} has a skin with id {skinID} which is not a valid skin registered in the database");
+                            Logging.Debug(
+                                $"Case with id {caseID} has a skin with id {skinID} which is not a valid skin registered in the database");
                             continue;
                         }
 
                         if (availableSkins.Contains(skin))
                         {
-                            Logging.Debug($"Case with id {caseID} has a skin with id {skinID} which is a duplicate, the same skin is already added to the case");
+                            Logging.Debug(
+                                $"Case with id {caseID} has a skin with id {skinID} which is a duplicate, the same skin is already added to the case");
                             continue;
                         }
 
                         if (!availableSkinsSearchByRarity.ContainsKey(skin.SkinRarity))
-                        {
                             availableSkinsSearchByRarity.Add(skin.SkinRarity, new());
-                        }
 
                         availableSkinsSearchByRarity[skin.SkinRarity].Add(skin);
                         availableSkins.Add(skin);
@@ -1593,7 +1333,9 @@ public class DatabaseManager
                         continue;
                     }
 
-                    cases.Add(caseID, new Case(caseID, caseName, iconLink, caseRarity, isBuyable, scrapPrice, coinPrice, caseRarities, availableSkins, availableSkinsSearchByRarity));
+                    cases.Add(caseID,
+                        new(caseID, caseName, iconLink, caseRarity, isBuyable, scrapPrice, coinPrice, caseRarities,
+                            availableSkins, availableSkinsSearchByRarity));
                 }
 
                 Logging.Debug($"Successfully read {cases.Count} cases from base data");
@@ -1651,12 +1393,8 @@ public class DatabaseManager
                 {
                     Dictionary<EAttachment, GunAttachment> defaultAttachments = new();
                     foreach (var defaultAttachment in defaultPrimary.DefaultAttachments)
-                    {
                         if (!defaultAttachments.ContainsKey(defaultAttachment.AttachmentType))
-                        {
                             defaultAttachments.Add(defaultAttachment.AttachmentType, defaultAttachment);
-                        }
-                    }
 
                     defaultPrimaryAttachments = defaultAttachments.Values.Select(k => k.AttachmentID).ToList();
                 }
@@ -1669,12 +1407,8 @@ public class DatabaseManager
                 {
                     Dictionary<EAttachment, GunAttachment> defaultAttachments = new();
                     foreach (var defaultAttachment in defaultSecondary.DefaultAttachments)
-                    {
                         if (!defaultAttachments.ContainsKey(defaultAttachment.AttachmentType))
-                        {
                             defaultAttachments.Add(defaultAttachment.AttachmentType, defaultAttachment);
-                        }
-                    }
 
                     defaultSecondaryAttachments = defaultAttachments.Values.Select(k => k.AttachmentID).ToList();
                 }
@@ -1700,10 +1434,7 @@ public class DatabaseManager
                 foreach (var killstreak in defaultKillstreaks)
                 {
                     defaultKillstreak.Add(killstreak.KillstreakID);
-                    if (defaultKillstreaks.Count == 3)
-                    {
-                        break;
-                    }
+                    if (defaultKillstreaks.Count == 3) break;
                 }
 
                 Logging.Debug($"Found {defaultKillstreak.Count} default killstreaks");
@@ -1711,7 +1442,10 @@ public class DatabaseManager
                 Logging.Debug($"Found default glove with id {defaultGlove?.GloveID ?? 0}");
                 var defaultCard = defaultCards.FirstOrDefault();
                 Logging.Debug($"Found default card with id {defaultCard?.CardID ?? 0}");
-                DefaultLoadout = new LoadoutData("DEFAULT LOADOUT", defaultPrimary?.GunID ?? 0, 0, 0, defaultPrimaryAttachments, defaultSecondary?.GunID ?? 0, 0, 0, defaultSecondaryAttachments, defaultKnife?.KnifeID ?? 0, defaultTactical?.GadgetID ?? 0, defaultLethal?.GadgetID ?? 0, defaultKillstreak, defaultPerk, defaultGlove?.GloveID ?? 0, defaultCard?.CardID ?? 0);
+                DefaultLoadout = new("DEFAULT LOADOUT", defaultPrimary?.GunID ?? 0, 0, 0, defaultPrimaryAttachments,
+                    defaultSecondary?.GunID ?? 0, 0, 0, defaultSecondaryAttachments, defaultKnife?.KnifeID ?? 0,
+                    defaultTactical?.GadgetID ?? 0, defaultLethal?.GadgetID ?? 0, defaultKillstreak, defaultPerk,
+                    defaultGlove?.GloveID ?? 0, defaultCard?.CardID ?? 0);
                 Logging.Debug("Built a default loadout to give to the players when they join");
             }
             catch (Exception ex)
@@ -1747,136 +1481,155 @@ public class DatabaseManager
         try
         {
             Logging.Debug($"Adding {steamName} to the DB");
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.1f)), loadingText: "LOADING PLAYER DATA..."));
+            TaskDispatcher.QueueOnMainThread(() =>
+                Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(96 * 0.1f)), "LOADING PLAYER DATA..."));
             await Conn.OpenAsync();
-            MySqlCommand cmd = new($"INSERT INTO `{PLAYERS}` ( `SteamID` , `SteamName` , `AvatarLink` , `CountryCode` , `MuteExpiry`, `Coins` ) VALUES ({player.CSteamID}, @name, '{avatarLink}' , '{countryCode}' , {DateTimeOffset.UtcNow.ToUnixTimeSeconds()} , {(Plugin.Instance.Configuration.Instance.UnlockAllItems ? 10000000 : 0)}) ON DUPLICATE KEY UPDATE `AvatarLink` = '{avatarLink}', `SteamName` = @name, `CountryCode` = '{countryCode}';", Conn);
+            MySqlCommand cmd =
+                new(
+                    $"INSERT INTO `{PLAYERS}` ( `SteamID` , `SteamName` , `AvatarLink` , `CountryCode` , `MuteExpiry`, `Coins` ) VALUES ({player.CSteamID}, @name, '{avatarLink}' , '{countryCode}' , {DateTimeOffset.UtcNow.ToUnixTimeSeconds()} , {(Plugin.Instance.Configuration.Instance.UnlockAllItems ? 10000000 : 0)}) ON DUPLICATE KEY UPDATE `AvatarLink` = '{avatarLink}', `SteamName` = @name, `CountryCode` = '{countryCode}';",
+                    Conn);
             _ = cmd.Parameters.AddWithValue("@name", steamName.ToUnrich());
             _ = await cmd.ExecuteScalarAsync();
 
-            _ = await new MySqlCommand($"INSERT IGNORE INTO `{PLAYERS_LEADERBOARD_DAILY}` ( `SteamID` ) VALUES ({player.CSteamID});", Conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"INSERT IGNORE INTO `{PLAYERS_LEADERBOARD_WEEKLY}` ( `SteamID` ) VALUES ({player.CSteamID});", Conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"INSERT IGNORE INTO `{PLAYERS_LEADERBOARD_SEASONAL}` ( `SteamID` ) VALUES ({player.CSteamID});", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                    $"INSERT IGNORE INTO `{PLAYERS_LEADERBOARD_DAILY}` ( `SteamID` ) VALUES ({player.CSteamID});", Conn)
+                .ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                    $"INSERT IGNORE INTO `{PLAYERS_LEADERBOARD_WEEKLY}` ( `SteamID` ) VALUES ({player.CSteamID});",
+                    Conn)
+                .ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                    $"INSERT IGNORE INTO `{PLAYERS_LEADERBOARD_SEASONAL}` ( `SteamID` ) VALUES ({player.CSteamID});",
+                    Conn)
+                .ExecuteScalarAsync();
 
             Logging.Debug($"Giving {steamName} the guns");
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.15f)), loadingText: "LOADING GUNS..."));
+            TaskDispatcher.QueueOnMainThread(() =>
+                Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(96 * 0.15f)), "LOADING GUNS..."));
             foreach (var gun in Guns.Values)
             {
-                if (gun.LevelRequirement < 0)
-                {
-                    continue;
-                }
+                if (gun.LevelRequirement < 0) continue;
 
-                _ = await new MySqlCommand($"INSERT IGNORE INTO `{PLAYERS_GUNS}` (`SteamID` , `GunID` , `Level` , `XP` , `GunKills` , `IsBought` , `Attachments`) VALUES ({player.CSteamID} , {gun.GunID} , 1 , 0 , 0 , {gun.LevelRequirement == 0} , '{Utility.CreateStringFromDefaultAttachments(gun.DefaultAttachments) + Utility.CreateStringFromRewardAttachments(gun.RewardAttachments.Values.ToList())}');", Conn).ExecuteScalarAsync();
+                _ = await new MySqlCommand(
+                    $"INSERT IGNORE INTO `{PLAYERS_GUNS}` (`SteamID` , `GunID` , `Level` , `XP` , `GunKills` , `IsBought` , `Attachments`) VALUES ({player.CSteamID} , {gun.GunID} , 1 , 0 , 0 , {gun.LevelRequirement == 0} , '{Utility.CreateStringFromDefaultAttachments(gun.DefaultAttachments) + Utility.CreateStringFromRewardAttachments(gun.RewardAttachments.Values.ToList())}');",
+                    Conn).ExecuteScalarAsync();
             }
 
-            _ = await new MySqlCommand($"INSERT IGNORE INTO `{PLAYERS_GUNS_SKINS}` (`SteamID` , `SkinIDs`) VALUES ({player.CSteamID}, '');", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"INSERT IGNORE INTO `{PLAYERS_GUNS_SKINS}` (`SteamID` , `SkinIDs`) VALUES ({player.CSteamID}, '');",
+                Conn).ExecuteScalarAsync();
 
             Logging.Debug($"Giving {steamName} the gun charms");
             foreach (var gunCharm in GunCharms.Values)
             {
-                if (gunCharm.LevelRequirement < 0)
-                {
-                    continue;
-                }
+                if (gunCharm.LevelRequirement < 0) continue;
 
-                _ = await new MySqlCommand($"INSERT IGNORE INTO `{PLAYERS_GUNS_CHARMS}` (`SteamID` , `CharmID` , `IsBought`) VALUES ({player.CSteamID} , {gunCharm.CharmID} , {gunCharm.LevelRequirement == 0});", Conn).ExecuteScalarAsync();
+                _ = await new MySqlCommand(
+                    $"INSERT IGNORE INTO `{PLAYERS_GUNS_CHARMS}` (`SteamID` , `CharmID` , `IsBought`) VALUES ({player.CSteamID} , {gunCharm.CharmID} , {gunCharm.LevelRequirement == 0});",
+                    Conn).ExecuteScalarAsync();
             }
 
             Logging.Debug($"Giving {steamName} the knives");
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.2f)), loadingText: "LOADING KNIVES..."));
+            TaskDispatcher.QueueOnMainThread(() =>
+                Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(96 * 0.2f)), "LOADING KNIVES..."));
             foreach (var knife in Knives.Values)
             {
-                if (knife.LevelRequirement < 0)
-                {
-                    continue;
-                }
+                if (knife.LevelRequirement < 0) continue;
 
-                _ = await new MySqlCommand($"INSERT IGNORE INTO `{PLAYERS_KNIVES}` (`SteamID` , `KnifeID` , `KnifeKills` , `IsBought`) VALUES ({player.CSteamID} , {knife.KnifeID} , 0 , {knife.LevelRequirement == 0});", Conn).ExecuteScalarAsync();
+                _ = await new MySqlCommand(
+                    $"INSERT IGNORE INTO `{PLAYERS_KNIVES}` (`SteamID` , `KnifeID` , `KnifeKills` , `IsBought`) VALUES ({player.CSteamID} , {knife.KnifeID} , 0 , {knife.LevelRequirement == 0});",
+                    Conn).ExecuteScalarAsync();
             }
 
             Logging.Debug($"Giving {steamName} the gadgets");
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.25f)), loadingText: "LOADING GADGETS..."));
+            TaskDispatcher.QueueOnMainThread(() =>
+                Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(96 * 0.25f)), "LOADING GADGETS..."));
             foreach (var gadget in Gadgets.Values)
             {
-                if (gadget.LevelRequirement < 0)
-                {
-                    continue;
-                }
+                if (gadget.LevelRequirement < 0) continue;
 
-                _ = await new MySqlCommand($"INSERT IGNORE INTO  `{PLAYERS_GADGETS}` (`SteamID` , `GadgetID` , `GadgetKills` , `IsBought`) VALUES ({player.CSteamID} , {gadget.GadgetID} , 0 , {gadget.LevelRequirement == 0});", Conn).ExecuteScalarAsync();
+                _ = await new MySqlCommand(
+                    $"INSERT IGNORE INTO  `{PLAYERS_GADGETS}` (`SteamID` , `GadgetID` , `GadgetKills` , `IsBought`) VALUES ({player.CSteamID} , {gadget.GadgetID} , 0 , {gadget.LevelRequirement == 0});",
+                    Conn).ExecuteScalarAsync();
             }
 
             Logging.Debug($"Giving {steamName} the killstreaks");
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.3f)), loadingText: "LOADING KILLSTREAKS..."));
+            TaskDispatcher.QueueOnMainThread(() =>
+                Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(96 * 0.3f)), "LOADING KILLSTREAKS..."));
             foreach (var killstreak in Killstreaks.Values)
             {
-                if (killstreak.LevelRequirement < 0)
-                {
-                    continue;
-                }
+                if (killstreak.LevelRequirement < 0) continue;
 
-                _ = await new MySqlCommand($"INSERT IGNORE INTO `{PLAYERS_KILLSTREAKS}` (`SteamID` , `KillstreakID` , `KillstreakKills` , `IsBought`) VALUES ({player.CSteamID} , {killstreak.KillstreakID} , 0 ,  {killstreak.LevelRequirement == 0});", Conn).ExecuteScalarAsync();
+                _ = await new MySqlCommand(
+                    $"INSERT IGNORE INTO `{PLAYERS_KILLSTREAKS}` (`SteamID` , `KillstreakID` , `KillstreakKills` , `IsBought`) VALUES ({player.CSteamID} , {killstreak.KillstreakID} , 0 ,  {killstreak.LevelRequirement == 0});",
+                    Conn).ExecuteScalarAsync();
             }
 
             Logging.Debug($"Giving {steamName} the perks");
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.35f)), loadingText: "LOADING PERKS..."));
+            TaskDispatcher.QueueOnMainThread(() =>
+                Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(96 * 0.35f)), "LOADING PERKS..."));
             foreach (var perk in Perks.Values)
             {
-                if (perk.LevelRequirement < 0)
-                {
-                    continue;
-                }
+                if (perk.LevelRequirement < 0) continue;
 
-                _ = await new MySqlCommand($"INSERT IGNORE INTO `{PLAYERS_PERKS}` (`SteamID` , `PerkID` , `IsBought`) VALUES ({player.CSteamID} , {perk.PerkID} , {perk.LevelRequirement == 0});", Conn).ExecuteScalarAsync();
+                _ = await new MySqlCommand(
+                    $"INSERT IGNORE INTO `{PLAYERS_PERKS}` (`SteamID` , `PerkID` , `IsBought`) VALUES ({player.CSteamID} , {perk.PerkID} , {perk.LevelRequirement == 0});",
+                    Conn).ExecuteScalarAsync();
             }
 
             Logging.Debug($"Giving {steamName} the gloves");
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.4f)), loadingText: "LOADING GLOVES..."));
+            TaskDispatcher.QueueOnMainThread(() =>
+                Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(96 * 0.4f)), "LOADING GLOVES..."));
             foreach (var glove in Gloves.Values)
             {
-                if (glove.LevelRequirement < 0)
-                {
-                    continue;
-                }
+                if (glove.LevelRequirement < 0) continue;
 
-                _ = await new MySqlCommand($"INSERT IGNORE INTO `{PLAYERS_GLOVES}` (`SteamID` , `GloveID` , `IsBought`) VALUES ({player.CSteamID} , {glove.GloveID} , {glove.LevelRequirement == 0});", Conn).ExecuteScalarAsync();
+                _ = await new MySqlCommand(
+                    $"INSERT IGNORE INTO `{PLAYERS_GLOVES}` (`SteamID` , `GloveID` , `IsBought`) VALUES ({player.CSteamID} , {glove.GloveID} , {glove.LevelRequirement == 0});",
+                    Conn).ExecuteScalarAsync();
             }
 
             Logging.Debug($"Giving {steamName} the cards");
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.45f)), loadingText: "LOADING CARDS..."));
+            TaskDispatcher.QueueOnMainThread(() =>
+                Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(96 * 0.45f)), "LOADING CARDS..."));
             foreach (var card in Cards.Values)
             {
-                if (card.LevelRequirement < 0)
-                {
-                    continue;
-                }
+                if (card.LevelRequirement < 0) continue;
 
-                _ = await new MySqlCommand($"INSERT IGNORE INTO `{PLAYERS_CARDS}` (`SteamID` , `CardID` , `IsBought`) VALUES ({player.CSteamID} , {card.CardID} ,  {card.LevelRequirement == 0});", Conn).ExecuteScalarAsync();
+                _ = await new MySqlCommand(
+                    $"INSERT IGNORE INTO `{PLAYERS_CARDS}` (`SteamID` , `CardID` , `IsBought`) VALUES ({player.CSteamID} , {card.CardID} ,  {card.LevelRequirement == 0});",
+                    Conn).ExecuteScalarAsync();
             }
 
             Logging.Debug($"Giving {steamName} the battlepass");
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.47f)), loadingText: "LOADING BATTLEPASS..."));
-            _ = await new MySqlCommand($"INSERT IGNORE INTO `{PLAYERS_BATTLEPASS}` (`SteamID` , `ClaimedFreeRewards` , `ClaimedPremiumRewards`) VALUES ({player.CSteamID} , '' , '');", Conn).ExecuteScalarAsync();
+            TaskDispatcher.QueueOnMainThread(() =>
+                Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(96 * 0.47f)), "LOADING BATTLEPASS..."));
+            _ = await new MySqlCommand(
+                $"INSERT IGNORE INTO `{PLAYERS_BATTLEPASS}` (`SteamID` , `ClaimedFreeRewards` , `ClaimedPremiumRewards`) VALUES ({player.CSteamID} , '' , '');",
+                Conn).ExecuteScalarAsync();
 
             Logging.Debug($"Giving {steamName} the achievements");
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.5f)), loadingText: "LOADING ACHIEVEMENTS..."));
+            TaskDispatcher.QueueOnMainThread(() =>
+                Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(96 * 0.5f)), "LOADING ACHIEVEMENTS..."));
             foreach (var achievement in Achievements)
-            {
-                _ = await new MySqlCommand($"INSERT IGNORE INTO `{PLAYERS_ACHIEVEMENTS}` (`SteamID`, `AchievementID`) VALUES ({player.CSteamID}, {achievement.AchievementID});", Conn).ExecuteScalarAsync();
-            }
+                _ = await new MySqlCommand(
+                    $"INSERT IGNORE INTO `{PLAYERS_ACHIEVEMENTS}` (`SteamID`, `AchievementID`) VALUES ({player.CSteamID}, {achievement.AchievementID});",
+                    Conn).ExecuteScalarAsync();
 
             var loadoutAmount = Utility.GetLoadoutAmount(player);
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.51f)), loadingText: "LOADING LOADOUTS..."));
+            TaskDispatcher.QueueOnMainThread(() =>
+                Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(96 * 0.51f)), "LOADING LOADOUTS..."));
             Logging.Debug($"{steamName} should have {loadoutAmount} loadouts, adding them");
             var data = Plugin.Instance.Data.ConvertLoadoutToJson(DefaultLoadout);
             for (var i = 1; i <= loadoutAmount; i++)
-            {
-                _ = await new MySqlCommand($"INSERT IGNORE INTO `{PLAYERS_LOADOUTS}` (`SteamID` , `LoadoutID` , `IsActive` , `Loadout`) VALUES ({player.CSteamID}, {i}, {i == 1}, '{data}');", Conn).ExecuteScalarAsync();
-            }
+                _ = await new MySqlCommand(
+                    $"INSERT IGNORE INTO `{PLAYERS_LOADOUTS}` (`SteamID` , `LoadoutID` , `IsActive` , `Loadout`) VALUES ({player.CSteamID}, {i}, {i == 1}, '{data}');",
+                    Conn).ExecuteScalarAsync();
         }
         catch (Exception ex)
         {
-            Logger.Log($"Error adding player with Steam ID {player.CSteamID}, Steam Name {steamName}, avatar link {avatarLink}");
+            Logger.Log(
+                $"Error adding player with Steam ID {player.CSteamID}, Steam Name {steamName}, avatar link {avatarLink}");
             Logger.Log(ex);
         }
         finally
@@ -1893,9 +1646,11 @@ public class DatabaseManager
         try
         {
             Logging.Debug($"Getting data for {player.CharacterName} from the main table");
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.6f)), loadingText: "PREPARING PLAYER DATA..."));
+            TaskDispatcher.QueueOnMainThread(() =>
+                Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(96 * 0.6f)), "PREPARING PLAYER DATA..."));
             await Conn.OpenAsync();
-            var rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
+            var rdr = (MySqlDataReader)await new MySqlCommand(
+                $"SELECT * FROM `{PLAYERS}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
             try
             {
                 while (await rdr.ReadAsync())
@@ -1904,147 +1659,71 @@ public class DatabaseManager
                     var avatarLink = rdr[2].ToString();
                     var countryCode = rdr[3].ToString();
 
-                    if (!bool.TryParse(rdr[4].ToString(), out var hideFlag))
-                    {
-                        continue;
-                    }
+                    if (!bool.TryParse(rdr[4].ToString(), out var hideFlag)) continue;
 
-                    if (!int.TryParse(rdr[5].ToString(), out var xp))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[5].ToString(), out var xp)) continue;
 
-                    if (!int.TryParse(rdr[6].ToString(), out var level))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[6].ToString(), out var level)) continue;
 
-                    if (!int.TryParse(rdr[7].ToString(), out var credits))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[7].ToString(), out var credits)) continue;
 
-                    if (!int.TryParse(rdr[8].ToString(), out var scrap))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[8].ToString(), out var scrap)) continue;
 
-                    if (!int.TryParse(rdr[9].ToString(), out var coins))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[9].ToString(), out var coins)) continue;
 
-                    if (!int.TryParse(rdr[10].ToString(), out var kills))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[10].ToString(), out var kills)) continue;
 
-                    if (!int.TryParse(rdr[11].ToString(), out var headshotKills))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[11].ToString(), out var headshotKills)) continue;
 
-                    if (!int.TryParse(rdr[12].ToString(), out var highestKillstreak))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[12].ToString(), out var highestKillstreak)) continue;
 
-                    if (!int.TryParse(rdr[13].ToString(), out var highestMultiKills))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[13].ToString(), out var highestMultiKills)) continue;
 
-                    if (!int.TryParse(rdr[14].ToString(), out var killsConfirmed))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[14].ToString(), out var killsConfirmed)) continue;
 
-                    if (!int.TryParse(rdr[15].ToString(), out var killsDenied))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[15].ToString(), out var killsDenied)) continue;
 
-                    if (!int.TryParse(rdr[16].ToString(), out var flagsCaptured))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[16].ToString(), out var flagsCaptured)) continue;
 
-                    if (!int.TryParse(rdr[17].ToString(), out var flagsSaved))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[17].ToString(), out var flagsSaved)) continue;
 
-                    if (!int.TryParse(rdr[18].ToString(), out var areasTaken))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[18].ToString(), out var areasTaken)) continue;
 
-                    if (!int.TryParse(rdr[19].ToString(), out var deaths))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[19].ToString(), out var deaths)) continue;
 
-                    if (!bool.TryParse(rdr[20].ToString(), out var music))
-                    {
-                        continue;
-                    }
+                    if (!bool.TryParse(rdr[20].ToString(), out var music)) continue;
 
-                    if (!bool.TryParse(rdr[21].ToString(), out var isMuted))
-                    {
-                        continue;
-                    }
+                    if (!bool.TryParse(rdr[21].ToString(), out var isMuted)) continue;
 
-                    if (!long.TryParse(rdr[22].ToString(), out var muteUnixSeconds))
-                    {
-                        continue;
-                    }
+                    if (!long.TryParse(rdr[22].ToString(), out var muteUnixSeconds)) continue;
 
                     var muteExpiry = DateTimeOffset.FromUnixTimeSeconds(muteUnixSeconds);
 
-                    if (!bool.TryParse(rdr[23].ToString(), out var hasBattlepass))
-                    {
-                        continue;
-                    }
+                    if (!bool.TryParse(rdr[23].ToString(), out var hasBattlepass)) continue;
 
-                    if (!float.TryParse(rdr[24].ToString(), out var xpBooster))
-                    {
-                        continue;
-                    }
+                    if (!float.TryParse(rdr[24].ToString(), out var xpBooster)) continue;
 
-                    if (!float.TryParse(rdr[25].ToString(), out var bpBooster))
-                    {
-                        continue;
-                    }
+                    if (!float.TryParse(rdr[25].ToString(), out var bpBooster)) continue;
 
-                    if (!float.TryParse(rdr[26].ToString(), out var gunXPBooster))
-                    {
-                        continue;
-                    }
+                    if (!float.TryParse(rdr[26].ToString(), out var gunXPBooster)) continue;
 
-                    if (!bool.TryParse(rdr[27].ToString(), out var hasPrime))
-                    {
-                        continue;
-                    }
+                    if (!bool.TryParse(rdr[27].ToString(), out var hasPrime)) continue;
 
-                    if (!long.TryParse(rdr[28].ToString(), out var primeExpiryUnixSeconds))
-                    {
-                        continue;
-                    }
+                    if (!long.TryParse(rdr[28].ToString(), out var primeExpiryUnixSeconds)) continue;
 
                     var primeExpiry = DateTimeOffset.FromUnixTimeSeconds(primeExpiryUnixSeconds);
 
-                    if (!long.TryParse(rdr[29].ToString(), out var primeLastDailyRewardUnixSeconds))
-                    {
-                        continue;
-                    }
+                    if (!long.TryParse(rdr[29].ToString(), out var primeLastDailyRewardUnixSeconds)) continue;
 
                     var primeLastDailyReward = DateTimeOffset.FromUnixTimeSeconds(primeLastDailyRewardUnixSeconds);
-                    if (PlayerData.ContainsKey(player.CSteamID))
-                    {
-                        _ = PlayerData.Remove(player.CSteamID);
-                    }
+                    if (PlayerData.ContainsKey(player.CSteamID)) _ = PlayerData.Remove(player.CSteamID);
 
-                    PlayerData.Add(player.CSteamID, new PlayerData(player.CSteamID, steamName, avatarLink, countryCode, hideFlag, xp, level, credits, scrap, coins, kills, headshotKills, highestKillstreak, highestMultiKills, killsConfirmed, killsDenied, flagsCaptured, flagsSaved, areasTaken, deaths, music, isMuted, muteExpiry, hasBattlepass, xpBooster, bpBooster, gunXPBooster, hasPrime, primeExpiry, primeLastDailyReward));
+                    PlayerData.Add(player.CSteamID,
+                        new(player.CSteamID, steamName, avatarLink, countryCode, hideFlag, xp, level, credits, scrap,
+                            coins, kills, headshotKills, highestKillstreak, highestMultiKills, killsConfirmed,
+                            killsDenied, flagsCaptured, flagsSaved, areasTaken, deaths, music, isMuted, muteExpiry,
+                            hasBattlepass, xpBooster, bpBooster, gunXPBooster, hasPrime, primeExpiry,
+                            primeLastDailyReward));
                 }
             }
             catch (Exception ex)
@@ -2060,7 +1739,9 @@ public class DatabaseManager
             Logging.Debug($"Getting all time data for {player.CharacterName} from the all time table");
             if (PlayerData.TryGetValue(player.CSteamID, out var playerData))
             {
-                LeaderboardData leaderboardData = new(player.CSteamID, playerData.SteamName, playerData.CountryCode, playerData.HideFlag, playerData.Level, playerData.HasPrime, playerData.Kills, playerData.HeadshotKills, playerData.Deaths);
+                LeaderboardData leaderboardData = new(player.CSteamID, playerData.SteamName, playerData.CountryCode,
+                    playerData.HideFlag, playerData.Level, playerData.HasPrime, playerData.Kills,
+                    playerData.HeadshotKills, playerData.Deaths);
                 if (!PlayerAllTimeLeaderboardLookup.ContainsKey(player.CSteamID))
                 {
                     PlayerAllTimeLeaderboardLookup.Add(player.CSteamID, leaderboardData);
@@ -2070,33 +1751,26 @@ public class DatabaseManager
             }
 
             Logging.Debug($"Getting leaderboard daily data for {player.CharacterName} from the daily table");
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.65f)), loadingText: "PREPARING LEADERBOARD DATA..."));
-            rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS_LEADERBOARD_DAILY}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
+            TaskDispatcher.QueueOnMainThread(() =>
+                Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(96 * 0.65f)),
+                    "PREPARING LEADERBOARD DATA..."));
+            rdr = (MySqlDataReader)await new MySqlCommand(
+                    $"SELECT * FROM `{PLAYERS_LEADERBOARD_DAILY}` WHERE `SteamID` = {player.CSteamID};", Conn)
+                .ExecuteReaderAsync();
             try
             {
                 while (await rdr.ReadAsync())
                 {
-                    if (!PlayerData.TryGetValue(player.CSteamID, out var data))
-                    {
-                        continue;
-                    }
+                    if (!PlayerData.TryGetValue(player.CSteamID, out var data)) continue;
 
-                    if (!int.TryParse(rdr[1].ToString(), out var kills))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[1].ToString(), out var kills)) continue;
 
-                    if (!int.TryParse(rdr[2].ToString(), out var headshotKills))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[2].ToString(), out var headshotKills)) continue;
 
-                    if (!int.TryParse(rdr[3].ToString(), out var deaths))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[3].ToString(), out var deaths)) continue;
 
-                    LeaderboardData leaderboardData = new(player.CSteamID, data.SteamName, data.CountryCode, data.HideFlag, data.Level, data.HasPrime, kills, headshotKills, deaths);
+                    LeaderboardData leaderboardData = new(player.CSteamID, data.SteamName, data.CountryCode,
+                        data.HideFlag, data.Level, data.HasPrime, kills, headshotKills, deaths);
                     if (!PlayerDailyLeaderboardLookup.ContainsKey(player.CSteamID))
                     {
                         PlayerDailyLeaderboardLookup.Add(player.CSteamID, leaderboardData);
@@ -2115,32 +1789,23 @@ public class DatabaseManager
             }
 
             Logging.Debug($"Getting leaderboard weekly data for {player.CharacterName} from the weekly table");
-            rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS_LEADERBOARD_WEEKLY}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
+            rdr = (MySqlDataReader)await new MySqlCommand(
+                    $"SELECT * FROM `{PLAYERS_LEADERBOARD_WEEKLY}` WHERE `SteamID` = {player.CSteamID};", Conn)
+                .ExecuteReaderAsync();
             try
             {
                 while (await rdr.ReadAsync())
                 {
-                    if (!PlayerData.TryGetValue(player.CSteamID, out var data))
-                    {
-                        continue;
-                    }
+                    if (!PlayerData.TryGetValue(player.CSteamID, out var data)) continue;
 
-                    if (!int.TryParse(rdr[1].ToString(), out var kills))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[1].ToString(), out var kills)) continue;
 
-                    if (!int.TryParse(rdr[2].ToString(), out var headshotKills))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[2].ToString(), out var headshotKills)) continue;
 
-                    if (!int.TryParse(rdr[3].ToString(), out var deaths))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[3].ToString(), out var deaths)) continue;
 
-                    LeaderboardData leaderboardData = new(player.CSteamID, data.SteamName, data.CountryCode, data.HideFlag, data.Level, data.HasPrime, kills, headshotKills, deaths);
+                    LeaderboardData leaderboardData = new(player.CSteamID, data.SteamName, data.CountryCode,
+                        data.HideFlag, data.Level, data.HasPrime, kills, headshotKills, deaths);
                     if (!PlayerWeeklyLeaderboardLookup.ContainsKey(player.CSteamID))
                     {
                         PlayerWeeklyLeaderboardLookup.Add(player.CSteamID, leaderboardData);
@@ -2159,32 +1824,23 @@ public class DatabaseManager
             }
 
             Logging.Debug($"Getting leaderboard seasonal data for {player.CharacterName} from the seasonal table");
-            rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS_LEADERBOARD_SEASONAL}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
+            rdr = (MySqlDataReader)await new MySqlCommand(
+                    $"SELECT * FROM `{PLAYERS_LEADERBOARD_SEASONAL}` WHERE `SteamID` = {player.CSteamID};", Conn)
+                .ExecuteReaderAsync();
             try
             {
                 while (await rdr.ReadAsync())
                 {
-                    if (!PlayerData.TryGetValue(player.CSteamID, out var data))
-                    {
-                        continue;
-                    }
+                    if (!PlayerData.TryGetValue(player.CSteamID, out var data)) continue;
 
-                    if (!int.TryParse(rdr[1].ToString(), out var kills))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[1].ToString(), out var kills)) continue;
 
-                    if (!int.TryParse(rdr[2].ToString(), out var headshotKills))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[2].ToString(), out var headshotKills)) continue;
 
-                    if (!int.TryParse(rdr[3].ToString(), out var deaths))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[3].ToString(), out var deaths)) continue;
 
-                    LeaderboardData leaderboardData = new(player.CSteamID, data.SteamName, data.CountryCode, data.HideFlag, data.Level, data.HasPrime, kills, headshotKills, deaths);
+                    LeaderboardData leaderboardData = new(player.CSteamID, data.SteamName, data.CountryCode,
+                        data.HideFlag, data.Level, data.HasPrime, kills, headshotKills, deaths);
                     if (!PlayerSeasonalLeaderboardLookup.ContainsKey(player.CSteamID))
                     {
                         PlayerSeasonalLeaderboardLookup.Add(player.CSteamID, leaderboardData);
@@ -2203,8 +1859,10 @@ public class DatabaseManager
             }
 
             Logging.Debug($"Getting quests for {player.CharacterName}");
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.7f)), loadingText: "PREPARING QUESTS..."));
-            rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS_QUESTS}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
+            TaskDispatcher.QueueOnMainThread(() =>
+                Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(96 * 0.7f)), "PREPARING QUESTS..."));
+            rdr = (MySqlDataReader)await new MySqlCommand(
+                $"SELECT * FROM `{PLAYERS_QUESTS}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
             try
             {
                 List<PlayerQuest> playerQuests = new();
@@ -2212,10 +1870,7 @@ public class DatabaseManager
 
                 while (await rdr.ReadAsync())
                 {
-                    if (!int.TryParse(rdr[1].ToString(), out var questID))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[1].ToString(), out var questID)) continue;
 
                     if (!QuestsSearchByID.TryGetValue(questID, out var quest))
                     {
@@ -2223,24 +1878,16 @@ public class DatabaseManager
                         continue;
                     }
 
-                    if (!int.TryParse(rdr[2].ToString(), out var amount))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[2].ToString(), out var amount)) continue;
 
-                    if (!long.TryParse(rdr[3].ToString(), out var questEndDate))
-                    {
-                        continue;
-                    }
+                    if (!long.TryParse(rdr[3].ToString(), out var questEndDate)) continue;
 
                     var questEndDateTime = DateTimeOffset.FromUnixTimeSeconds(questEndDate);
 
                     PlayerQuest playerQuest = new(player.CSteamID, quest, amount, questEndDateTime);
                     playerQuests.Add(playerQuest);
                     if (!playerQuestsSearchByType.ContainsKey(quest.QuestType))
-                    {
-                        playerQuestsSearchByType.Add(quest.QuestType, new List<PlayerQuest>());
-                    }
+                        playerQuestsSearchByType.Add(quest.QuestType, new());
 
                     playerQuestsSearchByType[quest.QuestType].Add(playerQuest);
                 }
@@ -2255,7 +1902,8 @@ public class DatabaseManager
                     playerQuests.Clear();
                     playerQuestsSearchByType.Clear();
 
-                    _ = await new MySqlCommand($"DELETE FROM `{PLAYERS_QUESTS}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteScalarAsync();
+                    _ = await new MySqlCommand($"DELETE FROM `{PLAYERS_QUESTS}` WHERE `SteamID` = {player.CSteamID};",
+                        Conn).ExecuteScalarAsync();
                     var expiryDate = ServerOptions.DailyLeaderboardWipe;
                     List<Quest> questsToAdd = new();
                     for (var i = 0; i < 6; i++)
@@ -2270,12 +1918,12 @@ public class DatabaseManager
                         PlayerQuest playerQuest = new(player.CSteamID, quest, 0, expiryDate);
                         playerQuests.Add(playerQuest);
                         if (!playerQuestsSearchByType.ContainsKey(quest.QuestType))
-                        {
-                            playerQuestsSearchByType.Add(quest.QuestType, new List<PlayerQuest>());
-                        }
+                            playerQuestsSearchByType.Add(quest.QuestType, new());
 
                         playerQuestsSearchByType[quest.QuestType].Add(playerQuest);
-                        _ = await new MySqlCommand($"INSERT INTO `{PLAYERS_QUESTS}` (`SteamID` , `QuestID`, `Amount`, `QuestEnd`) VALUES ({player.CSteamID}, {quest.QuestID}, 0, {expiryDate.ToUnixTimeSeconds()});", Conn).ExecuteScalarAsync();
+                        _ = await new MySqlCommand(
+                            $"INSERT INTO `{PLAYERS_QUESTS}` (`SteamID` , `QuestID`, `Amount`, `QuestEnd`) VALUES ({player.CSteamID}, {quest.QuestID}, 0, {expiryDate.ToUnixTimeSeconds()});",
+                            Conn).ExecuteScalarAsync();
                     }
 
                     Logging.Debug($"Generated {playerQuests.Count} quests for player");
@@ -2283,7 +1931,6 @@ public class DatabaseManager
 
                 playerData.Quests = playerQuests;
                 playerData.QuestsSearchByType = playerQuestsSearchByType;
-
             }
             catch (Exception ex)
             {
@@ -2295,9 +1942,12 @@ public class DatabaseManager
                 rdr.Close();
             }
 
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.73f)), loadingText: "PREPARING ACHIEVEMENTS..."));
+            TaskDispatcher.QueueOnMainThread(() =>
+                Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(96 * 0.73f)), "PREPARING ACHIEVEMENTS..."));
             Logging.Debug($"Getting achievements for {player.CharacterName}");
-            rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS_ACHIEVEMENTS}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
+            rdr = (MySqlDataReader)await new MySqlCommand(
+                    $"SELECT * FROM `{PLAYERS_ACHIEVEMENTS}` WHERE `SteamID` = {player.CSteamID};", Conn)
+                .ExecuteReaderAsync();
             try
             {
                 List<PlayerAchievement> achievements = new();
@@ -2306,43 +1956,32 @@ public class DatabaseManager
 
                 while (await rdr.ReadAsync())
                 {
-                    if (!int.TryParse(rdr[1].ToString(), out var achievementID))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[1].ToString(), out var achievementID)) continue;
 
                     if (!AchievementsSearchByID.TryGetValue(achievementID, out var achievement))
                     {
-                        Logging.Debug($"Error finding achievement with id {achievementID} for {player.CharacterName}, ignoring");
+                        Logging.Debug(
+                            $"Error finding achievement with id {achievementID} for {player.CharacterName}, ignoring");
                         continue;
                     }
 
-                    if (!int.TryParse(rdr[2].ToString(), out var currentTier))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[2].ToString(), out var currentTier)) continue;
 
-                    if (!int.TryParse(rdr[3].ToString(), out var amount))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[3].ToString(), out var amount)) continue;
 
                     PlayerAchievement playerAchievement = new(player.CSteamID, achievement, currentTier, amount);
                     if (!achievementsSearchByID.ContainsKey(achievementID))
                     {
                         achievementsSearchByID.Add(achievementID, playerAchievement);
                         if (!achievementsSearchByType.ContainsKey(achievement.AchievementType))
-                        {
                             achievementsSearchByType.Add(achievement.AchievementType, new());
-                        }
 
                         achievementsSearchByType[achievement.AchievementType].Add(playerAchievement);
                         achievements.Add(playerAchievement);
                     }
                     else
-                    {
-                        Logging.Debug($"Error, achievement {achievementID} already exists for {player.CharacterName}, ignoring");
-                    }
+                        Logging.Debug(
+                            $"Error, achievement {achievementID} already exists for {player.CharacterName}, ignoring");
                 }
 
                 Logging.Debug($"Got {achievements.Count} achievements registered to player");
@@ -2362,27 +2001,26 @@ public class DatabaseManager
 
             playerData.SetAchievementXPBooster();
             Logging.Debug($"Getting battlepass for {player.CharacterName}");
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.8f)), loadingText: "PREPARING BATTLEPASS..."));
-            rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS_BATTLEPASS}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
+            TaskDispatcher.QueueOnMainThread(() =>
+                Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(96 * 0.8f)), "PREPARING BATTLEPASS..."));
+            rdr = (MySqlDataReader)await new MySqlCommand(
+                    $"SELECT * FROM `{PLAYERS_BATTLEPASS}` WHERE `SteamID` = {player.CSteamID};", Conn)
+                .ExecuteReaderAsync();
             try
             {
                 while (await rdr.ReadAsync())
                 {
-                    if (!int.TryParse(rdr[1].ToString(), out var currentTier))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[1].ToString(), out var currentTier)) continue;
 
-                    if (!int.TryParse(rdr[2].ToString(), out var xp))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[2].ToString(), out var xp)) continue;
 
                     var claimedFreeRewards = rdr[3].GetHashSetIntFromReaderResult();
                     var claimedPremiumRewards = rdr[4].GetHashSetIntFromReaderResult();
 
-                    Logging.Debug($"Got battlepass with current tier {currentTier}, xp {xp} and claimed free rewards {claimedFreeRewards.Count} and claimed premium rewards {claimedPremiumRewards.Count} registered to the player");
-                    playerData.Battlepass = new PlayerBattlepass(player.CSteamID, currentTier, xp, claimedFreeRewards, claimedPremiumRewards);
+                    Logging.Debug(
+                        $"Got battlepass with current tier {currentTier}, xp {xp} and claimed free rewards {claimedFreeRewards.Count} and claimed premium rewards {claimedPremiumRewards.Count} registered to the player");
+                    playerData.Battlepass = new(player.CSteamID, currentTier, xp, claimedFreeRewards,
+                        claimedPremiumRewards);
                 }
             }
             catch (Exception ex)
@@ -2415,16 +2053,15 @@ public class DatabaseManager
             Dictionary<int, Loadout> loadouts = new();
 
             Logging.Debug($"Getting guns for {player.CharacterName}");
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.82f)), loadingText: "PREPARING GUNS..."));
-            rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS_GUNS}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
+            TaskDispatcher.QueueOnMainThread(() =>
+                Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(96 * 0.82f)), "PREPARING GUNS..."));
+            rdr = (MySqlDataReader)await new MySqlCommand(
+                $"SELECT * FROM `{PLAYERS_GUNS}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
             try
             {
                 while (await rdr.ReadAsync())
                 {
-                    if (!ushort.TryParse(rdr[1].ToString(), out var gunID))
-                    {
-                        continue;
-                    }
+                    if (!ushort.TryParse(rdr[1].ToString(), out var gunID)) continue;
 
                     if (!Guns.TryGetValue(gunID, out var gun))
                     {
@@ -2432,40 +2069,21 @@ public class DatabaseManager
                         continue;
                     }
 
-                    if (!int.TryParse(rdr[2].ToString(), out var level))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[2].ToString(), out var level)) continue;
 
-                    if (!int.TryParse(rdr[3].ToString(), out var xp))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[3].ToString(), out var xp)) continue;
 
-                    if (!int.TryParse(rdr[4].ToString(), out var gunKills))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[4].ToString(), out var gunKills)) continue;
 
-                    if (!bool.TryParse(rdr[5].ToString(), out var isBought))
-                    {
-                        continue;
-                    }
+                    if (!bool.TryParse(rdr[5].ToString(), out var isBought)) continue;
 
-                    if (!bool.TryParse(rdr[6].ToString(), out var isUnlocked))
-                    {
-                        continue;
-                    }
+                    if (!bool.TryParse(rdr[6].ToString(), out var isUnlocked)) continue;
 
                     var attachments = Utility.GetAttachmentsFromString(rdr[7].ToString(), gun, player);
                     if (!guns.ContainsKey(gunID))
-                    {
-                        guns.Add(gunID, new LoadoutGun(gun, level, xp, gunKills, isBought, isUnlocked, attachments));
-                    }
+                        guns.Add(gunID, new(gun, level, xp, gunKills, isBought, isUnlocked, attachments));
                     else
-                    {
                         Logging.Debug($"Found a duplicate gun with id {gunID} registered for the player, ignoring it");
-                    }
                 }
 
                 Logging.Debug($"Successfully got {guns.Count} guns registered to the player");
@@ -2481,7 +2099,8 @@ public class DatabaseManager
             }
 
             Logging.Debug($"Checking gun attachments for {player.CharacterName}");
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.84f)), loadingText: "PREPARING ATTACHMENTS..."));
+            TaskDispatcher.QueueOnMainThread(() =>
+                Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(96 * 0.84f)), "PREPARING ATTACHMENTS..."));
             try
             {
                 foreach (var gun in guns.Values)
@@ -2490,12 +2109,16 @@ public class DatabaseManager
                     {
                         if (!gun.Attachments.ContainsKey(rewardAttachment.Value.AttachmentID))
                         {
-                            gun.Attachments.Add(rewardAttachment.Value.AttachmentID, new LoadoutAttachment(rewardAttachment.Value, rewardAttachment.Key, false, false));
-                            Logging.Debug($"Gun with name {gun.Gun.GunName} doesn't have a reward attachment with id {rewardAttachment.Value.AttachmentID} that comes with the gun, adding it for {player.CharacterName}");
+                            gun.Attachments.Add(rewardAttachment.Value.AttachmentID,
+                                new(rewardAttachment.Value, rewardAttachment.Key, false, false));
+                            Logging.Debug(
+                                $"Gun with name {gun.Gun.GunName} doesn't have a reward attachment with id {rewardAttachment.Value.AttachmentID} that comes with the gun, adding it for {player.CharacterName}");
                         }
                     }
 
-                    _ = await new MySqlCommand($"UPDATE `{PLAYERS_GUNS}` SET `Attachments` = '{Utility.GetStringFromAttachments(gun.Attachments.Values.ToList())}' WHERE `SteamID` = {player.CSteamID} AND `GunID` = {gun.Gun.GunID};", Conn).ExecuteScalarAsync();
+                    _ = await new MySqlCommand(
+                        $"UPDATE `{PLAYERS_GUNS}` SET `Attachments` = '{Utility.GetStringFromAttachments(gun.Attachments.Values.ToList())}' WHERE `SteamID` = {player.CSteamID} AND `GunID` = {gun.Gun.GunID};",
+                        Conn).ExecuteScalarAsync();
                 }
             }
             catch (Exception ex)
@@ -2505,8 +2128,12 @@ public class DatabaseManager
             }
 
             Logging.Debug($"Getting gun skins for {player.CharacterName}");
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.86f)), loadingText: "PREPARING SKINS..."));
-            var gunSkinsTxt = await new MySqlCommand($"SELECT `SkinIDs` FROM `{PLAYERS_GUNS_SKINS}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteScalarAsync();
+            TaskDispatcher.QueueOnMainThread(() =>
+                Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(96 * 0.86f)), "PREPARING SKINS..."));
+            var gunSkinsTxt =
+                await new MySqlCommand(
+                        $"SELECT `SkinIDs` FROM `{PLAYERS_GUNS_SKINS}` WHERE `SteamID` = {player.CSteamID};", Conn)
+                    .ExecuteScalarAsync();
             if (gunSkinsTxt is string gunSkinsText)
             {
                 foreach (var id in gunSkinsText.GetIntListFromReaderResult())
@@ -2519,19 +2146,16 @@ public class DatabaseManager
 
                     if (gunSkinsSearchByID.ContainsKey(id))
                     {
-                        Logging.Debug($"Found a duplicate gun skin with id {id} registered for {player.CharacterName}, ignoring this");
+                        Logging.Debug(
+                            $"Found a duplicate gun skin with id {id} registered for {player.CharacterName}, ignoring this");
                         continue;
                     }
 
                     gunSkinsSearchByID.Add(id, skin);
                     if (gunSkinsSearchByGunID.TryGetValue(skin.Gun.GunID, out var gunSkins))
-                    {
                         gunSkins.Add(skin);
-                    }
                     else
-                    {
-                        gunSkinsSearchByGunID.Add(skin.Gun.GunID, new List<GunSkin> { skin });
-                    }
+                        gunSkinsSearchByGunID.Add(skin.Gun.GunID, new() { skin });
 
                     gunSkinsSearchBySkinID.Add(skin.SkinID, skin);
                 }
@@ -2540,41 +2164,33 @@ public class DatabaseManager
             }
 
             Logging.Debug($"Getting gun charms for {player.CharacterName}");
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.88f)), loadingText: "PREPARING CHARMS..."));
-            rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS_GUNS_CHARMS}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
+            TaskDispatcher.QueueOnMainThread(() =>
+                Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(96 * 0.88f)), "PREPARING CHARMS..."));
+            rdr = (MySqlDataReader)await new MySqlCommand(
+                    $"SELECT * FROM `{PLAYERS_GUNS_CHARMS}` WHERE `SteamID` = {player.CSteamID};", Conn)
+                .ExecuteReaderAsync();
             try
             {
                 while (await rdr.ReadAsync())
                 {
-                    if (!ushort.TryParse(rdr[1].ToString(), out var charmID))
-                    {
-                        continue;
-                    }
+                    if (!ushort.TryParse(rdr[1].ToString(), out var charmID)) continue;
 
                     if (!GunCharms.TryGetValue(charmID, out var gunCharm))
                     {
-                        Logging.Debug($"Error finding gun charm with id {charmID} for {player.CharacterName}, ignoring it");
+                        Logging.Debug(
+                            $"Error finding gun charm with id {charmID} for {player.CharacterName}, ignoring it");
                         continue;
                     }
 
-                    if (!bool.TryParse(rdr[2].ToString(), out var isBought))
-                    {
-                        continue;
-                    }
+                    if (!bool.TryParse(rdr[2].ToString(), out var isBought)) continue;
 
-                    if (!bool.TryParse(rdr[3].ToString(), out var isUnlocked))
-                    {
-                        continue;
-                    }
+                    if (!bool.TryParse(rdr[3].ToString(), out var isUnlocked)) continue;
 
                     if (!gunCharms.ContainsKey(charmID))
-                    {
-                        gunCharms.Add(charmID, new LoadoutGunCharm(gunCharm, isBought, isUnlocked));
-                    }
+                        gunCharms.Add(charmID, new(gunCharm, isBought, isUnlocked));
                     else
-                    {
-                        Logging.Debug($"Found duplicate gun charm with id {charmID} for {player.CharacterName}, ignoring it");
-                    }
+                        Logging.Debug(
+                            $"Found duplicate gun charm with id {charmID} for {player.CharacterName}, ignoring it");
                 }
 
                 Logging.Debug($"Successfully got {gunCharms.Count} for {player.CharacterName}");
@@ -2590,16 +2206,15 @@ public class DatabaseManager
             }
 
             Logging.Debug($"Getting knives for {player.CharacterName}");
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.9f)), loadingText: "PREPARING KNIVES..."));
-            rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS_KNIVES}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
+            TaskDispatcher.QueueOnMainThread(() =>
+                Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(96 * 0.9f)), "PREPARING KNIVES..."));
+            rdr = (MySqlDataReader)await new MySqlCommand(
+                $"SELECT * FROM `{PLAYERS_KNIVES}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
             try
             {
                 while (await rdr.ReadAsync())
                 {
-                    if (!ushort.TryParse(rdr[1].ToString(), out var knifeID))
-                    {
-                        continue;
-                    }
+                    if (!ushort.TryParse(rdr[1].ToString(), out var knifeID)) continue;
 
                     if (!Knives.TryGetValue(knifeID, out var knife))
                     {
@@ -2607,29 +2222,17 @@ public class DatabaseManager
                         continue;
                     }
 
-                    if (!int.TryParse(rdr[2].ToString(), out var knifeKills))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[2].ToString(), out var knifeKills)) continue;
 
-                    if (!bool.TryParse(rdr[3].ToString(), out var isBought))
-                    {
-                        continue;
-                    }
+                    if (!bool.TryParse(rdr[3].ToString(), out var isBought)) continue;
 
-                    if (!bool.TryParse(rdr[4].ToString(), out var isUnlocked))
-                    {
-                        continue;
-                    }
+                    if (!bool.TryParse(rdr[4].ToString(), out var isUnlocked)) continue;
 
                     if (!knives.ContainsKey(knifeID))
-                    {
-                        knives.Add(knifeID, new LoadoutKnife(knife, knifeKills, isBought, isUnlocked));
-                    }
+                        knives.Add(knifeID, new(knife, knifeKills, isBought, isUnlocked));
                     else
-                    {
-                        Logging.Debug($"Found a duplicate knife with id {knifeID} registered for {player.CharacterName}, ignoring it");
-                    }
+                        Logging.Debug(
+                            $"Found a duplicate knife with id {knifeID} registered for {player.CharacterName}, ignoring it");
                 }
 
                 Logging.Debug($"Successfully got {knives.Count} knives for {player.CharacterName}");
@@ -2645,16 +2248,15 @@ public class DatabaseManager
             }
 
             Logging.Debug($"Getting perks for {player.CharacterName}");
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.91f)), loadingText: "PREPARING PERKS..."));
-            rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS_PERKS}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
+            TaskDispatcher.QueueOnMainThread(() =>
+                Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(96 * 0.91f)), "PREPARING PERKS..."));
+            rdr = (MySqlDataReader)await new MySqlCommand(
+                $"SELECT * FROM `{PLAYERS_PERKS}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
             try
             {
                 while (await rdr.ReadAsync())
                 {
-                    if (!int.TryParse(rdr[1].ToString(), out var perkID))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[1].ToString(), out var perkID)) continue;
 
                     if (!Perks.TryGetValue(perkID, out var perk))
                     {
@@ -2662,24 +2264,15 @@ public class DatabaseManager
                         continue;
                     }
 
-                    if (!bool.TryParse(rdr[2].ToString(), out var isBought))
-                    {
-                        continue;
-                    }
+                    if (!bool.TryParse(rdr[2].ToString(), out var isBought)) continue;
 
-                    if (!bool.TryParse(rdr[3].ToString(), out var isUnlocked))
-                    {
-                        continue;
-                    }
+                    if (!bool.TryParse(rdr[3].ToString(), out var isUnlocked)) continue;
 
                     if (!perks.ContainsKey(perkID))
-                    {
-                        perks.Add(perkID, new LoadoutPerk(perk, isBought, isUnlocked));
-                    }
+                        perks.Add(perkID, new(perk, isBought, isUnlocked));
                     else
-                    {
-                        Logging.Debug($"Found a duplicate perk with id {perkID} registered for {player.CharacterName}, ignoring it");
-                    }
+                        Logging.Debug(
+                            $"Found a duplicate perk with id {perkID} registered for {player.CharacterName}, ignoring it");
                 }
 
                 Logging.Debug($"Successfully got {perks.Count} perks for {player.CharacterName}");
@@ -2695,46 +2288,34 @@ public class DatabaseManager
             }
 
             Logging.Debug($"Getting gadgets for {player.CharacterName}");
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.93f)), loadingText: "PREPARING GADGETS..."));
-            rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS_GADGETS}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
+            TaskDispatcher.QueueOnMainThread(() =>
+                Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(96 * 0.93f)), "PREPARING GADGETS..."));
+            rdr = (MySqlDataReader)await new MySqlCommand(
+                $"SELECT * FROM `{PLAYERS_GADGETS}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
             try
             {
                 while (await rdr.ReadAsync())
                 {
-                    if (!ushort.TryParse(rdr[1].ToString(), out var gadgetID))
-                    {
-                        continue;
-                    }
+                    if (!ushort.TryParse(rdr[1].ToString(), out var gadgetID)) continue;
 
                     if (!Gadgets.TryGetValue(gadgetID, out var gadget))
                     {
-                        Logging.Debug($"Error finding gadget with id {gadgetID} for {player.CharacterName}, ignoring it");
+                        Logging.Debug(
+                            $"Error finding gadget with id {gadgetID} for {player.CharacterName}, ignoring it");
                         continue;
                     }
 
-                    if (!int.TryParse(rdr[2].ToString(), out var gadgetKills))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[2].ToString(), out var gadgetKills)) continue;
 
-                    if (!bool.TryParse(rdr[3].ToString(), out var isBought))
-                    {
-                        continue;
-                    }
+                    if (!bool.TryParse(rdr[3].ToString(), out var isBought)) continue;
 
-                    if (!bool.TryParse(rdr[4].ToString(), out var isUnlocked))
-                    {
-                        continue;
-                    }
+                    if (!bool.TryParse(rdr[4].ToString(), out var isUnlocked)) continue;
 
                     if (!gadgets.ContainsKey(gadgetID))
-                    {
-                        gadgets.Add(gadgetID, new LoadoutGadget(gadget, gadgetKills, isBought, isUnlocked));
-                    }
+                        gadgets.Add(gadgetID, new(gadget, gadgetKills, isBought, isUnlocked));
                     else
-                    {
-                        Logging.Debug($"Found duplicate gadget with id {gadgetID} registered for {player.CharacterName}, ignoring it");
-                    }
+                        Logging.Debug(
+                            $"Found duplicate gadget with id {gadgetID} registered for {player.CharacterName}, ignoring it");
                 }
 
                 Logging.Debug($"Successfully got {gadgets.Count} for {player.CharacterName}");
@@ -2750,46 +2331,35 @@ public class DatabaseManager
             }
 
             Logging.Debug($"Getting killstreaks for {player.CharacterName}");
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.94f)), loadingText: "PREPARING KILLSTREAKS..."));
-            rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS_KILLSTREAKS}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
+            TaskDispatcher.QueueOnMainThread(() =>
+                Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(96 * 0.94f)), "PREPARING KILLSTREAKS..."));
+            rdr = (MySqlDataReader)await new MySqlCommand(
+                    $"SELECT * FROM `{PLAYERS_KILLSTREAKS}` WHERE `SteamID` = {player.CSteamID};", Conn)
+                .ExecuteReaderAsync();
             try
             {
                 while (await rdr.ReadAsync())
                 {
-                    if (!int.TryParse(rdr[1].ToString(), out var killstreakID))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[1].ToString(), out var killstreakID)) continue;
 
                     if (!Killstreaks.TryGetValue(killstreakID, out var killstreak))
                     {
-                        Logging.Debug($"Error finding killstreak with id {killstreakID} for {player.CharacterName}, ignoring it");
+                        Logging.Debug(
+                            $"Error finding killstreak with id {killstreakID} for {player.CharacterName}, ignoring it");
                         continue;
                     }
 
-                    if (!int.TryParse(rdr[2].ToString(), out var killstreakKills))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[2].ToString(), out var killstreakKills)) continue;
 
-                    if (!bool.TryParse(rdr[3].ToString(), out var isBought))
-                    {
-                        continue;
-                    }
+                    if (!bool.TryParse(rdr[3].ToString(), out var isBought)) continue;
 
-                    if (!bool.TryParse(rdr[4].ToString(), out var isUnlocked))
-                    {
-                        continue;
-                    }
+                    if (!bool.TryParse(rdr[4].ToString(), out var isUnlocked)) continue;
 
                     if (!killstreaks.ContainsKey(killstreakID))
-                    {
-                        killstreaks.Add(killstreakID, new LoadoutKillstreak(killstreak, killstreakKills, isBought, isUnlocked));
-                    }
+                        killstreaks.Add(killstreakID, new(killstreak, killstreakKills, isBought, isUnlocked));
                     else
-                    {
-                        Logging.Debug($"Found a duplicate killstreak with id {killstreakID} for {player.CharacterName}, ignoring it");
-                    }
+                        Logging.Debug(
+                            $"Found a duplicate killstreak with id {killstreakID} for {player.CharacterName}, ignoring it");
                 }
 
                 Logging.Debug($"Successfully got {killstreaks.Count} for {player.CharacterName}");
@@ -2805,16 +2375,15 @@ public class DatabaseManager
             }
 
             Logging.Debug($"Getting cards for {player.CharacterName}");
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.97f)), loadingText: "PREPARING CARDS..."));
-            rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS_CARDS}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
+            TaskDispatcher.QueueOnMainThread(() =>
+                Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(96 * 0.97f)), "PREPARING CARDS..."));
+            rdr = (MySqlDataReader)await new MySqlCommand(
+                $"SELECT * FROM `{PLAYERS_CARDS}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
             try
             {
                 while (await rdr.ReadAsync())
                 {
-                    if (!int.TryParse(rdr[1].ToString(), out var cardID))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[1].ToString(), out var cardID)) continue;
 
                     if (!Cards.TryGetValue(cardID, out var card))
                     {
@@ -2822,24 +2391,14 @@ public class DatabaseManager
                         continue;
                     }
 
-                    if (!bool.TryParse(rdr[2].ToString(), out var isBought))
-                    {
-                        continue;
-                    }
+                    if (!bool.TryParse(rdr[2].ToString(), out var isBought)) continue;
 
-                    if (!bool.TryParse(rdr[3].ToString(), out var isUnlocked))
-                    {
-                        continue;
-                    }
+                    if (!bool.TryParse(rdr[3].ToString(), out var isUnlocked)) continue;
 
                     if (!cards.ContainsKey(cardID))
-                    {
-                        cards.Add(cardID, new LoadoutCard(card, isBought, isUnlocked));
-                    }
+                        cards.Add(cardID, new(card, isBought, isUnlocked));
                     else
-                    {
                         Logging.Debug($"Found duplicate card with id {cardID} for {player.CharacterName}, ignoring it");
-                    }
                 }
 
                 Logging.Debug($"Successfully got {cards.Count} for {player.CharacterName}");
@@ -2855,16 +2414,15 @@ public class DatabaseManager
             }
 
             Logging.Debug($"Getting gloves for {player.CharacterName}");
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.98f)), loadingText: "PREPARING GLOVES..."));
-            rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS_GLOVES}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
+            TaskDispatcher.QueueOnMainThread(() =>
+                Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(96 * 0.98f)), "PREPARING GLOVES..."));
+            rdr = (MySqlDataReader)await new MySqlCommand(
+                $"SELECT * FROM `{PLAYERS_GLOVES}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
             try
             {
                 while (await rdr.ReadAsync())
                 {
-                    if (!int.TryParse(rdr[1].ToString(), out var gloveID))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[1].ToString(), out var gloveID)) continue;
 
                     if (!Gloves.TryGetValue(gloveID, out var glove))
                     {
@@ -2872,24 +2430,15 @@ public class DatabaseManager
                         continue;
                     }
 
-                    if (!bool.TryParse(rdr[2].ToString(), out var isBought))
-                    {
-                        continue;
-                    }
+                    if (!bool.TryParse(rdr[2].ToString(), out var isBought)) continue;
 
-                    if (!bool.TryParse(rdr[3].ToString(), out var isUnlocked))
-                    {
-                        continue;
-                    }
+                    if (!bool.TryParse(rdr[3].ToString(), out var isUnlocked)) continue;
 
                     if (!gloves.ContainsKey(gloveID))
-                    {
-                        gloves.Add(gloveID, new LoadoutGlove(glove, isBought, isUnlocked));
-                    }
+                        gloves.Add(gloveID, new(glove, isBought, isUnlocked));
                     else
-                    {
-                        Logging.Debug($"Found duplicate glove with id {gloveID} for {player.CharacterName}, ignoring it");
-                    }
+                        Logging.Debug(
+                            $"Found duplicate glove with id {gloveID} for {player.CharacterName}, ignoring it");
                 }
 
                 Logging.Debug($"Successfully got {gloves.Count} gloves for {player.CharacterName}");
@@ -2905,151 +2454,124 @@ public class DatabaseManager
             }
 
             Logging.Debug($"Getting loadouts for {player.CharacterName}");
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.99f)), loadingText: "PREPARING LOADOUTS..."));
-            rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS_LOADOUTS}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
+            TaskDispatcher.QueueOnMainThread(() =>
+                Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(96 * 0.99f)), "PREPARING LOADOUTS..."));
+            rdr = (MySqlDataReader)await new MySqlCommand(
+                $"SELECT * FROM `{PLAYERS_LOADOUTS}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
             List<int> updateLoadouts = new();
             try
             {
                 while (await rdr.ReadAsync())
                 {
-                    if (!int.TryParse(rdr[1].ToString(), out var loadoutID))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[1].ToString(), out var loadoutID)) continue;
 
-                    if (!bool.TryParse(rdr[2].ToString(), out var isActive))
-                    {
-                        continue;
-                    }
+                    if (!bool.TryParse(rdr[2].ToString(), out var isActive)) continue;
 
                     if (loadouts.ContainsKey(loadoutID))
                     {
-                        Logging.Debug($"Found a duplicate loadout with id {loadoutID} for {player.CharacterName}, ignoring it");
+                        Logging.Debug(
+                            $"Found a duplicate loadout with id {loadoutID} for {player.CharacterName}, ignoring it");
                         continue;
                     }
 
                     var loadoutData = Plugin.Instance.Data.ConvertLoadoutFromJson(rdr[3].ToString());
                     if (!guns.TryGetValue(loadoutData.Primary, out var primary) && loadoutData.Primary != 0)
                     {
-                        Logging.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a primary with id {loadoutData.Primary} which is not owned by the player, removing primary");
-                        if (!updateLoadouts.Contains(loadoutID))
-                        {
-                            updateLoadouts.Add(loadoutID);
-                        }
+                        Logging.Debug(
+                            $"Loadout with id {loadoutID} for {player.CharacterName} has a primary with id {loadoutData.Primary} which is not owned by the player, removing primary");
+                        if (!updateLoadouts.Contains(loadoutID)) updateLoadouts.Add(loadoutID);
                     }
 
-                    if (!gunCharms.TryGetValue(loadoutData.PrimaryGunCharm, out var primaryGunCharm) && loadoutData.PrimaryGunCharm != 0)
+                    if (!gunCharms.TryGetValue(loadoutData.PrimaryGunCharm, out var primaryGunCharm) &&
+                        loadoutData.PrimaryGunCharm != 0)
                     {
-                        Logging.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a primary gun charm with id {loadoutData.PrimaryGunCharm} which is not owned by the player, not counting this loadout");
-                        if (!updateLoadouts.Contains(loadoutID))
-                        {
-                            updateLoadouts.Add(loadoutID);
-                        }
+                        Logging.Debug(
+                            $"Loadout with id {loadoutID} for {player.CharacterName} has a primary gun charm with id {loadoutData.PrimaryGunCharm} which is not owned by the player, not counting this loadout");
+                        if (!updateLoadouts.Contains(loadoutID)) updateLoadouts.Add(loadoutID);
                     }
 
-                    if (!gunSkinsSearchByID.TryGetValue(loadoutData.PrimarySkin, out var primarySkin) && loadoutData.PrimarySkin != 0)
+                    if (!gunSkinsSearchByID.TryGetValue(loadoutData.PrimarySkin, out var primarySkin) &&
+                        loadoutData.PrimarySkin != 0)
                     {
-                        Logging.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a primary skin with id {loadoutData.PrimarySkin} which is not owned by the player, not counting this loadout");
-                        if (!updateLoadouts.Contains(loadoutID))
-                        {
-                            updateLoadouts.Add(loadoutID);
-                        }
+                        Logging.Debug(
+                            $"Loadout with id {loadoutID} for {player.CharacterName} has a primary skin with id {loadoutData.PrimarySkin} which is not owned by the player, not counting this loadout");
+                        if (!updateLoadouts.Contains(loadoutID)) updateLoadouts.Add(loadoutID);
                     }
 
                     Dictionary<EAttachment, LoadoutAttachment> primaryAttachments = new();
                     foreach (var primaryAttachment in loadoutData.PrimaryAttachments)
                     {
                         if (primary.Attachments.TryGetValue(primaryAttachment, out var attachment))
-                        {
                             primaryAttachments.Add(attachment.Attachment.AttachmentType, attachment);
-                        }
                         else
-                        {
-                            Logging.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a primary attachment id with {primaryAttachment} which is not owned by the player, not counting it");
-                        }
+                            Logging.Debug(
+                                $"Loadout with id {loadoutID} for {player.CharacterName} has a primary attachment id with {primaryAttachment} which is not owned by the player, not counting it");
                     }
 
                     if (!guns.TryGetValue(loadoutData.Secondary, out var secondary) && loadoutData.Secondary != 0)
                     {
-                        Logging.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a secondary with id {loadoutData.Secondary} which is not owned by the player, not counting this loadout");
-                        if (!updateLoadouts.Contains(loadoutID))
-                        {
-                            updateLoadouts.Add(loadoutID);
-                        }
+                        Logging.Debug(
+                            $"Loadout with id {loadoutID} for {player.CharacterName} has a secondary with id {loadoutData.Secondary} which is not owned by the player, not counting this loadout");
+                        if (!updateLoadouts.Contains(loadoutID)) updateLoadouts.Add(loadoutID);
                     }
 
-                    if (!gunCharms.TryGetValue(loadoutData.SecondaryGunCharm, out var secondaryGunCharm) && loadoutData.SecondaryGunCharm != 0)
+                    if (!gunCharms.TryGetValue(loadoutData.SecondaryGunCharm, out var secondaryGunCharm) &&
+                        loadoutData.SecondaryGunCharm != 0)
                     {
-                        Logging.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a secondary gun charm with id {loadoutData.SecondaryGunCharm} which is not owned by the player, not counting this loadout");
-                        if (!updateLoadouts.Contains(loadoutID))
-                        {
-                            updateLoadouts.Add(loadoutID);
-                        }
+                        Logging.Debug(
+                            $"Loadout with id {loadoutID} for {player.CharacterName} has a secondary gun charm with id {loadoutData.SecondaryGunCharm} which is not owned by the player, not counting this loadout");
+                        if (!updateLoadouts.Contains(loadoutID)) updateLoadouts.Add(loadoutID);
                     }
 
-                    if (!gunSkinsSearchByID.TryGetValue(loadoutData.SecondarySkin, out var secondarySkin) && loadoutData.SecondarySkin != 0)
+                    if (!gunSkinsSearchByID.TryGetValue(loadoutData.SecondarySkin, out var secondarySkin) &&
+                        loadoutData.SecondarySkin != 0)
                     {
-                        Logging.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a secondary skin with id {loadoutData.SecondarySkin} which is not owned by the player, not counting this loadout");
-                        if (!updateLoadouts.Contains(loadoutID))
-                        {
-                            updateLoadouts.Add(loadoutID);
-                        }
+                        Logging.Debug(
+                            $"Loadout with id {loadoutID} for {player.CharacterName} has a secondary skin with id {loadoutData.SecondarySkin} which is not owned by the player, not counting this loadout");
+                        if (!updateLoadouts.Contains(loadoutID)) updateLoadouts.Add(loadoutID);
                     }
 
                     Dictionary<EAttachment, LoadoutAttachment> secondaryAttachments = new();
                     foreach (var secondaryAttachment in loadoutData.SecondaryAttachments)
                     {
                         if (secondary.Attachments.TryGetValue(secondaryAttachment, out var attachment))
-                        {
                             secondaryAttachments.Add(attachment.Attachment.AttachmentType, attachment);
-                        }
                         else
-                        {
-                            Logging.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a secondary attachment id with {secondaryAttachment} which is not owned by the player, not counting it");
-                        }
+                            Logging.Debug(
+                                $"Loadout with id {loadoutID} for {player.CharacterName} has a secondary attachment id with {secondaryAttachment} which is not owned by the player, not counting it");
                     }
 
                     if (!knives.TryGetValue(loadoutData.Knife, out var knife) && loadoutData.Knife != 0)
                     {
-                        Logging.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a knife with id {loadoutData.Knife} which is not owned by the player, not counting this loadout");
-                        if (!updateLoadouts.Contains(loadoutID))
-                        {
-                            updateLoadouts.Add(loadoutID);
-                        }
+                        Logging.Debug(
+                            $"Loadout with id {loadoutID} for {player.CharacterName} has a knife with id {loadoutData.Knife} which is not owned by the player, not counting this loadout");
+                        if (!updateLoadouts.Contains(loadoutID)) updateLoadouts.Add(loadoutID);
                     }
 
                     if (!gadgets.TryGetValue(loadoutData.Tactical, out var tactical) && loadoutData.Tactical != 0)
                     {
-                        Logging.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a tactical with id {loadoutData.Tactical} which is not owned by the player, not counting this loadout");
-                        if (!updateLoadouts.Contains(loadoutID))
-                        {
-                            updateLoadouts.Add(loadoutID);
-                        }
+                        Logging.Debug(
+                            $"Loadout with id {loadoutID} for {player.CharacterName} has a tactical with id {loadoutData.Tactical} which is not owned by the player, not counting this loadout");
+                        if (!updateLoadouts.Contains(loadoutID)) updateLoadouts.Add(loadoutID);
                     }
 
                     if (!gadgets.TryGetValue(loadoutData.Lethal, out var lethal) && loadoutData.Lethal != 0)
                     {
-                        Logging.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a lethal with id {loadoutData.Lethal} which is not owned by the player, not counting this loadout");
-                        if (!updateLoadouts.Contains(loadoutID))
-                        {
-                            updateLoadouts.Add(loadoutID);
-                        }
+                        Logging.Debug(
+                            $"Loadout with id {loadoutID} for {player.CharacterName} has a lethal with id {loadoutData.Lethal} which is not owned by the player, not counting this loadout");
+                        if (!updateLoadouts.Contains(loadoutID)) updateLoadouts.Add(loadoutID);
                     }
 
                     List<LoadoutKillstreak> loadoutKillstreaks = new();
                     foreach (var killstreakID in loadoutData.Killstreaks)
                     {
                         if (killstreaks.TryGetValue(killstreakID, out var killstreak))
-                        {
                             loadoutKillstreaks.Add(killstreak);
-                        }
                         else
                         {
-                            Logging.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a killstreak with id {killstreakID} which is not owned by the player, not counting this loadout");
-                            if (!updateLoadouts.Contains(loadoutID))
-                            {
-                                updateLoadouts.Add(loadoutID);
-                            }
+                            Logging.Debug(
+                                $"Loadout with id {loadoutID} for {player.CharacterName} has a killstreak with id {killstreakID} which is not owned by the player, not counting this loadout");
+                            if (!updateLoadouts.Contains(loadoutID)) updateLoadouts.Add(loadoutID);
                         }
                     }
 
@@ -3057,16 +2579,12 @@ public class DatabaseManager
                     foreach (var perkID in loadoutData.Perks)
                     {
                         if (perks.TryGetValue(perkID, out var perk))
-                        {
                             loadoutPerks.Add(perk.Perk.PerkType, perk);
-                        }
                         else
                         {
-                            Logging.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a perk with id {perkID} which is not owned by the player, not counting this loadout");
-                            if (!updateLoadouts.Contains(loadoutID))
-                            {
-                                updateLoadouts.Add(loadoutID);
-                            }
+                            Logging.Debug(
+                                $"Loadout with id {loadoutID} for {player.CharacterName} has a perk with id {perkID} which is not owned by the player, not counting this loadout");
+                            if (!updateLoadouts.Contains(loadoutID)) updateLoadouts.Add(loadoutID);
                         }
                     }
 
@@ -3074,34 +2592,30 @@ public class DatabaseManager
                     foreach (var perk in loadoutPerks.Values)
                     {
                         if (perksSearchByType.ContainsKey(perk.Perk.SkillType))
-                        {
-                            Logging.Debug($"There is perk with type {perk.Perk.SkillType} already in the loadout, ignoring");
-                        }
+                            Logging.Debug(
+                                $"There is perk with type {perk.Perk.SkillType} already in the loadout, ignoring");
                         else
-                        {
                             perksSearchByType.Add(perk.Perk.SkillType, perk);
-                        }
                     }
 
                     if (!gloves.TryGetValue(loadoutData.Glove, out var glove) && loadoutData.Glove != 0)
                     {
-                        Logging.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a glove with id {loadoutData.Glove} which is not owned by the player, not counting this loadout");
-                        if (!updateLoadouts.Contains(loadoutID))
-                        {
-                            updateLoadouts.Add(loadoutID);
-                        }
+                        Logging.Debug(
+                            $"Loadout with id {loadoutID} for {player.CharacterName} has a glove with id {loadoutData.Glove} which is not owned by the player, not counting this loadout");
+                        if (!updateLoadouts.Contains(loadoutID)) updateLoadouts.Add(loadoutID);
                     }
 
                     if (!cards.TryGetValue(loadoutData.Card, out var card) && loadoutData.Card != 0)
                     {
-                        Logging.Debug($"Loadout with id {loadoutID} has a card with id {loadoutData.Card} which is not owned by the player, not counting this loadout");
-                        if (!updateLoadouts.Contains(loadoutID))
-                        {
-                            updateLoadouts.Add(loadoutID);
-                        }
+                        Logging.Debug(
+                            $"Loadout with id {loadoutID} has a card with id {loadoutData.Card} which is not owned by the player, not counting this loadout");
+                        if (!updateLoadouts.Contains(loadoutID)) updateLoadouts.Add(loadoutID);
                     }
 
-                    loadouts.Add(loadoutID, new Loadout(loadoutID, loadoutData.LoadoutName, isActive, primary, primarySkin, primaryGunCharm, primaryAttachments, secondary, secondarySkin, secondaryGunCharm, secondaryAttachments, knife, tactical, lethal, loadoutKillstreaks, loadoutPerks, perksSearchByType, glove, card));
+                    loadouts.Add(loadoutID,
+                        new(loadoutID, loadoutData.LoadoutName, isActive, primary, primarySkin, primaryGunCharm,
+                            primaryAttachments, secondary, secondarySkin, secondaryGunCharm, secondaryAttachments,
+                            knife, tactical, lethal, loadoutKillstreaks, loadoutPerks, perksSearchByType, glove, card));
                 }
 
                 Logging.Debug($"Successfully got {loadouts.Count} loadouts for {player.CharacterName}");
@@ -3116,42 +2630,41 @@ public class DatabaseManager
                 rdr.Close();
             }
 
-            Logging.Debug($"Fixing broken loadouts for {player.CharacterName}, found {updateLoadouts.Count} broken loadouts");
+            Logging.Debug(
+                $"Fixing broken loadouts for {player.CharacterName}, found {updateLoadouts.Count} broken loadouts");
             foreach (var updateLoadout in updateLoadouts)
             {
                 if (!loadouts.TryGetValue(updateLoadout, out var playerLoadout))
                 {
-                    Logging.Debug($"Error finding loadout with id {updateLoadout} for player with steam id {player.CSteamID}");
+                    Logging.Debug(
+                        $"Error finding loadout with id {updateLoadout} for player with steam id {player.CSteamID}");
                     continue;
                 }
 
                 LoadoutData loadoutData = new(playerLoadout);
-                _ = await new MySqlCommand($"UPDATE `{PLAYERS_LOADOUTS}` SET `Loadout` = '{Plugin.Instance.Data.ConvertLoadoutToJson(loadoutData)}' WHERE `SteamID` = {player.CSteamID} AND `LoadoutID` = {updateLoadout};", Conn).ExecuteScalarAsync();
+                _ = await new MySqlCommand(
+                    $"UPDATE `{PLAYERS_LOADOUTS}` SET `Loadout` = '{Plugin.Instance.Data.ConvertLoadoutToJson(loadoutData)}' WHERE `SteamID` = {player.CSteamID} AND `LoadoutID` = {updateLoadout};",
+                    Conn).ExecuteScalarAsync();
             }
 
             Logging.Debug($"Getting boosters for {player.CharacterName}");
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', (int)(96 * 0.99f)), loadingText: "PREPARING BOOSTERS..."));
-            _ = await new MySqlCommand($"DELETE FROM `{PLAYERS_BOOSTERS}` WHERE `SteamID` = {player.CSteamID} AND `BoosterExpiration` < {DateTimeOffset.UtcNow.ToUnixTimeSeconds()};", Conn).ExecuteScalarAsync();
-            rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS_BOOSTERS}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
+            TaskDispatcher.QueueOnMainThread(() =>
+                Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(96 * 0.99f)), "PREPARING BOOSTERS..."));
+            _ = await new MySqlCommand(
+                $"DELETE FROM `{PLAYERS_BOOSTERS}` WHERE `SteamID` = {player.CSteamID} AND `BoosterExpiration` < {DateTimeOffset.UtcNow.ToUnixTimeSeconds()};",
+                Conn).ExecuteScalarAsync();
+            rdr = (MySqlDataReader)await new MySqlCommand(
+                $"SELECT * FROM `{PLAYERS_BOOSTERS}` WHERE `SteamID` = {player.CSteamID};", Conn).ExecuteReaderAsync();
             try
             {
                 List<PlayerBooster> boosters = new();
                 while (await rdr.ReadAsync())
                 {
-                    if (!Enum.TryParse(rdr[1].ToString(), true, out EBoosterType boosterType))
-                    {
-                        return;
-                    }
+                    if (!Enum.TryParse(rdr[1].ToString(), true, out EBoosterType boosterType)) return;
 
-                    if (!float.TryParse(rdr[2].ToString(), out var boosterValue))
-                    {
-                        return;
-                    }
+                    if (!float.TryParse(rdr[2].ToString(), out var boosterValue)) return;
 
-                    if (!long.TryParse(rdr[3].ToString(), out var boosterExpirationUnix))
-                    {
-                        return;
-                    }
+                    if (!long.TryParse(rdr[3].ToString(), out var boosterExpirationUnix)) return;
 
                     var boosterExpiration = DateTimeOffset.FromUnixTimeSeconds(boosterExpirationUnix);
                     PlayerBooster booster = new(player.CSteamID, boosterType, boosterValue, boosterExpiration);
@@ -3161,7 +2674,8 @@ public class DatabaseManager
 
                 playerData.ActiveBoosters = boosters;
 
-                Logging.Debug($"Successfully got {boosters.Count} active boosters registered for {player.CharacterName}");
+                Logging.Debug(
+                    $"Successfully got {boosters.Count} active boosters registered for {player.CharacterName}");
             }
             catch (Exception ex)
             {
@@ -3174,18 +2688,18 @@ public class DatabaseManager
             }
 
             Logging.Debug($"Getting cases for {player.CharacterName}");
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string(' ', (int)(96 * 0.99f)), loadingText: "PREPARING CASES..."));
-            rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS_CASES}` WHERE `SteamID` = {player.CSteamID} ORDER BY `CaseID` ASC;", Conn).ExecuteReaderAsync();
+            TaskDispatcher.QueueOnMainThread(() =>
+                Plugin.Instance.UI.UpdateLoadingBar(player, new(' ', (int)(96 * 0.99f)), "PREPARING CASES..."));
+            rdr = (MySqlDataReader)await new MySqlCommand(
+                    $"SELECT * FROM `{PLAYERS_CASES}` WHERE `SteamID` = {player.CSteamID} ORDER BY `CaseID` ASC;", Conn)
+                .ExecuteReaderAsync();
             try
             {
                 List<PlayerCase> playerCases = new();
                 Dictionary<int, PlayerCase> playerCasesSearchByID = new();
                 while (await rdr.ReadAsync())
                 {
-                    if (!int.TryParse(rdr[1].ToString(), out var caseID))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[1].ToString(), out var caseID)) continue;
 
                     if (!Cases.TryGetValue(caseID, out var @case))
                     {
@@ -3193,10 +2707,7 @@ public class DatabaseManager
                         continue;
                     }
 
-                    if (!int.TryParse(rdr[2].ToString(), out var amount))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[2].ToString(), out var amount)) continue;
 
                     PlayerCase playerCase = new(player.CSteamID, @case, amount);
                     if (playerCasesSearchByID.ContainsKey(caseID))
@@ -3228,32 +2739,36 @@ public class DatabaseManager
             playerData.SetPersonalBooster(EBoosterType.BPXP, playerData.BPBooster);
             playerData.SetPersonalBooster(EBoosterType.GUNXP, playerData.GunXPBooster);
 
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new string('　', 96), loadingText: "FINALISING..."));
+            TaskDispatcher.QueueOnMainThread(() =>
+                Plugin.Instance.UI.UpdateLoadingBar(player, new('　', 96), "FINALISING..."));
             Logging.Debug($"Checking if player has more loadouts for {player.CharacterName}");
             try
             {
                 var loadoutAmount = Utility.GetLoadoutAmount(player);
-                Logging.Debug($"{player.CharacterName} should have {loadoutAmount} loadouts, he has {loadouts.Count} registered");
+                Logging.Debug(
+                    $"{player.CharacterName} should have {loadoutAmount} loadouts, he has {loadouts.Count} registered");
                 var data = Plugin.Instance.Data.ConvertLoadoutToJson(DefaultLoadout);
                 if (loadoutAmount < loadouts.Count)
                 {
-                    Logging.Debug($"{player.CharacterName} has more loadouts than he should have, deleting the last ones");
+                    Logging.Debug(
+                        $"{player.CharacterName} has more loadouts than he should have, deleting the last ones");
                     for (var i = loadouts.Count; i > loadoutAmount; i--)
                     {
                         Logging.Debug($"Removing loadout with id {i} for {player.CharacterName}");
 
-                        if (!loadouts.TryGetValue(i, out var loadout))
-                        {
-                            continue;
-                        }
+                        if (!loadouts.TryGetValue(i, out var loadout)) continue;
 
                         if (loadout.IsActive)
                         {
                             loadouts[1].IsActive = true;
-                            _ = await new MySqlCommand($"UPDATE `{PLAYERS_LOADOUTS}` SET `IsActive` = true WHERE `SteamID` = {player.CSteamID} AND `LoadoutID` = 1;", Conn).ExecuteScalarAsync();
+                            _ = await new MySqlCommand(
+                                $"UPDATE `{PLAYERS_LOADOUTS}` SET `IsActive` = true WHERE `SteamID` = {player.CSteamID} AND `LoadoutID` = 1;",
+                                Conn).ExecuteScalarAsync();
                         }
 
-                        _ = await new MySqlCommand($"DELETE FROM `{PLAYERS_LOADOUTS}` WHERE `SteamID` = {player.CSteamID} AND `LoadoutID` = {i}", Conn).ExecuteScalarAsync();
+                        _ = await new MySqlCommand(
+                            $"DELETE FROM `{PLAYERS_LOADOUTS}` WHERE `SteamID` = {player.CSteamID} AND `LoadoutID` = {i}",
+                            Conn).ExecuteScalarAsync();
                         _ = loadouts.Remove(i);
                     }
                 }
@@ -3264,12 +2779,11 @@ public class DatabaseManager
                 Logger.Log(ex);
             }
 
-            if (PlayerLoadouts.ContainsKey(player.CSteamID))
-            {
-                _ = PlayerLoadouts.Remove(player.CSteamID);
-            }
+            if (PlayerLoadouts.ContainsKey(player.CSteamID)) _ = PlayerLoadouts.Remove(player.CSteamID);
 
-            PlayerLoadouts.Add(player.CSteamID, new PlayerLoadout(guns, gunCharms, knives, gunSkinsSearchByID, gunSkinsSearchByGunID, gunSkinsSearchBySkinID, perks, gadgets, killstreaks, cards, gloves, loadouts));
+            PlayerLoadouts.Add(player.CSteamID,
+                new(guns, gunCharms, knives, gunSkinsSearchByID, gunSkinsSearchByGunID, gunSkinsSearchBySkinID, perks,
+                    gadgets, killstreaks, cards, gloves, loadouts));
         }
         catch (Exception ex)
         {
@@ -3289,21 +2803,23 @@ public class DatabaseManager
         {
             await Conn.OpenAsync();
 
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS}` SET `XP` = `XP` + {xp} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-            var obj = await new MySqlCommand($"Select `XP` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand($"UPDATE `{PLAYERS}` SET `XP` = `XP` + {xp} WHERE `SteamID` = {steamID};", Conn)
+                .ExecuteScalarAsync();
+            var obj = await new MySqlCommand($"Select `XP` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn)
+                .ExecuteScalarAsync();
 
             if (PlayerData.TryGetValue(steamID, out var data))
             {
-                if (obj is int newXp)
-                {
-                    data.XP = newXp;
-                }
+                if (obj is int newXp) data.XP = newXp;
 
                 while (data.TryGetNeededXP(out var neededXP) && data.XP >= neededXP)
                 {
                     var newXP = data.XP - neededXP;
-                    _ = await new MySqlCommand($"UPDATE `{PLAYERS}` SET `XP` = {newXP}, `Level` = `Level` + 1 WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-                    obj = await new MySqlCommand($"Select `Level` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                    _ = await new MySqlCommand(
+                        $"UPDATE `{PLAYERS}` SET `XP` = {newXP}, `Level` = `Level` + 1 WHERE `SteamID` = {steamID};",
+                        Conn).ExecuteScalarAsync();
+                    obj = await new MySqlCommand($"Select `Level` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn)
+                        .ExecuteScalarAsync();
                     if (obj is int level)
                     {
                         data.Level = level;
@@ -3312,14 +2828,11 @@ public class DatabaseManager
                             var player = Plugin.Instance.Game.GetGamePlayer(data.SteamID);
                             if (player != null)
                             {
-                                Plugin.Instance.UI.SendAnimation(player, new AnimationInfo(EAnimationType.LevelUp, level));
+                                Plugin.Instance.UI.SendAnimation(player, new(EAnimationType.LevelUp, level));
                                 if (ItemsSearchByLevel.TryGetValue(level, out var unlocks))
-                                {
                                     foreach (var unlock in unlocks)
-                                    {
-                                        Plugin.Instance.UI.SendAnimation(player, new AnimationInfo(EAnimationType.ItemUnlock, unlock));
-                                    }
-                                }
+                                        Plugin.Instance.UI.SendAnimation(player,
+                                            new(EAnimationType.ItemUnlock, unlock));
                             }
                         });
                     }
@@ -3346,15 +2859,14 @@ public class DatabaseManager
         {
             await Conn.OpenAsync();
 
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS}` SET `Credits` = `Credits` + {credits} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-            var obj = await new MySqlCommand($"Select `Credits` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                    $"UPDATE `{PLAYERS}` SET `Credits` = `Credits` + {credits} WHERE `SteamID` = {steamID};", Conn)
+                .ExecuteScalarAsync();
+            var obj = await new MySqlCommand($"Select `Credits` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn)
+                .ExecuteScalarAsync();
             if (PlayerData.TryGetValue(steamID, out var data))
-            {
                 if (obj is int newCredits)
-                {
                     data.Credits = newCredits;
-                }
-            }
 
             TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.OnCurrencyUpdated(steamID, ECurrency.Credits));
         }
@@ -3376,15 +2888,14 @@ public class DatabaseManager
         {
             await Conn.OpenAsync();
 
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS}` SET `Credits` = `Credits` - {credits} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-            var obj = await new MySqlCommand($"Select `Credits` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                    $"UPDATE `{PLAYERS}` SET `Credits` = `Credits` - {credits} WHERE `SteamID` = {steamID};", Conn)
+                .ExecuteScalarAsync();
+            var obj = await new MySqlCommand($"Select `Credits` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn)
+                .ExecuteScalarAsync();
             if (PlayerData.TryGetValue(steamID, out var data))
-            {
                 if (obj is int newCredits)
-                {
                     data.Credits = newCredits;
-                }
-            }
 
             TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.OnCurrencyUpdated(steamID, ECurrency.Credits));
         }
@@ -3406,15 +2917,14 @@ public class DatabaseManager
         {
             await Conn.OpenAsync();
 
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS}` SET `Scrap` = `Scrap` + {scrap} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-            var obj = await new MySqlCommand($"Select `Scrap` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                    $"UPDATE `{PLAYERS}` SET `Scrap` = `Scrap` + {scrap} WHERE `SteamID` = {steamID};", Conn)
+                .ExecuteScalarAsync();
+            var obj = await new MySqlCommand($"Select `Scrap` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn)
+                .ExecuteScalarAsync();
             if (PlayerData.TryGetValue(steamID, out var data))
-            {
                 if (obj is int newScrap)
-                {
                     data.Scrap = newScrap;
-                }
-            }
 
             TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.OnCurrencyUpdated(steamID, ECurrency.Scrap));
         }
@@ -3436,15 +2946,14 @@ public class DatabaseManager
         {
             await Conn.OpenAsync();
 
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS}` SET `Scrap` = `Scrap` - {scrap} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-            var obj = await new MySqlCommand($"Select `Scrap` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                    $"UPDATE `{PLAYERS}` SET `Scrap` = `Scrap` - {scrap} WHERE `SteamID` = {steamID};", Conn)
+                .ExecuteScalarAsync();
+            var obj = await new MySqlCommand($"Select `Scrap` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn)
+                .ExecuteScalarAsync();
             if (PlayerData.TryGetValue(steamID, out var data))
-            {
                 if (obj is int newScrap)
-                {
                     data.Scrap = newScrap;
-                }
-            }
 
             TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.OnCurrencyUpdated(steamID, ECurrency.Scrap));
         }
@@ -3466,15 +2975,14 @@ public class DatabaseManager
         {
             await Conn.OpenAsync();
 
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS}` SET `Coins` = `Coins` + {coins} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-            var obj = await new MySqlCommand($"Select `Coins` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                    $"UPDATE `{PLAYERS}` SET `Coins` = `Coins` + {coins} WHERE `SteamID` = {steamID};", Conn)
+                .ExecuteScalarAsync();
+            var obj = await new MySqlCommand($"Select `Coins` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn)
+                .ExecuteScalarAsync();
             if (PlayerData.TryGetValue(steamID, out var data))
-            {
                 if (obj is int newCoins)
-                {
                     data.Coins = newCoins;
-                }
-            }
 
             TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.OnCurrencyUpdated(steamID, ECurrency.Coins));
         }
@@ -3496,15 +3004,14 @@ public class DatabaseManager
         {
             await Conn.OpenAsync();
 
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS}` SET `Coins` = `Coins` - {coins} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-            var obj = await new MySqlCommand($"Select `Coins` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                    $"UPDATE `{PLAYERS}` SET `Coins` = `Coins` - {coins} WHERE `SteamID` = {steamID};", Conn)
+                .ExecuteScalarAsync();
+            var obj = await new MySqlCommand($"Select `Coins` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn)
+                .ExecuteScalarAsync();
             if (PlayerData.TryGetValue(steamID, out var data))
-            {
                 if (obj is int newCoins)
-                {
                     data.Coins = newCoins;
-                }
-            }
 
             TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.OnCurrencyUpdated(steamID, ECurrency.Coins));
         }
@@ -3526,49 +3033,48 @@ public class DatabaseManager
         {
             await Conn.OpenAsync();
 
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS}` SET `Kills` = `Kills` + {kills} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-            var obj = await new MySqlCommand($"Select `Kills` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                    $"UPDATE `{PLAYERS}` SET `Kills` = `Kills` + {kills} WHERE `SteamID` = {steamID};", Conn)
+                .ExecuteScalarAsync();
+            var obj = await new MySqlCommand($"Select `Kills` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn)
+                .ExecuteScalarAsync();
 
             if (PlayerData.TryGetValue(steamID, out var data))
-            {
                 if (obj is int newKills)
-                {
                     data.Kills = newKills;
-                }
-            }
 
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_LEADERBOARD_DAILY}` SET `Kills` = `Kills` + {kills} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-            obj = await new MySqlCommand($"SELECT `Kills` FROM `{PLAYERS_LEADERBOARD_DAILY}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"UPDATE `{PLAYERS_LEADERBOARD_DAILY}` SET `Kills` = `Kills` + {kills} WHERE `SteamID` = {steamID};",
+                Conn).ExecuteScalarAsync();
+            obj = await new MySqlCommand(
+                    $"SELECT `Kills` FROM `{PLAYERS_LEADERBOARD_DAILY}` WHERE `SteamID` = {steamID};", Conn)
+                .ExecuteScalarAsync();
 
             if (PlayerDailyLeaderboardLookup.TryGetValue(steamID, out var lData))
-            {
                 if (obj is int newKills)
-                {
                     lData.Kills = newKills;
-                }
-            }
 
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_LEADERBOARD_WEEKLY}` SET `Kills` = `Kills` + {kills} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-            obj = await new MySqlCommand($"SELECT `Kills` FROM `{PLAYERS_LEADERBOARD_WEEKLY}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"UPDATE `{PLAYERS_LEADERBOARD_WEEKLY}` SET `Kills` = `Kills` + {kills} WHERE `SteamID` = {steamID};",
+                Conn).ExecuteScalarAsync();
+            obj = await new MySqlCommand(
+                    $"SELECT `Kills` FROM `{PLAYERS_LEADERBOARD_WEEKLY}` WHERE `SteamID` = {steamID};", Conn)
+                .ExecuteScalarAsync();
 
             if (PlayerWeeklyLeaderboardLookup.TryGetValue(steamID, out lData))
-            {
                 if (obj is int newKills)
-                {
                     lData.Kills = newKills;
-                }
-            }
 
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_LEADERBOARD_SEASONAL}` SET `Kills` = `Kills` + {kills} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-            obj = await new MySqlCommand($"SELECT `Kills` FROM `{PLAYERS_LEADERBOARD_SEASONAL}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"UPDATE `{PLAYERS_LEADERBOARD_SEASONAL}` SET `Kills` = `Kills` + {kills} WHERE `SteamID` = {steamID};",
+                Conn).ExecuteScalarAsync();
+            obj = await new MySqlCommand(
+                    $"SELECT `Kills` FROM `{PLAYERS_LEADERBOARD_SEASONAL}` WHERE `SteamID` = {steamID};", Conn)
+                .ExecuteScalarAsync();
 
             if (PlayerSeasonalLeaderboardLookup.TryGetValue(steamID, out lData))
-            {
                 if (obj is int newKills)
-                {
                     lData.Kills = newKills;
-                }
-            }
         }
         catch (Exception ex)
         {
@@ -3588,45 +3094,44 @@ public class DatabaseManager
         {
             await Conn.OpenAsync();
 
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS}` SET `HeadshotKills` = `HeadshotKills` + {headshotKills} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-            var obj = await new MySqlCommand($"Select `HeadshotKills` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"UPDATE `{PLAYERS}` SET `HeadshotKills` = `HeadshotKills` + {headshotKills} WHERE `SteamID` = {steamID};",
+                Conn).ExecuteScalarAsync();
+            var obj = await new MySqlCommand($"Select `HeadshotKills` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};",
+                Conn).ExecuteScalarAsync();
             if (PlayerData.TryGetValue(steamID, out var data))
-            {
                 if (obj is int newHeadshotKills)
-                {
                     data.HeadshotKills = newHeadshotKills;
-                }
-            }
 
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_LEADERBOARD_DAILY}` SET `HeadshotKills` = `HeadshotKills` + {headshotKills} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-            obj = await new MySqlCommand($"Select `HeadshotKills` FROM `{PLAYERS_LEADERBOARD_DAILY}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"UPDATE `{PLAYERS_LEADERBOARD_DAILY}` SET `HeadshotKills` = `HeadshotKills` + {headshotKills} WHERE `SteamID` = {steamID};",
+                Conn).ExecuteScalarAsync();
+            obj = await new MySqlCommand(
+                    $"Select `HeadshotKills` FROM `{PLAYERS_LEADERBOARD_DAILY}` WHERE `SteamID` = {steamID};", Conn)
+                .ExecuteScalarAsync();
             if (PlayerDailyLeaderboardLookup.TryGetValue(steamID, out var lData))
-            {
                 if (obj is int newHeadshotKills)
-                {
                     lData.HeadshotKills = newHeadshotKills;
-                }
-            }
 
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_LEADERBOARD_WEEKLY}` SET `HeadshotKills` = `HeadshotKills` + {headshotKills} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-            obj = await new MySqlCommand($"Select `HeadshotKills` FROM `{PLAYERS_LEADERBOARD_WEEKLY}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"UPDATE `{PLAYERS_LEADERBOARD_WEEKLY}` SET `HeadshotKills` = `HeadshotKills` + {headshotKills} WHERE `SteamID` = {steamID};",
+                Conn).ExecuteScalarAsync();
+            obj = await new MySqlCommand(
+                    $"Select `HeadshotKills` FROM `{PLAYERS_LEADERBOARD_WEEKLY}` WHERE `SteamID` = {steamID};", Conn)
+                .ExecuteScalarAsync();
             if (PlayerWeeklyLeaderboardLookup.TryGetValue(steamID, out lData))
-            {
                 if (obj is int newHeadshotKills)
-                {
                     lData.HeadshotKills = newHeadshotKills;
-                }
-            }
 
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_LEADERBOARD_SEASONAL}` SET `HeadshotKills` = `HeadshotKills` + {headshotKills} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-            obj = await new MySqlCommand($"Select `HeadshotKills` FROM `{PLAYERS_LEADERBOARD_SEASONAL}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"UPDATE `{PLAYERS_LEADERBOARD_SEASONAL}` SET `HeadshotKills` = `HeadshotKills` + {headshotKills} WHERE `SteamID` = {steamID};",
+                Conn).ExecuteScalarAsync();
+            obj = await new MySqlCommand(
+                    $"Select `HeadshotKills` FROM `{PLAYERS_LEADERBOARD_SEASONAL}` WHERE `SteamID` = {steamID};", Conn)
+                .ExecuteScalarAsync();
             if (PlayerSeasonalLeaderboardLookup.TryGetValue(steamID, out lData))
-            {
                 if (obj is int newHeadshotKills)
-                {
                     lData.HeadshotKills = newHeadshotKills;
-                }
-            }
         }
         catch (Exception ex)
         {
@@ -3646,11 +3151,10 @@ public class DatabaseManager
         {
             await Conn.OpenAsync();
 
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS}` SET `HighestKillstreak` = {killStreak} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-            if (PlayerData.TryGetValue(steamID, out var data))
-            {
-                data.HighestKillstreak = killStreak;
-            }
+            _ = await new MySqlCommand(
+                    $"UPDATE `{PLAYERS}` SET `HighestKillstreak` = {killStreak} WHERE `SteamID` = {steamID};", Conn)
+                .ExecuteScalarAsync();
+            if (PlayerData.TryGetValue(steamID, out var data)) data.HighestKillstreak = killStreak;
         }
         catch (Exception ex)
         {
@@ -3670,11 +3174,10 @@ public class DatabaseManager
         {
             await Conn.OpenAsync();
 
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS}` SET `HighestMultiKills` = {multiKills} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-            if (PlayerData.TryGetValue(steamID, out var data))
-            {
-                data.HighestMultiKills = multiKills;
-            }
+            _ = await new MySqlCommand(
+                    $"UPDATE `{PLAYERS}` SET `HighestMultiKills` = {multiKills} WHERE `SteamID` = {steamID};", Conn)
+                .ExecuteScalarAsync();
+            if (PlayerData.TryGetValue(steamID, out var data)) data.HighestMultiKills = multiKills;
         }
         catch (Exception ex)
         {
@@ -3694,15 +3197,14 @@ public class DatabaseManager
         {
             await Conn.OpenAsync();
 
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS}` SET `KillsConfirmed` = `KillsConfirmed` + {killsConfirmed} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-            var obj = await new MySqlCommand($"Select `KillsConfirmed` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"UPDATE `{PLAYERS}` SET `KillsConfirmed` = `KillsConfirmed` + {killsConfirmed} WHERE `SteamID` = {steamID};",
+                Conn).ExecuteScalarAsync();
+            var obj = await new MySqlCommand($"Select `KillsConfirmed` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};",
+                Conn).ExecuteScalarAsync();
             if (PlayerData.TryGetValue(steamID, out var data))
-            {
                 if (obj is int newKillsConfirmed)
-                {
                     data.KillsConfirmed = newKillsConfirmed;
-                }
-            }
         }
         catch (Exception ex)
         {
@@ -3722,15 +3224,14 @@ public class DatabaseManager
         {
             await Conn.OpenAsync();
 
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS}` SET `KillsDenied` = `KillsDenied` + {killsDenied} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-            var obj = await new MySqlCommand($"Select `KillsDenied` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"UPDATE `{PLAYERS}` SET `KillsDenied` = `KillsDenied` + {killsDenied} WHERE `SteamID` = {steamID};",
+                Conn).ExecuteScalarAsync();
+            var obj = await new MySqlCommand($"Select `KillsDenied` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};",
+                Conn).ExecuteScalarAsync();
             if (PlayerData.TryGetValue(steamID, out var data))
-            {
                 if (obj is int newKillsDenied)
-                {
                     data.KillsDenied = newKillsDenied;
-                }
-            }
         }
         catch (Exception ex)
         {
@@ -3750,15 +3251,14 @@ public class DatabaseManager
         {
             await Conn.OpenAsync();
 
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS}` SET `FlagsCaptured` = `FlagsCaptured` + {flagsCaptured} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-            var obj = await new MySqlCommand($"Select `FlagsCaptured` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"UPDATE `{PLAYERS}` SET `FlagsCaptured` = `FlagsCaptured` + {flagsCaptured} WHERE `SteamID` = {steamID};",
+                Conn).ExecuteScalarAsync();
+            var obj = await new MySqlCommand($"Select `FlagsCaptured` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};",
+                Conn).ExecuteScalarAsync();
             if (PlayerData.TryGetValue(steamID, out var data))
-            {
                 if (obj is int newFlagsCaptured)
-                {
                     data.FlagsCaptured = newFlagsCaptured;
-                }
-            }
         }
         catch (Exception ex)
         {
@@ -3778,15 +3278,15 @@ public class DatabaseManager
         {
             await Conn.OpenAsync();
 
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS}` SET `FlagsSaved` = `FlagsSaved` + {flagsSaved} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-            var obj = await new MySqlCommand($"Select `FlagsSaved` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                    $"UPDATE `{PLAYERS}` SET `FlagsSaved` = `FlagsSaved` + {flagsSaved} WHERE `SteamID` = {steamID};",
+                    Conn)
+                .ExecuteScalarAsync();
+            var obj = await new MySqlCommand($"Select `FlagsSaved` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn)
+                .ExecuteScalarAsync();
             if (PlayerData.TryGetValue(steamID, out var data))
-            {
                 if (obj is int newFlagsSaved)
-                {
                     data.FlagsSaved = newFlagsSaved;
-                }
-            }
         }
         catch (Exception ex)
         {
@@ -3806,15 +3306,15 @@ public class DatabaseManager
         {
             await Conn.OpenAsync();
 
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS}` SET `AreasTaken` = `AreasTaken` + {areasTaken} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-            var obj = await new MySqlCommand($"Select `AreasTaken` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                    $"UPDATE `{PLAYERS}` SET `AreasTaken` = `AreasTaken` + {areasTaken} WHERE `SteamID` = {steamID};",
+                    Conn)
+                .ExecuteScalarAsync();
+            var obj = await new MySqlCommand($"Select `AreasTaken` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn)
+                .ExecuteScalarAsync();
             if (PlayerData.TryGetValue(steamID, out var data))
-            {
                 if (obj is int newArenasTaken)
-                {
                     data.AreasTaken = newArenasTaken;
-                }
-            }
         }
         catch (Exception ex)
         {
@@ -3834,45 +3334,44 @@ public class DatabaseManager
         {
             await Conn.OpenAsync();
 
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS}` SET `Deaths` = `Deaths` + {deaths} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-            var obj = await new MySqlCommand($"Select `Deaths` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                    $"UPDATE `{PLAYERS}` SET `Deaths` = `Deaths` + {deaths} WHERE `SteamID` = {steamID};", Conn)
+                .ExecuteScalarAsync();
+            var obj = await new MySqlCommand($"Select `Deaths` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn)
+                .ExecuteScalarAsync();
             if (PlayerData.TryGetValue(steamID, out var data))
-            {
                 if (obj is int newDeaths)
-                {
                     data.Deaths = newDeaths;
-                }
-            }
 
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_LEADERBOARD_DAILY}` SET `Deaths` = `Deaths` + {deaths} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-            obj = await new MySqlCommand($"Select `Deaths` FROM `{PLAYERS_LEADERBOARD_DAILY}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"UPDATE `{PLAYERS_LEADERBOARD_DAILY}` SET `Deaths` = `Deaths` + {deaths} WHERE `SteamID` = {steamID};",
+                Conn).ExecuteScalarAsync();
+            obj = await new MySqlCommand(
+                    $"Select `Deaths` FROM `{PLAYERS_LEADERBOARD_DAILY}` WHERE `SteamID` = {steamID};", Conn)
+                .ExecuteScalarAsync();
             if (PlayerDailyLeaderboardLookup.TryGetValue(steamID, out var lData))
-            {
                 if (obj is int newDeaths)
-                {
                     lData.Deaths = newDeaths;
-                }
-            }
 
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_LEADERBOARD_WEEKLY}` SET `Deaths` = `Deaths` + {deaths} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-            obj = await new MySqlCommand($"Select `Deaths` FROM `{PLAYERS_LEADERBOARD_WEEKLY}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"UPDATE `{PLAYERS_LEADERBOARD_WEEKLY}` SET `Deaths` = `Deaths` + {deaths} WHERE `SteamID` = {steamID};",
+                Conn).ExecuteScalarAsync();
+            obj = await new MySqlCommand(
+                    $"Select `Deaths` FROM `{PLAYERS_LEADERBOARD_WEEKLY}` WHERE `SteamID` = {steamID};", Conn)
+                .ExecuteScalarAsync();
             if (PlayerWeeklyLeaderboardLookup.TryGetValue(steamID, out lData))
-            {
                 if (obj is int newDeaths)
-                {
                     lData.Deaths = newDeaths;
-                }
-            }
 
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_LEADERBOARD_SEASONAL}` SET `Deaths` = `Deaths` + {deaths} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-            obj = await new MySqlCommand($"Select `Deaths` FROM `{PLAYERS_LEADERBOARD_SEASONAL}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"UPDATE `{PLAYERS_LEADERBOARD_SEASONAL}` SET `Deaths` = `Deaths` + {deaths} WHERE `SteamID` = {steamID};",
+                Conn).ExecuteScalarAsync();
+            obj = await new MySqlCommand(
+                    $"Select `Deaths` FROM `{PLAYERS_LEADERBOARD_SEASONAL}` WHERE `SteamID` = {steamID};", Conn)
+                .ExecuteScalarAsync();
             if (PlayerSeasonalLeaderboardLookup.TryGetValue(steamID, out lData))
-            {
                 if (obj is int newDeaths)
-                {
                     lData.Deaths = newDeaths;
-                }
-            }
         }
         catch (Exception ex)
         {
@@ -3892,11 +3391,9 @@ public class DatabaseManager
         {
             await Conn.OpenAsync();
 
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS}` SET `Music` = {isMusic} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-            if (PlayerData.TryGetValue(steamID, out var data))
-            {
-                data.Music = isMusic;
-            }
+            _ = await new MySqlCommand($"UPDATE `{PLAYERS}` SET `Music` = {isMusic} WHERE `SteamID` = {steamID};", Conn)
+                .ExecuteScalarAsync();
+            if (PlayerData.TryGetValue(steamID, out var data)) data.Music = isMusic;
         }
         catch (Exception ex)
         {
@@ -3916,11 +3413,10 @@ public class DatabaseManager
         {
             await Conn.OpenAsync();
 
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS}` SET `CountryCode` = '{countryCode}' WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-            if (PlayerData.TryGetValue(steamID, out var data))
-            {
-                data.CountryCode = countryCode;
-            }
+            _ = await new MySqlCommand(
+                    $"UPDATE `{PLAYERS}` SET `CountryCode` = '{countryCode}' WHERE `SteamID` = {steamID};", Conn)
+                .ExecuteScalarAsync();
+            if (PlayerData.TryGetValue(steamID, out var data)) data.CountryCode = countryCode;
         }
         catch (Exception ex)
         {
@@ -3940,11 +3436,9 @@ public class DatabaseManager
         {
             await Conn.OpenAsync();
 
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS}` SET `HideFlag` = {hideFlag} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-            if (PlayerData.TryGetValue(steamID, out var data))
-            {
-                data.HideFlag = hideFlag;
-            }
+            _ = await new MySqlCommand($"UPDATE `{PLAYERS}` SET `HideFlag` = {hideFlag} WHERE `SteamID` = {steamID};",
+                Conn).ExecuteScalarAsync();
+            if (PlayerData.TryGetValue(steamID, out var data)) data.HideFlag = hideFlag;
         }
         catch (Exception ex)
         {
@@ -3964,11 +3458,9 @@ public class DatabaseManager
         {
             await Conn.OpenAsync();
 
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS}` SET `IsMuted` = {isMuted} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-            if (PlayerData.TryGetValue(steamID, out var data))
-            {
-                data.IsMuted = isMuted;
-            }
+            _ = await new MySqlCommand($"UPDATE `{PLAYERS}` SET `IsMuted` = {isMuted} WHERE `SteamID` = {steamID};",
+                Conn).ExecuteScalarAsync();
+            if (PlayerData.TryGetValue(steamID, out var data)) data.IsMuted = isMuted;
         }
         catch (Exception ex)
         {
@@ -3987,15 +3479,15 @@ public class DatabaseManager
         try
         {
             await Conn.OpenAsync();
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS}` SET `MuteExpiry` = {muteExpiry.ToUnixTimeSeconds()} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-            if (PlayerData.TryGetValue(steamID, out var data))
-            {
-                data.MuteExpiry = muteExpiry;
-            }
+            _ = await new MySqlCommand(
+                $"UPDATE `{PLAYERS}` SET `MuteExpiry` = {muteExpiry.ToUnixTimeSeconds()} WHERE `SteamID` = {steamID};",
+                Conn).ExecuteScalarAsync();
+            if (PlayerData.TryGetValue(steamID, out var data)) data.MuteExpiry = muteExpiry;
         }
         catch (Exception ex)
         {
-            Logger.Log($"Error changing mute expiry to {muteExpiry.ToUnixTimeSeconds()} for player with steam id {steamID}");
+            Logger.Log(
+                $"Error changing mute expiry to {muteExpiry.ToUnixTimeSeconds()} for player with steam id {steamID}");
             Logger.Log(ex);
         }
         finally
@@ -4026,17 +3518,19 @@ public class DatabaseManager
                     break;
             }
 
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS}` SET `{coloumnName}` = `{coloumnName}` + {increaseBooster} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-            var obj = await new MySqlCommand($"SELECT `{coloumnName}` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"UPDATE `{PLAYERS}` SET `{coloumnName}` = `{coloumnName}` + {increaseBooster} WHERE `SteamID` = {steamID};",
+                Conn).ExecuteScalarAsync();
+            var obj = await new MySqlCommand($"SELECT `{coloumnName}` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};",
+                Conn).ExecuteScalarAsync();
 
             if (PlayerData.TryGetValue(steamID, out var data) && float.TryParse(obj.ToString(), out var updatedBooster))
-            {
                 data.SetPersonalBooster(boosterType, updatedBooster);
-            }
         }
         catch (Exception ex)
         {
-            Logger.Log($"Error increasing the persoanl booster for player with steam id {steamID} for type {boosterType} by {increaseBooster}");
+            Logger.Log(
+                $"Error increasing the persoanl booster for player with steam id {steamID} for type {boosterType} by {increaseBooster}");
             Logger.Log(ex);
         }
         finally
@@ -4053,20 +3547,23 @@ public class DatabaseManager
             await Conn.OpenAsync();
             var expiryDate = DateTimeOffset.UtcNow.AddDays(days);
             var primeLastDailyReward = DateTimeOffset.UtcNow;
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS}` SET `PrimeExpiry` = `PrimeExpiry` + {days * 24 * 60 * 60} WHERE `HasPrime` = true AND `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS}` SET `HasPrime` = true, `PrimeExpiry` = {expiryDate.ToUnixTimeSeconds()} , `PrimeLastDailyReward` = {primeLastDailyReward.ToUnixTimeSeconds()} WHERE `HasPrime` = false AND `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"UPDATE `{PLAYERS}` SET `PrimeExpiry` = `PrimeExpiry` + {days * 24 * 60 * 60} WHERE `HasPrime` = true AND `SteamID` = {steamID};",
+                Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"UPDATE `{PLAYERS}` SET `HasPrime` = true, `PrimeExpiry` = {expiryDate.ToUnixTimeSeconds()} , `PrimeLastDailyReward` = {primeLastDailyReward.ToUnixTimeSeconds()} WHERE `HasPrime` = false AND `SteamID` = {steamID};",
+                Conn).ExecuteScalarAsync();
             _ = R.Permissions.AddPlayerToGroup("Prime", new RocketPlayer(steamID.ToString()));
 
             if (!PlayerData.TryGetValue(steamID, out var data))
             {
-                Logging.Debug($"Could'nt find player data for player with steam id {steamID}, probably player is offline");
+                Logging.Debug(
+                    $"Could'nt find player data for player with steam id {steamID}, probably player is offline");
                 return;
             }
 
             if (data.HasPrime)
-            {
                 data.PrimeExpiry = data.PrimeExpiry.AddDays(days);
-            }
             else
             {
                 data.HasPrime = true;
@@ -4100,7 +3597,9 @@ public class DatabaseManager
                 return;
             }
 
-            _ = await new MySqlCommand($"INSERT INTO `{PLAYERS_GUNS}` (`SteamID` , `GunID` , `Level` , `XP` , `GunKills` , `IsBought` , `Attachments`) VALUES ({steamID} , {gunID} , 1 , 0 , 0 , {isBought} , '{Utility.CreateStringFromDefaultAttachments(gun.DefaultAttachments) + Utility.CreateStringFromRewardAttachments(gun.RewardAttachments.Values.ToList())}') ON DUPLICATE KEY UPDATE `IsBought` = {isBought};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"INSERT INTO `{PLAYERS_GUNS}` (`SteamID` , `GunID` , `Level` , `XP` , `GunKills` , `IsBought` , `Attachments`) VALUES ({steamID} , {gunID} , 1 , 0 , 0 , {isBought} , '{Utility.CreateStringFromDefaultAttachments(gun.DefaultAttachments) + Utility.CreateStringFromRewardAttachments(gun.RewardAttachments.Values.ToList())}') ON DUPLICATE KEY UPDATE `IsBought` = {isBought};",
+                Conn).ExecuteScalarAsync();
 
             if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
             {
@@ -4113,22 +3612,25 @@ public class DatabaseManager
             {
                 if (loadoutAttachments.ContainsKey(attachment.AttachmentID))
                 {
-                    Logging.Debug($"Duplicate default attachment found for gun {gunID} with id {attachment.AttachmentID}, ignoring it");
+                    Logging.Debug(
+                        $"Duplicate default attachment found for gun {gunID} with id {attachment.AttachmentID}, ignoring it");
                     continue;
                 }
 
-                loadoutAttachments.Add(attachment.AttachmentID, new LoadoutAttachment(attachment, 0, true, false));
+                loadoutAttachments.Add(attachment.AttachmentID, new(attachment, 0, true, false));
             }
 
             foreach (var attachment in gun.RewardAttachments)
             {
                 if (loadoutAttachments.ContainsKey(attachment.Value.AttachmentID))
                 {
-                    Logging.Debug($"Duplicate reward attachment found for gun {gunID} with id {attachment.Value.AttachmentID}, ignoring it");
+                    Logging.Debug(
+                        $"Duplicate reward attachment found for gun {gunID} with id {attachment.Value.AttachmentID}, ignoring it");
                     continue;
                 }
 
-                loadoutAttachments.Add(attachment.Value.AttachmentID, new LoadoutAttachment(attachment.Value, attachment.Key, true, false));
+                loadoutAttachments.Add(attachment.Value.AttachmentID,
+                    new(attachment.Value, attachment.Key, true, false));
             }
 
             LoadoutGun loadoutGun = new(gun, 1, 0, 0, isBought, false, loadoutAttachments);
@@ -4161,8 +3663,12 @@ public class DatabaseManager
         try
         {
             await Conn.OpenAsync();
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_GUNS}` SET `XP` = `XP` + {xp} WHERE `SteamID` = {steamID} AND `GunID` = {gunID};", Conn).ExecuteScalarAsync();
-            var obj = await new MySqlCommand($"SELECT `XP` FROM `{PLAYERS_GUNS}` WHERE `SteamID` = {steamID} AND `GunID` = {gunID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"UPDATE `{PLAYERS_GUNS}` SET `XP` = `XP` + {xp} WHERE `SteamID` = {steamID} AND `GunID` = {gunID};",
+                Conn).ExecuteScalarAsync();
+            var obj = await new MySqlCommand(
+                    $"SELECT `XP` FROM `{PLAYERS_GUNS}` WHERE `SteamID` = {steamID} AND `GunID` = {gunID};", Conn)
+                .ExecuteScalarAsync();
             if (obj is int newXP)
             {
                 if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
@@ -4181,12 +3687,13 @@ public class DatabaseManager
                 while (gun.TryGetNeededXP(out var neededXP) && gun.XP >= neededXP)
                 {
                     var updatedXP = gun.XP - neededXP;
-                    _ = await new MySqlCommand($"UPDATE `{PLAYERS_GUNS}` SET `XP` = {updatedXP}, `Level` = `Level` + 1 WHERE `SteamID` = {steamID} AND `GunID` = {gunID};", Conn).ExecuteScalarAsync();
-                    obj = await new MySqlCommand($"SELECT `Level` FROM `{PLAYERS_GUNS}` WHERE `SteamID` = {steamID} AND `GunID` = {gunID};", Conn).ExecuteScalarAsync();
-                    if (obj is int newLevel)
-                    {
-                        gun.Level = newLevel;
-                    }
+                    _ = await new MySqlCommand(
+                        $"UPDATE `{PLAYERS_GUNS}` SET `XP` = {updatedXP}, `Level` = `Level` + 1 WHERE `SteamID` = {steamID} AND `GunID` = {gunID};",
+                        Conn).ExecuteScalarAsync();
+                    obj = await new MySqlCommand(
+                        $"SELECT `Level` FROM `{PLAYERS_GUNS}` WHERE `SteamID` = {steamID} AND `GunID` = {gunID};",
+                        Conn).ExecuteScalarAsync();
+                    if (obj is int newLevel) gun.Level = newLevel;
 
                     gun.XP = updatedXP;
 
@@ -4196,20 +3703,21 @@ public class DatabaseManager
                         if (player != null)
                         {
                             var icon = gun.Gun.IconLink;
-                            if ((player.ActiveLoadout?.Primary?.Gun?.GunID ?? 0) == gun.Gun.GunID && (player.ActiveLoadout?.PrimarySkin?.Gun?.GunID ?? 0) == gun.Gun.GunID)
-                            {
+                            if ((player.ActiveLoadout?.Primary?.Gun?.GunID ?? 0) == gun.Gun.GunID &&
+                                (player.ActiveLoadout?.PrimarySkin?.Gun?.GunID ?? 0) == gun.Gun.GunID)
                                 icon = player.ActiveLoadout.PrimarySkin.IconLink;
-                            }
-                            else if ((player.ActiveLoadout?.Secondary?.Gun?.GunID ?? 0) == gun.Gun.GunID && (player.ActiveLoadout?.SecondarySkin?.Gun?.GunID ?? 0) == gun.Gun.GunID)
-                            {
+                            else if ((player.ActiveLoadout?.Secondary?.Gun?.GunID ?? 0) == gun.Gun.GunID &&
+                                     (player.ActiveLoadout?.SecondarySkin?.Gun?.GunID ?? 0) == gun.Gun.GunID)
                                 icon = player.ActiveLoadout.SecondarySkin.IconLink;
-                            }
 
-                            Plugin.Instance.UI.SendAnimation(player, new AnimationInfo(EAnimationType.GunLevelUp, new AnimationItemUnlock(icon, gun.Level.ToString(), gun.Gun.GunName)));
+                            Plugin.Instance.UI.SendAnimation(player,
+                                new(EAnimationType.GunLevelUp,
+                                    new AnimationItemUnlock(icon, gun.Level.ToString(), gun.Gun.GunName)));
                             if (gun.Gun.RewardAttachments.TryGetValue(gun.Level, out var attachment))
-                            {
-                                Plugin.Instance.UI.SendAnimation(player, new AnimationInfo(EAnimationType.ItemUnlock, new AnimationItemUnlock(attachment.IconLink, "", $"{attachment.AttachmentName} [{gun.Gun.GunName}]")));
-                            }
+                                Plugin.Instance.UI.SendAnimation(player,
+                                    new(EAnimationType.ItemUnlock,
+                                        new AnimationItemUnlock(attachment.IconLink, "",
+                                            $"{attachment.AttachmentName} [{gun.Gun.GunName}]")));
                         }
                     });
                 }
@@ -4232,8 +3740,12 @@ public class DatabaseManager
         try
         {
             await Conn.OpenAsync();
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_GUNS}` SET `GunKills` = `GunKills` + {kills} WHERE `SteamID` = {steamID} AND `GunID` = {gunID};", Conn).ExecuteScalarAsync();
-            var obj = await new MySqlCommand($"SELECT `GunKills` FROM `{PLAYERS_GUNS}` WHERE `SteamID` = {steamID} AND `GunID` = {gunID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"UPDATE `{PLAYERS_GUNS}` SET `GunKills` = `GunKills` + {kills} WHERE `SteamID` = {steamID} AND `GunID` = {gunID};",
+                Conn).ExecuteScalarAsync();
+            var obj = await new MySqlCommand(
+                    $"SELECT `GunKills` FROM `{PLAYERS_GUNS}` WHERE `SteamID` = {steamID} AND `GunID` = {gunID};", Conn)
+                .ExecuteScalarAsync();
             if (obj is int newKills)
             {
                 if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
@@ -4268,7 +3780,9 @@ public class DatabaseManager
         try
         {
             await Conn.OpenAsync();
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_GUNS}` SET `IsBought` = {isBought} WHERE `SteamID` = {steamID} AND `GunID` = {gunID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"UPDATE `{PLAYERS_GUNS}` SET `IsBought` = {isBought} WHERE `SteamID` = {steamID} AND `GunID` = {gunID};",
+                Conn).ExecuteScalarAsync();
 
             if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
             {
@@ -4301,7 +3815,9 @@ public class DatabaseManager
         try
         {
             await Conn.OpenAsync();
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_GUNS}` SET `IsUnlocked` = {isUnlocked} WHERE `SteamID` = {steamID} AND `GunID` = {gunID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"UPDATE `{PLAYERS_GUNS}` SET `IsUnlocked` = {isUnlocked} WHERE `SteamID` = {steamID} AND `GunID` = {gunID};",
+                Conn).ExecuteScalarAsync();
 
             if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
             {
@@ -4330,7 +3846,11 @@ public class DatabaseManager
 
     // Player Guns Attachments
 
-    public async Task UpdatePlayerGunAttachmentBoughtAsync(CSteamID steamID, ushort gunID, ushort attachmentID, bool isBought)
+    public async Task UpdatePlayerGunAttachmentBoughtAsync(
+        CSteamID steamID,
+        ushort gunID,
+        ushort attachmentID,
+        bool isBought)
     {
         using MySqlConnection Conn = new(ConnectionString);
         try
@@ -4351,16 +3871,20 @@ public class DatabaseManager
 
             if (!gun.Attachments.TryGetValue(attachmentID, out var attachment))
             {
-                Logging.Debug($"Error finding loadout attachment with id {attachmentID} for loadout gun with id {gunID} for player with steam id {steamID}");
+                Logging.Debug(
+                    $"Error finding loadout attachment with id {attachmentID} for loadout gun with id {gunID} for player with steam id {steamID}");
                 return;
             }
 
             attachment.IsBought = isBought;
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_GUNS}` SET `Attachments` = '{Utility.GetStringFromAttachments(gun.Attachments.Values.ToList())}' WHERE `SteamID` = {steamID} AND `GunID` = {gunID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"UPDATE `{PLAYERS_GUNS}` SET `Attachments` = '{Utility.GetStringFromAttachments(gun.Attachments.Values.ToList())}' WHERE `SteamID` = {steamID} AND `GunID` = {gunID};",
+                Conn).ExecuteScalarAsync();
         }
         catch (Exception ex)
         {
-            Logger.Log($"Error changing is bought to {isBought} for attachment with id {attachmentID} for gun with id {gunID} for player with steam id");
+            Logger.Log(
+                $"Error changing is bought to {isBought} for attachment with id {attachmentID} for gun with id {gunID} for player with steam id");
             Logger.Log(ex);
         }
         finally
@@ -4369,7 +3893,11 @@ public class DatabaseManager
         }
     }
 
-    public async Task UpdatePlayerGunAttachmentUnlockedAsync(CSteamID steamID, ushort gunID, ushort attachmentID, bool isUnlocked)
+    public async Task UpdatePlayerGunAttachmentUnlockedAsync(
+        CSteamID steamID,
+        ushort gunID,
+        ushort attachmentID,
+        bool isUnlocked)
     {
         using MySqlConnection Conn = new(ConnectionString);
         try
@@ -4390,16 +3918,20 @@ public class DatabaseManager
 
             if (!gun.Attachments.TryGetValue(attachmentID, out var attachment))
             {
-                Logging.Debug($"Error finding loadout attachment with id {attachmentID} for loadout gun with id {gunID} for player with steam id {steamID}");
+                Logging.Debug(
+                    $"Error finding loadout attachment with id {attachmentID} for loadout gun with id {gunID} for player with steam id {steamID}");
                 return;
             }
 
             attachment.IsUnlocked = isUnlocked;
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_GUNS}` SET `Attachments` = '{Utility.GetStringFromAttachments(gun.Attachments.Values.ToList())}' WHERE `SteamID` = {steamID} AND `GunID` = {gunID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"UPDATE `{PLAYERS_GUNS}` SET `Attachments` = '{Utility.GetStringFromAttachments(gun.Attachments.Values.ToList())}' WHERE `SteamID` = {steamID} AND `GunID` = {gunID};",
+                Conn).ExecuteScalarAsync();
         }
         catch (Exception ex)
         {
-            Logger.Log($"Error changing is unlocked to {isUnlocked} for attachment with id {attachmentID} for gun with id {gunID} for player with steam id");
+            Logger.Log(
+                $"Error changing is unlocked to {isUnlocked} for attachment with id {attachmentID} for gun with id {gunID} for player with steam id");
             Logger.Log(ex);
         }
         finally
@@ -4418,13 +3950,17 @@ public class DatabaseManager
             await Conn.OpenAsync();
             if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
             {
-                var skins = await new MySqlCommand($"SELECT `SkinIDs` FROM `{PLAYERS_GUNS_SKINS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                var skins = await new MySqlCommand(
+                        $"SELECT `SkinIDs` FROM `{PLAYERS_GUNS_SKINS}` WHERE `SteamID` = {steamID};", Conn)
+                    .ExecuteScalarAsync();
                 var ids = skins.GetIntListFromReaderResult();
                 if (!ids.Contains(id))
                 {
                     ids.Add(id);
                     var newSkins = ids.GetStringFromIntList();
-                    _ = await new MySqlCommand($"UPDATE `{PLAYERS_GUNS_SKINS}` SET `SkinIDs` = '{newSkins}' WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                    _ = await new MySqlCommand(
+                        $"UPDATE `{PLAYERS_GUNS_SKINS}` SET `SkinIDs` = '{newSkins}' WHERE `SteamID` = {steamID};",
+                        Conn).ExecuteScalarAsync();
                 }
 
                 return;
@@ -4444,15 +3980,15 @@ public class DatabaseManager
 
             loadout.GunSkinsSearchByID.Add(id, skin);
             if (!loadout.GunSkinsSearchByGunID.TryGetValue(skin.Gun.GunID, out var gunSkins))
-            {
                 loadout.GunSkinsSearchByGunID.Add(skin.Gun.GunID, new());
-            }
 
             loadout.GunSkinsSearchByGunID[skin.Gun.GunID].Add(skin);
             loadout.GunSkinsSearchBySkinID.Add(skin.SkinID, skin);
 
             var skinsString = loadout.GunSkinsSearchByID.Keys.ToList().GetStringFromIntList();
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_GUNS_SKINS}` SET `SkinIDs` = '{skinsString}' WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                    $"UPDATE `{PLAYERS_GUNS_SKINS}` SET `SkinIDs` = '{skinsString}' WHERE `SteamID` = {steamID};", Conn)
+                .ExecuteScalarAsync();
 
             Plugin.Instance.UI.OnUIUpdated(steamID, EUIPage.GunSkin);
         }
@@ -4479,12 +4015,12 @@ public class DatabaseManager
                 return;
             }
 
-            _ = await new MySqlCommand($"UPDATE `{GUNS_SKINS}` SET `UnboxedAmount` = `UnboxedAmount` + {amount} WHERE `ID` = {id};", Conn).ExecuteScalarAsync();
-            var obj = await new MySqlCommand($"SELECT `UnboxedAmount` FROM `{GUNS_SKINS}` WHERE `ID` = {id};", Conn).ExecuteScalarAsync();
-            if (obj is int unboxedAmount)
-            {
-                skin.UnboxedAmount = unboxedAmount;
-            }
+            _ = await new MySqlCommand(
+                    $"UPDATE `{GUNS_SKINS}` SET `UnboxedAmount` = `UnboxedAmount` + {amount} WHERE `ID` = {id};", Conn)
+                .ExecuteScalarAsync();
+            var obj = await new MySqlCommand($"SELECT `UnboxedAmount` FROM `{GUNS_SKINS}` WHERE `ID` = {id};", Conn)
+                .ExecuteScalarAsync();
+            if (obj is int unboxedAmount) skin.UnboxedAmount = unboxedAmount;
         }
         catch (Exception ex)
         {
@@ -4506,7 +4042,9 @@ public class DatabaseManager
         {
             await Conn.OpenAsync();
 
-            _ = await new MySqlCommand($"INSERT INTO `{PLAYERS_GUNS_CHARMS}` (`SteamID` , `CharmID` , `IsBought`) VALUES ({steamID} , {gunCharmID} , {isBought}) ON DUPLICATE KEY UPDATE `IsBought` = {isBought};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"INSERT INTO `{PLAYERS_GUNS_CHARMS}` (`SteamID` , `CharmID` , `IsBought`) VALUES ({steamID} , {gunCharmID} , {isBought}) ON DUPLICATE KEY UPDATE `IsBought` = {isBought};",
+                Conn).ExecuteScalarAsync();
             if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
             {
                 Logging.Debug($"Couldnt find loadout for player with steam id {steamID}");
@@ -4521,7 +4059,8 @@ public class DatabaseManager
 
             if (loadout.GunCharms.ContainsKey(gunCharmID))
             {
-                Logging.Debug($"Gun charm with id {gunCharmID} is already registered to player with steam id {steamID}");
+                Logging.Debug(
+                    $"Gun charm with id {gunCharmID} is already registered to player with steam id {steamID}");
                 loadout.GunCharms[gunCharmID].IsBought = isBought;
                 return;
             }
@@ -4549,7 +4088,10 @@ public class DatabaseManager
         {
             await Conn.OpenAsync();
 
-            _ = await new MySqlCommand($"DELETE FROM `{PLAYERS_GUNS_CHARMS}` WHERE `SteamID` = {steamID} AND `CharmID` = {gunCharmID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                    $"DELETE FROM `{PLAYERS_GUNS_CHARMS}` WHERE `SteamID` = {steamID} AND `CharmID` = {gunCharmID};",
+                    Conn)
+                .ExecuteScalarAsync();
             if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
             {
                 Logging.Debug($"Couldnt find loadout for player with steam id {steamID}");
@@ -4589,16 +4131,20 @@ public class DatabaseManager
 
             if (!loadout.GunCharms.TryGetValue(gunCharmID, out var gunCharm))
             {
-                Logging.Debug($"Error finding loadout gun charm with id {gunCharmID} for player with steam id {steamID}");
+                Logging.Debug(
+                    $"Error finding loadout gun charm with id {gunCharmID} for player with steam id {steamID}");
                 return;
             }
 
             gunCharm.IsBought = isBought;
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_GUNS_CHARMS}` SET `IsBought` = {isBought} WHERE `SteamID` = {steamID} AND `CharmID` = {gunCharmID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"UPDATE `{PLAYERS_GUNS_CHARMS}` SET `IsBought` = {isBought} WHERE `SteamID` = {steamID} AND `CharmID` = {gunCharmID};",
+                Conn).ExecuteScalarAsync();
         }
         catch (Exception ex)
         {
-            Logger.Log($"Error changing is bought to {isBought} for gun charm with id {gunCharmID} for player with steam id {steamID}");
+            Logger.Log(
+                $"Error changing is bought to {isBought} for gun charm with id {gunCharmID} for player with steam id {steamID}");
             Logger.Log(ex);
         }
         finally
@@ -4621,16 +4167,20 @@ public class DatabaseManager
 
             if (!loadout.GunCharms.TryGetValue(gunCharmID, out var gunCharm))
             {
-                Logging.Debug($"Error finding loadout gun charm with id {gunCharmID} for player with steam id {steamID}");
+                Logging.Debug(
+                    $"Error finding loadout gun charm with id {gunCharmID} for player with steam id {steamID}");
                 return;
             }
 
             gunCharm.IsUnlocked = isUnlocked;
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_GUNS_CHARMS}` SET `IsUnlocked` = {isUnlocked} WHERE `SteamID` = {steamID} AND `CharmID` = {gunCharmID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"UPDATE `{PLAYERS_GUNS_CHARMS}` SET `IsUnlocked` = {isUnlocked} WHERE `SteamID` = {steamID} AND `CharmID` = {gunCharmID};",
+                Conn).ExecuteScalarAsync();
         }
         catch (Exception ex)
         {
-            Logger.Log($"Error changing is unlocked to {isUnlocked} for gun charm with id {gunCharmID} for player with steam id {steamID}");
+            Logger.Log(
+                $"Error changing is unlocked to {isUnlocked} for gun charm with id {gunCharmID} for player with steam id {steamID}");
             Logger.Log(ex);
         }
         finally
@@ -4653,7 +4203,9 @@ public class DatabaseManager
                 return;
             }
 
-            _ = await new MySqlCommand($"INSERT INTO `{PLAYERS_KNIVES}` (`SteamID` , `KnifeID` , `KnifeKills` , `IsBought`) VALUES ({steamID} , {knifeID} , 0 , {isBought}) ON DUPLICATE KEY UPDATE `IsBought` = {isBought};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"INSERT INTO `{PLAYERS_KNIVES}` (`SteamID` , `KnifeID` , `KnifeKills` , `IsBought`) VALUES ({steamID} , {knifeID} , 0 , {isBought}) ON DUPLICATE KEY UPDATE `IsBought` = {isBought};",
+                Conn).ExecuteScalarAsync();
 
             LoadoutKnife loadoutKnife = new(knife, 0, isBought, false);
             if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
@@ -4702,12 +4254,13 @@ public class DatabaseManager
                 return;
             }
 
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_KNIVES}` SET `KnifeKills` = `KnifeKills` + {kills} WHERE `SteamID` = {steamID} AND `KnifeID` = {knifeID};", Conn).ExecuteScalarAsync();
-            var obj = await new MySqlCommand($"SELECT `KnifeKills` FROM `{PLAYERS_KNIVES}` WHERE `SteamID` = {steamID} AND `KnifeID` = {knifeID};", Conn).ExecuteScalarAsync();
-            if (obj is int newKills)
-            {
-                knife.KnifeKills = newKills;
-            }
+            _ = await new MySqlCommand(
+                $"UPDATE `{PLAYERS_KNIVES}` SET `KnifeKills` = `KnifeKills` + {kills} WHERE `SteamID` = {steamID} AND `KnifeID` = {knifeID};",
+                Conn).ExecuteScalarAsync();
+            var obj = await new MySqlCommand(
+                $"SELECT `KnifeKills` FROM `{PLAYERS_KNIVES}` WHERE `SteamID` = {steamID} AND `KnifeID` = {knifeID};",
+                Conn).ExecuteScalarAsync();
+            if (obj is int newKills) knife.KnifeKills = newKills;
         }
         catch (Exception ex)
         {
@@ -4739,11 +4292,14 @@ public class DatabaseManager
             }
 
             knife.IsBought = isBought;
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_KNIVES}` SET `IsBought` = {isBought} WHERE `SteamID` = {steamID} AND `KnifeID` = {knifeID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"UPDATE `{PLAYERS_KNIVES}` SET `IsBought` = {isBought} WHERE `SteamID` = {steamID} AND `KnifeID` = {knifeID};",
+                Conn).ExecuteScalarAsync();
         }
         catch (Exception ex)
         {
-            Logger.Log($"Error changing is bought to {isBought} for knife with id {knifeID} for player with steam id {steamID}");
+            Logger.Log(
+                $"Error changing is bought to {isBought} for knife with id {knifeID} for player with steam id {steamID}");
             Logger.Log(ex);
         }
         finally
@@ -4771,11 +4327,14 @@ public class DatabaseManager
             }
 
             knife.IsUnlocked = isUnlocked;
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_KNIVES}` SET `IsUnlocked` = {isUnlocked} WHERE `SteamID` = {steamID} AND `KnifeID` = {knifeID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"UPDATE `{PLAYERS_KNIVES}` SET `IsUnlocked` = {isUnlocked} WHERE `SteamID` = {steamID} AND `KnifeID` = {knifeID};",
+                Conn).ExecuteScalarAsync();
         }
         catch (Exception ex)
         {
-            Logger.Log($"Error changing is unlocked to {isUnlocked} for knife with id {knifeID} for player with steam id {steamID}");
+            Logger.Log(
+                $"Error changing is unlocked to {isUnlocked} for knife with id {knifeID} for player with steam id {steamID}");
             Logger.Log(ex);
         }
         finally
@@ -4798,12 +4357,12 @@ public class DatabaseManager
                 return;
             }
 
-            _ = await new MySqlCommand($"UPDATE `{KNIVES}` SET `UnboxedAmount` = `UnboxedAmount` + {amount} WHERE `KnifeID` = {knifeID};", Conn).ExecuteScalarAsync();
-            var obj = await new MySqlCommand($"SELECT `UnboxedAmount` FROM `{KNIVES}` WHERE `KnifeID` = {knifeID};", Conn).ExecuteScalarAsync();
-            if (obj is int unboxedAmount)
-            {
-                knife.UnboxedAmount = unboxedAmount;
-            }
+            _ = await new MySqlCommand(
+                $"UPDATE `{KNIVES}` SET `UnboxedAmount` = `UnboxedAmount` + {amount} WHERE `KnifeID` = {knifeID};",
+                Conn).ExecuteScalarAsync();
+            var obj = await new MySqlCommand($"SELECT `UnboxedAmount` FROM `{KNIVES}` WHERE `KnifeID` = {knifeID};",
+                Conn).ExecuteScalarAsync();
+            if (obj is int unboxedAmount) knife.UnboxedAmount = unboxedAmount;
         }
         catch (Exception ex)
         {
@@ -4824,7 +4383,9 @@ public class DatabaseManager
         try
         {
             await Conn.OpenAsync();
-            _ = await new MySqlCommand($"INSERT INTO `{PLAYERS_PERKS}` (`SteamID` , `PerkID` , `IsBought`) VALUES ({steamID} , {perkID} , {isBought}) ON DUPLICATE KEY UPDATE `IsBought` = {isBought};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"INSERT INTO `{PLAYERS_PERKS}` (`SteamID` , `PerkID` , `IsBought`) VALUES ({steamID} , {perkID} , {isBought}) ON DUPLICATE KEY UPDATE `IsBought` = {isBought};",
+                Conn).ExecuteScalarAsync();
             if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
             {
                 Logging.Debug($"Couldnt finding loadout for player with steam id {steamID}");
@@ -4848,7 +4409,6 @@ public class DatabaseManager
             loadout.Perks.Add(perkID, loadoutPerk);
 
             Plugin.Instance.UI.OnUIUpdated(steamID, EUIPage.Perk);
-
         }
         catch (Exception ex)
         {
@@ -4880,7 +4440,9 @@ public class DatabaseManager
             }
 
             perk.IsBought = isBought;
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_PERKS}` SET `IsBought` = {isBought} WHERE `SteamID` = {steamID} AND `PerkID` = {perkID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"UPDATE `{PLAYERS_PERKS}` SET `IsBought` = {isBought} WHERE `SteamID` = {steamID} AND `PerkID` = {perkID};",
+                Conn).ExecuteScalarAsync();
         }
         catch (Exception ex)
         {
@@ -4912,11 +4474,14 @@ public class DatabaseManager
             }
 
             perk.IsUnlocked = isUnlocked;
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_PERKS}` SET `IsUnlocked` = {isUnlocked} WHERE `SteamID` = {steamID} AND `PerkID` = {perkID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"UPDATE `{PLAYERS_PERKS}` SET `IsUnlocked` = {isUnlocked} WHERE `SteamID` = {steamID} AND `PerkID` = {perkID};",
+                Conn).ExecuteScalarAsync();
         }
         catch (Exception ex)
         {
-            Logger.Log($"Error changing is unlocked of perk to {isUnlocked} with id {perkID} of player with steam id {steamID}");
+            Logger.Log(
+                $"Error changing is unlocked of perk to {isUnlocked} with id {perkID} of player with steam id {steamID}");
             Logger.Log(ex);
         }
         finally
@@ -4933,7 +4498,9 @@ public class DatabaseManager
         try
         {
             await Conn.OpenAsync();
-            _ = await new MySqlCommand($"INSERT INTO `{PLAYERS_GADGETS}` (`SteamID` , `GadgetID` , `GadgetKills` , `IsBought) VALUES ({steamID} , {gadgetID} , 0 , {isBought}) ON DUPLICATE KEY UPDATE `IsBought` = {isBought};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"INSERT INTO `{PLAYERS_GADGETS}` (`SteamID` , `GadgetID` , `GadgetKills` , `IsBought) VALUES ({steamID} , {gadgetID} , 0 , {isBought}) ON DUPLICATE KEY UPDATE `IsBought` = {isBought};",
+                Conn).ExecuteScalarAsync();
             if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
             {
                 Logging.Debug($"Couldnt finding loadout for player with steam id {steamID}");
@@ -4987,16 +4554,18 @@ public class DatabaseManager
                 return;
             }
 
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_GADGETS}` SET `GadgetKills` = `GadgetKills` + {kills} WHERE `SteamID` = {steamID} AND `GadgetID` = {gadgetID};", Conn).ExecuteScalarAsync();
-            var obj = await new MySqlCommand($"SELECT `GadgetKills` FROM `{PLAYERS_GADGETS}` WHERE `SteamID` = {steamID} AND `GadgetID` = {gadgetID};", Conn).ExecuteScalarAsync();
-            if (obj is int newKills)
-            {
-                gadget.GadgetKills = newKills;
-            }
+            _ = await new MySqlCommand(
+                $"UPDATE `{PLAYERS_GADGETS}` SET `GadgetKills` = `GadgetKills` + {kills} WHERE `SteamID` = {steamID} AND `GadgetID` = {gadgetID};",
+                Conn).ExecuteScalarAsync();
+            var obj = await new MySqlCommand(
+                $"SELECT `GadgetKills` FROM `{PLAYERS_GADGETS}` WHERE `SteamID` = {steamID} AND `GadgetID` = {gadgetID};",
+                Conn).ExecuteScalarAsync();
+            if (obj is int newKills) gadget.GadgetKills = newKills;
         }
         catch (Exception ex)
         {
-            Logger.Log($"Error increasing {kills} gadget kills for gadget with id {gadgetID} for player with steam id {steamID}");
+            Logger.Log(
+                $"Error increasing {kills} gadget kills for gadget with id {gadgetID} for player with steam id {steamID}");
             Logger.Log(ex);
         }
         finally
@@ -5024,11 +4593,14 @@ public class DatabaseManager
             }
 
             gadget.IsBought = isBought;
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_GADGETS}` SET `IsBought` = {isBought} WHERE `SteamID` = {steamID} AND `GadgetID` = {gadgetID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"UPDATE `{PLAYERS_GADGETS}` SET `IsBought` = {isBought} WHERE `SteamID` = {steamID} AND `GadgetID` = {gadgetID};",
+                Conn).ExecuteScalarAsync();
         }
         catch (Exception ex)
         {
-            Logger.Log($"Error changing is bought to {isBought} for gadget with id {gadgetID} for player with steam id {steamID}");
+            Logger.Log(
+                $"Error changing is bought to {isBought} for gadget with id {gadgetID} for player with steam id {steamID}");
             Logger.Log(ex);
         }
         finally
@@ -5056,11 +4628,14 @@ public class DatabaseManager
             }
 
             gadget.IsUnlocked = isUnlocked;
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_GADGETS}` SET `IsUnlocked` = {isUnlocked} WHERE `SteamID` = {steamID} AND `GadgetID` = {gadgetID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"UPDATE `{PLAYERS_GADGETS}` SET `IsUnlocked` = {isUnlocked} WHERE `SteamID` = {steamID} AND `GadgetID` = {gadgetID};",
+                Conn).ExecuteScalarAsync();
         }
         catch (Exception ex)
         {
-            Logger.Log($"Error changing is unlocked to {isUnlocked} for gadget with id {gadgetID} for player with steam id {steamID}");
+            Logger.Log(
+                $"Error changing is unlocked to {isUnlocked} for gadget with id {gadgetID} for player with steam id {steamID}");
             Logger.Log(ex);
         }
         finally
@@ -5077,7 +4652,9 @@ public class DatabaseManager
         try
         {
             await Conn.OpenAsync();
-            _ = await new MySqlCommand($"INSERT INTO `{PLAYERS_KILLSTREAKS}` (`SteamID` , `KillstreakID` , `KillstreakKills` , `IsBought) VALUES ({steamID} , {killstreakID} , 0 , {isBought}) ON DUPLICATE KEY UPDATE `IsBought` = {isBought};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"INSERT INTO `{PLAYERS_KILLSTREAKS}` (`SteamID` , `KillstreakID` , `KillstreakKills` , `IsBought) VALUES ({steamID} , {killstreakID} , 0 , {isBought}) ON DUPLICATE KEY UPDATE `IsBought` = {isBought};",
+                Conn).ExecuteScalarAsync();
             if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
             {
                 Logging.Debug($"Couldnt finding loadout for player with steam id {steamID}");
@@ -5092,7 +4669,8 @@ public class DatabaseManager
 
             if (loadout.Killstreaks.ContainsKey(killstreakID))
             {
-                Logging.Debug($"Found killstreak with id {killstreakID} already registered to player with steam id {steamID}");
+                Logging.Debug(
+                    $"Found killstreak with id {killstreakID} already registered to player with steam id {steamID}");
                 loadout.Killstreaks[killstreakID].IsBought = isBought;
                 return;
             }
@@ -5127,20 +4705,23 @@ public class DatabaseManager
 
             if (!loadout.Killstreaks.TryGetValue(killstreakID, out var killstreak))
             {
-                Logging.Debug($"Error finding loadout killstreak with id {killstreakID} for player with steam id {steamID}");
+                Logging.Debug(
+                    $"Error finding loadout killstreak with id {killstreakID} for player with steam id {steamID}");
                 return;
             }
 
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_KILLSTREAKS}` SET `KillstreakKills` = `KillstreakKills` + {kills} WHERE `SteamID` = {steamID} AND `KillstreakID` = {killstreakID};", Conn).ExecuteScalarAsync();
-            var obj = await new MySqlCommand($"SELECT `KillstreakKills` FROM `{PLAYERS_KILLSTREAKS}` WHERE `SteamID` = {steamID} AND `KillstreakID` = {killstreakID};", Conn).ExecuteScalarAsync();
-            if (obj is int newKills)
-            {
-                killstreak.KillstreakKills = newKills;
-            }
+            _ = await new MySqlCommand(
+                $"UPDATE `{PLAYERS_KILLSTREAKS}` SET `KillstreakKills` = `KillstreakKills` + {kills} WHERE `SteamID` = {steamID} AND `KillstreakID` = {killstreakID};",
+                Conn).ExecuteScalarAsync();
+            var obj = await new MySqlCommand(
+                $"SELECT `KillstreakKills` FROM `{PLAYERS_KILLSTREAKS}` WHERE `SteamID` = {steamID} AND `KillstreakID` = {killstreakID};",
+                Conn).ExecuteScalarAsync();
+            if (obj is int newKills) killstreak.KillstreakKills = newKills;
         }
         catch (Exception ex)
         {
-            Logger.Log($"Error increasing {kills} kills of killstreak with id {killstreakID} for player with steam id {steamID}");
+            Logger.Log(
+                $"Error increasing {kills} kills of killstreak with id {killstreakID} for player with steam id {steamID}");
             Logger.Log(ex);
         }
         finally
@@ -5163,16 +4744,20 @@ public class DatabaseManager
 
             if (!loadout.Killstreaks.TryGetValue(killstreakID, out var killstreak))
             {
-                Logging.Debug($"Error finding loadout killstreak with id {killstreakID} for player with steam id {steamID}");
+                Logging.Debug(
+                    $"Error finding loadout killstreak with id {killstreakID} for player with steam id {steamID}");
                 return;
             }
 
             killstreak.IsBought = isBought;
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_KILLSTREAKS}` SET `IsBought` = {isBought} WHERE `SteamID` = {steamID} AND `KillstreakID` = {killstreakID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"UPDATE `{PLAYERS_KILLSTREAKS}` SET `IsBought` = {isBought} WHERE `SteamID` = {steamID} AND `KillstreakID` = {killstreakID};",
+                Conn).ExecuteScalarAsync();
         }
         catch (Exception ex)
         {
-            Logger.Log($"Error changing is bought to {isBought} for killstreak with id {killstreakID} for player with steam id {steamID}");
+            Logger.Log(
+                $"Error changing is bought to {isBought} for killstreak with id {killstreakID} for player with steam id {steamID}");
             Logger.Log(ex);
         }
         finally
@@ -5195,16 +4780,20 @@ public class DatabaseManager
 
             if (!loadout.Killstreaks.TryGetValue(killstreakID, out var killstreak))
             {
-                Logging.Debug($"Error finding loadout killstreak with id {killstreakID} for player with steam id {steamID}");
+                Logging.Debug(
+                    $"Error finding loadout killstreak with id {killstreakID} for player with steam id {steamID}");
                 return;
             }
 
             killstreak.IsUnlocked = isUnlocked;
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_KILLSTREAKS}` SET `IsUnlocked` = {isUnlocked} WHERE `SteamID` = {steamID} AND `KillstreakID` = {killstreakID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"UPDATE `{PLAYERS_KILLSTREAKS}` SET `IsUnlocked` = {isUnlocked} WHERE `SteamID` = {steamID} AND `KillstreakID` = {killstreakID};",
+                Conn).ExecuteScalarAsync();
         }
         catch (Exception ex)
         {
-            Logger.Log($"Error changing is unlocked to {isUnlocked} for killstreak with id {killstreakID} for player with steam id {steamID}");
+            Logger.Log(
+                $"Error changing is unlocked to {isUnlocked} for killstreak with id {killstreakID} for player with steam id {steamID}");
             Logger.Log(ex);
         }
         finally
@@ -5221,7 +4810,9 @@ public class DatabaseManager
         try
         {
             await Conn.OpenAsync();
-            _ = await new MySqlCommand($"INSERT INTO `{PLAYERS_CARDS}` (`SteamID` , `CardID` , `IsBought`) VALUES ({steamID} , {cardID} , {isBought}) ON DUPLICATE KEY UPDATE `IsBought` = {isBought};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"INSERT INTO `{PLAYERS_CARDS}` (`SteamID` , `CardID` , `IsBought`) VALUES ({steamID} , {cardID} , {isBought}) ON DUPLICATE KEY UPDATE `IsBought` = {isBought};",
+                Conn).ExecuteScalarAsync();
             if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
             {
                 Logging.Debug($"Couldnt finding loadout for player with steam id {steamID}");
@@ -5276,11 +4867,14 @@ public class DatabaseManager
             }
 
             card.IsBought = isBought;
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_CARDS}` SET `IsBought` = {isBought} WHERE `SteamID` = {steamID} AND `CardID` = {cardID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"UPDATE `{PLAYERS_CARDS}` SET `IsBought` = {isBought} WHERE `SteamID` = {steamID} AND `CardID` = {cardID};",
+                Conn).ExecuteScalarAsync();
         }
         catch (Exception ex)
         {
-            Logger.Log($"Error changing is bought to {isBought} for card with id {cardID} for player with steam id {steamID}");
+            Logger.Log(
+                $"Error changing is bought to {isBought} for card with id {cardID} for player with steam id {steamID}");
             Logger.Log(ex);
         }
         finally
@@ -5308,11 +4902,14 @@ public class DatabaseManager
             }
 
             card.IsUnlocked = isUnlocked;
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_CARDS}` SET `IsUnlocked` = {isUnlocked} WHERE `SteamID` = {steamID} AND `CardID` = {cardID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"UPDATE `{PLAYERS_CARDS}` SET `IsUnlocked` = {isUnlocked} WHERE `SteamID` = {steamID} AND `CardID` = {cardID};",
+                Conn).ExecuteScalarAsync();
         }
         catch (Exception ex)
         {
-            Logger.Log($"Error changing is unlocked to {isUnlocked} for card with id {cardID} for player with steam id {steamID}");
+            Logger.Log(
+                $"Error changing is unlocked to {isUnlocked} for card with id {cardID} for player with steam id {steamID}");
             Logger.Log(ex);
         }
         finally
@@ -5327,7 +4924,9 @@ public class DatabaseManager
         try
         {
             await Conn.OpenAsync();
-            _ = await new MySqlCommand($"DELETE FROM `{PLAYERS_CARDS}` WHERE `SteamID` = {steamID} AND `CardID` = {cardID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                    $"DELETE FROM `{PLAYERS_CARDS}` WHERE `SteamID` = {steamID} AND `CardID` = {cardID};", Conn)
+                .ExecuteScalarAsync();
             if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
             {
                 Logging.Debug($"Error finding loadout for player with steam id {steamID}");
@@ -5360,7 +4959,9 @@ public class DatabaseManager
         try
         {
             await Conn.OpenAsync();
-            _ = await new MySqlCommand($"INSERT INTO `{PLAYERS_GLOVES}` (`SteamID` , `GloveID` , `IsBought`) VALUES ({steamID} , {gloveID} , {isBought}) ON DUPLICATE KEY UPDATE `IsBought` = {isBought};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"INSERT INTO `{PLAYERS_GLOVES}` (`SteamID` , `GloveID` , `IsBought`) VALUES ({steamID} , {gloveID} , {isBought}) ON DUPLICATE KEY UPDATE `IsBought` = {isBought};",
+                Conn).ExecuteScalarAsync();
             if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
             {
                 Logging.Debug($"Couldnt finding loadout for player with steam id {steamID}");
@@ -5415,11 +5016,14 @@ public class DatabaseManager
             }
 
             glove.IsBought = isBought;
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_GLOVES}` SET `IsBought` = {isBought} WHERE `SteamID` = {steamID} AND `GloveID` = {gloveID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"UPDATE `{PLAYERS_GLOVES}` SET `IsBought` = {isBought} WHERE `SteamID` = {steamID} AND `GloveID` = {gloveID};",
+                Conn).ExecuteScalarAsync();
         }
         catch (Exception ex)
         {
-            Logger.Log($"Error changing is bought to {isBought} for glove with id {gloveID} for player with steam id {steamID}");
+            Logger.Log(
+                $"Error changing is bought to {isBought} for glove with id {gloveID} for player with steam id {steamID}");
             Logger.Log(ex);
         }
         finally
@@ -5447,11 +5051,14 @@ public class DatabaseManager
             }
 
             glove.IsUnlocked = isUnlocked;
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_GLOVES}` SET `IsUnlocked` = {isUnlocked} WHERE `SteamID` = {steamID} AND `GloveID` = {gloveID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"UPDATE `{PLAYERS_GLOVES}` SET `IsUnlocked` = {isUnlocked} WHERE `SteamID` = {steamID} AND `GloveID` = {gloveID};",
+                Conn).ExecuteScalarAsync();
         }
         catch (Exception ex)
         {
-            Logger.Log($"Error changing is unlocked to {isUnlocked} for glove with id {gloveID} for player with steam id {steamID}");
+            Logger.Log(
+                $"Error changing is unlocked to {isUnlocked} for glove with id {gloveID} for player with steam id {steamID}");
             Logger.Log(ex);
         }
         finally
@@ -5472,12 +5079,12 @@ public class DatabaseManager
                 return;
             }
 
-            _ = await new MySqlCommand($"UPDATE `{GLOVES}` SET `UnboxedAmount` = `UnboxedAmount` + {amount} WHERE `GloveID` = {gloveID};", Conn).ExecuteScalarAsync();
-            var obj = await new MySqlCommand($"SELECT `UnboxedAmount` FROM `{GLOVES}` WHERE `GloveID` = {gloveID};", Conn).ExecuteScalarAsync();
-            if (obj is int unboxedAmount)
-            {
-                glove.UnboxedAmount = unboxedAmount;
-            }
+            _ = await new MySqlCommand(
+                $"UPDATE `{GLOVES}` SET `UnboxedAmount` = `UnboxedAmount` + {amount} WHERE `GloveID` = {gloveID};",
+                Conn).ExecuteScalarAsync();
+            var obj = await new MySqlCommand($"SELECT `UnboxedAmount` FROM `{GLOVES}` WHERE `GloveID` = {gloveID};",
+                Conn).ExecuteScalarAsync();
+            if (obj is int unboxedAmount) glove.UnboxedAmount = unboxedAmount;
         }
         catch (Exception ex)
         {
@@ -5510,7 +5117,9 @@ public class DatabaseManager
             }
 
             LoadoutData loadoutData = new(playerLoadout);
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_LOADOUTS}` SET `Loadout` = '{Plugin.Instance.Data.ConvertLoadoutToJson(loadoutData)}' WHERE `SteamID` = {steamID} AND `LoadoutID` = {loadoutID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"UPDATE `{PLAYERS_LOADOUTS}` SET `Loadout` = '{Plugin.Instance.Data.ConvertLoadoutToJson(loadoutData)}' WHERE `SteamID` = {steamID} AND `LoadoutID` = {loadoutID};",
+                Conn).ExecuteScalarAsync();
         }
         catch (Exception ex)
         {
@@ -5542,11 +5151,14 @@ public class DatabaseManager
             }
 
             playerLoadout.IsActive = isActive;
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_LOADOUTS}` SET `IsActive` = {isActive} WHERE `SteamID` = {steamID} AND `LoadoutID` = {loadoutID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"UPDATE `{PLAYERS_LOADOUTS}` SET `IsActive` = {isActive} WHERE `SteamID` = {steamID} AND `LoadoutID` = {loadoutID};",
+                Conn).ExecuteScalarAsync();
         }
         catch (Exception ex)
         {
-            Logger.Log($"Error setting loadout is active to {isActive} for loadout with id {loadoutID} for player with steam id {steamID}");
+            Logger.Log(
+                $"Error setting loadout is active to {isActive} for loadout with id {loadoutID} for player with steam id {steamID}");
             Logger.Log(ex);
         }
         finally
@@ -5558,30 +5170,21 @@ public class DatabaseManager
     // Player Leaderboard
     private void RefreshData(object sender, System.Timers.ElapsedEventArgs e)
     {
-
         using MySqlConnection Conn = new(ConnectionString);
 
         try
         {
-
             Conn.Open();
             var rdr = new MySqlCommand($"SELECT * FROM `{OPTIONS}`;", Conn).ExecuteReader();
             try
             {
                 while (rdr.Read())
                 {
-
-                    if (!long.TryParse(rdr[0].ToString(), out var dailyLeaderboardWipeUnix))
-                    {
-                        continue;
-                    }
+                    if (!long.TryParse(rdr[0].ToString(), out var dailyLeaderboardWipeUnix)) continue;
 
                     var dailyLeaderboardWipe = DateTimeOffset.FromUnixTimeSeconds(dailyLeaderboardWipeUnix);
 
-                    if (!long.TryParse(rdr[1].ToString(), out var weeklyLeaderboardWipeUnix))
-                    {
-                        continue;
-                    }
+                    if (!long.TryParse(rdr[1].ToString(), out var weeklyLeaderboardWipeUnix)) continue;
 
                     var weeklyLeaderboardWipe = DateTimeOffset.FromUnixTimeSeconds(weeklyLeaderboardWipeUnix);
 
@@ -5594,37 +5197,19 @@ public class DatabaseManager
                     var seasonalRanked = Utility.GetRankedRewardsFromString(rdr[6].ToString());
                     var seasonalPercentile = Utility.GetPercentileRewardsFromString(rdr[7].ToString());
 
-                    if (!float.TryParse(rdr[8].ToString(), out var xpBooster))
-                    {
-                        continue;
-                    }
+                    if (!float.TryParse(rdr[8].ToString(), out var xpBooster)) continue;
 
-                    if (!float.TryParse(rdr[9].ToString(), out var bpBooster))
-                    {
-                        continue;
-                    }
+                    if (!float.TryParse(rdr[9].ToString(), out var bpBooster)) continue;
 
-                    if (!float.TryParse(rdr[10].ToString(), out var gunXPBooster))
-                    {
-                        continue;
-                    }
+                    if (!float.TryParse(rdr[10].ToString(), out var gunXPBooster)) continue;
 
-                    if (!long.TryParse(rdr[11].ToString(), out var xpBoosterWipeUnix))
-                    {
-                        continue;
-                    }
+                    if (!long.TryParse(rdr[11].ToString(), out var xpBoosterWipeUnix)) continue;
 
                     var xpBoosterWipe = DateTimeOffset.FromUnixTimeSeconds(xpBoosterWipeUnix);
-                    if (!long.TryParse(rdr[12].ToString(), out var bpBoosterWipeUnix))
-                    {
-                        continue;
-                    }
+                    if (!long.TryParse(rdr[12].ToString(), out var bpBoosterWipeUnix)) continue;
 
                     var bpBoosterWipe = DateTimeOffset.FromUnixTimeSeconds(bpBoosterWipeUnix);
-                    if (!long.TryParse(rdr[13].ToString(), out var gunXPBoosterWipeUnix))
-                    {
-                        continue;
-                    }
+                    if (!long.TryParse(rdr[13].ToString(), out var gunXPBoosterWipeUnix)) continue;
 
                     var gunXPBoosterWipe = DateTimeOffset.FromUnixTimeSeconds(gunXPBoosterWipeUnix);
 
@@ -5632,7 +5217,10 @@ public class DatabaseManager
                     var primeRewards = Utility.GetRewardsFromString(rdr[15].ToString());
                     var primeDailyRewards = Utility.GetRewardsFromString(rdr[16].ToString());
 
-                    ServerOptions = new Options(dailyLeaderboardWipe, weeklyLeaderboardWipe, dailyRanked, dailyPercentile, weeklyRanked, weeklyPercentile, seasonalRanked, seasonalPercentile, xpBooster, bpBooster, gunXPBooster, xpBoosterWipe, bpBoosterWipe, gunXPBoosterWipe, gameTips, primeRewards, primeDailyRewards);
+                    ServerOptions = new(dailyLeaderboardWipe, weeklyLeaderboardWipe, dailyRanked, dailyPercentile,
+                        weeklyRanked, weeklyPercentile, seasonalRanked, seasonalPercentile, xpBooster, bpBooster,
+                        gunXPBooster, xpBoosterWipe, bpBoosterWipe, gunXPBoosterWipe, gameTips, primeRewards,
+                        primeDailyRewards);
                 }
             }
             catch (Exception ex)
@@ -5645,7 +5233,9 @@ public class DatabaseManager
                 rdr.Close();
             }
 
-            rdr = new MySqlCommand($"SELECT `{PLAYERS_LEADERBOARD_DAILY}`.`SteamID`, `{PLAYERS}`.`SteamName`, `{PLAYERS}`.`CountryCode`, `{PLAYERS}`.`HideFlag`, `{PLAYERS}`.`Level`, `{PLAYERS}`.`HasPrime` , `{PLAYERS_LEADERBOARD_DAILY}`.`Kills`, `{PLAYERS_LEADERBOARD_DAILY}`.`HeadshotKills`, `{PLAYERS_LEADERBOARD_DAILY}`.`Deaths` FROM `{PLAYERS_LEADERBOARD_DAILY}` INNER JOIN `{PLAYERS}` ON `{PLAYERS_LEADERBOARD_DAILY}`.`SteamID` = `{PLAYERS}`.`SteamID` ORDER BY (`{PLAYERS_LEADERBOARD_DAILY}`.`Kills` + `{PLAYERS_LEADERBOARD_DAILY}`.`HeadshotKills`) DESC;", Conn).ExecuteReader();
+            rdr = new MySqlCommand(
+                $"SELECT `{PLAYERS_LEADERBOARD_DAILY}`.`SteamID`, `{PLAYERS}`.`SteamName`, `{PLAYERS}`.`CountryCode`, `{PLAYERS}`.`HideFlag`, `{PLAYERS}`.`Level`, `{PLAYERS}`.`HasPrime` , `{PLAYERS_LEADERBOARD_DAILY}`.`Kills`, `{PLAYERS_LEADERBOARD_DAILY}`.`HeadshotKills`, `{PLAYERS_LEADERBOARD_DAILY}`.`Deaths` FROM `{PLAYERS_LEADERBOARD_DAILY}` INNER JOIN `{PLAYERS}` ON `{PLAYERS_LEADERBOARD_DAILY}`.`SteamID` = `{PLAYERS}`.`SteamID` ORDER BY (`{PLAYERS_LEADERBOARD_DAILY}`.`Kills` + `{PLAYERS_LEADERBOARD_DAILY}`.`HeadshotKills`) DESC;",
+                Conn).ExecuteReader();
             try
             {
                 List<LeaderboardData> playerDailyLeaderboard = new();
@@ -5653,46 +5243,26 @@ public class DatabaseManager
 
                 while (rdr.Read())
                 {
-                    if (!ulong.TryParse(rdr[0].ToString(), out var steamid))
-                    {
-                        continue;
-                    }
+                    if (!ulong.TryParse(rdr[0].ToString(), out var steamid)) continue;
 
                     var steamName = rdr[1].ToString();
                     var countryCode = rdr[2].ToString();
 
-                    if (!bool.TryParse(rdr[3].ToString(), out var hideFlag))
-                    {
-                        continue;
-                    }
+                    if (!bool.TryParse(rdr[3].ToString(), out var hideFlag)) continue;
 
-                    if (!int.TryParse(rdr[4].ToString(), out var level))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[4].ToString(), out var level)) continue;
 
-                    if (!bool.TryParse(rdr[5].ToString(), out var hasPrime))
-                    {
-                        continue;
-                    }
+                    if (!bool.TryParse(rdr[5].ToString(), out var hasPrime)) continue;
 
                     CSteamID steamID = new(steamid);
-                    if (!int.TryParse(rdr[6].ToString(), out var kills))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[6].ToString(), out var kills)) continue;
 
-                    if (!int.TryParse(rdr[7].ToString(), out var headshotKills))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[7].ToString(), out var headshotKills)) continue;
 
-                    if (!int.TryParse(rdr[8].ToString(), out var deaths))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[8].ToString(), out var deaths)) continue;
 
-                    LeaderboardData leaderboardData = new(steamID, steamName, countryCode, hideFlag, level, hasPrime, kills, headshotKills, deaths);
+                    LeaderboardData leaderboardData = new(steamID, steamName, countryCode, hideFlag, level, hasPrime,
+                        kills, headshotKills, deaths);
 
                     playerDailyLeaderboard.Add(leaderboardData);
                     playerDailyLeaderboardLookup.Add(steamID, leaderboardData);
@@ -5711,7 +5281,9 @@ public class DatabaseManager
                 rdr.Close();
             }
 
-            rdr = new MySqlCommand($"SELECT `{PLAYERS_LEADERBOARD_WEEKLY}`.`SteamID`, `{PLAYERS}`.`SteamName`, `{PLAYERS}`.`CountryCode`, `{PLAYERS}`.`HideFlag`, `{PLAYERS}`.`Level`, `{PLAYERS}`.`HasPrime` , `{PLAYERS_LEADERBOARD_WEEKLY}`.`Kills`, `{PLAYERS_LEADERBOARD_WEEKLY}`.`HeadshotKills`, `{PLAYERS_LEADERBOARD_WEEKLY}`.`Deaths` FROM `{PLAYERS_LEADERBOARD_WEEKLY}` INNER JOIN `{PLAYERS}` ON `{PLAYERS_LEADERBOARD_WEEKLY}`.`SteamID` = `{PLAYERS}`.`SteamID` ORDER BY (`{PLAYERS_LEADERBOARD_WEEKLY}`.`Kills` + `{PLAYERS_LEADERBOARD_WEEKLY}`.`HeadshotKills`) DESC;", Conn).ExecuteReader();
+            rdr = new MySqlCommand(
+                $"SELECT `{PLAYERS_LEADERBOARD_WEEKLY}`.`SteamID`, `{PLAYERS}`.`SteamName`, `{PLAYERS}`.`CountryCode`, `{PLAYERS}`.`HideFlag`, `{PLAYERS}`.`Level`, `{PLAYERS}`.`HasPrime` , `{PLAYERS_LEADERBOARD_WEEKLY}`.`Kills`, `{PLAYERS_LEADERBOARD_WEEKLY}`.`HeadshotKills`, `{PLAYERS_LEADERBOARD_WEEKLY}`.`Deaths` FROM `{PLAYERS_LEADERBOARD_WEEKLY}` INNER JOIN `{PLAYERS}` ON `{PLAYERS_LEADERBOARD_WEEKLY}`.`SteamID` = `{PLAYERS}`.`SteamID` ORDER BY (`{PLAYERS_LEADERBOARD_WEEKLY}`.`Kills` + `{PLAYERS_LEADERBOARD_WEEKLY}`.`HeadshotKills`) DESC;",
+                Conn).ExecuteReader();
             try
             {
                 List<LeaderboardData> playerWeeklyLeaderboard = new();
@@ -5719,46 +5291,26 @@ public class DatabaseManager
 
                 while (rdr.Read())
                 {
-                    if (!ulong.TryParse(rdr[0].ToString(), out var steamid))
-                    {
-                        continue;
-                    }
+                    if (!ulong.TryParse(rdr[0].ToString(), out var steamid)) continue;
 
                     var steamName = rdr[1].ToString();
                     var countryCode = rdr[2].ToString();
 
-                    if (!bool.TryParse(rdr[3].ToString(), out var hideFlag))
-                    {
-                        continue;
-                    }
+                    if (!bool.TryParse(rdr[3].ToString(), out var hideFlag)) continue;
 
-                    if (!int.TryParse(rdr[4].ToString(), out var level))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[4].ToString(), out var level)) continue;
 
-                    if (!bool.TryParse(rdr[5].ToString(), out var hasPrime))
-                    {
-                        continue;
-                    }
+                    if (!bool.TryParse(rdr[5].ToString(), out var hasPrime)) continue;
 
                     CSteamID steamID = new(steamid);
-                    if (!int.TryParse(rdr[6].ToString(), out var kills))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[6].ToString(), out var kills)) continue;
 
-                    if (!int.TryParse(rdr[7].ToString(), out var headshotKills))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[7].ToString(), out var headshotKills)) continue;
 
-                    if (!int.TryParse(rdr[8].ToString(), out var deaths))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[8].ToString(), out var deaths)) continue;
 
-                    LeaderboardData leaderboardData = new(steamID, steamName, countryCode, hideFlag, level, hasPrime, kills, headshotKills, deaths);
+                    LeaderboardData leaderboardData = new(steamID, steamName, countryCode, hideFlag, level, hasPrime,
+                        kills, headshotKills, deaths);
 
                     playerWeeklyLeaderboard.Add(leaderboardData);
                     playerWeeklyLeaderboardLookup.Add(steamID, leaderboardData);
@@ -5781,22 +5333,31 @@ public class DatabaseManager
             {
                 if (!PlayerDailyLeaderboardLookup.ContainsKey(data.SteamID))
                 {
-                    LeaderboardData dailyLeaderboardData = new(data.SteamID, data.SteamName, data.CountryCode, data.HideFlag, data.Level, data.HasPrime, 0, 0, 0);
+                    LeaderboardData dailyLeaderboardData = new(data.SteamID, data.SteamName, data.CountryCode,
+                        data.HideFlag, data.Level, data.HasPrime, 0, 0, 0);
                     PlayerDailyLeaderboard.Add(dailyLeaderboardData);
                     PlayerDailyLeaderboardLookup.Add(data.SteamID, dailyLeaderboardData);
-                    _ = new MySqlCommand($"INSERT INTO `{PLAYERS_LEADERBOARD_DAILY}` ( `SteamID` ) VALUES ( {data.SteamID} );", Conn).ExecuteScalar();
+                    _ = new MySqlCommand(
+                            $"INSERT INTO `{PLAYERS_LEADERBOARD_DAILY}` ( `SteamID` ) VALUES ( {data.SteamID} );", Conn)
+                        .ExecuteScalar();
                 }
 
                 if (!PlayerWeeklyLeaderboardLookup.ContainsKey(data.SteamID))
                 {
-                    LeaderboardData weeklyLeaderboardData = new(data.SteamID, data.SteamName, data.CountryCode, data.HideFlag, data.Level, data.HasPrime, 0, 0, 0);
+                    LeaderboardData weeklyLeaderboardData = new(data.SteamID, data.SteamName, data.CountryCode,
+                        data.HideFlag, data.Level, data.HasPrime, 0, 0, 0);
                     PlayerWeeklyLeaderboard.Add(weeklyLeaderboardData);
                     PlayerWeeklyLeaderboardLookup.Add(data.SteamID, weeklyLeaderboardData);
-                    _ = new MySqlCommand($"INSERT INTO `{PLAYERS_LEADERBOARD_WEEKLY}` ( `SteamID` ) VALUES ( {data.SteamID} );", Conn).ExecuteScalar();
+                    _ = new MySqlCommand(
+                            $"INSERT INTO `{PLAYERS_LEADERBOARD_WEEKLY}` ( `SteamID` ) VALUES ( {data.SteamID} );",
+                            Conn)
+                        .ExecuteScalar();
                 }
             }
 
-            rdr = new MySqlCommand($"SELECT `{PLAYERS_LEADERBOARD_SEASONAL}`.`SteamID`, `{PLAYERS}`.`SteamName`, `{PLAYERS}`.`CountryCode`, `{PLAYERS}`.`HideFlag`, `{PLAYERS}`.`Level`, `{PLAYERS}`.`HasPrime` , `{PLAYERS_LEADERBOARD_SEASONAL}`.`Kills`, `{PLAYERS_LEADERBOARD_SEASONAL}`.`HeadshotKills`, `{PLAYERS_LEADERBOARD_SEASONAL}`.`Deaths` FROM `{PLAYERS_LEADERBOARD_SEASONAL}` INNER JOIN `{PLAYERS}` ON `{PLAYERS_LEADERBOARD_SEASONAL}`.`SteamID` = `{PLAYERS}`.`SteamID` ORDER BY (`{PLAYERS_LEADERBOARD_SEASONAL}`.`Kills` + `{PLAYERS_LEADERBOARD_SEASONAL}`.`HeadshotKills`) DESC;", Conn).ExecuteReader();
+            rdr = new MySqlCommand(
+                $"SELECT `{PLAYERS_LEADERBOARD_SEASONAL}`.`SteamID`, `{PLAYERS}`.`SteamName`, `{PLAYERS}`.`CountryCode`, `{PLAYERS}`.`HideFlag`, `{PLAYERS}`.`Level`, `{PLAYERS}`.`HasPrime` , `{PLAYERS_LEADERBOARD_SEASONAL}`.`Kills`, `{PLAYERS_LEADERBOARD_SEASONAL}`.`HeadshotKills`, `{PLAYERS_LEADERBOARD_SEASONAL}`.`Deaths` FROM `{PLAYERS_LEADERBOARD_SEASONAL}` INNER JOIN `{PLAYERS}` ON `{PLAYERS_LEADERBOARD_SEASONAL}`.`SteamID` = `{PLAYERS}`.`SteamID` ORDER BY (`{PLAYERS_LEADERBOARD_SEASONAL}`.`Kills` + `{PLAYERS_LEADERBOARD_SEASONAL}`.`HeadshotKills`) DESC;",
+                Conn).ExecuteReader();
             try
             {
                 List<LeaderboardData> playerSeasonalLeaderboard = new();
@@ -5804,46 +5365,26 @@ public class DatabaseManager
 
                 while (rdr.Read())
                 {
-                    if (!ulong.TryParse(rdr[0].ToString(), out var steamid))
-                    {
-                        continue;
-                    }
+                    if (!ulong.TryParse(rdr[0].ToString(), out var steamid)) continue;
 
                     var steamName = rdr[1].ToString();
                     var countryCode = rdr[2].ToString();
 
-                    if (!bool.TryParse(rdr[3].ToString(), out var hideFlag))
-                    {
-                        continue;
-                    }
+                    if (!bool.TryParse(rdr[3].ToString(), out var hideFlag)) continue;
 
-                    if (!int.TryParse(rdr[4].ToString(), out var level))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[4].ToString(), out var level)) continue;
 
-                    if (!bool.TryParse(rdr[5].ToString(), out var hasPrime))
-                    {
-                        continue;
-                    }
+                    if (!bool.TryParse(rdr[5].ToString(), out var hasPrime)) continue;
 
                     CSteamID steamID = new(steamid);
-                    if (!int.TryParse(rdr[6].ToString(), out var kills))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[6].ToString(), out var kills)) continue;
 
-                    if (!int.TryParse(rdr[7].ToString(), out var headshotKills))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[7].ToString(), out var headshotKills)) continue;
 
-                    if (!int.TryParse(rdr[8].ToString(), out var deaths))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[8].ToString(), out var deaths)) continue;
 
-                    LeaderboardData leaderboardData = new(steamID, steamName, countryCode, hideFlag, level, hasPrime, kills, headshotKills, deaths);
+                    LeaderboardData leaderboardData = new(steamID, steamName, countryCode, hideFlag, level, hasPrime,
+                        kills, headshotKills, deaths);
 
                     playerSeasonalLeaderboard.Add(leaderboardData);
                     playerSeasonalLeaderboardLookup.Add(steamID, leaderboardData);
@@ -5862,7 +5403,9 @@ public class DatabaseManager
                 rdr.Close();
             }
 
-            rdr = new MySqlCommand($"SELECT `SteamID`, `SteamName`, `CountryCode`, `HideFlag`, `Level`, `HasPrime`, `Kills`, `HeadshotKills`, `Deaths` FROM `{PLAYERS}` ORDER BY (`Kills` + `HeadshotKills`) DESC;", Conn).ExecuteReader();
+            rdr = new MySqlCommand(
+                $"SELECT `SteamID`, `SteamName`, `CountryCode`, `HideFlag`, `Level`, `HasPrime`, `Kills`, `HeadshotKills`, `Deaths` FROM `{PLAYERS}` ORDER BY (`Kills` + `HeadshotKills`) DESC;",
+                Conn).ExecuteReader();
             try
             {
                 Dictionary<CSteamID, LeaderboardData> playerAllTimeLeaderboardLookup = new();
@@ -5870,46 +5413,26 @@ public class DatabaseManager
                 List<LeaderboardData> playerAllTimeLevel = new();
                 while (rdr.Read())
                 {
-                    if (!ulong.TryParse(rdr[0].ToString(), out var steamid))
-                    {
-                        continue;
-                    }
+                    if (!ulong.TryParse(rdr[0].ToString(), out var steamid)) continue;
 
                     CSteamID steamID = new(steamid);
                     var steamName = rdr[1].ToString();
                     var countryCode = rdr[2].ToString();
 
-                    if (!bool.TryParse(rdr[3].ToString(), out var hideFlag))
-                    {
-                        continue;
-                    }
+                    if (!bool.TryParse(rdr[3].ToString(), out var hideFlag)) continue;
 
-                    if (!int.TryParse(rdr[4].ToString(), out var level))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[4].ToString(), out var level)) continue;
 
-                    if (!bool.TryParse(rdr[5].ToString(), out var hasPrime))
-                    {
-                        continue;
-                    }
+                    if (!bool.TryParse(rdr[5].ToString(), out var hasPrime)) continue;
 
-                    if (!int.TryParse(rdr[6].ToString(), out var kills))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[6].ToString(), out var kills)) continue;
 
-                    if (!int.TryParse(rdr[7].ToString(), out var headshotKills))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[7].ToString(), out var headshotKills)) continue;
 
-                    if (!int.TryParse(rdr[8].ToString(), out var deaths))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[8].ToString(), out var deaths)) continue;
 
-                    LeaderboardData leaderboardData = new(steamID, steamName, countryCode, hideFlag, level, hasPrime, kills, headshotKills, deaths);
+                    LeaderboardData leaderboardData = new(steamID, steamName, countryCode, hideFlag, level, hasPrime,
+                        kills, headshotKills, deaths);
                     playerAllTimeLeaderboardLookup.Add(steamID, leaderboardData);
                     playerAllTimeKill.Add(leaderboardData);
                     playerAllTimeLevel.Add(leaderboardData);
@@ -5934,55 +5457,50 @@ public class DatabaseManager
 
             if (ServerOptions.DailyLeaderboardWipe < DateTimeOffset.UtcNow)
             {
-
                 // Give all ranked rewards
-                Embed embed = new(null, $"Last Playtest Rankings ({PlayerDailyLeaderboard.Count} Players)", null, "15105570", DateTime.UtcNow.ToString("s"),
-                new Footer(Provider.serverName, Provider.configData.Browser.Icon),
-                new Author(Provider.serverName, "", Provider.configData.Browser.Icon),
-                new Field[] { new Field($"Ranked:", "", false), new Field("Percentile:", "", false) },
-                null, null);
+                Embed embed = new(null, $"Last Playtest Rankings ({PlayerDailyLeaderboard.Count} Players)", null,
+                    "15105570", DateTime.UtcNow.ToString("s"),
+                    new(Provider.serverName, Provider.configData.Browser.Icon),
+                    new(Provider.serverName, "", Provider.configData.Browser.Icon),
+                    new Field[] { new($"Ranked:", "", false), new("Percentile:", "", false) }, null, null);
 
                 foreach (var rankedReward in ServerOptions.DailyRankedRewards)
                 {
-                    if (PlayerDailyLeaderboard.Count < (rankedReward.Key + 1))
-                    {
-                        break;
-                    }
+                    if (PlayerDailyLeaderboard.Count < rankedReward.Key + 1) break;
 
                     var leaderboardData = PlayerDailyLeaderboard[rankedReward.Key];
                     bulkRewards.Add(new(leaderboardData.SteamID, rankedReward.Value));
-                    embed.fields[0].value += $"{Utility.GetDiscordEmoji(rankedReward.Key + 1)} [{leaderboardData.SteamName}](https://steamcommunity.com/profiles/{leaderboardData.SteamID}/) | {leaderboardData.Kills + leaderboardData.HeadshotKills} Kills \n";
-                    if (rankedReward.Key == 2)
-                    {
-                        embed.fields[0].value += $"\n";
-                    }
+                    embed.fields[0].value +=
+                        $"{Utility.GetDiscordEmoji(rankedReward.Key + 1)} [{leaderboardData.SteamName}](https://steamcommunity.com/profiles/{leaderboardData.SteamID}/) | {leaderboardData.Kills + leaderboardData.HeadshotKills} Kills \n";
+                    if (rankedReward.Key == 2) embed.fields[0].value += $"\n";
                 }
 
                 // Give all percentile rewards
                 foreach (var percentileReward in ServerOptions.DailyPercentileRewards)
                 {
-                    var lowerIndex = percentileReward.LowerPercentile == 0 ? 0 : (percentileReward.LowerPercentile * PlayerDailyLeaderboard.Count / 100);
+                    var lowerIndex = percentileReward.LowerPercentile == 0
+                        ? 0
+                        : percentileReward.LowerPercentile * PlayerDailyLeaderboard.Count / 100;
                     var upperIndex = percentileReward.UpperPercentile * PlayerDailyLeaderboard.Count / 100;
 
                     for (var i = lowerIndex; i < upperIndex; i++)
                     {
-                        if (PlayerDailyLeaderboard.Count < (i + 1))
-                        {
-                            break;
-                        }
+                        if (PlayerDailyLeaderboard.Count < i + 1) break;
 
                         var leaderboardData = PlayerDailyLeaderboard[i];
                         bulkRewards.Add(new(leaderboardData.SteamID, percentileReward.Rewards));
                     }
 
-                    embed.fields[1].value += $"**Top {percentileReward.UpperPercentile}%:** {upperIndex - lowerIndex} players \n";
+                    embed.fields[1].value +=
+                        $"**Top {percentileReward.UpperPercentile}%:** {upperIndex - lowerIndex} players \n";
                 }
 
                 _ = Task.Run(() =>
                 {
                     try
                     {
-                        DiscordManager.SendEmbed(embed, "Leaderboard", "https://discord.com/api/webhooks/983367340525760542/RfPxBseRKp3kffBEaHovRBRsLpIR4A-pvAXbQWzknDMohxCiawGlsZw6U_ehXukPreb_");
+                        DiscordManager.SendEmbed(embed, "Leaderboard",
+                            "https://discord.com/api/webhooks/983367340525760542/RfPxBseRKp3kffBEaHovRBRsLpIR4A-pvAXbQWzknDMohxCiawGlsZw6U_ehXukPreb_");
                     }
                     catch (Exception ex)
                     {
@@ -5999,76 +5517,73 @@ public class DatabaseManager
 
                 foreach (var data in PlayerData.Values)
                 {
-                    LeaderboardData leaderboardData = new(data.SteamID, data.SteamName, data.CountryCode, data.HideFlag, data.Level, data.HasPrime, 0, 0, 0);
+                    LeaderboardData leaderboardData = new(data.SteamID, data.SteamName, data.CountryCode, data.HideFlag,
+                        data.Level, data.HasPrime, 0, 0, 0);
                     PlayerDailyLeaderboard.Add(leaderboardData);
                     PlayerDailyLeaderboardLookup.Add(data.SteamID, leaderboardData);
-                    _ = new MySqlCommand($"INSERT INTO `{PLAYERS_LEADERBOARD_DAILY}` ( `SteamID` ) VALUES ( {data.SteamID} );", Conn).ExecuteScalar();
+                    _ = new MySqlCommand(
+                            $"INSERT INTO `{PLAYERS_LEADERBOARD_DAILY}` ( `SteamID` ) VALUES ( {data.SteamID} );", Conn)
+                        .ExecuteScalar();
                 }
 
                 // Change the wipe date
                 var hourTarget = ServerOptions.DailyLeaderboardWipe.Hour;
                 var now = DateTime.UtcNow;
-                DateTimeOffset newWipeDate = new(now.Year, now.Month, now.Day, hourTarget, 0, 0, new TimeSpan(0));
-                if (now.Hour >= hourTarget)
-                {
-                    newWipeDate = newWipeDate.AddDays(1);
-                }
+                DateTimeOffset newWipeDate = new(now.Year, now.Month, now.Day, hourTarget, 0, 0, new(0));
+                if (now.Hour >= hourTarget) newWipeDate = newWipeDate.AddDays(1);
 
-                _ = new MySqlCommand($"UPDATE `{OPTIONS}` SET `DailyLeaderboardWipe` = {newWipeDate.ToUnixTimeSeconds()};", Conn).ExecuteScalar();
+                _ = new MySqlCommand(
+                        $"UPDATE `{OPTIONS}` SET `DailyLeaderboardWipe` = {newWipeDate.ToUnixTimeSeconds()};", Conn)
+                    .ExecuteScalar();
                 ServerOptions.DailyLeaderboardWipe = newWipeDate;
             }
 
             if (ServerOptions.WeeklyLeaderboardWipe < DateTimeOffset.UtcNow)
             {
-
                 // Give all ranked rewards
-                Embed embed = new(null, $"Last Playtest Rankings ({PlayerWeeklyLeaderboard.Count} Players)", null, "15105570", DateTime.UtcNow.ToString("s"),
-                new Footer(Provider.serverName, Provider.configData.Browser.Icon),
-                new Author(Provider.serverName, "", Provider.configData.Browser.Icon),
-                new Field[] { new Field($"Ranked:", "", false), new Field("Percentile:", "", false) },
-                null, null);
+                Embed embed = new(null, $"Last Playtest Rankings ({PlayerWeeklyLeaderboard.Count} Players)", null,
+                    "15105570", DateTime.UtcNow.ToString("s"),
+                    new(Provider.serverName, Provider.configData.Browser.Icon),
+                    new(Provider.serverName, "", Provider.configData.Browser.Icon),
+                    new Field[] { new($"Ranked:", "", false), new("Percentile:", "", false) }, null, null);
 
                 foreach (var rankedReward in ServerOptions.WeeklyRankedRewards)
                 {
-                    if (PlayerWeeklyLeaderboard.Count < (rankedReward.Key + 1))
-                    {
-                        break;
-                    }
+                    if (PlayerWeeklyLeaderboard.Count < rankedReward.Key + 1) break;
 
                     var leaderboardData = PlayerWeeklyLeaderboard[rankedReward.Key];
                     bulkRewards.Add(new(leaderboardData.SteamID, rankedReward.Value));
-                    embed.fields[0].value += $"{Utility.GetDiscordEmoji(rankedReward.Key + 1)} [{leaderboardData.SteamName}](https://steamcommunity.com/profiles/{leaderboardData.SteamID}/) | {leaderboardData.Kills + leaderboardData.HeadshotKills} Kills \n";
-                    if (rankedReward.Key == 2)
-                    {
-                        embed.fields[0].value += $"\n";
-                    }
+                    embed.fields[0].value +=
+                        $"{Utility.GetDiscordEmoji(rankedReward.Key + 1)} [{leaderboardData.SteamName}](https://steamcommunity.com/profiles/{leaderboardData.SteamID}/) | {leaderboardData.Kills + leaderboardData.HeadshotKills} Kills \n";
+                    if (rankedReward.Key == 2) embed.fields[0].value += $"\n";
                 }
 
                 // Give all percentile rewards
                 foreach (var percentileReward in ServerOptions.WeeklyPercentileRewards)
                 {
-                    var lowerIndex = percentileReward.LowerPercentile == 0 ? 0 : (percentileReward.LowerPercentile * PlayerWeeklyLeaderboard.Count / 100);
+                    var lowerIndex = percentileReward.LowerPercentile == 0
+                        ? 0
+                        : percentileReward.LowerPercentile * PlayerWeeklyLeaderboard.Count / 100;
                     var upperIndex = percentileReward.UpperPercentile * PlayerWeeklyLeaderboard.Count / 100;
 
                     for (var i = lowerIndex; i < upperIndex; i++)
                     {
-                        if (PlayerWeeklyLeaderboard.Count < (i + 1))
-                        {
-                            break;
-                        }
+                        if (PlayerWeeklyLeaderboard.Count < i + 1) break;
 
                         var leaderboardData = PlayerWeeklyLeaderboard[i];
                         bulkRewards.Add(new(leaderboardData.SteamID, percentileReward.Rewards));
                     }
 
-                    embed.fields[1].value += $"**Top {percentileReward.UpperPercentile}%:** {upperIndex - lowerIndex} players \n";
+                    embed.fields[1].value +=
+                        $"**Top {percentileReward.UpperPercentile}%:** {upperIndex - lowerIndex} players \n";
                 }
 
                 _ = Task.Run(() =>
                 {
                     try
                     {
-                        DiscordManager.SendEmbed(embed, "Leaderboard", "https://discord.com/api/webhooks/983367340525760542/RfPxBseRKp3kffBEaHovRBRsLpIR4A-pvAXbQWzknDMohxCiawGlsZw6U_ehXukPreb_");
+                        DiscordManager.SendEmbed(embed, "Leaderboard",
+                            "https://discord.com/api/webhooks/983367340525760542/RfPxBseRKp3kffBEaHovRBRsLpIR4A-pvAXbQWzknDMohxCiawGlsZw6U_ehXukPreb_");
                     }
                     catch (Exception ex)
                     {
@@ -6085,16 +5600,23 @@ public class DatabaseManager
 
                 foreach (var data in PlayerData.Values)
                 {
-                    LeaderboardData leaderboardData = new(data.SteamID, data.SteamName, data.CountryCode, data.HideFlag, data.Level, data.HasPrime, 0, 0, 0);
+                    LeaderboardData leaderboardData = new(data.SteamID, data.SteamName, data.CountryCode, data.HideFlag,
+                        data.Level, data.HasPrime, 0, 0, 0);
                     PlayerWeeklyLeaderboard.Add(leaderboardData);
                     PlayerWeeklyLeaderboardLookup.Add(data.SteamID, leaderboardData);
-                    _ = new MySqlCommand($"INSERT INTO `{PLAYERS_LEADERBOARD_WEEKLY}` ( `SteamID` ) VALUES ( {data.SteamID} );", Conn).ExecuteScalar();
+                    _ = new MySqlCommand(
+                            $"INSERT INTO `{PLAYERS_LEADERBOARD_WEEKLY}` ( `SteamID` ) VALUES ( {data.SteamID} );",
+                            Conn)
+                        .ExecuteScalar();
                 }
 
                 // Change the wipe date
                 var newWipeDate = DateTimeOffset.UtcNow.AddDays(7);
-                newWipeDate = new DateTimeOffset(newWipeDate.Year, newWipeDate.Month, newWipeDate.Day, ServerOptions.WeeklyLeaderboardWipe.Hour, 0, 0, new TimeSpan(0));
-                _ = new MySqlCommand($"UPDATE `{OPTIONS}` SET `WeeklyLeaderboardWipe` = {newWipeDate.ToUnixTimeSeconds()};", Conn).ExecuteScalar();
+                newWipeDate = new(newWipeDate.Year, newWipeDate.Month, newWipeDate.Day,
+                    ServerOptions.WeeklyLeaderboardWipe.Hour, 0, 0, new(0));
+                _ = new MySqlCommand(
+                        $"UPDATE `{OPTIONS}` SET `WeeklyLeaderboardWipe` = {newWipeDate.ToUnixTimeSeconds()};", Conn)
+                    .ExecuteScalar();
                 ServerOptions.WeeklyLeaderboardWipe = newWipeDate;
             }
 
@@ -6103,53 +5625,49 @@ public class DatabaseManager
                 IsPendingSeasonalWipe = false;
 
                 // Give all ranked rewards
-                Embed embed = new(null, $"Last Playtest Rankings ({PlayerSeasonalLeaderboard.Count} Players)", null, "15105570", DateTime.UtcNow.ToString("s"),
-                new Footer(Provider.serverName, Provider.configData.Browser.Icon),
-                new Author(Provider.serverName, "", Provider.configData.Browser.Icon),
-                new Field[] { new Field($"Ranked:", "", false), new Field("Percentile:", "", false) },
-                null, null);
+                Embed embed = new(null, $"Last Playtest Rankings ({PlayerSeasonalLeaderboard.Count} Players)", null,
+                    "15105570", DateTime.UtcNow.ToString("s"),
+                    new(Provider.serverName, Provider.configData.Browser.Icon),
+                    new(Provider.serverName, "", Provider.configData.Browser.Icon),
+                    new Field[] { new($"Ranked:", "", false), new("Percentile:", "", false) }, null, null);
 
                 foreach (var rankedReward in ServerOptions.SeasonalRankedRewards)
                 {
-                    if (PlayerSeasonalLeaderboard.Count < (rankedReward.Key + 1))
-                    {
-                        break;
-                    }
+                    if (PlayerSeasonalLeaderboard.Count < rankedReward.Key + 1) break;
 
                     var leaderboardData = PlayerSeasonalLeaderboard[rankedReward.Key];
                     bulkRewards.Add(new(leaderboardData.SteamID, rankedReward.Value));
-                    embed.fields[0].value += $"{Utility.GetDiscordEmoji(rankedReward.Key + 1)} [{leaderboardData.SteamName}](https://steamcommunity.com/profiles/{leaderboardData.SteamID}/) | {leaderboardData.Kills + leaderboardData.HeadshotKills} Kills \n";
-                    if (rankedReward.Key == 2)
-                    {
-                        embed.fields[0].value += $"\n";
-                    }
+                    embed.fields[0].value +=
+                        $"{Utility.GetDiscordEmoji(rankedReward.Key + 1)} [{leaderboardData.SteamName}](https://steamcommunity.com/profiles/{leaderboardData.SteamID}/) | {leaderboardData.Kills + leaderboardData.HeadshotKills} Kills \n";
+                    if (rankedReward.Key == 2) embed.fields[0].value += $"\n";
                 }
 
                 // Give all percentile rewards
                 foreach (var percentileReward in ServerOptions.SeasonalPercentileRewards)
                 {
-                    var lowerIndex = percentileReward.LowerPercentile == 0 ? 0 : (percentileReward.LowerPercentile * PlayerSeasonalLeaderboard.Count / 100);
+                    var lowerIndex = percentileReward.LowerPercentile == 0
+                        ? 0
+                        : percentileReward.LowerPercentile * PlayerSeasonalLeaderboard.Count / 100;
                     var upperIndex = percentileReward.UpperPercentile * PlayerSeasonalLeaderboard.Count / 100;
 
                     for (var i = lowerIndex; i < upperIndex; i++)
                     {
-                        if (PlayerSeasonalLeaderboard.Count < (i + 1))
-                        {
-                            break;
-                        }
+                        if (PlayerSeasonalLeaderboard.Count < i + 1) break;
 
                         var leaderboardData = PlayerSeasonalLeaderboard[i];
                         bulkRewards.Add(new(leaderboardData.SteamID, percentileReward.Rewards));
                     }
 
-                    embed.fields[1].value += $"**Top {percentileReward.UpperPercentile}%:** {upperIndex - lowerIndex} players \n";
+                    embed.fields[1].value +=
+                        $"**Top {percentileReward.UpperPercentile}%:** {upperIndex - lowerIndex} players \n";
                 }
 
                 _ = Task.Run(() =>
                 {
                     try
                     {
-                        DiscordManager.SendEmbed(embed, "Leaderboard", "https://discord.com/api/webhooks/983367340525760542/RfPxBseRKp3kffBEaHovRBRsLpIR4A-pvAXbQWzknDMohxCiawGlsZw6U_ehXukPreb_");
+                        DiscordManager.SendEmbed(embed, "Leaderboard",
+                            "https://discord.com/api/webhooks/983367340525760542/RfPxBseRKp3kffBEaHovRBRsLpIR4A-pvAXbQWzknDMohxCiawGlsZw6U_ehXukPreb_");
                     }
                     catch (Exception ex)
                     {
@@ -6164,15 +5682,13 @@ public class DatabaseManager
 
             foreach (var data in PlayerData.Values)
             {
-                if (data.Quests[0].QuestEnd > DateTimeOffset.UtcNow)
-                {
-                    continue;
-                }
+                if (data.Quests[0].QuestEnd > DateTimeOffset.UtcNow) continue;
 
                 List<PlayerQuest> playerQuests = new();
                 Dictionary<EQuestType, List<PlayerQuest>> playerQuestsSearchByType = new();
 
-                _ = new MySqlCommand($"DELETE FROM `{PLAYERS_QUESTS}` WHERE `SteamID` = {data.SteamID};", Conn).ExecuteScalar();
+                _ = new MySqlCommand($"DELETE FROM `{PLAYERS_QUESTS}` WHERE `SteamID` = {data.SteamID};", Conn)
+                    .ExecuteScalar();
                 var expiryDate = ServerOptions.DailyLeaderboardWipe;
                 List<Quest> questsToAdd = new();
                 for (var i = 0; i < 6; i++)
@@ -6187,17 +5703,16 @@ public class DatabaseManager
                     PlayerQuest playerQuest = new(data.SteamID, quest, 0, expiryDate);
                     playerQuests.Add(playerQuest);
                     if (!playerQuestsSearchByType.ContainsKey(quest.QuestType))
-                    {
-                        playerQuestsSearchByType.Add(quest.QuestType, new List<PlayerQuest>());
-                    }
+                        playerQuestsSearchByType.Add(quest.QuestType, new());
 
                     playerQuestsSearchByType[quest.QuestType].Add(playerQuest);
-                    _ = new MySqlCommand($"INSERT INTO `{PLAYERS_QUESTS}` (`SteamID` , `QuestID`, `Amount`, `QuestEnd`) VALUES ({data.SteamID}, {quest.QuestID}, 0, {expiryDate.ToUnixTimeSeconds()});", Conn).ExecuteScalar();
+                    _ = new MySqlCommand(
+                        $"INSERT INTO `{PLAYERS_QUESTS}` (`SteamID` , `QuestID`, `Amount`, `QuestEnd`) VALUES ({data.SteamID}, {quest.QuestID}, 0, {expiryDate.ToUnixTimeSeconds()});",
+                        Conn).ExecuteScalar();
                 }
 
                 data.Quests = playerQuests;
                 data.QuestsSearchByType = playerQuestsSearchByType;
-
             }
 
             if (ServerOptions.XPBoosterWipe < DateTimeOffset.UtcNow && ServerOptions.XPBooster != 0f)
@@ -6220,27 +5735,21 @@ public class DatabaseManager
 
             foreach (var data in PlayerData.Values)
             {
-                _ = new MySqlCommand($"DELETE FROM `{PLAYERS_BOOSTERS}` WHERE `SteamID` = {data.SteamID} AND `BoosterExpiration` < {DateTimeOffset.UtcNow.ToUnixTimeSeconds()};", Conn).ExecuteScalar();
-                rdr = new MySqlCommand($"SELECT * FROM `{PLAYERS_BOOSTERS}` WHERE `SteamID` = {data.SteamID};", Conn).ExecuteReader();
+                _ = new MySqlCommand(
+                    $"DELETE FROM `{PLAYERS_BOOSTERS}` WHERE `SteamID` = {data.SteamID} AND `BoosterExpiration` < {DateTimeOffset.UtcNow.ToUnixTimeSeconds()};",
+                    Conn).ExecuteScalar();
+                rdr = new MySqlCommand($"SELECT * FROM `{PLAYERS_BOOSTERS}` WHERE `SteamID` = {data.SteamID};", Conn)
+                    .ExecuteReader();
                 try
                 {
                     List<PlayerBooster> boosters = new();
                     while (rdr.Read())
                     {
-                        if (!Enum.TryParse(rdr[1].ToString(), true, out EBoosterType boosterType))
-                        {
-                            return;
-                        }
+                        if (!Enum.TryParse(rdr[1].ToString(), true, out EBoosterType boosterType)) return;
 
-                        if (!float.TryParse(rdr[2].ToString(), out var boosterValue))
-                        {
-                            return;
-                        }
+                        if (!float.TryParse(rdr[2].ToString(), out var boosterValue)) return;
 
-                        if (!long.TryParse(rdr[3].ToString(), out var boosterExpirationUnix))
-                        {
-                            return;
-                        }
+                        if (!long.TryParse(rdr[3].ToString(), out var boosterExpirationUnix)) return;
 
                         var boosterExpiration = DateTimeOffset.FromUnixTimeSeconds(boosterExpirationUnix);
                         PlayerBooster booster = new(data.SteamID, boosterType, boosterValue, boosterExpiration);
@@ -6272,26 +5781,24 @@ public class DatabaseManager
                         maxRewardDate = data.PrimeExpiry.UtcDateTime;
                         data.HasPrime = false;
                         Plugin.Instance.Reward.RemoveRewards(data.SteamID, ServerOptions.PrimeRewards);
-                        _ = new MySqlCommand($"UPDATE `{PLAYERS}` SET `HasPrime` = false WHERE `SteamID` = {data.SteamID};", Conn).ExecuteScalar();
+                        _ = new MySqlCommand(
+                                $"UPDATE `{PLAYERS}` SET `HasPrime` = false WHERE `SteamID` = {data.SteamID};", Conn)
+                            .ExecuteScalar();
                         _ = R.Permissions.RemovePlayerFromGroup("Prime", new RocketPlayer(data.SteamID.ToString()));
                     }
 
                     var daysWorthReward = (int)(maxRewardDate - data.PrimeLastDailyReward.UtcDateTime).TotalDays;
-                    if (daysWorthReward == 0)
-                    {
-                        continue;
-                    }
+                    if (daysWorthReward == 0) continue;
 
                     var dailyRewards = ServerOptions.PrimeDailyRewards.ToList();
-                    if (daysWorthReward > 1)
-                    {
-                        Plugin.Instance.Reward.MultiplyRewards(dailyRewards, daysWorthReward);
-                    }
+                    if (daysWorthReward > 1) Plugin.Instance.Reward.MultiplyRewards(dailyRewards, daysWorthReward);
 
                     Plugin.Instance.Reward.GiveRewards(data.SteamID, dailyRewards);
                     var lastDailyRewardDate = data.PrimeLastDailyReward.AddDays(daysWorthReward);
                     data.PrimeLastDailyReward = lastDailyRewardDate;
-                    _ = new MySqlCommand($"UPDATE `{PLAYERS}` SET `PrimeLastDailyReward` = {lastDailyRewardDate.ToUnixTimeSeconds()} WHERE `SteamID` = {data.SteamID};", Conn).ExecuteScalar();
+                    _ = new MySqlCommand(
+                        $"UPDATE `{PLAYERS}` SET `PrimeLastDailyReward` = {lastDailyRewardDate.ToUnixTimeSeconds()} WHERE `SteamID` = {data.SteamID};",
+                        Conn).ExecuteScalar();
                 }
 
                 if (data.IsMuted && DateTime.UtcNow > data.MuteExpiry.UtcDateTime)
@@ -6301,21 +5808,20 @@ public class DatabaseManager
                     {
                         Profile profile = new(data.SteamID.m_SteamID);
 
-                        Embed embed = new(null, $"**{profile.SteamID}** was unmuted", null, "15105570", DateTime.UtcNow.ToString("s"),
-                                                new Footer(Provider.serverName, Provider.configData.Browser.Icon),
-                                                new Author(profile.SteamID, $"https://steamcommunity.com/profiles/{profile.SteamID64}/", profile.AvatarIcon.ToString()),
-                                                new Field[]
-                                                {
-                                                        new Field("**Unmuter:**", $"**Mute Expired**", true),
-                                                        new Field("**Time:**", DateTime.UtcNow.ToString(), true)
-                                                },
-                                                null, null);
+                        Embed embed = new(null, $"**{profile.SteamID}** was unmuted", null, "15105570",
+                            DateTime.UtcNow.ToString("s"), new(Provider.serverName, Provider.configData.Browser.Icon),
+                            new(profile.SteamID, $"https://steamcommunity.com/profiles/{profile.SteamID64}/",
+                                profile.AvatarIcon.ToString()), new Field[]
+                            {
+                                new("**Unmuter:**", $"**Mute Expired**", true),
+                                new("**Time:**", DateTime.UtcNow.ToString(), true)
+                            }, null, null);
                         if (!string.IsNullOrEmpty(Plugin.Instance.Configuration.Instance.WebhookURL))
-                        {
-                            DiscordManager.SendEmbed(embed, "Player Unmuted", Plugin.Instance.Configuration.Instance.WebhookURL);
-                        }
+                            DiscordManager.SendEmbed(embed, "Player Unmuted",
+                                Plugin.Instance.Configuration.Instance.WebhookURL);
 
-                        TaskDispatcher.QueueOnMainThread(() => Utility.Say(UnturnedPlayer.FromCSteamID(data.SteamID), Plugin.Instance.Translate("Unmuted").ToRich()));
+                        TaskDispatcher.QueueOnMainThread(() => Utility.Say(UnturnedPlayer.FromCSteamID(data.SteamID),
+                            Plugin.Instance.Translate("Unmuted").ToRich()));
                     }
                     catch (Exception)
                     {
@@ -6329,20 +5835,11 @@ public class DatabaseManager
             {
                 while (rdr.Read())
                 {
-                    if (!int.TryParse(rdr[0].ToString(), out var id))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[0].ToString(), out var id)) continue;
 
-                    if (!int.TryParse(rdr[1].ToString(), out var unboxedAmount))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[1].ToString(), out var unboxedAmount)) continue;
 
-                    if (!GunSkinsSearchByID.TryGetValue(id, out var skin))
-                    {
-                        continue;
-                    }
+                    if (!GunSkinsSearchByID.TryGetValue(id, out var skin)) continue;
 
                     skin.UnboxedAmount = unboxedAmount;
                 }
@@ -6362,20 +5859,11 @@ public class DatabaseManager
             {
                 while (rdr.Read())
                 {
-                    if (!ushort.TryParse(rdr[0].ToString(), out var knifeID))
-                    {
-                        continue;
-                    }
+                    if (!ushort.TryParse(rdr[0].ToString(), out var knifeID)) continue;
 
-                    if (!int.TryParse(rdr[1].ToString(), out var unboxedAmount))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[1].ToString(), out var unboxedAmount)) continue;
 
-                    if (!Knives.TryGetValue(knifeID, out var knife))
-                    {
-                        continue;
-                    }
+                    if (!Knives.TryGetValue(knifeID, out var knife)) continue;
 
                     knife.UnboxedAmount = unboxedAmount;
                 }
@@ -6395,20 +5883,11 @@ public class DatabaseManager
             {
                 while (rdr.Read())
                 {
-                    if (!int.TryParse(rdr[0].ToString(), out var gloveID))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[0].ToString(), out var gloveID)) continue;
 
-                    if (!int.TryParse(rdr[1].ToString(), out var unboxedAmount))
-                    {
-                        continue;
-                    }
+                    if (!int.TryParse(rdr[1].ToString(), out var unboxedAmount)) continue;
 
-                    if (!Gloves.TryGetValue(gloveID, out var glove))
-                    {
-                        continue;
-                    }
+                    if (!Gloves.TryGetValue(gloveID, out var glove)) continue;
 
                     glove.UnboxedAmount = unboxedAmount;
                 }
@@ -6463,8 +5942,13 @@ public class DatabaseManager
         try
         {
             await Conn.OpenAsync();
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_QUESTS}` SET `Amount` = `Amount` + {amount} WHERE `SteamID` = {steamID} AND `QuestID` = {questID};", Conn).ExecuteScalarAsync();
-            var obj = await new MySqlCommand($"SELECT `Amount` FROM `{PLAYERS_QUESTS}` WHERE `SteamID` = {steamID} AND `QuestID` = {questID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"UPDATE `{PLAYERS_QUESTS}` SET `Amount` = `Amount` + {amount} WHERE `SteamID` = {steamID} AND `QuestID` = {questID};",
+                Conn).ExecuteScalarAsync();
+            var obj = await new MySqlCommand(
+                    $"SELECT `Amount` FROM `{PLAYERS_QUESTS}` WHERE `SteamID` = {steamID} AND `QuestID` = {questID};",
+                    Conn)
+                .ExecuteScalarAsync();
 
             if (obj is int newAmount)
             {
@@ -6502,11 +5986,14 @@ public class DatabaseManager
         try
         {
             await Conn.OpenAsync();
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_ACHIEVEMENTS}` SET `CurrentTier` = {currentTier} WHERE `SteamID` = {steamID} AND `AchievementID` = {achievementID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"UPDATE `{PLAYERS_ACHIEVEMENTS}` SET `CurrentTier` = {currentTier} WHERE `SteamID` = {steamID} AND `AchievementID` = {achievementID};",
+                Conn).ExecuteScalarAsync();
         }
         catch (Exception ex)
         {
-            Logger.Log($"Error updating player achievement tier of {steamID} for achievement {achievementID} to {currentTier}");
+            Logger.Log(
+                $"Error updating player achievement tier of {steamID} for achievement {achievementID} to {currentTier}");
             Logger.Log(ex);
         }
         finally
@@ -6521,8 +6008,12 @@ public class DatabaseManager
         try
         {
             await Conn.OpenAsync();
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_ACHIEVEMENTS}` SET `Amount` = `Amount` + {amount} WHERE `SteamID` = {steamID} AND `AchievementID` = {achievementID};", Conn).ExecuteScalarAsync();
-            var obj = await new MySqlCommand($"SELECT `Amount` FROM `{PLAYERS_ACHIEVEMENTS}` WHERE `SteamID` = {steamID} AND `AchievementID` = {achievementID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"UPDATE `{PLAYERS_ACHIEVEMENTS}` SET `Amount` = `Amount` + {amount} WHERE `SteamID` = {steamID} AND `AchievementID` = {achievementID};",
+                Conn).ExecuteScalarAsync();
+            var obj = await new MySqlCommand(
+                $"SELECT `Amount` FROM `{PLAYERS_ACHIEVEMENTS}` WHERE `SteamID` = {steamID} AND `AchievementID` = {achievementID};",
+                Conn).ExecuteScalarAsync();
 
             if (obj is int newAmount)
             {
@@ -6543,7 +6034,8 @@ public class DatabaseManager
         }
         catch (Exception ex)
         {
-            Logger.Log($"Error updating player achievement amount of {steamID} for achievement {achievementID} by amount {amount}");
+            Logger.Log(
+                $"Error updating player achievement amount of {steamID} for achievement {achievementID} by amount {amount}");
             Logger.Log(ex);
         }
         finally
@@ -6585,7 +6077,9 @@ public class DatabaseManager
                         break;
                 }
 
-                _ = await new MySqlCommand($"INSERT INTO `{ACHIEVEMENTS_TIERS}` (`AchievementID` , `TierID` , `TierTitle` , `TierDesc` , `TierColor` , `TierPrevSmall` , `TierPrevLarge` , `TargetAmount` , `Rewards` , `RemoveRewards`) VALUES ({achievementID} , {i} , '{tierTitle}' , ' ', '{color}' , ' ', ' ', {targetAmount} , ' ' , ' ' );", Conn).ExecuteScalarAsync();
+                _ = await new MySqlCommand(
+                    $"INSERT INTO `{ACHIEVEMENTS_TIERS}` (`AchievementID` , `TierID` , `TierTitle` , `TierDesc` , `TierColor` , `TierPrevSmall` , `TierPrevLarge` , `TargetAmount` , `Rewards` , `RemoveRewards`) VALUES ({achievementID} , {i} , '{tierTitle}' , ' ', '{color}' , ' ', ' ', {targetAmount} , ' ' , ' ' );",
+                    Conn).ExecuteScalarAsync();
             }
         }
         catch (Exception ex)
@@ -6607,21 +6101,25 @@ public class DatabaseManager
         {
             await Conn.OpenAsync();
 
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_BATTLEPASS}` SET `XP` = `XP` + {xp} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-            var obj = await new MySqlCommand($"Select `XP` FROM `{PLAYERS_BATTLEPASS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                    $"UPDATE `{PLAYERS_BATTLEPASS}` SET `XP` = `XP` + {xp} WHERE `SteamID` = {steamID};", Conn)
+                .ExecuteScalarAsync();
+            var obj = await new MySqlCommand($"Select `XP` FROM `{PLAYERS_BATTLEPASS}` WHERE `SteamID` = {steamID};",
+                Conn).ExecuteScalarAsync();
 
             if (PlayerData.TryGetValue(steamID, out var data))
             {
-                if (obj is int newXp)
-                {
-                    data.Battlepass.XP = newXp;
-                }
+                if (obj is int newXp) data.Battlepass.XP = newXp;
 
                 while (data.Battlepass.TryGetNeededXP(out var neededXP) && data.Battlepass.XP >= neededXP)
                 {
                     var newXP = data.Battlepass.XP - neededXP;
-                    _ = await new MySqlCommand($"UPDATE `{PLAYERS_BATTLEPASS}` SET `XP` = {newXP}, `CurrentTier` = `CurrentTier` + 1 WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-                    obj = await new MySqlCommand($"Select `CurrentTier` FROM `{PLAYERS_BATTLEPASS}` WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+                    _ = await new MySqlCommand(
+                        $"UPDATE `{PLAYERS_BATTLEPASS}` SET `XP` = {newXP}, `CurrentTier` = `CurrentTier` + 1 WHERE `SteamID` = {steamID};",
+                        Conn).ExecuteScalarAsync();
+                    obj = await new MySqlCommand(
+                            $"Select `CurrentTier` FROM `{PLAYERS_BATTLEPASS}` WHERE `SteamID` = {steamID};", Conn)
+                        .ExecuteScalarAsync();
                     if (obj is int tier)
                     {
                         data.Battlepass.CurrentTier = tier;
@@ -6656,7 +6154,9 @@ public class DatabaseManager
         try
         {
             await Conn.OpenAsync();
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_BATTLEPASS}` SET `CurrentTier` = {tierID} WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                    $"UPDATE `{PLAYERS_BATTLEPASS}` SET `CurrentTier` = {tierID} WHERE `SteamID` = {steamID};", Conn)
+                .ExecuteScalarAsync();
         }
         catch (Exception ex)
         {
@@ -6681,8 +6181,9 @@ public class DatabaseManager
                 return;
             }
 
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_BATTLEPASS}` SET `ClaimedFreeRewards` = '{data.Battlepass.ClaimedFreeRewards.GetStringFromHashSetInt()}' WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-
+            _ = await new MySqlCommand(
+                $"UPDATE `{PLAYERS_BATTLEPASS}` SET `ClaimedFreeRewards` = '{data.Battlepass.ClaimedFreeRewards.GetStringFromHashSetInt()}' WHERE `SteamID` = {steamID};",
+                Conn).ExecuteScalarAsync();
         }
         catch (Exception ex)
         {
@@ -6707,8 +6208,9 @@ public class DatabaseManager
                 return;
             }
 
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_BATTLEPASS}` SET `ClaimedPremiumRewards` = '{data.Battlepass.ClaimedPremiumRewards.GetStringFromHashSetInt()}' WHERE `SteamID` = {steamID};", Conn).ExecuteScalarAsync();
-
+            _ = await new MySqlCommand(
+                $"UPDATE `{PLAYERS_BATTLEPASS}` SET `ClaimedPremiumRewards` = '{data.Battlepass.ClaimedPremiumRewards.GetStringFromHashSetInt()}' WHERE `SteamID` = {steamID};",
+                Conn).ExecuteScalarAsync();
         }
         catch (Exception ex)
         {
@@ -6728,8 +6230,13 @@ public class DatabaseManager
         try
         {
             await Conn.OpenAsync();
-            _ = await new MySqlCommand($"INSERT INTO `{PLAYERS_CASES}` ( `SteamID` , `CaseID` , `Amount` ) VALUES ({steamID}, {caseID}, {amount}) ON DUPLICATE KEY UPDATE `Amount` = `Amount` + {amount};", Conn).ExecuteScalarAsync();
-            var obj = await new MySqlCommand($"SELECT `Amount` FROM `{PLAYERS_CASES}` WHERE `SteamID` = {steamID} AND `CaseID` = {caseID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"INSERT INTO `{PLAYERS_CASES}` ( `SteamID` , `CaseID` , `Amount` ) VALUES ({steamID}, {caseID}, {amount}) ON DUPLICATE KEY UPDATE `Amount` = `Amount` + {amount};",
+                Conn).ExecuteScalarAsync();
+            var obj = await new MySqlCommand(
+                    $"SELECT `Amount` FROM `{PLAYERS_CASES}` WHERE `SteamID` = {steamID} AND `CaseID` = {caseID};",
+                    Conn)
+                .ExecuteScalarAsync();
 
             if (obj is not int updatedAmount)
             {
@@ -6755,7 +6262,7 @@ public class DatabaseManager
                 return;
             }
 
-            playerCase = new PlayerCase(steamID, @case, updatedAmount);
+            playerCase = new(steamID, @case, updatedAmount);
 
             data.Cases.Add(playerCase);
             data.CasesSearchByID.Add(caseID, playerCase);
@@ -6780,8 +6287,13 @@ public class DatabaseManager
         try
         {
             await Conn.OpenAsync();
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_CASES}` SET `Amount` = `Amount` - {amount} WHERE `SteamID` = {steamID} AND `CaseID` = {caseID};", Conn).ExecuteScalarAsync();
-            var obj = await new MySqlCommand($"SELECT `Amount` FROM `{PLAYERS_CASES}` WHERE `SteamID` = {steamID} AND `CaseID` = {caseID};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"UPDATE `{PLAYERS_CASES}` SET `Amount` = `Amount` - {amount} WHERE `SteamID` = {steamID} AND `CaseID` = {caseID};",
+                Conn).ExecuteScalarAsync();
+            var obj = await new MySqlCommand(
+                    $"SELECT `Amount` FROM `{PLAYERS_CASES}` WHERE `SteamID` = {steamID} AND `CaseID` = {caseID};",
+                    Conn)
+                .ExecuteScalarAsync();
 
             if (obj is not int updatedAmount)
             {
@@ -6790,9 +6302,9 @@ public class DatabaseManager
             }
 
             if (updatedAmount <= 0)
-            {
-                _ = await new MySqlCommand($"DELETE FROM `{PLAYERS_CASES}` WHERE `SteamID` = {steamID} AND `CaseID` = {caseID};", Conn).ExecuteScalarAsync();
-            }
+                _ = await new MySqlCommand(
+                        $"DELETE FROM `{PLAYERS_CASES}` WHERE `SteamID` = {steamID} AND `CaseID` = {caseID};", Conn)
+                    .ExecuteScalarAsync();
 
             if (!PlayerData.TryGetValue(steamID, out var data))
             {
@@ -6802,7 +6314,8 @@ public class DatabaseManager
 
             if (!data.CasesSearchByID.TryGetValue(caseID, out var playerCase))
             {
-                Logging.Debug($"Error finding case with id {caseID} to decrease amount of for player with steam id {steamID}");
+                Logging.Debug(
+                    $"Error finding case with id {caseID} to decrease amount of for player with steam id {steamID}");
                 return;
             }
 
@@ -6815,9 +6328,7 @@ public class DatabaseManager
                 Plugin.Instance.UI.OnUIUpdated(steamID, EUIPage.Case);
             }
             else
-            {
                 playerCase.Amount = updatedAmount;
-            }
         }
         catch (Exception ex)
         {
@@ -6838,27 +6349,28 @@ public class DatabaseManager
         {
             await Conn.OpenAsync();
             var expiryDate = DateTimeOffset.UtcNow.AddDays(days);
-            _ = await new MySqlCommand($"INSERT INTO `{PLAYERS_BOOSTERS}` (`SteamID` , `BoosterType` , `BoosterValue` , `BoosterExpiration`) VALUES ({steamID} , '{boosterType}' , {boosterValue} , {expiryDate.ToUnixTimeSeconds()}) ON DUPLICATE KEY UPDATE `BoosterExpiration` = `BoosterExpiration` + {days * 24 * 60 * 60};", Conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"INSERT INTO `{PLAYERS_BOOSTERS}` (`SteamID` , `BoosterType` , `BoosterValue` , `BoosterExpiration`) VALUES ({steamID} , '{boosterType}' , {boosterValue} , {expiryDate.ToUnixTimeSeconds()}) ON DUPLICATE KEY UPDATE `BoosterExpiration` = `BoosterExpiration` + {days * 24 * 60 * 60};",
+                Conn).ExecuteScalarAsync();
 
             if (!PlayerData.TryGetValue(steamID, out var data))
             {
-                Logging.Debug($"Could'nt find player data for player with steam id {steamID}, probably player is offline");
+                Logging.Debug(
+                    $"Could'nt find player data for player with steam id {steamID}, probably player is offline");
                 return;
             }
 
-            var booster = data.ActiveBoosters.FirstOrDefault(k => k.BoosterType == boosterType && k.BoosterValue == boosterValue);
+            var booster =
+                data.ActiveBoosters.FirstOrDefault(k => k.BoosterType == boosterType && k.BoosterValue == boosterValue);
             if (booster != null)
-            {
                 booster.BoosterExpiration = booster.BoosterExpiration.AddDays(days);
-            }
             else
-            {
-                data.ActiveBoosters.Add(new PlayerBooster(steamID, boosterType, boosterValue, expiryDate));
-            }
+                data.ActiveBoosters.Add(new(steamID, boosterType, boosterValue, expiryDate));
         }
         catch (Exception ex)
         {
-            Logger.Log($"Error adding booster with type {boosterType}, value {boosterValue}, days {days} to player with steam id {steamID}");
+            Logger.Log(
+                $"Error adding booster with type {boosterType}, value {boosterValue}, days {days} to player with steam id {steamID}");
             Logger.Log(ex);
         }
         finally

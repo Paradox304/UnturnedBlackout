@@ -12,15 +12,22 @@ public class GamemodeOption
     public string GamemodeColor { get; set; }
     public bool HasHardcore { get; set; }
     public int HardcoreChance { get; set; }
+
     [XmlArrayItem(ElementName = "IgnoredLocation")]
     public List<int> IgnoredLocations { get; set; }
 
     public GamemodeOption()
     {
-
     }
 
-    public GamemodeOption(EGameType gameType, string gamemodeIcon, int gamemodeWeight, string gamemodeColor, bool hasHardcore, int hardcoreChance, List<int> ignoredLocations)
+    public GamemodeOption(
+        EGameType gameType,
+        string gamemodeIcon,
+        int gamemodeWeight,
+        string gamemodeColor,
+        bool hasHardcore,
+        int hardcoreChance,
+        List<int> ignoredLocations)
     {
         GameType = gameType;
         GamemodeIcon = gamemodeIcon;

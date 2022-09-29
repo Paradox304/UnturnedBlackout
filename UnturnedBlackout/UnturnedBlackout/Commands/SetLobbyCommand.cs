@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace UnturnedBlackout.Commands;
 
-class SetLobbyCommand : IRocketCommand
+internal class SetLobbyCommand : IRocketCommand
 {
     public AllowedCaller AllowedCaller => AllowedCaller.Player;
 

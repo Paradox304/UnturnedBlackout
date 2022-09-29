@@ -108,26 +108,24 @@ public class GamePlayer
         if (!Plugin.Instance.DB.PlayerData.TryGetValue(SteamID, out var data))
         {
             Provider.kick(SteamID, "Your data was not found, please contact an admin on unturnedblackout.com");
-            throw new Exception($"PLAYER DATA FOR PLAYER WITH {SteamID} NOT FOUND, KICKING THE PLAYER");
+            throw new($"PLAYER DATA FOR PLAYER WITH {SteamID} NOT FOUND, KICKING THE PLAYER");
         }
 
         Data = data;
         TransportConnection = transportConnection;
         PreviousStance = EPlayerStance.STAND;
-        LastDamager = new Stack<CSteamID>(100);
+        LastDamager = new(100);
         PendingAnimations = new();
         ScoreboardCooldown = DateTime.UtcNow;
 
         AvailableKillstreaks = new();
         KillstreakTriggers = new();
         OrderedKillstreaks = new();
-
     }
 
     // Spawn Protection Seconds
     public void GiveSpawnProtection(int seconds)
     {
-
         Logging.Debug($"Giving {Player.CharacterName} spawn protection for {seconds} seconds at {DateTime.UtcNow}");
         SpawnProtectionRemover.Stop();
         HasSpawnProtection = true;
@@ -137,7 +135,8 @@ public class GamePlayer
     public IEnumerator RemoveSpawnProtection(int seconds)
     {
         yield return new WaitForSeconds(seconds);
-        Logging.Debug($"Timer to remove spawn protection for {Player.CharacterName} has passed at {DateTime.UtcNow} removing spawn protection");
+        Logging.Debug(
+            $"Timer to remove spawn protection for {Player.CharacterName} has passed at {DateTime.UtcNow} removing spawn protection");
         HasSpawnProtection = false;
     }
 
@@ -153,10 +152,7 @@ public class GamePlayer
         HasTactical = false;
         HasLethal = false;
 
-        if (loadout == null)
-        {
-            return;
-        }
+        if (loadout == null) return;
 
         loadout.GetPrimaryMovement(out var primaryMovementChange, out var primaryMovementChangeADS);
         PrimaryMovementChange = primaryMovementChange;
@@ -168,27 +164,32 @@ public class GamePlayer
 
         KnifeMovementChange = primaryMovementChange + secondaryMovementChange + loadout.GetKnifeMovement();
 
-        Logging.Debug($"Setting movement for {Player.CharacterName} with PrimaryMovementChange {PrimaryMovementChange}, PrimaryMovementChangeADS {PrimaryMovementChangeADS}, SecondaryMovementChange {SecondaryMovementChange}, SecondaryMovementChangeADS {SecondaryMovementChangeADS}, KnifeMovementChange {KnifeMovementChange}");
+        Logging.Debug(
+            $"Setting movement for {Player.CharacterName} with PrimaryMovementChange {PrimaryMovementChange}, PrimaryMovementChangeADS {PrimaryMovementChangeADS}, SecondaryMovementChange {SecondaryMovementChange}, SecondaryMovementChangeADS {SecondaryMovementChangeADS}, KnifeMovementChange {KnifeMovementChange}");
         LethalChecker.Stop();
         TacticalChecker.Stop();
 
         var medic = loadout.PerksSearchByType.TryGetValue("medic", out var medicPerk) ? medicPerk.Perk.SkillLevel : 0f;
-        HealAmount = Config.Base.FileData.HealAmount * (1 + (medic / 100));
+        HealAmount = Config.Base.FileData.HealAmount * (1 + medic / 100);
 
         Plugin.Instance.UI.SendGadgetIcons(this);
 
         if (loadout.Tactical != null)
         {
             HasTactical = true;
-            var tactician = loadout.PerksSearchByType.TryGetValue("tactician", out var tacticianPerk) ? tacticianPerk.Perk.SkillLevel : 0f;
-            TacticalIntervalSeconds = loadout.Tactical.Gadget.GiveSeconds * (1 - (tactician / 100));
+            var tactician = loadout.PerksSearchByType.TryGetValue("tactician", out var tacticianPerk)
+                ? tacticianPerk.Perk.SkillLevel
+                : 0f;
+            TacticalIntervalSeconds = loadout.Tactical.Gadget.GiveSeconds * (1 - tactician / 100);
         }
 
         if (loadout.Lethal != null)
         {
             HasLethal = true;
-            var grenadier = loadout.PerksSearchByType.TryGetValue("grenadier", out var grenadierPerk) ? grenadierPerk.Perk.SkillLevel : 0f;
-            LethalIntervalSeconds = loadout.Lethal.Gadget.GiveSeconds * (1 - (grenadier / 100));
+            var grenadier = loadout.PerksSearchByType.TryGetValue("grenadier", out var grenadierPerk)
+                ? grenadierPerk.Perk.SkillLevel
+                : 0f;
+            LethalIntervalSeconds = loadout.Lethal.Gadget.GiveSeconds * (1 - grenadier / 100);
         }
 
         Plugin.Instance.UI.UpdateGadgetUsed(this, false, !HasLethal);
@@ -210,7 +211,8 @@ public class GamePlayer
                 { EQuestCondition.Gamemode, (int)CurrentGame.GameMode },
                 { EQuestCondition.Gadget, ActiveLoadout.Tactical.Gadget.GadgetID }
             };
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.Quest.CheckQuest(this, EQuestType.GadgetsUsed, questConditions));
+            TaskDispatcher.QueueOnMainThread(() =>
+                Plugin.Instance.Quest.CheckQuest(this, EQuestType.GadgetsUsed, questConditions));
         }
 
         TacticalChecker.Stop();
@@ -232,7 +234,8 @@ public class GamePlayer
                 { EQuestCondition.Gamemode, (int)CurrentGame.GameMode },
                 { EQuestCondition.Gadget, ActiveLoadout.Lethal.Gadget.GadgetID }
             };
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.Quest.CheckQuest(this, EQuestType.GadgetsUsed, questConditions));
+            TaskDispatcher.QueueOnMainThread(() =>
+                Plugin.Instance.Quest.CheckQuest(this, EQuestType.GadgetsUsed, questConditions));
         }
 
         LethalChecker.Stop();
@@ -272,7 +275,7 @@ public class GamePlayer
                 continue;
             }
 
-            Player.Player.inventory.forceAddItem(new Item(id, false), false);
+            Player.Player.inventory.forceAddItem(new(id, false), false);
             break;
         }
     }
@@ -285,15 +288,9 @@ public class GamePlayer
         DamageChecker = Plugin.Instance.StartCoroutine(CheckDamage());
 
         var damagerPlayer = Plugin.Instance.Game.GetGamePlayer(damager);
-        if (damagerPlayer == null)
-        {
-            return;
-        }
+        if (damagerPlayer == null) return;
 
-        if (LastDamager.Count > 0 && LastDamager.Peek() == damager)
-        {
-            return;
-        }
+        if (LastDamager.Count > 0 && LastDamager.Peek() == damager) return;
 
         LastDamager.Push(damager);
     }
@@ -331,10 +328,7 @@ public class GamePlayer
     // Death screen
     public void OnDeath(CSteamID killer, int respawnSeconds)
     {
-        if (HasKillstreakActive)
-        {
-            RemoveActiveKillstreak();
-        }
+        if (HasKillstreakActive) RemoveActiveKillstreak();
 
         if (!Plugin.Instance.DB.PlayerData.TryGetValue(killer, out var killerData))
         {
@@ -342,10 +336,7 @@ public class GamePlayer
             return;
         }
 
-        if (killer != SteamID)
-        {
-            LastKiller = killer;
-        }
+        if (killer != SteamID) LastKiller = killer;
 
         DamageChecker.Stop();
         Healer.Stop();
@@ -353,10 +344,7 @@ public class GamePlayer
         Plugin.Instance.UI.RemoveKillCard(this);
 
         var killerPlayer = Plugin.Instance.Game.GetGamePlayer(killer);
-        if (killer == null)
-        {
-            return;
-        }
+        if (killer == null) return;
 
         Plugin.Instance.UI.SendDeathUI(this, killerPlayer, killerData);
         PreviousStance = EPlayerStance.STAND;
@@ -384,7 +372,8 @@ public class GamePlayer
         for (var i = 0; i <= Player.Player.inventory.getItemCount(PlayerInventory.SLOTS); i++)
         {
             var item = Player.Player.inventory.getItem(PlayerInventory.SLOTS, (byte)i);
-            if (item != null && ActiveLoadout.Killstreaks.Exists(k => k.Killstreak.KillstreakInfo.IsTurret && item.item.id == k.Killstreak.KillstreakInfo.TurretID))
+            if (item != null && ActiveLoadout.Killstreaks.Exists(k =>
+                    k.Killstreak.KillstreakInfo.IsTurret && item.item.id == k.Killstreak.KillstreakInfo.TurretID))
             {
                 Player.Player.inventory.removeItem(PlayerInventory.SLOTS, (byte)i);
                 break;
@@ -408,9 +397,7 @@ public class GamePlayer
             {
                 var magID = BitConverter.ToUInt16(item.item.state, 8);
                 if (Assets.find(EAssetType.ITEM, magID) is ItemMagazineAsset mAsset)
-                {
                     item.item.state[10] = mAsset.amount;
-                }
             }
         }
 
@@ -439,13 +426,8 @@ public class GamePlayer
     public void OnTalking()
     {
         if (VoiceChatChecker != null)
-        {
             Plugin.Instance.StopCoroutine(VoiceChatChecker);
-        }
-        else if (CurrentGame != null)
-        {
-            CurrentGame.OnStartedTalking(this);
-        }
+        else if (CurrentGame != null) CurrentGame.OnStartedTalking(this);
 
         VoiceChatChecker = Plugin.Instance.StartCoroutine(CheckVoiceChat());
     }
@@ -453,10 +435,7 @@ public class GamePlayer
     public IEnumerator CheckVoiceChat()
     {
         yield return new WaitForSeconds(0.5f);
-        if (CurrentGame != null && !Player.Player.voice.isTalking)
-        {
-            CurrentGame.OnStoppedTalking(this);
-        }
+        if (CurrentGame != null && !Player.Player.voice.isTalking) CurrentGame.OnStoppedTalking(this);
 
         VoiceChatChecker = null;
     }
@@ -478,43 +457,28 @@ public class GamePlayer
     // Movement
     public void GiveMovement(bool isADS, bool isCarryingFlag, bool doSteps)
     {
-        if (ActiveLoadout == null)
-        {
-            return;
-        }
+        if (ActiveLoadout == null) return;
 
-        if (Player.Player.equipment.itemID == 0)
-        {
-            return;
-        }
+        if (Player.Player.equipment.itemID == 0) return;
 
         var flagCarryingSpeed = isCarryingFlag ? Config.CTF.FileData.FlagCarryingSpeed : 0f;
         float updatedMovement;
         if (isCarryingFlag)
-        {
             updatedMovement = Config.CTF.FileData.FlagCarryingSpeed;
-        }
-        else if (Player.Player.equipment.itemID == (ActiveLoadout.Primary?.Gun?.GunID ?? 0) || Player.Player.equipment.itemID == (ActiveLoadout.PrimarySkin?.SkinID ?? 0))
-        {
-            updatedMovement = PrimaryMovementChange + SecondaryMovementChange + (isADS ? PrimaryMovementChangeADS : 0) + flagCarryingSpeed;
-        }
-        else if (Player.Player.equipment.itemID == (ActiveLoadout.Secondary?.Gun?.GunID ?? 0) || Player.Player.equipment.itemID == (ActiveLoadout.SecondarySkin?.SkinID ?? 0))
-        {
-            updatedMovement = PrimaryMovementChange + SecondaryMovementChange + (isADS ? SecondaryMovementChangeADS : 0) + flagCarryingSpeed;
-        }
+        else if (Player.Player.equipment.itemID == (ActiveLoadout.Primary?.Gun?.GunID ?? 0) ||
+                 Player.Player.equipment.itemID == (ActiveLoadout.PrimarySkin?.SkinID ?? 0))
+            updatedMovement = PrimaryMovementChange + SecondaryMovementChange + (isADS ? PrimaryMovementChangeADS : 0) +
+                              flagCarryingSpeed;
+        else if (Player.Player.equipment.itemID == (ActiveLoadout.Secondary?.Gun?.GunID ?? 0) ||
+                 Player.Player.equipment.itemID == (ActiveLoadout.SecondarySkin?.SkinID ?? 0))
+            updatedMovement = PrimaryMovementChange + SecondaryMovementChange +
+                              (isADS ? SecondaryMovementChangeADS : 0) + flagCarryingSpeed;
         else if (Player.Player.equipment.itemID == ActiveLoadout.Knife.Knife.KnifeID)
-        {
             updatedMovement = KnifeMovementChange + flagCarryingSpeed;
-        }
         else
-        {
             return;
-        }
 
-        if (updatedMovement == Player.Player.movement.pluginSpeedMultiplier)
-        {
-            return;
-        }
+        if (updatedMovement == Player.Player.movement.pluginSpeedMultiplier) return;
 
         MovementChanger.Stop();
         MovementChanger = Plugin.Instance.StartCoroutine(ChangeMovement(updatedMovement));
@@ -525,7 +489,8 @@ public class GamePlayer
         var type = typeof(PlayerMovement);
         var info = type.GetField("SendPluginSpeedMultiplier", BindingFlags.NonPublic | BindingFlags.Static);
         var value = info.GetValue(null);
-        ((ClientInstanceMethod<float>)value).Invoke(Player.Player.movement.GetNetId(), ENetReliability.Reliable, Player.Player.channel.GetOwnerTransportConnection(), newMovement);
+        ((ClientInstanceMethod<float>)value).Invoke(Player.Player.movement.GetNetId(), ENetReliability.Reliable,
+            Player.Player.channel.GetOwnerTransportConnection(), newMovement);
         yield return new WaitForSeconds(Player.Ping - 0.01f);
         Player.Player.movement.pluginSpeedMultiplier = newMovement;
     }
@@ -540,7 +505,9 @@ public class GamePlayer
         KillstreakTriggers = new();
         OrderedKillstreaks = new();
 
-        ExtraKillstreak = ActiveLoadout.PerksSearchByType.TryGetValue("expert", out var expertPerk) ? expertPerk.Perk.SkillLevel : 0;
+        ExtraKillstreak = ActiveLoadout.PerksSearchByType.TryGetValue("expert", out var expertPerk)
+            ? expertPerk.Perk.SkillLevel
+            : 0;
 
         foreach (var killstreak in ActiveLoadout.Killstreaks.OrderBy(k => k.Killstreak.KillstreakRequired))
         {
@@ -550,30 +517,25 @@ public class GamePlayer
         }
 
         if (OrderedKillstreaks.Count == 0)
-        {
             Plugin.Instance.UI.ClearKillstreakUI(this);
-        }
         else
-        {
             Plugin.Instance.UI.SetupKillstreakUI(this);
-        }
 
-        if (ExtraKillstreak > 0)
-        {
-            Plugin.Instance.UI.UpdateKillstreakBars(this, ExtraKillstreak);
-        }
+        if (ExtraKillstreak > 0) Plugin.Instance.UI.UpdateKillstreakBars(this, ExtraKillstreak);
     }
 
     public void UpdateKillstreak(int currentKillstreak)
     {
         var updatedKillstreak = currentKillstreak + ExtraKillstreak;
         Logging.Debug($"Updating killstreak for {Player.CharacterName} with killstreak {updatedKillstreak}");
-        var availableKillstreak = OrderedKillstreaks.FirstOrDefault(k => k.Killstreak.KillstreakRequired == updatedKillstreak && !AvailableKillstreaks[k]);
+        var availableKillstreak = OrderedKillstreaks.FirstOrDefault(k =>
+            k.Killstreak.KillstreakRequired == updatedKillstreak && !AvailableKillstreaks[k]);
         if (availableKillstreak != null)
         {
             AvailableKillstreaks[availableKillstreak] = true;
             Plugin.Instance.UI.UpdateKillstreakReady(this, availableKillstreak);
-            Plugin.Instance.UI.SendAnimation(this, new AnimationInfo(EAnimationType.KillstreakAvailable, availableKillstreak.Killstreak));
+            Plugin.Instance.UI.SendAnimation(this,
+                new(EAnimationType.KillstreakAvailable, availableKillstreak.Killstreak));
         }
 
         Plugin.Instance.UI.UpdateKillstreakBars(this, updatedKillstreak);
@@ -584,22 +546,16 @@ public class GamePlayer
         Logging.Debug($"Activating killstreak with id {killstreak.Killstreak.KillstreakID} for {Player.CharacterName}");
         var info = killstreak.Killstreak.KillstreakInfo;
         var inv = Player.Player.inventory;
-        if (CurrentGame == null)
-        {
-            return;
-        }
+        if (CurrentGame == null) return;
 
         if (info.IsItem)
         {
             if (info.MagAmount > 0)
             {
-                for (var i = 1; i <= info.MagAmount; i++)
-                {
-                    inv.forceAddItem(new Item(info.MagID, true), false);
-                }
+                for (var i = 1; i <= info.MagAmount; i++) inv.forceAddItem(new(info.MagID, true), false);
             }
 
-            inv.forceAddItem(new Item(info.ItemID, true), false);
+            inv.forceAddItem(new(info.ItemID, true), false);
             for (byte page = 0; page < PlayerInventory.PAGES - 2; page++)
             {
                 var shouldBreak = false;
@@ -616,10 +572,7 @@ public class GamePlayer
                     }
                 }
 
-                if (shouldBreak)
-                {
-                    break;
-                }
+                if (shouldBreak) break;
             }
 
             Player.Player.equipment.ServerEquip(KillstreakPage, KillstreakX, KillstreakY);
@@ -633,7 +586,7 @@ public class GamePlayer
                 return;
             }
 
-            inv.forceAddItem(new Item(info.TurretID, true), false);
+            inv.forceAddItem(new(info.TurretID, true), false);
 
             for (byte page = 0; page < PlayerInventory.PAGES - 2; page++)
             {
@@ -649,10 +602,7 @@ public class GamePlayer
                     }
                 }
 
-                if (shouldBreak)
-                {
-                    break;
-                }
+                if (shouldBreak) break;
             }
 
             AvailableKillstreaks[killstreak] = false;
@@ -665,7 +615,8 @@ public class GamePlayer
         {
             var clothing = Player.Player.clothing;
             var clothes = clothing.thirdClothes;
-            var clothingKillstreak = CurrentGame.GetTeam(this).TeamKillstreaks.FirstOrDefault(k => k.KillstreakID == killstreak.Killstreak.KillstreakID);
+            var clothingKillstreak = CurrentGame.GetTeam(this).TeamKillstreaks
+                .FirstOrDefault(k => k.KillstreakID == killstreak.Killstreak.KillstreakID);
 
             KillstreakPreviousShirtID = clothing.shirt;
             KillstreakPreviousPantsID = clothing.pants;
@@ -676,28 +627,28 @@ public class GamePlayer
             {
                 clothes.shirt = 0;
                 clothing.askWearShirt(0, 0, new byte[0], false);
-                inv.forceAddItem(new Item(clothingKillstreak.ShirtID, true), true);
+                inv.forceAddItem(new(clothingKillstreak.ShirtID, true), true);
             }
 
             if (clothingKillstreak.PantsID != 0)
             {
                 clothes.pants = 0;
                 clothing.askWearPants(0, 0, new byte[0], false);
-                inv.forceAddItem(new Item(clothingKillstreak.PantsID, true), true);
+                inv.forceAddItem(new(clothingKillstreak.PantsID, true), true);
             }
 
             if (clothingKillstreak.HatID != 0)
             {
                 clothes.hat = 0;
                 clothing.askWearHat(0, 0, new byte[0], false);
-                inv.forceAddItem(new Item(clothingKillstreak.HatID, true), true);
+                inv.forceAddItem(new(clothingKillstreak.HatID, true), true);
             }
 
             if (clothingKillstreak.VestID != 0)
             {
                 clothes.vest = 0;
                 clothing.askWearVest(0, 0, new byte[0], false);
-                inv.forceAddItem(new Item(clothingKillstreak.VestID, true), true);
+                inv.forceAddItem(new(clothingKillstreak.VestID, true), true);
             }
         }
 
@@ -712,10 +663,7 @@ public class GamePlayer
         MovementChanger.Stop();
         MovementChanger = Plugin.Instance.StartCoroutine(ChangeMovement(info.MovementMultiplier));
 
-        if (info.KillstreakStaySeconds == 0)
-        {
-            return;
-        }
+        if (info.KillstreakStaySeconds == 0) return;
 
         Plugin.Instance.UI.SendKillstreakTimer(this, info.KillstreakStaySeconds);
         KillstreakChecker = Plugin.Instance.StartCoroutine(CheckKillstreak(info.KillstreakStaySeconds));
@@ -723,7 +671,8 @@ public class GamePlayer
 
     public void RemoveActiveKillstreak()
     {
-        Logging.Debug($"Removing killstreak for {Player.CharacterName} with id {ActiveKillstreak.Killstreak.KillstreakID}");
+        Logging.Debug(
+            $"Removing killstreak for {Player.CharacterName} with id {ActiveKillstreak.Killstreak.KillstreakID}");
         if (!HasKillstreakActive)
         {
             Logging.Debug($"{Player.CharacterName} has no active killstreak, what we tryna remove");
@@ -736,14 +685,14 @@ public class GamePlayer
         KillstreakClothingRemover.Stop();
 
         if (info.IsItem)
-        {
-            KillstreakItemRemover = Plugin.Instance.StartCoroutine(RemoveItemKillstreak(KillstreakPage, KillstreakX, KillstreakY, info.MagID));
-        }
+            KillstreakItemRemover =
+                Plugin.Instance.StartCoroutine(RemoveItemKillstreak(KillstreakPage, KillstreakX, KillstreakY,
+                    info.MagID));
 
         if (info.IsClothing)
-        {
-            KillstreakClothingRemover = Plugin.Instance.StartCoroutine(RemoveClothingKillstreak(KillstreakPreviousShirtID, KillstreakPreviousPantsID, KillstreakPreviousHatID, KillstreakPreviousVestID));
-        }
+            KillstreakClothingRemover = Plugin.Instance.StartCoroutine(RemoveClothingKillstreak(
+                KillstreakPreviousShirtID, KillstreakPreviousPantsID, KillstreakPreviousHatID,
+                KillstreakPreviousVestID));
 
         Plugin.Instance.UI.ClearKillstreakTimer(this);
         HasKillstreakActive = false;
@@ -769,10 +718,7 @@ public class GamePlayer
                 for (var i = itemCount - 1; i >= 0; i--)
                 {
                     var item = inv.getItem(PlayerInventory.SLOTS, (byte)i);
-                    if ((item?.item?.id ?? 0) == magID)
-                    {
-                        inv.removeItem(PlayerInventory.SLOTS, (byte)i);
-                    }
+                    if ((item?.item?.id ?? 0) == magID) inv.removeItem(PlayerInventory.SLOTS, (byte)i);
                 }
             }
 
@@ -797,28 +743,28 @@ public class GamePlayer
             {
                 clothes.shirt = 0;
                 clothing.askWearShirt(0, 0, new byte[0], false);
-                Player.Player.inventory.forceAddItem(new Item(shirt, true), true);
+                Player.Player.inventory.forceAddItem(new(shirt, true), true);
             }
 
             if (pants != 0 && clothing.pants != pants)
             {
                 clothes.pants = 0;
                 clothing.askWearPants(0, 0, new byte[0], false);
-                Player.Player.inventory.forceAddItem(new Item(pants, true), true);
+                Player.Player.inventory.forceAddItem(new(pants, true), true);
             }
 
             if (hat != 0 && clothing.hat != hat)
             {
                 clothes.hat = 0;
                 clothing.askWearHat(0, 0, new byte[0], false);
-                Player.Player.inventory.forceAddItem(new Item(hat, true), true);
+                Player.Player.inventory.forceAddItem(new(hat, true), true);
             }
 
             if (vest != 0 && clothing.vest != vest)
             {
                 clothes.vest = 0;
                 clothing.askWearVest(0, 0, new byte[0], false);
-                Player.Player.inventory.forceAddItem(new Item(vest, true), true);
+                Player.Player.inventory.forceAddItem(new(vest, true), true);
             }
 
             break;

@@ -9,17 +9,17 @@ namespace UnturnedBlackout.Managers;
 
 public class AchievementManager
 {
-    public void CheckAchievement(GamePlayer player, EQuestType achievementType, Dictionary<EQuestCondition, int> achievementConditions)
+    public void CheckAchievement(
+        GamePlayer player,
+        EQuestType achievementType,
+        Dictionary<EQuestCondition, int> achievementConditions)
     {
         var steamID = player.Player.CSteamID;
 
         var db = Plugin.Instance.DB;
         var data = player.Data;
 
-        if (!data.AchievementsSearchByType.TryGetValue(achievementType, out var achievements))
-        {
-            return;
-        }
+        if (!data.AchievementsSearchByType.TryGetValue(achievementType, out var achievements)) return;
 
         foreach (var achievement in achievements)
         {
@@ -33,29 +33,28 @@ public class AchievementManager
                 }
 
                 var isConditionMinimum = IsConditionMinimum(condition.Key);
-                if (!condition.Value.Contains(conditionValue) && !condition.Value.Exists(k => isConditionMinimum && conditionValue >= k) && !condition.Value.Contains(-1))
+                if (!condition.Value.Contains(conditionValue) &&
+                    !condition.Value.Exists(k => isConditionMinimum && conditionValue >= k) &&
+                    !condition.Value.Contains(-1))
                 {
                     conditionsMet = false;
                     break;
                 }
             }
 
-            if (!conditionsMet)
-            {
-                continue;
-            }
+            if (!conditionsMet) continue;
 
             achievement.Amount += 1;
 
             if (achievement.Achievement.TiersLookup.TryGetValue(achievement.CurrentTier + 1, out var nextTier))
             {
                 if (achievement.Amount == nextTier.TargetAmount)
-                {
-                    TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.SendAnimation(player, new Models.Animation.AnimationInfo(EAnimationType.AchievementCompletion, nextTier)));
-                }
+                    TaskDispatcher.QueueOnMainThread(() =>
+                        Plugin.Instance.UI.SendAnimation(player, new(EAnimationType.AchievementCompletion, nextTier)));
             }
 
-            _ = Task.Run(async () => await db.IncreasePlayerAchievementAmountAsync(steamID, achievement.Achievement.AchievementID, 1));
+            _ = Task.Run(async () =>
+                await db.IncreasePlayerAchievementAmountAsync(steamID, achievement.Achievement.AchievementID, 1));
         }
     }
 
@@ -92,7 +91,8 @@ public class AchievementManager
         Plugin.Instance.UI.OnAchievementsUpdated(steamID);
 
         data.SetAchievementXPBooster();
-        _ = Task.Run(async () => await Plugin.Instance.DB.UpdatePlayerAchievementTierAsync(steamID, achievementID, nextTier.TierID));
+        _ = Task.Run(async () =>
+            await Plugin.Instance.DB.UpdatePlayerAchievementTierAsync(steamID, achievementID, nextTier.TierID));
     }
 
     public bool IsConditionMinimum(EQuestCondition condition)

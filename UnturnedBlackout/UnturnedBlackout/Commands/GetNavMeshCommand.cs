@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace UnturnedBlackout.Commands;
 
-class GetNavMeshCommand : IRocketCommand
+internal class GetNavMeshCommand : IRocketCommand
 {
     public AllowedCaller AllowedCaller => AllowedCaller.Player;
 
@@ -24,8 +24,6 @@ class GetNavMeshCommand : IRocketCommand
     {
         var player = caller as UnturnedPlayer;
         if (LevelNavigation.tryGetNavigation(player.Position, out var nav))
-        {
             UnturnedChat.Say(caller, $"Nav Mesh: {nav}");
-        }
     }
 }

@@ -15,7 +15,17 @@ public class AchievementTier
     public List<Reward> Rewards { get; set; }
     public List<Reward> RemoveRewards { get; set; }
 
-    public AchievementTier(Achievement achievement, int tierID, string tierTitle, string tierDesc, string tierColor, string tierPrevSmall, string tierPrevLarge, int targetAmount, List<Reward> rewards, List<Reward> removeRewards)
+    public AchievementTier(
+        Achievement achievement,
+        int tierID,
+        string tierTitle,
+        string tierDesc,
+        string tierColor,
+        string tierPrevSmall,
+        string tierPrevLarge,
+        int targetAmount,
+        List<Reward> rewards,
+        List<Reward> removeRewards)
     {
         Achievement = achievement;
         TierID = tierID;

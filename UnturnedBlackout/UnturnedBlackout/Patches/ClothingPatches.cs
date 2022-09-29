@@ -6,31 +6,24 @@ namespace UnturnedBlackout.Patches;
 [HarmonyPatch(typeof(PlayerClothing))]
 public static class ClothingPatches
 {
-    [HarmonyPatch("ReceiveSwapHatRequest")]
-    [HarmonyPrefix]
+    [HarmonyPatch("ReceiveSwapHatRequest"), HarmonyPrefix]
     public static bool WearHatPrefix(byte page, byte x, byte y) => false;
 
-    [HarmonyPatch("ReceiveSwapBackpackRequest")]
-    [HarmonyPrefix]
+    [HarmonyPatch("ReceiveSwapBackpackRequest"), HarmonyPrefix]
     public static bool WearBackpackPrefix(byte page, byte x, byte y) => page != 255;
 
-    [HarmonyPatch("ReceiveSwapVestRequest")]
-    [HarmonyPrefix]
+    [HarmonyPatch("ReceiveSwapVestRequest"), HarmonyPrefix]
     public static bool WearVestPrefix(byte page, byte x, byte y) => false;
 
-    [HarmonyPatch("ReceiveSwapMaskRequest")]
-    [HarmonyPrefix]
+    [HarmonyPatch("ReceiveSwapMaskRequest"), HarmonyPrefix]
     public static bool WearMaskPrefix(byte page, byte x, byte y) => false;
 
-    [HarmonyPatch("ReceiveSwapShirtRequest")]
-    [HarmonyPrefix]
+    [HarmonyPatch("ReceiveSwapShirtRequest"), HarmonyPrefix]
     public static bool WearShirtPrefix(byte page, byte x, byte y) => false;
 
-    [HarmonyPatch("ReceiveSwapPantsRequest")]
-    [HarmonyPrefix]
+    [HarmonyPatch("ReceiveSwapPantsRequest"), HarmonyPrefix]
     public static bool WearPantsPrefix(byte page, byte x, byte y) => false;
 
-    [HarmonyPatch("ReceiveSwapGlassesRequest")]
-    [HarmonyPrefix]
+    [HarmonyPatch("ReceiveSwapGlassesRequest"), HarmonyPrefix]
     public static bool WearGlassesPrefix(byte page, byte x, byte y) => false;
 }

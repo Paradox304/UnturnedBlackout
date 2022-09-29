@@ -13,7 +13,14 @@ public class LoadoutGun
     public bool IsUnlocked { get; set; }
     public Dictionary<ushort, LoadoutAttachment> Attachments { get; set; }
 
-    public LoadoutGun(Gun gun, int level, int xP, int gunKills, bool isBought, bool isUnlocked, Dictionary<ushort, LoadoutAttachment> attachments)
+    public LoadoutGun(
+        Gun gun,
+        int level,
+        int xP,
+        int gunKills,
+        bool isBought,
+        bool isUnlocked,
+        Dictionary<ushort, LoadoutAttachment> attachments)
     {
         Gun = gun;
         Level = level;
@@ -27,7 +34,7 @@ public class LoadoutGun
     public bool TryGetNeededXP(out int neededXP)
     {
         neededXP = 0;
-        if (Gun.LevelXPNeeded.Count > (Level - 1))
+        if (Gun.LevelXPNeeded.Count > Level - 1)
         {
             neededXP = Gun.LevelXPNeeded[Level - 1];
             return true;

@@ -6,7 +6,7 @@ using UnturnedBlackout.Models.TDM;
 
 namespace UnturnedBlackout.Commands;
 
-class TDMSPCommand : IRocketCommand
+internal class TDMSPCommand : IRocketCommand
 {
     public AllowedCaller AllowedCaller => AllowedCaller.Player;
 
@@ -42,7 +42,8 @@ class TDMSPCommand : IRocketCommand
             return;
         }
 
-        var location = Plugin.Instance.Config.Locations.FileData.ArenaLocations.FirstOrDefault(k => k.LocationID == locationID);
+        var location =
+            Plugin.Instance.Config.Locations.FileData.ArenaLocations.FirstOrDefault(k => k.LocationID == locationID);
         if (location == null)
         {
             Utility.Say(caller, Plugin.Instance.Translate("Location_Not_Found").ToRich());
@@ -50,7 +51,9 @@ class TDMSPCommand : IRocketCommand
         }
 
         Utility.Say(caller, Plugin.Instance.Translate("TDM_SpawnPoint_Set", location.LocationName, groupID).ToRich());
-        Plugin.Instance.Data.Data.TDMSpawnPoints.Add(new TDMSpawnPoint(locationID, groupID, player.Player.transform.position.x, player.Player.transform.position.y, player.Player.transform.position.z, player.Player.transform.eulerAngles.y));
+        Plugin.Instance.Data.Data.TDMSpawnPoints.Add(new(locationID, groupID, player.Player.transform.position.x,
+            player.Player.transform.position.y, player.Player.transform.position.z,
+            player.Player.transform.eulerAngles.y));
         Plugin.Instance.Data.SaveJson();
     }
 }

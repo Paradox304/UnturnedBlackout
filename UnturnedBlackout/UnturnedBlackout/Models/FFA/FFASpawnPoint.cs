@@ -14,7 +14,6 @@ public class FFASpawnPoint
 
     public FFASpawnPoint()
     {
-
     }
 
     public FFASpawnPoint(int locationID, float x, float y, float z, float yaw)

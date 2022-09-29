@@ -13,6 +13,5 @@ public class LoadoutAmount
 
     public LoadoutAmount()
     {
-
     }
 }

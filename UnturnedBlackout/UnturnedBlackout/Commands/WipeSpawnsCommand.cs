@@ -5,7 +5,7 @@ using UnturnedBlackout.Enums;
 
 namespace UnturnedBlackout.Commands;
 
-class WipeSpawnsCommand : IRocketCommand
+internal class WipeSpawnsCommand : IRocketCommand
 {
     public AllowedCaller AllowedCaller => AllowedCaller.Both;
 

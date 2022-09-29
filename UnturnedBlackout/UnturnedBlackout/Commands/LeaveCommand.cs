@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace UnturnedBlackout.Commands;
 
-class LeaveCommand : IRocketCommand
+internal class LeaveCommand : IRocketCommand
 {
     public AllowedCaller AllowedCaller => AllowedCaller.Player;
 

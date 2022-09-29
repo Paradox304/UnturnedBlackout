@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace UnturnedBlackout.Commands;
 
-class GenAchievementCommand : IRocketCommand
+internal class GenAchievementCommand : IRocketCommand
 {
     public AllowedCaller AllowedCaller => AllowedCaller.Both;
 
@@ -38,7 +38,8 @@ class GenAchievementCommand : IRocketCommand
         {
             await Plugin.Instance.DB.GenerateAchievementTiersAsync(achievementID, command[1]);
 
-            TaskDispatcher.QueueOnMainThread(() => UnturnedChat.Say(caller, $"Tiers generated for {achievementID} with title {command[1]}"));
+            TaskDispatcher.QueueOnMainThread(() =>
+                UnturnedChat.Say(caller, $"Tiers generated for {achievementID} with title {command[1]}"));
         });
     }
 }

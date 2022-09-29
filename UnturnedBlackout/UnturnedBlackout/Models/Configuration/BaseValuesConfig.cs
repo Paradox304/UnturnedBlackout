@@ -40,7 +40,8 @@ public class BaseValuesConfig
 
         PlayerColorHexCode = "#FFFF00";
         HardcoreColor = "red";
-        WebhookURL = "https://discord.com/api/webhooks/979000847197409280/e7Pbmjj_8bALCCDCbEDMCEVLX2ZSuIG3ymxbd-yb-IxkQ-sToxCkLJRmneeqB6LYVwgC";
+        WebhookURL =
+            "https://discord.com/api/webhooks/979000847197409280/e7Pbmjj_8bALCCDCbEDMCEVLX2ZSuIG3ymxbd-yb-IxkQ-sToxCkLJRmneeqB6LYVwgC";
         MaxKillFeed = 6;
         KillFeedFont = 40;
         KillFeedSeconds = 10;
@@ -49,7 +50,7 @@ public class BaseValuesConfig
 
         EnableDebugLogs = true;
 
-        LobbySpawn = new Vector3(353.027039f, 54.5521927f, -3792.77026f);
+        LobbySpawn = new(353.027039f, 54.5521927f, -3792.77026f);
         LobbyYaw = 100f;
 
         LastDamageAfterHealSeconds = 3;

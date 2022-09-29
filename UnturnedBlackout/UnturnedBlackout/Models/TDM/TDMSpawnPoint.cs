@@ -15,7 +15,6 @@ public class TDMSpawnPoint
 
     public TDMSpawnPoint()
     {
-
     }
 
     public TDMSpawnPoint(int locationID, int groupID, float x, float y, float z, float yaw)

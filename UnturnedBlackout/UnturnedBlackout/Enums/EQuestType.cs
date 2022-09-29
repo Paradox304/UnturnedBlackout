@@ -21,5 +21,5 @@ public enum EQuestType
     FirstKill, // Get the first kill of the match
     Longshot, // Get a kill from more than X meters
     Survivor, // Get a kill with health below X
-    Collector, // Collect X tags in a row
+    Collector // Collect X tags in a row
 }
