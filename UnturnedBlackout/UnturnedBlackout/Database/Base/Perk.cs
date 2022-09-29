@@ -17,19 +17,7 @@ public class Perk
     public int ScrapAmount { get; set; }
     public int LevelRequirement { get; set; }
 
-    public Perk(
-        int perkID,
-        string perkName,
-        string perkDesc,
-        int perkType,
-        ERarity perkRarity,
-        string iconLink,
-        string skillType,
-        int skillLevel,
-        int coins,
-        int buyPrice,
-        int scrapAmount,
-        int levelRequirement)
+    public Perk(int perkID, string perkName, string perkDesc, int perkType, ERarity perkRarity, string iconLink, string skillType, int skillLevel, int coins, int buyPrice, int scrapAmount, int levelRequirement)
     {
         PerkID = perkID;
         PerkName = perkName;

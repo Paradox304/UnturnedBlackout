@@ -35,7 +35,7 @@ internal class AddPrimeCommand : IRocketCommand
 
         CSteamID steamID = new(steamid);
 
-        if (!int.TryParse(command[1].ToString(), out var days))
+        if (!int.TryParse(command[1], out var days))
         {
             Utility.Say(caller, $"<color=red>Days is not in the correct format</color>");
             return;

@@ -20,14 +20,7 @@ public class GamemodeOption
     {
     }
 
-    public GamemodeOption(
-        EGameType gameType,
-        string gamemodeIcon,
-        int gamemodeWeight,
-        string gamemodeColor,
-        bool hasHardcore,
-        int hardcoreChance,
-        List<int> ignoredLocations)
+    public GamemodeOption(EGameType gameType, string gamemodeIcon, int gamemodeWeight, string gamemodeColor, bool hasHardcore, int hardcoreChance, List<int> ignoredLocations)
     {
         GameType = gameType;
         GamemodeIcon = gamemodeIcon;

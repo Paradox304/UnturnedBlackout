@@ -11,9 +11,11 @@ public static class BarricadePatches
     {
         Logging.Debug("Barricade destroy patch detected");
         var drop = NetIdRegistry.Get<BarricadeDrop>(netId);
-        if (drop == null) return;
+        if (drop == null)
+            return;
 
         Logging.Debug("Drop found, sending to all games");
-        foreach (var game in Plugin.Instance.Game.Games) game.OnBarricadeDestroyed(drop);
+        foreach (var game in Plugin.Instance.Game.Games)
+            game.OnBarricadeDestroyed(drop);
     }
 }

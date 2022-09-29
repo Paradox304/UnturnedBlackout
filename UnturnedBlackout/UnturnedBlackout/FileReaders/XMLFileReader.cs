@@ -19,10 +19,7 @@ public class XmlFileReader<T> : IFileReader<T> where T : class, new()
     public XmlFileReader(string filePath, string urlPath, params Type[] extraTypes)
     {
         if (string.IsNullOrWhiteSpace(filePath))
-        {
-            throw new ArgumentNullException(nameof(filePath),
-                "Parameter 'fileName' either null or empty. This is not allowed.");
-        }
+            throw new ArgumentNullException(nameof(filePath), "Parameter 'fileName' either null or empty. This is not allowed.");
 
         FileData = new();
         FilePath = Path.ChangeExtension(filePath, "xml");

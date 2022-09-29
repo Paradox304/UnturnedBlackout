@@ -11,11 +11,7 @@ public class PlayerBooster
     public float BoosterValue { get; set; }
     public DateTimeOffset BoosterExpiration { get; set; }
 
-    public PlayerBooster(
-        CSteamID steamID,
-        EBoosterType boosterType,
-        float boosterValue,
-        DateTimeOffset boosterExpiration)
+    public PlayerBooster(CSteamID steamID, EBoosterType boosterType, float boosterValue, DateTimeOffset boosterExpiration)
     {
         SteamID = steamID;
         BoosterType = boosterType;

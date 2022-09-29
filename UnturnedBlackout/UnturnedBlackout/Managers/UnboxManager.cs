@@ -12,16 +12,7 @@ public class UnboxManager
 {
     public DatabaseManager DB => Plugin.Instance.DB;
 
-    public bool TryCalculateReward(
-        Case @case,
-        UnturnedPlayer player,
-        out Reward reward,
-        out string rewardImage,
-        out string rewardName,
-        out string rewardDesc,
-        out ERarity rewardRarity,
-        out bool isDuplicate,
-        out int duplicateScrapAmount)
+    public bool TryCalculateReward(Case @case, UnturnedPlayer player, out Reward reward, out string rewardImage, out string rewardName, out string rewardDesc, out ERarity rewardRarity, out bool isDuplicate, out int duplicateScrapAmount)
     {
         reward = null;
         rewardImage = "";
@@ -50,24 +41,16 @@ public class UnboxManager
                 List<Knife> knivesAvailable = new();
                 if (isLimited)
                 {
-                    Logging.Debug(
-                        $"{player.CharacterName} has gotten a limited knife rarity, checking if there are any limited knives available");
-                    knivesAvailable = DB.Knives.Values.Where(k =>
-                        k.KnifeWeight > 0 && k.MaxAmount > 0 && k.MaxAmount > k.UnboxedAmount &&
-                        (!loadout.Knives.TryGetValue(k.KnifeID, out var knife) || !knife.IsBought)).ToList();
+                    Logging.Debug($"{player.CharacterName} has gotten a limited knife rarity, checking if there are any limited knives available");
+                    knivesAvailable = DB.Knives.Values.Where(k => k.KnifeWeight > 0 && k.MaxAmount > 0 && k.MaxAmount > k.UnboxedAmount && (!loadout.Knives.TryGetValue(k.KnifeID, out var knife) || !knife.IsBought)).ToList();
                     if (knivesAvailable.Count == 0)
                     {
-                        Logging.Debug(
-                            "There are no limited knives available, getting knives that are not owned by the player");
-                        knivesAvailable = DB.Knives.Values.Where(k =>
-                            k.KnifeWeight > 0 && k.MaxAmount == 0 &&
-                            (!loadout.Knives.TryGetValue(k.KnifeID, out var knife) || !knife.IsBought)).ToList();
+                        Logging.Debug("There are no limited knives available, getting knives that are not owned by the player");
+                        knivesAvailable = DB.Knives.Values.Where(k => k.KnifeWeight > 0 && k.MaxAmount == 0 && (!loadout.Knives.TryGetValue(k.KnifeID, out var knife) || !knife.IsBought)).ToList();
                     }
                 }
                 else
-                    knivesAvailable = DB.Knives.Values.Where(k =>
-                        k.KnifeWeight > 0 && k.MaxAmount == 0 &&
-                        (!loadout.Knives.TryGetValue(k.KnifeID, out var knife) || !knife.IsBought)).ToList();
+                    knivesAvailable = DB.Knives.Values.Where(k => k.KnifeWeight > 0 && k.MaxAmount == 0 && (!loadout.Knives.TryGetValue(k.KnifeID, out var knife) || !knife.IsBought)).ToList();
 
                 Logging.Debug($"Found {knivesAvailable.Count} knives available to be unboxed by the player");
                 Knife knife = null;
@@ -103,24 +86,16 @@ public class UnboxManager
                 List<Glove> glovesAvailable = new();
                 if (isLimited)
                 {
-                    Logging.Debug(
-                        $"{player.CharacterName} has gotten a limited glove rarity, checking if there are any limited gloves available");
-                    glovesAvailable = DB.Gloves.Values.Where(k =>
-                        k.GloveWeight > 0 && k.MaxAmount > 0 && k.MaxAmount > k.UnboxedAmount &&
-                        (!loadout.Gloves.TryGetValue(k.GloveID, out var glove) || !glove.IsBought)).ToList();
+                    Logging.Debug($"{player.CharacterName} has gotten a limited glove rarity, checking if there are any limited gloves available");
+                    glovesAvailable = DB.Gloves.Values.Where(k => k.GloveWeight > 0 && k.MaxAmount > 0 && k.MaxAmount > k.UnboxedAmount && (!loadout.Gloves.TryGetValue(k.GloveID, out var glove) || !glove.IsBought)).ToList();
                     if (glovesAvailable.Count == 0)
                     {
-                        Logging.Debug(
-                            "There are no limited gloves available, getting gloves that are not owned by the player");
-                        glovesAvailable = DB.Gloves.Values.Where(k =>
-                            k.GloveWeight > 0 && k.MaxAmount == 0 &&
-                            (!loadout.Gloves.TryGetValue(k.GloveID, out var glove) || !glove.IsBought)).ToList();
+                        Logging.Debug("There are no limited gloves available, getting gloves that are not owned by the player");
+                        glovesAvailable = DB.Gloves.Values.Where(k => k.GloveWeight > 0 && k.MaxAmount == 0 && (!loadout.Gloves.TryGetValue(k.GloveID, out var glove) || !glove.IsBought)).ToList();
                     }
                 }
                 else
-                    glovesAvailable = DB.Gloves.Values.Where(k =>
-                        k.GloveWeight > 0 && k.MaxAmount == 0 &&
-                        (!loadout.Gloves.TryGetValue(k.GloveID, out var glove) || !glove.IsBought)).ToList();
+                    glovesAvailable = DB.Gloves.Values.Where(k => k.GloveWeight > 0 && k.MaxAmount == 0 && (!loadout.Gloves.TryGetValue(k.GloveID, out var glove) || !glove.IsBought)).ToList();
 
                 Logging.Debug($"Found {glovesAvailable.Count} gloves available to be unboxed by the player");
                 Glove glove = null;
@@ -158,14 +133,11 @@ public class UnboxManager
                     return false;
                 }
 
-                var skinsAvailable = @case.AvailableSkinsSearchByRarity[skinRarity]
-                    .Where(k => k.MaxAmount == 0 || k.MaxAmount > k.UnboxedAmount).ToList();
-                Logging.Debug(
-                    $"Found {skinsAvailable.Count} skins available to got by {player.CharacterName} for rarity {skinRarity}");
+                var skinsAvailable = @case.AvailableSkinsSearchByRarity[skinRarity].Where(k => k.MaxAmount == 0 || k.MaxAmount > k.UnboxedAmount).ToList();
+                Logging.Debug($"Found {skinsAvailable.Count} skins available to got by {player.CharacterName} for rarity {skinRarity}");
                 if (skinsAvailable.Count == 0)
                 {
-                    Logging.Debug(
-                        $"Found no skins available for the {player.CharacterName} to get for rarity {skinRarity}");
+                    Logging.Debug($"Found no skins available for the {player.CharacterName} to get for rarity {skinRarity}");
                     return false;
                 }
 
@@ -196,7 +168,8 @@ public class UnboxManager
     {
         Logging.Debug($"Calculating random glove, found {gloves.Count} weights to look from");
         var poolSize = 0;
-        foreach (var glove in gloves) poolSize += glove.GloveWeight;
+        foreach (var glove in gloves)
+            poolSize += glove.GloveWeight;
         var randInt = UnityEngine.Random.Range(0, poolSize) + 1;
 
         Logging.Debug($"Total Poolsize: {poolSize}, random int: {randInt}");
@@ -219,7 +192,8 @@ public class UnboxManager
     {
         Logging.Debug($"Calculating random knife, found {knives.Count} weights to look from");
         var poolSize = 0;
-        foreach (var knife in knives) poolSize += knife.KnifeWeight;
+        foreach (var knife in knives)
+            poolSize += knife.KnifeWeight;
         var randInt = UnityEngine.Random.Range(0, poolSize) + 1;
 
         Logging.Debug($"Total Poolsize: {poolSize}, random int: {randInt}");
@@ -242,7 +216,8 @@ public class UnboxManager
     {
         Logging.Debug($"Calculating reward rarities, found {weights.Count} weights to look from");
         var poolSize = 0;
-        foreach (var weight in weights) poolSize += weight.Item2;
+        foreach (var weight in weights)
+            poolSize += weight.Item2;
         var randInt = UnityEngine.Random.Range(0, poolSize) + 1;
 
         Logging.Debug($"Total Poolsize: {poolSize}, random int: {randInt}");

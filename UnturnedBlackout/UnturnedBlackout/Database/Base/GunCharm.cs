@@ -15,17 +15,7 @@ public class GunCharm
     public int LevelRequirement { get; set; }
     public string AuthorCredits { get; set; }
 
-    public GunCharm(
-        ushort charmID,
-        string charmName,
-        string charmDesc,
-        ERarity charmRarity,
-        string iconLink,
-        int buyPrice,
-        int coins,
-        int scrapAmount,
-        int levelRequirement,
-        string authorCredits)
+    public GunCharm(ushort charmID, string charmName, string charmDesc, ERarity charmRarity, string iconLink, int buyPrice, int coins, int scrapAmount, int levelRequirement, string authorCredits)
     {
         CharmID = charmID;
         CharmName = charmName;

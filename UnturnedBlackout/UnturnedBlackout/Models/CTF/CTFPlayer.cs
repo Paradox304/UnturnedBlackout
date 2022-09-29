@@ -80,7 +80,8 @@ public class CTFPlayer
             return;
 
         Killstreak = killstreak;
-        if (killstreak > HighestKillstreak) HighestKillstreak = killstreak;
+        if (killstreak > HighestKillstreak)
+            HighestKillstreak = killstreak;
 
         GamePlayer.UpdateKillstreak(killstreak);
     }
@@ -91,6 +92,7 @@ public class CTFPlayer
             return;
 
         MultipleKills = multikills;
-        if (multikills > HighestMK) HighestMK = multikills;
+        if (multikills > HighestMK)
+            HighestMK = multikills;
     }
 }

@@ -14,15 +14,7 @@ public class Quest
     public int TargetAmount { get; set; }
     public int XP { get; set; }
 
-    public Quest(
-        int questID,
-        string questTitle,
-        string questDesc,
-        EQuestType questType,
-        EQuestTier questTier,
-        Dictionary<EQuestCondition, List<int>> questConditions,
-        int targetAmount,
-        int xP)
+    public Quest(int questID, string questTitle, string questDesc, EQuestType questType, EQuestTier questTier, Dictionary<EQuestCondition, List<int>> questConditions, int targetAmount, int xP)
     {
         QuestID = questID;
         QuestTitle = questTitle;

@@ -2,7 +2,6 @@
 using Rocket.Unturned.Player;
 using System.Collections.Generic;
 using System.Linq;
-using UnturnedBlackout.Models.CTF;
 
 namespace UnturnedBlackout.Commands;
 
@@ -45,24 +44,25 @@ internal class CTFSPCommand : IRocketCommand
         var isFlag = false;
         if (command.Length > 2)
         {
-            if (command[2] == "true" || command[2] == "t") isFlag = true;
+            if (command[2] == "true" || command[2] == "t")
+                isFlag = true;
         }
 
-        var location =
-            Plugin.Instance.Config.Locations.FileData.ArenaLocations.FirstOrDefault(k => k.LocationID == locationID);
+        var location = Plugin.Instance.Config.Locations.FileData.ArenaLocations.FirstOrDefault(k => k.LocationID == locationID);
         if (location == null)
         {
             Utility.Say(caller, Plugin.Instance.Translate("Location_Not_Found").ToRich());
             return;
         }
 
-        Utility.Say(caller,
-            isFlag == true
-                ? Plugin.Instance.Translate("CTF_Flag_SpawnPoint_Set", location.LocationName, groupID).ToRich()
-                : Plugin.Instance.Translate("CTF_SpawnPoint_Set", location.LocationName, groupID).ToRich());
-        Plugin.Instance.Data.Data.CTFSpawnPoints.Add(new(locationID, groupID, player.Player.transform.position.x,
-            player.Player.transform.position.y, player.Player.transform.position.z,
-            player.Player.transform.eulerAngles.y, isFlag));
+        Utility.Say(caller, isFlag ? Plugin.Instance.Translate("CTF_Flag_SpawnPoint_Set", location.LocationName, groupID).ToRich() : Plugin.Instance.Translate("CTF_SpawnPoint_Set", location.LocationName, groupID).ToRich());
+        if (player != null)
+        {
+            var transform = player.Player.transform;
+            var position = transform.position;
+            Plugin.Instance.Data.Data.CTFSpawnPoints.Add(new(locationID, groupID, position.x, position.y, position.z, transform.eulerAngles.y, isFlag));
+        }
+
         Plugin.Instance.Data.SaveJson();
     }
 }

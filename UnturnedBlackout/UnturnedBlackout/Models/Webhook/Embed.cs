@@ -13,17 +13,7 @@ public class Embed
     public string thumbnail { get; set; } = null;
     public string image { get; set; } = null;
 
-    public Embed(
-        string title,
-        string description,
-        string url,
-        string color,
-        string timestamp,
-        Footer footer,
-        Author author,
-        Field[] fields,
-        string thumbnail,
-        string image)
+    public Embed(string title, string description, string url, string color, string timestamp, Footer footer, Author author, Field[] fields, string thumbnail, string image)
     {
         this.title = title;
         this.description = description;

@@ -13,14 +13,7 @@ public class LoadoutGun
     public bool IsUnlocked { get; set; }
     public Dictionary<ushort, LoadoutAttachment> Attachments { get; set; }
 
-    public LoadoutGun(
-        Gun gun,
-        int level,
-        int xP,
-        int gunKills,
-        bool isBought,
-        bool isUnlocked,
-        Dictionary<ushort, LoadoutAttachment> attachments)
+    public LoadoutGun(Gun gun, int level, int xP, int gunKills, bool isBought, bool isUnlocked, Dictionary<ushort, LoadoutAttachment> attachments)
     {
         Gun = gun;
         Level = level;

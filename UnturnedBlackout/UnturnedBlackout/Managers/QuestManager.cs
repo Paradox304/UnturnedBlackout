@@ -17,7 +17,8 @@ public class QuestManager
 
         _ = Task.Run(() => Plugin.Instance.Achievement.CheckAchievement(player, questType, questConditions));
 
-        if (!data.QuestsSearchByType.TryGetValue(questType, out var quests)) return;
+        if (!data.QuestsSearchByType.TryGetValue(questType, out var quests))
+            return;
 
         List<PlayerQuest> pendingQuestsProgression = new();
         foreach (var quest in quests.Where(k => k.Amount < k.Quest.TargetAmount))
@@ -32,16 +33,15 @@ public class QuestManager
                 }
 
                 var isConditionMinimum = IsConditionMinimum(condition.Key);
-                if (!condition.Value.Contains(conditionValue) &&
-                    !condition.Value.Exists(k => isConditionMinimum && conditionValue >= k) &&
-                    !condition.Value.Contains(-1))
+                if (!condition.Value.Contains(conditionValue) && !condition.Value.Exists(k => isConditionMinimum && conditionValue >= k) && !condition.Value.Contains(-1))
                 {
                     conditionsMet = false;
                     break;
                 }
             }
 
-            if (!conditionsMet) continue;
+            if (!conditionsMet)
+                continue;
 
             quest.Amount += 1;
             if (quest.Amount >= quest.Quest.TargetAmount)
@@ -49,7 +49,8 @@ public class QuestManager
                 Plugin.Instance.UI.SendAnimation(player, new(EAnimationType.QuestCompletion, quest.Quest));
                 _ = Task.Run(async () => await db.IncreasePlayerBPXPAsync(steamID, quest.Quest.XP));
             }
-            else if (quest.Amount * 100 / quest.Quest.TargetAmount % 10 == 0) pendingQuestsProgression.Add(quest);
+            else if (quest.Amount * 100 / quest.Quest.TargetAmount % 10 == 0)
+                pendingQuestsProgression.Add(quest);
 
             _ = Task.Run(async () => await db.IncreasePlayerQuestAmountAsync(steamID, quest.Quest.QuestID, 1));
         }

@@ -27,22 +27,7 @@ public class ArenaLocation
     {
     }
 
-    public ArenaLocation(
-        int locationID,
-        string locationName,
-        string imageLink,
-        int navMesh,
-        int blueTeamID,
-        int redTeamID,
-        int fFACount,
-        int tDMCount,
-        int kCCount,
-        int cTFCount,
-        int fFAMinCount,
-        int tDMMinCount,
-        int kCMinCount,
-        int cTFMinCount,
-        float positionCheck)
+    public ArenaLocation(int locationID, string locationName, string imageLink, int navMesh, int blueTeamID, int redTeamID, int fFACount, int tDMCount, int kCCount, int cTFCount, int fFAMinCount, int tDMMinCount, int kCMinCount, int cTFMinCount, float positionCheck)
     {
         LocationID = locationID;
         LocationName = locationName;

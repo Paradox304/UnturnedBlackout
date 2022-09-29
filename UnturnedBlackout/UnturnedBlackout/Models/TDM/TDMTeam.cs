@@ -71,22 +71,20 @@ public class TDMTeam
             return;
         }
 
-        Logging.Debug(
-            $"Last death: {lastDeath}, Current Time: {DateTime.UtcNow}, Seconds: {(DateTime.UtcNow - lastDeath).TotalSeconds}, Spawn Switch Count: {Config.Base.FileData.SpawnSwitchCountSeconds}");
+        Logging.Debug($"Last death: {lastDeath}, Current Time: {DateTime.UtcNow}, Seconds: {(DateTime.UtcNow - lastDeath).TotalSeconds}, Spawn Switch Count: {Config.Base.FileData.SpawnSwitchCountSeconds}");
         if ((DateTime.UtcNow - lastDeath).TotalSeconds < Config.Base.FileData.SpawnSwitchCountSeconds)
         {
-            Logging.Debug(
-                $"Player died within spawn switch count seconds, current threshold {SpawnThreshold}, increasing it by one");
+            Logging.Debug($"Player died within spawn switch count seconds, current threshold {SpawnThreshold}, increasing it by one");
             SpawnThreshold++;
             if (SpawnThreshold > Config.Base.FileData.SpawnSwitchThreshold)
             {
-                Logging.Debug(
-                    $"Threshold reached limit: {Config.Base.FileData.SpawnSwitchThreshold}, switching spawns");
+                Logging.Debug($"Threshold reached limit: {Config.Base.FileData.SpawnSwitchThreshold}, switching spawns");
                 CheckSpawnSwitcher.Stop();
                 Game.SwitchSpawn();
                 SpawnThreshold = 0;
             }
-            else if (CheckSpawnSwitcher == null) CheckSpawnSwitcher = Plugin.Instance.StartCoroutine(SpawnSwitch());
+            else if (CheckSpawnSwitcher == null)
+                CheckSpawnSwitcher = Plugin.Instance.StartCoroutine(SpawnSwitch());
         }
 
         Players[steamID] = DateTime.UtcNow;
@@ -96,7 +94,8 @@ public class TDMTeam
     {
         yield return new WaitForSeconds(Config.Base.FileData.SpawnSwitchTimeFrame);
         Logging.Debug($"Spawn switch time frame reached, setting threshold back to 0 and waiting for kills");
-        if (SpawnThreshold > Config.Base.FileData.SpawnSwitchThreshold) Game.SwitchSpawn();
+        if (SpawnThreshold > Config.Base.FileData.SpawnSwitchThreshold)
+            Game.SwitchSpawn();
 
         SpawnThreshold = 0;
     }

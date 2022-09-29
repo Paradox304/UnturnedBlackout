@@ -30,6 +30,5 @@ public class PlayerAchievement
         return false;
     }
 
-    public AchievementTier GetCurrentTier() =>
-        Achievement.TiersLookup.TryGetValue(CurrentTier, out var tier) ? tier : null;
+    public AchievementTier GetCurrentTier() => Achievement.TiersLookup.TryGetValue(CurrentTier, out var tier) ? tier : null;
 }

@@ -15,12 +15,7 @@ public class PlayerBattlepass
     {
     }
 
-    public PlayerBattlepass(
-        CSteamID steamID,
-        int currentTier,
-        int xP,
-        HashSet<int> claimedFreeRewards,
-        HashSet<int> claimedPremiumRewards)
+    public PlayerBattlepass(CSteamID steamID, int currentTier, int xP, HashSet<int> claimedFreeRewards, HashSet<int> claimedPremiumRewards)
     {
         SteamID = steamID;
         CurrentTier = currentTier;

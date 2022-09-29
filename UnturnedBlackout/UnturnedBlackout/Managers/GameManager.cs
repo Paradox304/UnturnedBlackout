@@ -47,8 +47,7 @@ public class GameManager
             var locationID = AvailableLocations[UnityEngine.Random.Range(0, AvailableLocations.Count)];
             var location = Config.Locations.FileData.ArenaLocations.FirstOrDefault(k => k.LocationID == locationID);
             var gameMode = GetRandomGameMode(locationID);
-            Logging.Debug(
-                $"Found Location: {location.LocationName}, GameMode: {gameMode.Item1}, IsHardcore: {gameMode.Item2}");
+            Logging.Debug($"Found Location: {location.LocationName}, GameMode: {gameMode.Item1}, IsHardcore: {gameMode.Item2}");
             StartGame(location, gameMode.Item1, gameMode.Item2);
         }
     }
@@ -78,8 +77,7 @@ public class GameManager
         Logging.Debug($"Game started, adding game to games and removing location from available locations");
         Games.Add(game);
         if (!AvailableLocations.Contains(location.LocationID))
-            Logging.Debug(
-                $"LOCATION {location.LocationName} IS NOT FOUND IN THE AVAILABLE LOCATIONS, WHAT TO REMOVE????");
+            Logging.Debug($"LOCATION {location.LocationName} IS NOT FOUND IN THE AVAILABLE LOCATIONS, WHAT TO REMOVE????");
         else
             _ = AvailableLocations.Remove(location.LocationID);
 
@@ -93,8 +91,7 @@ public class GameManager
         Logging.Debug($"Removing game and adding locations to available locations");
         _ = Games.Remove(game);
         if (AvailableLocations.Contains(game.Location.LocationID))
-            Logging.Debug(
-                $"LOCATION {game.Location.LocationName} IS ALREADY AVAILABLE IN THE AVAILABLELOCATIONS LIST, ERRORRRRR");
+            Logging.Debug($"LOCATION {game.Location.LocationName} IS ALREADY AVAILABLE IN THE AVAILABLELOCATIONS LIST, ERRORRRRR");
         else
             AvailableLocations.Add(game.Location.LocationID);
     }
@@ -108,7 +105,8 @@ public class GameManager
         }
 
         var gPlayer = GetGamePlayer(player);
-        if (gPlayer == null) return;
+        if (gPlayer == null)
+            return;
 
         if (gPlayer.CurrentGame != null)
         {
@@ -130,7 +128,8 @@ public class GameManager
     public void RemovePlayerFromGame(UnturnedPlayer player)
     {
         var gPlayer = GetGamePlayer(player);
-        if (gPlayer == null) return;
+        if (gPlayer == null)
+            return;
 
         if (gPlayer.CurrentGame == null)
         {
@@ -184,7 +183,8 @@ public class GameManager
             {
                 Plugin.Instance.UI.ClearLoadingUI(player);
                 player.Player.quests.leaveGroup(true);
-                if (Players.ContainsKey(player.CSteamID)) _ = Players.Remove(player.CSteamID);
+                if (Players.ContainsKey(player.CSteamID))
+                    _ = Players.Remove(player.CSteamID);
 
                 Players.Add(player.CSteamID, new(player, player.Player.channel.GetOwnerTransportConnection()));
                 Plugin.Instance.UI.RegisterUIHandler(player);
@@ -198,7 +198,8 @@ public class GameManager
         if (Players.TryGetValue(player.CSteamID, out var gPlayer))
         {
             var game = gPlayer.CurrentGame;
-            if (game != null) game.RemovePlayerFromGame(gPlayer);
+            if (game != null)
+                game.RemovePlayerFromGame(gPlayer);
 
             _ = Players.Remove(player.CSteamID);
         }
@@ -207,27 +208,24 @@ public class GameManager
     private void OnPlayerDeath(PlayerLife sender, EDeathCause cause, ELimb limb, CSteamID instigator)
     {
         var ply = UnturnedPlayer.FromPlayer(sender.player);
-        if (ply == null) return;
+        if (ply == null)
+            return;
 
         if (Players.TryGetValue(ply.CSteamID, out var gPlayer))
         {
             var game = gPlayer.CurrentGame;
-            if (game == null) SendPlayerToLobby(ply);
+            if (game == null)
+                SendPlayerToLobby(ply);
         }
     }
 
-    private void OnMessageSent(
-        SteamPlayer player,
-        EChatMode mode,
-        ref UnityEngine.Color chatted,
-        ref bool isRich,
-        string text,
-        ref bool isVisible)
+    private void OnMessageSent(SteamPlayer player, EChatMode mode, ref UnityEngine.Color chatted, ref bool isRich, string text, ref bool isVisible)
     {
         if (Players.TryGetValue(player.playerID.steamID, out var gPlayer))
         {
             var game = gPlayer.CurrentGame;
-            if (game == null) isVisible = false;
+            if (game == null)
+                isVisible = false;
         }
     }
 
@@ -247,8 +245,7 @@ public class GameManager
     public (EGameType, bool) GetRandomGameMode(int locationID)
     {
         Logging.Debug($"Getting list of random gamemodes for location with id {locationID}");
-        var gameModeOptions = Config.Gamemode.FileData.GamemodeOptions
-            .Where(k => !k.IgnoredLocations.Contains(locationID)).ToList();
+        var gameModeOptions = Config.Gamemode.FileData.GamemodeOptions.Where(k => !k.IgnoredLocations.Contains(locationID)).ToList();
         Logging.Debug($"Found {gameModeOptions.Count} gamemode options to choose from");
         var option = CalculateRandomGameMode(gameModeOptions);
         Logging.Debug($"Found gamemode with name {option.GameType}");
@@ -260,7 +257,8 @@ public class GameManager
     public GamemodeOption CalculateRandomGameMode(List<GamemodeOption> options)
     {
         var poolSize = 0;
-        foreach (var option in options) poolSize += option.GamemodeWeight;
+        foreach (var option in options)
+            poolSize += option.GamemodeWeight;
         var randInt = UnityEngine.Random.Range(0, poolSize) + 1;
 
         var accumulatedProbability = 0;
@@ -284,13 +282,11 @@ public class GameManager
         ChatManager.onChatted -= OnMessageSent;
     }
 
-    public GamePlayer GetGamePlayer(UnturnedPlayer player) =>
-        Players.TryGetValue(player.CSteamID, out var gPlayer) ? gPlayer : null;
+    public GamePlayer GetGamePlayer(UnturnedPlayer player) => Players.TryGetValue(player.CSteamID, out var gPlayer) ? gPlayer : null;
 
     public GamePlayer GetGamePlayer(CSteamID steamID) => Players.TryGetValue(steamID, out var gPlayer) ? gPlayer : null;
 
-    public GamePlayer GetGamePlayer(Player player) =>
-        Players.TryGetValue(player.channel.owner.playerID.steamID, out var gPlayer) ? gPlayer : null;
+    public GamePlayer GetGamePlayer(Player player) => Players.TryGetValue(player.channel.owner.playerID.steamID, out var gPlayer) ? gPlayer : null;
 
     /*
     public bool TryGetCurrentGame(CSteamID steamID, out Game game)

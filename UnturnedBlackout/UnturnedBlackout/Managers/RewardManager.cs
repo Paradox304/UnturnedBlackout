@@ -119,8 +119,7 @@ public class RewardManager
                             await db.AddPlayerGunAsync(bulkReward.Item1, Convert.ToUInt16(reward.RewardValue), true);
                             break;
                         case ERewardType.GunCharm:
-                            await db.AddPlayerGunCharmAsync(bulkReward.Item1, Convert.ToUInt16(reward.RewardValue),
-                                true);
+                            await db.AddPlayerGunCharmAsync(bulkReward.Item1, Convert.ToUInt16(reward.RewardValue), true);
                             break;
                         case ERewardType.GunSkin:
                             await db.AddPlayerGunSkinAsync(bulkReward.Item1, Convert.ToInt32(reward.RewardValue));
@@ -132,8 +131,7 @@ public class RewardManager
                             await db.AddPlayerGadgetAsync(bulkReward.Item1, Convert.ToUInt16(reward.RewardValue), true);
                             break;
                         case ERewardType.Killstreak:
-                            await db.AddPlayerKillstreakAsync(bulkReward.Item1, Convert.ToInt32(reward.RewardValue),
-                                true);
+                            await db.AddPlayerKillstreakAsync(bulkReward.Item1, Convert.ToInt32(reward.RewardValue), true);
                             break;
                         case ERewardType.Perk:
                             await db.AddPlayerPerkAsync(bulkReward.Item1, Convert.ToInt32(reward.RewardValue), true);
@@ -185,9 +183,11 @@ public class RewardManager
         Logging.Debug($"Multiplying rewards by {multiply}");
         foreach (var reward in rewards)
         {
-            if (reward.RewardType != ERewardType.Coin && reward.RewardType != ERewardType.Credit) continue;
+            if (reward.RewardType != ERewardType.Coin && reward.RewardType != ERewardType.Credit)
+                continue;
 
-            if (reward.RewardValue is not int rewardValue) continue;
+            if (reward.RewardValue is not int rewardValue)
+                continue;
 
             Logging.Debug($"Reward value is {rewardValue}, reward type: {reward.RewardType}");
             reward.RewardValue = rewardValue * multiply;

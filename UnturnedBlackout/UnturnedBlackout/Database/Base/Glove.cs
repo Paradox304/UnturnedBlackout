@@ -17,19 +17,7 @@ public class Glove
     public int MaxAmount { get; set; }
     public int UnboxedAmount { get; set; }
 
-    public Glove(
-        int gloveID,
-        string gloveName,
-        string gloveDesc,
-        ERarity gloveRarity,
-        string iconLink,
-        int scrapAmount,
-        int buyPrice,
-        int coins,
-        int levelRequirement,
-        int gloveWeight,
-        int maxAmount,
-        int unboxedAmount)
+    public Glove(int gloveID, string gloveName, string gloveDesc, ERarity gloveRarity, string iconLink, int scrapAmount, int buyPrice, int coins, int levelRequirement, int gloveWeight, int maxAmount, int unboxedAmount)
     {
         GloveID = gloveID;
         GloveName = gloveName;

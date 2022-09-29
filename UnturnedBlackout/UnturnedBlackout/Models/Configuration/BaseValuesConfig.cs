@@ -40,8 +40,7 @@ public class BaseValuesConfig
 
         PlayerColorHexCode = "#FFFF00";
         HardcoreColor = "red";
-        WebhookURL =
-            "https://discord.com/api/webhooks/979000847197409280/e7Pbmjj_8bALCCDCbEDMCEVLX2ZSuIG3ymxbd-yb-IxkQ-sToxCkLJRmneeqB6LYVwgC";
+        WebhookURL = "https://discord.com/api/webhooks/979000847197409280/e7Pbmjj_8bALCCDCbEDMCEVLX2ZSuIG3ymxbd-yb-IxkQ-sToxCkLJRmneeqB6LYVwgC";
         MaxKillFeed = 6;
         KillFeedFont = 40;
         KillFeedSeconds = 10;

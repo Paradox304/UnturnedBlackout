@@ -18,19 +18,7 @@ public class GunAttachment
     public int BuyPrice { get; set; }
     public int Coins { get; set; }
 
-    public GunAttachment(
-        ushort attachmentID,
-        string attachmentName,
-        string attachmentDesc,
-        List<string> attachmentPros,
-        List<string> attachmentCons,
-        EAttachment attachmentType,
-        ERarity attachmentRarity,
-        float movementChange,
-        float movementChangeADS,
-        string iconLink,
-        int buyPrice,
-        int coins)
+    public GunAttachment(ushort attachmentID, string attachmentName, string attachmentDesc, List<string> attachmentPros, List<string> attachmentCons, EAttachment attachmentType, ERarity attachmentRarity, float movementChange, float movementChangeADS, string iconLink, int buyPrice, int coins)
     {
         AttachmentID = attachmentID;
         AttachmentName = attachmentName;

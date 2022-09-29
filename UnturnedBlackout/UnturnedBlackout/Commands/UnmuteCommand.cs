@@ -35,9 +35,7 @@ internal class UnmuteCommand : IRocketCommand
         }
 
         var steamID = CSteamID.Nil;
-        steamID = !ulong.TryParse(command[0], out var steamid)
-            ? PlayerTool.getPlayer(command[0])?.channel?.owner?.playerID?.steamID ?? CSteamID.Nil
-            : new(steamid);
+        steamID = !ulong.TryParse(command[0], out var steamid) ? PlayerTool.getPlayer(command[0])?.channel?.owner?.playerID?.steamID ?? CSteamID.Nil : new(steamid);
 
         if (steamID == CSteamID.Nil)
         {
@@ -61,22 +59,11 @@ internal class UnmuteCommand : IRocketCommand
             await Plugin.Instance.DB.ChangePlayerMutedAsync(steamID, false);
 
             if (Provider.clients.Exists(k => k.playerID.steamID == steamID))
-                TaskDispatcher.QueueOnMainThread(() => Utility.Say(UnturnedPlayer.FromCSteamID(steamID),
-                    Plugin.Instance.Translate("Unmuted").ToRich()));
+                TaskDispatcher.QueueOnMainThread(() => Utility.Say(UnturnedPlayer.FromCSteamID(steamID), Plugin.Instance.Translate("Unmuted").ToRich()));
 
-            TaskDispatcher.QueueOnMainThread(() =>
-                Utility.Say(caller, $"<color=green>Player has been unmuted</color>"));
+            TaskDispatcher.QueueOnMainThread(() => Utility.Say(caller, $"<color=green>Player has been unmuted</color>"));
 
-            Embed embed = new(null, $"**{profile.SteamID}** was unmuted", null, "15105570",
-                DateTime.UtcNow.ToString("s"), new(Provider.serverName, Provider.configData.Browser.Icon),
-                new(profile.SteamID, $"https://steamcommunity.com/profiles/{profile.SteamID64}/",
-                    profile.AvatarIcon.ToString()), new Field[]
-                {
-                    new("**Unmuter:**",
-                        $"{(caller is UnturnedPlayer player ? $"[**{player.SteamName}**](https://steamcommunity.com/profiles/{player.CSteamID}/)" : "**Console**")}",
-                        true),
-                    new("**Time:**", DateTime.UtcNow.ToString(), true)
-                }, null, null);
+            Embed embed = new(null, $"**{profile.SteamID}** was unmuted", null, "15105570", DateTime.UtcNow.ToString("s"), new(Provider.serverName, Provider.configData.Browser.Icon), new(profile.SteamID, $"https://steamcommunity.com/profiles/{profile.SteamID64}/", profile.AvatarIcon.ToString()), new Field[] { new("**Unmuter:**", $"{(caller is UnturnedPlayer player ? $"[**{player.SteamName}**](https://steamcommunity.com/profiles/{player.CSteamID}/)" : "**Console**")}", true), new("**Time:**", DateTime.UtcNow.ToString(), true) }, null, null);
             if (!string.IsNullOrEmpty(Plugin.Instance.Configuration.Instance.WebhookURL))
                 DiscordManager.SendEmbed(embed, "Player Unmuted", Plugin.Instance.Configuration.Instance.WebhookURL);
         });

@@ -16,18 +16,7 @@ public class Card
     public int LevelRequirement { get; set; }
     public string AuthorCredits { get; set; }
 
-    public Card(
-        int cardID,
-        string cardName,
-        string cardDesc,
-        ERarity cardRarity,
-        string iconLink,
-        string cardLink,
-        int scrapAmount,
-        int buyPrice,
-        int coins,
-        int levelRequirement,
-        string authorCredits)
+    public Card(int cardID, string cardName, string cardDesc, ERarity cardRarity, string iconLink, string cardLink, int scrapAmount, int buyPrice, int coins, int levelRequirement, string authorCredits)
     {
         CardID = cardID;
         CardName = cardName;

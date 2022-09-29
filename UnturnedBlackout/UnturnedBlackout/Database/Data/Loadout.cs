@@ -27,26 +27,7 @@ public class Loadout
     public LoadoutGlove Glove { get; set; }
     public LoadoutCard Card { get; set; }
 
-    public Loadout(
-        int loadoutID,
-        string loadoutName,
-        bool isActive,
-        LoadoutGun primary,
-        GunSkin primarySkin,
-        LoadoutGunCharm primaryGunCharm,
-        Dictionary<EAttachment, LoadoutAttachment> primaryAttachments,
-        LoadoutGun secondary,
-        GunSkin secondarySkin,
-        LoadoutGunCharm secondaryGunCharm,
-        Dictionary<EAttachment, LoadoutAttachment> secondaryAttachments,
-        LoadoutKnife knife,
-        LoadoutGadget tactical,
-        LoadoutGadget lethal,
-        List<LoadoutKillstreak> killstreaks,
-        Dictionary<int, LoadoutPerk> perks,
-        Dictionary<string, LoadoutPerk> perksSearchByType,
-        LoadoutGlove glove,
-        LoadoutCard card)
+    public Loadout(int loadoutID, string loadoutName, bool isActive, LoadoutGun primary, GunSkin primarySkin, LoadoutGunCharm primaryGunCharm, Dictionary<EAttachment, LoadoutAttachment> primaryAttachments, LoadoutGun secondary, GunSkin secondarySkin, LoadoutGunCharm secondaryGunCharm, Dictionary<EAttachment, LoadoutAttachment> secondaryAttachments, LoadoutKnife knife, LoadoutGadget tactical, LoadoutGadget lethal, List<LoadoutKillstreak> killstreaks, Dictionary<int, LoadoutPerk> perks, Dictionary<string, LoadoutPerk> perksSearchByType, LoadoutGlove glove, LoadoutCard card)
     {
         LoadoutID = loadoutID;
         LoadoutName = loadoutName;
@@ -73,11 +54,11 @@ public class Loadout
     {
         movementChange = 0f;
         movementChangeADS = 0f;
-        if (Primary == null) return;
+        if (Primary == null)
+            return;
 
         movementChange = Primary.Gun.MovementChange + PrimaryAttachments.Values.Sum(k => k.Attachment.MovementChange);
-        movementChangeADS = Primary.Gun.MovementChangeADS +
-                            PrimaryAttachments.Values.Sum(k => k.Attachment.MovementChangeADS);
+        movementChangeADS = Primary.Gun.MovementChangeADS + PrimaryAttachments.Values.Sum(k => k.Attachment.MovementChangeADS);
         return;
     }
 
@@ -85,12 +66,11 @@ public class Loadout
     {
         movementChange = 0f;
         movementChangeADS = 0f;
-        if (Secondary == null) return;
+        if (Secondary == null)
+            return;
 
-        movementChange = Secondary.Gun.MovementChange +
-                         SecondaryAttachments.Values.Sum(k => k.Attachment.MovementChange);
-        movementChangeADS = Secondary.Gun.MovementChangeADS +
-                            SecondaryAttachments.Values.Sum(k => k.Attachment.MovementChangeADS);
+        movementChange = Secondary.Gun.MovementChange + SecondaryAttachments.Values.Sum(k => k.Attachment.MovementChange);
+        movementChangeADS = Secondary.Gun.MovementChangeADS + SecondaryAttachments.Values.Sum(k => k.Attachment.MovementChangeADS);
         return;
     }
 

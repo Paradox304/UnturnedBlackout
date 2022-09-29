@@ -14,16 +14,7 @@ public class LeaderboardData
     public int HeadshotKills { get; set; }
     public int Deaths { get; set; }
 
-    public LeaderboardData(
-        CSteamID steamID,
-        string steamName,
-        string countryCode,
-        bool hideFlag,
-        int level,
-        bool hasPrime,
-        int kills,
-        int headshotKills,
-        int deaths)
+    public LeaderboardData(CSteamID steamID, string steamName, string countryCode, bool hideFlag, int level, bool hasPrime, int kills, int headshotKills, int deaths)
     {
         SteamID = steamID;
         SteamName = steamName;

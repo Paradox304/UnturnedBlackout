@@ -78,7 +78,8 @@ public class KCPlayer
             return;
 
         Killstreak = killstreak;
-        if (killstreak > HighestKillstreak) HighestKillstreak = killstreak;
+        if (killstreak > HighestKillstreak)
+            HighestKillstreak = killstreak;
 
         GamePlayer.UpdateKillstreak(killstreak);
     }
@@ -89,6 +90,7 @@ public class KCPlayer
             return;
 
         MultipleKills = multikills;
-        if (multikills > HighestMK) HighestMK = multikills;
+        if (multikills > HighestMK)
+            HighestMK = multikills;
     }
 }
