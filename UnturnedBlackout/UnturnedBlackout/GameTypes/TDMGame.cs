@@ -902,6 +902,7 @@ public class TDMGame : Game
         if (sentry.items.tryAddItem(new Item(turret.Killstreak.KillstreakInfo.GunID, true), true))
         {
             sentry.refreshDisplay();
+            sentry.despawnWhenDestroyed = true;
         }
         
         GameTurrets.Add(player, (drop, turret.Killstreak.KillstreakInfo));

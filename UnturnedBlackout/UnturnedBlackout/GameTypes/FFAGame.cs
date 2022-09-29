@@ -840,6 +840,7 @@ public class FFAGame : Game
         if (sentry.items.tryAddItem(new Item(turret.Killstreak.KillstreakInfo.GunID, true), true))
         {
             Logging.Debug("Successfully added gun in turret");
+            sentry.despawnWhenDestroyed = true;
             sentry.refreshDisplay();
         }
 

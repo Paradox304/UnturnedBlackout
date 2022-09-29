@@ -1106,16 +1106,12 @@ public class CTFGame : Game
         {
             return;
         }
-
-        Logging.Debug("Turret spawned");
+        
         if (sentry.items.tryAddItem(new Item(turret.Killstreak.KillstreakInfo.GunID, true), true))
         {
-            Logging.Debug("Successfully added gun in turret");
             sentry.despawnWhenDestroyed = true;
             sentry.refreshDisplay();
         }
-
-        Logging.Debug("Add turret to tracking system");
 
         GameTurrets.Add(player, (drop, turret.Killstreak.KillstreakInfo));
         GameTurretsInverse.Add(drop, player);
