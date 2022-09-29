@@ -2,16 +2,24 @@
 using SDG.Unturned;
 
 namespace UnturnedBlackout.Patches;
-public class BarricadePatches
+
+[HarmonyPatch(typeof(BarricadeManager), nameof(BarricadeManager.ReceiveDestroyBarricade))]
+public static class BarricadePatches
 {
-    [HarmonyPatch(typeof(BarricadeManager), nameof(BarricadeManager.destroyBarricade))]
     [HarmonyPrefix]
-    private static void BarricadeDestroyed(BarricadeDrop barricade, byte x, byte y, ushort plant)
+    public static void BarricadeDestroyed(NetId netId)
     {
-        Logging.Debug("Barricade destroy patch detected. Drop found, sending to all games");
+        Logging.Debug("Barricade destroy patch detected");
+        var drop = NetIdRegistry.Get<BarricadeDrop>(netId);
+        if (drop == null)
+        {
+            return;
+        }
+        
+        Logging.Debug("Drop found, sending to all games");
         foreach (var game in Plugin.Instance.Game.Games)
         {
-            game.OnBarricadeDestroyed(barricade);
+            game.OnBarricadeDestroyed(drop);
         }
     }
 }
