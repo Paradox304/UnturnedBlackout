@@ -858,7 +858,7 @@ public class UIManager
     public IEnumerator DelayedEquip(PlayerEquipment equipment, byte page, byte x, byte y)
     {
         yield return new WaitForSeconds(0.2f);
-        if (equipment.useable == null && equipment.canEquip)
+        if (equipment.itemID == 0 && equipment.canEquip)
             equipment.ServerEquip(page, x, y);
     }
 
@@ -889,39 +889,34 @@ public class UIManager
 
     private void OnBulletShot(UseableGun gun, BulletInfo bullet)
     {
-        var ammo = gun.player.equipment.state[10];
+        var ids = new ushort[] { 17001 };
+        Logging.Debug($"Bullet magazine id: {bullet.magazineAsset.id}");
+        var ammo = ids.Contains(bullet.magazineAsset.id) ? 1 : gun.player.equipment.state[10];
         var player = Plugin.Instance.Game.GetGamePlayer(gun.player);
-        Logging.Debug($"{player.Player.CharacterName} shot a bullet, ammo left {ammo}");
         EffectManager.sendUIEffectText(HUD_KEY, player.TransportConnection, true, "AmmoNum", ammo.ToString());
-
+        
         var info = player.ActiveKillstreak?.Killstreak?.KillstreakInfo;
-        if (ammo == 0 && player.HasKillstreakActive && player.ActiveKillstreak.Killstreak.KillstreakInfo.IsItem && info.RemoveWhenAmmoEmpty)
+        if (ammo != 0 || !player.HasKillstreakActive || !player.ActiveKillstreak.Killstreak.KillstreakInfo.IsItem || !info.RemoveWhenAmmoEmpty)
+            return;
+        if (info.MagAmount > 0)
         {
-            Logging.Debug($"Ammo is 0, {player.Player.CharacterName} has a killstreak active");
-            if (info.MagAmount > 0)
+            var inv = gun.player.inventory;
+            var itemCount = inv.items[2].items.Count;
+            for (var i = itemCount - 1; i >= 0; i--)
             {
-                Logging.Debug($"Killstreak supposed to have mags, check if any mag is left with id {info.MagID}");
-                var inv = gun.player.inventory;
-                var itemCount = inv.items[2].items.Count;
-                for (var i = itemCount - 1; i >= 0; i--)
-                {
-                    var item = inv.getItem(2, (byte)i);
-                    if ((item?.item?.id ?? 0) == info.MagID)
-                        return;
-                }
-
-                Logging.Debug("No mag found in inventory, remove killstreak");
+                var item = inv.getItem(2, (byte)i);
+                if ((item?.item?.id ?? 0) == info.MagID)
+                    return;
             }
-
-            _ = Plugin.Instance.StartCoroutine(DelayedRemoveActiveKillstreak(player));
         }
+
+        _ = Plugin.Instance.StartCoroutine(DelayedRemoveActiveKillstreak(player));
     }
 
     private void OnProjectileShot(UseableGun sender, GameObject projectile)
     {
         var ammo = sender.player.equipment.state[10];
         var player = Plugin.Instance.Game.GetGamePlayer(sender.player);
-        Logging.Debug($"{player.Player.CharacterName} shot a projectile, ammo left {ammo}");
         EffectManager.sendUIEffectText(HUD_KEY, player.TransportConnection, true, "AmmoNum", ammo.ToString());
 
         var info = player.ActiveKillstreak?.Killstreak?.KillstreakInfo;

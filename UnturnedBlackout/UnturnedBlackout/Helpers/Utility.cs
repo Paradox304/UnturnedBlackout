@@ -281,7 +281,7 @@ public static class Utility
     {
         Dictionary<EQuestCondition, List<int>> questConditions = new();
 
-        Regex letterRegex = new("([a-zA-Z]+)");
+        Regex letterRegex = new("([a-zA-Z_]+)");
         Regex numberRegex = new("([0-9-]+)");
 
         foreach (var conditionTxt in text.Split(','))
@@ -359,11 +359,11 @@ public static class Utility
     {
         ELoadoutPage.PRIMARY_SKIN or ELoadoutPage.SECONDARY_SKIN => "Skin",
         ELoadoutPage.PERK1 or ELoadoutPage.PERK2 or ELoadoutPage.PERK3 => "Perk",
-        ELoadoutPage.ATTACHMENT_PRIMARY_BARREL or ELoadoutPage.ATTACHMENT_PRIMARY_CHARM or ELoadoutPage.ATTACHMENT_PRIMARY_GRIP or ELoadoutPage.ATTACHMENT_PRIMARY_MAGAZINE or ELoadoutPage.ATTACHMENT_PRIMARY_SIGHTS => page.ToString().Replace("AttachmentPrimary", ""),
-        ELoadoutPage.ATTACHMENT_SECONDARY_SIGHTS or ELoadoutPage.ATTACHMENT_SECONDARY_BARREL or ELoadoutPage.ATTACHMENT_SECONDARY_CHARM or ELoadoutPage.ATTACHMENT_SECONDARY_MAGAZINE => page.ToString().Replace("AttachmentSecondary", ""),
+        ELoadoutPage.ATTACHMENT_PRIMARY_BARREL or ELoadoutPage.ATTACHMENT_PRIMARY_CHARM or ELoadoutPage.ATTACHMENT_PRIMARY_GRIP or ELoadoutPage.ATTACHMENT_PRIMARY_MAGAZINE or ELoadoutPage.ATTACHMENT_PRIMARY_SIGHTS => page.ToString().Replace("ATTACHMENT_PRIMARY_", ""),
+        ELoadoutPage.ATTACHMENT_SECONDARY_SIGHTS or ELoadoutPage.ATTACHMENT_SECONDARY_BARREL or ELoadoutPage.ATTACHMENT_SECONDARY_CHARM or ELoadoutPage.ATTACHMENT_SECONDARY_MAGAZINE => page.ToString().Replace("ATTACHMENT_SECONDARY_", ""),
         _ => page.ToString()
     };
-
+    
     public static string ToFriendlyName(this EGamePhase gamePhase) => gamePhase switch
     {
         EGamePhase.WAITING_FOR_PLAYERS => "Waiting For Players",
@@ -378,6 +378,13 @@ public static class Utility
         _ => throw new ArgumentOutOfRangeException("currency", "Currency is not as expected")
     };
 
+    public static string ToUIName(this ECurrency currency) => currency switch
+    {
+        ECurrency.SCRAP => "Scrap",
+        ECurrency.CREDITS => "Credits",
+        ECurrency.COINS => "Coins"
+    };
+    
     public static string ToFriendlyName(this EChatMode chatMode) => chatMode switch
     {
         EChatMode.LOCAL or EChatMode.GROUP => "Team",

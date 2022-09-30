@@ -16,7 +16,7 @@
         <TargetFrameworkProfile />
         <NuGetPackageImportStamp>
         </NuGetPackageImportStamp>
-        <RunPostBuildEvent>Always</RunPostBuildEvent>
+        <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
         <DebugSymbols>true</DebugSymbols>

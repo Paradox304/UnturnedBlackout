@@ -6498,7 +6498,7 @@ public class UIHandler
     public void OnCurrencyUpdated(ECurrency currency)
     {
         Logging.Debug($"Currency updated {Player.CharacterName}, {currency}");
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Currency {currency} TEXT", PlayerData.GetCurrency(currency).ToString());
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Currency {currency.ToUIName()} TEXT", PlayerData.GetCurrency(currency).ToString());
     }
 
     public IEnumerator RefreshTimer()
