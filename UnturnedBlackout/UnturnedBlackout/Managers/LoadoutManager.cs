@@ -771,7 +771,7 @@ public class LoadoutManager
             inv.TryGetItemIndex(lethalID, out var lethalX, out var lethalY, out var lethalPage, out var _);
             if (Assets.find(EAssetType.ITEM, lethalID) is ItemAsset lethalAsset)
             {
-                player.Player.Player.equipment.ServerBindItemHotkey(3, lethalAsset, lethalPage, lethalX, lethalY);
+                player.Player.Player.equipment.ServerBindItemHotkey(0, lethalAsset, lethalPage, lethalX, lethalY);
             }
         }
 
@@ -782,12 +782,12 @@ public class LoadoutManager
             inv.TryGetItemIndex(tacticalID, out var tacticalX, out var tacticalY, out var tacticalPage, out var _);
             if (Assets.find(EAssetType.ITEM, tacticalID) is ItemAsset tacticalAsset)
             {
-                player.Player.Player.equipment.ServerBindItemHotkey(4, tacticalAsset, tacticalPage, tacticalX, tacticalY);
+                player.Player.Player.equipment.ServerBindItemHotkey(1, tacticalAsset, tacticalPage, tacticalX, tacticalY);
             }
         }
 
         // Giving killstreaks to player
-        byte killstreakHotkey = 5;
+        byte killstreakHotkey = 2;
         foreach (var killstreak in activeLoadout.Killstreaks)
         {
             var killstreakID = killstreak.Killstreak.KillstreakInfo.TriggerItemID;
