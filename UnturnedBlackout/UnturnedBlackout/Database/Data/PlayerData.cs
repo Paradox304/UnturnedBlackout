@@ -121,7 +121,7 @@ public class PlayerData
     public void SetAchievementXPBooster()
     {
         var completedTiers = Achievements.Sum(k => k.CurrentTier);
-        float totalTiers = Achievements.Sum(k => k.Achievement.Tiers.Max(k => k.TierID));
+        float totalTiers = Achievements.Sum(k => k.Achievement.Tiers.Max(tier => tier.TierID));
 
         var xpBooster = completedTiers / totalTiers;
 
@@ -130,8 +130,8 @@ public class PlayerData
 
     public void SetPersonalBooster(EBoosterType type, float permanentBooster)
     {
-        var boosters = ActiveBoosters.Where(k => k.BoosterType == type);
-        var max = boosters.Count() > 0 ? boosters.Max(k => k.BoosterValue) : 0f;
+        var boosters = ActiveBoosters.Where(k => k.BoosterType == type).ToList();
+        var max = boosters.Count > 0 ? boosters.Max(k => k.BoosterValue) : 0f;
         var updatedValue = permanentBooster + max;
         switch (type)
         {
@@ -149,9 +149,9 @@ public class PlayerData
 
     public int GetCurrency(ECurrency currency) => currency switch
     {
-        ECurrency.Coins => Coins,
-        ECurrency.Scrap => Scrap,
-        ECurrency.Credits => Credits,
-        _ => throw new ArgumentOutOfRangeException("currency", "Currency is not as expected")
+        ECurrency.COINS => Coins,
+        ECurrency.SCRAP => Scrap,
+        ECurrency.CREDITS => Credits,
+        var _ => throw new ArgumentOutOfRangeException("currency", "Currency is not as expected")
     };
 }

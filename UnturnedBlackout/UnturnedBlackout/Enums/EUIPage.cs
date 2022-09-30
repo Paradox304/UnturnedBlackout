@@ -2,22 +2,22 @@
 
 public enum EUIPage
 {
-    Pistol,
+    PISTOL,
     SMG,
-    Shotgun,
+    SHOTGUN,
     LMG,
     AR,
-    Sniper,
-    Carbine,
-    GunCharm,
-    GunSkin,
-    Knife,
-    Perk,
-    Tactical,
-    Lethal,
-    Card,
-    Glove,
-    Killstreak,
-    Case,
-    Achievement
+    SNIPER,
+    CARBINE,
+    GUN_CHARM,
+    GUN_SKIN,
+    KNIFE,
+    PERK,
+    TACTICAL,
+    LETHAL,
+    CARD,
+    GLOVE,
+    KILLSTREAK,
+    CASE,
+    ACHIEVEMENT
 }

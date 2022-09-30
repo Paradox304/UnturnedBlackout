@@ -336,10 +336,10 @@ public static class Utility
 
     public static int GetStartingPos(EAttachment attachment) => attachment switch
     {
-        EAttachment.Sights => 0,
-        EAttachment.Grip => 4,
-        EAttachment.Barrel => 6,
-        EAttachment.Magazine => 8,
+        EAttachment.SIGHTS => 0,
+        EAttachment.GRIP => 4,
+        EAttachment.BARREL => 6,
+        EAttachment.MAGAZINE => 8,
         _ => -1
     };
 
@@ -357,24 +357,24 @@ public static class Utility
 
     public static string ToFriendlyName(this ELoadoutPage page) => page switch
     {
-        ELoadoutPage.PrimarySkin or ELoadoutPage.SecondarySkin => "Skin",
-        ELoadoutPage.Perk1 or ELoadoutPage.Perk2 or ELoadoutPage.Perk3 => "Perk",
-        ELoadoutPage.AttachmentPrimaryBarrel or ELoadoutPage.AttachmentPrimaryCharm or ELoadoutPage.AttachmentPrimaryGrip or ELoadoutPage.AttachmentPrimaryMagazine or ELoadoutPage.AttachmentPrimarySights => page.ToString().Replace("AttachmentPrimary", ""),
-        ELoadoutPage.AttachmentSecondarySights or ELoadoutPage.AttachmentSecondaryBarrel or ELoadoutPage.AttachmentSecondaryCharm or ELoadoutPage.AttachmentSecondaryMagazine => page.ToString().Replace("AttachmentSecondary", ""),
+        ELoadoutPage.PRIMARY_SKIN or ELoadoutPage.SECONDARY_SKIN => "Skin",
+        ELoadoutPage.PERK1 or ELoadoutPage.PERK2 or ELoadoutPage.PERK3 => "Perk",
+        ELoadoutPage.ATTACHMENT_PRIMARY_BARREL or ELoadoutPage.ATTACHMENT_PRIMARY_CHARM or ELoadoutPage.ATTACHMENT_PRIMARY_GRIP or ELoadoutPage.ATTACHMENT_PRIMARY_MAGAZINE or ELoadoutPage.ATTACHMENT_PRIMARY_SIGHTS => page.ToString().Replace("AttachmentPrimary", ""),
+        ELoadoutPage.ATTACHMENT_SECONDARY_SIGHTS or ELoadoutPage.ATTACHMENT_SECONDARY_BARREL or ELoadoutPage.ATTACHMENT_SECONDARY_CHARM or ELoadoutPage.ATTACHMENT_SECONDARY_MAGAZINE => page.ToString().Replace("AttachmentSecondary", ""),
         _ => page.ToString()
     };
 
     public static string ToFriendlyName(this EGamePhase gamePhase) => gamePhase switch
     {
-        EGamePhase.WaitingForPlayers => "Waiting For Players",
+        EGamePhase.WAITING_FOR_PLAYERS => "Waiting For Players",
         _ => gamePhase.ToString()
     };
 
     public static string ToFriendlyName(this ECurrency currency) => currency switch
     {
-        ECurrency.Scrap => "Scrap",
-        ECurrency.Credits => "Blackout Points",
-        ECurrency.Coins => "Blacktags",
+        ECurrency.SCRAP => "Scrap",
+        ECurrency.CREDITS => "Blackout Points",
+        ECurrency.COINS => "Blacktags",
         _ => throw new ArgumentOutOfRangeException("currency", "Currency is not as expected")
     };
 
@@ -415,9 +415,9 @@ public static class Utility
 
     public static string GetCurrencySymbol(ECurrency currency) => currency switch
     {
-        ECurrency.Coins => "",
-        ECurrency.Scrap => "",
-        ECurrency.Credits => "",
+        ECurrency.COINS => "",
+        ECurrency.SCRAP => "",
+        ECurrency.CREDITS => "",
         _ => throw new ArgumentOutOfRangeException("currency", "Currency is not as expected")
     };
 

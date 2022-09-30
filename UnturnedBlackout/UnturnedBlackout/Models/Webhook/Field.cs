@@ -2,14 +2,14 @@
 
 public class Field
 {
-    public string name { get; set; }
-    public string value { get; set; }
-    public bool inline { get; set; }
+    public string Name { get; set; }
+    public string Value { get; set; }
+    public bool Inline { get; set; }
 
     public Field(string name, string value, bool inline)
     {
-        this.name = name;
-        this.value = value;
-        this.inline = inline;
+        Name = name;
+        Value = value;
+        Inline = inline;
     }
 }

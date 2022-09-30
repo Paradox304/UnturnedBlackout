@@ -59,7 +59,6 @@ public class Loadout
 
         movementChange = Primary.Gun.MovementChange + PrimaryAttachments.Values.Sum(k => k.Attachment.MovementChange);
         movementChangeADS = Primary.Gun.MovementChangeADS + PrimaryAttachments.Values.Sum(k => k.Attachment.MovementChangeADS);
-        return;
     }
 
     public void GetSecondaryMovement(out float movementChange, out float movementChangeADS)
@@ -71,7 +70,6 @@ public class Loadout
 
         movementChange = Secondary.Gun.MovementChange + SecondaryAttachments.Values.Sum(k => k.Attachment.MovementChange);
         movementChangeADS = Secondary.Gun.MovementChangeADS + SecondaryAttachments.Values.Sum(k => k.Attachment.MovementChangeADS);
-        return;
     }
 
     public float GetKnifeMovement() => Knife.Knife.MovementChange;

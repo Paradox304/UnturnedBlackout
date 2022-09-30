@@ -20,10 +20,13 @@ internal class SetLobbyCommand : IRocketCommand
 
     public void Execute(IRocketPlayer caller, string[] command)
     {
-        var player = caller as UnturnedPlayer;
+        if (caller is UnturnedPlayer player)
+        {
+            var transform = player.Player.transform;
+            Plugin.Instance.Config.Base.FileData.LobbySpawn = transform.position;
+            Plugin.Instance.Config.Base.FileData.LobbyYaw = transform.eulerAngles.y;
+        }
 
-        Plugin.Instance.Config.Base.FileData.LobbySpawn = player.Player.transform.position;
-        Plugin.Instance.Config.Base.FileData.LobbyYaw = player.Player.transform.eulerAngles.y;
         Plugin.Instance.Config.Base.Save();
     }
 }

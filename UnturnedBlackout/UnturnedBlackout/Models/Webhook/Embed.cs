@@ -1,29 +1,30 @@
-﻿namespace UnturnedBlackout.Models.Webhook;
+﻿// ReSharper disable UnusedAutoPropertyAccessor.Local
+namespace UnturnedBlackout.Models.Webhook;
 
 public class Embed
 {
-    public string title { get; set; } = null;
-    public string description { get; set; } = null;
-    public string url { get; set; } = null;
-    public string color { get; set; } = null;
-    public string timestamp { get; set; } = null;
-    public Footer footer { get; set; } = null;
-    public Author author { get; set; } = null;
-    public Field[] fields { get; set; } = null;
-    public string thumbnail { get; set; } = null;
-    public string image { get; set; } = null;
+    private string Title { get; set; }
+    private string Description { get; set; }
+    private string URL { get; set; }
+    private string Color { get; set; }
+    private string Timestamp { get; set; }
+    private Footer Footer { get; set; }
+    private Author Author { get; set; }
+    public Field[] Fields { get; set; }
+    private string Thumbnail { get; set; }
+    private string Image { get; set; }
 
     public Embed(string title, string description, string url, string color, string timestamp, Footer footer, Author author, Field[] fields, string thumbnail, string image)
     {
-        this.title = title;
-        this.description = description;
-        this.url = url;
-        this.color = color;
-        this.timestamp = timestamp;
-        this.footer = footer;
-        this.author = author;
-        this.fields = fields;
-        this.thumbnail = thumbnail;
-        this.image = image;
+        Title = title;
+        Description = description;
+        URL = url;
+        Color = color;
+        Timestamp = timestamp;
+        Footer = footer;
+        Author = author;
+        Fields = fields;
+        Thumbnail = thumbnail;
+        Image = image;
     }
 }

@@ -35,6 +35,9 @@ public class UIHandler
     private const int MAX_SPACES_MATCH_END_SUMMARY = 113;
     private const int MAX_LOADOUTS_PER_PAGE = 9;
 
+    private const int MINIMUM_LOADOUT_PAGE_ATTACHMENT_PRIMARY = 4;
+    private const int MAXIMUM_LOADOUT_PAGE_ATTACHMENT_PRIMARY = 8;
+    
     public DatabaseManager DB { get; set; }
     public CSteamID SteamID { get; set; }
     public UnturnedPlayer Player { get; set; }
@@ -133,7 +136,7 @@ public class UIHandler
 
         TimerRefresher = Plugin.Instance.StartCoroutine(RefreshTimer());
 
-        MainPage = EMainPage.None;
+        MainPage = EMainPage.NONE;
         BuildPages();
         ShowUI();
     }
@@ -769,7 +772,7 @@ public class UIHandler
     {
         EffectManager.askEffectClearByID(MAIN_MENU_ID, TransportConnection);
         Player.Player.disablePluginWidgetFlag(EPluginWidgetFlags.Modal);
-        MainPage = EMainPage.None;
+        MainPage = EMainPage.NONE;
     }
 
     public void SetupMainMenu()
@@ -787,9 +790,9 @@ public class UIHandler
         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Currency Coins IMAGE", Config.Icons.FileData.BlacktagsSmallIconLink);
         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Currency Scrap IMAGE", Config.Icons.FileData.ScrapSmallIconLink);
 
-        OnCurrencyUpdated(ECurrency.Coins);
-        OnCurrencyUpdated(ECurrency.Scrap);
-        OnCurrencyUpdated(ECurrency.Credits);
+        OnCurrencyUpdated(ECurrency.COINS);
+        OnCurrencyUpdated(ECurrency.SCRAP);
+        OnCurrencyUpdated(ECurrency.CREDITS);
 
         ClearChat();
         ShowXP();
@@ -828,16 +831,16 @@ public class UIHandler
 
     public void ShowPlayPage()
     {
-        MainPage = EMainPage.Play;
-        ShowPlayPage(EPlayPage.Games);
+        MainPage = EMainPage.PLAY;
+        ShowPlayPage(EPlayPage.GAMES);
     }
 
     public void ShowPlayPage(EPlayPage playPage)
     {
         SelectedGameID = 0;
-        if (playPage == EPlayPage.Games)
+        if (playPage == EPlayPage.GAMES)
             ShowGames();
-        else if (playPage == EPlayPage.Servers)
+        else if (playPage == EPlayPage.SERVERS)
             ShowServers();
     }
 
@@ -845,14 +848,14 @@ public class UIHandler
     {
         var games = Plugin.Instance.Game.Games;
         var servers = Plugin.Instance.DB.Servers;
-        if (PlayPage == EPlayPage.Games)
+        if (PlayPage == EPlayPage.GAMES)
         {
             if (selected + 1 > games.Count)
                 return;
 
             ShowGame(games[selected]);
         }
-        else if (PlayPage == EPlayPage.Servers)
+        else if (PlayPage == EPlayPage.SERVERS)
         {
             if (selected + 1 > servers.Count)
                 return;
@@ -865,9 +868,9 @@ public class UIHandler
 
     public void ClickedJoinButton()
     {
-        if (PlayPage == EPlayPage.Games)
+        if (PlayPage == EPlayPage.GAMES)
             Plugin.Instance.Game.AddPlayerToGame(Player, SelectedGameID);
-        else if (PlayPage == EPlayPage.Servers)
+        else if (PlayPage == EPlayPage.SERVERS)
         {
             var server = Plugin.Instance.DB.Servers[SelectedGameID];
             if (server.IsOnline)
@@ -882,7 +885,7 @@ public class UIHandler
     public void ShowGames()
     {
         var games = Plugin.Instance.Game.Games;
-        PlayPage = EPlayPage.Games;
+        PlayPage = EPlayPage.GAMES;
 
         for (var i = 0; i <= 13; i++)
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Play BUTTON {i}", false);
@@ -917,7 +920,7 @@ public class UIHandler
         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Play IMAGE", game.Location.ImageLink);
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Play Map TEXT", game.Location.LocationName);
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Play Description TEXT", Plugin.Instance.Translate($"{game.GameMode}_Description_Full"));
-        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Play Join BUTTON", game.GamePhase != EGamePhase.Ending && game.GamePhase != EGamePhase.Ended);
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Play Join BUTTON", game.GamePhase != EGamePhase.ENDING && game.GamePhase != EGamePhase.ENDED);
     }
 
     public void UpdateGamePlayerCount(Game game)
@@ -932,7 +935,7 @@ public class UIHandler
 
     public void ShowServers()
     {
-        PlayPage = EPlayPage.Servers;
+        PlayPage = EPlayPage.SERVERS;
         for (var i = 0; i <= 13; i++)
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Play BUTTON {i}", false);
 
@@ -995,7 +998,7 @@ public class UIHandler
 
     public void ShowLoadouts()
     {
-        MainPage = EMainPage.Loadout;
+        MainPage = EMainPage.LOADOUT;
 
         if (!LoadoutPages.TryGetValue(1, out var firstPage))
         {
@@ -1221,7 +1224,7 @@ public class UIHandler
 
     public void ShowMidgameLoadouts()
     {
-        MainPage = EMainPage.Loadout;
+        MainPage = EMainPage.LOADOUT;
 
         Player.Player.enablePluginWidgetFlag(EPluginWidgetFlags.Modal);
         EffectManager.sendUIEffect(MIDGAME_LOADOUT_ID, MIDGAME_LOADOUT_KEY, TransportConnection, true);
@@ -1421,10 +1424,10 @@ public class UIHandler
 
         switch (LoadoutPage)
         {
-            case ELoadoutPage.Primary:
+            case ELoadoutPage.PRIMARY:
                 ShowLoadoutTab(ELoadoutTab.ASSAULT_RIFLES);
                 break;
-            case ELoadoutPage.Secondary:
+            case ELoadoutPage.SECONDARY:
                 ShowLoadoutTab(ELoadoutTab.PISTOLS);
                 break;
             default:
@@ -1459,7 +1462,7 @@ public class UIHandler
             {
                 switch (LoadoutPage)
                 {
-                    case ELoadoutPage.PrimarySkin:
+                    case ELoadoutPage.PRIMARY_SKIN:
                     {
                         if (!GunSkinPages.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out var gunSkinPages))
                         {
@@ -1479,7 +1482,7 @@ public class UIHandler
                         break;
                     }
 
-                    case ELoadoutPage.SecondarySkin:
+                    case ELoadoutPage.SECONDARY_SKIN:
                     {
                         if (!GunSkinPages.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out var gunSkinPages))
                         {
@@ -1499,12 +1502,12 @@ public class UIHandler
                         break;
                     }
 
-                    case ELoadoutPage.AttachmentPrimaryBarrel:
-                    case ELoadoutPage.AttachmentPrimaryGrip:
-                    case ELoadoutPage.AttachmentPrimaryMagazine:
-                    case ELoadoutPage.AttachmentPrimarySights:
+                    case ELoadoutPage.ATTACHMENT_PRIMARY_BARREL:
+                    case ELoadoutPage.ATTACHMENT_PRIMARY_GRIP:
+                    case ELoadoutPage.ATTACHMENT_PRIMARY_MAGAZINE:
+                    case ELoadoutPage.ATTACHMENT_PRIMARY_SIGHTS:
                     {
-                        if (!Enum.TryParse(LoadoutPage.ToString().Replace("AttachmentPrimary", ""), false, out EAttachment attachmentType))
+                        if (!Enum.TryParse(GetAttachmentPage(), false, out EAttachment attachmentType))
                         {
                             Logging.Debug($"Error finding attachment type that {Player.CharacterName} has selected");
                             return;
@@ -1538,8 +1541,8 @@ public class UIHandler
                         break;
                     }
 
-                    case ELoadoutPage.AttachmentPrimaryCharm:
-                    case ELoadoutPage.AttachmentSecondaryCharm:
+                    case ELoadoutPage.ATTACHMENT_PRIMARY_CHARM:
+                    case ELoadoutPage.ATTACHMENT_SECONDARY_CHARM:
                     {
                         if (!GunCharmPages.TryGetValue(1, out var firstPage))
                         {
@@ -1554,11 +1557,11 @@ public class UIHandler
                         break;
                     }
 
-                    case ELoadoutPage.AttachmentSecondaryBarrel:
-                    case ELoadoutPage.AttachmentSecondaryMagazine:
-                    case ELoadoutPage.AttachmentSecondarySights:
+                    case ELoadoutPage.ATTACHMENT_SECONDARY_BARREL:
+                    case ELoadoutPage.ATTACHMENT_SECONDARY_MAGAZINE:
+                    case ELoadoutPage.ATTACHMENT_SECONDARY_SIGHTS:
                     {
-                        if (!Enum.TryParse(LoadoutPage.ToString().Replace("AttachmentSecondary", ""), false, out EAttachment attachmentType))
+                        if (!Enum.TryParse(GetAttachmentPage(), false, out EAttachment attachmentType))
                         {
                             Logging.Debug($"Error finding attachment type that {Player.CharacterName} has selected");
                             return;
@@ -1592,9 +1595,9 @@ public class UIHandler
                         break;
                     }
 
-                    case ELoadoutPage.Perk1:
-                    case ELoadoutPage.Perk2:
-                    case ELoadoutPage.Perk3:
+                    case ELoadoutPage.PERK1:
+                    case ELoadoutPage.PERK2:
+                    case ELoadoutPage.PERK3:
                     {
                         if (!int.TryParse(LoadoutPage.ToString().Replace("Perk", ""), out var perkType))
                         {
@@ -1612,7 +1615,7 @@ public class UIHandler
                         break;
                     }
 
-                    case ELoadoutPage.Lethal:
+                    case ELoadoutPage.LETHAL:
                     {
                         if (!LethalPages.TryGetValue(1, out var firstPage))
                         {
@@ -1624,7 +1627,7 @@ public class UIHandler
                         break;
                     }
 
-                    case ELoadoutPage.Tactical:
+                    case ELoadoutPage.TACTICAL:
                     {
                         if (!TacticalPages.TryGetValue(1, out var firstPage))
                         {
@@ -1636,7 +1639,7 @@ public class UIHandler
                         break;
                     }
 
-                    case ELoadoutPage.Knife:
+                    case ELoadoutPage.KNIFE:
                     {
                         if (!KnifePages.TryGetValue(1, out var firstPage))
                         {
@@ -1650,7 +1653,7 @@ public class UIHandler
                         break;
                     }
 
-                    case ELoadoutPage.Killstreak:
+                    case ELoadoutPage.KILLSTREAK:
                     {
                         if (!KillstreakPages.TryGetValue(1, out var firstPage))
                         {
@@ -1665,7 +1668,7 @@ public class UIHandler
                         break;
                     }
 
-                    case ELoadoutPage.Glove:
+                    case ELoadoutPage.GLOVE:
                     {
                         if (!GlovePages.TryGetValue(1, out var firstPage))
                         {
@@ -1679,7 +1682,7 @@ public class UIHandler
                         break;
                     }
 
-                    case ELoadoutPage.Card:
+                    case ELoadoutPage.CARD:
                     {
                         if (!CardPages.TryGetValue(1, out var firstPage))
                         {
@@ -1804,7 +1807,7 @@ public class UIHandler
             {
                 switch (LoadoutPage)
                 {
-                    case ELoadoutPage.PrimarySkin:
+                    case ELoadoutPage.PRIMARY_SKIN:
                     {
                         if (!GunSkinPages.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out var gunSkinPages))
                         {
@@ -1822,7 +1825,7 @@ public class UIHandler
                         break;
                     }
 
-                    case ELoadoutPage.SecondarySkin:
+                    case ELoadoutPage.SECONDARY_SKIN:
                     {
                         if (!GunSkinPages.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out var gunSkinPages))
                         {
@@ -1840,12 +1843,12 @@ public class UIHandler
                         break;
                     }
 
-                    case ELoadoutPage.AttachmentPrimaryBarrel:
-                    case ELoadoutPage.AttachmentPrimaryGrip:
-                    case ELoadoutPage.AttachmentPrimaryMagazine:
-                    case ELoadoutPage.AttachmentPrimarySights:
+                    case ELoadoutPage.ATTACHMENT_PRIMARY_BARREL:
+                    case ELoadoutPage.ATTACHMENT_PRIMARY_GRIP:
+                    case ELoadoutPage.ATTACHMENT_PRIMARY_MAGAZINE:
+                    case ELoadoutPage.ATTACHMENT_PRIMARY_SIGHTS:
                     {
-                        if (!Enum.TryParse(LoadoutPage.ToString().Replace("AttachmentPrimary", ""), false, out EAttachment attachmentType))
+                        if (!Enum.TryParse(GetAttachmentPage(), false, out EAttachment attachmentType))
                         {
                             Logging.Debug($"Error finding attachment type that {Player.CharacterName} has selected");
                             return;
@@ -1879,8 +1882,8 @@ public class UIHandler
                         break;
                     }
 
-                    case ELoadoutPage.AttachmentPrimaryCharm:
-                    case ELoadoutPage.AttachmentSecondaryCharm:
+                    case ELoadoutPage.ATTACHMENT_PRIMARY_CHARM:
+                    case ELoadoutPage.ATTACHMENT_SECONDARY_CHARM:
                     {
                         if (!GunCharmPages.TryGetValue(LoadoutTabPageID + 1, out var nextPage) && !GunCharmPages.TryGetValue(1, out nextPage))
                         {
@@ -1892,11 +1895,11 @@ public class UIHandler
                         break;
                     }
 
-                    case ELoadoutPage.AttachmentSecondaryBarrel:
-                    case ELoadoutPage.AttachmentSecondaryMagazine:
-                    case ELoadoutPage.AttachmentSecondarySights:
+                    case ELoadoutPage.ATTACHMENT_SECONDARY_BARREL:
+                    case ELoadoutPage.ATTACHMENT_SECONDARY_MAGAZINE:
+                    case ELoadoutPage.ATTACHMENT_SECONDARY_SIGHTS:
                     {
-                        if (!Enum.TryParse(LoadoutPage.ToString().Replace("AttachmentSecondary", ""), false, out EAttachment attachmentType))
+                        if (!Enum.TryParse(GetAttachmentPage(), false, out EAttachment attachmentType))
                         {
                             Logging.Debug($"Error finding attachment type that {Player.CharacterName} has selected");
                             return;
@@ -1930,9 +1933,9 @@ public class UIHandler
                         break;
                     }
 
-                    case ELoadoutPage.Perk1:
-                    case ELoadoutPage.Perk2:
-                    case ELoadoutPage.Perk3:
+                    case ELoadoutPage.PERK1:
+                    case ELoadoutPage.PERK2:
+                    case ELoadoutPage.PERK3:
                     {
                         if (!int.TryParse(LoadoutPage.ToString().Replace("Perk", ""), out var perkType))
                         {
@@ -1950,7 +1953,7 @@ public class UIHandler
                         break;
                     }
 
-                    case ELoadoutPage.Lethal:
+                    case ELoadoutPage.LETHAL:
                     {
                         if (!LethalPages.TryGetValue(LoadoutTabPageID + 1, out var nextPage) && !LethalPages.TryGetValue(1, out nextPage))
                         {
@@ -1962,7 +1965,7 @@ public class UIHandler
                         break;
                     }
 
-                    case ELoadoutPage.Tactical:
+                    case ELoadoutPage.TACTICAL:
                     {
                         if (!TacticalPages.TryGetValue(LoadoutTabPageID + 1, out var nextPage) && !TacticalPages.TryGetValue(1, out nextPage))
                         {
@@ -1974,7 +1977,7 @@ public class UIHandler
                         break;
                     }
 
-                    case ELoadoutPage.Knife:
+                    case ELoadoutPage.KNIFE:
                     {
                         if (!KnifePages.TryGetValue(LoadoutTabPageID + 1, out var nextPage) && !KnifePages.TryGetValue(1, out nextPage))
                         {
@@ -1986,7 +1989,7 @@ public class UIHandler
                         break;
                     }
 
-                    case ELoadoutPage.Killstreak:
+                    case ELoadoutPage.KILLSTREAK:
                     {
                         if (!KillstreakPages.TryGetValue(LoadoutTabPageID + 1, out var nextPage) && !KillstreakPages.TryGetValue(1, out nextPage))
                         {
@@ -1998,7 +2001,7 @@ public class UIHandler
                         break;
                     }
 
-                    case ELoadoutPage.Glove:
+                    case ELoadoutPage.GLOVE:
                     {
                         if (!GlovePages.TryGetValue(LoadoutTabPageID + 1, out var nextPage) && !GlovePages.TryGetValue(1, out nextPage))
                         {
@@ -2010,7 +2013,7 @@ public class UIHandler
                         break;
                     }
 
-                    case ELoadoutPage.Card:
+                    case ELoadoutPage.CARD:
                     {
                         if (!CardPages.TryGetValue(LoadoutTabPageID + 1, out var nextPage) && !CardPages.TryGetValue(1, out nextPage))
                         {
@@ -2126,7 +2129,7 @@ public class UIHandler
             {
                 switch (LoadoutPage)
                 {
-                    case ELoadoutPage.PrimarySkin:
+                    case ELoadoutPage.PRIMARY_SKIN:
                     {
                         if (!GunSkinPages.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out var gunSkinPages))
                         {
@@ -2144,7 +2147,7 @@ public class UIHandler
                         break;
                     }
 
-                    case ELoadoutPage.SecondarySkin:
+                    case ELoadoutPage.SECONDARY_SKIN:
                     {
                         if (!GunSkinPages.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out var gunSkinPages))
                         {
@@ -2162,12 +2165,12 @@ public class UIHandler
                         break;
                     }
 
-                    case ELoadoutPage.AttachmentPrimaryBarrel:
-                    case ELoadoutPage.AttachmentPrimaryGrip:
-                    case ELoadoutPage.AttachmentPrimaryMagazine:
-                    case ELoadoutPage.AttachmentPrimarySights:
+                    case ELoadoutPage.ATTACHMENT_PRIMARY_BARREL:
+                    case ELoadoutPage.ATTACHMENT_PRIMARY_GRIP:
+                    case ELoadoutPage.ATTACHMENT_PRIMARY_MAGAZINE:
+                    case ELoadoutPage.ATTACHMENT_PRIMARY_SIGHTS:
                     {
-                        if (!Enum.TryParse(LoadoutPage.ToString().Replace("AttachmentPrimary", ""), false, out EAttachment attachmentType))
+                        if (!Enum.TryParse(GetAttachmentPage(), false, out EAttachment attachmentType))
                         {
                             Logging.Debug($"Error finding attachment type that {Player.CharacterName} has selected");
                             return;
@@ -2201,8 +2204,8 @@ public class UIHandler
                         break;
                     }
 
-                    case ELoadoutPage.AttachmentPrimaryCharm:
-                    case ELoadoutPage.AttachmentSecondaryCharm:
+                    case ELoadoutPage.ATTACHMENT_PRIMARY_CHARM:
+                    case ELoadoutPage.ATTACHMENT_SECONDARY_CHARM:
                     {
                         if (!GunCharmPages.TryGetValue(LoadoutTabPageID - 1, out var prevPage) && !GunCharmPages.TryGetValue(GunCharmPages.Keys.Max(), out prevPage))
                         {
@@ -2214,11 +2217,11 @@ public class UIHandler
                         break;
                     }
 
-                    case ELoadoutPage.AttachmentSecondaryBarrel:
-                    case ELoadoutPage.AttachmentSecondaryMagazine:
-                    case ELoadoutPage.AttachmentSecondarySights:
+                    case ELoadoutPage.ATTACHMENT_SECONDARY_BARREL:
+                    case ELoadoutPage.ATTACHMENT_SECONDARY_MAGAZINE:
+                    case ELoadoutPage.ATTACHMENT_SECONDARY_SIGHTS:
                     {
-                        if (!Enum.TryParse(LoadoutPage.ToString().Replace("AttachmentSecondary", ""), false, out EAttachment attachmentType))
+                        if (!Enum.TryParse(GetAttachmentPage(), false, out EAttachment attachmentType))
                         {
                             Logging.Debug($"Error finding attachment type that {Player.CharacterName} has selected");
                             return;
@@ -2252,9 +2255,9 @@ public class UIHandler
                         break;
                     }
 
-                    case ELoadoutPage.Perk1:
-                    case ELoadoutPage.Perk2:
-                    case ELoadoutPage.Perk3:
+                    case ELoadoutPage.PERK1:
+                    case ELoadoutPage.PERK2:
+                    case ELoadoutPage.PERK3:
                     {
                         if (!int.TryParse(LoadoutPage.ToString().Replace("Perk", ""), out var perkType))
                         {
@@ -2272,7 +2275,7 @@ public class UIHandler
                         break;
                     }
 
-                    case ELoadoutPage.Lethal:
+                    case ELoadoutPage.LETHAL:
                     {
                         if (!LethalPages.TryGetValue(LoadoutTabPageID - 1, out var prevPage) && !LethalPages.TryGetValue(LethalPages.Keys.Max(), out prevPage))
                         {
@@ -2284,7 +2287,7 @@ public class UIHandler
                         break;
                     }
 
-                    case ELoadoutPage.Tactical:
+                    case ELoadoutPage.TACTICAL:
                     {
                         if (!TacticalPages.TryGetValue(LoadoutTabPageID - 1, out var prevPage) && !TacticalPages.TryGetValue(TacticalPages.Keys.Max(), out prevPage))
                         {
@@ -2296,7 +2299,7 @@ public class UIHandler
                         break;
                     }
 
-                    case ELoadoutPage.Knife:
+                    case ELoadoutPage.KNIFE:
                     {
                         if (!KnifePages.TryGetValue(LoadoutTabPageID - 1, out var prevPage) && !KnifePages.TryGetValue(KnifePages.Keys.Max(), out prevPage))
                         {
@@ -2308,7 +2311,7 @@ public class UIHandler
                         break;
                     }
 
-                    case ELoadoutPage.Killstreak:
+                    case ELoadoutPage.KILLSTREAK:
                     {
                         if (!KillstreakPages.TryGetValue(LoadoutTabPageID - 1, out var prevPage) && !KillstreakPages.TryGetValue(KillstreakPages.Keys.Max(), out prevPage))
                         {
@@ -2320,7 +2323,7 @@ public class UIHandler
                         break;
                     }
 
-                    case ELoadoutPage.Glove:
+                    case ELoadoutPage.GLOVE:
                     {
                         if (!GlovePages.TryGetValue(LoadoutTabPageID - 1, out var prevPage) && !GlovePages.TryGetValue(GlovePages.Keys.Max(), out prevPage))
                         {
@@ -2332,7 +2335,7 @@ public class UIHandler
                         break;
                     }
 
-                    case ELoadoutPage.Card:
+                    case ELoadoutPage.CARD:
                     {
                         if (!CardPages.TryGetValue(LoadoutTabPageID - 1, out var prevPage) && !CardPages.TryGetValue(CardPages.Keys.Max(), out prevPage))
                         {
@@ -2448,7 +2451,7 @@ public class UIHandler
             {
                 switch (LoadoutPage)
                 {
-                    case ELoadoutPage.PrimarySkin:
+                    case ELoadoutPage.PRIMARY_SKIN:
                     {
                         if (!GunSkinPages.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out var gunSkinPages))
                         {
@@ -2466,7 +2469,7 @@ public class UIHandler
                         break;
                     }
 
-                    case ELoadoutPage.SecondarySkin:
+                    case ELoadoutPage.SECONDARY_SKIN:
                     {
                         if (!GunSkinPages.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out var gunSkinPages))
                         {
@@ -2483,12 +2486,12 @@ public class UIHandler
                         ShowGunSkinPage(page);
                         break;
                     }
-                    case ELoadoutPage.AttachmentPrimaryBarrel:
-                    case ELoadoutPage.AttachmentPrimaryGrip:
-                    case ELoadoutPage.AttachmentPrimaryMagazine:
-                    case ELoadoutPage.AttachmentPrimarySights:
+                    case ELoadoutPage.ATTACHMENT_PRIMARY_BARREL:
+                    case ELoadoutPage.ATTACHMENT_PRIMARY_GRIP:
+                    case ELoadoutPage.ATTACHMENT_PRIMARY_MAGAZINE:
+                    case ELoadoutPage.ATTACHMENT_PRIMARY_SIGHTS:
                     {
-                        if (!Enum.TryParse(LoadoutPage.ToString().Replace("AttachmentPrimary", ""), false, out EAttachment attachmentType))
+                        if (!Enum.TryParse(GetAttachmentPage(), false, out EAttachment attachmentType))
                         {
                             Logging.Debug($"Error finding attachment type that {Player.CharacterName} has selected");
                             return;
@@ -2522,8 +2525,8 @@ public class UIHandler
                         break;
                     }
 
-                    case ELoadoutPage.AttachmentPrimaryCharm:
-                    case ELoadoutPage.AttachmentSecondaryCharm:
+                    case ELoadoutPage.ATTACHMENT_PRIMARY_CHARM:
+                    case ELoadoutPage.ATTACHMENT_SECONDARY_CHARM:
                     {
                         if (!GunCharmPages.TryGetValue(LoadoutTabPageID, out var page))
                         {
@@ -2535,11 +2538,11 @@ public class UIHandler
                         break;
                     }
 
-                    case ELoadoutPage.AttachmentSecondaryBarrel:
-                    case ELoadoutPage.AttachmentSecondaryMagazine:
-                    case ELoadoutPage.AttachmentSecondarySights:
+                    case ELoadoutPage.ATTACHMENT_SECONDARY_BARREL:
+                    case ELoadoutPage.ATTACHMENT_SECONDARY_MAGAZINE:
+                    case ELoadoutPage.ATTACHMENT_SECONDARY_SIGHTS:
                     {
-                        if (!Enum.TryParse(LoadoutPage.ToString().Replace("AttachmentSecondary", ""), false, out EAttachment attachmentType))
+                        if (!Enum.TryParse(GetAttachmentPage(), false, out EAttachment attachmentType))
                         {
                             Logging.Debug($"Error finding attachment type that {Player.CharacterName} has selected");
                             return;
@@ -2573,9 +2576,9 @@ public class UIHandler
                         break;
                     }
 
-                    case ELoadoutPage.Perk1:
-                    case ELoadoutPage.Perk2:
-                    case ELoadoutPage.Perk3:
+                    case ELoadoutPage.PERK1:
+                    case ELoadoutPage.PERK2:
+                    case ELoadoutPage.PERK3:
                     {
                         if (!int.TryParse(LoadoutPage.ToString().Replace("Perk", ""), out var perkType))
                         {
@@ -2593,7 +2596,7 @@ public class UIHandler
                         break;
                     }
 
-                    case ELoadoutPage.Lethal:
+                    case ELoadoutPage.LETHAL:
                     {
                         if (!LethalPages.TryGetValue(LoadoutTabPageID, out var page))
                         {
@@ -2605,7 +2608,7 @@ public class UIHandler
                         break;
                     }
 
-                    case ELoadoutPage.Tactical:
+                    case ELoadoutPage.TACTICAL:
                     {
                         if (!TacticalPages.TryGetValue(LoadoutTabPageID, out var page))
                         {
@@ -2617,7 +2620,7 @@ public class UIHandler
                         break;
                     }
 
-                    case ELoadoutPage.Knife:
+                    case ELoadoutPage.KNIFE:
                     {
                         if (!KnifePages.TryGetValue(LoadoutTabPageID, out var page))
                         {
@@ -2629,7 +2632,7 @@ public class UIHandler
                         break;
                     }
 
-                    case ELoadoutPage.Killstreak:
+                    case ELoadoutPage.KILLSTREAK:
                     {
                         if (!KillstreakPages.TryGetValue(LoadoutTabPageID, out var page))
                         {
@@ -2641,7 +2644,7 @@ public class UIHandler
                         break;
                     }
 
-                    case ELoadoutPage.Glove:
+                    case ELoadoutPage.GLOVE:
                     {
                         if (!GlovePages.TryGetValue(LoadoutTabPageID, out var page))
                         {
@@ -2653,7 +2656,7 @@ public class UIHandler
                         break;
                     }
 
-                    case ELoadoutPage.Card:
+                    case ELoadoutPage.CARD:
                     {
                         if (!CardPages.TryGetValue(LoadoutTabPageID, out var page))
                         {
@@ -2775,11 +2778,11 @@ public class UIHandler
             }
 
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item BUTTON {i}", true);
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Equipped {i}", (LoadoutPage == ELoadoutPage.Primary && currentLoadout.Primary == gun) || (LoadoutPage == ELoadoutPage.Secondary && currentLoadout.Secondary == gun));
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Equipped {i}", (LoadoutPage == ELoadoutPage.PRIMARY && currentLoadout.Primary == gun) || (LoadoutPage == ELoadoutPage.SECONDARY && currentLoadout.Secondary == gun));
             EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item IMAGE {i}", gun.Gun.IconLink);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item TEXT {i}", gun.Gun.GunName);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay {i}", !gun.IsBought);
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", gun.Gun.LevelRequirement > PlayerData.Level && !gun.IsUnlocked ? Plugin.Instance.Translate("Unlock_Level", gun.Gun.LevelRequirement) : $"{Utility.GetCurrencySymbol(ECurrency.Credits)} <color={(PlayerData.Credits >= gun.Gun.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{gun.Gun.BuyPrice}</color>");
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", gun.Gun.LevelRequirement > PlayerData.Level && !gun.IsUnlocked ? Plugin.Instance.Translate("Unlock_Level", gun.Gun.LevelRequirement) : $"{Utility.GetCurrencySymbol(ECurrency.CREDITS)} <color={(PlayerData.Credits >= gun.Gun.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{gun.Gun.BuyPrice}</color>");
             SendRarity("SERVER Item", gun.Gun.GunRarity, i);
         }
     }
@@ -2804,11 +2807,12 @@ public class UIHandler
             }
 
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item BUTTON {i}", true);
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Equipped {i}", (LoadoutPage.ToString().StartsWith("AttachmentPrimary") && currentLoadout.PrimaryAttachments.ContainsValue(attachment)) || (LoadoutPage.ToString().StartsWith("AttachmentSecondary") && currentLoadout.SecondaryAttachments.ContainsValue(attachment)));
+            var isAttachmentPrimary = IsAttachmentPagePrimary();
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Equipped {i}", (isAttachmentPrimary && currentLoadout.PrimaryAttachments.ContainsValue(attachment)) || (!isAttachmentPrimary && currentLoadout.SecondaryAttachments.ContainsValue(attachment)));
             EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item IMAGE {i}", attachment.Attachment.IconLink);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item TEXT {i}", attachment.Attachment.AttachmentName);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay {i}", !attachment.IsBought);
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", attachment.LevelRequirement > gun.Level && !attachment.IsUnlocked ? Plugin.Instance.Translate("Unlock_Gun_Level", attachment.LevelRequirement) : $"{Utility.GetCurrencySymbol(ECurrency.Credits)} <color={(PlayerData.Credits >= attachment.Attachment.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{attachment.Attachment.BuyPrice}</color>");
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", attachment.LevelRequirement > gun.Level && !attachment.IsUnlocked ? Plugin.Instance.Translate("Unlock_Gun_Level", attachment.LevelRequirement) : $"{Utility.GetCurrencySymbol(ECurrency.CREDITS)} <color={(PlayerData.Credits >= attachment.Attachment.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{attachment.Attachment.BuyPrice}</color>");
             SendRarity("SERVER Item", attachment.Attachment.AttachmentRarity, i);
         }
     }
@@ -2833,7 +2837,8 @@ public class UIHandler
             }
 
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Grid BUTTON {i}", true);
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Grid Equipped {i}", (LoadoutPage.ToString().StartsWith("AttachmentPrimary") && currentLoadout.PrimaryGunCharm == gunCharm) || (LoadoutPage.ToString().StartsWith("AttachmentSecondary") && currentLoadout.SecondaryGunCharm == gunCharm));
+            var isAttachmentPrimary = IsAttachmentPagePrimary();
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Grid Equipped {i}", (isAttachmentPrimary && currentLoadout.PrimaryGunCharm == gunCharm) || (!isAttachmentPrimary && currentLoadout.SecondaryGunCharm == gunCharm));
             EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Grid IMAGE {i}", gunCharm.GunCharm.IconLink);
             SendRarity("SERVER Item Grid", gunCharm.GunCharm.CharmRarity, i);
         }
@@ -2859,7 +2864,7 @@ public class UIHandler
             }
 
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Grid BUTTON {i}", true);
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Grid Equipped {i}", (LoadoutPage == ELoadoutPage.PrimarySkin && currentLoadout.PrimarySkin == skin) || (LoadoutPage == ELoadoutPage.SecondarySkin && currentLoadout.SecondarySkin == skin));
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Grid Equipped {i}", (LoadoutPage == ELoadoutPage.PRIMARY_SKIN && currentLoadout.PrimarySkin == skin) || (LoadoutPage == ELoadoutPage.SECONDARY_SKIN && currentLoadout.SecondarySkin == skin));
             EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Grid IMAGE {i}", skin.IconLink);
             SendRarity("SERVER Item Grid", skin.SkinRarity, i);
         }
@@ -2915,7 +2920,7 @@ public class UIHandler
             EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item IMAGE {i}", perk.Perk.IconLink);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item TEXT {i}", perk.Perk.PerkName);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay {i}", !perk.IsBought);
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", perk.Perk.LevelRequirement > PlayerData.Level && !perk.IsUnlocked ? Plugin.Instance.Translate("Unlock_Level", perk.Perk.LevelRequirement) : $"{Utility.GetCurrencySymbol(ECurrency.Credits)} <color={(PlayerData.Credits >= perk.Perk.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{perk.Perk.BuyPrice}</color>");
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", perk.Perk.LevelRequirement > PlayerData.Level && !perk.IsUnlocked ? Plugin.Instance.Translate("Unlock_Level", perk.Perk.LevelRequirement) : $"{Utility.GetCurrencySymbol(ECurrency.CREDITS)} <color={(PlayerData.Credits >= perk.Perk.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{perk.Perk.BuyPrice}</color>");
             switch (perk.Perk.PerkType)
             {
                 case 1:
@@ -2951,11 +2956,11 @@ public class UIHandler
             }
 
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item BUTTON {i}", true);
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Equipped {i}", (LoadoutPage == ELoadoutPage.Tactical && currentLoadout.Tactical == gadget) || (LoadoutPage == ELoadoutPage.Lethal && currentLoadout.Lethal == gadget));
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Equipped {i}", (LoadoutPage == ELoadoutPage.TACTICAL && currentLoadout.Tactical == gadget) || (LoadoutPage == ELoadoutPage.LETHAL && currentLoadout.Lethal == gadget));
             EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item IMAGE {i}", gadget.Gadget.IconLink);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item TEXT {i}", gadget.Gadget.GadgetName);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay {i}", !gadget.IsBought);
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", gadget.Gadget.LevelRequirement > PlayerData.Level && !gadget.IsUnlocked ? Plugin.Instance.Translate("Unlock_Level", gadget.Gadget.LevelRequirement) : $"{Utility.GetCurrencySymbol(ECurrency.Credits)} <color={(PlayerData.Credits >= gadget.Gadget.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{gadget.Gadget.BuyPrice}</color>");
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", gadget.Gadget.LevelRequirement > PlayerData.Level && !gadget.IsUnlocked ? Plugin.Instance.Translate("Unlock_Level", gadget.Gadget.LevelRequirement) : $"{Utility.GetCurrencySymbol(ECurrency.CREDITS)} <color={(PlayerData.Credits >= gadget.Gadget.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{gadget.Gadget.BuyPrice}</color>");
             SendRarity("SERVER Item", gadget.Gadget.GadgetRarity, i);
         }
     }
@@ -3048,7 +3053,7 @@ public class UIHandler
 
         switch (LoadoutPage)
         {
-            case ELoadoutPage.Primary:
+            case ELoadoutPage.PRIMARY:
             {
                 if (!PlayerLoadout.Guns.TryGetValue((ushort)SelectedItemID, out var gun))
                 {
@@ -3060,7 +3065,7 @@ public class UIHandler
                 break;
             }
 
-            case ELoadoutPage.Secondary:
+            case ELoadoutPage.SECONDARY:
             {
                 if (!PlayerLoadout.Guns.TryGetValue((ushort)SelectedItemID, out var gun))
                 {
@@ -3072,10 +3077,10 @@ public class UIHandler
                 break;
             }
 
-            case ELoadoutPage.AttachmentPrimaryBarrel:
-            case ELoadoutPage.AttachmentPrimaryGrip:
-            case ELoadoutPage.AttachmentPrimaryMagazine:
-            case ELoadoutPage.AttachmentPrimarySights:
+            case ELoadoutPage.ATTACHMENT_PRIMARY_BARREL:
+            case ELoadoutPage.ATTACHMENT_PRIMARY_GRIP:
+            case ELoadoutPage.ATTACHMENT_PRIMARY_MAGAZINE:
+            case ELoadoutPage.ATTACHMENT_PRIMARY_SIGHTS:
             {
                 if (!PlayerLoadout.Guns.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out var gun))
                 {
@@ -3093,9 +3098,9 @@ public class UIHandler
                 break;
             }
 
-            case ELoadoutPage.AttachmentSecondaryBarrel:
-            case ELoadoutPage.AttachmentSecondaryMagazine:
-            case ELoadoutPage.AttachmentSecondarySights:
+            case ELoadoutPage.ATTACHMENT_SECONDARY_BARREL:
+            case ELoadoutPage.ATTACHMENT_SECONDARY_MAGAZINE:
+            case ELoadoutPage.ATTACHMENT_SECONDARY_SIGHTS:
             {
                 if (!PlayerLoadout.Guns.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out var gun))
                 {
@@ -3113,8 +3118,8 @@ public class UIHandler
                 break;
             }
 
-            case ELoadoutPage.AttachmentPrimaryCharm:
-            case ELoadoutPage.AttachmentSecondaryCharm:
+            case ELoadoutPage.ATTACHMENT_PRIMARY_CHARM:
+            case ELoadoutPage.ATTACHMENT_SECONDARY_CHARM:
             {
                 if (!PlayerLoadout.GunCharms.TryGetValue((ushort)SelectedItemID, out var gunCharm))
                 {
@@ -3126,7 +3131,7 @@ public class UIHandler
                 break;
             }
 
-            case ELoadoutPage.Lethal:
+            case ELoadoutPage.LETHAL:
             {
                 if (!PlayerLoadout.Gadgets.TryGetValue((ushort)SelectedItemID, out var gadget))
                 {
@@ -3138,7 +3143,7 @@ public class UIHandler
                 break;
             }
 
-            case ELoadoutPage.Tactical:
+            case ELoadoutPage.TACTICAL:
             {
                 if (!PlayerLoadout.Gadgets.TryGetValue((ushort)SelectedItemID, out var gadget))
                 {
@@ -3150,9 +3155,9 @@ public class UIHandler
                 break;
             }
 
-            case ELoadoutPage.Perk1:
-            case ELoadoutPage.Perk2:
-            case ELoadoutPage.Perk3:
+            case ELoadoutPage.PERK1:
+            case ELoadoutPage.PERK2:
+            case ELoadoutPage.PERK3:
             {
                 if (!PlayerLoadout.Perks.TryGetValue((int)SelectedItemID, out var perk))
                 {
@@ -3164,7 +3169,7 @@ public class UIHandler
                 break;
             }
 
-            case ELoadoutPage.Knife:
+            case ELoadoutPage.KNIFE:
             {
                 if (!PlayerLoadout.Knives.TryGetValue((ushort)SelectedItemID, out var knife))
                 {
@@ -3176,7 +3181,7 @@ public class UIHandler
                 break;
             }
 
-            case ELoadoutPage.Killstreak:
+            case ELoadoutPage.KILLSTREAK:
             {
                 if (!PlayerLoadout.Killstreaks.TryGetValue((int)SelectedItemID, out var killstreak))
                 {
@@ -3188,7 +3193,7 @@ public class UIHandler
                 break;
             }
 
-            case ELoadoutPage.Glove:
+            case ELoadoutPage.GLOVE:
             {
                 if (!PlayerLoadout.Gloves.TryGetValue((int)SelectedItemID, out var glove))
                 {
@@ -3200,7 +3205,7 @@ public class UIHandler
                 break;
             }
 
-            case ELoadoutPage.Card:
+            case ELoadoutPage.CARD:
             {
                 if (!PlayerLoadout.Cards.TryGetValue((int)SelectedItemID, out var card))
                 {
@@ -3228,7 +3233,7 @@ public class UIHandler
             {
                 switch (LoadoutPage)
                 {
-                    case ELoadoutPage.PrimarySkin:
+                    case ELoadoutPage.PRIMARY_SKIN:
                     {
                         if (!GunSkinPages.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out var skinsPage))
                         {
@@ -3252,7 +3257,7 @@ public class UIHandler
                         break;
                     }
 
-                    case ELoadoutPage.SecondarySkin:
+                    case ELoadoutPage.SECONDARY_SKIN:
                     {
                         if (!GunSkinPages.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out var skinsPage))
                         {
@@ -3276,12 +3281,12 @@ public class UIHandler
                         break;
                     }
 
-                    case ELoadoutPage.AttachmentPrimaryBarrel:
-                    case ELoadoutPage.AttachmentPrimaryGrip:
-                    case ELoadoutPage.AttachmentPrimaryMagazine:
-                    case ELoadoutPage.AttachmentPrimarySights:
+                    case ELoadoutPage.ATTACHMENT_PRIMARY_BARREL:
+                    case ELoadoutPage.ATTACHMENT_PRIMARY_GRIP:
+                    case ELoadoutPage.ATTACHMENT_PRIMARY_MAGAZINE:
+                    case ELoadoutPage.ATTACHMENT_PRIMARY_SIGHTS:
                     {
-                        if (!Enum.TryParse(LoadoutPage.ToString().Replace("AttachmentPrimary", ""), false, out EAttachment attachmentType))
+                        if (!Enum.TryParse(GetAttachmentPage(), false, out EAttachment attachmentType))
                         {
                             Logging.Debug($"Error finding attachment type that {Player.CharacterName} has selected");
                             return;
@@ -3321,8 +3326,8 @@ public class UIHandler
                         break;
                     }
 
-                    case ELoadoutPage.AttachmentPrimaryCharm:
-                    case ELoadoutPage.AttachmentSecondaryCharm:
+                    case ELoadoutPage.ATTACHMENT_PRIMARY_CHARM:
+                    case ELoadoutPage.ATTACHMENT_SECONDARY_CHARM:
                     {
                         if (!GunCharmPages.TryGetValue(LoadoutTabPageID, out var page))
                         {
@@ -3340,11 +3345,11 @@ public class UIHandler
                         break;
                     }
 
-                    case ELoadoutPage.AttachmentSecondaryBarrel:
-                    case ELoadoutPage.AttachmentSecondaryMagazine:
-                    case ELoadoutPage.AttachmentSecondarySights:
+                    case ELoadoutPage.ATTACHMENT_SECONDARY_BARREL:
+                    case ELoadoutPage.ATTACHMENT_SECONDARY_MAGAZINE:
+                    case ELoadoutPage.ATTACHMENT_SECONDARY_SIGHTS:
                     {
-                        if (!Enum.TryParse(LoadoutPage.ToString().Replace("AttachmentSecondary", ""), false, out EAttachment attachmentType))
+                        if (!Enum.TryParse(GetAttachmentPage(), false, out EAttachment attachmentType))
                         {
                             Logging.Debug($"Error finding attachment type that {Player.CharacterName} has selected");
                             return;
@@ -3384,9 +3389,9 @@ public class UIHandler
                         break;
                     }
 
-                    case ELoadoutPage.Perk1:
-                    case ELoadoutPage.Perk2:
-                    case ELoadoutPage.Perk3:
+                    case ELoadoutPage.PERK1:
+                    case ELoadoutPage.PERK2:
+                    case ELoadoutPage.PERK3:
                     {
                         if (!int.TryParse(LoadoutPage.ToString().Replace("Perk", ""), out var perkType))
                         {
@@ -3410,7 +3415,7 @@ public class UIHandler
                         break;
                     }
 
-                    case ELoadoutPage.Lethal:
+                    case ELoadoutPage.LETHAL:
                     {
                         if (!LethalPages.TryGetValue(LoadoutTabPageID, out var page))
                         {
@@ -3428,7 +3433,7 @@ public class UIHandler
                         break;
                     }
 
-                    case ELoadoutPage.Tactical:
+                    case ELoadoutPage.TACTICAL:
                     {
                         if (!TacticalPages.TryGetValue(LoadoutTabPageID, out var page))
                         {
@@ -3446,7 +3451,7 @@ public class UIHandler
                         break;
                     }
 
-                    case ELoadoutPage.Knife:
+                    case ELoadoutPage.KNIFE:
                     {
                         if (!KnifePages.TryGetValue(LoadoutTabPageID, out var page))
                         {
@@ -3464,7 +3469,7 @@ public class UIHandler
                         break;
                     }
 
-                    case ELoadoutPage.Killstreak:
+                    case ELoadoutPage.KILLSTREAK:
                     {
                         if (!KillstreakPages.TryGetValue(LoadoutTabPageID, out var page))
                         {
@@ -3482,7 +3487,7 @@ public class UIHandler
                         break;
                     }
 
-                    case ELoadoutPage.Glove:
+                    case ELoadoutPage.GLOVE:
                     {
                         if (!GlovePages.TryGetValue(LoadoutTabPageID, out var page))
                         {
@@ -3500,7 +3505,7 @@ public class UIHandler
                         break;
                     }
 
-                    case ELoadoutPage.Card:
+                    case ELoadoutPage.CARD:
                     {
                         if (!CardPages.TryGetValue(LoadoutTabPageID, out var page))
                         {
@@ -3661,12 +3666,12 @@ public class UIHandler
 
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy BUTTON", !gun.IsBought);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy Locked", !gun.IsUnlocked && gun.Gun.LevelRequirement > PlayerData.Level);
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.Credits)} <color={(PlayerData.Credits >= gun.Gun.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{gun.Gun.BuyPrice}</color>");
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.CREDITS)} <color={(PlayerData.Credits >= gun.Gun.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{gun.Gun.BuyPrice}</color>");
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !gun.IsBought && !gun.IsUnlocked && gun.Gun.LevelRequirement > PlayerData.Level);
         var coins = gun.Gun.GetCoins(PlayerData.Level);
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.Coins)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
-        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Equip BUTTON", gun.IsBought && ((LoadoutPage == ELoadoutPage.Primary && loadout.Primary != gun) || (LoadoutPage == ELoadoutPage.Secondary && loadout.Secondary != gun)));
-        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Dequip BUTTON", gun.IsBought && ((LoadoutPage == ELoadoutPage.Primary && loadout.Primary == gun) || (LoadoutPage == ELoadoutPage.Secondary && loadout.Secondary == gun)));
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.COINS)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Equip BUTTON", gun.IsBought && ((LoadoutPage == ELoadoutPage.PRIMARY && loadout.Primary != gun) || (LoadoutPage == ELoadoutPage.SECONDARY && loadout.Secondary != gun)));
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Dequip BUTTON", gun.IsBought && ((LoadoutPage == ELoadoutPage.PRIMARY && loadout.Primary == gun) || (LoadoutPage == ELoadoutPage.SECONDARY && loadout.Secondary == gun)));
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Description TEXT", gun.Gun.GunDesc);
         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item IMAGE", gun.Gun.IconLink);
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item TEXT", gun.Gun.GunName);
@@ -3691,13 +3696,14 @@ public class UIHandler
 
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy BUTTON", !attachment.IsBought);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy Locked", !attachment.IsUnlocked && attachment.LevelRequirement > gun.Level);
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.Credits)} <color={(PlayerData.Credits >= attachment.Attachment.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{attachment.Attachment.BuyPrice}</color>");
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.CREDITS)} <color={(PlayerData.Credits >= attachment.Attachment.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{attachment.Attachment.BuyPrice}</color>");
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !attachment.IsBought && !attachment.IsUnlocked && attachment.LevelRequirement > gun.Level);
         var coins = attachment.GetCoins(gun.Level);
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.Coins)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
-        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Equip BUTTON", attachment.IsBought && ((LoadoutPage.ToString().StartsWith("AttachmentPrimary") && !loadout.PrimaryAttachments.ContainsValue(attachment)) || (LoadoutPage.ToString().StartsWith("AttachmentSecondary") && !loadout.SecondaryAttachments.ContainsValue(attachment))));
-        if (attachment.Attachment.AttachmentType != EAttachment.Magazine)
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Dequip BUTTON", attachment.IsBought && ((LoadoutPage.ToString().StartsWith("AttachmentPrimary") && loadout.PrimaryAttachments.ContainsValue(attachment)) || (LoadoutPage.ToString().StartsWith("AttachmentSecondary") && loadout.SecondaryAttachments.ContainsValue(attachment))));
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.COINS)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
+        var isAttachmentPrimary = IsAttachmentPagePrimary();
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Equip BUTTON", attachment.IsBought && ((isAttachmentPrimary && !loadout.PrimaryAttachments.ContainsValue(attachment)) || (!isAttachmentPrimary && !loadout.SecondaryAttachments.ContainsValue(attachment))));
+        if (attachment.Attachment.AttachmentType != EAttachment.MAGAZINE)
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Dequip BUTTON", attachment.IsBought && ((isAttachmentPrimary && loadout.PrimaryAttachments.ContainsValue(attachment)) || (!isAttachmentPrimary && loadout.SecondaryAttachments.ContainsValue(attachment))));
         else
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Dequip BUTTON", false);
 
@@ -3730,13 +3736,14 @@ public class UIHandler
 
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy BUTTON", !gunCharm.IsBought);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy Locked", !gunCharm.IsUnlocked && gunCharm.GunCharm.LevelRequirement > PlayerData.Level);
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.Credits)} <color={(PlayerData.Credits >= gunCharm.GunCharm.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{gunCharm.GunCharm.BuyPrice}</color>");
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.CREDITS)} <color={(PlayerData.Credits >= gunCharm.GunCharm.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{gunCharm.GunCharm.BuyPrice}</color>");
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !gunCharm.IsBought && !gunCharm.IsUnlocked && gunCharm.GunCharm.LevelRequirement > PlayerData.Level);
         var coins = gunCharm.GunCharm.GetCoins(PlayerData.Level);
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.Coins)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.Coins)} {gunCharm.GunCharm.GetCoins(PlayerData.Level)}");
-        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Equip BUTTON", gunCharm.IsBought && ((LoadoutPage.ToString().StartsWith("AttachmentPrimary") && loadout.PrimaryGunCharm != gunCharm) || (LoadoutPage.ToString().StartsWith("AttachmentSecondary") && loadout.SecondaryGunCharm != gunCharm)));
-        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Dequip BUTTON", gunCharm.IsBought && ((LoadoutPage.ToString().StartsWith("AttachmentPrimary") && loadout.PrimaryGunCharm == gunCharm) || (LoadoutPage.ToString().StartsWith("AttachmentSecondary") && loadout.SecondaryGunCharm == gunCharm)));
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.COINS)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.COINS)} {gunCharm.GunCharm.GetCoins(PlayerData.Level)}");
+        var isAttachmentPrimary = IsAttachmentPagePrimary();
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Equip BUTTON", gunCharm.IsBought && ((isAttachmentPrimary && loadout.PrimaryGunCharm != gunCharm) || (!isAttachmentPrimary && loadout.SecondaryGunCharm != gunCharm)));
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Dequip BUTTON", gunCharm.IsBought && ((isAttachmentPrimary && loadout.PrimaryGunCharm == gunCharm) || (!isAttachmentPrimary && loadout.SecondaryGunCharm == gunCharm)));
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Description TEXT", gunCharm.GunCharm.CharmDesc);
         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item IMAGE", gunCharm.GunCharm.IconLink);
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item TEXT", gunCharm.GunCharm.CharmName);
@@ -3759,8 +3766,8 @@ public class UIHandler
 
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy BUTTON", false);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", false);
-        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Equip BUTTON", (LoadoutPage == ELoadoutPage.PrimarySkin && loadout.PrimarySkin != skin) || (LoadoutPage == ELoadoutPage.SecondarySkin && loadout.SecondarySkin != skin));
-        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Dequip BUTTON", (LoadoutPage == ELoadoutPage.PrimarySkin && loadout.PrimarySkin == skin) || (LoadoutPage == ELoadoutPage.SecondarySkin && loadout.SecondarySkin == skin));
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Equip BUTTON", (LoadoutPage == ELoadoutPage.PRIMARY_SKIN && loadout.PrimarySkin != skin) || (LoadoutPage == ELoadoutPage.SECONDARY_SKIN && loadout.SecondarySkin != skin));
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Dequip BUTTON", (LoadoutPage == ELoadoutPage.PRIMARY_SKIN && loadout.PrimarySkin == skin) || (LoadoutPage == ELoadoutPage.SECONDARY_SKIN && loadout.SecondarySkin == skin));
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Description TEXT", skin.SkinDesc);
         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item IMAGE", skin.IconLink);
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item TEXT", skin.SkinName);
@@ -3781,10 +3788,10 @@ public class UIHandler
 
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy BUTTON", !knife.IsBought);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy Locked", !knife.IsUnlocked && knife.Knife.LevelRequirement > PlayerData.Level);
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.Credits)} <color={(PlayerData.Credits >= knife.Knife.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{knife.Knife.BuyPrice}</color>");
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.CREDITS)} <color={(PlayerData.Credits >= knife.Knife.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{knife.Knife.BuyPrice}</color>");
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !knife.IsBought && !knife.IsUnlocked && knife.Knife.LevelRequirement > PlayerData.Level);
         var coins = knife.Knife.GetCoins(PlayerData.Level);
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.Coins)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.COINS)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Equip BUTTON", knife.IsBought && loadout.Knife != knife);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Dequip BUTTON", false);
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Description TEXT", knife.Knife.KnifeDesc);
@@ -3807,10 +3814,10 @@ public class UIHandler
 
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy BUTTON", !perk.IsBought);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy Locked", !perk.IsUnlocked && perk.Perk.LevelRequirement > PlayerData.Level);
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.Credits)} <color={(PlayerData.Credits >= perk.Perk.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{perk.Perk.BuyPrice}</color>");
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.CREDITS)} <color={(PlayerData.Credits >= perk.Perk.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{perk.Perk.BuyPrice}</color>");
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !perk.IsBought && !perk.IsUnlocked && perk.Perk.LevelRequirement > PlayerData.Level);
         var coins = perk.Perk.GetCoins(PlayerData.Level);
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.Coins)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.COINS)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Equip BUTTON", perk.IsBought && !loadout.Perks.ContainsValue(perk));
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Dequip BUTTON", perk.IsBought && loadout.Perks.ContainsValue(perk));
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Description TEXT", perk.Perk.PerkDesc);
@@ -3844,12 +3851,12 @@ public class UIHandler
 
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy BUTTON", !gadget.IsBought);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy Locked", !gadget.IsUnlocked && gadget.Gadget.LevelRequirement > PlayerData.Level);
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.Credits)} <color={(PlayerData.Credits >= gadget.Gadget.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{gadget.Gadget.BuyPrice}</color>");
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.CREDITS)} <color={(PlayerData.Credits >= gadget.Gadget.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{gadget.Gadget.BuyPrice}</color>");
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !gadget.IsBought && !gadget.IsUnlocked && gadget.Gadget.LevelRequirement > PlayerData.Level);
         var coins = gadget.Gadget.GetCoins(PlayerData.Level);
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.Coins)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
-        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Equip BUTTON", gadget.IsBought && ((LoadoutPage == ELoadoutPage.Tactical && loadout.Tactical != gadget) || (LoadoutPage == ELoadoutPage.Lethal && loadout.Lethal != gadget)));
-        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Dequip BUTTON", gadget.IsBought && ((LoadoutPage == ELoadoutPage.Tactical && loadout.Tactical == gadget) || (LoadoutPage == ELoadoutPage.Lethal && loadout.Lethal == gadget)));
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.COINS)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Equip BUTTON", gadget.IsBought && ((LoadoutPage == ELoadoutPage.TACTICAL && loadout.Tactical != gadget) || (LoadoutPage == ELoadoutPage.LETHAL && loadout.Lethal != gadget)));
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Dequip BUTTON", gadget.IsBought && ((LoadoutPage == ELoadoutPage.TACTICAL && loadout.Tactical == gadget) || (LoadoutPage == ELoadoutPage.LETHAL && loadout.Lethal == gadget)));
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Description TEXT", gadget.Gadget.GadgetDesc);
         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item IMAGE", gadget.Gadget.IconLink);
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item TEXT", gadget.Gadget.GadgetName);
@@ -3870,10 +3877,10 @@ public class UIHandler
 
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy BUTTON", !card.IsBought);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy Locked", !card.IsUnlocked && card.Card.LevelRequirement > PlayerData.Level);
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.Credits)} <color={(PlayerData.Credits >= card.Card.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{card.Card.BuyPrice}</color>");
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.CREDITS)} <color={(PlayerData.Credits >= card.Card.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{card.Card.BuyPrice}</color>");
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !card.IsBought && !card.IsUnlocked && card.Card.LevelRequirement > PlayerData.Level);
         var coins = card.Card.GetCoins(PlayerData.Level);
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.Coins)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.COINS)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Equip BUTTON", card.IsBought && loadout.Card != card);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Dequip BUTTON", card.IsBought && loadout.Card == card);
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Description TEXT", card.Card.CardDesc);
@@ -3897,10 +3904,10 @@ public class UIHandler
 
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy BUTTON", !glove.IsBought);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy Locked", !glove.IsUnlocked && glove.Glove.LevelRequirement > PlayerData.Level);
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.Credits)} <color={(PlayerData.Credits >= glove.Glove.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{glove.Glove.BuyPrice}</color>");
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.CREDITS)} <color={(PlayerData.Credits >= glove.Glove.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{glove.Glove.BuyPrice}</color>");
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !glove.IsBought && !glove.IsUnlocked && glove.Glove.LevelRequirement > PlayerData.Level);
         var coins = glove.Glove.GetCoins(PlayerData.Level);
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.Coins)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.COINS)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Equip BUTTON", glove.IsBought && loadout.Glove != glove);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Dequip BUTTON", glove.IsBought && loadout.Glove == glove);
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Description TEXT", glove.Glove.GloveDesc);
@@ -3923,10 +3930,10 @@ public class UIHandler
 
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy BUTTON", !killstreak.IsBought);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy Locked", !killstreak.IsUnlocked && killstreak.Killstreak.LevelRequirement > PlayerData.Level);
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.Credits)} <color={(PlayerData.Credits >= killstreak.Killstreak.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{killstreak.Killstreak.BuyPrice}</color>");
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.CREDITS)} <color={(PlayerData.Credits >= killstreak.Killstreak.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{killstreak.Killstreak.BuyPrice}</color>");
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !killstreak.IsBought && !killstreak.IsUnlocked && killstreak.Killstreak.LevelRequirement > PlayerData.Level);
         var coins = killstreak.Killstreak.GetCoins(PlayerData.Level);
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.Coins)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.COINS)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Equip BUTTON", killstreak.IsBought && !loadout.Killstreaks.Contains(killstreak));
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Dequip BUTTON", killstreak.IsBought && loadout.Killstreaks.Contains(killstreak));
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Description TEXT", killstreak.Killstreak.KillstreakDesc);
@@ -3969,7 +3976,7 @@ public class UIHandler
 
         switch (LoadoutPage)
         {
-            case ELoadoutPage.Primary:
+            case ELoadoutPage.PRIMARY:
             {
                 if (!PlayerLoadout.Guns.TryGetValue((ushort)SelectedItemID, out var gun))
                 {
@@ -3990,15 +3997,15 @@ public class UIHandler
                         });
                     }
                     else
-                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.Credits));
+                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.CREDITS));
                 });
                 break;
             }
 
-            case ELoadoutPage.AttachmentPrimaryBarrel:
-            case ELoadoutPage.AttachmentPrimaryGrip:
-            case ELoadoutPage.AttachmentPrimaryMagazine:
-            case ELoadoutPage.AttachmentPrimarySights:
+            case ELoadoutPage.ATTACHMENT_PRIMARY_BARREL:
+            case ELoadoutPage.ATTACHMENT_PRIMARY_GRIP:
+            case ELoadoutPage.ATTACHMENT_PRIMARY_MAGAZINE:
+            case ELoadoutPage.ATTACHMENT_PRIMARY_SIGHTS:
             {
                 if (!PlayerLoadout.Guns.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out var gun))
                 {
@@ -4025,12 +4032,12 @@ public class UIHandler
                         });
                     }
                     else
-                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.Credits));
+                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.CREDITS));
                 });
                 break;
             }
 
-            case ELoadoutPage.Secondary:
+            case ELoadoutPage.SECONDARY:
             {
                 if (!PlayerLoadout.Guns.TryGetValue((ushort)SelectedItemID, out var gun))
                 {
@@ -4051,14 +4058,14 @@ public class UIHandler
                         });
                     }
                     else
-                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.Credits));
+                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.CREDITS));
                 });
                 break;
             }
 
-            case ELoadoutPage.AttachmentSecondaryBarrel:
-            case ELoadoutPage.AttachmentSecondaryMagazine:
-            case ELoadoutPage.AttachmentSecondarySights:
+            case ELoadoutPage.ATTACHMENT_SECONDARY_BARREL:
+            case ELoadoutPage.ATTACHMENT_SECONDARY_MAGAZINE:
+            case ELoadoutPage.ATTACHMENT_SECONDARY_SIGHTS:
             {
                 if (!PlayerLoadout.Guns.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out var gun))
                 {
@@ -4085,13 +4092,13 @@ public class UIHandler
                         });
                     }
                     else
-                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.Credits));
+                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.CREDITS));
                 });
                 break;
             }
 
-            case ELoadoutPage.AttachmentPrimaryCharm:
-            case ELoadoutPage.AttachmentSecondaryCharm:
+            case ELoadoutPage.ATTACHMENT_PRIMARY_CHARM:
+            case ELoadoutPage.ATTACHMENT_SECONDARY_CHARM:
             {
                 if (!PlayerLoadout.GunCharms.TryGetValue((ushort)SelectedItemID, out var gunCharm))
                 {
@@ -4112,12 +4119,12 @@ public class UIHandler
                         });
                     }
                     else
-                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.Credits));
+                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.CREDITS));
                 });
                 break;
             }
 
-            case ELoadoutPage.Knife:
+            case ELoadoutPage.KNIFE:
             {
                 if (!PlayerLoadout.Knives.TryGetValue((ushort)SelectedItemID, out var knife))
                 {
@@ -4138,12 +4145,12 @@ public class UIHandler
                         });
                     }
                     else
-                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.Credits));
+                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.CREDITS));
                 });
                 break;
             }
 
-            case ELoadoutPage.Tactical:
+            case ELoadoutPage.TACTICAL:
             {
                 if (!PlayerLoadout.Gadgets.TryGetValue((ushort)SelectedItemID, out var gadget))
                 {
@@ -4164,12 +4171,12 @@ public class UIHandler
                         });
                     }
                     else
-                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.Credits));
+                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.CREDITS));
                 });
                 break;
             }
 
-            case ELoadoutPage.Lethal:
+            case ELoadoutPage.LETHAL:
             {
                 if (!PlayerLoadout.Gadgets.TryGetValue((ushort)SelectedItemID, out var gadget))
                 {
@@ -4190,14 +4197,14 @@ public class UIHandler
                         });
                     }
                     else
-                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.Credits));
+                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.CREDITS));
                 });
                 break;
             }
 
-            case ELoadoutPage.Perk1:
-            case ELoadoutPage.Perk2:
-            case ELoadoutPage.Perk3:
+            case ELoadoutPage.PERK1:
+            case ELoadoutPage.PERK2:
+            case ELoadoutPage.PERK3:
             {
                 if (!PlayerLoadout.Perks.TryGetValue((int)SelectedItemID, out var perk))
                 {
@@ -4218,12 +4225,12 @@ public class UIHandler
                         });
                     }
                     else
-                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.Credits));
+                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.CREDITS));
                 });
                 break;
             }
 
-            case ELoadoutPage.Killstreak:
+            case ELoadoutPage.KILLSTREAK:
             {
                 if (!PlayerLoadout.Killstreaks.TryGetValue((int)SelectedItemID, out var killstreak))
                 {
@@ -4245,12 +4252,12 @@ public class UIHandler
                         });
                     }
                     else
-                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.Credits));
+                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.CREDITS));
                 });
                 break;
             }
 
-            case ELoadoutPage.Card:
+            case ELoadoutPage.CARD:
             {
                 if (!PlayerLoadout.Cards.TryGetValue((int)SelectedItemID, out var card))
                 {
@@ -4271,12 +4278,12 @@ public class UIHandler
                         });
                     }
                     else
-                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.Credits));
+                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.CREDITS));
                 });
                 break;
             }
 
-            case ELoadoutPage.Glove:
+            case ELoadoutPage.GLOVE:
             {
                 if (!PlayerLoadout.Gloves.TryGetValue((int)SelectedItemID, out var glove))
                 {
@@ -4297,7 +4304,7 @@ public class UIHandler
                         });
                     }
                     else
-                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.Credits));
+                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.CREDITS));
                 });
                 break;
             }
@@ -4314,8 +4321,8 @@ public class UIHandler
 
         switch (LoadoutPage)
         {
-            case ELoadoutPage.Primary:
-            case ELoadoutPage.Secondary:
+            case ELoadoutPage.PRIMARY:
+            case ELoadoutPage.SECONDARY:
             {
                 if (!PlayerLoadout.Guns.TryGetValue((ushort)SelectedItemID, out var gun))
                 {
@@ -4338,15 +4345,15 @@ public class UIHandler
                         });
                     }
                     else
-                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.Coins));
+                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.COINS));
                 });
                 break;
             }
 
-            case ELoadoutPage.AttachmentPrimaryBarrel:
-            case ELoadoutPage.AttachmentPrimaryGrip:
-            case ELoadoutPage.AttachmentPrimaryMagazine:
-            case ELoadoutPage.AttachmentPrimarySights:
+            case ELoadoutPage.ATTACHMENT_PRIMARY_BARREL:
+            case ELoadoutPage.ATTACHMENT_PRIMARY_GRIP:
+            case ELoadoutPage.ATTACHMENT_PRIMARY_MAGAZINE:
+            case ELoadoutPage.ATTACHMENT_PRIMARY_SIGHTS:
             {
                 if (!PlayerLoadout.Guns.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out var gun))
                 {
@@ -4375,14 +4382,14 @@ public class UIHandler
                         });
                     }
                     else
-                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.Coins));
+                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.COINS));
                 });
                 break;
             }
 
-            case ELoadoutPage.AttachmentSecondaryBarrel:
-            case ELoadoutPage.AttachmentSecondaryMagazine:
-            case ELoadoutPage.AttachmentSecondarySights:
+            case ELoadoutPage.ATTACHMENT_SECONDARY_BARREL:
+            case ELoadoutPage.ATTACHMENT_SECONDARY_MAGAZINE:
+            case ELoadoutPage.ATTACHMENT_SECONDARY_SIGHTS:
             {
                 if (!PlayerLoadout.Guns.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out var gun))
                 {
@@ -4411,13 +4418,13 @@ public class UIHandler
                         });
                     }
                     else
-                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.Coins));
+                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.COINS));
                 });
                 break;
             }
 
-            case ELoadoutPage.AttachmentPrimaryCharm:
-            case ELoadoutPage.AttachmentSecondaryCharm:
+            case ELoadoutPage.ATTACHMENT_PRIMARY_CHARM:
+            case ELoadoutPage.ATTACHMENT_SECONDARY_CHARM:
             {
                 if (!PlayerLoadout.GunCharms.TryGetValue((ushort)SelectedItemID, out var gunCharm))
                 {
@@ -4440,12 +4447,12 @@ public class UIHandler
                         });
                     }
                     else
-                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.Coins));
+                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.COINS));
                 });
                 break;
             }
 
-            case ELoadoutPage.Knife:
+            case ELoadoutPage.KNIFE:
             {
                 if (!PlayerLoadout.Knives.TryGetValue((ushort)SelectedItemID, out var knife))
                 {
@@ -4468,13 +4475,13 @@ public class UIHandler
                         });
                     }
                     else
-                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.Coins));
+                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.COINS));
                 });
                 break;
             }
 
-            case ELoadoutPage.Tactical:
-            case ELoadoutPage.Lethal:
+            case ELoadoutPage.TACTICAL:
+            case ELoadoutPage.LETHAL:
             {
                 if (!PlayerLoadout.Gadgets.TryGetValue((ushort)SelectedItemID, out var gadget))
                 {
@@ -4497,14 +4504,14 @@ public class UIHandler
                         });
                     }
                     else
-                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.Coins));
+                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.COINS));
                 });
                 break;
             }
 
-            case ELoadoutPage.Perk1:
-            case ELoadoutPage.Perk2:
-            case ELoadoutPage.Perk3:
+            case ELoadoutPage.PERK1:
+            case ELoadoutPage.PERK2:
+            case ELoadoutPage.PERK3:
             {
                 if (!PlayerLoadout.Perks.TryGetValue((int)SelectedItemID, out var perk))
                 {
@@ -4527,12 +4534,12 @@ public class UIHandler
                         });
                     }
                     else
-                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.Coins));
+                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.COINS));
                 });
                 break;
             }
 
-            case ELoadoutPage.Killstreak:
+            case ELoadoutPage.KILLSTREAK:
             {
                 if (!PlayerLoadout.Killstreaks.TryGetValue((int)SelectedItemID, out var killstreak))
                 {
@@ -4555,12 +4562,12 @@ public class UIHandler
                         });
                     }
                     else
-                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.Coins));
+                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.COINS));
                 });
                 break;
             }
 
-            case ELoadoutPage.Card:
+            case ELoadoutPage.CARD:
             {
                 if (!PlayerLoadout.Cards.TryGetValue((int)SelectedItemID, out var card))
                 {
@@ -4583,12 +4590,12 @@ public class UIHandler
                         });
                     }
                     else
-                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.Coins));
+                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.COINS));
                 });
                 break;
             }
 
-            case ELoadoutPage.Glove:
+            case ELoadoutPage.GLOVE:
             {
                 if (!PlayerLoadout.Gloves.TryGetValue((int)SelectedItemID, out var glove))
                 {
@@ -4611,7 +4618,7 @@ public class UIHandler
                         });
                     }
                     else
-                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.Coins));
+                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.COINS));
                 });
                 break;
             }
@@ -4629,7 +4636,7 @@ public class UIHandler
 
         switch (LoadoutPage)
         {
-            case ELoadoutPage.PrimarySkin:
+            case ELoadoutPage.PRIMARY_SKIN:
             {
                 if (!PlayerLoadout.GunSkinsSearchByID.TryGetValue((int)SelectedItemID, out var skin))
                 {
@@ -4642,7 +4649,7 @@ public class UIHandler
                 break;
             }
 
-            case ELoadoutPage.SecondarySkin:
+            case ELoadoutPage.SECONDARY_SKIN:
             {
                 if (!PlayerLoadout.GunSkinsSearchByID.TryGetValue((int)SelectedItemID, out var skin))
                 {
@@ -4655,7 +4662,7 @@ public class UIHandler
                 break;
             }
 
-            case ELoadoutPage.Primary:
+            case ELoadoutPage.PRIMARY:
             {
                 if (!PlayerLoadout.Guns.TryGetValue((ushort)SelectedItemID, out var gun))
                 {
@@ -4672,10 +4679,10 @@ public class UIHandler
                 break;
             }
 
-            case ELoadoutPage.AttachmentPrimaryBarrel:
-            case ELoadoutPage.AttachmentPrimaryGrip:
-            case ELoadoutPage.AttachmentPrimaryMagazine:
-            case ELoadoutPage.AttachmentPrimarySights:
+            case ELoadoutPage.ATTACHMENT_PRIMARY_BARREL:
+            case ELoadoutPage.ATTACHMENT_PRIMARY_GRIP:
+            case ELoadoutPage.ATTACHMENT_PRIMARY_MAGAZINE:
+            case ELoadoutPage.ATTACHMENT_PRIMARY_SIGHTS:
             {
                 if (!PlayerLoadout.Guns.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out var gun))
                 {
@@ -4698,7 +4705,7 @@ public class UIHandler
                 break;
             }
 
-            case ELoadoutPage.Secondary:
+            case ELoadoutPage.SECONDARY:
             {
                 if (!PlayerLoadout.Guns.TryGetValue((ushort)SelectedItemID, out var gun))
                 {
@@ -4715,9 +4722,9 @@ public class UIHandler
                 break;
             }
 
-            case ELoadoutPage.AttachmentSecondaryBarrel:
-            case ELoadoutPage.AttachmentSecondaryMagazine:
-            case ELoadoutPage.AttachmentSecondarySights:
+            case ELoadoutPage.ATTACHMENT_SECONDARY_BARREL:
+            case ELoadoutPage.ATTACHMENT_SECONDARY_MAGAZINE:
+            case ELoadoutPage.ATTACHMENT_SECONDARY_SIGHTS:
             {
                 if (!PlayerLoadout.Guns.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out var gun))
                 {
@@ -4740,8 +4747,8 @@ public class UIHandler
                 break;
             }
 
-            case ELoadoutPage.AttachmentPrimaryCharm:
-            case ELoadoutPage.AttachmentSecondaryCharm:
+            case ELoadoutPage.ATTACHMENT_PRIMARY_CHARM:
+            case ELoadoutPage.ATTACHMENT_SECONDARY_CHARM:
             {
                 if (!PlayerLoadout.GunCharms.TryGetValue((ushort)SelectedItemID, out var gunCharm))
                 {
@@ -4751,14 +4758,14 @@ public class UIHandler
 
                 if (gunCharm.IsBought)
                 {
-                    loadoutManager.EquipGunCharm(Player, LoadoutID, gunCharm.GunCharm.CharmID, LoadoutPage.ToString().StartsWith("AttachmentPrimary"));
+                    loadoutManager.EquipGunCharm(Player, LoadoutID, gunCharm.GunCharm.CharmID, IsAttachmentPagePrimary());
                     BackToLoadout();
                 }
 
                 break;
             }
 
-            case ELoadoutPage.Tactical:
+            case ELoadoutPage.TACTICAL:
             {
                 if (!PlayerLoadout.Gadgets.TryGetValue((ushort)SelectedItemID, out var gadget))
                 {
@@ -4775,7 +4782,7 @@ public class UIHandler
                 break;
             }
 
-            case ELoadoutPage.Lethal:
+            case ELoadoutPage.LETHAL:
             {
                 if (!PlayerLoadout.Gadgets.TryGetValue((ushort)SelectedItemID, out var gadget))
                 {
@@ -4792,9 +4799,9 @@ public class UIHandler
                 break;
             }
 
-            case ELoadoutPage.Perk1:
-            case ELoadoutPage.Perk2:
-            case ELoadoutPage.Perk3:
+            case ELoadoutPage.PERK1:
+            case ELoadoutPage.PERK2:
+            case ELoadoutPage.PERK3:
             {
                 if (!PlayerLoadout.Perks.TryGetValue((int)SelectedItemID, out var perk))
                 {
@@ -4811,7 +4818,7 @@ public class UIHandler
                 break;
             }
 
-            case ELoadoutPage.Knife:
+            case ELoadoutPage.KNIFE:
             {
                 if (!PlayerLoadout.Knives.TryGetValue((ushort)SelectedItemID, out var knife))
                 {
@@ -4828,7 +4835,7 @@ public class UIHandler
                 break;
             }
 
-            case ELoadoutPage.Killstreak:
+            case ELoadoutPage.KILLSTREAK:
             {
                 if (!PlayerLoadout.Killstreaks.TryGetValue((int)SelectedItemID, out var killstreak))
                 {
@@ -4846,7 +4853,7 @@ public class UIHandler
                 break;
             }
 
-            case ELoadoutPage.Glove:
+            case ELoadoutPage.GLOVE:
             {
                 if (!PlayerLoadout.Gloves.TryGetValue((int)SelectedItemID, out var glove))
                 {
@@ -4863,7 +4870,7 @@ public class UIHandler
                 break;
             }
 
-            case ELoadoutPage.Card:
+            case ELoadoutPage.CARD:
             {
                 if (!PlayerLoadout.Cards.TryGetValue((int)SelectedItemID, out var card))
                 {
@@ -4895,7 +4902,7 @@ public class UIHandler
 
         switch (LoadoutPage)
         {
-            case ELoadoutPage.PrimarySkin:
+            case ELoadoutPage.PRIMARY_SKIN:
             {
                 loadoutManager.DequipGunSkin(Player, LoadoutID, true);
                 ReloadLoadoutTab();
@@ -4903,7 +4910,7 @@ public class UIHandler
                 break;
             }
 
-            case ELoadoutPage.SecondarySkin:
+            case ELoadoutPage.SECONDARY_SKIN:
             {
                 loadoutManager.DequipGunSkin(Player, LoadoutID, false);
                 ReloadLoadoutTab();
@@ -4911,16 +4918,16 @@ public class UIHandler
                 break;
             }
 
-            case ELoadoutPage.Primary:
+            case ELoadoutPage.PRIMARY:
             {
                 loadoutManager.EquipGun(Player, LoadoutID, 0, true);
                 break;
             }
 
-            case ELoadoutPage.AttachmentPrimaryBarrel:
-            case ELoadoutPage.AttachmentPrimaryGrip:
-            case ELoadoutPage.AttachmentPrimaryMagazine:
-            case ELoadoutPage.AttachmentPrimarySights:
+            case ELoadoutPage.ATTACHMENT_PRIMARY_BARREL:
+            case ELoadoutPage.ATTACHMENT_PRIMARY_GRIP:
+            case ELoadoutPage.ATTACHMENT_PRIMARY_MAGAZINE:
+            case ELoadoutPage.ATTACHMENT_PRIMARY_SIGHTS:
             {
                 if (!PlayerLoadout.Guns.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out var gun))
                 {
@@ -4940,15 +4947,15 @@ public class UIHandler
                 break;
             }
 
-            case ELoadoutPage.Secondary:
+            case ELoadoutPage.SECONDARY:
             {
                 loadoutManager.EquipGun(Player, LoadoutID, 0, false);
                 break;
             }
 
-            case ELoadoutPage.AttachmentSecondaryBarrel:
-            case ELoadoutPage.AttachmentSecondaryMagazine:
-            case ELoadoutPage.AttachmentSecondarySights:
+            case ELoadoutPage.ATTACHMENT_SECONDARY_BARREL:
+            case ELoadoutPage.ATTACHMENT_SECONDARY_MAGAZINE:
+            case ELoadoutPage.ATTACHMENT_SECONDARY_SIGHTS:
             {
                 if (!PlayerLoadout.Guns.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out var gun))
                 {
@@ -4968,16 +4975,16 @@ public class UIHandler
                 break;
             }
 
-            case ELoadoutPage.AttachmentPrimaryCharm:
-            case ELoadoutPage.AttachmentSecondaryCharm:
+            case ELoadoutPage.ATTACHMENT_PRIMARY_CHARM:
+            case ELoadoutPage.ATTACHMENT_SECONDARY_CHARM:
             {
-                loadoutManager.EquipGunCharm(Player, LoadoutID, 0, LoadoutPage.ToString().StartsWith("AttachmentPrimary"));
+                loadoutManager.EquipGunCharm(Player, LoadoutID, 0, IsAttachmentPagePrimary());
                 ReloadLoadoutTab();
                 ReloadSelectedItem();
                 break;
             }
 
-            case ELoadoutPage.Tactical:
+            case ELoadoutPage.TACTICAL:
             {
                 loadoutManager.EquipTactical(Player, LoadoutID, 0);
                 ReloadLoadoutTab();
@@ -4985,7 +4992,7 @@ public class UIHandler
                 break;
             }
 
-            case ELoadoutPage.Lethal:
+            case ELoadoutPage.LETHAL:
             {
                 loadoutManager.EquipLethal(Player, LoadoutID, 0);
                 ReloadLoadoutTab();
@@ -4993,9 +5000,9 @@ public class UIHandler
                 break;
             }
 
-            case ELoadoutPage.Perk1:
-            case ELoadoutPage.Perk2:
-            case ELoadoutPage.Perk3:
+            case ELoadoutPage.PERK1:
+            case ELoadoutPage.PERK2:
+            case ELoadoutPage.PERK3:
             {
                 if (!PlayerLoadout.Perks.TryGetValue((int)SelectedItemID, out var perk))
                 {
@@ -5009,7 +5016,7 @@ public class UIHandler
                 break;
             }
 
-            case ELoadoutPage.Knife:
+            case ELoadoutPage.KNIFE:
             {
                 loadoutManager.EquipKnife(Player, LoadoutID, 0);
                 ReloadLoadoutTab();
@@ -5017,7 +5024,7 @@ public class UIHandler
                 break;
             }
 
-            case ELoadoutPage.Killstreak:
+            case ELoadoutPage.KILLSTREAK:
             {
                 if (!PlayerLoadout.Killstreaks.TryGetValue((int)SelectedItemID, out var killstreak))
                 {
@@ -5031,7 +5038,7 @@ public class UIHandler
                 break;
             }
 
-            case ELoadoutPage.Glove:
+            case ELoadoutPage.GLOVE:
             {
                 loadoutManager.EquipGlove(Player, LoadoutID, 0);
                 ReloadLoadoutTab();
@@ -5039,7 +5046,7 @@ public class UIHandler
                 break;
             }
 
-            case ELoadoutPage.Card:
+            case ELoadoutPage.CARD:
             {
                 loadoutManager.EquipCard(Player, LoadoutID, 0);
                 ReloadLoadoutTab();
@@ -5051,6 +5058,8 @@ public class UIHandler
         ReloadLoadout();
     }
 
+    public string GetAttachmentPage() => LoadoutPage.ToString().Replace("ATTACHMENT_PRIMARY_", "").Replace("ATTACHMENT_SECONDARY_", "");
+    public bool IsAttachmentPagePrimary() => (int)LoadoutPage >= MINIMUM_LOADOUT_PAGE_ATTACHMENT_PRIMARY && (int)LoadoutPage <= MAXIMUM_LOADOUT_PAGE_ATTACHMENT_PRIMARY;
     public void BackToLoadout() => EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Item Page Disabler", true);
 
     #endregion
@@ -5059,7 +5068,7 @@ public class UIHandler
 
     public void ShowLeaderboards()
     {
-        MainPage = EMainPage.Leaderboard;
+        MainPage = EMainPage.LEADERBOARD;
 
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Leaderboards Level TEXT 10", PlayerData.Level.ToString());
         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Leaderboards Level IMAGE 10", Plugin.Instance.DB.Levels.TryGetValue(PlayerData.Level, out var level) ? level.IconLinkMedium : "");
@@ -5067,13 +5076,13 @@ public class UIHandler
         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Leaderboards Flag IMAGE 10", PlayerData.HideFlag ? Config.Icons.FileData.HiddenFlagIconLink : Utility.GetFlag(PlayerData.CountryCode));
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Leaderboards Name TEXT 10", (PlayerData.HasPrime ? UIManager.PRIME_SYMBOL : "") + PlayerData.SteamName);
 
-        SelectLeaderboardPage(ELeaderboardPage.Daily);
+        SelectLeaderboardPage(ELeaderboardPage.DAILY);
     }
 
     public void SelectLeaderboardPage(ELeaderboardPage page)
     {
         LeaderboardPage = page;
-        SelectLeaderboardTab(page == ELeaderboardPage.All ? ELeaderboardTab.Level : ELeaderboardTab.Kill);
+        SelectLeaderboardTab(page == ELeaderboardPage.ALL ? ELeaderboardTab.LEVEL : ELeaderboardTab.KILL);
     }
 
     public void SelectLeaderboardTab(ELeaderboardTab tab)
@@ -5208,26 +5217,26 @@ public class UIHandler
 
     public List<LeaderboardData> GetLeaderboardData() => LeaderboardPage switch
     {
-        ELeaderboardPage.Daily => DB.PlayerDailyLeaderboard,
-        ELeaderboardPage.Weekly => DB.PlayerWeeklyLeaderboard,
-        ELeaderboardPage.Seasonal => DB.PlayerSeasonalLeaderboard,
-        ELeaderboardPage.All => LeaderboardTab == ELeaderboardTab.Kill ? DB.PlayerAllTimeKill : DB.PlayerAllTimeLevel,
+        ELeaderboardPage.DAILY => DB.PlayerDailyLeaderboard,
+        ELeaderboardPage.WEEKLY => DB.PlayerWeeklyLeaderboard,
+        ELeaderboardPage.SEASONAL => DB.PlayerSeasonalLeaderboard,
+        ELeaderboardPage.ALL => LeaderboardTab == ELeaderboardTab.KILL ? DB.PlayerAllTimeKill : DB.PlayerAllTimeLevel,
         _ => throw new ArgumentOutOfRangeException("LeaderboardPage is not as expected")
     };
 
     public Dictionary<CSteamID, LeaderboardData> GetLeaderboardDataLookup() => LeaderboardPage switch
     {
-        ELeaderboardPage.Daily => DB.PlayerDailyLeaderboardLookup,
-        ELeaderboardPage.Weekly => DB.PlayerWeeklyLeaderboardLookup,
-        ELeaderboardPage.Seasonal => DB.PlayerSeasonalLeaderboardLookup,
-        ELeaderboardPage.All => DB.PlayerAllTimeLeaderboardLookup,
+        ELeaderboardPage.DAILY => DB.PlayerDailyLeaderboardLookup,
+        ELeaderboardPage.WEEKLY => DB.PlayerWeeklyLeaderboardLookup,
+        ELeaderboardPage.SEASONAL => DB.PlayerSeasonalLeaderboardLookup,
+        ELeaderboardPage.ALL => DB.PlayerAllTimeLeaderboardLookup,
         _ => throw new ArgumentOutOfRangeException("LeaderboardPage is not as expected")
     };
 
     public string GetLeaderboardRefreshTime() => LeaderboardPage switch
     {
-        ELeaderboardPage.Daily => (DB.ServerOptions.DailyLeaderboardWipe.UtcDateTime - DateTime.UtcNow).ToString(@"hh\:mm\:ss"),
-        ELeaderboardPage.Weekly => (DB.ServerOptions.WeeklyLeaderboardWipe.UtcDateTime - DateTime.UtcNow).ToString(@"dd\:hh\:mm\:ss"),
+        ELeaderboardPage.DAILY => (DB.ServerOptions.DailyLeaderboardWipe.UtcDateTime - DateTime.UtcNow).ToString(@"hh\:mm\:ss"),
+        ELeaderboardPage.WEEKLY => (DB.ServerOptions.WeeklyLeaderboardWipe.UtcDateTime - DateTime.UtcNow).ToString(@"dd\:hh\:mm\:ss"),
         _ => "00:00:00"
     };
 
@@ -5266,7 +5275,7 @@ public class UIHandler
 
     public void ShowAchievements()
     {
-        MainPage = EMainPage.Achievements;
+        MainPage = EMainPage.ACHIEVEMENTS;
         SelectedAchievementMainPage(1);
 
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements Page 1 TEXT", "Weapons");
@@ -5490,7 +5499,7 @@ public class UIHandler
 
         switch (reward.RewardType)
         {
-            case ERewardType.Card:
+            case ERewardType.CARD:
                 if (!DB.Cards.TryGetValue(Convert.ToInt32(reward.RewardValue), out var card))
                     return false;
 
@@ -5498,7 +5507,7 @@ public class UIHandler
                 rewardImage = card.IconLink;
                 rewardRarity = card.CardRarity;
                 return true;
-            case ERewardType.GunSkin:
+            case ERewardType.GUN_SKIN:
                 if (!DB.GunSkinsSearchByID.TryGetValue(Convert.ToInt32(reward.RewardValue), out var skin))
                     return false;
 
@@ -5506,7 +5515,7 @@ public class UIHandler
                 rewardImage = skin.IconLink;
                 rewardRarity = skin.SkinRarity;
                 return true;
-            case ERewardType.Glove:
+            case ERewardType.GLOVE:
                 if (!DB.Gloves.TryGetValue(Convert.ToUInt16(reward.RewardValue), out var glove))
                     return false;
 
@@ -5514,7 +5523,7 @@ public class UIHandler
                 rewardImage = glove.IconLink;
                 rewardRarity = glove.GloveRarity;
                 return true;
-            case ERewardType.Gun:
+            case ERewardType.GUN:
                 if (!DB.Guns.TryGetValue(Convert.ToUInt16(reward.RewardValue), out var gun))
                     return false;
 
@@ -5522,7 +5531,7 @@ public class UIHandler
                 rewardImage = gun.IconLink;
                 rewardRarity = gun.GunRarity;
                 return true;
-            case ERewardType.GunCharm:
+            case ERewardType.GUN_CHARM:
                 if (!DB.GunCharms.TryGetValue(Convert.ToUInt16(reward.RewardValue), out var gunCharm))
                     return false;
 
@@ -5530,31 +5539,31 @@ public class UIHandler
                 rewardImage = gunCharm.IconLink;
                 rewardRarity = gunCharm.CharmRarity;
                 return true;
-            case ERewardType.BPBooster:
+            case ERewardType.BP_BOOSTER:
                 rewardName = $"<color=white>{string.Format("{0:0.##}", Convert.ToDecimal(reward.RewardValue) * 100)}% Battlepass Stars Boost</color>";
                 rewardImage = Config.Icons.FileData.BPXPBoostIconLink;
                 return true;
-            case ERewardType.XPBooster:
+            case ERewardType.XP_BOOSTER:
                 rewardName = $"<color=white>{string.Format("{0:0.##}", Convert.ToDecimal(reward.RewardValue) * 100)}% XP Boost</color>";
                 rewardImage = Config.Icons.FileData.XPBoostIconLink;
                 return true;
-            case ERewardType.GunXPBooster:
+            case ERewardType.GUN_XP_BOOSTER:
                 rewardName = $"<color=white>{string.Format("{0:0.##}", Convert.ToDecimal(reward.RewardValue) * 100)}% Gun XP Boost</color>";
                 rewardImage = Config.Icons.FileData.GunXPBoostIconLink;
                 return true;
-            case ERewardType.Coin:
+            case ERewardType.COIN:
                 rewardName = $"<color=white>{reward.RewardValue} Blacktags</color>";
                 rewardImage = Config.Icons.FileData.BlacktagsSmallIconLink;
                 return true;
-            case ERewardType.Credit:
+            case ERewardType.CREDIT:
                 rewardName = $"<color=white>{reward.RewardValue} Points</color>";
                 rewardImage = Config.Icons.FileData.PointsSmallIconLink;
                 return true;
-            case ERewardType.LevelXP:
+            case ERewardType.LEVEL_XP:
                 rewardName = $"<color=white>{reward.RewardValue} XP</color>";
                 rewardImage = Config.Icons.FileData.XPIconLink;
                 return true;
-            case ERewardType.Scrap:
+            case ERewardType.SCRAP:
                 rewardName = $"<color=white>{reward.RewardValue} Scrap</color>";
                 rewardImage = Config.Icons.FileData.ScrapSmallIconLink;
                 return true;
@@ -5569,7 +5578,7 @@ public class UIHandler
 
     public IEnumerator SetupBattlepass()
     {
-        MainPage = EMainPage.Battlepass;
+        MainPage = EMainPage.BATTLEPASS;
         ShowBattlepass();
         // Setup all 50 objects
         for (var i = 1; i <= 50; i++)
@@ -5609,7 +5618,7 @@ public class UIHandler
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass Expire TEXT", "365 Days");
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass Buy Pass BUTTON", !PlayerData.HasBattlepass);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass Tier Skip", !isBattlePassCompleted);
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass Tier Skip TEXT", $"{Utility.GetCurrencySymbol(ECurrency.Coins)} <color={(PlayerData.Coins >= Config.Base.FileData.BattlepassTierSkipCost ? "#9CFF84" : "#FF6E6E")}>{Config.Base.FileData.BattlepassTierSkipCost}</color>");
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass Tier Skip TEXT", $"{Utility.GetCurrencySymbol(ECurrency.COINS)} <color={(PlayerData.Coins >= Config.Base.FileData.BattlepassTierSkipCost ? "#9CFF84" : "#FF6E6E")}>{Config.Base.FileData.BattlepassTierSkipCost}</color>");
         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass Tier Skip IMAGE", "");
     }
 
@@ -5682,8 +5691,8 @@ public class UIHandler
         var reward = isTop ? tier.FreeReward : tier.PremiumReward;
         if (reward != null && TryGetBattlepassRewardInfo(reward, out _, out var rewardImage, out _))
         {
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass IMAGE", reward.RewardType != ERewardType.Card);
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass Card IMAGE", reward.RewardType == ERewardType.Card);
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass IMAGE", reward.RewardType != ERewardType.CARD);
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass Card IMAGE", reward.RewardType == ERewardType.CARD);
             EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass IMAGE", rewardImage);
             EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass Card IMAGE", rewardImage);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass Claim BUTTON", true);
@@ -5698,80 +5707,80 @@ public class UIHandler
 
         switch (reward.RewardType)
         {
-            case ERewardType.Card:
+            case ERewardType.CARD:
                 if (!DB.Cards.TryGetValue(Convert.ToInt32(reward.RewardValue), out var card))
                     return false;
 
                 rewardImage = card.IconLink;
                 rewardRarity = card.CardRarity;
                 return true;
-            case ERewardType.GunSkin:
+            case ERewardType.GUN_SKIN:
                 if (!DB.GunSkinsSearchByID.TryGetValue(Convert.ToInt32(reward.RewardValue), out var skin))
                     return false;
 
                 rewardImage = skin.IconLink;
                 rewardRarity = skin.SkinRarity;
                 return true;
-            case ERewardType.Glove:
+            case ERewardType.GLOVE:
                 if (!DB.Gloves.TryGetValue(Convert.ToUInt16(reward.RewardValue), out var glove))
                     return false;
 
                 rewardImage = glove.IconLink;
                 rewardRarity = glove.GloveRarity;
                 return true;
-            case ERewardType.Gun:
+            case ERewardType.GUN:
                 if (!DB.Guns.TryGetValue(Convert.ToUInt16(reward.RewardValue), out var gun))
                     return false;
 
                 rewardImage = gun.IconLink;
                 rewardRarity = gun.GunRarity;
                 return true;
-            case ERewardType.GunCharm:
+            case ERewardType.GUN_CHARM:
                 if (!DB.GunCharms.TryGetValue(Convert.ToUInt16(reward.RewardValue), out var gunCharm))
                     return false;
 
                 rewardImage = gunCharm.IconLink;
                 rewardRarity = gunCharm.CharmRarity;
                 return true;
-            case ERewardType.Knife:
+            case ERewardType.KNIFE:
                 if (!DB.Knives.TryGetValue(Convert.ToUInt16(reward.RewardValue), out var knife))
                     return false;
 
                 rewardImage = knife.IconLink;
                 rewardRarity = knife.KnifeRarity;
                 return true;
-            case ERewardType.Case:
+            case ERewardType.CASE:
                 if (!DB.Cases.TryGetValue(Convert.ToInt32(reward.RewardValue), out var @case))
                     return false;
 
                 rewardImage = @case.IconLink;
                 rewardRarity = @case.CaseRarity;
                 return true;
-            case ERewardType.BPBooster:
+            case ERewardType.BP_BOOSTER:
                 rewardName = $"<color=white>{string.Format("{0:0.##}", Convert.ToDecimal(reward.RewardValue) * 100)}%</color>";
                 rewardImage = Config.Icons.FileData.BPXPBoostIconLink;
                 return true;
-            case ERewardType.XPBooster:
+            case ERewardType.XP_BOOSTER:
                 rewardName = $"<color=white>{string.Format("{0:0.##}", Convert.ToDecimal(reward.RewardValue) * 100)}%</color>";
                 rewardImage = Config.Icons.FileData.XPBoostIconLink;
                 return true;
-            case ERewardType.GunXPBooster:
+            case ERewardType.GUN_XP_BOOSTER:
                 rewardName = $"<color=white>{string.Format("{0:0.##}", Convert.ToDecimal(reward.RewardValue) * 100)}%</color>";
                 rewardImage = Config.Icons.FileData.GunXPBoostIconLink;
                 return true;
-            case ERewardType.Coin:
+            case ERewardType.COIN:
                 rewardName = $"<color=white>{reward.RewardValue}</color>";
                 rewardImage = Config.Icons.FileData.BlacktagsLargeIconLink;
                 return true;
-            case ERewardType.Credit:
+            case ERewardType.CREDIT:
                 rewardName = $"<color=white>{reward.RewardValue}</color>";
                 rewardImage = Config.Icons.FileData.PointsLargeIconLink;
                 return true;
-            case ERewardType.LevelXP:
+            case ERewardType.LEVEL_XP:
                 rewardName = $"<color=white>{reward.RewardValue}</color>";
                 rewardImage = Config.Icons.FileData.XPIconLink;
                 return true;
-            case ERewardType.Scrap:
+            case ERewardType.SCRAP:
                 rewardName = $"<color=white>{reward.RewardValue}</color>";
                 rewardImage = Config.Icons.FileData.ScrapLargeIconLink;
                 return true;
@@ -5790,13 +5799,13 @@ public class UIHandler
 
         switch (unboxingPage)
         {
-            case EUnboxingPage.Inventory:
+            case EUnboxingPage.INVENTORY:
                 ShowUnboxingInventoryPage();
                 break;
-            case EUnboxingPage.Buy:
+            case EUnboxingPage.BUY:
                 ShowUnboxingStorePage();
                 break;
-            case EUnboxingPage.Open:
+            case EUnboxingPage.OPEN:
                 UnboxInventoryCase(selectedCase);
                 break;
         }
@@ -5930,8 +5939,8 @@ public class UIHandler
         {
             if (i == 20)
             {
-                EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Rolling IMAGE {i}", reward.RewardType == ERewardType.Knife ? Config.Icons.FileData.KnifeUnboxingIconLink : reward.RewardType == ERewardType.Glove ? Config.Icons.FileData.GloveUnboxingIconLink : rewardImage);
-                SendRarity("SERVER Unbox Content Rolling", reward.RewardType == ERewardType.Knife || reward.RewardType == ERewardType.Glove ? ERarity.YELLOW : rewardRarity, i);
+                EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Rolling IMAGE {i}", reward.RewardType == ERewardType.KNIFE ? Config.Icons.FileData.KnifeUnboxingIconLink : reward.RewardType == ERewardType.GLOVE ? Config.Icons.FileData.GloveUnboxingIconLink : rewardImage);
+                SendRarity("SERVER Unbox Content Rolling", reward.RewardType == ERewardType.KNIFE || reward.RewardType == ERewardType.GLOVE ? ERarity.YELLOW : rewardRarity, i);
                 continue;
             }
 
@@ -6093,8 +6102,8 @@ public class UIHandler
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Unbox Buy Coins BUTTON", true);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Unbox Buy Scrap BUTTON", true);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Unbox Buy Preview BUTTON", true);
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Preview Coins TEXT", $"{Utility.GetCurrencySymbol(ECurrency.Coins)} <color={(PlayerData.Coins >= @case.CoinPrice ? "#9CFF84" : "#FF6E6E")}>{@case.CoinPrice}</color>");
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Preview Scrap TEXT", $"{Utility.GetCurrencySymbol(ECurrency.Scrap)} <color={(PlayerData.Scrap >= @case.ScrapPrice ? "#9CFF84" : "#FF6E6E")}>{@case.ScrapPrice}</color>");
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Preview Coins TEXT", $"{Utility.GetCurrencySymbol(ECurrency.COINS)} <color={(PlayerData.Coins >= @case.CoinPrice ? "#9CFF84" : "#FF6E6E")}>{@case.CoinPrice}</color>");
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Preview Scrap TEXT", $"{Utility.GetCurrencySymbol(ECurrency.SCRAP)} <color={(PlayerData.Scrap >= @case.ScrapPrice ? "#9CFF84" : "#FF6E6E")}>{@case.ScrapPrice}</color>");
 
         SendRarityName("SERVER Unbox Buy RarityType TEXT", @case.CaseRarity);
     }
@@ -6179,11 +6188,11 @@ public class UIHandler
 
         switch (SelectedCaseBuyMethod)
         {
-            case ECurrency.Coins:
+            case ECurrency.COINS:
                 PlayerData.Coins -= buyPrice;
                 _ = Task.Run(async () => await DB.DecreasePlayerCoinsAsync(SteamID, buyPrice));
                 break;
-            case ECurrency.Scrap:
+            case ECurrency.SCRAP:
                 PlayerData.Scrap -= buyPrice;
                 _ = Task.Run(async () => await DB.DecreasePlayerScrapAsync(SteamID, buyPrice));
                 break;
@@ -6202,7 +6211,7 @@ public class UIHandler
 
         switch (reward.RewardType)
         {
-            case ERewardType.Card:
+            case ERewardType.CARD:
                 if (!DB.Cards.TryGetValue(Convert.ToInt32(reward.RewardValue), out var card))
                     return false;
 
@@ -6210,7 +6219,7 @@ public class UIHandler
                 rewardImage = card.IconLink;
                 rewardRarity = card.CardRarity;
                 return true;
-            case ERewardType.GunSkin:
+            case ERewardType.GUN_SKIN:
                 if (!DB.GunSkinsSearchByID.TryGetValue(Convert.ToInt32(reward.RewardValue), out var skin))
                     return false;
 
@@ -6218,7 +6227,7 @@ public class UIHandler
                 rewardImage = skin.IconLink;
                 rewardRarity = skin.SkinRarity;
                 return true;
-            case ERewardType.Glove:
+            case ERewardType.GLOVE:
                 if (!DB.Gloves.TryGetValue(Convert.ToUInt16(reward.RewardValue), out var glove))
                     return false;
 
@@ -6226,7 +6235,7 @@ public class UIHandler
                 rewardImage = glove.IconLink;
                 rewardRarity = glove.GloveRarity;
                 return true;
-            case ERewardType.Gun:
+            case ERewardType.GUN:
                 if (!DB.Guns.TryGetValue(Convert.ToUInt16(reward.RewardValue), out var gun))
                     return false;
 
@@ -6234,7 +6243,7 @@ public class UIHandler
                 rewardImage = gun.IconLink;
                 rewardRarity = gun.GunRarity;
                 return true;
-            case ERewardType.GunCharm:
+            case ERewardType.GUN_CHARM:
                 if (!DB.GunCharms.TryGetValue(Convert.ToUInt16(reward.RewardValue), out var gunCharm))
                     return false;
 
@@ -6242,13 +6251,13 @@ public class UIHandler
                 rewardImage = gunCharm.IconLink;
                 rewardRarity = gunCharm.CharmRarity;
                 return true;
-            case ERewardType.Coin:
+            case ERewardType.COIN:
                 rewardName = $"<color=white>{reward.RewardValue} Coins</color>";
                 return true;
-            case ERewardType.Credit:
+            case ERewardType.CREDIT:
                 rewardName = $"<color=white>{reward.RewardValue} Credits</color>";
                 return true;
-            case ERewardType.LevelXP:
+            case ERewardType.LEVEL_XP:
                 rewardName = $"<color=white>{reward.RewardValue} XP</color>";
                 return true;
             default:
@@ -6497,7 +6506,7 @@ public class UIHandler
         while (PlayerData != null)
         {
             yield return new WaitForSeconds(1f);
-            if (MainPage == EMainPage.Leaderboard)
+            if (MainPage == EMainPage.LEADERBOARD)
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Leaderboards Reset TEXT", GetLeaderboardRefreshTime());
 
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Quest Expire TEXT", $"NEW QUESTS IN: {(DateTimeOffset.UtcNow > PlayerData.Quests[0].QuestEnd ? "00:00:00" : (DateTimeOffset.UtcNow - PlayerData.Quests[0].QuestEnd).ToString(@"hh\:mm\:ss"))}");

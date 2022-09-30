@@ -2,10 +2,11 @@
 using Rocket.Unturned.Player;
 using System.Collections.Generic;
 using System.Linq;
-using UnturnedBlackout.Models.FFA;
+using JetBrains.Annotations;
 
 namespace UnturnedBlackout.Commands;
 
+[UsedImplicitly]
 public class FFASPCommand : IRocketCommand
 {
     public AllowedCaller AllowedCaller => AllowedCaller.Player;
@@ -44,7 +45,9 @@ public class FFASPCommand : IRocketCommand
         }
 
         Utility.Say(caller, Plugin.Instance.Translate("FFA_Spawnpoint_Set", location.LocationName).ToRich());
-        Plugin.Instance.Data.Data.FFASpawnPoints.Add(new(locationID, player.Player.transform.position.x, player.Player.transform.position.y, player.Player.transform.position.z, player.Player.transform.eulerAngles.y));
+        var transform = player.Player.transform;
+        var position = transform.position;
+        Plugin.Instance.Data.Data.FFASpawnPoints.Add(new(locationID, position.x, position.y, position.z, transform.eulerAngles.y));
         Plugin.Instance.Data.SaveJson();
     }
 }

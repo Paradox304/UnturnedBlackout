@@ -41,7 +41,7 @@ public class FFAGame : Game
     public IEnumerator StartGame()
     {
         TaskDispatcher.QueueOnMainThread(CleanMap);
-        GamePhase = EGamePhase.Starting;
+        GamePhase = EGamePhase.STARTING;
         Plugin.Instance.UI.OnGameUpdated();
         foreach (var player in Players)
         {
@@ -60,7 +60,7 @@ public class FFAGame : Game
                 Plugin.Instance.UI.SendCountdownSeconds(player.GamePlayer, seconds);
         }
 
-        GamePhase = EGamePhase.Started;
+        GamePhase = EGamePhase.STARTED;
         Plugin.Instance.UI.OnGameUpdated();
         foreach (var player in Players)
         {
@@ -93,7 +93,7 @@ public class FFAGame : Game
         if (GameEnder != null)
             Plugin.Instance.StopCoroutine(GameEnder);
 
-        GamePhase = EGamePhase.Ending;
+        GamePhase = EGamePhase.ENDING;
         Plugin.Instance.UI.OnGameUpdated();
         Dictionary<GamePlayer, MatchEndSummary> summaries = new();
 
@@ -152,9 +152,9 @@ public class FFAGame : Game
                 await Plugin.Instance.DB.IncreasePlayerBPXPAsync(player.GamePlayer.SteamID, summary.BattlepassXP + summary.BattlepassBonusXP);
             });
 
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.Quest.CheckQuest(player.GamePlayer, EQuestType.FinishMatch, new() { { EQuestCondition.Map, Location.LocationID }, { EQuestCondition.Gamemode, (int)GameMode }, { EQuestCondition.WinKills, player.Kills } }));
+            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.Quest.CheckQuest(player.GamePlayer, EQuestType.FINISH_MATCH, new() { { EQuestCondition.MAP, Location.LocationID }, { EQuestCondition.GAMEMODE, (int)GameMode }, { EQuestCondition.WIN_KILLS, player.Kills } }));
             if (index == 0)
-                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.Quest.CheckQuest(player.GamePlayer, EQuestType.Win, new() { { EQuestCondition.Map, Location.LocationID }, { EQuestCondition.Gamemode, (int)GameMode }, { EQuestCondition.WinKills, player.Kills } }));
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.Quest.CheckQuest(player.GamePlayer, EQuestType.WIN, new() { { EQuestCondition.MAP, Location.LocationID }, { EQuestCondition.GAMEMODE, (int)GameMode }, { EQuestCondition.WIN_KILLS, player.Kills } }));
         }
 
         TaskDispatcher.QueueOnMainThread(() =>
@@ -184,7 +184,7 @@ public class FFAGame : Game
             var randomLocation = locations.Count > 0 ? locations[UnityEngine.Random.Range(0, locations.Count)] : Location.LocationID;
             var location = Config.Locations.FileData.ArenaLocations.FirstOrDefault(k => k.LocationID == randomLocation);
             var gameMode = Plugin.Instance.Game.GetRandomGameMode(location.LocationID);
-            GamePhase = EGamePhase.Ended;
+            GamePhase = EGamePhase.ENDED;
             Plugin.Instance.Game.EndGame(this);
             Plugin.Instance.Game.StartGame(location, gameMode.Item1, gameMode.Item2);
         }
@@ -222,7 +222,7 @@ public class FFAGame : Game
         player.IsLoading = false;
         switch (GamePhase)
         {
-            case EGamePhase.WaitingForPlayers:
+            case EGamePhase.WAITING_FOR_PLAYERS:
                 var minPlayers = Location.GetMinPlayers(GameMode);
                 if (Players.Count >= minPlayers)
                     GameStarter = Plugin.Instance.StartCoroutine(StartGame());
@@ -235,12 +235,12 @@ public class FFAGame : Game
 
                 SpawnPlayer(fPlayer);
                 break;
-            case EGamePhase.Starting:
+            case EGamePhase.STARTING:
                 player.Player.Player.movement.sendPluginSpeedMultiplier(0);
                 Plugin.Instance.UI.ShowCountdownUI(player);
                 SpawnPlayer(fPlayer);
                 break;
-            case EGamePhase.Ending:
+            case EGamePhase.ENDING:
                 Plugin.Instance.UI.SetupFFALeaderboard(fPlayer, Players, Location, true, IsHardcore);
                 Plugin.Instance.UI.ShowFFALeaderboard(fPlayer.GamePlayer);
                 break;
@@ -270,16 +270,16 @@ public class FFAGame : Game
 
         switch (GamePhase)
         {
-            case EGamePhase.Starting:
+            case EGamePhase.STARTING:
                 Plugin.Instance.UI.ClearCountdownUI(player);
                 fPlayer.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1);
                 break;
-            case EGamePhase.WaitingForPlayers:
+            case EGamePhase.WAITING_FOR_PLAYERS:
                 Plugin.Instance.UI.ClearWaitingForPlayersUI(player);
                 break;
         }
 
-        if (GamePhase != EGamePhase.Ending)
+        if (GamePhase != EGamePhase.ENDING)
             TaskDispatcher.QueueOnMainThread(() => BarricadeManager.BarricadeRegions.Cast<BarricadeRegion>().SelectMany(k => k.drops).Where(k => (k.GetServersideData()?.owner ?? 0UL) == player.SteamID.m_SteamID && LevelNavigation.tryGetNavigation(k.model.transform.position, out var nav) && nav == Location.NavMesh).Select(k => BarricadeManager.tryGetRegion(k.model.transform, out var x, out var y, out var plant, out var _) ? (k, x, y, plant) : (k, byte.MaxValue, byte.MaxValue, ushort.MaxValue)).ToList().ForEach(k => BarricadeManager.destroyBarricade(k.k, k.Item2, k.Item3, k.Item4)));
 
         player.Player.Player.quests.askSetRadioFrequency(CSteamID.Nil, 0);
@@ -337,7 +337,7 @@ public class FFAGame : Game
                 return;
             }
 
-            Dictionary<EQuestCondition, int> questConditions = new() { { EQuestCondition.Map, Location.LocationID }, { EQuestCondition.Gamemode, (int)GameMode } };
+            Dictionary<EQuestCondition, int> questConditions = new() { { EQuestCondition.MAP, Location.LocationID }, { EQuestCondition.GAMEMODE, (int)GameMode } };
 
             Logging.Debug($"Killer found, killer name: {kPlayer.GamePlayer.Player.CharacterName}");
 
@@ -378,7 +378,7 @@ public class FFAGame : Game
                 xpGained += info.MedalXP;
                 xpText += info.MedalName;
                 equipmentUsed += info.ItemID;
-                questConditions.Add(EQuestCondition.Killstreak, killstreakID);
+                questConditions.Add(EQuestCondition.KILLSTREAK, killstreakID);
             }
             else
             {
@@ -388,7 +388,7 @@ public class FFAGame : Game
                         xpGained += Config.Medals.FileData.MeleeKillXP;
                         xpText += Plugin.Instance.Translate("Melee_Kill").ToRich();
                         equipmentUsed = kPlayer.GamePlayer.ActiveLoadout.Knife?.Knife?.KnifeID ?? 0;
-                        questConditions.Add(EQuestCondition.Knife, equipmentUsed);
+                        questConditions.Add(EQuestCondition.KNIFE, equipmentUsed);
                         break;
                     case EDeathCause.GUN:
                         if (limb == ELimb.SKULL)
@@ -405,20 +405,20 @@ public class FFAGame : Game
                         var equipment = kPlayer.GamePlayer.Player.Player.equipment.itemID;
                         if (equipment == (kPlayer.GamePlayer.ActiveLoadout.PrimarySkin?.SkinID ?? 0) || equipment == (kPlayer.GamePlayer.ActiveLoadout.Primary?.Gun?.GunID ?? 0))
                         {
-                            questConditions.Add(EQuestCondition.GunType, (int)kPlayer.GamePlayer.ActiveLoadout.Primary.Gun.GunType);
+                            questConditions.Add(EQuestCondition.GUN_TYPE, (int)kPlayer.GamePlayer.ActiveLoadout.Primary.Gun.GunType);
                             equipmentUsed = kPlayer.GamePlayer.ActiveLoadout.Primary.Gun.GunID;
                             longshotRange = kPlayer.GamePlayer.ActiveLoadout.Primary.Gun.LongshotRange;
                         }
                         else if (equipment == (kPlayer.GamePlayer.ActiveLoadout.SecondarySkin?.SkinID ?? 0) || equipment == (kPlayer.GamePlayer.ActiveLoadout.Secondary?.Gun?.GunID ?? 0))
                         {
-                            questConditions.Add(EQuestCondition.GunType, (int)kPlayer.GamePlayer.ActiveLoadout.Secondary.Gun.GunType);
+                            questConditions.Add(EQuestCondition.GUN_TYPE, (int)kPlayer.GamePlayer.ActiveLoadout.Secondary.Gun.GunType);
                             equipmentUsed = kPlayer.GamePlayer.ActiveLoadout.Secondary.Gun.GunID;
                             longshotRange = kPlayer.GamePlayer.ActiveLoadout.Secondary.Gun.LongshotRange;
                         }
                         else
                             equipmentUsed = equipment;
 
-                        questConditions.Add(EQuestCondition.Gun, equipmentUsed);
+                        questConditions.Add(EQuestCondition.GUN, equipmentUsed);
                         break;
                     case EDeathCause.CHARGE:
                     case EDeathCause.GRENADE:
@@ -428,7 +428,7 @@ public class FFAGame : Game
                         xpGained += Config.Medals.FileData.LethalKillXP;
                         xpText += Plugin.Instance.Translate("Lethal_Kill").ToRich();
                         equipmentUsed = kPlayer.GamePlayer.ActiveLoadout.Lethal?.Gadget?.GadgetID ?? 0;
-                        questConditions.Add(EQuestCondition.Gadget, equipmentUsed);
+                        questConditions.Add(EQuestCondition.GADGET, equipmentUsed);
                         break;
                     case EDeathCause.SENTRY:
                         if (!GameTurrets.TryGetValue(kPlayer.GamePlayer, out var sentry))
@@ -444,7 +444,7 @@ public class FFAGame : Game
             xpText += "\n";
 
             kPlayer.SetKillstreak(kPlayer.Killstreak + 1);
-            questConditions.Add(EQuestCondition.TargetKS, kPlayer.Killstreak);
+            questConditions.Add(EQuestCondition.TARGET_KS, kPlayer.Killstreak);
             if (kPlayer.MultipleKills == 0)
                 kPlayer.SetMultipleKills(kPlayer.MultipleKills + 1);
             else if ((DateTime.UtcNow - kPlayer.LastKill).TotalSeconds <= 10)
@@ -457,13 +457,13 @@ public class FFAGame : Game
             else
                 kPlayer.SetMultipleKills(1);
 
-            questConditions.Add(EQuestCondition.TargetMK, kPlayer.MultipleKills);
+            questConditions.Add(EQuestCondition.TARGET_MK, kPlayer.MultipleKills);
 
             if (victimKS > Config.Medals.FileData.ShutdownKillStreak)
             {
                 xpGained += Config.Medals.FileData.ShutdownXP;
                 xpText += Plugin.Instance.Translate("Shutdown_Kill").ToRich() + "\n";
-                Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.Shutdown, questConditions);
+                Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.SHUTDOWN, questConditions);
             }
 
             if (kPlayer.PlayersKilled.ContainsKey(fPlayer.GamePlayer.SteamID))
@@ -473,7 +473,7 @@ public class FFAGame : Game
                 {
                     xpGained += Config.Medals.FileData.DominationXP;
                     xpText += Plugin.Instance.Translate("Domination_Kill").ToRich() + "\n";
-                    Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.Domination, questConditions);
+                    Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.DOMINATION, questConditions);
                 }
             }
             else
@@ -483,28 +483,28 @@ public class FFAGame : Game
             {
                 xpGained += Config.Medals.FileData.RevengeXP;
                 xpText += Plugin.Instance.Translate("Revenge_Kill").ToRich() + "\n";
-                Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.Revenge, questConditions);
+                Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.REVENGE, questConditions);
             }
 
             if (isFirstKill)
             {
                 xpGained += Config.Medals.FileData.FirstKillXP;
                 xpText += Plugin.Instance.Translate("First_Kill").ToRich() + "\n";
-                Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.FirstKill, questConditions);
+                Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.FIRST_KILL, questConditions);
             }
 
             if (!usedKillstreak && cause == EDeathCause.GUN && (fPlayer.GamePlayer.Player.Position - kPlayer.GamePlayer.Player.Position).sqrMagnitude > longshotRange)
             {
                 xpGained += Config.Medals.FileData.LongshotXP;
                 xpText += Plugin.Instance.Translate("Longshot_Kill").ToRich() + "\n";
-                Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.Longshot, questConditions);
+                Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.LONGSHOT, questConditions);
             }
 
             if (kPlayer.GamePlayer.Player.Player.life.health < Config.Medals.FileData.HealthSurvivorKill)
             {
                 xpGained += Config.Medals.FileData.SurvivorXP;
                 xpText += Plugin.Instance.Translate("Survivor_Kill").ToRich() + "\n";
-                Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.Survivor, questConditions);
+                Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.SURVIVOR, questConditions);
             }
 
             kPlayer.GamePlayer.LastKiller = CSteamID.Nil;
@@ -527,13 +527,13 @@ public class FFAGame : Game
             if (kPlayer.Kills == Config.FFA.FileData.ScoreLimit)
                 _ = Plugin.Instance.StartCoroutine(GameEnd());
 
-            Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.Kill, questConditions);
-            Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.MultiKill, questConditions);
-            Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.Killstreak, questConditions);
+            Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.KILL, questConditions);
+            Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.MULTI_KILL, questConditions);
+            Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.KILLSTREAK, questConditions);
             if (limb == ELimb.SKULL && cause == EDeathCause.GUN)
-                Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.Headshots, questConditions);
+                Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.HEADSHOTS, questConditions);
 
-            Plugin.Instance.Quest.CheckQuest(fPlayer.GamePlayer, EQuestType.Death, questConditions);
+            Plugin.Instance.Quest.CheckQuest(fPlayer.GamePlayer, EQuestType.DEATH, questConditions);
 
             _ = Task.Run(async () =>
             {
@@ -565,7 +565,7 @@ public class FFAGame : Game
             return;
 
         parameters.applyGlobalArmorMultiplier = IsHardcore;
-        if (GamePhase != EGamePhase.Started)
+        if (GamePhase != EGamePhase.STARTED)
         {
             shouldAllow = false;
             return;
@@ -780,7 +780,7 @@ public class FFAGame : Game
         if (fPlayer == null)
             return;
 
-        if (GamePhase == EGamePhase.Ending)
+        if (GamePhase == EGamePhase.ENDING)
             return;
 
         if (player.ScoreboardCooldown > DateTime.UtcNow)
@@ -812,13 +812,13 @@ public class FFAGame : Game
 
     public override void PlayerEquipmentChanged(GamePlayer player)
     {
-        if (IsPlayerIngame(player.SteamID) && GamePhase != EGamePhase.Starting)
+        if (IsPlayerIngame(player.SteamID) && GamePhase != EGamePhase.STARTING)
             player.GiveMovement(player.Player.Player.equipment.useable is UseableGun gun && gun.isAiming, false, true);
     }
 
     public override void PlayerAimingChanged(GamePlayer player, bool isAiming)
     {
-        if (IsPlayerIngame(player.SteamID) && GamePhase != EGamePhase.Starting)
+        if (IsPlayerIngame(player.SteamID) && GamePhase != EGamePhase.STARTING)
             player.GiveMovement(isAiming, false, false);
     }
 

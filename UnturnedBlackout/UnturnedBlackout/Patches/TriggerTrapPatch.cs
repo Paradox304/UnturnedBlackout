@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using SDG.Unturned;
 using UnityEngine;
+// ReSharper disable InconsistentNaming
 
 namespace UnturnedBlackout.Patches;
 
@@ -40,6 +41,5 @@ public static class TriggerTrapPatch
             return;
 
         game.OnTrapTriggered(gPlayer, drop);
-        return;
     }
 }

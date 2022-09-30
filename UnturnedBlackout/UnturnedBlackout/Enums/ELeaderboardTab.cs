@@ -2,6 +2,6 @@
 
 public enum ELeaderboardTab
 {
-    Kill,
-    Level
+    KILL,
+    LEVEL
 }

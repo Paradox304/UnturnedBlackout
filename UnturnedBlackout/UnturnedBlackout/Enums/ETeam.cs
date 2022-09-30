@@ -2,6 +2,6 @@
 
 public enum ETeam
 {
-    Blue,
-    Red
+    BLUE,
+    RED
 }

@@ -2,10 +2,11 @@
 using Rocket.Unturned.Player;
 using System.Collections.Generic;
 using System.Linq;
-using UnturnedBlackout.Models.TDM;
+using JetBrains.Annotations;
 
 namespace UnturnedBlackout.Commands;
 
+[UsedImplicitly]
 internal class TDMSPCommand : IRocketCommand
 {
     public AllowedCaller AllowedCaller => AllowedCaller.Player;
@@ -50,7 +51,13 @@ internal class TDMSPCommand : IRocketCommand
         }
 
         Utility.Say(caller, Plugin.Instance.Translate("TDM_SpawnPoint_Set", location.LocationName, groupID).ToRich());
-        Plugin.Instance.Data.Data.TDMSpawnPoints.Add(new(locationID, groupID, player.Player.transform.position.x, player.Player.transform.position.y, player.Player.transform.position.z, player.Player.transform.eulerAngles.y));
+        if (player != null)
+        {
+            var transform = player.Player.transform;
+            var position = transform.position;
+            Plugin.Instance.Data.Data.TDMSpawnPoints.Add(new(locationID, groupID, position.x, position.y, position.z, transform.eulerAngles.y));
+        }
+
         Plugin.Instance.Data.SaveJson();
     }
 }

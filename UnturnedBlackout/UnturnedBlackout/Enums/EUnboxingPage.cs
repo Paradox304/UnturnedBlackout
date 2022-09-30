@@ -2,7 +2,7 @@
 
 public enum EUnboxingPage
 {
-    Inventory,
-    Buy,
-    Open
+    INVENTORY,
+    BUY,
+    OPEN
 }

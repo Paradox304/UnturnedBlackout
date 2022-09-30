@@ -70,8 +70,6 @@ public class GameManager
             case EGameType.CTF:
                 game = new CTFGame(location, isHardcore);
                 break;
-            default:
-                break;
         }
 
         Logging.Debug($"Game started, adding game to games and removing location from available locations");
@@ -146,7 +144,7 @@ public class GameManager
         SendPlayerToLobby(player);
 
         var db = Plugin.Instance.DB;
-        Plugin.Instance.UI.SendLoadingUI(player, false, EGameType.None, null, "LOADING...");
+        Plugin.Instance.UI.SendLoadingUI(player, false, EGameType.NONE, null);
         _ = Task.Run(async () =>
         {
             var avatarURL = "";

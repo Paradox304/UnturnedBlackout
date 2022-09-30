@@ -654,7 +654,7 @@ public class LoadoutManager
                     item.state[startingPos] = bytes[0];
                     item.state[startingPos + 1] = bytes[1];
 
-                    if (attachmentType == EAttachment.Magazine)
+                    if (attachmentType == EAttachment.MAGAZINE)
                     {
                         var asset = Assets.find(EAssetType.ITEM, attachment.Attachment.AttachmentID) as ItemMagazineAsset;
                         item.state[10] = asset.amount;
@@ -691,7 +691,7 @@ public class LoadoutManager
                     var bytes = BitConverter.GetBytes(attachment.Attachment.AttachmentID);
                     item.state[startingPos] = bytes[0];
                     item.state[startingPos + 1] = bytes[1];
-                    if (attachmentType == EAttachment.Magazine)
+                    if (attachmentType == EAttachment.MAGAZINE)
                     {
                         var asset = Assets.find(EAssetType.ITEM, attachment.Attachment.AttachmentID) as ItemMagazineAsset;
                         item.state[10] = asset.amount;

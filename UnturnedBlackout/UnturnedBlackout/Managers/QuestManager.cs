@@ -46,7 +46,7 @@ public class QuestManager
             quest.Amount += 1;
             if (quest.Amount >= quest.Quest.TargetAmount)
             {
-                Plugin.Instance.UI.SendAnimation(player, new(EAnimationType.QuestCompletion, quest.Quest));
+                Plugin.Instance.UI.SendAnimation(player, new(EAnimationType.QUEST_COMPLETION, quest.Quest));
                 _ = Task.Run(async () => await db.IncreasePlayerBPXPAsync(steamID, quest.Quest.XP));
             }
             else if (quest.Amount * 100 / quest.Quest.TargetAmount % 10 == 0)

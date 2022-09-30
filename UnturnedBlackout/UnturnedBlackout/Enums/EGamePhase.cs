@@ -2,9 +2,9 @@
 
 public enum EGamePhase
 {
-    WaitingForPlayers,
-    Starting,
-    Started,
-    Ending,
-    Ended
+    WAITING_FOR_PLAYERS,
+    STARTING,
+    STARTED,
+    ENDING,
+    ENDED
 }

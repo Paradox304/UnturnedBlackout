@@ -6,5 +6,5 @@ public enum EGameType
     TDM,
     KC,
     CTF,
-    None
+    NONE
 }

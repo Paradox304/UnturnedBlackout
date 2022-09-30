@@ -11,6 +11,7 @@ using System.Reflection;
 using UnityEngine;
 using UnturnedBlackout.Managers;
 using Logger = Rocket.Core.Logging.Logger;
+// ReSharper disable RedundantAssignment
 
 namespace UnturnedBlackout;
 
@@ -128,7 +129,7 @@ public class Plugin : RocketPlugin<Config>
                 game.OnChangeFiremode(gPlayer);
                 break;
             case 1:
-                if (game.GamePhase != Enums.EGamePhase.Ending && !gPlayer.HasMidgameLoadout)
+                if (game.GamePhase != Enums.EGamePhase.ENDING && !gPlayer.HasMidgameLoadout)
                 {
                     gPlayer.HasMidgameLoadout = true;
                     UI.ShowMidgameLoadoutUI(gPlayer);
@@ -149,6 +150,7 @@ public class Plugin : RocketPlugin<Config>
             Logging.Debug($"TPS: {Provider.debugTPS}", ConsoleColor.Yellow);
             Logging.Debug($"UPS: {Provider.debugUPS}", ConsoleColor.Yellow);
         }
+        // ReSharper disable once IteratorNeverReturns
     }
 
     private void OnDamageStructure(CSteamID instigatorSteamID, Transform structureTransform, ref ushort pendingTotalDamage, ref bool shouldAllow, EDamageOrigin damageOrigin) => shouldAllow = false;
@@ -196,7 +198,7 @@ public class Plugin : RocketPlugin<Config>
 
         _ = StartCoroutine(Day());
 
-        var ignoreMags = Config.Killstreaks.FileData.KillstreaksData.Where(k => k.MagID != 0).Select(k => k.MagID);
+        var ignoreMags = Config.Killstreaks.FileData.KillstreaksData.Where(k => k.MagID != 0).Select(k => k.MagID).ToList();
         var shouldFillAfterDetach = typeof(ItemMagazineAsset).GetProperty("shouldFillAfterDetach", BindingFlags.Public | BindingFlags.Instance);
         var magazines = Assets.find(EAssetType.ITEM).OfType<ItemMagazineAsset>();
         foreach (var mag in magazines)
@@ -204,13 +206,13 @@ public class Plugin : RocketPlugin<Config>
             if (ignoreMags.Contains(mag.id))
                 continue;
 
-            _ = shouldFillAfterDetach.GetSetMethod(true).Invoke(mag, new object[] { true });
+            _ = shouldFillAfterDetach?.GetSetMethod(true).Invoke(mag, new object[] { true });
         }
 
         var isEarpiece = typeof(ItemMaskAsset).GetField("_isEarpiece", BindingFlags.NonPublic | BindingFlags.Instance);
         var masks = Assets.find(EAssetType.ITEM).OfType<ItemMaskAsset>();
         foreach (var mask in masks)
-            isEarpiece.SetValue(mask, true);
+            isEarpiece?.SetValue(mask, true);
     }
 
     public override TranslationList DefaultTranslations => new()

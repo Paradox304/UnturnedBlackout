@@ -200,8 +200,8 @@ public class GamePlayer
         Plugin.Instance.UI.UpdateGadgetUsed(this, true, true);
         if (CurrentGame != null)
         {
-            Dictionary<EQuestCondition, int> questConditions = new() { { EQuestCondition.Map, CurrentGame.Location.LocationID }, { EQuestCondition.Gamemode, (int)CurrentGame.GameMode }, { EQuestCondition.Gadget, ActiveLoadout.Tactical.Gadget.GadgetID } };
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.Quest.CheckQuest(this, EQuestType.GadgetsUsed, questConditions));
+            Dictionary<EQuestCondition, int> questConditions = new() { { EQuestCondition.MAP, CurrentGame.Location.LocationID }, { EQuestCondition.GAMEMODE, (int)CurrentGame.GameMode }, { EQuestCondition.GADGET, ActiveLoadout.Tactical.Gadget.GadgetID } };
+            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.Quest.CheckQuest(this, EQuestType.GADGETS_USED, questConditions));
         }
 
         TacticalChecker.Stop();
@@ -217,8 +217,8 @@ public class GamePlayer
         Plugin.Instance.UI.UpdateGadgetUsed(this, false, true);
         if (CurrentGame != null)
         {
-            Dictionary<EQuestCondition, int> questConditions = new() { { EQuestCondition.Map, CurrentGame.Location.LocationID }, { EQuestCondition.Gamemode, (int)CurrentGame.GameMode }, { EQuestCondition.Gadget, ActiveLoadout.Lethal.Gadget.GadgetID } };
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.Quest.CheckQuest(this, EQuestType.GadgetsUsed, questConditions));
+            Dictionary<EQuestCondition, int> questConditions = new() { { EQuestCondition.MAP, CurrentGame.Location.LocationID }, { EQuestCondition.GAMEMODE, (int)CurrentGame.GameMode }, { EQuestCondition.GADGET, ActiveLoadout.Lethal.Gadget.GadgetID } };
+            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.Quest.CheckQuest(this, EQuestType.GADGETS_USED, questConditions));
         }
 
         LethalChecker.Stop();
@@ -331,7 +331,7 @@ public class GamePlayer
         Plugin.Instance.UI.RemoveKillCard(this);
 
         var killerPlayer = Plugin.Instance.Game.GetGamePlayer(killer);
-        if (killer == null)
+        if (killerPlayer == null)
             return;
 
         Plugin.Instance.UI.SendDeathUI(this, killerPlayer, killerData);
@@ -465,6 +465,7 @@ public class GamePlayer
         else
             return;
 
+        // ReSharper disable once CompareOfFloatsByEqualityOperator
         if (updatedMovement == Player.Player.movement.pluginSpeedMultiplier)
             return;
 
@@ -519,7 +520,7 @@ public class GamePlayer
         {
             AvailableKillstreaks[availableKillstreak] = true;
             Plugin.Instance.UI.UpdateKillstreakReady(this, availableKillstreak);
-            Plugin.Instance.UI.SendAnimation(this, new(EAnimationType.KillstreakAvailable, availableKillstreak.Killstreak));
+            Plugin.Instance.UI.SendAnimation(this, new(EAnimationType.KILLSTREAK_AVAILABLE, availableKillstreak.Killstreak));
         }
 
         Plugin.Instance.UI.UpdateKillstreakBars(this, updatedKillstreak);

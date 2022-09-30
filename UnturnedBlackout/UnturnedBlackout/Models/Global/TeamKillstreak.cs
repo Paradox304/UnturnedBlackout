@@ -1,4 +1,6 @@
-﻿namespace UnturnedBlackout.Models.Global;
+﻿using JetBrains.Annotations;
+
+namespace UnturnedBlackout.Models.Global;
 
 public class TeamKillstreak
 {
@@ -8,6 +10,7 @@ public class TeamKillstreak
     public ushort HatID { get; set; }
     public ushort VestID { get; set; }
 
+    [UsedImplicitly]
     public TeamKillstreak()
     {
     }

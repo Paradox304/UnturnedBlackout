@@ -2,8 +2,8 @@
 
 public enum EAttachment
 {
-    Sights,
-    Grip,
-    Barrel,
-    Magazine
+    SIGHTS,
+    GRIP,
+    BARREL,
+    MAGAZINE
 }

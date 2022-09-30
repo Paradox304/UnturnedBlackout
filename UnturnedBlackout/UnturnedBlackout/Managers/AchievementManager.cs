@@ -46,7 +46,7 @@ public class AchievementManager
             if (achievement.Achievement.TiersLookup.TryGetValue(achievement.CurrentTier + 1, out var nextTier))
             {
                 if (achievement.Amount == nextTier.TargetAmount)
-                    TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.SendAnimation(player, new(EAnimationType.AchievementCompletion, nextTier)));
+                    TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.SendAnimation(player, new(EAnimationType.ACHIEVEMENT_COMPLETION, nextTier)));
             }
 
             _ = Task.Run(async () => await db.IncreasePlayerAchievementAmountAsync(steamID, achievement.Achievement.AchievementID, 1));

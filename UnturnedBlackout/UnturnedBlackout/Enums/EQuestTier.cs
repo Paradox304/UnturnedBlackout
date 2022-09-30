@@ -2,10 +2,10 @@
 
 public enum EQuestTier
 {
-    Easy1,
-    Easy2,
-    Easy3,
-    Medium1,
-    Medium2,
-    Hard1
+    EASY1,
+    EASY2,
+    EASY3,
+    MEDIUM1,
+    MEDIUM2,
+    HARD1
 }

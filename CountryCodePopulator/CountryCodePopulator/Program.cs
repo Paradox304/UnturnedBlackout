@@ -1,4 +1,5 @@
-﻿using MySql.Data.MySqlClient;
+﻿using Microsoft.VisualBasic.CompilerServices;
+using MySql.Data.MySqlClient;
 
 var builder = new MySqlConnectionStringBuilder()
 {
@@ -11,27 +12,70 @@ var builder = new MySqlConnectionStringBuilder()
 };
 
 var connectionString = builder.ConnectionString;
-using (var connection = new MySqlConnection(connectionString))
+var conn = new MySqlConnection(connectionString);
+conn.Open();
+/*var rdr = new MySqlCommand($"SELECT * FROM `UB_Achievements`;", conn).ExecuteReader();
+var achievements = new Dictionary<int, string>();
+while (rdr.Read())
 {
-    connection.Open();
-    var rdr = new MySqlCommand("SELECT `Moderation_PlayerInfo`.`PlayerID` , `Moderation_IPInfo`.`CountryCode` FROM `Moderation_IPInfo` INNER JOIN `Moderation_PlayerInfo` ON `Moderation_IPInfo`.`IP` = `Moderation_PlayerInfo`.`IP`;", connection).ExecuteReader();
-    var playerIPs = new Dictionary<ulong, string>();
-    while (rdr.Read())
+    if (!int.TryParse(rdr[0].ToString(), out var achievementID))
     {
-        if (!ulong.TryParse(rdr[0].ToString(), out ulong steamID))
-        {
-            continue;
-        }
-
-        var countryCode = rdr[1].ToString();
-
-        playerIPs.Add(steamID, countryCode);
+        continue;
     }
-    rdr.Close();
 
-    foreach (var playerIP in playerIPs)
+    var conditions = rdr[2].ToString();
+    if (string.IsNullOrEmpty(conditions))
     {
-        Console.WriteLine($"PlayerIP: {playerIP.Key}, CountryCode: {playerIP.Value}");
-        await new MySqlCommand($"UPDATE `UB_Players` SET `CountryCode` = '{playerIP.Value}' WHERE `SteamID` = {playerIP.Key};", connection).ExecuteScalarAsync();
+        continue;
     }
+    achievements.Add(achievementID, conditions);
+}
+
+rdr.Close();
+
+var previousConditions = new string[] { "guntype", "targetmk", "targetks", "winkills" };
+var newConditions = new string[] { "gun_type", "target_mk", "target_ks", "win_kills" };
+foreach (var achievement in achievements)
+{
+    Console.WriteLine($"Achievement ID: {achievement.Key}, conditions: {achievement.Value}");
+    var conditions = achievement.Value;
+    for (var i = 0; i < previousConditions.Length; i++)
+    {
+        conditions = conditions.Replace(previousConditions[i], newConditions[i]);
+    }
+    Console.WriteLine($"Achievement ID: {achievement.Key}, new conditions: {conditions}");
+    new MySqlCommand($"UPDATE `UB_Achievements` SET `AchievementConditions` = '{conditions}' WHERE `AchievementID` = {achievement.Key};", conn).ExecuteNonQuery();
+}*/
+var rdr = new MySqlCommand($"SELECT * FROM `UB_Battlepass`;", conn).ExecuteReader();
+var battlepass = new Dictionary<int, (string, string)>();
+while (rdr.Read())
+{
+    if (!int.TryParse(rdr[0].ToString(), out var tierID))
+    {
+        continue;
+    }
+    
+    var freeRewards = rdr[1].ToString();
+    var premiumRewards = rdr[2].ToString();
+    
+    battlepass.Add(tierID, (freeRewards, premiumRewards));
+}
+
+rdr.Close();
+
+var previousRewards = new string[] { "guncharm", "gunskin" };
+var newRewards = new string[] { "gun_charm", "gun_skin" };
+foreach (var bp in battlepass)
+{
+    Console.WriteLine($"Battlepass ID: {bp.Key}, free rewards: {bp.Value.Item1}, premium rewards: {bp.Value.Item2}");
+    var freeRewards = bp.Value.Item1;
+    var premiumRewards = bp.Value.Item2;
+    for (var i = 0; i < previousRewards.Length; i++)
+    {
+        freeRewards = freeRewards.Replace(previousRewards[i], newRewards[i]);
+        premiumRewards = premiumRewards.Replace(previousRewards[i], newRewards[i]);
+    }
+
+    Console.WriteLine($"Battlepass ID: {bp.Key}, new free rewards: {bp.Value.Item1}, new premium rewards: {bp.Value.Item2}");
+    new MySqlCommand($"UPDATE `UB_Battlepass` SET `FreeReward` = '{freeRewards}', `PremiumReward` = '{premiumRewards}' WHERE `TierID` = {bp.Key};", conn).ExecuteNonQuery();
 }

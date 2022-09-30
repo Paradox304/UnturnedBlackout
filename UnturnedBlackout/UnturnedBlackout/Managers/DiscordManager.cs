@@ -9,7 +9,7 @@ public static class DiscordManager
 {
     public static void SendEmbed(Embed embed, string name, string webhookurl)
     {
-        Message webhookMessage = new(name, null, new Embed[1] { embed });
+        Message webhookMessage = new(name, null, new[] { embed });
         SendHook(webhookMessage, webhookurl);
     }
 

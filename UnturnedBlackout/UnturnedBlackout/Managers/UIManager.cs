@@ -269,7 +269,7 @@ public class UIManager
     public void SendAnimation(GamePlayer player, AnimationInfo animationInfo)
     {
         var game = player.CurrentGame;
-        if (game != null && game.GamePhase != EGamePhase.Started)
+        if (game != null && game.GamePhase != EGamePhase.STARTED)
             return;
 
         if (player.HasAnimationGoingOn)
@@ -285,7 +285,7 @@ public class UIManager
 
         switch (animationInfo.AnimationType)
         {
-            case EAnimationType.LevelUp:
+            case EAnimationType.LEVEL_UP:
             {
                 if (!Plugin.Instance.DB.Levels.TryGetValue((int)animationInfo.Info, out var level))
                     return;
@@ -296,7 +296,7 @@ public class UIManager
                 EffectManager.sendUIEffectText(LEVEL_UP_KEY, player.TransportConnection, true, "LevelUpTxt", $"LEVEL {level.Level}");
                 break;
             }
-            case EAnimationType.GunLevelUp:
+            case EAnimationType.GUN_LEVEL_UP:
             {
                 var gun = animationInfo.Info as AnimationItemUnlock;
                 EffectManager.sendUIEffect(GUN_LEVEL_UP_ID, GUN_LEVEL_UP_KEY, player.TransportConnection, true);
@@ -305,21 +305,21 @@ public class UIManager
                 EffectManager.sendUIEffectText(GUN_LEVEL_UP_KEY, player.TransportConnection, true, "LevelUpTxt", gun.ItemName);
                 break;
             }
-            case EAnimationType.QuestCompletion:
+            case EAnimationType.QUEST_COMPLETION:
             {
                 var quest = animationInfo.Info as Quest;
                 EffectManager.sendUIEffect(QUEST_COMPLETION_ID, QUEST_COMPLETION_KEY, player.TransportConnection, true);
                 EffectManager.sendUIEffectText(QUEST_COMPLETION_KEY, player.TransportConnection, true, "LevelUpDesc", quest.QuestTitle);
                 break;
             }
-            case EAnimationType.BattlepassTierCompletion:
+            case EAnimationType.BATTLEPASS_TIER_COMPLETION:
             {
                 var tier = animationInfo.Info as BattlepassTier;
                 EffectManager.sendUIEffect(BP_TIER_COMPLETION_ID, BP_TIER_COMPLETION_KEY, player.TransportConnection, true);
                 EffectManager.sendUIEffectText(BP_TIER_COMPLETION_KEY, player.TransportConnection, true, "LevelUpDesc", tier.TierID.ToString());
                 break;
             }
-            case EAnimationType.ItemUnlock:
+            case EAnimationType.ITEM_UNLOCK:
             {
                 var itemUnlock = animationInfo.Info as AnimationItemUnlock;
                 EffectManager.sendUIEffect(ITEM_UNLOCK_ID, ITEM_UNLOCK_KEY, player.TransportConnection, true);
@@ -328,7 +328,7 @@ public class UIManager
                 EffectManager.sendUIEffectText(ITEM_UNLOCK_KEY, player.TransportConnection, true, "LevelUpDesc", itemUnlock.ItemName);
                 break;
             }
-            case EAnimationType.AchievementCompletion:
+            case EAnimationType.ACHIEVEMENT_COMPLETION:
             {
                 var achievement = animationInfo.Info as AchievementTier;
                 EffectManager.sendUIEffect(ACHIEVEMENT_COMPLETION_ID, ACHIEVEMENT_COMPLETION_KEY, player.TransportConnection, true);
@@ -337,7 +337,7 @@ public class UIManager
                 EffectManager.sendUIEffectText(ACHIEVEMENT_COMPLETION_KEY, player.TransportConnection, true, "LevelUpDesc", achievement.TierDesc);
                 break;
             }
-            case EAnimationType.KillstreakAvailable:
+            case EAnimationType.KILLSTREAK_AVAILABLE:
             {
                 var killstreak = animationInfo.Info as Killstreak;
                 EffectManager.sendUIEffect(KILLSTREAK_AVAILABLE_ID, KILLSTREAK_AVAILABLE_KEY, player.TransportConnection, true);
@@ -753,12 +753,12 @@ public class UIManager
         if (player.ActiveLoadout == null)
             return;
 
-        if ((jar.item.id == (player.ActiveLoadout.Tactical?.Gadget?.GadgetID ?? 0) && !player.HasTactical) || (jar.item.id == (player.ActiveLoadout.Tactical?.Gadget?.GadgetID ?? 0) && game.GamePhase != EGamePhase.Started))
+        if ((jar.item.id == (player.ActiveLoadout.Tactical?.Gadget?.GadgetID ?? 0) && !player.HasTactical) || (jar.item.id == (player.ActiveLoadout.Tactical?.Gadget?.GadgetID ?? 0) && game.GamePhase != EGamePhase.STARTED))
         {
             shouldAllow = false;
             return;
         }
-        else if ((jar.item.id == (player.ActiveLoadout.Lethal?.Gadget?.GadgetID ?? 0) && !player.HasLethal) || (jar.item.id == (player.ActiveLoadout.Lethal?.Gadget?.GadgetID ?? 0) && game.GamePhase != EGamePhase.Started))
+        else if ((jar.item.id == (player.ActiveLoadout.Lethal?.Gadget?.GadgetID ?? 0) && !player.HasLethal) || (jar.item.id == (player.ActiveLoadout.Lethal?.Gadget?.GadgetID ?? 0) && game.GamePhase != EGamePhase.STARTED))
         {
             shouldAllow = false;
             return;
@@ -767,7 +767,7 @@ public class UIManager
         if (player.KillstreakTriggers.TryGetValue(jar.item.id, out var activateKillstreak))
         {
             shouldAllow = false;
-            if (game.GamePhase == EGamePhase.Started && /*player.AvailableKillstreaks[activateKillstreak] &&*/
+            if (game.GamePhase == EGamePhase.STARTED && /*player.AvailableKillstreaks[activateKillstreak] &&*/
                 !isCarryingFlag && !player.HasKillstreakActive)
                 player.ActivateKillstreak(activateKillstreak);
 
@@ -891,6 +891,7 @@ public class UIManager
     {
         var ammo = gun.player.equipment.state[10];
         var player = Plugin.Instance.Game.GetGamePlayer(gun.player);
+        Logging.Debug($"{player.Player.CharacterName} shot a bullet, ammo left {ammo}");
         EffectManager.sendUIEffectText(HUD_KEY, player.TransportConnection, true, "AmmoNum", ammo.ToString());
 
         var info = player.ActiveKillstreak?.Killstreak?.KillstreakInfo;
@@ -920,10 +921,11 @@ public class UIManager
     {
         var ammo = sender.player.equipment.state[10];
         var player = Plugin.Instance.Game.GetGamePlayer(sender.player);
+        Logging.Debug($"{player.Player.CharacterName} shot a projectile, ammo left {ammo}");
         EffectManager.sendUIEffectText(HUD_KEY, player.TransportConnection, true, "AmmoNum", ammo.ToString());
 
         var info = player.ActiveKillstreak?.Killstreak?.KillstreakInfo;
-        if (ammo == 0 && player.HasKillstreakActive && player.ActiveKillstreak.Killstreak.KillstreakInfo.IsItem && info.RemoveWhenAmmoEmpty)
+        if (ammo == 0 && player.HasKillstreakActive && info.IsItem && info.RemoveWhenAmmoEmpty)
         {
             if (info.MagAmount > 0)
             {
@@ -1044,13 +1046,13 @@ public class UIManager
     public void SendTDMHUD(TDMPlayer player, TDMTeam blueTeam, TDMTeam redTeam)
     {
         EffectManager.sendUIEffect(TDM_ID, TDM_KEY, player.GamePlayer.TransportConnection, true);
-        EffectManager.sendUIEffectVisibility(TDM_KEY, player.GamePlayer.TransportConnection, true, player.Team.TeamID == (byte)ETeam.Blue ? "BlueTeam" : "RedTeam", true);
+        EffectManager.sendUIEffectVisibility(TDM_KEY, player.GamePlayer.TransportConnection, true, player.Team.TeamID == (byte)ETeam.BLUE ? "BlueTeam" : "RedTeam", true);
         SendGamemodePopup(player.GamePlayer, EGameType.TDM);
         EffectManager.sendUIEffectVisibility(TDM_KEY, player.GamePlayer.TransportConnection, true, "Timer", true);
         EffectManager.sendUIEffectVisibility(TDM_KEY, player.GamePlayer.TransportConnection, true, "Team", true);
         EffectManager.sendUIEffectText(TDM_KEY, player.GamePlayer.TransportConnection, true, "TeamName", $"<color={player.Team.Info.TeamColorHexCode}>{player.Team.Info.TeamName}</color>");
 
-        var index = player.Team.TeamID == (byte)ETeam.Blue ? 1 : 0;
+        var index = player.Team.TeamID == (byte)ETeam.BLUE ? 1 : 0;
         var blueSpaces = blueTeam.Score * MAX_SPACES_TDM_SCORE / Config.TDM.FileData.ScoreLimit;
         var redSpaces = redTeam.Score * MAX_SPACES_TDM_SCORE / Config.TDM.FileData.ScoreLimit;
         EffectManager.sendUIEffectText(TDM_KEY, player.GamePlayer.TransportConnection, true, $"RedNum{index}", redTeam.Score.ToString());
@@ -1064,7 +1066,7 @@ public class UIManager
 
     public void UpdateTDMScore(TDMPlayer player, TDMTeam changeTeam)
     {
-        var index = player.Team.TeamID == (byte)ETeam.Blue ? 1 : 0;
+        var index = player.Team.TeamID == (byte)ETeam.BLUE ? 1 : 0;
         var team = (ETeam)changeTeam.TeamID;
         var spaces = changeTeam.Score * MAX_SPACES_TDM_SCORE / Config.TDM.FileData.ScoreLimit;
 
@@ -1080,8 +1082,8 @@ public class UIManager
 
     public void SetupTDMLeaderboard(TDMPlayer player, List<TDMPlayer> players, ArenaLocation location, TDMTeam wonTeam, TDMTeam blueTeam, TDMTeam redTeam, bool isPlaying, bool isHardcore)
     {
-        var bluePlayers = players.Where(k => k.Team.TeamID == (byte)ETeam.Blue).ToList();
-        var redPlayers = players.Where(k => k.Team.TeamID == (byte)ETeam.Red).ToList();
+        var bluePlayers = players.Where(k => k.Team.TeamID == (byte)ETeam.BLUE).ToList();
+        var redPlayers = players.Where(k => k.Team.TeamID == (byte)ETeam.RED).ToList();
 
         EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "MatchResult0", Plugin.Instance.Translate(player.Team == wonTeam ? isPlaying ? "Winning_Text" : "Victory_Text" : isPlaying ? "Losing_Text" : "Defeat_Text").ToRich());
         EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "MapName0", location.LocationName.ToUpper());
@@ -1160,13 +1162,13 @@ public class UIManager
     public void SendKCHUD(KCPlayer player, KCTeam blueTeam, KCTeam redTeam)
     {
         EffectManager.sendUIEffect(KC_ID, KC_KEY, player.GamePlayer.TransportConnection, true);
-        EffectManager.sendUIEffectVisibility(KC_KEY, player.GamePlayer.TransportConnection, true, player.Team.TeamID == (byte)ETeam.Blue ? "BlueTeam" : "RedTeam", true);
+        EffectManager.sendUIEffectVisibility(KC_KEY, player.GamePlayer.TransportConnection, true, player.Team.TeamID == (byte)ETeam.BLUE ? "BlueTeam" : "RedTeam", true);
         SendGamemodePopup(player.GamePlayer, EGameType.KC);
         EffectManager.sendUIEffectVisibility(KC_KEY, player.GamePlayer.TransportConnection, true, "Timer", true);
         EffectManager.sendUIEffectVisibility(KC_KEY, player.GamePlayer.TransportConnection, true, "Team", true);
         EffectManager.sendUIEffectText(KC_KEY, player.GamePlayer.TransportConnection, true, "TeamName", $"<color={player.Team.Info.TeamColorHexCode}>{player.Team.Info.TeamName}</color>");
 
-        var index = player.Team.TeamID == (byte)ETeam.Blue ? 1 : 0;
+        var index = player.Team.TeamID == (byte)ETeam.BLUE ? 1 : 0;
         var blueSpaces = blueTeam.Score * MAX_SPACES_TDM_SCORE / Config.TDM.FileData.ScoreLimit;
         var redSpaces = redTeam.Score * MAX_SPACES_TDM_SCORE / Config.TDM.FileData.ScoreLimit;
         EffectManager.sendUIEffectText(KC_KEY, player.GamePlayer.TransportConnection, true, $"RedNum{index}", redTeam.Score.ToString());
@@ -1180,7 +1182,7 @@ public class UIManager
 
     public void UpdateKCScore(KCPlayer player, KCTeam changeTeam)
     {
-        var index = player.Team.TeamID == (byte)ETeam.Blue ? 1 : 0;
+        var index = player.Team.TeamID == (byte)ETeam.BLUE ? 1 : 0;
         var team = (ETeam)changeTeam.TeamID;
         var spaces = changeTeam.Score * MAX_SPACES_TDM_SCORE / Config.KC.FileData.ScoreLimit;
 
@@ -1196,8 +1198,8 @@ public class UIManager
 
     public void SetupKCLeaderboard(KCPlayer player, List<KCPlayer> players, ArenaLocation location, KCTeam wonTeam, KCTeam blueTeam, KCTeam redTeam, bool isPlaying, bool isHardcore)
     {
-        var bluePlayers = players.Where(k => k.Team.TeamID == (byte)ETeam.Blue).ToList();
-        var redPlayers = players.Where(k => k.Team.TeamID == (byte)ETeam.Red).ToList();
+        var bluePlayers = players.Where(k => k.Team.TeamID == (byte)ETeam.BLUE).ToList();
+        var redPlayers = players.Where(k => k.Team.TeamID == (byte)ETeam.RED).ToList();
 
         EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "MatchResult2", Plugin.Instance.Translate(player.Team == wonTeam ? isPlaying ? "Winning_Text" : "Victory_Text" : isPlaying ? "Losing_Text" : "Defeat_Text").ToRich());
         EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "MapName2", location.LocationName.ToUpper());
@@ -1343,13 +1345,13 @@ public class UIManager
 
     public void UpdateCTFHUD(List<CTFPlayer> players, CTFTeam changeTeam)
     {
-        var team = (ETeam)changeTeam.TeamID == ETeam.Blue ? "Blue" : "Red";
+        var team = (ETeam)changeTeam.TeamID == ETeam.BLUE ? "Blue" : "Red";
         var otherTeamPlayers = players.Where(k => k.Team.TeamID != changeTeam.TeamID);
         var teamFlagTaker = otherTeamPlayers.FirstOrDefault(k => k.IsCarryingFlag);
 
         foreach (var player in players)
         {
-            var index = (ETeam)player.Team.TeamID == ETeam.Blue ? 1 : 0;
+            var index = (ETeam)player.Team.TeamID == ETeam.BLUE ? 1 : 0;
 
             EffectManager.sendUIEffectText(CTF_KEY, player.GamePlayer.TransportConnection, true, $"{team}Num{index}", changeTeam.Score.ToString());
             EffectManager.sendUIEffectText(CTF_KEY, player.GamePlayer.TransportConnection, true, $"{team}Flag{index}", changeTeam.HasFlag ? "" : "");
@@ -1365,8 +1367,8 @@ public class UIManager
 
     public void SetupCTFLeaderboard(CTFPlayer player, List<CTFPlayer> players, ArenaLocation location, CTFTeam wonTeam, CTFTeam blueTeam, CTFTeam redTeam, bool isPlaying, bool isHardcore)
     {
-        var bluePlayers = players.Where(k => k.Team.TeamID == (byte)ETeam.Blue).ToList();
-        var redPlayers = players.Where(k => k.Team.TeamID == (byte)ETeam.Red).ToList();
+        var bluePlayers = players.Where(k => k.Team.TeamID == (byte)ETeam.BLUE).ToList();
+        var redPlayers = players.Where(k => k.Team.TeamID == (byte)ETeam.RED).ToList();
 
         EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "MatchResult2", Plugin.Instance.Translate(player.Team == wonTeam ? isPlaying ? "Winning_Text" : "Victory_Text" : isPlaying ? "Losing_Text" : "Defeat_Text").ToRich());
         EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "MapName2", location.LocationName.ToUpper());
@@ -1477,7 +1479,7 @@ public class UIManager
 
         switch (page)
         {
-            case EUIPage.Pistol:
+            case EUIPage.PISTOL:
                 handler.BuildPistolPages();
                 return;
             case EUIPage.SMG:
@@ -1486,46 +1488,46 @@ public class UIManager
             case EUIPage.LMG:
                 handler.BuildLMGPages();
                 return;
-            case EUIPage.Shotgun:
+            case EUIPage.SHOTGUN:
                 handler.BuildShotgunPages();
                 return;
             case EUIPage.AR:
                 handler.BuildARPages();
                 return;
-            case EUIPage.Sniper:
+            case EUIPage.SNIPER:
                 handler.BuildSniperPages();
                 return;
-            case EUIPage.Carbine:
+            case EUIPage.CARBINE:
                 handler.BuildCarbinePages();
                 return;
-            case EUIPage.GunCharm:
+            case EUIPage.GUN_CHARM:
                 handler.BuildGunCharmPages();
                 return;
-            case EUIPage.GunSkin:
+            case EUIPage.GUN_SKIN:
                 handler.BuildGunSkinPages();
                 return;
-            case EUIPage.Knife:
+            case EUIPage.KNIFE:
                 handler.BuildKnifePages();
                 return;
-            case EUIPage.Tactical:
+            case EUIPage.TACTICAL:
                 handler.BuildTacticalPages();
                 return;
-            case EUIPage.Lethal:
+            case EUIPage.LETHAL:
                 handler.BuildLethalPages();
                 return;
-            case EUIPage.Card:
+            case EUIPage.CARD:
                 handler.BuildCardPages();
                 return;
-            case EUIPage.Glove:
+            case EUIPage.GLOVE:
                 handler.BuildGlovePages();
                 return;
-            case EUIPage.Killstreak:
+            case EUIPage.KILLSTREAK:
                 handler.BuildKillstreakPages();
                 return;
-            case EUIPage.Achievement:
+            case EUIPage.ACHIEVEMENT:
                 handler.BuildAchievementPages();
                 return;
-            case EUIPage.Case:
+            case EUIPage.CASE:
                 handler.BuildUnboxingInventoryPages();
                 return;
             default:
@@ -1543,7 +1545,7 @@ public class UIManager
     {
         foreach (var handler in UIHandlers)
         {
-            if (handler.MainPage == EMainPage.Play && handler.PlayPage == EPlayPage.Games)
+            if (handler.MainPage == EMainPage.PLAY && handler.PlayPage == EPlayPage.GAMES)
                 handler.ShowGames();
         }
     }
@@ -1552,7 +1554,7 @@ public class UIManager
     {
         foreach (var handler in UIHandlers)
         {
-            if (handler.MainPage == EMainPage.Play && handler.PlayPage == EPlayPage.Games)
+            if (handler.MainPage == EMainPage.PLAY && handler.PlayPage == EPlayPage.GAMES)
                 handler.UpdateGamePlayerCount(game);
         }
     }
@@ -1561,7 +1563,7 @@ public class UIManager
     {
         foreach (var handler in UIHandlers)
         {
-            if (handler.MainPage == EMainPage.Play && handler.PlayPage == EPlayPage.Servers)
+            if (handler.MainPage == EMainPage.PLAY && handler.PlayPage == EPlayPage.SERVERS)
                 handler.ShowServers();
         }
     }
@@ -1570,7 +1572,7 @@ public class UIManager
     {
         if (UIHandlersLookup.TryGetValue(steamID, out var handler))
         {
-            if (handler.MainPage == EMainPage.Achievements)
+            if (handler.MainPage == EMainPage.ACHIEVEMENTS)
             {
                 handler.ReloadAchievementSubPage();
                 handler.ReloadSelectedAchievement();
@@ -1582,7 +1584,7 @@ public class UIManager
     {
         if (UIHandlersLookup.TryGetValue(steamID, out var handler))
         {
-            if (handler.MainPage == EMainPage.Battlepass)
+            if (handler.MainPage == EMainPage.BATTLEPASS)
                 handler.ShowBattlepassTier(tierID);
         }
     }
@@ -1591,7 +1593,7 @@ public class UIManager
     {
         if (UIHandlersLookup.TryGetValue(steamID, out var handler))
         {
-            if (handler.MainPage == EMainPage.Battlepass)
+            if (handler.MainPage == EMainPage.BATTLEPASS)
                 handler.ShowBattlepass();
         }
     }
@@ -1637,7 +1639,7 @@ public class UIManager
                 player.sendBrowserRequest("Our Store:", "https://store.unturnedblackout.com/");
                 return;
             case "SERVER Unbox BUTTON":
-                handler.ShowUnboxingPage(EUnboxingPage.Inventory);
+                handler.ShowUnboxingPage(EUnboxingPage.INVENTORY);
                 return;
             case "SERVER Battlepass BUTTON":
                 _ = Plugin.Instance.StartCoroutine(handler.SetupBattlepass());
@@ -1651,10 +1653,10 @@ public class UIManager
                 player.sendBrowserRequest("Buy currency here:", "https://store.unturnedblackout.com/category/currency");
                 return;
             case "SERVER Play Games BUTTON":
-                handler.ShowPlayPage(EPlayPage.Games);
+                handler.ShowPlayPage(EPlayPage.GAMES);
                 return;
             case "SERVER Play Servers BUTTON":
-                handler.ShowPlayPage(EPlayPage.Servers);
+                handler.ShowPlayPage(EPlayPage.SERVERS);
                 return;
             case "SERVER Play Join BUTTON":
                 handler.ClickedJoinButton();
@@ -1691,70 +1693,70 @@ public class UIManager
                 handler.ExitRenameLoadout();
                 return;
             case "SERVER Loadout Card BUTTON":
-                handler.ShowLoadoutSubPage(ELoadoutPage.Card);
+                handler.ShowLoadoutSubPage(ELoadoutPage.CARD);
                 return;
             case "SERVER Loadout Glove BUTTON":
-                handler.ShowLoadoutSubPage(ELoadoutPage.Glove);
+                handler.ShowLoadoutSubPage(ELoadoutPage.GLOVE);
                 return;
             case "SERVER Loadout Killstreak BUTTON":
-                handler.ShowLoadoutSubPage(ELoadoutPage.Killstreak);
+                handler.ShowLoadoutSubPage(ELoadoutPage.KILLSTREAK);
                 return;
             case "SERVER Loadout Perk BUTTON 1":
-                handler.ShowLoadoutSubPage(ELoadoutPage.Perk1);
+                handler.ShowLoadoutSubPage(ELoadoutPage.PERK1);
                 return;
             case "SERVER Loadout Perk BUTTON 2":
-                handler.ShowLoadoutSubPage(ELoadoutPage.Perk2);
+                handler.ShowLoadoutSubPage(ELoadoutPage.PERK2);
                 return;
             case "SERVER Loadout Perk BUTTON 3":
-                handler.ShowLoadoutSubPage(ELoadoutPage.Perk3);
+                handler.ShowLoadoutSubPage(ELoadoutPage.PERK3);
                 return;
             case "SERVER Loadout Primary BUTTON":
-                handler.ShowLoadoutSubPage(ELoadoutPage.Primary);
+                handler.ShowLoadoutSubPage(ELoadoutPage.PRIMARY);
                 return;
             case "SERVER Loadout Primary Magazine BUTTON":
-                handler.ShowLoadoutSubPage(ELoadoutPage.AttachmentPrimaryMagazine);
+                handler.ShowLoadoutSubPage(ELoadoutPage.ATTACHMENT_PRIMARY_MAGAZINE);
                 return;
             case "SERVER Loadout Primary Sights BUTTON":
-                handler.ShowLoadoutSubPage(ELoadoutPage.AttachmentPrimarySights);
+                handler.ShowLoadoutSubPage(ELoadoutPage.ATTACHMENT_PRIMARY_SIGHTS);
                 return;
             case "SERVER Loadout Primary Grip BUTTON":
-                handler.ShowLoadoutSubPage(ELoadoutPage.AttachmentPrimaryGrip);
+                handler.ShowLoadoutSubPage(ELoadoutPage.ATTACHMENT_PRIMARY_GRIP);
                 return;
             case "SERVER Loadout Primary Charm BUTTON":
-                handler.ShowLoadoutSubPage(ELoadoutPage.AttachmentPrimaryCharm);
+                handler.ShowLoadoutSubPage(ELoadoutPage.ATTACHMENT_PRIMARY_CHARM);
                 return;
             case "SERVER Loadout Primary Barrel BUTTON":
-                handler.ShowLoadoutSubPage(ELoadoutPage.AttachmentPrimaryBarrel);
+                handler.ShowLoadoutSubPage(ELoadoutPage.ATTACHMENT_PRIMARY_BARREL);
                 return;
             case "SERVER Loadout Secondary BUTTON":
-                handler.ShowLoadoutSubPage(ELoadoutPage.Secondary);
+                handler.ShowLoadoutSubPage(ELoadoutPage.SECONDARY);
                 return;
             case "SERVER Loadout Secondary Magazine BUTTON":
-                handler.ShowLoadoutSubPage(ELoadoutPage.AttachmentSecondaryMagazine);
+                handler.ShowLoadoutSubPage(ELoadoutPage.ATTACHMENT_SECONDARY_MAGAZINE);
                 return;
             case "SERVER Loadout Secondary Sights BUTTON":
-                handler.ShowLoadoutSubPage(ELoadoutPage.AttachmentSecondarySights);
+                handler.ShowLoadoutSubPage(ELoadoutPage.ATTACHMENT_SECONDARY_SIGHTS);
                 return;
             case "SERVER Loadout Secondary Charm BUTTON":
-                handler.ShowLoadoutSubPage(ELoadoutPage.AttachmentSecondaryCharm);
+                handler.ShowLoadoutSubPage(ELoadoutPage.ATTACHMENT_SECONDARY_CHARM);
                 return;
             case "SERVER Loadout Secondary Barrel BUTTON":
-                handler.ShowLoadoutSubPage(ELoadoutPage.AttachmentSecondaryBarrel);
+                handler.ShowLoadoutSubPage(ELoadoutPage.ATTACHMENT_SECONDARY_BARREL);
                 return;
             case "SERVER Loadout Knife BUTTON":
-                handler.ShowLoadoutSubPage(ELoadoutPage.Knife);
+                handler.ShowLoadoutSubPage(ELoadoutPage.KNIFE);
                 return;
             case "SERVER Loadout Lethal BUTTON":
-                handler.ShowLoadoutSubPage(ELoadoutPage.Lethal);
+                handler.ShowLoadoutSubPage(ELoadoutPage.LETHAL);
                 return;
             case "SERVER Loadout Tactical BUTTON":
-                handler.ShowLoadoutSubPage(ELoadoutPage.Tactical);
+                handler.ShowLoadoutSubPage(ELoadoutPage.TACTICAL);
                 return;
             case "SERVER Loadout Primary Skin BUTTON":
-                handler.ShowLoadoutSubPage(ELoadoutPage.PrimarySkin);
+                handler.ShowLoadoutSubPage(ELoadoutPage.PRIMARY_SKIN);
                 return;
             case "SERVER Loadout Secondary Skin BUTTON":
-                handler.ShowLoadoutSubPage(ELoadoutPage.SecondarySkin);
+                handler.ShowLoadoutSubPage(ELoadoutPage.SECONDARY_SKIN);
                 return;
             case "SERVER Item All BUTTON":
                 handler.ShowLoadoutTab(ELoadoutTab.ALL);
@@ -1802,22 +1804,22 @@ public class UIManager
                 handler.BackwardLoadoutTab();
                 return;
             case "SERVER Leaderboards Weekly BUTTON":
-                handler.SelectLeaderboardPage(ELeaderboardPage.Weekly);
+                handler.SelectLeaderboardPage(ELeaderboardPage.WEEKLY);
                 return;
             case "SERVER Leaderboards All BUTTON":
-                handler.SelectLeaderboardPage(ELeaderboardPage.All);
+                handler.SelectLeaderboardPage(ELeaderboardPage.ALL);
                 return;
             case "SERVER Leaderboards Daily BUTTON":
-                handler.SelectLeaderboardPage(ELeaderboardPage.Daily);
+                handler.SelectLeaderboardPage(ELeaderboardPage.DAILY);
                 return;
             case "SERVER Leaderboards Seasonal BUTTON":
-                handler.SelectLeaderboardPage(ELeaderboardPage.Seasonal);
+                handler.SelectLeaderboardPage(ELeaderboardPage.SEASONAL);
                 return;
             case "SERVER Leaderboards Kill BUTTON":
-                handler.SelectLeaderboardTab(ELeaderboardTab.Kill);
+                handler.SelectLeaderboardTab(ELeaderboardTab.KILL);
                 return;
             case "SERVER Leaderboards Level BUTTON":
-                handler.SelectLeaderboardTab(ELeaderboardTab.Level);
+                handler.SelectLeaderboardTab(ELeaderboardTab.LEVEL);
                 return;
             case "SERVER Leaderboards Next BUTTON":
                 handler.ForwardLeaderboardPage();
@@ -1834,18 +1836,18 @@ public class UIManager
                 handler.BackwardAchievementSubPage();
                 return;
             case "SERVER Achievements Claim BUTTON":
-                if (handler.MainPage == EMainPage.Achievements)
+                if (handler.MainPage == EMainPage.ACHIEVEMENTS)
                     Plugin.Instance.Achievement.ClaimAchievementTier(ply.CSteamID, handler.SelectedAchievementID);
 
                 return;
             case "SERVER Battlepass Tier Skip BUTTON":
                 return;
             case "SERVER Battlepass Confirm BUTTON":
-                if (handler.MainPage == EMainPage.Battlepass)
+                if (handler.MainPage == EMainPage.BATTLEPASS)
                     Plugin.Instance.BP.SkipTier(gPly);
                 return;
             case "SERVER Battlepass Claim BUTTON":
-                if (handler.MainPage == EMainPage.Battlepass)
+                if (handler.MainPage == EMainPage.BATTLEPASS)
                     Plugin.Instance.BP.ClaimReward(gPly, handler.SelectedBattlepassTierID.Item1, handler.SelectedBattlepassTierID.Item2);
 
                 return;
@@ -1853,7 +1855,7 @@ public class UIManager
                 player.sendBrowserRequest("Buy premium battlepass here:", "https://store.unturnedblackout.com/category/battlepass");
                 return;
             case "SERVER Unbox Inventory BUTTON":
-                handler.ShowUnboxingPage(EUnboxingPage.Inventory);
+                handler.ShowUnboxingPage(EUnboxingPage.INVENTORY);
                 return;
             case "SERVER Unbox Inventory Previous BUTTON":
                 handler.BackwardUnboxingInventoryPage();
@@ -1862,7 +1864,7 @@ public class UIManager
                 handler.ForwardUnboxingInventoryPage();
                 return;
             case "SERVER Unbox BuyCrate BUTTON":
-                handler.ShowUnboxingPage(EUnboxingPage.Buy);
+                handler.ShowUnboxingPage(EUnboxingPage.BUY);
                 return;
             case "SERVER Unbox Buy Previous BUTTON":
                 handler.BackwardUnboxingStorePage();
@@ -1874,25 +1876,25 @@ public class UIManager
                 handler.PreviewUnboxingStoreCase();
                 return;
             case "SERVER Unbox Buy Coins BUTTON":
-                handler.BuyUnboxingStoreCase(ECurrency.Coins);
+                handler.BuyUnboxingStoreCase(ECurrency.COINS);
                 return;
             case "SERVER Unbox Buy Scrap BUTTON":
-                handler.BuyUnboxingStoreCase(ECurrency.Scrap);
+                handler.BuyUnboxingStoreCase(ECurrency.SCRAP);
                 return;
             case "SERVER Unbox Confirm BUTTON":
                 handler.ConfirmUnboxingStoreCase();
                 return;
             case "SERVER Unbox Content Back BUTTON":
-                if (handler.UnboxingPage == EUnboxingPage.Open)
+                if (handler.UnboxingPage == EUnboxingPage.OPEN)
                 {
-                    handler.ShowUnboxingPage(EUnboxingPage.Inventory);
+                    handler.ShowUnboxingPage(EUnboxingPage.INVENTORY);
                     if (handler.CrateUnboxer != null)
                         Plugin.Instance.StopCoroutine(handler.CrateUnboxer);
                 }
 
                 return;
             case "SERVER Unbox Content Unbox BUTTON":
-                if (handler.UnboxingPage == EUnboxingPage.Open && !handler.IsUnboxing)
+                if (handler.UnboxingPage == EUnboxingPage.OPEN && !handler.IsUnboxing)
                     handler.CrateUnboxer = Plugin.Instance.StartCoroutine(handler.UnboxCase());
 
                 return;
@@ -1935,7 +1937,7 @@ public class UIManager
         else if (buttonName.StartsWith("SERVER Battlepass"))
             handler.SelectedBattlepassTier(buttonName.Split(' ')[2] == "T", selected);
         else if (buttonName.StartsWith("SERVER Unbox Crate BUTTON"))
-            handler.ShowUnboxingPage(EUnboxingPage.Open, selected);
+            handler.ShowUnboxingPage(EUnboxingPage.OPEN, selected);
         else if (buttonName.StartsWith("SERVER Unbox Buy BUTTON"))
             handler.SelectedUnboxingStoreCase(selected);
     }

@@ -75,7 +75,7 @@ public class UnboxManager
                 rewardImage = knife.IconLink;
                 rewardDesc = knife.KnifeDesc;
                 rewardRarity = knife.KnifeRarity;
-                reward = new(ERewardType.Knife, knife.KnifeID);
+                reward = new(ERewardType.KNIFE, knife.KnifeID);
 
                 return true;
             }
@@ -120,7 +120,7 @@ public class UnboxManager
                 rewardImage = glove.IconLink;
                 rewardDesc = glove.GloveDesc;
                 rewardRarity = glove.GloveRarity;
-                reward = new(ERewardType.Glove, glove.GloveID);
+                reward = new(ERewardType.GLOVE, glove.GloveID);
 
                 return true;
             }
@@ -157,7 +157,7 @@ public class UnboxManager
                 rewardImage = skin.IconLink;
                 rewardDesc = skin.SkinDesc;
                 rewardRarity = skin.SkinRarity;
-                reward = new(ERewardType.GunSkin, skin.ID);
+                reward = new(ERewardType.GUN_SKIN, skin.ID);
 
                 return true;
             }

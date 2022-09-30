@@ -2,11 +2,11 @@
 
 public enum EAnimationType
 {
-    LevelUp,
-    GunLevelUp,
-    QuestCompletion,
-    AchievementCompletion,
-    BattlepassTierCompletion,
-    ItemUnlock,
-    KillstreakAvailable
+    LEVEL_UP,
+    GUN_LEVEL_UP,
+    QUEST_COMPLETION,
+    ACHIEVEMENT_COMPLETION,
+    BATTLEPASS_TIER_COMPLETION,
+    ITEM_UNLOCK,
+    KILLSTREAK_AVAILABLE
 }

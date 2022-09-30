@@ -2,12 +2,12 @@
 
 public class Footer
 {
-    public string text { get; set; }
-    public string icon_url { get; set; }
+    private string Text { get; set; }
+    private string IconURL { get; set; }
 
-    public Footer(string text, string icon_url)
+    public Footer(string text, string iconURL)
     {
-        this.text = text;
-        this.icon_url = icon_url;
+        Text = text;
+        IconURL = iconURL;
     }
 }

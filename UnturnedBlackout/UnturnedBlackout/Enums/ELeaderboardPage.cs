@@ -2,8 +2,8 @@
 
 public enum ELeaderboardPage
 {
-    Daily,
-    Weekly,
-    Seasonal,
-    All
+    DAILY,
+    WEEKLY,
+    SEASONAL,
+    ALL
 }

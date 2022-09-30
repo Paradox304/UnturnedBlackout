@@ -2,14 +2,14 @@
 
 public class Author
 {
-    public string name { get; set; }
-    public string url { get; set; }
-    public string icon_url { get; set; }
+    public string Name { get; set; }
+    public string URL { get; set; }
+    public string IconURL { get; set; }
 
-    public Author(string name, string url, string icon_url)
+    public Author(string name, string url, string iconURL)
     {
-        this.name = name;
-        this.url = url;
-        this.icon_url = icon_url;
+        Name = name;
+        URL = url;
+        IconURL = iconURL;
     }
 }

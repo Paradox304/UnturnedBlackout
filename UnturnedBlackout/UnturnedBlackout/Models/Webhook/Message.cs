@@ -2,20 +2,20 @@
 
 public class Message
 {
-    public string username { get; set; }
+    private string Username { get; set; }
 
-    public string avatar_url { get; set; }
+    private string AvatarURL { get; set; }
 
-    public Embed[] embeds { get; set; }
+    private Embed[] Embeds { get; set; }
 
     public Message()
     {
     }
 
-    public Message(string username, string avatar_url, Embed[] embeds)
+    public Message(string username, string avatarURL, Embed[] embeds)
     {
-        this.username = username;
-        this.avatar_url = avatar_url;
-        this.embeds = embeds;
+        Username = username;
+        AvatarURL = avatarURL;
+        Embeds = embeds;
     }
 }

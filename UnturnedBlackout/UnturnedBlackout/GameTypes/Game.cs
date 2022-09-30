@@ -44,7 +44,7 @@ public abstract class Game
         GameMode = gameMode;
         Location = location;
         IsHardcore = isHardcore;
-        GamePhase = EGamePhase.WaitingForPlayers;
+        GamePhase = EGamePhase.WAITING_FOR_PLAYERS;
         Killfeed = new();
 
         GameTurrets = new();

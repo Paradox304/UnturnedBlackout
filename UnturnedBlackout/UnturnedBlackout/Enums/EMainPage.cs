@@ -2,13 +2,13 @@
 
 public enum EMainPage
 {
-    None,
-    Play,
-    Loadout,
-    Unbox,
-    Shop,
-    Achievements,
-    Battlepass,
-    Quests,
-    Leaderboard
+    NONE,
+    PLAY,
+    LOADOUT,
+    UNBOX,
+    SHOP,
+    ACHIEVEMENTS,
+    BATTLEPASS,
+    QUESTS,
+    LEADERBOARD
 }

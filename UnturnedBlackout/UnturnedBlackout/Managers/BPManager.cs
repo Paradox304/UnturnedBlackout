@@ -105,7 +105,7 @@ public class BPManager
                 });
             }
             else
-                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.SendNotEnoughCurrencyModal(player.SteamID, ECurrency.Coins));
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.SendNotEnoughCurrencyModal(player.SteamID, ECurrency.COINS));
 
             _ = PendingWork.Remove(player.SteamID);
         });

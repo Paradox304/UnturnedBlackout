@@ -27,7 +27,7 @@ public class ArenaLocation
     {
     }
 
-    public ArenaLocation(int locationID, string locationName, string imageLink, int navMesh, int blueTeamID, int redTeamID, int fFACount, int tDMCount, int kCCount, int cTFCount, int fFAMinCount, int tDMMinCount, int kCMinCount, int cTFMinCount, float positionCheck)
+    public ArenaLocation(int locationID, string locationName, string imageLink, int navMesh, int blueTeamID, int redTeamID, int fFaCount, int tDmCount, int kCCount, int cTfCount, int fFaMinCount, int tDmMinCount, int kCMinCount, int cTfMinCount, float positionCheck)
     {
         LocationID = locationID;
         LocationName = locationName;
@@ -35,14 +35,14 @@ public class ArenaLocation
         NavMesh = navMesh;
         BlueTeamID = blueTeamID;
         RedTeamID = redTeamID;
-        FFACount = fFACount;
-        TDMCount = tDMCount;
+        FFACount = fFaCount;
+        TDMCount = tDmCount;
         KCCount = kCCount;
-        CTFCount = cTFCount;
-        FFAMinCount = fFAMinCount;
-        TDMMinCount = tDMMinCount;
+        CTFCount = cTfCount;
+        FFAMinCount = fFaMinCount;
+        TDMMinCount = tDmMinCount;
         KCMinCount = kCMinCount;
-        CTFMinCount = cTFMinCount;
+        CTFMinCount = cTfMinCount;
         PositionCheck = positionCheck;
     }
 
@@ -54,7 +54,7 @@ public class ArenaLocation
             EGameType.TDM => TDMCount,
             EGameType.KC => KCCount,
             EGameType.CTF => CTFCount,
-            _ => 0
+            var _ => 0
         };
     }
 
@@ -66,7 +66,7 @@ public class ArenaLocation
             EGameType.TDM => TDMMinCount,
             EGameType.KC => KCMinCount,
             EGameType.CTF => CTFMinCount,
-            _ => 0
+            var _ => 0
         };
     }
 }

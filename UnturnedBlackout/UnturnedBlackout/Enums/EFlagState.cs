@@ -2,9 +2,9 @@
 
 public enum EFlagState
 {
-    Captured,
-    Recovered,
-    Taken,
-    Dropped,
-    Picked
+    CAPTURED,
+    RECOVERED,
+    TAKEN,
+    DROPPED,
+    PICKED
 }

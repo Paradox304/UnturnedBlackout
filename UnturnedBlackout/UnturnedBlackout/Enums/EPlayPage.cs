@@ -2,6 +2,6 @@
 
 public enum EPlayPage
 {
-    Games,
-    Servers
+    GAMES,
+    SERVERS
 }

@@ -43,9 +43,9 @@ public class CTFGame : Game
         {
             if (spawnPoint.IsFlagSP)
             {
-                if ((ETeam)spawnPoint.GroupID == ETeam.Blue)
+                if ((ETeam)spawnPoint.GroupID == ETeam.BLUE)
                     blueFlag = spawnPoint.GetSpawnPoint();
-                else if ((ETeam)spawnPoint.GroupID == ETeam.Red)
+                else if ((ETeam)spawnPoint.GroupID == ETeam.RED)
                     redFlag = spawnPoint.GetSpawnPoint();
 
                 continue;
@@ -63,14 +63,14 @@ public class CTFGame : Game
         var blueTeamInfo = Config.Teams.FileData.TeamsInfo.FirstOrDefault(k => k.TeamID == location.BlueTeamID);
         var redTeamInfo = Config.Teams.FileData.TeamsInfo.FirstOrDefault(k => k.TeamID == location.RedTeamID);
 
-        BlueTeam = new((byte)ETeam.Blue, false, blueTeamInfo, Config.CTF.FileData.BlueFlagID, blueFlag);
-        RedTeam = new((byte)ETeam.Red, false, redTeamInfo, Config.CTF.FileData.RedFlagID, redFlag);
+        BlueTeam = new((byte)ETeam.BLUE, false, blueTeamInfo, Config.CTF.FileData.BlueFlagID, blueFlag);
+        RedTeam = new((byte)ETeam.RED, false, redTeamInfo, Config.CTF.FileData.RedFlagID, redFlag);
         Frequency = Utility.GetFreeFrequency();
     }
 
     public IEnumerator StartGame()
     {
-        GamePhase = EGamePhase.Starting;
+        GamePhase = EGamePhase.STARTING;
         foreach (var player in Players)
         {
             if (player.GamePlayer.IsLoading)
@@ -88,7 +88,7 @@ public class CTFGame : Game
                 Plugin.Instance.UI.SendCountdownSeconds(player.GamePlayer, seconds);
         }
 
-        GamePhase = EGamePhase.Started;
+        GamePhase = EGamePhase.STARTED;
         foreach (var player in Players)
         {
             player.GamePlayer.GiveMovement(player.GamePlayer.Player.Player.equipment.useable is UseableGun gun && gun.isAiming, false, false);
@@ -127,7 +127,7 @@ public class CTFGame : Game
         if (GameEnder != null)
             Plugin.Instance.StopCoroutine(GameEnder);
 
-        GamePhase = EGamePhase.Ending;
+        GamePhase = EGamePhase.ENDING;
         Plugin.Instance.UI.OnGameUpdated();
 
         var endTime = DateTime.UtcNow;
@@ -184,23 +184,23 @@ public class CTFGame : Game
                 await Plugin.Instance.DB.IncreasePlayerBPXPAsync(player.GamePlayer.SteamID, summary.BattlepassXP + summary.BattlepassBonusXP);
             });
 
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.Quest.CheckQuest(player.GamePlayer, EQuestType.FinishMatch, new()
+            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.Quest.CheckQuest(player.GamePlayer, EQuestType.FINISH_MATCH, new()
             {
-                { EQuestCondition.Map, Location.LocationID },
-                { EQuestCondition.Gamemode, (int)GameMode },
-                { EQuestCondition.WinFlagsCaptured, player.FlagsCaptured },
-                { EQuestCondition.WinFlagsSaved, player.FlagsSaved },
-                { EQuestCondition.WinKills, player.Kills }
+                { EQuestCondition.MAP, Location.LocationID },
+                { EQuestCondition.GAMEMODE, (int)GameMode },
+                { EQuestCondition.WIN_FLAGS_CAPTURED, player.FlagsCaptured },
+                { EQuestCondition.WIN_FLAGS_SAVED, player.FlagsSaved },
+                { EQuestCondition.WIN_KILLS, player.Kills }
             }));
             if (player.Team == wonTeam)
             {
-                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.Quest.CheckQuest(player.GamePlayer, EQuestType.Win, new()
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.Quest.CheckQuest(player.GamePlayer, EQuestType.WIN, new()
                 {
-                    { EQuestCondition.Map, Location.LocationID },
-                    { EQuestCondition.Gamemode, (int)GameMode },
-                    { EQuestCondition.WinFlagsCaptured, player.FlagsCaptured },
-                    { EQuestCondition.WinFlagsSaved, player.FlagsSaved },
-                    { EQuestCondition.WinKills, player.Kills }
+                    { EQuestCondition.MAP, Location.LocationID },
+                    { EQuestCondition.GAMEMODE, (int)GameMode },
+                    { EQuestCondition.WIN_FLAGS_CAPTURED, player.FlagsCaptured },
+                    { EQuestCondition.WIN_FLAGS_SAVED, player.FlagsSaved },
+                    { EQuestCondition.WIN_KILLS, player.Kills }
                 }));
             }
 
@@ -234,17 +234,10 @@ public class CTFGame : Game
         var locations = Plugin.Instance.Game.AvailableLocations;
         lock (locations)
         {
-            var locString = "";
-            foreach (var loc in locations)
-            {
-                var locc = Config.Locations.FileData.ArenaLocations.FirstOrDefault(k => k.LocationID == loc);
-                locString += $"{locc.LocationName},";
-            }
-
             var randomLocation = locations.Count > 0 ? locations[UnityEngine.Random.Range(0, locations.Count)] : Location.LocationID;
             var location = Config.Locations.FileData.ArenaLocations.FirstOrDefault(k => k.LocationID == randomLocation);
             var gameMode = Plugin.Instance.Game.GetRandomGameMode(location.LocationID);
-            GamePhase = EGamePhase.Ended;
+            GamePhase = EGamePhase.ENDED;
             Plugin.Instance.Game.EndGame(this);
             Plugin.Instance.Game.StartGame(location, gameMode.Item1, gameMode.Item2);
         }
@@ -284,7 +277,7 @@ public class CTFGame : Game
         player.IsLoading = false;
         switch (GamePhase)
         {
-            case EGamePhase.WaitingForPlayers:
+            case EGamePhase.WAITING_FOR_PLAYERS:
                 var minPlayers = Location.GetMinPlayers(GameMode);
                 if (Players.Count >= minPlayers)
                     GameStarter = Plugin.Instance.StartCoroutine(StartGame());
@@ -301,11 +294,11 @@ public class CTFGame : Game
                 }
 
                 break;
-            case EGamePhase.Starting:
+            case EGamePhase.STARTING:
                 player.Player.Player.movement.sendPluginSpeedMultiplier(0);
                 Plugin.Instance.UI.ShowCountdownUI(player);
                 break;
-            case EGamePhase.Ending:
+            case EGamePhase.ENDING:
                 CTFTeam wonTeam;
                 wonTeam = BlueTeam.Score > RedTeam.Score ? BlueTeam : RedTeam.Score > BlueTeam.Score ? RedTeam : new(-1, true, new(), 0, Vector3.zero);
 
@@ -332,16 +325,16 @@ public class CTFGame : Game
 
         OnStoppedTalking(player);
 
-        if (GamePhase == EGamePhase.Starting)
+        if (GamePhase == EGamePhase.STARTING)
         {
             Plugin.Instance.UI.ClearCountdownUI(player);
             cPlayer.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1);
         }
-        else if (GamePhase == EGamePhase.WaitingForPlayers)
+        else if (GamePhase == EGamePhase.WAITING_FOR_PLAYERS)
             Plugin.Instance.UI.ClearWaitingForPlayersUI(player);
 
-        if (GamePhase != EGamePhase.Ending)
-            TaskDispatcher.QueueOnMainThread(() => BarricadeManager.BarricadeRegions.Cast<BarricadeRegion>().SelectMany(k => k.drops).Where(k => (k.GetServersideData()?.owner ?? 0UL) == player.SteamID.m_SteamID && LevelNavigation.tryGetNavigation(k.model.transform.position, out var nav) && nav == Location.NavMesh).Select(k => BarricadeManager.tryGetRegion(k.model.transform, out var x, out var y, out var plant, out _) ? (k, x, y, plant) : (k, byte.MaxValue, byte.MaxValue, ushort.MaxValue)).ToList().ForEach(k => BarricadeManager.destroyBarricade(k.k, k.Item2, k.Item3, k.Item4)));
+        if (GamePhase != EGamePhase.ENDING)
+            TaskDispatcher.QueueOnMainThread(() => BarricadeManager.BarricadeRegions.Cast<BarricadeRegion>().SelectMany(k => k.drops).Where(k => (k.GetServersideData()?.owner ?? 0UL) == player.SteamID.m_SteamID && LevelNavigation.tryGetNavigation(k.model.transform.position, out var nav) && nav == Location.NavMesh).Select(k => BarricadeManager.tryGetRegion(k.model.transform, out var x, out var y, out var plant, out var _) ? (k, x, y, plant) : (k, byte.MaxValue, byte.MaxValue, ushort.MaxValue)).ToList().ForEach(k => BarricadeManager.destroyBarricade(k.k, k.Item2, k.Item3, k.Item4)));
 
         if (cPlayer != null)
         {
@@ -361,7 +354,7 @@ public class CTFGame : Game
                 TaskDispatcher.QueueOnMainThread(() =>
                 {
                     Plugin.Instance.UI.UpdateCTFHUD(Players, otherTeam);
-                    Plugin.Instance.UI.SendCTFFlagStates(cPlayer.Team, (ETeam)otherTeam.TeamID, Players, EFlagState.Dropped);
+                    Plugin.Instance.UI.SendCTFFlagStates(cPlayer.Team, (ETeam)otherTeam.TeamID, Players, EFlagState.DROPPED);
                 });
             }
         }
@@ -409,7 +402,7 @@ public class CTFGame : Game
             TaskDispatcher.QueueOnMainThread(() =>
             {
                 Plugin.Instance.UI.UpdateCTFHUD(Players, otherTeam);
-                Plugin.Instance.UI.SendCTFFlagStates(cPlayer.Team, (ETeam)otherTeam.TeamID, Players, EFlagState.Dropped);
+                Plugin.Instance.UI.SendCTFFlagStates(cPlayer.Team, (ETeam)otherTeam.TeamID, Players, EFlagState.DROPPED);
             });
         }
 
@@ -432,7 +425,7 @@ public class CTFGame : Game
                 return;
             }
 
-            Dictionary<EQuestCondition, int> questConditions = new() { { EQuestCondition.Map, Location.LocationID }, { EQuestCondition.Gamemode, (int)GameMode } };
+            Dictionary<EQuestCondition, int> questConditions = new() { { EQuestCondition.MAP, Location.LocationID }, { EQuestCondition.GAMEMODE, (int)GameMode } };
 
             Logging.Debug($"Killer found, killer name: {kPlayer.GamePlayer.Player.CharacterName}");
 
@@ -474,7 +467,7 @@ public class CTFGame : Game
                 xpGained += info.MedalXP;
                 xpText += info.MedalName;
                 equipmentUsed += info.ItemID;
-                questConditions.Add(EQuestCondition.Killstreak, killstreakID);
+                questConditions.Add(EQuestCondition.KILLSTREAK, killstreakID);
             }
             else
             {
@@ -484,7 +477,7 @@ public class CTFGame : Game
                         xpGained += Config.Medals.FileData.MeleeKillXP;
                         xpText += Plugin.Instance.Translate("Melee_Kill").ToRich();
                         equipmentUsed = kPlayer.GamePlayer.ActiveLoadout.Knife?.Knife?.KnifeID ?? 0;
-                        questConditions.Add(EQuestCondition.Knife, equipmentUsed);
+                        questConditions.Add(EQuestCondition.KNIFE, equipmentUsed);
                         break;
                     case EDeathCause.GUN:
                         if (limb == ELimb.SKULL)
@@ -501,20 +494,20 @@ public class CTFGame : Game
                         var equipment = kPlayer.GamePlayer.Player.Player.equipment.itemID;
                         if (equipment == (kPlayer.GamePlayer.ActiveLoadout.PrimarySkin?.SkinID ?? 0) || equipment == (kPlayer.GamePlayer.ActiveLoadout.Primary?.Gun?.GunID ?? 0))
                         {
-                            questConditions.Add(EQuestCondition.GunType, (int)kPlayer.GamePlayer.ActiveLoadout.Primary.Gun.GunType);
+                            questConditions.Add(EQuestCondition.GUN_TYPE, (int)kPlayer.GamePlayer.ActiveLoadout.Primary.Gun.GunType);
                             equipmentUsed = kPlayer.GamePlayer.ActiveLoadout.Primary.Gun.GunID;
                             longshotRange = kPlayer.GamePlayer.ActiveLoadout.Primary.Gun.LongshotRange;
                         }
                         else if (equipment == (kPlayer.GamePlayer.ActiveLoadout.SecondarySkin?.SkinID ?? 0) || equipment == (kPlayer.GamePlayer.ActiveLoadout.Secondary?.Gun?.GunID ?? 0))
                         {
-                            questConditions.Add(EQuestCondition.GunType, (int)kPlayer.GamePlayer.ActiveLoadout.Secondary.Gun.GunType);
+                            questConditions.Add(EQuestCondition.GUN_TYPE, (int)kPlayer.GamePlayer.ActiveLoadout.Secondary.Gun.GunType);
                             equipmentUsed = kPlayer.GamePlayer.ActiveLoadout.Secondary.Gun.GunID;
                             longshotRange = kPlayer.GamePlayer.ActiveLoadout.Secondary.Gun.LongshotRange;
                         }
                         else
                             equipmentUsed = equipment;
 
-                        questConditions.Add(EQuestCondition.Gun, equipmentUsed);
+                        questConditions.Add(EQuestCondition.GUN, equipmentUsed);
                         break;
                     case EDeathCause.CHARGE:
                     case EDeathCause.GRENADE:
@@ -524,7 +517,7 @@ public class CTFGame : Game
                         xpGained += Config.Medals.FileData.LethalKillXP;
                         xpText += Plugin.Instance.Translate("Lethal_Kill").ToRich();
                         equipmentUsed = kPlayer.GamePlayer.ActiveLoadout.Lethal?.Gadget?.GadgetID ?? 0;
-                        questConditions.Add(EQuestCondition.Gadget, equipmentUsed);
+                        questConditions.Add(EQuestCondition.GADGET, equipmentUsed);
                         break;
                     case EDeathCause.SENTRY:
                         if (!GameTurrets.TryGetValue(kPlayer.GamePlayer, out var sentry))
@@ -534,15 +527,13 @@ public class CTFGame : Game
                         xpGained += sentry.Item2.MedalXP;
                         xpText += sentry.Item2.MedalName;
                         break;
-                    default:
-                        break;
                 }
             }
 
             xpText += "\n";
 
             kPlayer.SetKillstreak(kPlayer.Killstreak + 1);
-            questConditions.Add(EQuestCondition.TargetKS, kPlayer.Killstreak);
+            questConditions.Add(EQuestCondition.TARGET_KS, kPlayer.Killstreak);
             if (kPlayer.MultipleKills == 0)
                 kPlayer.SetMultipleKills(kPlayer.MultipleKills + 1);
             else if ((DateTime.UtcNow - kPlayer.LastKill).TotalSeconds <= 10)
@@ -555,13 +546,13 @@ public class CTFGame : Game
             else
                 kPlayer.SetMultipleKills(1);
 
-            questConditions.Add(EQuestCondition.TargetMK, kPlayer.MultipleKills);
+            questConditions.Add(EQuestCondition.TARGET_MK, kPlayer.MultipleKills);
 
             if (victimKS > Config.Medals.FileData.ShutdownKillStreak)
             {
                 xpGained += Config.Medals.FileData.ShutdownXP;
                 xpText += Plugin.Instance.Translate("Shutdown_Kill").ToRich() + "\n";
-                Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.Shutdown, questConditions);
+                Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.SHUTDOWN, questConditions);
             }
 
             if (kPlayer.PlayersKilled.ContainsKey(cPlayer.GamePlayer.SteamID))
@@ -571,7 +562,7 @@ public class CTFGame : Game
                 {
                     xpGained += Config.Medals.FileData.DominationXP;
                     xpText += Plugin.Instance.Translate("Domination_Kill").ToRich() + "\n";
-                    Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.Domination, questConditions);
+                    Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.DOMINATION, questConditions);
                 }
             }
             else
@@ -581,42 +572,42 @@ public class CTFGame : Game
             {
                 xpGained += Config.Medals.FileData.FlagCarrierKilledXP;
                 xpText += Plugin.Instance.Translate("Flag_Killer").ToRich() + "\n";
-                Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.FlagKiller, questConditions);
+                Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.FLAG_KILLER, questConditions);
             }
 
             if (kPlayer.IsCarryingFlag)
             {
                 xpGained += Config.Medals.FileData.KillWhileCarryingFlagXP;
                 xpText += Plugin.Instance.Translate("Flag_Denied").ToRich() + "\n";
-                Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.FlagDenied, questConditions);
+                Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.FLAG_DENIED, questConditions);
             }
 
             if (cPlayer.GamePlayer.SteamID == kPlayer.GamePlayer.LastKiller)
             {
                 xpGained += Config.Medals.FileData.RevengeXP;
                 xpText += Plugin.Instance.Translate("Revenge_Kill").ToRich() + "\n";
-                Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.Revenge, questConditions);
+                Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.REVENGE, questConditions);
             }
 
             if (isFirstKill)
             {
                 xpGained += Config.Medals.FileData.FirstKillXP;
                 xpText += Plugin.Instance.Translate("First_Kill").ToRich() + "\n";
-                Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.FirstKill, questConditions);
+                Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.FIRST_KILL, questConditions);
             }
 
             if (!usedKillstreak && cause == EDeathCause.GUN && (cPlayer.GamePlayer.Player.Position - kPlayer.GamePlayer.Player.Position).sqrMagnitude > longshotRange)
             {
                 xpGained += Config.Medals.FileData.LongshotXP;
                 xpText += Plugin.Instance.Translate("Longshot_Kill").ToRich() + "\n";
-                Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.Longshot, questConditions);
+                Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.LONGSHOT, questConditions);
             }
 
             if (kPlayer.GamePlayer.Player.Player.life.health < Config.Medals.FileData.HealthSurvivorKill)
             {
                 xpGained += Config.Medals.FileData.SurvivorXP;
                 xpText += Plugin.Instance.Translate("Survivor_Kill").ToRich() + "\n";
-                Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.Survivor, questConditions);
+                Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.SURVIVOR, questConditions);
             }
 
             kPlayer.GamePlayer.LastKiller = CSteamID.Nil;
@@ -632,13 +623,13 @@ public class CTFGame : Game
             if (equipmentUsed != 0)
                 OnKill(kPlayer.GamePlayer, cPlayer.GamePlayer, equipmentUsed, kPlayer.Team.Info.KillFeedHexCode, cPlayer.Team.Info.KillFeedHexCode);
 
-            Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.Kill, questConditions);
-            Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.MultiKill, questConditions);
-            Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.Killstreak, questConditions);
+            Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.KILL, questConditions);
+            Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.MULTI_KILL, questConditions);
+            Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.KILLSTREAK, questConditions);
             if (limb == ELimb.SKULL && cause == EDeathCause.GUN)
-                Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.Headshots, questConditions);
+                Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.HEADSHOTS, questConditions);
 
-            Plugin.Instance.Quest.CheckQuest(cPlayer.GamePlayer, EQuestType.Death, questConditions);
+            Plugin.Instance.Quest.CheckQuest(cPlayer.GamePlayer, EQuestType.DEATH, questConditions);
 
             _ = Task.Run(async () =>
             {
@@ -670,7 +661,7 @@ public class CTFGame : Game
             return;
 
         parameters.applyGlobalArmorMultiplier = IsHardcore;
-        if (GamePhase != EGamePhase.Started)
+        if (GamePhase != EGamePhase.STARTED)
         {
             shouldAllow = false;
             return;
@@ -777,7 +768,7 @@ public class CTFGame : Game
             return;
         }
 
-        Dictionary<EQuestCondition, int> questConditions = new() { { EQuestCondition.Map, Location.LocationID }, { EQuestCondition.Gamemode, (int)GameMode } };
+        Dictionary<EQuestCondition, int> questConditions = new() { { EQuestCondition.MAP, Location.LocationID }, { EQuestCondition.GAMEMODE, (int)GameMode } };
 
         if (cPlayer.Team.FlagID == itemData.item.id)
         {
@@ -800,8 +791,8 @@ public class CTFGame : Game
                 TaskDispatcher.QueueOnMainThread(() =>
                 {
                     Plugin.Instance.UI.UpdateCTFHUD(Players, cPlayer.Team);
-                    Plugin.Instance.UI.SendCTFFlagStates(cPlayer.Team, (ETeam)cPlayer.Team.TeamID, Players, EFlagState.Recovered);
-                    Plugin.Instance.Quest.CheckQuest(player, EQuestType.FlagsSaved, questConditions);
+                    Plugin.Instance.UI.SendCTFFlagStates(cPlayer.Team, (ETeam)cPlayer.Team.TeamID, Players, EFlagState.RECOVERED);
+                    Plugin.Instance.Quest.CheckQuest(player, EQuestType.FLAGS_SAVED, questConditions);
                 });
 
                 _ = Task.Run(async () =>
@@ -840,8 +831,8 @@ public class CTFGame : Game
                 {
                     Plugin.Instance.UI.UpdateCTFHUD(Players, cPlayer.Team);
                     Plugin.Instance.UI.UpdateCTFHUD(Players, otherTeam);
-                    Plugin.Instance.UI.SendCTFFlagStates(cPlayer.Team, (ETeam)otherTeam.TeamID, Players, EFlagState.Captured);
-                    Plugin.Instance.Quest.CheckQuest(player, EQuestType.FlagsCaptured, questConditions);
+                    Plugin.Instance.UI.SendCTFFlagStates(cPlayer.Team, (ETeam)otherTeam.TeamID, Players, EFlagState.CAPTURED);
+                    Plugin.Instance.Quest.CheckQuest(player, EQuestType.FLAGS_CAPTURED, questConditions);
                 });
 
                 if (cPlayer.Team.Score >= Config.CTF.FileData.ScoreLimit)
@@ -864,11 +855,11 @@ public class CTFGame : Game
 
             if (otherTeam.HasFlag)
             {
-                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.SendCTFFlagStates(cPlayer.Team, (ETeam)otherTeam.TeamID, Players, EFlagState.Taken));
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.SendCTFFlagStates(cPlayer.Team, (ETeam)otherTeam.TeamID, Players, EFlagState.TAKEN));
                 otherTeam.HasFlag = false;
             }
             else
-                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.SendCTFFlagStates(cPlayer.Team, (ETeam)otherTeam.TeamID, Players, EFlagState.Picked));
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.SendCTFFlagStates(cPlayer.Team, (ETeam)otherTeam.TeamID, Players, EFlagState.PICKED));
 
             TaskDispatcher.QueueOnMainThread(() =>
             {
@@ -923,7 +914,7 @@ public class CTFGame : Game
 
     public override void OnVoiceChatUpdated(GamePlayer player)
     {
-        if (GamePhase == EGamePhase.Ending)
+        if (GamePhase == EGamePhase.ENDING)
         {
             SendVoiceChat(Players.Select(k => k.GamePlayer).ToList(), false);
             return;
@@ -1038,7 +1029,7 @@ public class CTFGame : Game
         if (cPlayer == null)
             return;
 
-        if (GamePhase == EGamePhase.Ending)
+        if (GamePhase == EGamePhase.ENDING)
             return;
 
         if (player.ScoreboardCooldown > DateTime.UtcNow)
@@ -1075,7 +1066,7 @@ public class CTFGame : Game
         if (cPlayer == null)
             return;
 
-        if (GamePhase == EGamePhase.Starting)
+        if (GamePhase == EGamePhase.STARTING)
             return;
 
         player.GiveMovement(player.Player.Player.equipment.useable is UseableGun gun && gun.isAiming, cPlayer.IsCarryingFlag, true);
@@ -1087,7 +1078,7 @@ public class CTFGame : Game
         if (cPlayer == null)
             return;
 
-        if (GamePhase == EGamePhase.Starting)
+        if (GamePhase == EGamePhase.STARTING)
             return;
 
         player.GiveMovement(isAiming, cPlayer.IsCarryingFlag, false);
