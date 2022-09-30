@@ -9,7 +9,7 @@ public class Config : IRocketPluginConfiguration
     public string DatabaseName { get; set; }
     public string DatabasePassword { get; set; }
     public string DatabasePort { get; set; }
-
+    public uint ConnectionTimeout { get; set; }
     public string WebhookURL { get; set; }
     public string URL { get; set; }
     public bool UnlockAllItems { get; set; }
@@ -26,5 +26,6 @@ public class Config : IRocketPluginConfiguration
         URL = "http://213.32.6.3:27090/";
         UnlockAllItems = true;
         IP = "";
+        ConnectionTimeout = 3;
     }
 }
