@@ -689,6 +689,7 @@ public class UIManager
         player.Player.inventory.onDropItemRequested += OnDropItemRequested;
         player.Player.stance.onStanceUpdated += () => OnStanceUpdated(player.Player);
 
+        player.Player.voice.ServerSetPermissions(true, true);
         player.Player.inventory.items[2].resize(Config.Base.FileData.HandSlotWidth, Config.Base.FileData.HandSlotHeight);
 
         var transportConnection = player.Player.channel.owner.transportConnection;
