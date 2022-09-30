@@ -42,6 +42,29 @@ public static class Utility
         Plugin.Instance.UI.RemoveGunUI(inv.player.channel.GetOwnerTransportConnection());
     }
 
+    public static bool TryGetItemIndex(this PlayerInventory inv, ushort itemID, out byte x, out byte y, out byte page, out ItemJar itemJar)
+    {
+        x = 0;
+        y = 0;
+        page = 0;
+        itemJar = null;
+        
+        var itemCount = inv.getItemCount(PlayerInventory.SLOTS);
+        for (byte i = 0; i < itemCount; i++)
+        {
+            itemJar = inv.getItem(PlayerInventory.SLOTS, i);
+            if (itemJar != null && itemJar.item.id == itemID)
+            {
+                x = itemJar.x;
+                y = itemJar.y;
+                page = PlayerInventory.SLOTS;
+                return true;
+            }
+        }
+
+        return false;
+    }
+    
     public static void Stop(this Coroutine cr)
     {
         if (cr != null)
@@ -394,6 +417,13 @@ public static class Utility
         EAttachment.SIGHTS => "Sights",
         _ => throw new ArgumentOutOfRangeException(nameof(attachment), attachment, "Attachment is not as expected")
     };
+
+    public static string ToUIName(this ETeam team) => team switch
+    {
+        ETeam.RED => "Red",
+        ETeam.BLUE => "Blue"
+    };
+    
     public static string ToFriendlyName(this EChatMode chatMode) => chatMode switch
     {
         EChatMode.LOCAL or EChatMode.GROUP => "Team",

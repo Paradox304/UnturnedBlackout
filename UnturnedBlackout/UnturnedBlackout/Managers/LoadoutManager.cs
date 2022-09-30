@@ -721,25 +721,7 @@ public class LoadoutManager
         if (activeLoadout.Knife != null)
         {
             inv.forceAddItem(new(activeLoadout.Knife.Knife.KnifeID, true), activeLoadout.Primary == null && activeLoadout.Secondary == null);
-            for (byte page = 0; page < PlayerInventory.PAGES - 2; page++)
-            {
-                var shouldBreak = false;
-                for (var index = inv.getItemCount(page) - 1; index >= 0; index--)
-                {
-                    var item = inv.getItem(page, (byte)index);
-                    if (item != null && item.item.id == activeLoadout.Knife.Knife.KnifeID)
-                    {
-                        knifePage = page;
-                        knifeX = item.x;
-                        knifeY = item.y;
-                        shouldBreak = true;
-                        break;
-                    }
-                }
-
-                if (shouldBreak)
-                    break;
-            }
+            inv.TryGetItemIndex(activeLoadout.Knife.Knife.KnifeID, out knifeX, out knifeY, out knifePage, out var _);
         }
 
         // Giving perks to player
@@ -783,14 +765,40 @@ public class LoadoutManager
 
         // Giving tactical and lethal to player
         if (activeLoadout.Lethal != null)
-            inv.forceAddItem(new(activeLoadout.Lethal.Gadget.GadgetID, false), false);
+        {
+            var lethalID = activeLoadout.Lethal.Gadget.GadgetID;
+            inv.forceAddItem(new(lethalID, false), false);
+            inv.TryGetItemIndex(lethalID, out var lethalX, out var lethalY, out var lethalPage, out var _);
+            if (Assets.find(EAssetType.ITEM, lethalID) is ItemAsset lethalAsset)
+            {
+                player.Player.Player.equipment.ServerBindItemHotkey(3, lethalAsset, lethalPage, lethalX, lethalY);
+            }
+        }
 
         if (activeLoadout.Tactical != null)
-            inv.forceAddItem(new(activeLoadout.Tactical.Gadget.GadgetID, false), false);
+        {
+            var tacticalID = activeLoadout.Tactical.Gadget.GadgetID;
+            inv.forceAddItem(new(tacticalID, false), false);
+            inv.TryGetItemIndex(tacticalID, out var tacticalX, out var tacticalY, out var tacticalPage, out var _);
+            if (Assets.find(EAssetType.ITEM, tacticalID) is ItemAsset tacticalAsset)
+            {
+                player.Player.Player.equipment.ServerBindItemHotkey(4, tacticalAsset, tacticalPage, tacticalX, tacticalY);
+            }
+        }
 
         // Giving killstreaks to player
+        byte killstreakHotkey = 5;
         foreach (var killstreak in activeLoadout.Killstreaks)
-            inv.forceAddItem(new(killstreak.Killstreak.KillstreakInfo.TriggerItemID, true), false);
+        {
+            var killstreakID = killstreak.Killstreak.KillstreakInfo.TriggerItemID;
+            inv.forceAddItem(new(killstreakID, true), false);
+            inv.TryGetItemIndex(killstreakID, out var killstreakX, out var killstreakY, out var killstreakPage, out var _);
+            if (Assets.find(EAssetType.ITEM, killstreakID) is ItemAsset killstreakAsset)
+            {
+                player.Player.Player.equipment.ServerBindItemHotkey(killstreakHotkey, killstreakAsset, killstreakPage, killstreakX, killstreakY);
+                killstreakHotkey++;
+            }
+        }
 
         player.SetActiveLoadout(activeLoadout, knifePage, knifeX, knifeY);
     }

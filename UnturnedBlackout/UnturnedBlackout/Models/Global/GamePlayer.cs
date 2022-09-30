@@ -543,25 +543,15 @@ public class GamePlayer
             }
 
             inv.forceAddItem(new(info.ItemID, true), false);
-            for (byte page = 0; page < PlayerInventory.PAGES - 2; page++)
+            if (!inv.TryGetItemIndex(info.ItemID, out var x, out var y, out var page, out var _))
             {
-                var shouldBreak = false;
-                for (var index = inv.getItemCount(page) - 1; index >= 0; index--)
-                {
-                    var item = inv.getItem(page, (byte)index);
-                    if ((item?.item?.id ?? 0) == info.ItemID)
-                    {
-                        KillstreakPage = page;
-                        KillstreakX = item.x;
-                        KillstreakY = item.y;
-                        shouldBreak = true;
-                        break;
-                    }
-                }
-
-                if (shouldBreak)
-                    break;
+                Logging.Debug($"Failed to add killstreak to inventory, no space probably?");
+                return;
             }
+
+            KillstreakPage = page;
+            KillstreakX = x;
+            KillstreakY = y;
 
             Player.Player.equipment.ServerEquip(KillstreakPage, KillstreakX, KillstreakY);
         }
@@ -576,23 +566,13 @@ public class GamePlayer
 
             inv.forceAddItem(new(info.TurretID, true), false);
 
-            for (byte page = 0; page < PlayerInventory.PAGES - 2; page++)
+            if (!inv.TryGetItemIndex(info.TurretID, out var x, out var y, out var page, out var _))
             {
-                var shouldBreak = false;
-                for (var index = inv.getItemCount(page) - 1; index >= 0; index--)
-                {
-                    var item = inv.getItem(page, (byte)index);
-                    if ((item?.item?.id ?? 0) == info.TurretID)
-                    {
-                        shouldBreak = true;
-                        Player.Player.equipment.ServerEquip(page, item.x, item.y);
-                        break;
-                    }
-                }
-
-                if (shouldBreak)
-                    break;
+                Logging.Debug($"Failed to add turret to inventory, probably no space?");
+                return;
             }
+            
+            Player.Player.equipment.ServerEquip(page, x, y);
 
             AvailableKillstreaks[killstreak] = false;
             Plugin.Instance.UI.UpdateKillstreakReady(this, killstreak);

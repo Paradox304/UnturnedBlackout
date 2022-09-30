@@ -156,8 +156,6 @@ public class UIHandler
             Plugin.Instance.StopCoroutine(CrateUnboxer);
     }
 
-    #region BuildingPages
-
     public void BuildPages()
     {
         BuildLoadoutPages();
@@ -755,10 +753,6 @@ public class UIHandler
             UnboxStorePages.Add(page, new(page, cases));
     }
 
-    #endregion
-
-    #region MainPage
-
     public void ShowUI(MatchEndSummary summary = null)
     {
         EffectManager.sendUIEffect(MAIN_MENU_ID, MAIN_MENU_KEY, TransportConnection, true);
@@ -825,10 +819,6 @@ public class UIHandler
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Enough Currency Modal TEXT", Plugin.Instance.Translate("Not_Enough_Currency", Utility.ToFriendlyName(currency)).ToRich());
     }
 
-    #endregion
-
-    #region PlayPage
-
     public void ShowPlayPage()
     {
         MainPage = EMainPage.PLAY;
@@ -878,10 +868,6 @@ public class UIHandler
         }
     }
 
-    #endregion
-
-    #region PlayGamesPage
-
     public void ShowGames()
     {
         var games = Plugin.Instance.Game.Games;
@@ -929,10 +915,6 @@ public class UIHandler
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Play Players TEXT {index}", $"{game.GetPlayerCount()}/{game.Location.GetMaxPlayers(game.GameMode)}");
     }
 
-    #endregion
-
-    #region PlayServersPage
-
     public void ShowServers()
     {
         PlayPage = EPlayPage.SERVERS;
@@ -970,10 +952,6 @@ public class UIHandler
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Play IP TEXT", $"{server.FriendlyIP}:{server.Port}");
     }
 
-    #endregion
-
-    #region OptionsPage
-
     public void MusicButtonPressed()
     {
         PlayerData.Music = !PlayerData.Music;
@@ -991,10 +969,6 @@ public class UIHandler
 
         _ = Task.Run(async () => await Plugin.Instance.DB.ChangePlayerHideFlagAsync(SteamID, PlayerData.HideFlag));
     }
-
-    #endregion
-
-    #region LoadoutPage
 
     public void ShowLoadouts()
     {
@@ -1218,10 +1192,6 @@ public class UIHandler
 
     public void ExitRenameLoadout() => LoadoutNameText = "";
 
-    #endregion
-
-    #region MidgameLoadoutPage
-
     public void ShowMidgameLoadouts()
     {
         MainPage = EMainPage.LOADOUT;
@@ -1413,10 +1383,6 @@ public class UIHandler
         Player.Player.disablePluginWidgetFlag(EPluginWidgetFlags.Modal);
     }
 
-    #endregion
-
-    #region LoadoutSubPage
-
     public void ShowLoadoutSubPage(ELoadoutPage page)
     {
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Type TEXT", page.ToFriendlyName());
@@ -1599,7 +1565,7 @@ public class UIHandler
                     case ELoadoutPage.PERK2:
                     case ELoadoutPage.PERK3:
                     {
-                        if (!int.TryParse(LoadoutPage.ToString().Replace("Perk", ""), out var perkType))
+                        if (!int.TryParse(GetPerkInt(), out var perkType))
                         {
                             Logging.Debug($"Error getting perk type from {LoadoutPage}");
                             return;
@@ -1937,7 +1903,7 @@ public class UIHandler
                     case ELoadoutPage.PERK2:
                     case ELoadoutPage.PERK3:
                     {
-                        if (!int.TryParse(LoadoutPage.ToString().Replace("Perk", ""), out var perkType))
+                        if (!int.TryParse(GetPerkInt(), out var perkType))
                         {
                             Logging.Debug($"Error getting perk type from {LoadoutPage}");
                             return;
@@ -2259,7 +2225,7 @@ public class UIHandler
                     case ELoadoutPage.PERK2:
                     case ELoadoutPage.PERK3:
                     {
-                        if (!int.TryParse(LoadoutPage.ToString().Replace("Perk", ""), out var perkType))
+                        if (!int.TryParse(GetPerkInt(), out var perkType))
                         {
                             Logging.Debug($"Error getting perk type from {LoadoutPage}");
                             return;
@@ -2580,7 +2546,7 @@ public class UIHandler
                     case ELoadoutPage.PERK2:
                     case ELoadoutPage.PERK3:
                     {
-                        if (!int.TryParse(LoadoutPage.ToString().Replace("Perk", ""), out var perkType))
+                        if (!int.TryParse(GetPerkInt(), out var perkType))
                         {
                             Logging.Debug($"Error getting perk type from {LoadoutPage}");
                             return;
@@ -3393,7 +3359,7 @@ public class UIHandler
                     case ELoadoutPage.PERK2:
                     case ELoadoutPage.PERK3:
                     {
-                        if (!int.TryParse(LoadoutPage.ToString().Replace("Perk", ""), out var perkType))
+                        if (!int.TryParse(GetPerkInt(), out var perkType))
                         {
                             Logging.Debug($"Error getting perk type from {LoadoutPage}");
                             return;
@@ -5058,13 +5024,10 @@ public class UIHandler
         ReloadLoadout();
     }
 
+    public string GetPerkInt() => LoadoutPage.ToString().Replace("PERK", "");
     public string GetAttachmentPage() => LoadoutPage.ToString().Replace("ATTACHMENT_PRIMARY_", "").Replace("ATTACHMENT_SECONDARY_", "");
     public bool IsAttachmentPagePrimary() => (int)LoadoutPage >= MINIMUM_LOADOUT_PAGE_ATTACHMENT_PRIMARY && (int)LoadoutPage <= MAXIMUM_LOADOUT_PAGE_ATTACHMENT_PRIMARY;
     public void BackToLoadout() => EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Item Page Disabler", true);
-
-    #endregion
-
-    #region LeaderboardPage
 
     public void ShowLeaderboards()
     {
@@ -5238,10 +5201,6 @@ public class UIHandler
         _ => "00:00:00"
     };
 
-    #endregion
-
-    #region QuestPage
-
     public void ShowQuests()
     {
         var quests = PlayerData.Quests.OrderBy(k => (int)k.Quest.QuestTier).ToList();
@@ -5266,10 +5225,6 @@ public class UIHandler
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Quest Complete", completedQuests == totalQuests);
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Quest Complete Count TEXT", $"{completedQuests}/{totalQuests}");
     }
-
-    #endregion
-
-    #region AchievementPage
 
     public void ShowAchievements()
     {
@@ -5570,10 +5525,6 @@ public class UIHandler
         }
     }
 
-    #endregion
-
-    #region BattlepassPage
-
     public IEnumerator SetupBattlepass()
     {
         MainPage = EMainPage.BATTLEPASS;
@@ -5786,10 +5737,6 @@ public class UIHandler
                 return false;
         }
     }
-
-    #endregion
-
-    #region UnboxingPage
 
     public void ShowUnboxingPage(EUnboxingPage unboxingPage, int selectedCase = -1)
     {
@@ -6263,10 +6210,6 @@ public class UIHandler
         }
     }
 
-    #endregion
-
-    #region MatchEndSummary
-
     public IEnumerator ShowMatchEndSummary(MatchEndSummary summary)
     {
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary", true);
@@ -6489,10 +6432,6 @@ public class UIHandler
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Battlepass Bonus TEXT", $"<color=#be69ff>+{summary.BattlepassBonusXP}</color>");
     }
 
-    #endregion
-
-    #region Events
-
     public void OnCurrencyUpdated(ECurrency currency)
     {
         Logging.Debug($"Currency updated {Player.CharacterName}, {currency}");
@@ -6510,6 +6449,4 @@ public class UIHandler
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Quest Expire TEXT", $"NEW QUESTS IN: {(DateTimeOffset.UtcNow > PlayerData.Quests[0].QuestEnd ? "00:00:00" : (DateTimeOffset.UtcNow - PlayerData.Quests[0].QuestEnd).ToString(@"hh\:mm\:ss"))}");
         }
     }
-
-    #endregion
 }

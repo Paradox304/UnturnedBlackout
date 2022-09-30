@@ -1063,8 +1063,8 @@ public class UIManager
         var team = (ETeam)changeTeam.TeamID;
         var spaces = changeTeam.Score * MAX_SPACES_TDM_SCORE / Config.TDM.FileData.ScoreLimit;
 
-        EffectManager.sendUIEffectText(TDM_KEY, player.GamePlayer.TransportConnection, true, $"{team}Num{index}", changeTeam.Score.ToString());
-        EffectManager.sendUIEffectText(TDM_KEY, player.GamePlayer.TransportConnection, true, $"{team}BarFill{index}", spaces == 0 ? HAIRSPACE_SYMBOL_STRING : new(HAIRSPACE_SYMBOL_CHAR, spaces));
+        EffectManager.sendUIEffectText(TDM_KEY, player.GamePlayer.TransportConnection, true, $"{team.ToUIName()}Num{index}", changeTeam.Score.ToString());
+        EffectManager.sendUIEffectText(TDM_KEY, player.GamePlayer.TransportConnection, true, $"{team.ToUIName()}BarFill{index}", spaces == 0 ? HAIRSPACE_SYMBOL_STRING : new(HAIRSPACE_SYMBOL_CHAR, spaces));
     }
 
     public void SetupTDMLeaderboard(List<TDMPlayer> players, ArenaLocation location, TDMTeam wonTeam, TDMTeam blueTeam, TDMTeam redTeam, bool isPlaying, bool isHardcore)
@@ -1179,8 +1179,8 @@ public class UIManager
         var team = (ETeam)changeTeam.TeamID;
         var spaces = changeTeam.Score * MAX_SPACES_TDM_SCORE / Config.KC.FileData.ScoreLimit;
 
-        EffectManager.sendUIEffectText(KC_KEY, player.GamePlayer.TransportConnection, true, $"{team}Num{index}", changeTeam.Score.ToString());
-        EffectManager.sendUIEffectText(KC_KEY, player.GamePlayer.TransportConnection, true, $"{team}BarFill{index}", spaces == 0 ? HAIRSPACE_SYMBOL_STRING : new(HAIRSPACE_SYMBOL_CHAR, spaces));
+        EffectManager.sendUIEffectText(KC_KEY, player.GamePlayer.TransportConnection, true, $"{team.ToUIName()}Num{index}", changeTeam.Score.ToString());
+        EffectManager.sendUIEffectText(KC_KEY, player.GamePlayer.TransportConnection, true, $"{team.ToUIName()}BarFill{index}", spaces == 0 ? HAIRSPACE_SYMBOL_STRING : new(HAIRSPACE_SYMBOL_CHAR, spaces));
     }
 
     public void SetupKCLeaderboard(List<KCPlayer> players, ArenaLocation location, KCTeam wonTeam, KCTeam blueTeam, KCTeam redTeam, bool isPlaying, bool isHardcore)

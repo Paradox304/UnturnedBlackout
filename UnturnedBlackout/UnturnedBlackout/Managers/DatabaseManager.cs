@@ -5626,8 +5626,10 @@ public class DatabaseManager
                 rdr.Close();
             }
 
+            Logging.Debug($"Querying servers to get their info");
             foreach (var server in Plugin.Instance.DB.Servers)
             {
+                Logging.Debug($"Querying server with IP: {server.FriendlyIP}, Port: {server.Port}");
                 try
                 {
                     var info = SteamServer.QueryServer(server.IP, server.PortNo, 1000);
@@ -5635,11 +5637,13 @@ public class DatabaseManager
                     server.MaxPlayers = info.MaxPlayers;
                     server.Name = info.Name;
                     server.IsOnline = true;
+                    Logging.Debug($"Found info, players: {info.Players}, max players: {info.MaxPlayers}, name: {info.Name}");
                 }
                 catch
                 {
+                    Logging.Debug($"Failed to get info, server is probably offline");
                     if (server.IsOnline)
-                    {
+                    { 
                         server.LastOnline = DateTime.UtcNow;
                         server.IsOnline = false;
                     }

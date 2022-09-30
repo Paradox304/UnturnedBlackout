@@ -126,7 +126,7 @@ public class Plugin : RocketPlugin<Config>
         var game = gPlayer.CurrentGame;
         if (game == null)
             return;
-
+        
         switch (key)
         {
             case 0:
