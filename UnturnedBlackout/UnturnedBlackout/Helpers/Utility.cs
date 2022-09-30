@@ -320,9 +320,9 @@ public static class Utility
 
     public static int GetLoadoutAmount(UnturnedPlayer player)
     {
-        var Config = Plugin.Instance.Config.Loadout.FileData;
-        var amount = Config.DefaultLoadoutAmount;
-        foreach (var loadoutAmount in Config.LoadoutAmounts.OrderByDescending(k => k.Amount))
+        var config = Plugin.Instance.Config.Loadout.FileData;
+        var amount = config.DefaultLoadoutAmount;
+        foreach (var loadoutAmount in config.LoadoutAmounts.OrderByDescending(k => k.Amount))
         {
             if (player.HasPermission(loadoutAmount.Permission))
             {
@@ -340,7 +340,7 @@ public static class Utility
         EAttachment.GRIP => 4,
         EAttachment.BARREL => 6,
         EAttachment.MAGAZINE => 8,
-        _ => -1
+        var _ => -1
     };
 
     public static string GetLevelColor(int level) => level switch
@@ -361,13 +361,13 @@ public static class Utility
         ELoadoutPage.PERK1 or ELoadoutPage.PERK2 or ELoadoutPage.PERK3 => "Perk",
         ELoadoutPage.ATTACHMENT_PRIMARY_BARREL or ELoadoutPage.ATTACHMENT_PRIMARY_CHARM or ELoadoutPage.ATTACHMENT_PRIMARY_GRIP or ELoadoutPage.ATTACHMENT_PRIMARY_MAGAZINE or ELoadoutPage.ATTACHMENT_PRIMARY_SIGHTS => page.ToString().Replace("ATTACHMENT_PRIMARY_", ""),
         ELoadoutPage.ATTACHMENT_SECONDARY_SIGHTS or ELoadoutPage.ATTACHMENT_SECONDARY_BARREL or ELoadoutPage.ATTACHMENT_SECONDARY_CHARM or ELoadoutPage.ATTACHMENT_SECONDARY_MAGAZINE => page.ToString().Replace("ATTACHMENT_SECONDARY_", ""),
-        _ => page.ToString()
+        var _ => page.ToString()
     };
     
     public static string ToFriendlyName(this EGamePhase gamePhase) => gamePhase switch
     {
         EGamePhase.WAITING_FOR_PLAYERS => "Waiting For Players",
-        _ => gamePhase.ToString()
+        var _ => gamePhase.ToString()
     };
 
     public static string ToFriendlyName(this ECurrency currency) => currency switch
@@ -375,21 +375,30 @@ public static class Utility
         ECurrency.SCRAP => "Scrap",
         ECurrency.CREDITS => "Blackout Points",
         ECurrency.COINS => "Blacktags",
-        _ => throw new ArgumentOutOfRangeException("currency", "Currency is not as expected")
+        var _ => throw new ArgumentOutOfRangeException(nameof(currency), currency, "Currency is not as expected")
     };
 
     public static string ToUIName(this ECurrency currency) => currency switch
     {
         ECurrency.SCRAP => "Scrap",
         ECurrency.CREDITS => "Credits",
-        ECurrency.COINS => "Coins"
+        ECurrency.COINS => "Coins",
+        _ => throw new ArgumentOutOfRangeException(nameof(currency), currency, null)
     };
-    
+
+    public static string ToUIName(this EAttachment attachment) => attachment switch
+    {
+        EAttachment.GRIP => "Grip",
+        EAttachment.BARREL => "Barrel",
+        EAttachment.MAGAZINE => "Magazine",
+        EAttachment.SIGHTS => "Sights",
+        _ => throw new ArgumentOutOfRangeException(nameof(attachment), attachment, "Attachment is not as expected")
+    };
     public static string ToFriendlyName(this EChatMode chatMode) => chatMode switch
     {
         EChatMode.LOCAL or EChatMode.GROUP => "Team",
         EChatMode.GLOBAL => "All",
-        _ => throw new ArgumentOutOfRangeException("chatMode", "ChatMode is not as expected")
+        var _ => throw new ArgumentOutOfRangeException(nameof(chatMode), chatMode,"ChatMode is not as expected")
     };
 
     public static string GetDefaultAttachmentImage(string attachmentType) => attachmentType.ToLower() switch
@@ -399,8 +408,8 @@ public static class Utility
         "barrel" => "https://cdn.discordapp.com/attachments/458038940847439903/957681668276232213/barrel.png",
         "magazine" => "https://cdn.discordapp.com/attachments/458038940847439903/957681667101835305/ammo.png",
         "charm" => "https://cdn.discordapp.com/attachments/458038940847439903/957681668053958656/charm.png",
-        "skin" => "https://cdn.discordapp.com/attachments/458038940847439903/957681667781324810/skins.png",
-        _ => ""
+        "skin" => "https://cdn.discordapp.com/attachments/1016553641861202001/1025405063092518973/spray.png",
+        var _ => ""
     };
 
     public static string ToColor(this object value, bool isPlayer) => isPlayer ? $"<color={Plugin.Instance.Config.Base.FileData.PlayerColorHexCode}>{value}</color>" : value.ToString();
@@ -417,7 +426,7 @@ public static class Utility
         ERarity.ORANGE => "orange",
         ERarity.CYAN => "#31FFF9",
         ERarity.GREEN => "#00FF00",
-        _ => throw new ArgumentOutOfRangeException("rarity", "Rarity is not as expected")
+        _ => throw new ArgumentOutOfRangeException(nameof(rarity), rarity, "Rarity is not as expected")
     };
 
     public static string GetCurrencySymbol(ECurrency currency) => currency switch
@@ -425,10 +434,10 @@ public static class Utility
         ECurrency.COINS => "",
         ECurrency.SCRAP => "",
         ECurrency.CREDITS => "",
-        _ => throw new ArgumentOutOfRangeException("currency", "Currency is not as expected")
+        _ => throw new ArgumentOutOfRangeException(nameof(currency), currency, "Currency is not as expected")
     };
 
     public static string GetFlag(string country) => Plugin.Instance.Config.Icons.FileData.FlagAPILink.Replace("{country}", country.ToLower());
 
-    private static List<uint> UsedFrequencies = new();
+    private static readonly List<uint> UsedFrequencies = new();
 }
