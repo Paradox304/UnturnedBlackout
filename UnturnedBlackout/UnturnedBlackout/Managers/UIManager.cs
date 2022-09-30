@@ -767,8 +767,7 @@ public class UIManager
         if (player.KillstreakTriggers.TryGetValue(jar.item.id, out var activateKillstreak))
         {
             shouldAllow = false;
-            if (game.GamePhase == EGamePhase.STARTED && /*player.AvailableKillstreaks[activateKillstreak] &&*/
-                !isCarryingFlag && !player.HasKillstreakActive)
+            if (game.GamePhase == EGamePhase.STARTED && player.AvailableKillstreaks[activateKillstreak] && !isCarryingFlag && !player.HasKillstreakActive)
                 player.ActivateKillstreak(activateKillstreak);
 
             return;
@@ -890,7 +889,6 @@ public class UIManager
     private void OnBulletShot(UseableGun gun, BulletInfo bullet)
     {
         var ids = new ushort[] { 17001 };
-        Logging.Debug($"Bullet magazine id: {bullet.magazineAsset.id}");
         var ammo = ids.Contains(bullet.magazineAsset.id) ? 1 : gun.player.equipment.state[10];
         var player = Plugin.Instance.Game.GetGamePlayer(gun.player);
         EffectManager.sendUIEffectText(HUD_KEY, player.TransportConnection, true, "AmmoNum", ammo.ToString());
