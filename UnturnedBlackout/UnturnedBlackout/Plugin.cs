@@ -105,14 +105,13 @@ public class Plugin : RocketPlugin<Config>
 
         ply.skinItems = Array.Empty<int>();
 
-        var randColor = _allowedColors[UnityEngine.Random.Range(0, _allowedColors.Length)];
+        //var randColor = _allowedColors[UnityEngine.Random.Range(0, _allowedColors.Length)];
         
-        var field = typeof(SteamPending).GetField
-        ("_skin", BindingFlags.Instance | BindingFlags.NonPublic);
-        if (field == null)
-            return;
-        Logging.Debug($"Field found for {ply.playerID.characterName}, setting color: {randColor[0]}, {randColor[1]}, {randColor[2]}");
-        field.SetValue(ply, new Color(randColor[0], randColor[1], randColor[2]));
+        //var field = typeof(SteamPending).GetField("_color", BindingFlags.Instance | BindingFlags.NonPublic);
+        //if (field == null)
+            //return;
+        //Logging.Debug($"Field found for {ply.playerID.characterName}, setting color: {randColor[0]}, {randColor[1]}, {randColor[2]}");
+        //field.SetValue(ply, new Color(randColor[0], randColor[1], randColor[2]));
     }
 
     private void OnHotkeyPressed(Player player, uint simulation, byte key, bool state)
