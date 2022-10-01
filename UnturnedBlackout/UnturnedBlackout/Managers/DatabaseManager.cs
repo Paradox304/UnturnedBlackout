@@ -200,7 +200,7 @@ public class DatabaseManager
             UserID = Config.DatabaseUsername,
             Password = Config.DatabasePassword,
             MaximumPoolSize = 500,
-            ConnectionLifeTime = Config.ConnectionTimeout == 0 ? 3 : Config.ConnectionTimeout,
+            ConnectionLifeTime = Config.ConnectionTimeout,
             CacheServerProperties = true
         };
 

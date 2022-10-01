@@ -89,7 +89,7 @@ public class AchievementManager
         _ = Task.Run(async () => await Plugin.Instance.DB.UpdatePlayerAchievementTierAsync(steamID, achievementID, nextTier.TierID));
     }
 
-    public bool IsConditionMinimum(EQuestCondition condition)
+    private static bool IsConditionMinimum(EQuestCondition condition)
     {
         var conditionInt = (int)condition;
         return conditionInt >= 9 && conditionInt <= 12;

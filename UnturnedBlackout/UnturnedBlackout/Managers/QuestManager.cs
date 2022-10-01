@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Rocket.Core.Utils;
 using UnturnedBlackout.Database.Data;
 using UnturnedBlackout.Enums;
 using UnturnedBlackout.Models.Global;
@@ -15,7 +16,7 @@ public class QuestManager
         var db = Plugin.Instance.DB;
         var data = player.Data;
 
-        _ = Task.Run(() => Plugin.Instance.Achievement.CheckAchievement(player, questType, questConditions));
+        TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.Achievement.CheckAchievement(player, questType, questConditions));
 
         if (!data.QuestsSearchByType.TryGetValue(questType, out var quests))
             return;
@@ -59,9 +60,9 @@ public class QuestManager
             Plugin.Instance.UI.SendQuestProgression(player, pendingQuestsProgression);
     }
 
-    public bool IsConditionMinimum(EQuestCondition condition)
+    private static bool IsConditionMinimum(EQuestCondition condition)
     {
         var conditionInt = (int)condition;
-        return conditionInt >= 9 && conditionInt <= 12;
+        return conditionInt is >= 9 and <= 12;
     }
 }
