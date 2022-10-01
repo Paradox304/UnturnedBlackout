@@ -13,7 +13,7 @@ public class RewardManager
     {
         Logging.Debug($"Giving rewards to {steamID}, rewards: {rewards.Count}");
         var db = Plugin.Instance.DB;
-        _ = Task.Run(async () =>
+        Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () =>
         {
             Logging.Debug("Sending rewards");
             foreach (var reward in rewards)
@@ -85,7 +85,7 @@ public class RewardManager
     public void RemoveRewards(CSteamID steamID, List<Reward> removeRewards)
     {
         var db = Plugin.Instance.DB;
-        _ = Task.Run(async () =>
+        Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () =>
         {
             foreach (var reward in removeRewards)
             {
@@ -107,7 +107,7 @@ public class RewardManager
     public void GiveBulkRewards(List<(CSteamID, List<Reward>)> bulkRewards)
     {
         var db = Plugin.Instance.DB;
-        _ = Task.Run(async () =>
+        Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () =>
         {
             foreach (var bulkReward in bulkRewards)
             {

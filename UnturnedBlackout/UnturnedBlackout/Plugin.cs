@@ -9,6 +9,7 @@ using System.Collections;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
+using UnturnedBlackout.Dispatcher;
 using UnturnedBlackout.Managers;
 using Logger = Rocket.Core.Logging.Logger;
 // ReSharper disable RedundantAssignment
@@ -25,7 +26,7 @@ public class Plugin : RocketPlugin<Config>
             Harmony = new("UnturnedBlackout");
             Harmony.PatchAll(Assembly);
         }
-
+        
         Level.onLevelLoaded += OnLevelLoaded;
         PlayerVoice.onRelayVoice += OnVoice;
 
@@ -47,7 +48,8 @@ public class Plugin : RocketPlugin<Config>
     {
         Game.Destroy();
         UI.Destroy();
-
+        ActionDispatcher.Dispose();
+        
         Level.onLevelLoaded -= OnLevelLoaded;
         PlayerVoice.onRelayVoice -= OnVoice;
 
@@ -177,6 +179,8 @@ public class Plugin : RocketPlugin<Config>
 
     private void OnLevelLoaded(int level)
     {
+        ActionDispatcher = new();
+        
         Config = new();
         Logging.Debug("Init Config");
         UI = new();
@@ -321,7 +325,7 @@ public class Plugin : RocketPlugin<Config>
     public LoadoutManager Loadout { get; set; }
     public RewardManager Reward { get; set; }
     public UnboxManager Unbox { get; set; }
-
+    public ActionScheduler ActionDispatcher { get; set; }
     // ReSharper disable once InconsistentNaming
     public BPManager BP { get; set; }
     private static Harmony Harmony { get; set; }

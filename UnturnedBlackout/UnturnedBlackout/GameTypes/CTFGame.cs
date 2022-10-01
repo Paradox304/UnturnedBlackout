@@ -155,7 +155,7 @@ public class CTFGame : Game
                 continue;
 
             roundEndCases.Add((roundEndCasePlayer, @case));
-            _ = Task.Run(async () => await Plugin.Instance.DB.IncreasePlayerCaseAsync(roundEndCasePlayer.SteamID, @case.CaseID, 1));
+            Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () => await Plugin.Instance.DB.IncreasePlayerCaseAsync(roundEndCasePlayer.SteamID, @case.CaseID, 1));
         }
 
         Dictionary<GamePlayer, MatchEndSummary> summaries = new();
@@ -177,7 +177,7 @@ public class CTFGame : Game
 
             MatchEndSummary summary = new(player.GamePlayer, player.XP, player.StartingLevel, player.StartingXP, player.Kills, player.Deaths, player.Assists, player.HighestKillstreak, player.HighestMK, player.StartTime, GameMode, player.Team == wonTeam);
             summaries.Add(player.GamePlayer, summary);
-            _ = Task.Run(async () =>
+            Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () =>
             {
                 await Plugin.Instance.DB.IncreasePlayerXPAsync(player.GamePlayer.SteamID, summary.PendingXP);
                 await Plugin.Instance.DB.IncreasePlayerCreditsAsync(player.GamePlayer.SteamID, summary.PendingCredits);
@@ -406,7 +406,7 @@ public class CTFGame : Game
             });
         }
 
-        _ = Task.Run(async () => await Plugin.Instance.DB.IncreasePlayerDeathsAsync(cPlayer.GamePlayer.SteamID, 1));
+        Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () => await Plugin.Instance.DB.IncreasePlayerDeathsAsync(cPlayer.GamePlayer.SteamID, 1));
 
         TaskDispatcher.QueueOnMainThread(() =>
         {
@@ -442,7 +442,7 @@ public class CTFGame : Game
                     if (!assister.GamePlayer.Player.Player.life.isDead)
                         Plugin.Instance.UI.ShowXPUI(assister.GamePlayer, Config.Medals.FileData.AssistKillXP, Plugin.Instance.Translate("Assist_Kill", cPlayer.GamePlayer.Player.CharacterName.ToUnrich()));
 
-                    _ = Task.Run(async () => await Plugin.Instance.DB.IncreasePlayerXPAsync(assister.GamePlayer.SteamID, Config.Medals.FileData.AssistKillXP));
+                    Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () => await Plugin.Instance.DB.IncreasePlayerXPAsync(assister.GamePlayer.SteamID, Config.Medals.FileData.AssistKillXP));
                 }
 
                 cPlayer.GamePlayer.LastDamager.Clear();
@@ -631,7 +631,7 @@ public class CTFGame : Game
 
             Plugin.Instance.Quest.CheckQuest(cPlayer.GamePlayer, EQuestType.DEATH, questConditions);
 
-            _ = Task.Run(async () =>
+            Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () =>
             {
                 await Plugin.Instance.DB.IncreasePlayerXPAsync(kPlayer.GamePlayer.SteamID, xpGained);
                 if (cause == EDeathCause.GUN && limb == ELimb.SKULL)
@@ -795,7 +795,7 @@ public class CTFGame : Game
                     Plugin.Instance.Quest.CheckQuest(player, EQuestType.FLAGS_SAVED, questConditions);
                 });
 
-                _ = Task.Run(async () =>
+                Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () =>
                 {
                     await Plugin.Instance.DB.IncreasePlayerFlagsSavedAsync(cPlayer.GamePlayer.SteamID, 1);
                     await Plugin.Instance.DB.IncreasePlayerXPAsync(cPlayer.GamePlayer.SteamID, Config.Medals.FileData.FlagSavedXP);
@@ -838,7 +838,7 @@ public class CTFGame : Game
                 if (cPlayer.Team.Score >= Config.CTF.FileData.ScoreLimit)
                     _ = Plugin.Instance.StartCoroutine(GameEnd(cPlayer.Team));
 
-                _ = Task.Run(async () =>
+                Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () =>
                 {
                     await Plugin.Instance.DB.IncreasePlayerFlagsCapturedAsync(cPlayer.GamePlayer.SteamID, 1);
                     await Plugin.Instance.DB.IncreasePlayerXPAsync(cPlayer.GamePlayer.SteamID, Config.Medals.FileData.FlagCapturedXP);
@@ -1020,7 +1020,7 @@ public class CTFGame : Game
             return;
 
         Plugin.Instance.UI.ShowXPUI(player, Config.Medals.FileData.TurretDestroyXP, Plugin.Instance.Translate("Turret_Destroy"));
-        _ = Task.Run(async () => await Plugin.Instance.DB.IncreasePlayerXPAsync(player.SteamID, Config.Medals.FileData.TurretDestroyXP));
+        Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () => await Plugin.Instance.DB.IncreasePlayerXPAsync(player.SteamID, Config.Medals.FileData.TurretDestroyXP));
     }
 
     public override void PlayerChangeFiremode(GamePlayer player)

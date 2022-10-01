@@ -55,7 +55,7 @@ internal class AddBoosterCommand : IRocketCommand
             return;
         }
 
-        _ = Task.Run(async () => await Plugin.Instance.DB.AddPlayerBoosterAsync(steamID, boosterType, boosterValue, expirationDays));
+        Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () => await Plugin.Instance.DB.AddPlayerBoosterAsync(steamID, boosterType, boosterValue, expirationDays));
 
         Utility.Say(caller, $"<color=green>Added booster with type {boosterType}, value {boosterValue}, days {expirationDays} to {steamID}</color>");
     }

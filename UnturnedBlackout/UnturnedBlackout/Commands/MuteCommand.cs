@@ -49,7 +49,7 @@ internal class MuteCommand : IRocketCommand
             return;
         }
 
-        _ = Task.Run(async () =>
+        Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () =>
         {
             Profile profile;
             try

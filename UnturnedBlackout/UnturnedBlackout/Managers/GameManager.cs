@@ -145,7 +145,7 @@ public class GameManager
 
         var db = Plugin.Instance.DB;
         Plugin.Instance.UI.SendLoadingUI(player, false, EGameType.NONE, null);
-        _ = Task.Run(async () =>
+        Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () =>
         {
             var avatarURL = "";
             var countryCode = "EU";

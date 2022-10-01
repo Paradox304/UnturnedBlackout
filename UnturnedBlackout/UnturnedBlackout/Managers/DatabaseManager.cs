@@ -218,11 +218,8 @@ public class DatabaseManager
             await GetBaseDataAsync();
         }).Wait();
 
-        _ = Task.Run(() =>
-        {
-            RefreshData(null, null);
-            CacheRefresher.Start();
-        });
+        RefreshData(null, null);
+        CacheRefresher.Start();
     }
 
     public async Task LoadDatabaseAsync()
