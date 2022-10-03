@@ -958,7 +958,7 @@ public class UIHandler
 
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Options Audio Music Toggler", PlayerData.Music);
 
-        Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () => await Plugin.Instance.DB.ChangePlayerMusicAsync(SteamID, PlayerData.Music));
+        _ = Task.Run(async () => await Plugin.Instance.DB.ChangePlayerMusicAsync(SteamID, PlayerData.Music));
     }
 
     public void FlagButtonPressed()
@@ -967,7 +967,7 @@ public class UIHandler
 
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Options Audio Flag Toggler", PlayerData.HideFlag);
 
-        Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () => await Plugin.Instance.DB.ChangePlayerHideFlagAsync(SteamID, PlayerData.HideFlag));
+        _ = Task.Run(async () => await Plugin.Instance.DB.ChangePlayerHideFlagAsync(SteamID, PlayerData.HideFlag));
     }
 
     public void ShowLoadouts()
@@ -1153,7 +1153,7 @@ public class UIHandler
         }
 
         Logging.Debug($"PRE LOADOUT EQUIP CHECK {Player.CharacterName}");
-        Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () =>
+        _ = Task.Run(async () =>
         {
             Logging.Debug($"TASK ENTERED LOADOUT CHECK {Player.CharacterName}");
             foreach (var activeLoadout in PlayerLoadout.Loadouts.Values.Where(k => k.IsActive))
@@ -1185,7 +1185,7 @@ public class UIHandler
                 return;
 
             loadout.LoadoutName = LoadoutNameText;
-            Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () => await DB.UpdatePlayerLoadoutAsync(Player.CSteamID, LoadoutID));
+            _ = Task.Run(async () => await DB.UpdatePlayerLoadoutAsync(Player.CSteamID, LoadoutID));
             ReloadLoadoutPage();
         }
     }
@@ -1355,7 +1355,7 @@ public class UIHandler
         }
 
         Logging.Debug($"PRE LOADOUT ACTIVE CHECK {Player.CharacterName}");
-        Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () =>
+        _ = Task.Run(async () =>
         {
             Logging.Debug($"TASK ENTERED LOADOUT CHECK {Player.CharacterName}");
             foreach (var activeLoadout in PlayerLoadout.Loadouts.Values.Where(k => k.IsActive))
@@ -3950,7 +3950,7 @@ public class UIHandler
                     return;
                 }
 
-                Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () =>
+                _ = Task.Run(async () =>
                 {
                     if (PlayerData.Credits >= gun.Gun.BuyPrice && !gun.IsBought)
                     {
@@ -3985,7 +3985,7 @@ public class UIHandler
                     return;
                 }
 
-                Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () =>
+                _ = Task.Run(async () =>
                 {
                     if (PlayerData.Credits >= attachment.Attachment.BuyPrice && !attachment.IsBought)
                     {
@@ -4011,7 +4011,7 @@ public class UIHandler
                     return;
                 }
 
-                Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () =>
+                _ = Task.Run(async () =>
                 {
                     if (PlayerData.Credits >= gun.Gun.BuyPrice && !gun.IsBought)
                     {
@@ -4045,7 +4045,7 @@ public class UIHandler
                     return;
                 }
 
-                Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () =>
+                _ = Task.Run(async () =>
                 {
                     if (PlayerData.Credits >= attachment.Attachment.BuyPrice && !attachment.IsBought)
                     {
@@ -4072,7 +4072,7 @@ public class UIHandler
                     return;
                 }
 
-                Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () =>
+                _ = Task.Run(async () =>
                 {
                     if (PlayerData.Credits >= gunCharm.GunCharm.BuyPrice && !gunCharm.IsBought)
                     {
@@ -4098,7 +4098,7 @@ public class UIHandler
                     return;
                 }
 
-                Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () =>
+                _ = Task.Run(async () =>
                 {
                     if (PlayerData.Credits >= knife.Knife.BuyPrice && !knife.IsBought)
                     {
@@ -4124,7 +4124,7 @@ public class UIHandler
                     return;
                 }
 
-                Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () =>
+                _ = Task.Run(async () =>
                 {
                     if (PlayerData.Credits >= gadget.Gadget.BuyPrice && !gadget.IsBought)
                     {
@@ -4150,7 +4150,7 @@ public class UIHandler
                     return;
                 }
 
-                Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () =>
+                _ = Task.Run(async () =>
                 {
                     if (PlayerData.Credits >= gadget.Gadget.BuyPrice && !gadget.IsBought)
                     {
@@ -4178,7 +4178,7 @@ public class UIHandler
                     return;
                 }
 
-                Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () =>
+                _ = Task.Run(async () =>
                 {
                     if (PlayerData.Credits >= perk.Perk.BuyPrice && !perk.IsBought)
                     {
@@ -4204,7 +4204,7 @@ public class UIHandler
                     return;
                 }
 
-                Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () =>
+                _ = Task.Run(async () =>
                 {
                     if (PlayerData.Credits >= killstreak.Killstreak.BuyPrice && !killstreak.IsBought)
                     {
@@ -4231,7 +4231,7 @@ public class UIHandler
                     return;
                 }
 
-                Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () =>
+                _ = Task.Run(async () =>
                 {
                     if (PlayerData.Credits >= card.Card.BuyPrice && !card.IsBought)
                     {
@@ -4257,7 +4257,7 @@ public class UIHandler
                     return;
                 }
 
-                Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () =>
+                _ = Task.Run(async () =>
                 {
                     if (PlayerData.Credits >= glove.Glove.BuyPrice && !glove.IsBought)
                     {
@@ -4296,7 +4296,7 @@ public class UIHandler
                     return;
                 }
 
-                Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () =>
+                _ = Task.Run(async () =>
                 {
                     var cost = gun.Gun.GetCoins(PlayerData.Level);
                     if (PlayerData.Coins >= cost && !gun.IsBought && !gun.IsUnlocked && gun.Gun.LevelRequirement > PlayerData.Level)
@@ -4333,7 +4333,7 @@ public class UIHandler
                     return;
                 }
 
-                Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () =>
+                _ = Task.Run(async () =>
                 {
                     var cost = attachment.GetCoins(gun.Level);
                     if (PlayerData.Coins >= cost && !attachment.IsBought && !attachment.IsUnlocked && attachment.LevelRequirement > gun.Level)
@@ -4369,7 +4369,7 @@ public class UIHandler
                     return;
                 }
 
-                Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () =>
+                _ = Task.Run(async () =>
                 {
                     var cost = attachment.GetCoins(gun.Level);
                     if (PlayerData.Coins >= cost && !attachment.IsBought && !attachment.IsUnlocked && attachment.LevelRequirement > gun.Level)
@@ -4398,7 +4398,7 @@ public class UIHandler
                     return;
                 }
 
-                Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () =>
+                _ = Task.Run(async () =>
                 {
                     var cost = gunCharm.GunCharm.GetCoins(PlayerData.Level);
                     if (PlayerData.Coins >= cost && !gunCharm.IsBought && !gunCharm.IsUnlocked && gunCharm.GunCharm.LevelRequirement > PlayerData.Level)
@@ -4426,7 +4426,7 @@ public class UIHandler
                     return;
                 }
 
-                Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () =>
+                _ = Task.Run(async () =>
                 {
                     var cost = knife.Knife.GetCoins(PlayerData.Level);
                     if (PlayerData.Coins >= cost && !knife.IsBought && !knife.IsUnlocked && knife.Knife.LevelRequirement > PlayerData.Level)
@@ -4455,7 +4455,7 @@ public class UIHandler
                     return;
                 }
 
-                Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () =>
+                _ = Task.Run(async () =>
                 {
                     var cost = gadget.Gadget.GetCoins(PlayerData.Level);
                     if (PlayerData.Coins >= cost && !gadget.IsBought && !gadget.IsUnlocked && gadget.Gadget.LevelRequirement > PlayerData.Level)
@@ -4485,7 +4485,7 @@ public class UIHandler
                     return;
                 }
 
-                Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () =>
+                _ = Task.Run(async () =>
                 {
                     var cost = perk.Perk.GetCoins(PlayerData.Level);
                     if (PlayerData.Coins >= cost && !perk.IsBought && !perk.IsUnlocked && perk.Perk.LevelRequirement > PlayerData.Level)
@@ -4513,7 +4513,7 @@ public class UIHandler
                     return;
                 }
 
-                Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () =>
+                _ = Task.Run(async () =>
                 {
                     var cost = killstreak.Killstreak.GetCoins(PlayerData.Level);
                     if (PlayerData.Coins >= cost && !killstreak.IsBought && !killstreak.IsUnlocked && killstreak.Killstreak.LevelRequirement > PlayerData.Level)
@@ -4541,7 +4541,7 @@ public class UIHandler
                     return;
                 }
 
-                Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () =>
+                _ = Task.Run(async () =>
                 {
                     var cost = card.Card.GetCoins(PlayerData.Level);
                     if (PlayerData.Coins >= cost && !card.IsBought && !card.IsUnlocked && card.Card.LevelRequirement > PlayerData.Level)
@@ -4569,7 +4569,7 @@ public class UIHandler
                     return;
                 }
 
-                Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () =>
+                _ = Task.Run(async () =>
                 {
                     var cost = glove.Glove.GetCoins(PlayerData.Level);
                     if (PlayerData.Coins >= cost && !glove.IsBought && !glove.IsUnlocked && glove.Glove.LevelRequirement > PlayerData.Level)
@@ -5925,10 +5925,10 @@ public class UIHandler
         }
 
         @case.Amount--;
-        Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () => await DB.DecreasePlayerCaseAsync(SteamID, @case.Case.CaseID, 1));
+        _ = Task.Run(async () => await DB.DecreasePlayerCaseAsync(SteamID, @case.Case.CaseID, 1));
 
         if (isDuplicate)
-            Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () => await DB.IncreasePlayerScrapAsync(SteamID, duplicateScrapAmount));
+            _ = Task.Run(async () => await DB.IncreasePlayerScrapAsync(SteamID, duplicateScrapAmount));
         else
             Plugin.Instance.Reward.GiveRewards(SteamID, new() { reward });
 
@@ -6132,17 +6132,17 @@ public class UIHandler
         {
             case ECurrency.COINS:
                 PlayerData.Coins -= buyPrice;
-                Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () => await DB.DecreasePlayerCoinsAsync(SteamID, buyPrice));
+                _ = Task.Run(async () => await DB.DecreasePlayerCoinsAsync(SteamID, buyPrice));
                 break;
             case ECurrency.SCRAP:
                 PlayerData.Scrap -= buyPrice;
-                Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () => await DB.DecreasePlayerScrapAsync(SteamID, buyPrice));
+                _ = Task.Run(async () => await DB.DecreasePlayerScrapAsync(SteamID, buyPrice));
                 break;
             default:
                 return;
         }
 
-        Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () => await DB.IncreasePlayerCaseAsync(SteamID, @case.CaseID, 1));
+        _ = Task.Run(async () => await DB.IncreasePlayerCaseAsync(SteamID, @case.CaseID, 1));
     }
 
     public bool TryGetUnboxRewardInfo(Reward reward, out string rewardName, out string rewardImage, out ERarity rewardRarity)

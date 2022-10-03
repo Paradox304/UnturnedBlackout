@@ -49,7 +49,7 @@ public class AchievementManager
                     TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.SendAnimation(player, new(EAnimationType.ACHIEVEMENT_COMPLETION, nextTier)));
             }
 
-            Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () => await db.IncreasePlayerAchievementAmountAsync(steamID, achievement.Achievement.AchievementID, 1));
+            _ = Task.Run(async () => await db.IncreasePlayerAchievementAmountAsync(steamID, achievement.Achievement.AchievementID, 1));
         }
     }
 
@@ -86,7 +86,7 @@ public class AchievementManager
         Plugin.Instance.UI.OnAchievementsUpdated(steamID);
 
         data.SetAchievementXPBooster();
-        Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () => await Plugin.Instance.DB.UpdatePlayerAchievementTierAsync(steamID, achievementID, nextTier.TierID));
+        _ = Task.Run(async () => await Plugin.Instance.DB.UpdatePlayerAchievementTierAsync(steamID, achievementID, nextTier.TierID));
     }
 
     private static bool IsConditionMinimum(EQuestCondition condition)

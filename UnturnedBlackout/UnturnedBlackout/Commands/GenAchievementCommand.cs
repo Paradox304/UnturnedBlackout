@@ -34,7 +34,7 @@ internal class GenAchievementCommand : IRocketCommand
             return;
         }
 
-        Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () =>
+        _ = Task.Run(async () =>
         {
             await Plugin.Instance.DB.GenerateAchievementTiersAsync(achievementID, command[1]);
 

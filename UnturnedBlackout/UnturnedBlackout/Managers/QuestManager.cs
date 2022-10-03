@@ -48,12 +48,12 @@ public class QuestManager
             if (quest.Amount >= quest.Quest.TargetAmount)
             {
                 Plugin.Instance.UI.SendAnimation(player, new(EAnimationType.QUEST_COMPLETION, quest.Quest));
-                Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () => await db.IncreasePlayerBPXPAsync(steamID, quest.Quest.XP));
+                _ = Task.Run(async () => await db.IncreasePlayerBPXPAsync(steamID, quest.Quest.XP));
             }
             else if (quest.Amount * 100 / quest.Quest.TargetAmount % 10 == 0)
                 pendingQuestsProgression.Add(quest);
 
-            Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () => await db.IncreasePlayerQuestAmountAsync(steamID, quest.Quest.QuestID, 1));
+            _ = Task.Run(async () => await db.IncreasePlayerQuestAmountAsync(steamID, quest.Quest.QuestID, 1));
         }
 
         if (pendingQuestsProgression.Count > 0)

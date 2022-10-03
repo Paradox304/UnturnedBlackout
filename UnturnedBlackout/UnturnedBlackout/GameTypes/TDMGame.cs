@@ -136,7 +136,7 @@ public class TDMGame : Game
                 continue;
 
             roundEndCases.Add((roundEndCasePlayer, @case));
-            Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () => await Plugin.Instance.DB.IncreasePlayerCaseAsync(roundEndCasePlayer.SteamID, @case.CaseID, 1));
+            _ = Task.Run(async () => await Plugin.Instance.DB.IncreasePlayerCaseAsync(roundEndCasePlayer.SteamID, @case.CaseID, 1));
         }
 
         Dictionary<GamePlayer, MatchEndSummary> summaries = new();
@@ -158,7 +158,7 @@ public class TDMGame : Game
 
             MatchEndSummary summary = new(player.GamePlayer, player.XP, player.StartingLevel, player.StartingXP, player.Kills, player.Deaths, player.Assists, player.HighestKillstreak, player.HighestMK, player.StartTime, GameMode, player.Team == wonTeam);
             summaries.Add(player.GamePlayer, summary);
-            Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () =>
+            _ = Task.Run(async () =>
             {
                 await Plugin.Instance.DB.IncreasePlayerXPAsync(player.GamePlayer.SteamID, summary.PendingXP);
                 await Plugin.Instance.DB.IncreasePlayerCreditsAsync(player.GamePlayer.SteamID, summary.PendingCredits);
@@ -351,7 +351,7 @@ public class TDMGame : Game
         tPlayer.GamePlayer.OnDeath(updatedKiller, Config.TDM.FileData.RespawnSeconds);
         tPlayer.Team.OnDeath(tPlayer.GamePlayer.SteamID);
 
-        Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () => await Plugin.Instance.DB.IncreasePlayerDeathsAsync(tPlayer.GamePlayer.SteamID, 1));
+        _ = Task.Run(async () => await Plugin.Instance.DB.IncreasePlayerDeathsAsync(tPlayer.GamePlayer.SteamID, 1));
 
         TaskDispatcher.QueueOnMainThread(() =>
         {
@@ -387,7 +387,7 @@ public class TDMGame : Game
                     if (!assister.GamePlayer.Player.Player.life.isDead)
                         Plugin.Instance.UI.ShowXPUI(assister.GamePlayer, Config.Medals.FileData.AssistKillXP, Plugin.Instance.Translate("Assist_Kill", tPlayer.GamePlayer.Player.CharacterName.ToUnrich()));
 
-                    Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () => await Plugin.Instance.DB.IncreasePlayerXPAsync(assister.GamePlayer.SteamID, Config.Medals.FileData.AssistKillXP));
+                    _ = Task.Run(async () => await Plugin.Instance.DB.IncreasePlayerXPAsync(assister.GamePlayer.SteamID, Config.Medals.FileData.AssistKillXP));
                 }
 
                 tPlayer.GamePlayer.LastDamager.Clear();
@@ -570,7 +570,7 @@ public class TDMGame : Game
 
             Plugin.Instance.Quest.CheckQuest(tPlayer.GamePlayer, EQuestType.DEATH, questConditions);
 
-            Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () =>
+            _ = Task.Run(async () =>
             {
                 await Plugin.Instance.DB.IncreasePlayerXPAsync(kPlayer.GamePlayer.SteamID, xpGained);
                 if (cause == EDeathCause.GUN && limb == ELimb.SKULL)
@@ -823,7 +823,7 @@ public class TDMGame : Game
             return;
 
         Plugin.Instance.UI.ShowXPUI(player, Config.Medals.FileData.TurretDestroyXP, Plugin.Instance.Translate("Turret_Destroy"));
-        Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () => await Plugin.Instance.DB.IncreasePlayerXPAsync(player.SteamID, Config.Medals.FileData.TurretDestroyXP));
+        _ = Task.Run(async () => await Plugin.Instance.DB.IncreasePlayerXPAsync(player.SteamID, Config.Medals.FileData.TurretDestroyXP));
     }
 
     public override void PlayerChangeFiremode(GamePlayer player)

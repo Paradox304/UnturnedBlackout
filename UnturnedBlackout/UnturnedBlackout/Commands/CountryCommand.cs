@@ -35,6 +35,6 @@ public class CountryCommand : IRocketCommand
 
         CSteamID steamID = new(steamid);
         var countryCode = command[1].ToUpper();
-        Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () => await Plugin.Instance.DB.UpdatePlayerCountryCodeAsync(steamID, countryCode));
+        _ = Task.Run(async () => await Plugin.Instance.DB.UpdatePlayerCountryCodeAsync(steamID, countryCode));
     }
 }

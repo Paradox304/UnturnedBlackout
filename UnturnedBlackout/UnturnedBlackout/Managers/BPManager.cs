@@ -60,7 +60,7 @@ public class BPManager
         Plugin.Instance.UI.OnBattlepassTierUpdated(player.SteamID, tierID);
 
         _ = PendingWork.Remove(player.SteamID);
-        Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () =>
+        _ = Task.Run(async () =>
         {
             if (isTop)
                 await DB.UpdatePlayerBPClaimedFreeRewardsAsync(player.SteamID);
@@ -86,7 +86,7 @@ public class BPManager
 
         _ = PendingWork.Add(player.SteamID);
 
-        Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () =>
+        _ = Task.Run(async () =>
         {
             if (player.Data.Coins >= Config.Base.FileData.BattlepassTierSkipCost)
             {

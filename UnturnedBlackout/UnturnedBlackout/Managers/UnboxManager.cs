@@ -68,7 +68,7 @@ public class UnboxManager
                     knife = CalculateKnife(knivesAvailable);
 
                     // Send unboxed amount +1
-                    Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () => await DB.UpdatePlayerKnifeUnboxedAmountAsync(knife.KnifeID, 1));
+                    _ = Task.Run(async () => await DB.UpdatePlayerKnifeUnboxedAmountAsync(knife.KnifeID, 1));
                 }
 
                 rewardName = knife.KnifeName;
@@ -113,7 +113,7 @@ public class UnboxManager
                     glove = CalculateGlove(glovesAvailable);
 
                     // Send updated unbox amount +1
-                    Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () => await DB.UpdatePlayerGloveUnboxedAmountAsync(glove.GloveID, 1));
+                    _ = Task.Run(async () => await DB.UpdatePlayerGloveUnboxedAmountAsync(glove.GloveID, 1));
                 }
 
                 rewardName = glove.GloveName;
@@ -150,7 +150,7 @@ public class UnboxManager
                 else
                 {
                     // Send unboxed amount by +1
-                    Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () => await DB.UpdatePlayerGunSkinUnboxedAmountAsync(skin.ID, 1));
+                    _ = Task.Run(async () => await DB.UpdatePlayerGunSkinUnboxedAmountAsync(skin.ID, 1));
                 }
 
                 rewardName = skin.Gun.GunName + " | " + skin.SkinName;

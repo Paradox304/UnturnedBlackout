@@ -44,7 +44,7 @@ internal class UnmuteCommand : IRocketCommand
             return;
         }
 
-        Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () =>
+        _ = Task.Run(async () =>
         {
             Profile profile;
             try

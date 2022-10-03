@@ -81,7 +81,7 @@ public class LoadoutManager
         }
 
         Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
-        Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () =>
+        _ = Task.Run(async () =>
         {
             Logging.Debug($"TASK ENTERED LOADOUT CHECK {player.CharacterName}");
             await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
@@ -124,7 +124,7 @@ public class LoadoutManager
             attachments.Add(attachment.Attachment.AttachmentType, attachment);
 
         Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
-        Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () =>
+        _ = Task.Run(async () =>
         {
             Logging.Debug($"TASK ENTERED LOADOUT CHECK {player.CharacterName}");
             await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
@@ -166,7 +166,7 @@ public class LoadoutManager
             _ = attachments.Remove(attachment.Attachment.AttachmentType);
 
             Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
-            Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () =>
+            _ = Task.Run(async () =>
             {
                 Logging.Debug($"TASK ENTERED LOADOUT CHECK {player.CharacterName}");
                 await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
@@ -204,7 +204,7 @@ public class LoadoutManager
             playerLoadout.SecondaryGunCharm = gunCharm;
 
         Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
-        Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () =>
+        _ = Task.Run(async () =>
         {
             Logging.Debug($"TASK ENTERED LOADOUT CHECK {player.CharacterName}");
             await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
@@ -235,7 +235,7 @@ public class LoadoutManager
 
         playerLoadout.Knife = knife;
         Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
-        Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () =>
+        _ = Task.Run(async () =>
         {
             Logging.Debug($"TASK ENTERED LOADOUT CHECK {player.CharacterName}");
             await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
@@ -266,7 +266,7 @@ public class LoadoutManager
 
         playerLoadout.Tactical = tactical;
         Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
-        Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () =>
+        _ = Task.Run(async () =>
         {
             Logging.Debug($"TASK ENTERED LOADOUT CHECK {player.CharacterName}");
             await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
@@ -297,7 +297,7 @@ public class LoadoutManager
 
         playerLoadout.Lethal = lethal;
         Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
-        Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () =>
+        _ = Task.Run(async () =>
         {
             Logging.Debug($"TASK ENTERED LOADOUT CHECK {player.CharacterName}");
             await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
@@ -328,7 +328,7 @@ public class LoadoutManager
 
         playerLoadout.Glove = glove;
         Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
-        Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () =>
+        _ = Task.Run(async () =>
         {
             Logging.Debug($"TASK ENTERED LOADOUT CHECK {player.CharacterName}");
             await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
@@ -359,7 +359,7 @@ public class LoadoutManager
 
         playerLoadout.Card = card;
         Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
-        Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () =>
+        _ = Task.Run(async () =>
         {
             Logging.Debug($"TASK ENTERED LOADOUT CHECK {player.CharacterName}");
             await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
@@ -398,7 +398,7 @@ public class LoadoutManager
 
         playerLoadout.PerksSearchByType.Add(newPerk.Perk.SkillType, newPerk);
         Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
-        Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () =>
+        _ = Task.Run(async () =>
         {
             Logging.Debug($"TASK ENTERED LOADOUT CHECK {player.CharacterName}");
             await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
@@ -434,7 +434,7 @@ public class LoadoutManager
         }
 
         Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
-        Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () =>
+        _ = Task.Run(async () =>
         {
             Logging.Debug($"TASK ENTERED LOADOUT CHECK {player.CharacterName}");
             await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
@@ -476,7 +476,7 @@ public class LoadoutManager
         playerLoadout.Killstreaks.Sort((x, y) => x.Killstreak.KillstreakRequired.CompareTo(y.Killstreak.KillstreakRequired));
 
         Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
-        Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () =>
+        _ = Task.Run(async () =>
         {
             Logging.Debug($"TASK ENTERED LOADOUT CHECK {player.CharacterName}");
             await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
@@ -512,7 +512,7 @@ public class LoadoutManager
         }
 
         Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
-        Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () =>
+        _ = Task.Run(async () =>
         {
             Logging.Debug($"TASK ENTERED LOADOUT CHECK {player.CharacterName}");
             await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
@@ -563,7 +563,7 @@ public class LoadoutManager
         }
 
         Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
-        Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () =>
+        _ = Task.Run(async () =>
         {
             Logging.Debug($"TASK ENTERED LOADOUT CHECK {player.CharacterName}");
             await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
@@ -592,7 +592,7 @@ public class LoadoutManager
             playerLoadout.SecondarySkin = null;
 
         Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
-        Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () =>
+        _ = Task.Run(async () =>
         {
             Logging.Debug($"TASK ENTERED LOADOUT CHECK {player.CharacterName}");
             await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);

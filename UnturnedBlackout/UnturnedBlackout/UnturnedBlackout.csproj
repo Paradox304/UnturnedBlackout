@@ -233,7 +233,6 @@
         <Compile Include="Database\Data\PlayerData.cs" />
         <Compile Include="Database\Data\PlayerLoadout.cs" />
         <Compile Include="Database\Data\PlayerQuest.cs" />
-        <Compile Include="Dispatcher\ActionHandler.cs" />
         <Compile Include="Enums\EAttachment.cs" />
         <Compile Include="Enums\EBoosterType.cs" />
         <Compile Include="Enums\ECaseRarity.cs" />

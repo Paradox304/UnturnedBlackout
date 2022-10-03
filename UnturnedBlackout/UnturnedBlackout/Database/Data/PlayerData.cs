@@ -109,13 +109,13 @@ public class PlayerData
     public void CheckMultipleKills(int multiKills)
     {
         if (multiKills > HighestMultiKills)
-            Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () => await Plugin.Instance.DB.UpdatePlayerHighestMultiKillsAsync(SteamID, multiKills));
+            _ = Task.Run(async () => await Plugin.Instance.DB.UpdatePlayerHighestMultiKillsAsync(SteamID, multiKills));
     }
 
     public void CheckKillstreak(int killStreak)
     {
         if (killStreak > HighestKillstreak)
-            Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () => await Plugin.Instance.DB.UpdatePlayerHighestKillStreakAsync(SteamID, killStreak));
+            _ = Task.Run(async () => await Plugin.Instance.DB.UpdatePlayerHighestKillStreakAsync(SteamID, killStreak));
     }
 
     public void SetAchievementXPBooster()

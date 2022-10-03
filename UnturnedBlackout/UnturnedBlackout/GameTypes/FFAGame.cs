@@ -122,7 +122,7 @@ public class FFAGame : Game
                 continue;
 
             roundEndCases.Add((roundEndCasePlayer, @case));
-            Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () => await Plugin.Instance.DB.IncreasePlayerCaseAsync(roundEndCasePlayer.SteamID, @case.CaseID, 1));
+            _ = Task.Run(async () => await Plugin.Instance.DB.IncreasePlayerCaseAsync(roundEndCasePlayer.SteamID, @case.CaseID, 1));
         }
 
         for (var index = 0; index < Players.Count; index++)
@@ -145,7 +145,7 @@ public class FFAGame : Game
             Plugin.Instance.UI.SetupPreEndingUI(player.GamePlayer, EGameType.FFA, index == 0, 0, 0, "", "");
             MatchEndSummary summary = new(player.GamePlayer, player.XP, player.StartingLevel, player.StartingXP, player.Kills, player.Deaths, player.Assists, player.HighestKillstreak, player.HighestMK, player.StartTime, GameMode, index == 0);
             summaries.Add(player.GamePlayer, summary);
-            Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () =>
+            _ = Task.Run(async () =>
             {
                 await Plugin.Instance.DB.IncreasePlayerXPAsync(player.GamePlayer.SteamID, summary.PendingXP);
                 await Plugin.Instance.DB.IncreasePlayerCreditsAsync(player.GamePlayer.SteamID, summary.PendingCredits);
@@ -318,7 +318,7 @@ public class FFAGame : Game
         fPlayer.OnDeath(updatedKiller);
         fPlayer.GamePlayer.OnDeath(updatedKiller, Config.FFA.FileData.RespawnSeconds);
 
-        Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () => await Plugin.Instance.DB.IncreasePlayerDeathsAsync(fPlayer.GamePlayer.SteamID, 1));
+        _ = Task.Run(async () => await Plugin.Instance.DB.IncreasePlayerDeathsAsync(fPlayer.GamePlayer.SteamID, 1));
 
         TaskDispatcher.QueueOnMainThread(() =>
         {
@@ -354,7 +354,7 @@ public class FFAGame : Game
                     if (!assister.GamePlayer.Player.Player.life.isDead)
                         Plugin.Instance.UI.ShowXPUI(assister.GamePlayer, Config.Medals.FileData.AssistKillXP, Plugin.Instance.Translate("Assist_Kill", fPlayer.GamePlayer.Player.CharacterName.ToUnrich()));
 
-                    Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () => await Plugin.Instance.DB.IncreasePlayerXPAsync(assister.GamePlayer.SteamID, Config.Medals.FileData.AssistKillXP));
+                    _ = Task.Run(async () => await Plugin.Instance.DB.IncreasePlayerXPAsync(assister.GamePlayer.SteamID, Config.Medals.FileData.AssistKillXP));
                 }
 
                 fPlayer.GamePlayer.LastDamager.Clear();
@@ -535,7 +535,7 @@ public class FFAGame : Game
 
             Plugin.Instance.Quest.CheckQuest(fPlayer.GamePlayer, EQuestType.DEATH, questConditions);
 
-            Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () =>
+            _ = Task.Run(async () =>
             {
                 await Plugin.Instance.DB.IncreasePlayerXPAsync(kPlayer.GamePlayer.SteamID, xpGained);
                 if (cause == EDeathCause.GUN && limb == ELimb.SKULL)
@@ -771,7 +771,7 @@ public class FFAGame : Game
 
         Logging.Debug($"Turret destroyed, send xp");
         Plugin.Instance.UI.ShowXPUI(player, Config.Medals.FileData.TurretDestroyXP, Plugin.Instance.Translate("Turret_Destroy"));
-        Plugin.Instance.ActionDispatcher.QueueOnSecondThread(async () => await Plugin.Instance.DB.IncreasePlayerXPAsync(player.SteamID, Config.Medals.FileData.TurretDestroyXP));
+        _ = Task.Run(async () => await Plugin.Instance.DB.IncreasePlayerXPAsync(player.SteamID, Config.Medals.FileData.TurretDestroyXP));
     }
 
     public override void PlayerChangeFiremode(GamePlayer player)
