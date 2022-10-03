@@ -147,6 +147,14 @@ public class PlayerData
         }
     }
 
+    public float GetPersonalBooster(EBoosterType type) => type switch
+    {
+        EBoosterType.XP => XPBooster,
+        EBoosterType.BPXP => BPBooster,
+        EBoosterType.GUNXP => GunXPBooster,
+        var _ => throw new ArgumentOutOfRangeException("type", type, "Booster type is not as expected")
+    };
+    
     public int GetCurrency(ECurrency currency) => currency switch
     {
         ECurrency.COINS => Coins,

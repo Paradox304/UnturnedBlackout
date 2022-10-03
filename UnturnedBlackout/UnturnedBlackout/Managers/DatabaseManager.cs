@@ -9,9 +9,12 @@ using SteamServerQuery;
 using Steamworks;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Timers;
 using UnityEngine;
 using UnturnedBlackout.Database.Base;
 using UnturnedBlackout.Database.Data;
@@ -33,11 +36,15 @@ public class DatabaseManager
     public Config Config { get; set; }
 
     public Timer CacheRefresher { get; set; }
-
+    public Timer BatchQueryCleaner { get; set; }
+    
+    // Pending Queries
+    public List<string> PendingQueries { get; set; }
+    
     // Server Data
     public Options ServerOptions { get; set; }
     public bool IsPendingSeasonalWipe { get; set; }
-
+    
     // Players Data
     public Dictionary<CSteamID, PlayerData> PlayerData { get; set; }
     public Dictionary<CSteamID, PlayerLoadout> PlayerLoadouts { get; set; }
@@ -207,6 +214,10 @@ public class DatabaseManager
         CacheRefresher = new(120 * 1000);
         CacheRefresher.Elapsed += RefreshData;
 
+        BatchQueryCleaner = new(10 * 1000);
+        BatchQueryCleaner.Elapsed += CleanQueries;
+        PendingQueries = new();
+        
         PlayerData = new();
         PlayerLoadouts = new();
 
@@ -220,6 +231,7 @@ public class DatabaseManager
 
         RefreshData(null, null);
         CacheRefresher.Start();
+        BatchQueryCleaner.Start();
     }
 
     public async Task LoadDatabaseAsync()
@@ -1589,9 +1601,7 @@ public class DatabaseManager
             await conn.CloseAsync();
         }
     }
-
-    // Player Data
-
+    
     public async Task GetPlayerDataAsync(UnturnedPlayer player)
     {
         using MySqlConnection conn = new(ConnectionString);
@@ -2727,1143 +2737,1494 @@ public class DatabaseManager
         }
     }
 
-    public async Task IncreasePlayerXPAsync(CSteamID steamID, int xp)
+    // Pending Query
+    private void AddQuery(string query)
     {
+        if (string.IsNullOrEmpty(query))
+            return;
+
+        Logging.Debug($"Adding query to pending queries: {query}");
+        lock (PendingQueries)
+            PendingQueries.Add(query);
+    }
+
+    private void AddQueries(List<string> queries)
+    {
+        if (queries == null || queries.Count == 0)
+            return;
+
+        Logging.Debug($"Adding {queries.Count} queries to pending queries");
+        lock (PendingQueries)
+            PendingQueries.AddRange(queries);
+    }
+    
+    // Timers
+    private void CleanQueries(object sender, ElapsedEventArgs e)
+    {
+        Logging.Debug($"Cleaning queries");
+        lock (PendingQueries)
+        {
+            if (PendingQueries.Count == 0)
+            {
+                Logging.Debug($"No queries to process, return");
+                return;
+            }
+        }
+        
+        var stopWatch = new Stopwatch();
+        stopWatch.Start();
         using MySqlConnection conn = new(ConnectionString);
         try
         {
-            await conn.OpenAsync();
-
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS}` SET `XP` = `XP` + {xp} WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-            var obj = await new MySqlCommand($"Select `XP` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-
-            if (PlayerData.TryGetValue(steamID, out var data))
+            conn.Open();
+            stopWatch.Stop();
+            Logging.Debug($"Connction established, took {stopWatch.ElapsedMilliseconds}ms");
+            stopWatch.Reset();
+            List<string> pendingQueries = new();
+            lock (PendingQueries)
             {
-                if (obj is int newXp)
-                    data.XP = newXp;
+                pendingQueries = PendingQueries.ToList();
+                PendingQueries.Clear();
+            }
 
-                while (data.TryGetNeededXP(out var neededXP) && data.XP >= neededXP)
+            Logging.Debug($"Found {pendingQueries.Count} to go through");
+            MySqlCommand comm = new();
+            comm.Connection = conn;
+            List<string> processedQueries = new();
+            stopWatch.Start();
+            try
+            {
+                foreach (var query in pendingQueries)
                 {
-                    var newXP = data.XP - neededXP;
-                    _ = await new MySqlCommand($"UPDATE `{PLAYERS}` SET `XP` = {newXP}, `Level` = `Level` + 1 WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-                    obj = await new MySqlCommand($"Select `Level` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-                    if (obj is int level)
-                    {
-                        data.Level = level;
-                        TaskDispatcher.QueueOnMainThread(() =>
-                        {
-                            var player = Plugin.Instance.Game.GetGamePlayer(data.SteamID);
-                            if (player != null)
-                            {
-                                Plugin.Instance.UI.SendAnimation(player, new(EAnimationType.LEVEL_UP, level));
-                                if (ItemsSearchByLevel.TryGetValue(level, out var unlocks))
-                                {
-                                    foreach (var unlock in unlocks)
-                                        Plugin.Instance.UI.SendAnimation(player, new(EAnimationType.ITEM_UNLOCK, unlock));
-                                }
-                            }
-                        });
-                    }
-
-                    data.XP = newXP;
+                    comm.CommandText = query;
+                    comm.ExecuteNonQuery();
+                    processedQueries.Add(query);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"Error processing pending queries");
+                Logger.Log($"Current query: {comm.CommandText}");
+                Logger.Log(ex);
+            }
+            
+            stopWatch.Stop();
+            Logging.Debug($"Pending queries: {pendingQueries.Count}, Processed Queries: {processedQueries.Count}, Time Elapsed = {stopWatch.ElapsedMilliseconds}ms");
+            if (pendingQueries.Count > processedQueries.Count)
+            {
+                pendingQueries.RemoveAll(k => processedQueries.Contains(k));
+                lock (PendingQueries)
+                {
+                    PendingQueries.InsertRange(PendingQueries.Count - 1, pendingQueries);
                 }
             }
         }
         catch (Exception ex)
         {
-            Logger.Log($"Error adding {xp} xp for player with steam id {steamID}");
+            Logger.Log($"Error cleaning the queries, connection string: {ConnectionString}");
             Logger.Log(ex);
         }
         finally
         {
-            await conn.CloseAsync();
+            conn.Close();
         }
     }
-
-    public async Task IncreasePlayerCreditsAsync(CSteamID steamID, int credits)
-    {
-        using MySqlConnection conn = new(ConnectionString);
-        try
-        {
-            await conn.OpenAsync();
-
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS}` SET `Credits` = `Credits` + {credits} WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-            var obj = await new MySqlCommand($"Select `Credits` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-            if (PlayerData.TryGetValue(steamID, out var data))
-            {
-                if (obj is int newCredits)
-                    data.Credits = newCredits;
-            }
-
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.OnCurrencyUpdated(steamID, ECurrency.CREDITS));
-        }
-        catch (Exception ex)
-        {
-            Logger.Log($"Error adding {credits} credits for player with steam id {steamID}");
-            Logger.Log(ex);
-        }
-        finally
-        {
-            await conn.CloseAsync();
-        }
-    }
-
-    public async Task DecreasePlayerCreditsAsync(CSteamID steamID, int credits)
-    {
-        using MySqlConnection conn = new(ConnectionString);
-        try
-        {
-            await conn.OpenAsync();
-
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS}` SET `Credits` = `Credits` - {credits} WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-            var obj = await new MySqlCommand($"Select `Credits` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-            if (PlayerData.TryGetValue(steamID, out var data))
-            {
-                if (obj is int newCredits)
-                    data.Credits = newCredits;
-            }
-
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.OnCurrencyUpdated(steamID, ECurrency.CREDITS));
-        }
-        catch (Exception ex)
-        {
-            Logger.Log($"Error removing {credits} credits for player with steam id {steamID}");
-            Logger.Log(ex);
-        }
-        finally
-        {
-            await conn.CloseAsync();
-        }
-    }
-
-    public async Task IncreasePlayerScrapAsync(CSteamID steamID, int scrap)
-    {
-        using MySqlConnection conn = new(ConnectionString);
-        try
-        {
-            await conn.OpenAsync();
-
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS}` SET `Scrap` = `Scrap` + {scrap} WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-            var obj = await new MySqlCommand($"Select `Scrap` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-            if (PlayerData.TryGetValue(steamID, out var data))
-            {
-                if (obj is int newScrap)
-                    data.Scrap = newScrap;
-            }
-
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.OnCurrencyUpdated(steamID, ECurrency.SCRAP));
-        }
-        catch (Exception ex)
-        {
-            Logger.Log($"Error adding {scrap} scrap for player with steam id {steamID}");
-            Logger.Log(ex);
-        }
-        finally
-        {
-            await conn.CloseAsync();
-        }
-    }
-
-    public async Task DecreasePlayerScrapAsync(CSteamID steamID, int scrap)
-    {
-        using MySqlConnection conn = new(ConnectionString);
-        try
-        {
-            await conn.OpenAsync();
-
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS}` SET `Scrap` = `Scrap` - {scrap} WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-            var obj = await new MySqlCommand($"Select `Scrap` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-            if (PlayerData.TryGetValue(steamID, out var data))
-            {
-                if (obj is int newScrap)
-                    data.Scrap = newScrap;
-            }
-
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.OnCurrencyUpdated(steamID, ECurrency.SCRAP));
-        }
-        catch (Exception ex)
-        {
-            Logger.Log($"Error removing {scrap} scrap for player with steam id {steamID}");
-            Logger.Log(ex);
-        }
-        finally
-        {
-            await conn.CloseAsync();
-        }
-    }
-
-    public async Task IncreasePlayerCoinsAsync(CSteamID steamID, int coins)
-    {
-        using MySqlConnection conn = new(ConnectionString);
-        try
-        {
-            await conn.OpenAsync();
-
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS}` SET `Coins` = `Coins` + {coins} WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-            var obj = await new MySqlCommand($"Select `Coins` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-            if (PlayerData.TryGetValue(steamID, out var data))
-            {
-                if (obj is int newCoins)
-                    data.Coins = newCoins;
-            }
-
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.OnCurrencyUpdated(steamID, ECurrency.COINS));
-        }
-        catch (Exception ex)
-        {
-            Logger.Log($"Error adding {coins} coins for player with steam id {steamID}");
-            Logger.Log(ex);
-        }
-        finally
-        {
-            await conn.CloseAsync();
-        }
-    }
-
-    public async Task DecreasePlayerCoinsAsync(CSteamID steamID, int coins)
-    {
-        using MySqlConnection conn = new(ConnectionString);
-        try
-        {
-            await conn.OpenAsync();
-
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS}` SET `Coins` = `Coins` - {coins} WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-            var obj = await new MySqlCommand($"Select `Coins` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-            if (PlayerData.TryGetValue(steamID, out var data))
-            {
-                if (obj is int newCoins)
-                    data.Coins = newCoins;
-            }
-
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.OnCurrencyUpdated(steamID, ECurrency.COINS));
-        }
-        catch (Exception ex)
-        {
-            Logger.Log($"Error removing {coins} coins for player with steam id {steamID}");
-            Logger.Log(ex);
-        }
-        finally
-        {
-            await conn.CloseAsync();
-        }
-    }
-
-    public async Task IncreasePlayerKillsAsync(CSteamID steamID, int kills)
-    {
-        using MySqlConnection conn = new(ConnectionString);
-        try
-        {
-            await conn.OpenAsync();
-
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS}` SET `Kills` = `Kills` + {kills} WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-            var obj = await new MySqlCommand($"Select `Kills` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-
-            if (PlayerData.TryGetValue(steamID, out var data))
-            {
-                if (obj is int newKills)
-                    data.Kills = newKills;
-            }
-
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_LEADERBOARD_DAILY}` SET `Kills` = `Kills` + {kills} WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-            obj = await new MySqlCommand($"SELECT `Kills` FROM `{PLAYERS_LEADERBOARD_DAILY}` WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-
-            if (PlayerDailyLeaderboardLookup.TryGetValue(steamID, out var lData))
-            {
-                if (obj is int newKills)
-                    lData.Kills = newKills;
-            }
-
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_LEADERBOARD_WEEKLY}` SET `Kills` = `Kills` + {kills} WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-            obj = await new MySqlCommand($"SELECT `Kills` FROM `{PLAYERS_LEADERBOARD_WEEKLY}` WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-
-            if (PlayerWeeklyLeaderboardLookup.TryGetValue(steamID, out lData))
-            {
-                if (obj is int newKills)
-                    lData.Kills = newKills;
-            }
-
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_LEADERBOARD_SEASONAL}` SET `Kills` = `Kills` + {kills} WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-            obj = await new MySqlCommand($"SELECT `Kills` FROM `{PLAYERS_LEADERBOARD_SEASONAL}` WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-
-            if (PlayerSeasonalLeaderboardLookup.TryGetValue(steamID, out lData))
-            {
-                if (obj is int newKills)
-                    lData.Kills = newKills;
-            }
-        }
-        catch (Exception ex)
-        {
-            Logger.Log($"Error adding {kills} kills for player with steam id {steamID}");
-            Logger.Log(ex);
-        }
-        finally
-        {
-            await conn.CloseAsync();
-        }
-    }
-
-    public async Task IncreasePlayerHeadshotKillsAsync(CSteamID steamID, int headshotKills)
-    {
-        using MySqlConnection conn = new(ConnectionString);
-        try
-        {
-            await conn.OpenAsync();
-
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS}` SET `HeadshotKills` = `HeadshotKills` + {headshotKills} WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-            var obj = await new MySqlCommand($"Select `HeadshotKills` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-            if (PlayerData.TryGetValue(steamID, out var data))
-            {
-                if (obj is int newHeadshotKills)
-                    data.HeadshotKills = newHeadshotKills;
-            }
-
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_LEADERBOARD_DAILY}` SET `HeadshotKills` = `HeadshotKills` + {headshotKills} WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-            obj = await new MySqlCommand($"Select `HeadshotKills` FROM `{PLAYERS_LEADERBOARD_DAILY}` WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-            if (PlayerDailyLeaderboardLookup.TryGetValue(steamID, out var lData))
-            {
-                if (obj is int newHeadshotKills)
-                    lData.HeadshotKills = newHeadshotKills;
-            }
-
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_LEADERBOARD_WEEKLY}` SET `HeadshotKills` = `HeadshotKills` + {headshotKills} WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-            obj = await new MySqlCommand($"Select `HeadshotKills` FROM `{PLAYERS_LEADERBOARD_WEEKLY}` WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-            if (PlayerWeeklyLeaderboardLookup.TryGetValue(steamID, out lData))
-            {
-                if (obj is int newHeadshotKills)
-                    lData.HeadshotKills = newHeadshotKills;
-            }
-
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_LEADERBOARD_SEASONAL}` SET `HeadshotKills` = `HeadshotKills` + {headshotKills} WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-            obj = await new MySqlCommand($"Select `HeadshotKills` FROM `{PLAYERS_LEADERBOARD_SEASONAL}` WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-            if (PlayerSeasonalLeaderboardLookup.TryGetValue(steamID, out lData))
-            {
-                if (obj is int newHeadshotKills)
-                    lData.HeadshotKills = newHeadshotKills;
-            }
-        }
-        catch (Exception ex)
-        {
-            Logger.Log($"Error adding {headshotKills} headshot kills for player with steam id {steamID}");
-            Logger.Log(ex);
-        }
-        finally
-        {
-            await conn.CloseAsync();
-        }
-    }
-
-    public async Task UpdatePlayerHighestKillStreakAsync(CSteamID steamID, int killStreak)
-    {
-        using MySqlConnection conn = new(ConnectionString);
-        try
-        {
-            await conn.OpenAsync();
-
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS}` SET `HighestKillstreak` = {killStreak} WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-            if (PlayerData.TryGetValue(steamID, out var data))
-                data.HighestKillstreak = killStreak;
-        }
-        catch (Exception ex)
-        {
-            Logger.Log($"Error setting {killStreak} highest killstreak for player with steam id {steamID}");
-            Logger.Log(ex);
-        }
-        finally
-        {
-            await conn.CloseAsync();
-        }
-    }
-
-    public async Task UpdatePlayerHighestMultiKillsAsync(CSteamID steamID, int multiKills)
-    {
-        using MySqlConnection conn = new(ConnectionString);
-        try
-        {
-            await conn.OpenAsync();
-
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS}` SET `HighestMultiKills` = {multiKills} WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-            if (PlayerData.TryGetValue(steamID, out var data))
-                data.HighestMultiKills = multiKills;
-        }
-        catch (Exception ex)
-        {
-            Logger.Log($"Error setting {multiKills} highest multi kills for player with steam id {steamID}");
-            Logger.Log(ex);
-        }
-        finally
-        {
-            await conn.CloseAsync();
-        }
-    }
-
-    public async Task IncreasePlayerKillsConfirmedAsync(CSteamID steamID, int killsConfirmed)
-    {
-        using MySqlConnection conn = new(ConnectionString);
-        try
-        {
-            await conn.OpenAsync();
-
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS}` SET `KillsConfirmed` = `KillsConfirmed` + {killsConfirmed} WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-            var obj = await new MySqlCommand($"Select `KillsConfirmed` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-            if (PlayerData.TryGetValue(steamID, out var data))
-            {
-                if (obj is int newKillsConfirmed)
-                    data.KillsConfirmed = newKillsConfirmed;
-            }
-        }
-        catch (Exception ex)
-        {
-            Logger.Log($"Error adding {killsConfirmed} kills confirmed for player with steam id {steamID}");
-            Logger.Log(ex);
-        }
-        finally
-        {
-            await conn.CloseAsync();
-        }
-    }
-
-    public async Task IncreasePlayerKillsDeniedAsync(CSteamID steamID, int killsDenied)
-    {
-        using MySqlConnection conn = new(ConnectionString);
-        try
-        {
-            await conn.OpenAsync();
-
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS}` SET `KillsDenied` = `KillsDenied` + {killsDenied} WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-            var obj = await new MySqlCommand($"Select `KillsDenied` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-            if (PlayerData.TryGetValue(steamID, out var data))
-            {
-                if (obj is int newKillsDenied)
-                    data.KillsDenied = newKillsDenied;
-            }
-        }
-        catch (Exception ex)
-        {
-            Logger.Log($"Error adding {killsDenied} kills denied for player with steam id {steamID}");
-            Logger.Log(ex);
-        }
-        finally
-        {
-            await conn.CloseAsync();
-        }
-    }
-
-    public async Task IncreasePlayerFlagsCapturedAsync(CSteamID steamID, int flagsCaptured)
-    {
-        using MySqlConnection conn = new(ConnectionString);
-        try
-        {
-            await conn.OpenAsync();
-
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS}` SET `FlagsCaptured` = `FlagsCaptured` + {flagsCaptured} WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-            var obj = await new MySqlCommand($"Select `FlagsCaptured` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-            if (PlayerData.TryGetValue(steamID, out var data))
-            {
-                if (obj is int newFlagsCaptured)
-                    data.FlagsCaptured = newFlagsCaptured;
-            }
-        }
-        catch (Exception ex)
-        {
-            Logger.Log($"Error adding {flagsCaptured} flags captured for player with steam id {steamID}");
-            Logger.Log(ex);
-        }
-        finally
-        {
-            await conn.CloseAsync();
-        }
-    }
-
-    public async Task IncreasePlayerFlagsSavedAsync(CSteamID steamID, int flagsSaved)
-    {
-        using MySqlConnection conn = new(ConnectionString);
-        try
-        {
-            await conn.OpenAsync();
-
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS}` SET `FlagsSaved` = `FlagsSaved` + {flagsSaved} WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-            var obj = await new MySqlCommand($"Select `FlagsSaved` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-            if (PlayerData.TryGetValue(steamID, out var data))
-            {
-                if (obj is int newFlagsSaved)
-                    data.FlagsSaved = newFlagsSaved;
-            }
-        }
-        catch (Exception ex)
-        {
-            Logger.Log($"Error adding {flagsSaved} flags saved for player with steam id {steamID}");
-            Logger.Log(ex);
-        }
-        finally
-        {
-            await conn.CloseAsync();
-        }
-    }
-
-    public async Task IncreasePlayerAreasTakenAsync(CSteamID steamID, int areasTaken)
-    {
-        using MySqlConnection conn = new(ConnectionString);
-        try
-        {
-            await conn.OpenAsync();
-
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS}` SET `AreasTaken` = `AreasTaken` + {areasTaken} WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-            var obj = await new MySqlCommand($"Select `AreasTaken` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-            if (PlayerData.TryGetValue(steamID, out var data))
-            {
-                if (obj is int newArenasTaken)
-                    data.AreasTaken = newArenasTaken;
-            }
-        }
-        catch (Exception ex)
-        {
-            Logger.Log($"Error adding {areasTaken} areas taken for player with steam id {steamID}");
-            Logger.Log(ex);
-        }
-        finally
-        {
-            await conn.CloseAsync();
-        }
-    }
-
-    public async Task IncreasePlayerDeathsAsync(CSteamID steamID, int deaths)
-    {
-        using MySqlConnection conn = new(ConnectionString);
-        try
-        {
-            await conn.OpenAsync();
-
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS}` SET `Deaths` = `Deaths` + {deaths} WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-            var obj = await new MySqlCommand($"Select `Deaths` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-            if (PlayerData.TryGetValue(steamID, out var data))
-            {
-                if (obj is int newDeaths)
-                    data.Deaths = newDeaths;
-            }
-
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_LEADERBOARD_DAILY}` SET `Deaths` = `Deaths` + {deaths} WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-            obj = await new MySqlCommand($"Select `Deaths` FROM `{PLAYERS_LEADERBOARD_DAILY}` WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-            if (PlayerDailyLeaderboardLookup.TryGetValue(steamID, out var lData))
-            {
-                if (obj is int newDeaths)
-                    lData.Deaths = newDeaths;
-            }
-
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_LEADERBOARD_WEEKLY}` SET `Deaths` = `Deaths` + {deaths} WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-            obj = await new MySqlCommand($"Select `Deaths` FROM `{PLAYERS_LEADERBOARD_WEEKLY}` WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-            if (PlayerWeeklyLeaderboardLookup.TryGetValue(steamID, out lData))
-            {
-                if (obj is int newDeaths)
-                    lData.Deaths = newDeaths;
-            }
-
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_LEADERBOARD_SEASONAL}` SET `Deaths` = `Deaths` + {deaths} WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-            obj = await new MySqlCommand($"Select `Deaths` FROM `{PLAYERS_LEADERBOARD_SEASONAL}` WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-            if (PlayerSeasonalLeaderboardLookup.TryGetValue(steamID, out lData))
-            {
-                if (obj is int newDeaths)
-                    lData.Deaths = newDeaths;
-            }
-        }
-        catch (Exception ex)
-        {
-            Logger.Log($"Error adding {deaths} deaths for player with steam id {steamID}");
-            Logger.Log(ex);
-        }
-        finally
-        {
-            await conn.CloseAsync();
-        }
-    }
-
-    public async Task ChangePlayerMusicAsync(CSteamID steamID, bool isMusic)
-    {
-        using MySqlConnection conn = new(ConnectionString);
-        try
-        {
-            await conn.OpenAsync();
-
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS}` SET `Music` = {isMusic} WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-            if (PlayerData.TryGetValue(steamID, out var data))
-                data.Music = isMusic;
-        }
-        catch (Exception ex)
-        {
-            Logger.Log($"Error changing music to {isMusic} for player with steam id {steamID}");
-            Logger.Log(ex);
-        }
-        finally
-        {
-            await conn.CloseAsync();
-        }
-    }
-
-    public async Task UpdatePlayerCountryCodeAsync(CSteamID steamID, string countryCode)
-    {
-        using MySqlConnection conn = new(ConnectionString);
-        try
-        {
-            await conn.OpenAsync();
-
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS}` SET `CountryCode` = '{countryCode}' WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-            if (PlayerData.TryGetValue(steamID, out var data))
-                data.CountryCode = countryCode;
-        }
-        catch (Exception ex)
-        {
-            Logger.Log($"Error changing country code to {countryCode} for player with steam id {steamID}");
-            Logger.Log(ex);
-        }
-        finally
-        {
-            await conn.CloseAsync();
-        }
-    }
-
-    public async Task ChangePlayerHideFlagAsync(CSteamID steamID, bool hideFlag)
-    {
-        using MySqlConnection conn = new(ConnectionString);
-        try
-        {
-            await conn.OpenAsync();
-
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS}` SET `HideFlag` = {hideFlag} WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-            if (PlayerData.TryGetValue(steamID, out var data))
-                data.HideFlag = hideFlag;
-        }
-        catch (Exception ex)
-        {
-            Logger.Log($"Error changing hide flag to {hideFlag} for player with steam id {steamID}");
-            Logger.Log(ex);
-        }
-        finally
-        {
-            await conn.CloseAsync();
-        }
-    }
-
-    public async Task ChangePlayerMutedAsync(CSteamID steamID, bool isMuted)
-    {
-        using MySqlConnection conn = new(ConnectionString);
-        try
-        {
-            await conn.OpenAsync();
-
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS}` SET `IsMuted` = {isMuted} WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-            if (PlayerData.TryGetValue(steamID, out var data))
-                data.IsMuted = isMuted;
-        }
-        catch (Exception ex)
-        {
-            Logger.Log($"Error changing is muted to {isMuted} for player with steam id {steamID}");
-            Logger.Log(ex);
-        }
-        finally
-        {
-            await conn.CloseAsync();
-        }
-    }
-
-    public async Task ChangePlayerMuteExpiryAsync(CSteamID steamID, DateTimeOffset muteExpiry)
-    {
-        using MySqlConnection conn = new(ConnectionString);
-        try
-        {
-            await conn.OpenAsync();
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS}` SET `MuteExpiry` = {muteExpiry.ToUnixTimeSeconds()} WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-            if (PlayerData.TryGetValue(steamID, out var data))
-                data.MuteExpiry = muteExpiry;
-        }
-        catch (Exception ex)
-        {
-            Logger.Log($"Error changing mute expiry to {muteExpiry.ToUnixTimeSeconds()} for player with steam id {steamID}");
-            Logger.Log(ex);
-        }
-        finally
-        {
-            await conn.CloseAsync();
-        }
-    }
-
-    public async Task IncreasePlayerBoosterAsync(CSteamID steamID, EBoosterType boosterType, float increaseBooster)
+    
+    private void RefreshData(object sender, System.Timers.ElapsedEventArgs e)
     {
         using MySqlConnection conn = new(ConnectionString);
 
         try
         {
-            await conn.OpenAsync();
-
-            var coloumnName = "None";
-            switch (boosterType)
+            conn.Open();
+            var rdr = new MySqlCommand($"SELECT * FROM `{OPTIONS}`;", conn).ExecuteReader();
+            try
             {
-                case EBoosterType.XP:
-                    coloumnName = "XPBooster";
-                    break;
-                case EBoosterType.BPXP:
-                    coloumnName = "BPBooster";
-                    break;
-                case EBoosterType.GUNXP:
-                    coloumnName = "GunXPBooster";
-                    break;
+                while (rdr.Read())
+                {
+                    if (!long.TryParse(rdr[0].ToString(), out var dailyLeaderboardWipeUnix))
+                        continue;
+
+                    var dailyLeaderboardWipe = DateTimeOffset.FromUnixTimeSeconds(dailyLeaderboardWipeUnix);
+
+                    if (!long.TryParse(rdr[1].ToString(), out var weeklyLeaderboardWipeUnix))
+                        continue;
+
+                    var weeklyLeaderboardWipe = DateTimeOffset.FromUnixTimeSeconds(weeklyLeaderboardWipeUnix);
+
+                    var dailyRanked = Utility.GetRankedRewardsFromString(rdr[2].ToString());
+                    var dailyPercentile = Utility.GetPercentileRewardsFromString(rdr[3].ToString());
+
+                    var weeklyRanked = Utility.GetRankedRewardsFromString(rdr[4].ToString());
+                    var weeklyPercentile = Utility.GetPercentileRewardsFromString(rdr[5].ToString());
+
+                    var seasonalRanked = Utility.GetRankedRewardsFromString(rdr[6].ToString());
+                    var seasonalPercentile = Utility.GetPercentileRewardsFromString(rdr[7].ToString());
+
+                    if (!float.TryParse(rdr[8].ToString(), out var xpBooster))
+                        continue;
+
+                    if (!float.TryParse(rdr[9].ToString(), out var bpBooster))
+                        continue;
+
+                    if (!float.TryParse(rdr[10].ToString(), out var gunXPBooster))
+                        continue;
+
+                    if (!long.TryParse(rdr[11].ToString(), out var xpBoosterWipeUnix))
+                        continue;
+
+                    var xpBoosterWipe = DateTimeOffset.FromUnixTimeSeconds(xpBoosterWipeUnix);
+                    if (!long.TryParse(rdr[12].ToString(), out var bpBoosterWipeUnix))
+                        continue;
+
+                    var bpBoosterWipe = DateTimeOffset.FromUnixTimeSeconds(bpBoosterWipeUnix);
+                    if (!long.TryParse(rdr[13].ToString(), out var gunXPBoosterWipeUnix))
+                        continue;
+
+                    var gunXPBoosterWipe = DateTimeOffset.FromUnixTimeSeconds(gunXPBoosterWipeUnix);
+
+                    var gameTips = rdr[14].ToString().Split(',').ToList();
+                    var primeRewards = Utility.GetRewardsFromString(rdr[15].ToString());
+                    var primeDailyRewards = Utility.GetRewardsFromString(rdr[16].ToString());
+
+                    ServerOptions = new(dailyLeaderboardWipe, weeklyLeaderboardWipe, dailyRanked, dailyPercentile, weeklyRanked, weeklyPercentile, seasonalRanked, seasonalPercentile, xpBooster, bpBooster, gunXPBooster, xpBoosterWipe, bpBoosterWipe, gunXPBoosterWipe, gameTips, primeRewards, primeDailyRewards);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"Error getting data from options table");
+                Logger.Log(ex);
+            }
+            finally
+            {
+                rdr.Close();
             }
 
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS}` SET `{coloumnName}` = `{coloumnName}` + {increaseBooster} WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-            var obj = await new MySqlCommand($"SELECT `{coloumnName}` FROM `{PLAYERS}` WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
+            rdr = new MySqlCommand($"SELECT `{PLAYERS_LEADERBOARD_DAILY}`.`SteamID`, `{PLAYERS}`.`SteamName`, `{PLAYERS}`.`CountryCode`, `{PLAYERS}`.`HideFlag`, `{PLAYERS}`.`Level`, `{PLAYERS}`.`HasPrime` , `{PLAYERS_LEADERBOARD_DAILY}`.`Kills`, `{PLAYERS_LEADERBOARD_DAILY}`.`HeadshotKills`, `{PLAYERS_LEADERBOARD_DAILY}`.`Deaths` FROM `{PLAYERS_LEADERBOARD_DAILY}` INNER JOIN `{PLAYERS}` ON `{PLAYERS_LEADERBOARD_DAILY}`.`SteamID` = `{PLAYERS}`.`SteamID` ORDER BY (`{PLAYERS_LEADERBOARD_DAILY}`.`Kills` + `{PLAYERS_LEADERBOARD_DAILY}`.`HeadshotKills`) DESC;", conn).ExecuteReader();
+            try
+            {
+                List<LeaderboardData> playerDailyLeaderboard = new();
+                Dictionary<CSteamID, LeaderboardData> playerDailyLeaderboardLookup = new();
 
-            if (PlayerData.TryGetValue(steamID, out var data) && float.TryParse(obj.ToString(), out var updatedBooster))
-                data.SetPersonalBooster(boosterType, updatedBooster);
+                while (rdr.Read())
+                {
+                    if (!ulong.TryParse(rdr[0].ToString(), out var steamid))
+                        continue;
+
+                    var steamName = rdr[1].ToString();
+                    var countryCode = rdr[2].ToString();
+
+                    if (!bool.TryParse(rdr[3].ToString(), out var hideFlag))
+                        continue;
+
+                    if (!int.TryParse(rdr[4].ToString(), out var level))
+                        continue;
+
+                    if (!bool.TryParse(rdr[5].ToString(), out var hasPrime))
+                        continue;
+
+                    CSteamID steamID = new(steamid);
+                    if (!int.TryParse(rdr[6].ToString(), out var kills))
+                        continue;
+
+                    if (!int.TryParse(rdr[7].ToString(), out var headshotKills))
+                        continue;
+
+                    if (!int.TryParse(rdr[8].ToString(), out var deaths))
+                        continue;
+
+                    LeaderboardData leaderboardData = new(steamID, steamName, countryCode, hideFlag, level, hasPrime, kills, headshotKills, deaths);
+
+                    playerDailyLeaderboard.Add(leaderboardData);
+                    playerDailyLeaderboardLookup.Add(steamID, leaderboardData);
+                }
+
+                PlayerDailyLeaderboard = playerDailyLeaderboard;
+                PlayerDailyLeaderboardLookup = playerDailyLeaderboardLookup;
+            }
+            catch (Exception ex)
+            {
+                Logger.Log("Error reading data from daily leaderboard table");
+                Logger.Log(ex);
+            }
+            finally
+            {
+                rdr.Close();
+            }
+
+            rdr = new MySqlCommand($"SELECT `{PLAYERS_LEADERBOARD_WEEKLY}`.`SteamID`, `{PLAYERS}`.`SteamName`, `{PLAYERS}`.`CountryCode`, `{PLAYERS}`.`HideFlag`, `{PLAYERS}`.`Level`, `{PLAYERS}`.`HasPrime` , `{PLAYERS_LEADERBOARD_WEEKLY}`.`Kills`, `{PLAYERS_LEADERBOARD_WEEKLY}`.`HeadshotKills`, `{PLAYERS_LEADERBOARD_WEEKLY}`.`Deaths` FROM `{PLAYERS_LEADERBOARD_WEEKLY}` INNER JOIN `{PLAYERS}` ON `{PLAYERS_LEADERBOARD_WEEKLY}`.`SteamID` = `{PLAYERS}`.`SteamID` ORDER BY (`{PLAYERS_LEADERBOARD_WEEKLY}`.`Kills` + `{PLAYERS_LEADERBOARD_WEEKLY}`.`HeadshotKills`) DESC;", conn).ExecuteReader();
+            try
+            {
+                List<LeaderboardData> playerWeeklyLeaderboard = new();
+                Dictionary<CSteamID, LeaderboardData> playerWeeklyLeaderboardLookup = new();
+
+                while (rdr.Read())
+                {
+                    if (!ulong.TryParse(rdr[0].ToString(), out var steamid))
+                        continue;
+
+                    var steamName = rdr[1].ToString();
+                    var countryCode = rdr[2].ToString();
+
+                    if (!bool.TryParse(rdr[3].ToString(), out var hideFlag))
+                        continue;
+
+                    if (!int.TryParse(rdr[4].ToString(), out var level))
+                        continue;
+
+                    if (!bool.TryParse(rdr[5].ToString(), out var hasPrime))
+                        continue;
+
+                    CSteamID steamID = new(steamid);
+                    if (!int.TryParse(rdr[6].ToString(), out var kills))
+                        continue;
+
+                    if (!int.TryParse(rdr[7].ToString(), out var headshotKills))
+                        continue;
+
+                    if (!int.TryParse(rdr[8].ToString(), out var deaths))
+                        continue;
+
+                    LeaderboardData leaderboardData = new(steamID, steamName, countryCode, hideFlag, level, hasPrime, kills, headshotKills, deaths);
+
+                    playerWeeklyLeaderboard.Add(leaderboardData);
+                    playerWeeklyLeaderboardLookup.Add(steamID, leaderboardData);
+                }
+
+                PlayerWeeklyLeaderboard = playerWeeklyLeaderboard;
+                PlayerWeeklyLeaderboardLookup = playerWeeklyLeaderboardLookup;
+            }
+            catch (Exception ex)
+            {
+                Logger.Log("Error reading data from weekly leaderboard table");
+                Logger.Log(ex);
+            }
+            finally
+            {
+                rdr.Close();
+            }
+
+            foreach (var data in PlayerData.Values)
+            {
+                if (!PlayerDailyLeaderboardLookup.ContainsKey(data.SteamID))
+                {
+                    LeaderboardData dailyLeaderboardData = new(data.SteamID, data.SteamName, data.CountryCode, data.HideFlag, data.Level, data.HasPrime, 0, 0, 0);
+                    PlayerDailyLeaderboard.Add(dailyLeaderboardData);
+                    PlayerDailyLeaderboardLookup.Add(data.SteamID, dailyLeaderboardData);
+                    _ = new MySqlCommand($"INSERT INTO `{PLAYERS_LEADERBOARD_DAILY}` ( `SteamID` ) VALUES ( {data.SteamID} );", conn).ExecuteScalar();
+                }
+
+                if (!PlayerWeeklyLeaderboardLookup.ContainsKey(data.SteamID))
+                {
+                    LeaderboardData weeklyLeaderboardData = new(data.SteamID, data.SteamName, data.CountryCode, data.HideFlag, data.Level, data.HasPrime, 0, 0, 0);
+                    PlayerWeeklyLeaderboard.Add(weeklyLeaderboardData);
+                    PlayerWeeklyLeaderboardLookup.Add(data.SteamID, weeklyLeaderboardData);
+                    _ = new MySqlCommand($"INSERT INTO `{PLAYERS_LEADERBOARD_WEEKLY}` ( `SteamID` ) VALUES ( {data.SteamID} );", conn).ExecuteScalar();
+                }
+            }
+
+            rdr = new MySqlCommand($"SELECT `{PLAYERS_LEADERBOARD_SEASONAL}`.`SteamID`, `{PLAYERS}`.`SteamName`, `{PLAYERS}`.`CountryCode`, `{PLAYERS}`.`HideFlag`, `{PLAYERS}`.`Level`, `{PLAYERS}`.`HasPrime` , `{PLAYERS_LEADERBOARD_SEASONAL}`.`Kills`, `{PLAYERS_LEADERBOARD_SEASONAL}`.`HeadshotKills`, `{PLAYERS_LEADERBOARD_SEASONAL}`.`Deaths` FROM `{PLAYERS_LEADERBOARD_SEASONAL}` INNER JOIN `{PLAYERS}` ON `{PLAYERS_LEADERBOARD_SEASONAL}`.`SteamID` = `{PLAYERS}`.`SteamID` ORDER BY (`{PLAYERS_LEADERBOARD_SEASONAL}`.`Kills` + `{PLAYERS_LEADERBOARD_SEASONAL}`.`HeadshotKills`) DESC;", conn).ExecuteReader();
+            try
+            {
+                List<LeaderboardData> playerSeasonalLeaderboard = new();
+                Dictionary<CSteamID, LeaderboardData> playerSeasonalLeaderboardLookup = new();
+
+                while (rdr.Read())
+                {
+                    if (!ulong.TryParse(rdr[0].ToString(), out var steamid))
+                        continue;
+
+                    var steamName = rdr[1].ToString();
+                    var countryCode = rdr[2].ToString();
+
+                    if (!bool.TryParse(rdr[3].ToString(), out var hideFlag))
+                        continue;
+
+                    if (!int.TryParse(rdr[4].ToString(), out var level))
+                        continue;
+
+                    if (!bool.TryParse(rdr[5].ToString(), out var hasPrime))
+                        continue;
+
+                    CSteamID steamID = new(steamid);
+                    if (!int.TryParse(rdr[6].ToString(), out var kills))
+                        continue;
+
+                    if (!int.TryParse(rdr[7].ToString(), out var headshotKills))
+                        continue;
+
+                    if (!int.TryParse(rdr[8].ToString(), out var deaths))
+                        continue;
+
+                    LeaderboardData leaderboardData = new(steamID, steamName, countryCode, hideFlag, level, hasPrime, kills, headshotKills, deaths);
+
+                    playerSeasonalLeaderboard.Add(leaderboardData);
+                    playerSeasonalLeaderboardLookup.Add(steamID, leaderboardData);
+                }
+
+                PlayerSeasonalLeaderboard = playerSeasonalLeaderboard;
+                PlayerSeasonalLeaderboardLookup = playerSeasonalLeaderboardLookup;
+            }
+            catch (Exception ex)
+            {
+                Logger.Log("Error reading data from weekly leaderboard table");
+                Logger.Log(ex);
+            }
+            finally
+            {
+                rdr.Close();
+            }
+
+            rdr = new MySqlCommand($"SELECT `SteamID`, `SteamName`, `CountryCode`, `HideFlag`, `Level`, `HasPrime`, `Kills`, `HeadshotKills`, `Deaths` FROM `{PLAYERS}` ORDER BY (`Kills` + `HeadshotKills`) DESC;", conn).ExecuteReader();
+            try
+            {
+                Dictionary<CSteamID, LeaderboardData> playerAllTimeLeaderboardLookup = new();
+                List<LeaderboardData> playerAllTimeKill = new();
+                List<LeaderboardData> playerAllTimeLevel = new();
+                while (rdr.Read())
+                {
+                    if (!ulong.TryParse(rdr[0].ToString(), out var steamid))
+                        continue;
+
+                    CSteamID steamID = new(steamid);
+                    var steamName = rdr[1].ToString();
+                    var countryCode = rdr[2].ToString();
+
+                    if (!bool.TryParse(rdr[3].ToString(), out var hideFlag))
+                        continue;
+
+                    if (!int.TryParse(rdr[4].ToString(), out var level))
+                        continue;
+
+                    if (!bool.TryParse(rdr[5].ToString(), out var hasPrime))
+                        continue;
+
+                    if (!int.TryParse(rdr[6].ToString(), out var kills))
+                        continue;
+
+                    if (!int.TryParse(rdr[7].ToString(), out var headshotKills))
+                        continue;
+
+                    if (!int.TryParse(rdr[8].ToString(), out var deaths))
+                        continue;
+
+                    LeaderboardData leaderboardData = new(steamID, steamName, countryCode, hideFlag, level, hasPrime, kills, headshotKills, deaths);
+                    playerAllTimeLeaderboardLookup.Add(steamID, leaderboardData);
+                    playerAllTimeKill.Add(leaderboardData);
+                    playerAllTimeLevel.Add(leaderboardData);
+                }
+
+                PlayerAllTimeLeaderboardLookup = playerAllTimeLeaderboardLookup;
+                PlayerAllTimeKill = playerAllTimeKill;
+                PlayerAllTimeLevel = playerAllTimeLevel;
+                PlayerAllTimeLevel.Sort((x, y) => y.Level.CompareTo(x.Level));
+            }
+            catch (Exception ex)
+            {
+                Logger.Log("Error reading data from players table");
+                Logger.Log(ex);
+            }
+            finally
+            {
+                rdr.Close();
+            }
+
+            List<(CSteamID, List<Reward>)> bulkRewards = new();
+
+            if (ServerOptions.DailyLeaderboardWipe < DateTimeOffset.UtcNow)
+            {
+                // Give all ranked rewards
+                Embed embed = new(null, $"Last Playtest Rankings ({PlayerDailyLeaderboard.Count} Players)", null, "15105570", DateTime.UtcNow.ToString("s"), new(Provider.serverName, Provider.configData.Browser.Icon), new(Provider.serverName, "", Provider.configData.Browser.Icon), new Field[] { new($"Ranked:", "", false), new("Percentile:", "", false) }, null, null);
+
+                foreach (var rankedReward in ServerOptions.DailyRankedRewards)
+                {
+                    if (PlayerDailyLeaderboard.Count < rankedReward.Key + 1)
+                        break;
+
+                    var leaderboardData = PlayerDailyLeaderboard[rankedReward.Key];
+                    bulkRewards.Add(new(leaderboardData.SteamID, rankedReward.Value));
+                    embed.Fields[0].Value += $"{Utility.GetDiscordEmoji(rankedReward.Key + 1)} [{leaderboardData.SteamName}](https://steamcommunity.com/profiles/{leaderboardData.SteamID}/) | {leaderboardData.Kills + leaderboardData.HeadshotKills} Kills \n";
+                    if (rankedReward.Key == 2)
+                        embed.Fields[0].Value += $"\n";
+                }
+
+                // Give all percentile rewards
+                foreach (var percentileReward in ServerOptions.DailyPercentileRewards)
+                {
+                    var lowerIndex = percentileReward.LowerPercentile == 0 ? 0 : percentileReward.LowerPercentile * PlayerDailyLeaderboard.Count / 100;
+                    var upperIndex = percentileReward.UpperPercentile * PlayerDailyLeaderboard.Count / 100;
+
+                    for (var i = lowerIndex; i < upperIndex; i++)
+                    {
+                        if (PlayerDailyLeaderboard.Count < i + 1)
+                            break;
+
+                        var leaderboardData = PlayerDailyLeaderboard[i];
+                        bulkRewards.Add(new(leaderboardData.SteamID, percentileReward.Rewards));
+                    }
+
+                    embed.Fields[1].Value += $"**Top {percentileReward.UpperPercentile}%:** {upperIndex - lowerIndex} players \n";
+                }
+
+                _ = Task.Run(() =>
+                {
+                    try
+                    {
+                        DiscordManager.SendEmbed(embed, "Leaderboard", "https://discord.com/api/webhooks/983367340525760542/RfPxBseRKp3kffBEaHovRBRsLpIR4A-pvAXbQWzknDMohxCiawGlsZw6U_ehXukPreb_");
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Log("Error sending embed");
+                        Logger.Log(ex);
+                    }
+                });
+
+                // Wipe the Daily leaderboard data
+                _ = new MySqlCommand($"DELETE FROM `{PLAYERS_LEADERBOARD_DAILY}`;", conn).ExecuteScalar();
+
+                PlayerDailyLeaderboard.Clear();
+                PlayerDailyLeaderboardLookup.Clear();
+
+                foreach (var data in PlayerData.Values)
+                {
+                    LeaderboardData leaderboardData = new(data.SteamID, data.SteamName, data.CountryCode, data.HideFlag, data.Level, data.HasPrime, 0, 0, 0);
+                    PlayerDailyLeaderboard.Add(leaderboardData);
+                    PlayerDailyLeaderboardLookup.Add(data.SteamID, leaderboardData);
+                    _ = new MySqlCommand($"INSERT INTO `{PLAYERS_LEADERBOARD_DAILY}` ( `SteamID` ) VALUES ( {data.SteamID} );", conn).ExecuteScalar();
+                }
+
+                // Change the wipe date
+                var hourTarget = ServerOptions.DailyLeaderboardWipe.Hour;
+                var now = DateTime.UtcNow;
+                DateTimeOffset newWipeDate = new(now.Year, now.Month, now.Day, hourTarget, 0, 0, new(0));
+                if (now.Hour >= hourTarget)
+                    newWipeDate = newWipeDate.AddDays(1);
+
+                _ = new MySqlCommand($"UPDATE `{OPTIONS}` SET `DailyLeaderboardWipe` = {newWipeDate.ToUnixTimeSeconds()};", conn).ExecuteScalar();
+                ServerOptions.DailyLeaderboardWipe = newWipeDate;
+            }
+
+            if (ServerOptions.WeeklyLeaderboardWipe < DateTimeOffset.UtcNow)
+            {
+                // Give all ranked rewards
+                Embed embed = new(null, $"Last Playtest Rankings ({PlayerWeeklyLeaderboard.Count} Players)", null, "15105570", DateTime.UtcNow.ToString("s"), new(Provider.serverName, Provider.configData.Browser.Icon), new(Provider.serverName, "", Provider.configData.Browser.Icon), new Field[] { new($"Ranked:", "", false), new("Percentile:", "", false) }, null, null);
+
+                foreach (var rankedReward in ServerOptions.WeeklyRankedRewards)
+                {
+                    if (PlayerWeeklyLeaderboard.Count < rankedReward.Key + 1)
+                        break;
+
+                    var leaderboardData = PlayerWeeklyLeaderboard[rankedReward.Key];
+                    bulkRewards.Add(new(leaderboardData.SteamID, rankedReward.Value));
+                    embed.Fields[0].Value += $"{Utility.GetDiscordEmoji(rankedReward.Key + 1)} [{leaderboardData.SteamName}](https://steamcommunity.com/profiles/{leaderboardData.SteamID}/) | {leaderboardData.Kills + leaderboardData.HeadshotKills} Kills \n";
+                    if (rankedReward.Key == 2)
+                        embed.Fields[0].Value += $"\n";
+                }
+
+                // Give all percentile rewards
+                foreach (var percentileReward in ServerOptions.WeeklyPercentileRewards)
+                {
+                    var lowerIndex = percentileReward.LowerPercentile == 0 ? 0 : percentileReward.LowerPercentile * PlayerWeeklyLeaderboard.Count / 100;
+                    var upperIndex = percentileReward.UpperPercentile * PlayerWeeklyLeaderboard.Count / 100;
+
+                    for (var i = lowerIndex; i < upperIndex; i++)
+                    {
+                        if (PlayerWeeklyLeaderboard.Count < i + 1)
+                            break;
+
+                        var leaderboardData = PlayerWeeklyLeaderboard[i];
+                        bulkRewards.Add(new(leaderboardData.SteamID, percentileReward.Rewards));
+                    }
+
+                    embed.Fields[1].Value += $"**Top {percentileReward.UpperPercentile}%:** {upperIndex - lowerIndex} players \n";
+                }
+
+                _ = Task.Run(() =>
+                {
+                    try
+                    {
+                        DiscordManager.SendEmbed(embed, "Leaderboard", "https://discord.com/api/webhooks/983367340525760542/RfPxBseRKp3kffBEaHovRBRsLpIR4A-pvAXbQWzknDMohxCiawGlsZw6U_ehXukPreb_");
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Log("Error sending embed");
+                        Logger.Log(ex);
+                    }
+                });
+
+                // Wipe the Weekly leaderboard data
+                _ = new MySqlCommand($"DELETE FROM `{PLAYERS_LEADERBOARD_WEEKLY}`;", conn).ExecuteScalar();
+
+                PlayerWeeklyLeaderboard.Clear();
+                PlayerWeeklyLeaderboardLookup.Clear();
+
+                foreach (var data in PlayerData.Values)
+                {
+                    LeaderboardData leaderboardData = new(data.SteamID, data.SteamName, data.CountryCode, data.HideFlag, data.Level, data.HasPrime, 0, 0, 0);
+                    PlayerWeeklyLeaderboard.Add(leaderboardData);
+                    PlayerWeeklyLeaderboardLookup.Add(data.SteamID, leaderboardData);
+                    _ = new MySqlCommand($"INSERT INTO `{PLAYERS_LEADERBOARD_WEEKLY}` ( `SteamID` ) VALUES ( {data.SteamID} );", conn).ExecuteScalar();
+                }
+
+                // Change the wipe date
+                var newWipeDate = DateTimeOffset.UtcNow.AddDays(7);
+                newWipeDate = new(newWipeDate.Year, newWipeDate.Month, newWipeDate.Day, ServerOptions.WeeklyLeaderboardWipe.Hour, 0, 0, new(0));
+                _ = new MySqlCommand($"UPDATE `{OPTIONS}` SET `WeeklyLeaderboardWipe` = {newWipeDate.ToUnixTimeSeconds()};", conn).ExecuteScalar();
+                ServerOptions.WeeklyLeaderboardWipe = newWipeDate;
+            }
+
+            if (IsPendingSeasonalWipe)
+            {
+                IsPendingSeasonalWipe = false;
+
+                // Give all ranked rewards
+                Embed embed = new(null, $"Last Playtest Rankings ({PlayerSeasonalLeaderboard.Count} Players)", null, "15105570", DateTime.UtcNow.ToString("s"), new(Provider.serverName, Provider.configData.Browser.Icon), new(Provider.serverName, "", Provider.configData.Browser.Icon), new Field[] { new($"Ranked:", "", false), new("Percentile:", "", false) }, null, null);
+
+                foreach (var rankedReward in ServerOptions.SeasonalRankedRewards)
+                {
+                    if (PlayerSeasonalLeaderboard.Count < rankedReward.Key + 1)
+                        break;
+
+                    var leaderboardData = PlayerSeasonalLeaderboard[rankedReward.Key];
+                    bulkRewards.Add(new(leaderboardData.SteamID, rankedReward.Value));
+                    embed.Fields[0].Value += $"{Utility.GetDiscordEmoji(rankedReward.Key + 1)} [{leaderboardData.SteamName}](https://steamcommunity.com/profiles/{leaderboardData.SteamID}/) | {leaderboardData.Kills + leaderboardData.HeadshotKills} Kills \n";
+                    if (rankedReward.Key == 2)
+                        embed.Fields[0].Value += $"\n";
+                }
+
+                // Give all percentile rewards
+                foreach (var percentileReward in ServerOptions.SeasonalPercentileRewards)
+                {
+                    var lowerIndex = percentileReward.LowerPercentile == 0 ? 0 : percentileReward.LowerPercentile * PlayerSeasonalLeaderboard.Count / 100;
+                    var upperIndex = percentileReward.UpperPercentile * PlayerSeasonalLeaderboard.Count / 100;
+
+                    for (var i = lowerIndex; i < upperIndex; i++)
+                    {
+                        if (PlayerSeasonalLeaderboard.Count < i + 1)
+                            break;
+
+                        var leaderboardData = PlayerSeasonalLeaderboard[i];
+                        bulkRewards.Add(new(leaderboardData.SteamID, percentileReward.Rewards));
+                    }
+
+                    embed.Fields[1].Value += $"**Top {percentileReward.UpperPercentile}%:** {upperIndex - lowerIndex} players \n";
+                }
+
+                _ = Task.Run(() =>
+                {
+                    try
+                    {
+                        DiscordManager.SendEmbed(embed, "Leaderboard", "https://discord.com/api/webhooks/983367340525760542/RfPxBseRKp3kffBEaHovRBRsLpIR4A-pvAXbQWzknDMohxCiawGlsZw6U_ehXukPreb_");
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Log("Error sending embed");
+                        Logger.Log(ex);
+                    }
+                });
+            }
+
+            if (bulkRewards.Count > 0)
+                Plugin.Instance.Reward.GiveBulkRewards(bulkRewards);
+
+            foreach (var data in PlayerData.Values)
+            {
+                if (data.Quests[0].QuestEnd > DateTimeOffset.UtcNow)
+                    continue;
+
+                List<PlayerQuest> playerQuests = new();
+                Dictionary<EQuestType, List<PlayerQuest>> playerQuestsSearchByType = new();
+
+                _ = new MySqlCommand($"DELETE FROM `{PLAYERS_QUESTS}` WHERE `SteamID` = {data.SteamID};", conn).ExecuteScalar();
+                var expiryDate = ServerOptions.DailyLeaderboardWipe;
+                List<Quest> questsToAdd = new();
+                for (var i = 0; i < 6; i++)
+                {
+                    var randomQuests = Quests.Where(k => (int)k.QuestTier == i).ToList();
+                    var randomQuest = randomQuests[UnityEngine.Random.Range(0, randomQuests.Count)];
+                    questsToAdd.Add(randomQuest);
+                }
+
+                foreach (var quest in questsToAdd)
+                {
+                    PlayerQuest playerQuest = new(data.SteamID, quest, 0, expiryDate);
+                    playerQuests.Add(playerQuest);
+                    if (!playerQuestsSearchByType.ContainsKey(quest.QuestType))
+                        playerQuestsSearchByType.Add(quest.QuestType, new());
+
+                    playerQuestsSearchByType[quest.QuestType].Add(playerQuest);
+                    _ = new MySqlCommand($"INSERT INTO `{PLAYERS_QUESTS}` (`SteamID` , `QuestID`, `Amount`, `QuestEnd`) VALUES ({data.SteamID}, {quest.QuestID}, 0, {expiryDate.ToUnixTimeSeconds()});", conn).ExecuteScalar();
+                }
+
+                data.Quests = playerQuests;
+                data.QuestsSearchByType = playerQuestsSearchByType;
+            }
+
+            if (ServerOptions.XPBoosterWipe < DateTimeOffset.UtcNow && ServerOptions.XPBooster != 0f)
+            {
+                ServerOptions.XPBooster = 0f;
+                _ = new MySqlCommand($"UPDATE `{OPTIONS}` SET `XPBooster` = 0;", conn).ExecuteScalar();
+            }
+
+            if (ServerOptions.BPBoosterWipe < DateTimeOffset.UtcNow && ServerOptions.BPBooster != 0f)
+            {
+                ServerOptions.BPBooster = 0f;
+                _ = new MySqlCommand($"UPDATE `{OPTIONS}` SET `BPBooster` = 0;", conn).ExecuteScalar();
+            }
+
+            if (ServerOptions.GunXPBoosterWipe < DateTimeOffset.UtcNow && ServerOptions.GunXPBooster != 0f)
+            {
+                ServerOptions.GunXPBooster = 0f;
+                _ = new MySqlCommand($"UPDATE `{OPTIONS} SET `GunXPBooster` = 0;", conn).ExecuteScalar();
+            }
+
+            foreach (var data in PlayerData.Values)
+            {
+                _ = new MySqlCommand($"DELETE FROM `{PLAYERS_BOOSTERS}` WHERE `SteamID` = {data.SteamID} AND `BoosterExpiration` < {DateTimeOffset.UtcNow.ToUnixTimeSeconds()};", conn).ExecuteScalar();
+                rdr = new MySqlCommand($"SELECT * FROM `{PLAYERS_BOOSTERS}` WHERE `SteamID` = {data.SteamID};", conn).ExecuteReader();
+                try
+                {
+                    List<PlayerBooster> boosters = new();
+                    while (rdr.Read())
+                    {
+                        if (!Enum.TryParse(rdr[1].ToString(), true, out EBoosterType boosterType))
+                            return;
+
+                        if (!float.TryParse(rdr[2].ToString(), out var boosterValue))
+                            return;
+
+                        if (!long.TryParse(rdr[3].ToString(), out var boosterExpirationUnix))
+                            return;
+
+                        var boosterExpiration = DateTimeOffset.FromUnixTimeSeconds(boosterExpirationUnix);
+                        PlayerBooster booster = new(data.SteamID, boosterType, boosterValue, boosterExpiration);
+
+                        boosters.Add(booster);
+                    }
+
+                    data.ActiveBoosters = boosters;
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log($"Error reading player boosters for {data.SteamName}");
+                    Logger.Log(ex);
+                }
+                finally
+                {
+                    rdr.Close();
+                }
+
+                data.SetPersonalBooster(EBoosterType.XP, data.XPBooster);
+                data.SetPersonalBooster(EBoosterType.BPXP, data.BPBooster);
+                data.SetPersonalBooster(EBoosterType.GUNXP, data.GunXPBooster);
+
+                if (data.HasPrime)
+                {
+                    var maxRewardDate = DateTime.UtcNow;
+                    if (DateTime.UtcNow > data.PrimeExpiry.UtcDateTime)
+                    {
+                        maxRewardDate = data.PrimeExpiry.UtcDateTime;
+                        data.HasPrime = false;
+                        Plugin.Instance.Reward.RemoveRewards(data.SteamID, ServerOptions.PrimeRewards);
+                        _ = new MySqlCommand($"UPDATE `{PLAYERS}` SET `HasPrime` = false WHERE `SteamID` = {data.SteamID};", conn).ExecuteScalar();
+                        _ = R.Permissions.RemovePlayerFromGroup("Prime", new RocketPlayer(data.SteamID.ToString()));
+                    }
+
+                    var daysWorthReward = (int)(maxRewardDate - data.PrimeLastDailyReward.UtcDateTime).TotalDays;
+                    if (daysWorthReward == 0)
+                        continue;
+
+                    var dailyRewards = ServerOptions.PrimeDailyRewards.ToList();
+                    if (daysWorthReward > 1)
+                        Plugin.Instance.Reward.MultiplyRewards(dailyRewards, daysWorthReward);
+
+                    Plugin.Instance.Reward.GiveRewards(data.SteamID, dailyRewards);
+                    var lastDailyRewardDate = data.PrimeLastDailyReward.AddDays(daysWorthReward);
+                    data.PrimeLastDailyReward = lastDailyRewardDate;
+                    _ = new MySqlCommand($"UPDATE `{PLAYERS}` SET `PrimeLastDailyReward` = {lastDailyRewardDate.ToUnixTimeSeconds()} WHERE `SteamID` = {data.SteamID};", conn).ExecuteScalar();
+                }
+
+                if (data.IsMuted && DateTime.UtcNow > data.MuteExpiry.UtcDateTime)
+                {
+                    _ = ChangePlayerMutedAsync(data.SteamID, false);
+                    try
+                    {
+                        Profile profile = new(data.SteamID.m_SteamID);
+
+                        Embed embed = new(null, $"**{profile.SteamID}** was unmuted", null, "15105570", DateTime.UtcNow.ToString("s"), new(Provider.serverName, Provider.configData.Browser.Icon), new(profile.SteamID, $"https://steamcommunity.com/profiles/{profile.SteamID64}/", profile.AvatarIcon.ToString()), new Field[] { new("**Unmuter:**", $"**Mute Expired**", true), new("**Time:**", DateTime.UtcNow.ToString(CultureInfo.InvariantCulture), true) }, null, null);
+                        if (!string.IsNullOrEmpty(Plugin.Instance.Configuration.Instance.WebhookURL))
+                            DiscordManager.SendEmbed(embed, "Player Unmuted", Plugin.Instance.Configuration.Instance.WebhookURL);
+
+                        TaskDispatcher.QueueOnMainThread(() => Utility.Say(UnturnedPlayer.FromCSteamID(data.SteamID), Plugin.Instance.Translate("Unmuted").ToRich()));
+                    }
+                    catch (Exception)
+                    {
+                        Logger.Log($"Error sending discord webhook for {data.SteamID}");
+                    }
+                }
+            }
+
+            rdr = new MySqlCommand($"SELECT `ID`,`UnboxedAmount` FROM `{GUNS_SKINS}`;", conn).ExecuteReader();
+            try
+            {
+                while (rdr.Read())
+                {
+                    if (!int.TryParse(rdr[0].ToString(), out var id))
+                        continue;
+
+                    if (!int.TryParse(rdr[1].ToString(), out var unboxedAmount))
+                        continue;
+
+                    if (!GunSkinsSearchByID.TryGetValue(id, out var skin))
+                        continue;
+
+                    skin.UnboxedAmount = unboxedAmount;
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"Error reading unboxed amounts for skins");
+                Logger.Log(ex);
+            }
+            finally
+            {
+                rdr.Close();
+            }
+
+            rdr = new MySqlCommand($"SELECT `KnifeID`,`UnboxedAmount` FROM `{KNIVES}`;", conn).ExecuteReader();
+            try
+            {
+                while (rdr.Read())
+                {
+                    if (!ushort.TryParse(rdr[0].ToString(), out var knifeID))
+                        continue;
+
+                    if (!int.TryParse(rdr[1].ToString(), out var unboxedAmount))
+                        continue;
+
+                    if (!Knives.TryGetValue(knifeID, out var knife))
+                        continue;
+
+                    knife.UnboxedAmount = unboxedAmount;
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"Error reading unboxed amounts for knives");
+                Logger.Log(ex);
+            }
+            finally
+            {
+                rdr.Close();
+            }
+
+            rdr = new MySqlCommand($"SELECT `GloveID`,`UnboxedAmount` FROM `{GLOVES}`;", conn).ExecuteReader();
+            try
+            {
+                while (rdr.Read())
+                {
+                    if (!int.TryParse(rdr[0].ToString(), out var gloveID))
+                        continue;
+
+                    if (!int.TryParse(rdr[1].ToString(), out var unboxedAmount))
+                        continue;
+
+                    if (!Gloves.TryGetValue(gloveID, out var glove))
+                        continue;
+
+                    glove.UnboxedAmount = unboxedAmount;
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"Error reading unboxed amounts for gloves");
+                Logger.Log(ex);
+            }
+            finally
+            {
+                rdr.Close();
+            }
+
+            Logging.Debug($"Querying servers to get their info");
+            foreach (var server in Plugin.Instance.DB.Servers)
+            {
+                Logging.Debug($"Querying server with IP: {server.FriendlyIP}, Port: {server.Port}");
+                try
+                {
+                    var info = SteamServer.QueryServer(server.IP, server.PortNo, 1000);
+                    server.Players = info.Players;
+                    server.MaxPlayers = info.MaxPlayers;
+                    server.Name = info.Name;
+                    server.IsOnline = true;
+                    Logging.Debug($"Found info, players: {info.Players}, max players: {info.MaxPlayers}, name: {info.Name}");
+                }
+                catch
+                {
+                    Logging.Debug($"Failed to get info, server is probably offline");
+                    if (server.IsOnline)
+                    { 
+                        server.LastOnline = DateTime.UtcNow;
+                        server.IsOnline = false;
+                    }
+                }
+            }
+
+            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.OnServersUpdated());
         }
         catch (Exception ex)
         {
-            Logger.Log($"Error increasing the persoanl booster for player with steam id {steamID} for type {boosterType} by {increaseBooster}");
+            Logger.Log("Error refreshing leaderboard data");
             Logger.Log(ex);
         }
         finally
         {
-            await conn.CloseAsync();
+            conn.Close();
+        }
+    }
+    
+    // Player Data
+
+    public void IncreasePlayerXP(CSteamID steamID, int xp)
+    {
+        AddQuery($"UPDATE `{PLAYERS}` SET `XP` = `XP` + {xp} WHERE `SteamID` = {steamID};");
+        if (!PlayerData.TryGetValue(steamID, out var data))
+            return;
+
+        data.XP += xp;
+        
+        var updatedLevel = false;
+        var player = Plugin.Instance.Game.GetGamePlayer(data.SteamID);
+        if (player == null) return;
+        
+        while (data.TryGetNeededXP(out var neededXP) && data.XP >= neededXP)
+        {
+            updatedLevel = true;
+            data.XP -= neededXP;
+            data.Level++;
+
+            Plugin.Instance.UI.SendAnimation(player, new(EAnimationType.LEVEL_UP, data.Level));
+            if (ItemsSearchByLevel.TryGetValue(data.Level, out var unlocks))
+            {
+                foreach (var unlock in unlocks)
+                    Plugin.Instance.UI.SendAnimation(player, new(EAnimationType.ITEM_UNLOCK, unlock));
+            }
+        }
+
+        if (!updatedLevel)
+            return;
+
+        AddQuery($"UPDATE `{PLAYERS}` SET `Level` = {data.Level} WHERE `SteamID` = {steamID}");
+        if (PlayerDailyLeaderboardLookup.TryGetValue(steamID, out var dailyLeaderboard))
+        {
+            dailyLeaderboard.Level = data.Level;
+        }
+        
+        if (PlayerWeeklyLeaderboardLookup.TryGetValue(steamID, out var weeklyLeaderboard))
+        {
+            weeklyLeaderboard.Level = data.Level;
+        }
+
+        if (PlayerSeasonalLeaderboardLookup.TryGetValue(steamID, out var seasonalLeaderboard))
+        {
+            seasonalLeaderboard.Level = data.Level;
+        }
+
+        if (PlayerAllTimeLeaderboardLookup.TryGetValue(steamID, out var allTimeLeaderboard))
+        {
+            allTimeLeaderboard.Level = data.Level;
+        }
+    }
+    
+    public void IncreasePlayerCredits(CSteamID steamID, int credits)
+    {
+        AddQuery($"UPDATE `{PLAYERS}` SET `Credits` = `Credits` + {credits} WHERE `SteamID` = {steamID};");
+        if (!PlayerData.TryGetValue(steamID, out var data))
+            return;
+        
+        data.Credits += credits;
+        Plugin.Instance.UI.OnCurrencyUpdated(steamID, ECurrency.CREDITS);
+    }
+    
+    public void DecreasePlayerCredits(CSteamID steamID, int credits)
+    {
+        AddQuery($"UPDATE `{PLAYERS}` SET `Credits` = `Credits` - {credits} WHERE `SteamID` = {steamID};");
+        if (!PlayerData.TryGetValue(steamID, out var data))
+            return;
+
+        data.Credits -= credits;
+        Plugin.Instance.UI.OnCurrencyUpdated(steamID, ECurrency.CREDITS);
+    }
+    
+    public void IncreasePlayerScrap(CSteamID steamID, int scrap)
+    {
+        AddQuery($"UPDATE `{PLAYERS}` SET `Scrap` = `Scrap` + {scrap} WHERE `SteamID` = {steamID};");
+        if (!PlayerData.TryGetValue(steamID, out var data))
+            return;
+
+        data.Scrap += scrap;
+        Plugin.Instance.UI.OnCurrencyUpdated(steamID, ECurrency.SCRAP);
+    }
+    
+    public void DecreasePlayerScrap(CSteamID steamID, int scrap)
+    {
+        AddQuery($"UPDATE `{PLAYERS}` SET `Scrap` = `Scrap` - {scrap} WHERE `SteamID` = {steamID};");
+        if (!PlayerData.TryGetValue(steamID, out var data))
+            return;
+
+        data.Scrap -= scrap;
+        Plugin.Instance.UI.OnCurrencyUpdated(steamID, ECurrency.SCRAP);
+    }
+    
+    public void IncreasePlayerCoins(CSteamID steamID, int coins)
+    {
+        AddQuery($"UPDATE `{PLAYERS}` SET `Coins` = `Coins` + {coins} WHERE `SteamID` = {steamID};");
+        if (!PlayerData.TryGetValue(steamID, out var data))
+            return;
+
+        data.Coins += coins;
+        Plugin.Instance.UI.OnCurrencyUpdated(steamID, ECurrency.COINS);
+    }
+    
+    public void DecreasePlayerCoins(CSteamID steamID, int coins)
+    {
+        AddQuery($"UPDATE `{PLAYERS}` SET `Coins` = `Coins` - {coins} WHERE `SteamID` = {steamID};");
+        if (!PlayerData.TryGetValue(steamID, out var data))
+            return;
+
+        data.Coins -= coins;
+        Plugin.Instance.UI.OnCurrencyUpdated(steamID, ECurrency.COINS);
+    }
+    
+    public void IncreasePlayerKills(CSteamID steamID, int kills)
+    {
+        AddQueries(new()
+        {
+            $"UPDATE `{PLAYERS}` SET `Kills` = `Kills` + {kills} WHERE `SteamID` = {steamID};",
+            $"UPDATE `{PLAYERS_LEADERBOARD_DAILY}` SET `Kills` = `Kills` + {kills} WHERE `SteamID` = {steamID};",
+            $"UPDATE `{PLAYERS_LEADERBOARD_WEEKLY}` SET `Kills` = `Kills` + {kills} WHERE `SteamID` = {steamID};",
+            $"UPDATE `{PLAYERS_LEADERBOARD_SEASONAL}` SET `Kills` = `Kills` + {kills} WHERE `SteamID` = {steamID};"
+        });
+
+        if (PlayerData.TryGetValue(steamID, out var data))
+        {
+            data.Kills += kills;
+        }
+        
+        if (PlayerDailyLeaderboardLookup.TryGetValue(steamID, out var dailyLeaderboard))
+        {
+            dailyLeaderboard.Kills += kills;
+        }
+
+        if (PlayerWeeklyLeaderboardLookup.TryGetValue(steamID, out var weeklyLeaderboard))
+        {
+            weeklyLeaderboard.Kills += kills;
+        }
+
+        if (PlayerSeasonalLeaderboardLookup.TryGetValue(steamID, out var seasonalLeaderboard))
+        {
+            seasonalLeaderboard.Kills += kills;
+        }
+
+        if (PlayerAllTimeLeaderboardLookup.TryGetValue(steamID, out var allTimeLeaderboard))
+        {
+            allTimeLeaderboard.Kills += kills;
+        }
+    }
+    
+    public void IncreasePlayerHeadshotKills(CSteamID steamID, int headshotKills)
+    {
+        AddQueries(new()
+        {
+            $"UPDATE `{PLAYERS}` SET `HeadshotKills` = `HeadshotKills` + {headshotKills} WHERE `SteamID` = {steamID};",
+            $"UPDATE `{PLAYERS_LEADERBOARD_DAILY}` SET `HeadshotKills` = `HeadshotKills` + {headshotKills} WHERE `SteamID` = {steamID};",
+            $"UPDATE `{PLAYERS_LEADERBOARD_WEEKLY}` SET `HeadshotKills` = `HeadshotKills` + {headshotKills} WHERE `SteamID` = {steamID};",
+            $"UPDATE `{PLAYERS_LEADERBOARD_SEASONAL}` SET `HeadshotKills` = `HeadshotKills` + {headshotKills} WHERE `SteamID` = {steamID};"
+        });
+
+        if (PlayerData.TryGetValue(steamID, out var data))
+        {
+            data.HeadshotKills += headshotKills;
+        }
+
+        if (PlayerDailyLeaderboardLookup.TryGetValue(steamID, out var dailyLeaderboard))
+        {
+            dailyLeaderboard.HeadshotKills += headshotKills;
+        }
+
+        if (PlayerWeeklyLeaderboardLookup.TryGetValue(steamID, out var weeklyLeaderboard))
+        {
+            weeklyLeaderboard.HeadshotKills += headshotKills;
+        }
+
+        if (PlayerSeasonalLeaderboardLookup.TryGetValue(steamID, out var seasonalLeaderboard))
+        {
+            seasonalLeaderboard.HeadshotKills += headshotKills;
+        }
+
+        if (PlayerAllTimeLeaderboardLookup.TryGetValue(steamID, out var allTimeLeaderboard))
+        {
+            allTimeLeaderboard.HeadshotKills += headshotKills;
         }
     }
 
-    public async Task AddPlayerPrimeAsync(CSteamID steamID, int days)
+    public void UpdatePlayerHighestKillstreak(CSteamID steamID, int killstreak)
     {
-        using MySqlConnection conn = new(ConnectionString);
-        try
-        {
-            await conn.OpenAsync();
-            var expiryDate = DateTimeOffset.UtcNow.AddDays(days);
-            var primeLastDailyReward = DateTimeOffset.UtcNow;
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS}` SET `PrimeExpiry` = `PrimeExpiry` + {days * 24 * 60 * 60} WHERE `HasPrime` = true AND `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS}` SET `HasPrime` = true, `PrimeExpiry` = {expiryDate.ToUnixTimeSeconds()} , `PrimeLastDailyReward` = {primeLastDailyReward.ToUnixTimeSeconds()} WHERE `HasPrime` = false AND `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-            _ = R.Permissions.AddPlayerToGroup("Prime", new RocketPlayer(steamID.ToString()));
+        AddQuery($"UPDATE `{PLAYERS}` SET `HighestKillstreak` = {killstreak} WHERE `SteamID` = {steamID};");
+        if (!PlayerData.TryGetValue(steamID, out var data))
+            return;
 
-            if (!PlayerData.TryGetValue(steamID, out var data))
-            {
-                Logging.Debug($"Could'nt find player data for player with steam id {steamID}, probably player is offline");
-                return;
-            }
+        data.HighestKillstreak = killstreak;
+    }
 
-            if (data.HasPrime)
-                data.PrimeExpiry = data.PrimeExpiry.AddDays(days);
-            else
-            {
-                data.HasPrime = true;
-                data.PrimeExpiry = expiryDate;
-                data.PrimeLastDailyReward = primeLastDailyReward;
-                Plugin.Instance.Reward.GiveRewards(steamID, ServerOptions.PrimeRewards);
-            }
-        }
-        catch (Exception ex)
+    public void UpdatePlayerHighestMultikills(CSteamID steamID, int multikills)
+    {
+        AddQuery($"UPDATE `{PLAYERS}` SET `HighestMultiKills` = {multikills} WHERE `SteamID` = {steamID};");
+        if (!PlayerData.TryGetValue(steamID, out var data))
+            return;
+
+        data.HighestMultiKills = multikills;
+    }
+
+    public void IncreasePlayerKillsConfirmed(CSteamID steamID, int killsConfirmed)
+    {
+        AddQuery($"UPDATE `{PLAYERS}` SET `KillsConfirmed` = `KillsConfirmed` + {killsConfirmed} WHERE `SteamID` = {steamID};");
+        if (!PlayerData.TryGetValue(steamID, out var data))
+            return;
+
+        data.KillsConfirmed += killsConfirmed;
+    }
+
+    public void IncreasePlayerKillsDenied(CSteamID steamID, int killsDenied)
+    {
+        AddQuery($"UPDATE `{PLAYERS}` SET `KillsDenied` = `KillsDenied` + {killsDenied} WHERE `SteamID` = {steamID};");
+        if (!PlayerData.TryGetValue(steamID, out var data))
+            return;
+
+        data.KillsDenied += killsDenied;
+    }
+
+    public void IncreasePlayerFlagsCaptured(CSteamID steamID, int flagsCaptured)
+    {
+        AddQuery($"UPDATE `{PLAYERS}` SET `FlagsCaptured` = `FlagsCaptured` + {flagsCaptured} WHERE `SteamID` = {steamID};");
+        if (!PlayerData.TryGetValue(steamID, out var data))
+            return;
+
+        data.FlagsCaptured += flagsCaptured;
+    }
+
+    public void IncreasePlayerFlagsSaved(CSteamID steamID, int flagsSaved)
+    {
+        AddQuery($"UPDATE `{PLAYERS}` SET `FlagsSaved` = `FlagsSaved` + {flagsSaved} WHERE `SteamID` = {steamID};");
+        if (!PlayerData.TryGetValue(steamID, out var data))
+            return;
+
+        data.FlagsSaved += flagsSaved;
+    }
+
+    public void IncreasePlayerAreasTaken(CSteamID steamID, int areasTaken)
+    {
+        AddQuery($"UPDATE `{PLAYERS}` SET `AreasTaken` = `AreasTaken` + {areasTaken} WHERE `SteamID` = {steamID};");
+        if (!PlayerData.TryGetValue(steamID, out var data))
+            return;
+
+        data.AreasTaken += areasTaken;
+    }
+
+    public void IncreasePlayerDeaths(CSteamID steamID, int deaths)
+    {
+        AddQueries(new()
         {
-            Logger.Log($"Error adding prime with days {days} to player with steam id {steamID}");
-            Logger.Log(ex);
-        }
-        finally
+            $"UPDATE `{PLAYERS}` SET `Deaths` = `Deaths` + {deaths} WHERE `SteamID` = {steamID};",
+            $"UPDATE `{PLAYERS_LEADERBOARD_DAILY}` SET `Deaths` = `Deaths` + {deaths} WHERE `SteamID` = {steamID};",
+            $"UPDATE `{PLAYERS_LEADERBOARD_WEEKLY}` SET `Deaths` = `Deaths` + {deaths} WHERE `SteamID` = {steamID};",
+            $"UPDATE `{PLAYERS_LEADERBOARD_SEASONAL}` SET `Deaths` = `Deaths` + {deaths} WHERE `SteamID` = {steamID};"
+        });
+
+        if (PlayerData.TryGetValue(steamID, out var data))
         {
-            await conn.CloseAsync();
+            data.Deaths += deaths;
+        }
+
+        if (PlayerDailyLeaderboardLookup.TryGetValue(steamID, out var dailyLeaderboard))
+        {
+            dailyLeaderboard.Deaths += deaths;
+        }
+
+        if (PlayerWeeklyLeaderboardLookup.TryGetValue(steamID, out var weeklyLeaderboard))
+        {
+            weeklyLeaderboard.Deaths += deaths;
+        }
+
+        if (PlayerSeasonalLeaderboardLookup.TryGetValue(steamID, out var seasonalLeaderboard))
+        {
+            seasonalLeaderboard.Deaths += deaths;
+        }
+
+        if (PlayerAllTimeLeaderboardLookup.TryGetValue(steamID, out var allTimeLeaderboard))
+        {
+            allTimeLeaderboard.Deaths += deaths;
+        }
+    }
+
+    public void ChangePlayerMusic(CSteamID steamID, bool music)
+    {
+        AddQuery($"UPDATE `{PLAYERS}` SET `Music` = {music} WHERE `SteamID` = {steamID};");
+        if (!PlayerData.TryGetValue(steamID, out var data))
+            return;
+
+        data.Music = music;
+    }
+    
+    public void UpdatePlayerCountryCode(CSteamID steamID, string countryCode)
+    {
+        AddQuery($"UPDATE `{PLAYERS}` SET `CountryCode` = '{countryCode}' WHERE `SteamID` = {steamID};");
+        if (PlayerData.TryGetValue(steamID, out var data))
+        {
+            data.CountryCode = countryCode;
+        }
+
+        if (PlayerDailyLeaderboardLookup.TryGetValue(steamID, out var dailyLeaderboard))
+        {
+            dailyLeaderboard.CountryCode = countryCode;
+        }
+
+        if (PlayerWeeklyLeaderboardLookup.TryGetValue(steamID, out var weeklyLeaderboard))
+        {
+            weeklyLeaderboard.CountryCode = countryCode;
+        }
+
+        if (PlayerSeasonalLeaderboardLookup.TryGetValue(steamID, out var seasonalLeaderboard))
+        {
+            seasonalLeaderboard.CountryCode = countryCode;
+        }
+
+        if (PlayerAllTimeLeaderboardLookup.TryGetValue(steamID, out var allTimeLeaderboard))
+        {
+            allTimeLeaderboard.CountryCode = countryCode;
+        }
+    }
+
+    public void ChangePlayerHideFlag(CSteamID steamID, bool hideFlag)
+    {
+        AddQuery($"UPDATE `{PLAYERS}` SET `HideFlag` = {hideFlag} WHERE `SteamID` = {steamID};");
+        if (PlayerData.TryGetValue(steamID, out var data))
+        {
+            data.HideFlag = hideFlag;
+        }
+
+        if (PlayerDailyLeaderboardLookup.TryGetValue(steamID, out var dailyLeaderboard))
+        {
+            dailyLeaderboard.HideFlag = hideFlag;
+        }
+
+        if (PlayerWeeklyLeaderboardLookup.TryGetValue(steamID, out var weeklyLeaderboard))
+        {
+            weeklyLeaderboard.HideFlag = hideFlag;
+        }
+
+        if (PlayerSeasonalLeaderboardLookup.TryGetValue(steamID, out var seasonalLeaderboard))
+        {
+            seasonalLeaderboard.HideFlag = hideFlag;
+        }
+
+        if (PlayerAllTimeLeaderboardLookup.TryGetValue(steamID, out var allTimeLeaderboard))
+        {
+            allTimeLeaderboard.HideFlag = hideFlag;
+        }
+    }
+    
+    public void ChangePlayerMuted(CSteamID steamID, bool muted)
+    {
+        AddQuery($"UPDATE `{PLAYERS}` SET `IsMuted` = {muted} WHERE `SteamID` = {steamID};");
+        if (!PlayerData.TryGetValue(steamID, out var data))
+            return;
+
+        data.IsMuted = muted;
+    }
+    
+    public void ChangePlayerMuteExpiry(CSteamID steamID, DateTimeOffset muteExpiry)
+    {
+        AddQuery($"UPDATE `{PLAYERS}` SET `MuteExpiry` = {muteExpiry.ToUnixTimeSeconds()} WHERE `SteamID` = {steamID};");
+        if (!PlayerData.TryGetValue(steamID, out var data))
+            return;
+
+        data.MuteExpiry = muteExpiry;
+    }
+
+    public void IncreasePlayerBooster(CSteamID steamID, EBoosterType boosterType, float increaseBooster)
+    {
+        var coloumnName = "None";
+        switch (boosterType)
+        {
+            case EBoosterType.XP:
+                coloumnName = "XPBooster";
+                break;
+            case EBoosterType.BPXP:
+                coloumnName = "BPBooster";
+                break;
+            case EBoosterType.GUNXP:
+                coloumnName = "GunXPBooster";
+                break;
+        }
+
+        AddQuery($"UPDATE `{PLAYERS}` SET `{coloumnName}` = `{coloumnName}` + {increaseBooster} WHERE `SteamID` = {steamID};");
+        if (!PlayerData.TryGetValue(steamID, out var data))
+            return;
+        
+        data.SetPersonalBooster(boosterType, data.GetPersonalBooster(boosterType) + increaseBooster);
+    }
+
+    public void AddPlayerPrime(CSteamID steamID, int days)
+    {
+        if (!PlayerData.TryGetValue(steamID, out var data))
+            throw new ArgumentNullException("data", $"Player data for {steamID} is not found, please make sure prime is only added when the player is online");
+
+        if (data.HasPrime)
+        {
+            data.PrimeExpiry = data.PrimeExpiry.AddDays(days);
+            AddQuery($"UPDATE `{PLAYERS}` SET `PrimeExpiry` = {data.PrimeExpiry.ToUnixTimeSeconds()} WHERE `SteamID` = {steamID};");
+        }
+        else
+        {
+            data.HasPrime = true;
+            data.PrimeExpiry = DateTimeOffset.UtcNow.AddDays(days);
+            data.PrimeLastDailyReward = DateTimeOffset.UtcNow;
+            Plugin.Instance.Reward.GiveRewards(steamID, ServerOptions.PrimeRewards);
+            AddQuery($"UPDATE `{PLAYERS}` SET `HasPrime` = {data.HasPrime}, `PrimeExpiry` = {data.PrimeExpiry.ToUnixTimeSeconds()} , `PrimeLastDailyReward` = {data.PrimeLastDailyReward.ToUnixTimeSeconds()} WHERE `SteamID` = {steamID};");
+        }
+
+        if (PlayerDailyLeaderboardLookup.TryGetValue(steamID, out var dailyLeaderboard))
+        {
+            dailyLeaderboard.HasPrime = true;
+        }
+
+        if (PlayerWeeklyLeaderboardLookup.TryGetValue(steamID, out var weeklyLeaderboard))
+        {
+            weeklyLeaderboard.HasPrime = true;
+        }
+
+        if (PlayerSeasonalLeaderboardLookup.TryGetValue(steamID, out var seasonalLeaderboard))
+        {
+            seasonalLeaderboard.HasPrime = true;
+        }
+
+        if (PlayerAllTimeLeaderboardLookup.TryGetValue(steamID, out var allTimeLeaderboard))
+        {
+            allTimeLeaderboard.HasPrime = true;
         }
     }
 
     // Player Guns
-
-    public async Task AddPlayerGunAsync(CSteamID steamID, ushort gunID, bool isBought)
+    
+    public void AddPlayerGunBought(CSteamID steamID, ushort gunID)
     {
-        using MySqlConnection conn = new(ConnectionString);
-        try
+        if (!Guns.TryGetValue(gunID, out var gun))
         {
-            await conn.OpenAsync();
-            if (!Guns.TryGetValue(gunID, out var gun))
-            {
-                Logging.Debug($"Error finding gun with id {gunID} to add to {steamID}");
-                return;
-            }
-
-            _ = await new MySqlCommand($"INSERT INTO `{PLAYERS_GUNS}` (`SteamID` , `GunID` , `Level` , `XP` , `GunKills` , `IsBought` , `Attachments`) VALUES ({steamID} , {gunID} , 1 , 0 , 0 , {isBought} , '{Utility.CreateStringFromDefaultAttachments(gun.DefaultAttachments) + Utility.CreateStringFromRewardAttachments(gun.RewardAttachments.Values.ToList())}') ON DUPLICATE KEY UPDATE `IsBought` = {isBought};", conn).ExecuteScalarAsync();
-
-            if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
-            {
-                Logging.Debug($"Couldnt finding loadout for player with steam id {steamID}");
-                return;
-            }
-
-            Dictionary<ushort, LoadoutAttachment> loadoutAttachments = new();
-            foreach (var attachment in gun.DefaultAttachments)
-            {
-                if (loadoutAttachments.ContainsKey(attachment.AttachmentID))
-                {
-                    Logging.Debug($"Duplicate default attachment found for gun {gunID} with id {attachment.AttachmentID}, ignoring it");
-                    continue;
-                }
-
-                loadoutAttachments.Add(attachment.AttachmentID, new(attachment, 0, true, false));
-            }
-
-            foreach (var attachment in gun.RewardAttachments)
-            {
-                if (loadoutAttachments.ContainsKey(attachment.Value.AttachmentID))
-                {
-                    Logging.Debug($"Duplicate reward attachment found for gun {gunID} with id {attachment.Value.AttachmentID}, ignoring it");
-                    continue;
-                }
-
-                loadoutAttachments.Add(attachment.Value.AttachmentID, new(attachment.Value, attachment.Key, true, false));
-            }
-
-            LoadoutGun loadoutGun = new(gun, 1, 0, 0, isBought, false, loadoutAttachments);
-
-            if (loadout.Guns.ContainsKey(loadoutGun.Gun.GunID))
-            {
-                Logging.Debug($"{steamID} has already gun with id {gunID} registered, ignoring it");
-                loadout.Guns[loadoutGun.Gun.GunID].IsBought = isBought;
-                return;
-            }
-
-            loadout.Guns.Add(loadoutGun.Gun.GunID, loadoutGun);
-
-            Plugin.Instance.UI.OnUIUpdated(steamID, (EUIPage)(byte)loadoutGun.Gun.GunType);
+            throw new ArgumentNullException("gun", $"Gun {gunID} is not found, adding gun to player with steam id {steamID}");
         }
-        catch (Exception ex)
+        
+        AddQuery($"INSERT INTO `{PLAYERS_GUNS}` (`SteamID` , `GunID` , `Level` , `XP` , `GunKills` , `IsBought` , `Attachments`) VALUES ({steamID} , {gunID} , 1 , 0 , 0 , true , '{Utility.CreateStringFromDefaultAttachments(gun.DefaultAttachments) + Utility.CreateStringFromRewardAttachments(gun.RewardAttachments.Values.ToList())}') ON DUPLICATE KEY UPDATE `IsBought` = true;");
+
+        if (!PlayerData.TryGetValue(steamID, out var data))
+            return;
+
+        if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
+            return;
+        
+        Dictionary<ushort, LoadoutAttachment> loadoutAttachments = new();
+        foreach (var attachment in gun.DefaultAttachments)
         {
-            Logger.Log($"Error adding gun to {steamID} with gun id {gunID} and is bought {isBought}");
-            Logger.Log(ex);
+            if (loadoutAttachments.ContainsKey(attachment.AttachmentID))
+            {
+                Logging.Debug($"Duplicate default attachment found for gun {gunID} with id {attachment.AttachmentID}, ignoring it");
+                continue;
+            }
+
+            loadoutAttachments.Add(attachment.AttachmentID, new(attachment, 0, true, false));
         }
-        finally
+
+        foreach (var attachment in gun.RewardAttachments)
         {
-            await conn.CloseAsync();
+            if (loadoutAttachments.ContainsKey(attachment.Value.AttachmentID))
+            {
+                Logging.Debug($"Duplicate reward attachment found for gun {gunID} with id {attachment.Value.AttachmentID}, ignoring it");
+                continue;
+            }
+
+            loadoutAttachments.Add(attachment.Value.AttachmentID, new(attachment.Value, attachment.Key, true, false));
         }
+
+        LoadoutGun loadoutGun = new(gun, 1, 0, 0, true, false, loadoutAttachments);
+        if (loadout.Guns.ContainsKey(loadoutGun.Gun.GunID))
+        {
+            loadout.Guns[loadoutGun.Gun.GunID].IsBought = true;
+            return;
+        }
+
+        loadout.Guns.Add(loadoutGun.Gun.GunID, loadoutGun);
+        Plugin.Instance.UI.OnUIUpdated(steamID, (EUIPage)(byte)loadoutGun.Gun.GunType);
     }
-
-    public async Task IncreasePlayerGunXPAsync(CSteamID steamID, ushort gunID, int xp)
+    
+    public void IncreasePlayerGunXP(CSteamID steamID, ushort gunID, int increaseXP)
     {
-        using MySqlConnection conn = new(ConnectionString);
-        try
+        AddQuery($"UPDATE `{PLAYERS_GUNS}` SET `XP` = `XP` + {increaseXP} WHERE `SteamID` = {steamID} AND `GunID` = {gunID};");
+        if (!PlayerData.TryGetValue(steamID, out var data))
+            return;
+
+        if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
+            return;
+
+        if (!loadout.Guns.TryGetValue(gunID, out var gun))
+            return;
+
+        gun.XP += increaseXP;
+        var updatedLevel = false;
+        var player = Plugin.Instance.Game.GetGamePlayer(data.SteamID);
+        if (player == null) return;
+
+        while (gun.TryGetNeededXP(out var neededXP) && gun.XP >= neededXP)
         {
-            await conn.OpenAsync();
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_GUNS}` SET `XP` = `XP` + {xp} WHERE `SteamID` = {steamID} AND `GunID` = {gunID};", conn).ExecuteScalarAsync();
-            var obj = await new MySqlCommand($"SELECT `XP` FROM `{PLAYERS_GUNS}` WHERE `SteamID` = {steamID} AND `GunID` = {gunID};", conn).ExecuteScalarAsync();
-            if (obj is int newXP)
-            {
-                if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
-                {
-                    Logging.Debug($"Error finding loadout for player with steam id {steamID}");
-                    return;
-                }
+            updatedLevel = true;
+            gun.XP -= neededXP;
+            data.Level++;
 
-                if (!loadout.Guns.TryGetValue(gunID, out var gun))
-                {
-                    Logging.Debug($"Error finding loadout gun with id {gunID} for player with steam id {steamID}");
-                    return;
-                }
+            var icon = gun.Gun.IconLink;
+            if ((player.ActiveLoadout?.Primary?.Gun?.GunID ?? 0) == gun.Gun.GunID && (player.ActiveLoadout?.PrimarySkin?.Gun?.GunID ?? 0) == gun.Gun.GunID)
+                icon = player.ActiveLoadout.PrimarySkin.IconLink;
+            else if ((player.ActiveLoadout?.Secondary?.Gun?.GunID ?? 0) == gun.Gun.GunID && (player.ActiveLoadout?.SecondarySkin?.Gun?.GunID ?? 0) == gun.Gun.GunID)
+                icon = player.ActiveLoadout.SecondarySkin.IconLink;
 
-                gun.XP = newXP;
-                while (gun.TryGetNeededXP(out var neededXP) && gun.XP >= neededXP)
-                {
-                    var updatedXP = gun.XP - neededXP;
-                    _ = await new MySqlCommand($"UPDATE `{PLAYERS_GUNS}` SET `XP` = {updatedXP}, `Level` = `Level` + 1 WHERE `SteamID` = {steamID} AND `GunID` = {gunID};", conn).ExecuteScalarAsync();
-                    obj = await new MySqlCommand($"SELECT `Level` FROM `{PLAYERS_GUNS}` WHERE `SteamID` = {steamID} AND `GunID` = {gunID};", conn).ExecuteScalarAsync();
-                    if (obj is int newLevel)
-                        gun.Level = newLevel;
-
-                    gun.XP = updatedXP;
-
-                    TaskDispatcher.QueueOnMainThread(() =>
-                    {
-                        var player = Plugin.Instance.Game.GetGamePlayer(steamID);
-                        if (player != null)
-                        {
-                            var icon = gun.Gun.IconLink;
-                            if ((player.ActiveLoadout?.Primary?.Gun?.GunID ?? 0) == gun.Gun.GunID && (player.ActiveLoadout?.PrimarySkin?.Gun?.GunID ?? 0) == gun.Gun.GunID)
-                                icon = player.ActiveLoadout.PrimarySkin.IconLink;
-                            else if ((player.ActiveLoadout?.Secondary?.Gun?.GunID ?? 0) == gun.Gun.GunID && (player.ActiveLoadout?.SecondarySkin?.Gun?.GunID ?? 0) == gun.Gun.GunID)
-                                icon = player.ActiveLoadout.SecondarySkin.IconLink;
-
-                            Plugin.Instance.UI.SendAnimation(player, new(EAnimationType.GUN_LEVEL_UP, new AnimationItemUnlock(icon, gun.Level.ToString(), gun.Gun.GunName)));
-                            if (gun.Gun.RewardAttachments.TryGetValue(gun.Level, out var attachment))
-                                Plugin.Instance.UI.SendAnimation(player, new(EAnimationType.ITEM_UNLOCK, new AnimationItemUnlock(attachment.IconLink, "", $"{attachment.AttachmentName} [{gun.Gun.GunName}]")));
-                        }
-                    });
-                }
-            }
+            Plugin.Instance.UI.SendAnimation(player, new(EAnimationType.GUN_LEVEL_UP, new AnimationItemUnlock(icon, gun.Level.ToString(), gun.Gun.GunName)));
+            if (gun.Gun.RewardAttachments.TryGetValue(gun.Level, out var attachment))
+                Plugin.Instance.UI.SendAnimation(player, new(EAnimationType.ITEM_UNLOCK, new AnimationItemUnlock(attachment.IconLink, "", $"{attachment.AttachmentName} [{gun.Gun.GunName}]")));
         }
-        catch (Exception ex)
-        {
-            Logger.Log($"Error adding {xp} xp to gun with id {gunID} for {steamID}");
-            Logger.Log(ex);
-        }
-        finally
-        {
-            await conn.CloseAsync();
-        }
+
+        if (updatedLevel)
+            AddQuery($"UPDATE `{PLAYERS_GUNS}` SET `Level` = {gun.Level} WHERE `SteamID` = {steamID} AND `GunID` = {gunID};");
     }
-
-    public async Task IncreasePlayerGunKillsAsync(CSteamID steamID, ushort gunID, int kills)
+    
+    public void IncreasePlayerGunKills(CSteamID steamID, ushort gunID, int kills)
     {
-        using MySqlConnection conn = new(ConnectionString);
-        try
-        {
-            await conn.OpenAsync();
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_GUNS}` SET `GunKills` = `GunKills` + {kills} WHERE `SteamID` = {steamID} AND `GunID` = {gunID};", conn).ExecuteScalarAsync();
-            var obj = await new MySqlCommand($"SELECT `GunKills` FROM `{PLAYERS_GUNS}` WHERE `SteamID` = {steamID} AND `GunID` = {gunID};", conn).ExecuteScalarAsync();
-            if (obj is int newKills)
-            {
-                if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
-                {
-                    Logging.Debug($"Error finding loadout for player with steam id {steamID}");
-                    return;
-                }
+        AddQuery($"UPDATE `{PLAYERS_GUNS}` SET `GunKills` = `GunKills` + {kills} WHERE `SteamID`  {steamID} AND `GunID` = {gunID};");
+        if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
+            return;
 
-                if (!loadout.Guns.TryGetValue(gunID, out var gun))
-                {
-                    Logging.Debug($"Error finding loadout gun with id {gunID} for player with steam id {steamID}");
-                    return;
-                }
+        if (!loadout.Guns.TryGetValue(gunID, out var gun))
+            return;
 
-                gun.GunKills = newKills;
-            }
-        }
-        catch (Exception ex)
-        {
-            Logger.Log($"Error adding kills {kills} to gun with id {gunID} for steam id {steamID}");
-            Logger.Log(ex);
-        }
-        finally
-        {
-            await conn.CloseAsync();
-        }
+        gun.GunKills+= kills;
     }
-
-    public async Task UpdatePlayerGunBoughtAsync(CSteamID steamID, ushort gunID, bool isBought)
+    
+    public void UpdatePlayerGunBought(CSteamID steamID, ushort gunID, bool isBought)
     {
-        using MySqlConnection conn = new(ConnectionString);
-        try
-        {
-            await conn.OpenAsync();
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_GUNS}` SET `IsBought` = {isBought} WHERE `SteamID` = {steamID} AND `GunID` = {gunID};", conn).ExecuteScalarAsync();
+        AddQuery($"UPDATE `{PLAYERS_GUNS}` SET `IsBought` = {isBought} WHERE `SteamID` = {steamID} AND `GunID` = {gunID};");
+        if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
+            return;
 
-            if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
-            {
-                Logging.Debug($"Error finding loadout for player with steam id {steamID}");
-                return;
-            }
+        if (!loadout.Guns.TryGetValue(gunID, out var gun))
+            return;
 
-            if (!loadout.Guns.TryGetValue(gunID, out var gun))
-            {
-                Logging.Debug($"Error finding loadout gun with id {gunID} for player with steam id {steamID}");
-                return;
-            }
-
-            gun.IsBought = isBought;
-        }
-        catch (Exception ex)
-        {
-            Logger.Log($"Error changing bought to {isBought} for gun with id {gunID} for steam id {steamID}");
-            Logger.Log(ex);
-        }
-        finally
-        {
-            await conn.CloseAsync();
-        }
+        gun.IsBought = isBought;
     }
-
-    public async Task UpdatePlayerGunUnlockedAsync(CSteamID steamID, ushort gunID, bool isUnlocked)
+    
+    public void UpdatePlayerGunUnlocked(CSteamID steamID, ushort gunID, bool isUnlocked)
     {
-        using MySqlConnection conn = new(ConnectionString);
-        try
-        {
-            await conn.OpenAsync();
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_GUNS}` SET `IsUnlocked` = {isUnlocked} WHERE `SteamID` = {steamID} AND `GunID` = {gunID};", conn).ExecuteScalarAsync();
+        AddQuery($"UPDATE `{PLAYERS_GUNS}` SET `IsUnlocked` = {isUnlocked} WHERE `SteamID` = {steamID} AND `GunID` = {gunID};");
+        if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
+            return;
 
-            if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
-            {
-                Logging.Debug($"Error finding loadout for player with steam id {steamID}");
-                return;
-            }
+        if (!loadout.Guns.TryGetValue(gunID, out var gun))
+            return;
 
-            if (!loadout.Guns.TryGetValue(gunID, out var gun))
-            {
-                Logging.Debug($"Error finding loadout gun with id {gunID} for player with steam id {steamID}");
-                return;
-            }
-
-            gun.IsUnlocked = isUnlocked;
-        }
-        catch (Exception ex)
-        {
-            Logger.Log($"Error changing unlocked to {isUnlocked} for gun with id {gunID} for steam id {steamID}");
-            Logger.Log(ex);
-        }
-        finally
-        {
-            await conn.CloseAsync();
-        }
+        gun.IsUnlocked = isUnlocked;
     }
 
     // Player Guns Attachments
 
-    public async Task UpdatePlayerGunAttachmentBoughtAsync(CSteamID steamID, ushort gunID, ushort attachmentID, bool isBought)
+    public bool UpdatePlayerGunAttachmentBought(CSteamID steamID, ushort gunID, ushort attachmentID, bool isBought)
     {
-        using MySqlConnection conn = new(ConnectionString);
-        try
+        if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
         {
-            await conn.OpenAsync();
-
-            if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
-            {
-                Logging.Debug($"Error finding loadout for player with steam id {steamID}");
-                return;
-            }
-
-            if (!loadout.Guns.TryGetValue(gunID, out var gun))
-            {
-                Logging.Debug($"Error finding loadout gun with id {gunID} for player with steam id {steamID}");
-                return;
-            }
-
-            if (!gun.Attachments.TryGetValue(attachmentID, out var attachment))
-            {
-                Logging.Debug($"Error finding loadout attachment with id {attachmentID} for loadout gun with id {gunID} for player with steam id {steamID}");
-                return;
-            }
-
-            attachment.IsBought = isBought;
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_GUNS}` SET `Attachments` = '{Utility.GetStringFromAttachments(gun.Attachments.Values.ToList())}' WHERE `SteamID` = {steamID} AND `GunID` = {gunID};", conn).ExecuteScalarAsync();
+            throw new ArgumentNullException("loadout", $"Could'nt find loadout for {steamID} while adding gun attachment bought to {attachmentID} for gun with id {gunID}");
         }
-        catch (Exception ex)
+
+        if (!loadout.Guns.TryGetValue(gunID, out var gun))
         {
-            Logger.Log($"Error changing is bought to {isBought} for attachment with id {attachmentID} for gun with id {gunID} for player with steam id");
-            Logger.Log(ex);
+            throw new ArgumentNullException("gun", $"Could'nt find loadout gun with id {gunID} in player ({steamID}) loadout");
         }
-        finally
+
+        if (!gun.Attachments.TryGetValue(attachmentID, out var attachment))
         {
-            await conn.CloseAsync();
+            throw new ArgumentNullException("attachment", $"Could'nt find attachment with id {attachmentID} for gun with id {gunID} for player ({steamID})");
         }
+
+        attachment.IsBought = isBought;
+        AddQuery($"UPDATE `{PLAYERS_GUNS}` SET `Attachments` = '{Utility.GetStringFromAttachments(gun.Attachments.Values.ToList())}' WHERE `SteamID` = {steamID} AND `GunID` = {gunID};");
+        return true;
     }
 
-    public async Task UpdatePlayerGunAttachmentUnlockedAsync(CSteamID steamID, ushort gunID, ushort attachmentID, bool isUnlocked)
+    public bool UpdatePlayerGunAttachmentUnlocked(CSteamID steamID, ushort gunID, ushort attachmentID, bool isUnlocked)
     {
-        using MySqlConnection conn = new(ConnectionString);
-        try
+        if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
         {
-            await conn.OpenAsync();
-
-            if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
-            {
-                Logging.Debug($"Error finding loadout for player with steam id {steamID}");
-                return;
-            }
-
-            if (!loadout.Guns.TryGetValue(gunID, out var gun))
-            {
-                Logging.Debug($"Error finding loadout gun with id {gunID} for player with steam id {steamID}");
-                return;
-            }
-
-            if (!gun.Attachments.TryGetValue(attachmentID, out var attachment))
-            {
-                Logging.Debug($"Error finding loadout attachment with id {attachmentID} for loadout gun with id {gunID} for player with steam id {steamID}");
-                return;
-            }
-
-            attachment.IsUnlocked = isUnlocked;
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_GUNS}` SET `Attachments` = '{Utility.GetStringFromAttachments(gun.Attachments.Values.ToList())}' WHERE `SteamID` = {steamID} AND `GunID` = {gunID};", conn).ExecuteScalarAsync();
+            throw new ArgumentNullException("loadout", $"Could'nt find loadout for {steamID} while adding gun attachment unlocked to {attachmentID} for gun with id {gunID}");
         }
-        catch (Exception ex)
+
+        if (!loadout.Guns.TryGetValue(gunID, out var gun))
         {
-            Logger.Log($"Error changing is unlocked to {isUnlocked} for attachment with id {attachmentID} for gun with id {gunID} for player with steam id");
-            Logger.Log(ex);
+            throw new ArgumentNullException("gun", $"Could'nt find loadout gun with id {gunID} in player ({steamID}) loadout");
         }
-        finally
+
+        if (!gun.Attachments.TryGetValue(attachmentID, out var attachment))
         {
-            await conn.CloseAsync();
+            throw new ArgumentNullException("attachment", $"Could'nt find attachment with id {attachmentID} for gun with id {gunID} for player ({steamID})");
         }
+
+        attachment.IsUnlocked = isUnlocked;
+        AddQuery($"UPDATE `{PLAYERS_GUNS}` SET `Attachments` = '{Utility.GetStringFromAttachments(gun.Attachments.Values.ToList())}' WHERE `SteamID` = {steamID} AND `GunID` = {gunID};");
+        return true;
     }
 
     // Player Guns Skins
-
-    public async Task AddPlayerGunSkinAsync(CSteamID steamID, int id)
+    
+    public void AddPlayerGunSkin(CSteamID steamID, int id)
     {
-        using MySqlConnection conn = new(ConnectionString);
-        try
+        if (!GunSkinsSearchByID.TryGetValue(id, out var skin))
         {
-            await conn.OpenAsync();
-            if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
-            {
-                var skins = await new MySqlCommand($"SELECT `SkinIDs` FROM `{PLAYERS_GUNS_SKINS}` WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-                var ids = skins.GetIntListFromReaderResult();
-                if (!ids.Contains(id))
-                {
-                    ids.Add(id);
-                    var newSkins = ids.GetStringFromIntList();
-                    _ = await new MySqlCommand($"UPDATE `{PLAYERS_GUNS_SKINS}` SET `SkinIDs` = '{newSkins}' WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-                }
-
-                return;
-            }
-
-            if (!GunSkinsSearchByID.TryGetValue(id, out var skin))
-            {
-                Logging.Debug($"Error finding gun skin with id {id}");
-                return;
-            }
-
-            if (loadout.GunSkinsSearchByID.ContainsKey(id))
-            {
-                Logging.Debug($"Found gun skin with id {id} already registered to player with steam id {steamID}");
-                return;
-            }
-
-            loadout.GunSkinsSearchByID.Add(id, skin);
-            if (!loadout.GunSkinsSearchByGunID.ContainsKey(skin.Gun.GunID))
-                loadout.GunSkinsSearchByGunID.Add(skin.Gun.GunID, new());
-
-            loadout.GunSkinsSearchByGunID[skin.Gun.GunID].Add(skin);
-            loadout.GunSkinsSearchBySkinID.Add(skin.SkinID, skin);
-
-            var skinsString = loadout.GunSkinsSearchByID.Keys.ToList().GetStringFromIntList();
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_GUNS_SKINS}` SET `SkinIDs` = '{skinsString}' WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-
-            Plugin.Instance.UI.OnUIUpdated(steamID, EUIPage.GUN_SKIN);
+            throw new ArgumentNullException("id", $"Skin with id {id} doesn't exist in the database, while adding to {steamID}");
         }
-        catch (Exception ex)
+
+        if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
         {
-            Logger.Log($"Error adding gun skin with id {id} to player with steam id {steamID}");
-            Logger.Log(ex);
+            throw new ArgumentNullException("loadout", $"Loadout for player with steam id {steamID} is not found, please ensure that the player is online");
         }
-        finally
-        {
-            await conn.CloseAsync();
-        }
+
+        if (loadout.GunSkinsSearchByID.ContainsKey(id))
+            return;
+
+        loadout.GunSkinsSearchByID.Add(id, skin);
+        if (!loadout.GunSkinsSearchByGunID.ContainsKey(skin.Gun.GunID))
+            loadout.GunSkinsSearchByGunID.Add(skin.Gun.GunID, new());
+        
+        loadout.GunSkinsSearchByGunID[skin.Gun.GunID].Add(skin);
+        loadout.GunSkinsSearchBySkinID.Add(skin.SkinID, skin);
+        
+        var skinsString = loadout.GunSkinsSearchByID.Keys.ToList().GetStringFromIntList();
+        AddQuery($"UPDATE `{PLAYERS_GUNS_SKINS}` SET `SkinIDs` = '{skinsString}' WHERE `SteamID` = {steamID};");
+        Plugin.Instance.UI.OnUIUpdated(steamID, EUIPage.GUN_SKIN);
     }
-
-    public async Task UpdatePlayerGunSkinUnboxedAmountAsync(int id, int amount)
+    
+    public void UpdatePlayerGunSkinUnboxedAmount(int id, int amount)
     {
-        using MySqlConnection conn = new(ConnectionString);
+        if (!GunSkinsSearchByID.TryGetValue(id, out var skin))
+            throw new ArgumentNullException("id", $"Skin with id {id} is not found");
 
-        try
-        {
-            if (!GunSkinsSearchByID.TryGetValue(id, out var skin))
-            {
-                Logging.Debug($"Error finding gun skin with id {id}");
-                return;
-            }
-
-            _ = await new MySqlCommand($"UPDATE `{GUNS_SKINS}` SET `UnboxedAmount` = `UnboxedAmount` + {amount} WHERE `ID` = {id};", conn).ExecuteScalarAsync();
-            var obj = await new MySqlCommand($"SELECT `UnboxedAmount` FROM `{GUNS_SKINS}` WHERE `ID` = {id};", conn).ExecuteScalarAsync();
-            if (obj is int unboxedAmount)
-                skin.UnboxedAmount = unboxedAmount;
-        }
-        catch (Exception ex)
-        {
-            Logger.Log($"Error updating skin unboxed amount with id {id} by amount {amount}");
-            Logger.Log(ex);
-        }
-        finally
-        {
-            await conn.CloseAsync();
-        }
+        AddQuery($"UPDATE `{GUNS_SKINS}` SET `UnboxedAmount` = `UnboxedAmount` + {amount} WHERE `ID` = {id};");
+        skin.UnboxedAmount += amount;
     }
 
     // Player Guns Charms
-
+    
     public async Task AddPlayerGunCharmAsync(CSteamID steamID, ushort gunCharmID, bool isBought)
     {
         using MySqlConnection conn = new(ConnectionString);
@@ -4906,759 +5267,6 @@ public class DatabaseManager
         finally
         {
             await conn.CloseAsync();
-        }
-    }
-
-    // Player Leaderboard
-    private void RefreshData(object sender, System.Timers.ElapsedEventArgs e)
-    {
-        using MySqlConnection conn = new(ConnectionString);
-
-        try
-        {
-            conn.Open();
-            var rdr = new MySqlCommand($"SELECT * FROM `{OPTIONS}`;", conn).ExecuteReader();
-            try
-            {
-                while (rdr.Read())
-                {
-                    if (!long.TryParse(rdr[0].ToString(), out var dailyLeaderboardWipeUnix))
-                        continue;
-
-                    var dailyLeaderboardWipe = DateTimeOffset.FromUnixTimeSeconds(dailyLeaderboardWipeUnix);
-
-                    if (!long.TryParse(rdr[1].ToString(), out var weeklyLeaderboardWipeUnix))
-                        continue;
-
-                    var weeklyLeaderboardWipe = DateTimeOffset.FromUnixTimeSeconds(weeklyLeaderboardWipeUnix);
-
-                    var dailyRanked = Utility.GetRankedRewardsFromString(rdr[2].ToString());
-                    var dailyPercentile = Utility.GetPercentileRewardsFromString(rdr[3].ToString());
-
-                    var weeklyRanked = Utility.GetRankedRewardsFromString(rdr[4].ToString());
-                    var weeklyPercentile = Utility.GetPercentileRewardsFromString(rdr[5].ToString());
-
-                    var seasonalRanked = Utility.GetRankedRewardsFromString(rdr[6].ToString());
-                    var seasonalPercentile = Utility.GetPercentileRewardsFromString(rdr[7].ToString());
-
-                    if (!float.TryParse(rdr[8].ToString(), out var xpBooster))
-                        continue;
-
-                    if (!float.TryParse(rdr[9].ToString(), out var bpBooster))
-                        continue;
-
-                    if (!float.TryParse(rdr[10].ToString(), out var gunXPBooster))
-                        continue;
-
-                    if (!long.TryParse(rdr[11].ToString(), out var xpBoosterWipeUnix))
-                        continue;
-
-                    var xpBoosterWipe = DateTimeOffset.FromUnixTimeSeconds(xpBoosterWipeUnix);
-                    if (!long.TryParse(rdr[12].ToString(), out var bpBoosterWipeUnix))
-                        continue;
-
-                    var bpBoosterWipe = DateTimeOffset.FromUnixTimeSeconds(bpBoosterWipeUnix);
-                    if (!long.TryParse(rdr[13].ToString(), out var gunXPBoosterWipeUnix))
-                        continue;
-
-                    var gunXPBoosterWipe = DateTimeOffset.FromUnixTimeSeconds(gunXPBoosterWipeUnix);
-
-                    var gameTips = rdr[14].ToString().Split(',').ToList();
-                    var primeRewards = Utility.GetRewardsFromString(rdr[15].ToString());
-                    var primeDailyRewards = Utility.GetRewardsFromString(rdr[16].ToString());
-
-                    ServerOptions = new(dailyLeaderboardWipe, weeklyLeaderboardWipe, dailyRanked, dailyPercentile, weeklyRanked, weeklyPercentile, seasonalRanked, seasonalPercentile, xpBooster, bpBooster, gunXPBooster, xpBoosterWipe, bpBoosterWipe, gunXPBoosterWipe, gameTips, primeRewards, primeDailyRewards);
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.Log($"Error getting data from options table");
-                Logger.Log(ex);
-            }
-            finally
-            {
-                rdr.Close();
-            }
-
-            rdr = new MySqlCommand($"SELECT `{PLAYERS_LEADERBOARD_DAILY}`.`SteamID`, `{PLAYERS}`.`SteamName`, `{PLAYERS}`.`CountryCode`, `{PLAYERS}`.`HideFlag`, `{PLAYERS}`.`Level`, `{PLAYERS}`.`HasPrime` , `{PLAYERS_LEADERBOARD_DAILY}`.`Kills`, `{PLAYERS_LEADERBOARD_DAILY}`.`HeadshotKills`, `{PLAYERS_LEADERBOARD_DAILY}`.`Deaths` FROM `{PLAYERS_LEADERBOARD_DAILY}` INNER JOIN `{PLAYERS}` ON `{PLAYERS_LEADERBOARD_DAILY}`.`SteamID` = `{PLAYERS}`.`SteamID` ORDER BY (`{PLAYERS_LEADERBOARD_DAILY}`.`Kills` + `{PLAYERS_LEADERBOARD_DAILY}`.`HeadshotKills`) DESC;", conn).ExecuteReader();
-            try
-            {
-                List<LeaderboardData> playerDailyLeaderboard = new();
-                Dictionary<CSteamID, LeaderboardData> playerDailyLeaderboardLookup = new();
-
-                while (rdr.Read())
-                {
-                    if (!ulong.TryParse(rdr[0].ToString(), out var steamid))
-                        continue;
-
-                    var steamName = rdr[1].ToString();
-                    var countryCode = rdr[2].ToString();
-
-                    if (!bool.TryParse(rdr[3].ToString(), out var hideFlag))
-                        continue;
-
-                    if (!int.TryParse(rdr[4].ToString(), out var level))
-                        continue;
-
-                    if (!bool.TryParse(rdr[5].ToString(), out var hasPrime))
-                        continue;
-
-                    CSteamID steamID = new(steamid);
-                    if (!int.TryParse(rdr[6].ToString(), out var kills))
-                        continue;
-
-                    if (!int.TryParse(rdr[7].ToString(), out var headshotKills))
-                        continue;
-
-                    if (!int.TryParse(rdr[8].ToString(), out var deaths))
-                        continue;
-
-                    LeaderboardData leaderboardData = new(steamID, steamName, countryCode, hideFlag, level, hasPrime, kills, headshotKills, deaths);
-
-                    playerDailyLeaderboard.Add(leaderboardData);
-                    playerDailyLeaderboardLookup.Add(steamID, leaderboardData);
-                }
-
-                PlayerDailyLeaderboard = playerDailyLeaderboard;
-                PlayerDailyLeaderboardLookup = playerDailyLeaderboardLookup;
-            }
-            catch (Exception ex)
-            {
-                Logger.Log("Error reading data from daily leaderboard table");
-                Logger.Log(ex);
-            }
-            finally
-            {
-                rdr.Close();
-            }
-
-            rdr = new MySqlCommand($"SELECT `{PLAYERS_LEADERBOARD_WEEKLY}`.`SteamID`, `{PLAYERS}`.`SteamName`, `{PLAYERS}`.`CountryCode`, `{PLAYERS}`.`HideFlag`, `{PLAYERS}`.`Level`, `{PLAYERS}`.`HasPrime` , `{PLAYERS_LEADERBOARD_WEEKLY}`.`Kills`, `{PLAYERS_LEADERBOARD_WEEKLY}`.`HeadshotKills`, `{PLAYERS_LEADERBOARD_WEEKLY}`.`Deaths` FROM `{PLAYERS_LEADERBOARD_WEEKLY}` INNER JOIN `{PLAYERS}` ON `{PLAYERS_LEADERBOARD_WEEKLY}`.`SteamID` = `{PLAYERS}`.`SteamID` ORDER BY (`{PLAYERS_LEADERBOARD_WEEKLY}`.`Kills` + `{PLAYERS_LEADERBOARD_WEEKLY}`.`HeadshotKills`) DESC;", conn).ExecuteReader();
-            try
-            {
-                List<LeaderboardData> playerWeeklyLeaderboard = new();
-                Dictionary<CSteamID, LeaderboardData> playerWeeklyLeaderboardLookup = new();
-
-                while (rdr.Read())
-                {
-                    if (!ulong.TryParse(rdr[0].ToString(), out var steamid))
-                        continue;
-
-                    var steamName = rdr[1].ToString();
-                    var countryCode = rdr[2].ToString();
-
-                    if (!bool.TryParse(rdr[3].ToString(), out var hideFlag))
-                        continue;
-
-                    if (!int.TryParse(rdr[4].ToString(), out var level))
-                        continue;
-
-                    if (!bool.TryParse(rdr[5].ToString(), out var hasPrime))
-                        continue;
-
-                    CSteamID steamID = new(steamid);
-                    if (!int.TryParse(rdr[6].ToString(), out var kills))
-                        continue;
-
-                    if (!int.TryParse(rdr[7].ToString(), out var headshotKills))
-                        continue;
-
-                    if (!int.TryParse(rdr[8].ToString(), out var deaths))
-                        continue;
-
-                    LeaderboardData leaderboardData = new(steamID, steamName, countryCode, hideFlag, level, hasPrime, kills, headshotKills, deaths);
-
-                    playerWeeklyLeaderboard.Add(leaderboardData);
-                    playerWeeklyLeaderboardLookup.Add(steamID, leaderboardData);
-                }
-
-                PlayerWeeklyLeaderboard = playerWeeklyLeaderboard;
-                PlayerWeeklyLeaderboardLookup = playerWeeklyLeaderboardLookup;
-            }
-            catch (Exception ex)
-            {
-                Logger.Log("Error reading data from weekly leaderboard table");
-                Logger.Log(ex);
-            }
-            finally
-            {
-                rdr.Close();
-            }
-
-            foreach (var data in PlayerData.Values)
-            {
-                if (!PlayerDailyLeaderboardLookup.ContainsKey(data.SteamID))
-                {
-                    LeaderboardData dailyLeaderboardData = new(data.SteamID, data.SteamName, data.CountryCode, data.HideFlag, data.Level, data.HasPrime, 0, 0, 0);
-                    PlayerDailyLeaderboard.Add(dailyLeaderboardData);
-                    PlayerDailyLeaderboardLookup.Add(data.SteamID, dailyLeaderboardData);
-                    _ = new MySqlCommand($"INSERT INTO `{PLAYERS_LEADERBOARD_DAILY}` ( `SteamID` ) VALUES ( {data.SteamID} );", conn).ExecuteScalar();
-                }
-
-                if (!PlayerWeeklyLeaderboardLookup.ContainsKey(data.SteamID))
-                {
-                    LeaderboardData weeklyLeaderboardData = new(data.SteamID, data.SteamName, data.CountryCode, data.HideFlag, data.Level, data.HasPrime, 0, 0, 0);
-                    PlayerWeeklyLeaderboard.Add(weeklyLeaderboardData);
-                    PlayerWeeklyLeaderboardLookup.Add(data.SteamID, weeklyLeaderboardData);
-                    _ = new MySqlCommand($"INSERT INTO `{PLAYERS_LEADERBOARD_WEEKLY}` ( `SteamID` ) VALUES ( {data.SteamID} );", conn).ExecuteScalar();
-                }
-            }
-
-            rdr = new MySqlCommand($"SELECT `{PLAYERS_LEADERBOARD_SEASONAL}`.`SteamID`, `{PLAYERS}`.`SteamName`, `{PLAYERS}`.`CountryCode`, `{PLAYERS}`.`HideFlag`, `{PLAYERS}`.`Level`, `{PLAYERS}`.`HasPrime` , `{PLAYERS_LEADERBOARD_SEASONAL}`.`Kills`, `{PLAYERS_LEADERBOARD_SEASONAL}`.`HeadshotKills`, `{PLAYERS_LEADERBOARD_SEASONAL}`.`Deaths` FROM `{PLAYERS_LEADERBOARD_SEASONAL}` INNER JOIN `{PLAYERS}` ON `{PLAYERS_LEADERBOARD_SEASONAL}`.`SteamID` = `{PLAYERS}`.`SteamID` ORDER BY (`{PLAYERS_LEADERBOARD_SEASONAL}`.`Kills` + `{PLAYERS_LEADERBOARD_SEASONAL}`.`HeadshotKills`) DESC;", conn).ExecuteReader();
-            try
-            {
-                List<LeaderboardData> playerSeasonalLeaderboard = new();
-                Dictionary<CSteamID, LeaderboardData> playerSeasonalLeaderboardLookup = new();
-
-                while (rdr.Read())
-                {
-                    if (!ulong.TryParse(rdr[0].ToString(), out var steamid))
-                        continue;
-
-                    var steamName = rdr[1].ToString();
-                    var countryCode = rdr[2].ToString();
-
-                    if (!bool.TryParse(rdr[3].ToString(), out var hideFlag))
-                        continue;
-
-                    if (!int.TryParse(rdr[4].ToString(), out var level))
-                        continue;
-
-                    if (!bool.TryParse(rdr[5].ToString(), out var hasPrime))
-                        continue;
-
-                    CSteamID steamID = new(steamid);
-                    if (!int.TryParse(rdr[6].ToString(), out var kills))
-                        continue;
-
-                    if (!int.TryParse(rdr[7].ToString(), out var headshotKills))
-                        continue;
-
-                    if (!int.TryParse(rdr[8].ToString(), out var deaths))
-                        continue;
-
-                    LeaderboardData leaderboardData = new(steamID, steamName, countryCode, hideFlag, level, hasPrime, kills, headshotKills, deaths);
-
-                    playerSeasonalLeaderboard.Add(leaderboardData);
-                    playerSeasonalLeaderboardLookup.Add(steamID, leaderboardData);
-                }
-
-                PlayerSeasonalLeaderboard = playerSeasonalLeaderboard;
-                PlayerSeasonalLeaderboardLookup = playerSeasonalLeaderboardLookup;
-            }
-            catch (Exception ex)
-            {
-                Logger.Log("Error reading data from weekly leaderboard table");
-                Logger.Log(ex);
-            }
-            finally
-            {
-                rdr.Close();
-            }
-
-            rdr = new MySqlCommand($"SELECT `SteamID`, `SteamName`, `CountryCode`, `HideFlag`, `Level`, `HasPrime`, `Kills`, `HeadshotKills`, `Deaths` FROM `{PLAYERS}` ORDER BY (`Kills` + `HeadshotKills`) DESC;", conn).ExecuteReader();
-            try
-            {
-                Dictionary<CSteamID, LeaderboardData> playerAllTimeLeaderboardLookup = new();
-                List<LeaderboardData> playerAllTimeKill = new();
-                List<LeaderboardData> playerAllTimeLevel = new();
-                while (rdr.Read())
-                {
-                    if (!ulong.TryParse(rdr[0].ToString(), out var steamid))
-                        continue;
-
-                    CSteamID steamID = new(steamid);
-                    var steamName = rdr[1].ToString();
-                    var countryCode = rdr[2].ToString();
-
-                    if (!bool.TryParse(rdr[3].ToString(), out var hideFlag))
-                        continue;
-
-                    if (!int.TryParse(rdr[4].ToString(), out var level))
-                        continue;
-
-                    if (!bool.TryParse(rdr[5].ToString(), out var hasPrime))
-                        continue;
-
-                    if (!int.TryParse(rdr[6].ToString(), out var kills))
-                        continue;
-
-                    if (!int.TryParse(rdr[7].ToString(), out var headshotKills))
-                        continue;
-
-                    if (!int.TryParse(rdr[8].ToString(), out var deaths))
-                        continue;
-
-                    LeaderboardData leaderboardData = new(steamID, steamName, countryCode, hideFlag, level, hasPrime, kills, headshotKills, deaths);
-                    playerAllTimeLeaderboardLookup.Add(steamID, leaderboardData);
-                    playerAllTimeKill.Add(leaderboardData);
-                    playerAllTimeLevel.Add(leaderboardData);
-                }
-
-                PlayerAllTimeLeaderboardLookup = playerAllTimeLeaderboardLookup;
-                PlayerAllTimeKill = playerAllTimeKill;
-                PlayerAllTimeLevel = playerAllTimeLevel;
-                PlayerAllTimeLevel.Sort((x, y) => y.Level.CompareTo(x.Level));
-            }
-            catch (Exception ex)
-            {
-                Logger.Log("Error reading data from players table");
-                Logger.Log(ex);
-            }
-            finally
-            {
-                rdr.Close();
-            }
-
-            List<(CSteamID, List<Reward>)> bulkRewards = new();
-
-            if (ServerOptions.DailyLeaderboardWipe < DateTimeOffset.UtcNow)
-            {
-                // Give all ranked rewards
-                Embed embed = new(null, $"Last Playtest Rankings ({PlayerDailyLeaderboard.Count} Players)", null, "15105570", DateTime.UtcNow.ToString("s"), new(Provider.serverName, Provider.configData.Browser.Icon), new(Provider.serverName, "", Provider.configData.Browser.Icon), new Field[] { new($"Ranked:", "", false), new("Percentile:", "", false) }, null, null);
-
-                foreach (var rankedReward in ServerOptions.DailyRankedRewards)
-                {
-                    if (PlayerDailyLeaderboard.Count < rankedReward.Key + 1)
-                        break;
-
-                    var leaderboardData = PlayerDailyLeaderboard[rankedReward.Key];
-                    bulkRewards.Add(new(leaderboardData.SteamID, rankedReward.Value));
-                    embed.Fields[0].Value += $"{Utility.GetDiscordEmoji(rankedReward.Key + 1)} [{leaderboardData.SteamName}](https://steamcommunity.com/profiles/{leaderboardData.SteamID}/) | {leaderboardData.Kills + leaderboardData.HeadshotKills} Kills \n";
-                    if (rankedReward.Key == 2)
-                        embed.Fields[0].Value += $"\n";
-                }
-
-                // Give all percentile rewards
-                foreach (var percentileReward in ServerOptions.DailyPercentileRewards)
-                {
-                    var lowerIndex = percentileReward.LowerPercentile == 0 ? 0 : percentileReward.LowerPercentile * PlayerDailyLeaderboard.Count / 100;
-                    var upperIndex = percentileReward.UpperPercentile * PlayerDailyLeaderboard.Count / 100;
-
-                    for (var i = lowerIndex; i < upperIndex; i++)
-                    {
-                        if (PlayerDailyLeaderboard.Count < i + 1)
-                            break;
-
-                        var leaderboardData = PlayerDailyLeaderboard[i];
-                        bulkRewards.Add(new(leaderboardData.SteamID, percentileReward.Rewards));
-                    }
-
-                    embed.Fields[1].Value += $"**Top {percentileReward.UpperPercentile}%:** {upperIndex - lowerIndex} players \n";
-                }
-
-                _ = Task.Run(() =>
-                {
-                    try
-                    {
-                        DiscordManager.SendEmbed(embed, "Leaderboard", "https://discord.com/api/webhooks/983367340525760542/RfPxBseRKp3kffBEaHovRBRsLpIR4A-pvAXbQWzknDMohxCiawGlsZw6U_ehXukPreb_");
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.Log("Error sending embed");
-                        Logger.Log(ex);
-                    }
-                });
-
-                // Wipe the Daily leaderboard data
-                _ = new MySqlCommand($"DELETE FROM `{PLAYERS_LEADERBOARD_DAILY}`;", conn).ExecuteScalar();
-
-                PlayerDailyLeaderboard.Clear();
-                PlayerDailyLeaderboardLookup.Clear();
-
-                foreach (var data in PlayerData.Values)
-                {
-                    LeaderboardData leaderboardData = new(data.SteamID, data.SteamName, data.CountryCode, data.HideFlag, data.Level, data.HasPrime, 0, 0, 0);
-                    PlayerDailyLeaderboard.Add(leaderboardData);
-                    PlayerDailyLeaderboardLookup.Add(data.SteamID, leaderboardData);
-                    _ = new MySqlCommand($"INSERT INTO `{PLAYERS_LEADERBOARD_DAILY}` ( `SteamID` ) VALUES ( {data.SteamID} );", conn).ExecuteScalar();
-                }
-
-                // Change the wipe date
-                var hourTarget = ServerOptions.DailyLeaderboardWipe.Hour;
-                var now = DateTime.UtcNow;
-                DateTimeOffset newWipeDate = new(now.Year, now.Month, now.Day, hourTarget, 0, 0, new(0));
-                if (now.Hour >= hourTarget)
-                    newWipeDate = newWipeDate.AddDays(1);
-
-                _ = new MySqlCommand($"UPDATE `{OPTIONS}` SET `DailyLeaderboardWipe` = {newWipeDate.ToUnixTimeSeconds()};", conn).ExecuteScalar();
-                ServerOptions.DailyLeaderboardWipe = newWipeDate;
-            }
-
-            if (ServerOptions.WeeklyLeaderboardWipe < DateTimeOffset.UtcNow)
-            {
-                // Give all ranked rewards
-                Embed embed = new(null, $"Last Playtest Rankings ({PlayerWeeklyLeaderboard.Count} Players)", null, "15105570", DateTime.UtcNow.ToString("s"), new(Provider.serverName, Provider.configData.Browser.Icon), new(Provider.serverName, "", Provider.configData.Browser.Icon), new Field[] { new($"Ranked:", "", false), new("Percentile:", "", false) }, null, null);
-
-                foreach (var rankedReward in ServerOptions.WeeklyRankedRewards)
-                {
-                    if (PlayerWeeklyLeaderboard.Count < rankedReward.Key + 1)
-                        break;
-
-                    var leaderboardData = PlayerWeeklyLeaderboard[rankedReward.Key];
-                    bulkRewards.Add(new(leaderboardData.SteamID, rankedReward.Value));
-                    embed.Fields[0].Value += $"{Utility.GetDiscordEmoji(rankedReward.Key + 1)} [{leaderboardData.SteamName}](https://steamcommunity.com/profiles/{leaderboardData.SteamID}/) | {leaderboardData.Kills + leaderboardData.HeadshotKills} Kills \n";
-                    if (rankedReward.Key == 2)
-                        embed.Fields[0].Value += $"\n";
-                }
-
-                // Give all percentile rewards
-                foreach (var percentileReward in ServerOptions.WeeklyPercentileRewards)
-                {
-                    var lowerIndex = percentileReward.LowerPercentile == 0 ? 0 : percentileReward.LowerPercentile * PlayerWeeklyLeaderboard.Count / 100;
-                    var upperIndex = percentileReward.UpperPercentile * PlayerWeeklyLeaderboard.Count / 100;
-
-                    for (var i = lowerIndex; i < upperIndex; i++)
-                    {
-                        if (PlayerWeeklyLeaderboard.Count < i + 1)
-                            break;
-
-                        var leaderboardData = PlayerWeeklyLeaderboard[i];
-                        bulkRewards.Add(new(leaderboardData.SteamID, percentileReward.Rewards));
-                    }
-
-                    embed.Fields[1].Value += $"**Top {percentileReward.UpperPercentile}%:** {upperIndex - lowerIndex} players \n";
-                }
-
-                _ = Task.Run(() =>
-                {
-                    try
-                    {
-                        DiscordManager.SendEmbed(embed, "Leaderboard", "https://discord.com/api/webhooks/983367340525760542/RfPxBseRKp3kffBEaHovRBRsLpIR4A-pvAXbQWzknDMohxCiawGlsZw6U_ehXukPreb_");
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.Log("Error sending embed");
-                        Logger.Log(ex);
-                    }
-                });
-
-                // Wipe the Weekly leaderboard data
-                _ = new MySqlCommand($"DELETE FROM `{PLAYERS_LEADERBOARD_WEEKLY}`;", conn).ExecuteScalar();
-
-                PlayerWeeklyLeaderboard.Clear();
-                PlayerWeeklyLeaderboardLookup.Clear();
-
-                foreach (var data in PlayerData.Values)
-                {
-                    LeaderboardData leaderboardData = new(data.SteamID, data.SteamName, data.CountryCode, data.HideFlag, data.Level, data.HasPrime, 0, 0, 0);
-                    PlayerWeeklyLeaderboard.Add(leaderboardData);
-                    PlayerWeeklyLeaderboardLookup.Add(data.SteamID, leaderboardData);
-                    _ = new MySqlCommand($"INSERT INTO `{PLAYERS_LEADERBOARD_WEEKLY}` ( `SteamID` ) VALUES ( {data.SteamID} );", conn).ExecuteScalar();
-                }
-
-                // Change the wipe date
-                var newWipeDate = DateTimeOffset.UtcNow.AddDays(7);
-                newWipeDate = new(newWipeDate.Year, newWipeDate.Month, newWipeDate.Day, ServerOptions.WeeklyLeaderboardWipe.Hour, 0, 0, new(0));
-                _ = new MySqlCommand($"UPDATE `{OPTIONS}` SET `WeeklyLeaderboardWipe` = {newWipeDate.ToUnixTimeSeconds()};", conn).ExecuteScalar();
-                ServerOptions.WeeklyLeaderboardWipe = newWipeDate;
-            }
-
-            if (IsPendingSeasonalWipe)
-            {
-                IsPendingSeasonalWipe = false;
-
-                // Give all ranked rewards
-                Embed embed = new(null, $"Last Playtest Rankings ({PlayerSeasonalLeaderboard.Count} Players)", null, "15105570", DateTime.UtcNow.ToString("s"), new(Provider.serverName, Provider.configData.Browser.Icon), new(Provider.serverName, "", Provider.configData.Browser.Icon), new Field[] { new($"Ranked:", "", false), new("Percentile:", "", false) }, null, null);
-
-                foreach (var rankedReward in ServerOptions.SeasonalRankedRewards)
-                {
-                    if (PlayerSeasonalLeaderboard.Count < rankedReward.Key + 1)
-                        break;
-
-                    var leaderboardData = PlayerSeasonalLeaderboard[rankedReward.Key];
-                    bulkRewards.Add(new(leaderboardData.SteamID, rankedReward.Value));
-                    embed.Fields[0].Value += $"{Utility.GetDiscordEmoji(rankedReward.Key + 1)} [{leaderboardData.SteamName}](https://steamcommunity.com/profiles/{leaderboardData.SteamID}/) | {leaderboardData.Kills + leaderboardData.HeadshotKills} Kills \n";
-                    if (rankedReward.Key == 2)
-                        embed.Fields[0].Value += $"\n";
-                }
-
-                // Give all percentile rewards
-                foreach (var percentileReward in ServerOptions.SeasonalPercentileRewards)
-                {
-                    var lowerIndex = percentileReward.LowerPercentile == 0 ? 0 : percentileReward.LowerPercentile * PlayerSeasonalLeaderboard.Count / 100;
-                    var upperIndex = percentileReward.UpperPercentile * PlayerSeasonalLeaderboard.Count / 100;
-
-                    for (var i = lowerIndex; i < upperIndex; i++)
-                    {
-                        if (PlayerSeasonalLeaderboard.Count < i + 1)
-                            break;
-
-                        var leaderboardData = PlayerSeasonalLeaderboard[i];
-                        bulkRewards.Add(new(leaderboardData.SteamID, percentileReward.Rewards));
-                    }
-
-                    embed.Fields[1].Value += $"**Top {percentileReward.UpperPercentile}%:** {upperIndex - lowerIndex} players \n";
-                }
-
-                _ = Task.Run(() =>
-                {
-                    try
-                    {
-                        DiscordManager.SendEmbed(embed, "Leaderboard", "https://discord.com/api/webhooks/983367340525760542/RfPxBseRKp3kffBEaHovRBRsLpIR4A-pvAXbQWzknDMohxCiawGlsZw6U_ehXukPreb_");
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.Log("Error sending embed");
-                        Logger.Log(ex);
-                    }
-                });
-            }
-
-            if (bulkRewards.Count > 0)
-                Plugin.Instance.Reward.GiveBulkRewards(bulkRewards);
-
-            foreach (var data in PlayerData.Values)
-            {
-                if (data.Quests[0].QuestEnd > DateTimeOffset.UtcNow)
-                    continue;
-
-                List<PlayerQuest> playerQuests = new();
-                Dictionary<EQuestType, List<PlayerQuest>> playerQuestsSearchByType = new();
-
-                _ = new MySqlCommand($"DELETE FROM `{PLAYERS_QUESTS}` WHERE `SteamID` = {data.SteamID};", conn).ExecuteScalar();
-                var expiryDate = ServerOptions.DailyLeaderboardWipe;
-                List<Quest> questsToAdd = new();
-                for (var i = 0; i < 6; i++)
-                {
-                    var randomQuests = Quests.Where(k => (int)k.QuestTier == i).ToList();
-                    var randomQuest = randomQuests[UnityEngine.Random.Range(0, randomQuests.Count)];
-                    questsToAdd.Add(randomQuest);
-                }
-
-                foreach (var quest in questsToAdd)
-                {
-                    PlayerQuest playerQuest = new(data.SteamID, quest, 0, expiryDate);
-                    playerQuests.Add(playerQuest);
-                    if (!playerQuestsSearchByType.ContainsKey(quest.QuestType))
-                        playerQuestsSearchByType.Add(quest.QuestType, new());
-
-                    playerQuestsSearchByType[quest.QuestType].Add(playerQuest);
-                    _ = new MySqlCommand($"INSERT INTO `{PLAYERS_QUESTS}` (`SteamID` , `QuestID`, `Amount`, `QuestEnd`) VALUES ({data.SteamID}, {quest.QuestID}, 0, {expiryDate.ToUnixTimeSeconds()});", conn).ExecuteScalar();
-                }
-
-                data.Quests = playerQuests;
-                data.QuestsSearchByType = playerQuestsSearchByType;
-            }
-
-            if (ServerOptions.XPBoosterWipe < DateTimeOffset.UtcNow && ServerOptions.XPBooster != 0f)
-            {
-                ServerOptions.XPBooster = 0f;
-                _ = new MySqlCommand($"UPDATE `{OPTIONS}` SET `XPBooster` = 0;", conn).ExecuteScalar();
-            }
-
-            if (ServerOptions.BPBoosterWipe < DateTimeOffset.UtcNow && ServerOptions.BPBooster != 0f)
-            {
-                ServerOptions.BPBooster = 0f;
-                _ = new MySqlCommand($"UPDATE `{OPTIONS}` SET `BPBooster` = 0;", conn).ExecuteScalar();
-            }
-
-            if (ServerOptions.GunXPBoosterWipe < DateTimeOffset.UtcNow && ServerOptions.GunXPBooster != 0f)
-            {
-                ServerOptions.GunXPBooster = 0f;
-                _ = new MySqlCommand($"UPDATE `{OPTIONS} SET `GunXPBooster` = 0;", conn).ExecuteScalar();
-            }
-
-            foreach (var data in PlayerData.Values)
-            {
-                _ = new MySqlCommand($"DELETE FROM `{PLAYERS_BOOSTERS}` WHERE `SteamID` = {data.SteamID} AND `BoosterExpiration` < {DateTimeOffset.UtcNow.ToUnixTimeSeconds()};", conn).ExecuteScalar();
-                rdr = new MySqlCommand($"SELECT * FROM `{PLAYERS_BOOSTERS}` WHERE `SteamID` = {data.SteamID};", conn).ExecuteReader();
-                try
-                {
-                    List<PlayerBooster> boosters = new();
-                    while (rdr.Read())
-                    {
-                        if (!Enum.TryParse(rdr[1].ToString(), true, out EBoosterType boosterType))
-                            return;
-
-                        if (!float.TryParse(rdr[2].ToString(), out var boosterValue))
-                            return;
-
-                        if (!long.TryParse(rdr[3].ToString(), out var boosterExpirationUnix))
-                            return;
-
-                        var boosterExpiration = DateTimeOffset.FromUnixTimeSeconds(boosterExpirationUnix);
-                        PlayerBooster booster = new(data.SteamID, boosterType, boosterValue, boosterExpiration);
-
-                        boosters.Add(booster);
-                    }
-
-                    data.ActiveBoosters = boosters;
-                }
-                catch (Exception ex)
-                {
-                    Logger.Log($"Error reading player boosters for {data.SteamName}");
-                    Logger.Log(ex);
-                }
-                finally
-                {
-                    rdr.Close();
-                }
-
-                data.SetPersonalBooster(EBoosterType.XP, data.XPBooster);
-                data.SetPersonalBooster(EBoosterType.BPXP, data.BPBooster);
-                data.SetPersonalBooster(EBoosterType.GUNXP, data.GunXPBooster);
-
-                if (data.HasPrime)
-                {
-                    var maxRewardDate = DateTime.UtcNow;
-                    if (DateTime.UtcNow > data.PrimeExpiry.UtcDateTime)
-                    {
-                        maxRewardDate = data.PrimeExpiry.UtcDateTime;
-                        data.HasPrime = false;
-                        Plugin.Instance.Reward.RemoveRewards(data.SteamID, ServerOptions.PrimeRewards);
-                        _ = new MySqlCommand($"UPDATE `{PLAYERS}` SET `HasPrime` = false WHERE `SteamID` = {data.SteamID};", conn).ExecuteScalar();
-                        _ = R.Permissions.RemovePlayerFromGroup("Prime", new RocketPlayer(data.SteamID.ToString()));
-                    }
-
-                    var daysWorthReward = (int)(maxRewardDate - data.PrimeLastDailyReward.UtcDateTime).TotalDays;
-                    if (daysWorthReward == 0)
-                        continue;
-
-                    var dailyRewards = ServerOptions.PrimeDailyRewards.ToList();
-                    if (daysWorthReward > 1)
-                        Plugin.Instance.Reward.MultiplyRewards(dailyRewards, daysWorthReward);
-
-                    Plugin.Instance.Reward.GiveRewards(data.SteamID, dailyRewards);
-                    var lastDailyRewardDate = data.PrimeLastDailyReward.AddDays(daysWorthReward);
-                    data.PrimeLastDailyReward = lastDailyRewardDate;
-                    _ = new MySqlCommand($"UPDATE `{PLAYERS}` SET `PrimeLastDailyReward` = {lastDailyRewardDate.ToUnixTimeSeconds()} WHERE `SteamID` = {data.SteamID};", conn).ExecuteScalar();
-                }
-
-                if (data.IsMuted && DateTime.UtcNow > data.MuteExpiry.UtcDateTime)
-                {
-                    _ = ChangePlayerMutedAsync(data.SteamID, false);
-                    try
-                    {
-                        Profile profile = new(data.SteamID.m_SteamID);
-
-                        Embed embed = new(null, $"**{profile.SteamID}** was unmuted", null, "15105570", DateTime.UtcNow.ToString("s"), new(Provider.serverName, Provider.configData.Browser.Icon), new(profile.SteamID, $"https://steamcommunity.com/profiles/{profile.SteamID64}/", profile.AvatarIcon.ToString()), new Field[] { new("**Unmuter:**", $"**Mute Expired**", true), new("**Time:**", DateTime.UtcNow.ToString(CultureInfo.InvariantCulture), true) }, null, null);
-                        if (!string.IsNullOrEmpty(Plugin.Instance.Configuration.Instance.WebhookURL))
-                            DiscordManager.SendEmbed(embed, "Player Unmuted", Plugin.Instance.Configuration.Instance.WebhookURL);
-
-                        TaskDispatcher.QueueOnMainThread(() => Utility.Say(UnturnedPlayer.FromCSteamID(data.SteamID), Plugin.Instance.Translate("Unmuted").ToRich()));
-                    }
-                    catch (Exception)
-                    {
-                        Logger.Log($"Error sending discord webhook for {data.SteamID}");
-                    }
-                }
-            }
-
-            rdr = new MySqlCommand($"SELECT `ID`,`UnboxedAmount` FROM `{GUNS_SKINS}`;", conn).ExecuteReader();
-            try
-            {
-                while (rdr.Read())
-                {
-                    if (!int.TryParse(rdr[0].ToString(), out var id))
-                        continue;
-
-                    if (!int.TryParse(rdr[1].ToString(), out var unboxedAmount))
-                        continue;
-
-                    if (!GunSkinsSearchByID.TryGetValue(id, out var skin))
-                        continue;
-
-                    skin.UnboxedAmount = unboxedAmount;
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.Log($"Error reading unboxed amounts for skins");
-                Logger.Log(ex);
-            }
-            finally
-            {
-                rdr.Close();
-            }
-
-            rdr = new MySqlCommand($"SELECT `KnifeID`,`UnboxedAmount` FROM `{KNIVES}`;", conn).ExecuteReader();
-            try
-            {
-                while (rdr.Read())
-                {
-                    if (!ushort.TryParse(rdr[0].ToString(), out var knifeID))
-                        continue;
-
-                    if (!int.TryParse(rdr[1].ToString(), out var unboxedAmount))
-                        continue;
-
-                    if (!Knives.TryGetValue(knifeID, out var knife))
-                        continue;
-
-                    knife.UnboxedAmount = unboxedAmount;
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.Log($"Error reading unboxed amounts for knives");
-                Logger.Log(ex);
-            }
-            finally
-            {
-                rdr.Close();
-            }
-
-            rdr = new MySqlCommand($"SELECT `GloveID`,`UnboxedAmount` FROM `{GLOVES}`;", conn).ExecuteReader();
-            try
-            {
-                while (rdr.Read())
-                {
-                    if (!int.TryParse(rdr[0].ToString(), out var gloveID))
-                        continue;
-
-                    if (!int.TryParse(rdr[1].ToString(), out var unboxedAmount))
-                        continue;
-
-                    if (!Gloves.TryGetValue(gloveID, out var glove))
-                        continue;
-
-                    glove.UnboxedAmount = unboxedAmount;
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.Log($"Error reading unboxed amounts for gloves");
-                Logger.Log(ex);
-            }
-            finally
-            {
-                rdr.Close();
-            }
-
-            Logging.Debug($"Querying servers to get their info");
-            foreach (var server in Plugin.Instance.DB.Servers)
-            {
-                Logging.Debug($"Querying server with IP: {server.FriendlyIP}, Port: {server.Port}");
-                try
-                {
-                    var info = SteamServer.QueryServer(server.IP, server.PortNo, 1000);
-                    server.Players = info.Players;
-                    server.MaxPlayers = info.MaxPlayers;
-                    server.Name = info.Name;
-                    server.IsOnline = true;
-                    Logging.Debug($"Found info, players: {info.Players}, max players: {info.MaxPlayers}, name: {info.Name}");
-                }
-                catch
-                {
-                    Logging.Debug($"Failed to get info, server is probably offline");
-                    if (server.IsOnline)
-                    { 
-                        server.LastOnline = DateTime.UtcNow;
-                        server.IsOnline = false;
-                    }
-                }
-            }
-
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.OnServersUpdated());
-        }
-        catch (Exception ex)
-        {
-            Logger.Log("Error refreshing leaderboard data");
-            Logger.Log(ex);
-        }
-        finally
-        {
-            conn.Close();
         }
     }
 
