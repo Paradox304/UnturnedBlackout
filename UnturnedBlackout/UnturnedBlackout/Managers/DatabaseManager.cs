@@ -3377,7 +3377,7 @@ public class DatabaseManager
             if (ServerOptions.GunXPBoosterWipe < DateTimeOffset.UtcNow && ServerOptions.GunXPBooster != 0f)
             {
                 ServerOptions.GunXPBooster = 0f;
-                _ = new MySqlCommand($"UPDATE `{OPTIONS} SET `GunXPBooster` = 0;", conn).ExecuteScalar();
+                _ = new MySqlCommand($"UPDATE `{OPTIONS}` SET `GunXPBooster` = 0;", conn).ExecuteScalar();
             }
 
             foreach (var data in PlayerData.Values)
@@ -3448,7 +3448,7 @@ public class DatabaseManager
 
                 if (data.IsMuted && DateTime.UtcNow > data.MuteExpiry.UtcDateTime)
                 {
-                    _ = ChangePlayerMutedAsync(data.SteamID, false);
+                    ChangePlayerMuted(data.SteamID, false);
                     try
                     {
                         Profile profile = new(data.SteamID.m_SteamID);
@@ -3615,7 +3615,7 @@ public class DatabaseManager
         if (!updatedLevel)
             return;
 
-        AddQuery($"UPDATE `{PLAYERS}` SET `Level` = {data.Level} WHERE `SteamID` = {steamID}");
+        AddQuery($"UPDATE `{PLAYERS}` SET `Level` = {data.Level}, `XP` = {data.XP} WHERE `SteamID` = {steamID}");
         if (PlayerDailyLeaderboardLookup.TryGetValue(steamID, out var dailyLeaderboard))
         {
             dailyLeaderboard.Level = data.Level;
@@ -4102,12 +4102,12 @@ public class DatabaseManager
         }
 
         if (updatedLevel)
-            AddQuery($"UPDATE `{PLAYERS_GUNS}` SET `Level` = {gun.Level} WHERE `SteamID` = {steamID} AND `GunID` = {gunID};");
+            AddQuery($"UPDATE `{PLAYERS_GUNS}` SET `Level` = {gun.Level}, `XP` = {gun.XP} WHERE `SteamID` = {steamID} AND `GunID` = {gunID};");
     }
     
     public void IncreasePlayerGunKills(CSteamID steamID, ushort gunID, int kills)
     {
-        AddQuery($"UPDATE `{PLAYERS_GUNS}` SET `GunKills` = `GunKills` + {kills} WHERE `SteamID`  {steamID} AND `GunID` = {gunID};");
+        AddQuery($"UPDATE `{PLAYERS_GUNS}` SET `GunKills` = `GunKills` + {kills} WHERE `SteamID` = {steamID} AND `GunID` = {gunID};");
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
             return;
 
@@ -4783,99 +4783,42 @@ public class DatabaseManager
     }
 
     // Player Quest
-    public async Task IncreasePlayerQuestAmountAsync(CSteamID steamID, int questID, int amount)
+    
+    public void UpdatePlayerQuestAmount(CSteamID steamID, int questID, int amount)
     {
-        using MySqlConnection conn = new(ConnectionString);
-        try
+        if (!QuestsSearchByID.ContainsKey(questID))
         {
-            await conn.OpenAsync();
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_QUESTS}` SET `Amount` = `Amount` + {amount} WHERE `SteamID` = {steamID} AND `QuestID` = {questID};", conn).ExecuteScalarAsync();
-            var obj = await new MySqlCommand($"SELECT `Amount` FROM `{PLAYERS_QUESTS}` WHERE `SteamID` = {steamID} AND `QuestID` = {questID};", conn).ExecuteScalarAsync();
-
-            if (obj is int newAmount)
-            {
-                if (!PlayerData.TryGetValue(steamID, out var data))
-                {
-                    Logger.Log($"Error finding player data for player with steam id {steamID}");
-                    return;
-                }
-
-                var quest = data.Quests.FirstOrDefault(k => k.Quest.QuestID == questID);
-                if (quest == null)
-                {
-                    Logger.Log($"Error finding quest with id {questID} for player with steam id {steamID}");
-                    return;
-                }
-
-                quest.Amount = newAmount;
-            }
+            throw new ArgumentNullException("id", $"Quest with id {questID} doesn't exist in the database, while updating amount for {steamID}");
         }
-        catch (Exception ex)
-        {
-            Logger.Log($"Error updating player quest amount of {steamID} for quest {questID} by amount {amount}");
-            Logger.Log(ex);
-        }
-        finally
-        {
-            await conn.CloseAsync();
-        }
+        
+        AddQuery($"UPDATE `{PLAYERS_QUESTS}` SET `Amount` = `Amount` + {amount} WHERE `SteamID` = {steamID} AND `QuestID` = {questID};");
+        if (!PlayerData.TryGetValue(steamID, out var data))
+            return;
+
+        var quest = data.Quests.FirstOrDefault(k => k.Quest.QuestID == questID);
+        if (quest == null)
+            return;
+
+        quest.Amount += amount;
     }
 
     // Player Achievement
-    public async Task UpdatePlayerAchievementTierAsync(CSteamID steamID, int achievementID, int currentTier)
+    public void UpdatePlayerAchievementTier(CSteamID steamID, int achievementID, int currentTier)
     {
-        using MySqlConnection conn = new(ConnectionString);
-        try
-        {
-            await conn.OpenAsync();
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_ACHIEVEMENTS}` SET `CurrentTier` = {currentTier} WHERE `SteamID` = {steamID} AND `AchievementID` = {achievementID};", conn).ExecuteScalarAsync();
-        }
-        catch (Exception ex)
-        {
-            Logger.Log($"Error updating player achievement tier of {steamID} for achievement {achievementID} to {currentTier}");
-            Logger.Log(ex);
-        }
-        finally
-        {
-            await conn.CloseAsync();
-        }
+        AddQuery($"UPDATE `{PLAYERS_ACHIEVEMENTS}` SET `CurrentTier` = {currentTier} WHERE `SteamID` = {steamID} AND `AchievementID` = {achievementID};");
     }
 
-    public async Task IncreasePlayerAchievementAmountAsync(CSteamID steamID, int achievementID, int amount)
+    // increase player achievement amount
+    public void IncreasePlayerAchievementAmount(CSteamID steamID, int achievementID, int amount)
     {
-        using MySqlConnection conn = new(ConnectionString);
-        try
-        {
-            await conn.OpenAsync();
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_ACHIEVEMENTS}` SET `Amount` = `Amount` + {amount} WHERE `SteamID` = {steamID} AND `AchievementID` = {achievementID};", conn).ExecuteScalarAsync();
-            var obj = await new MySqlCommand($"SELECT `Amount` FROM `{PLAYERS_ACHIEVEMENTS}` WHERE `SteamID` = {steamID} AND `AchievementID` = {achievementID};", conn).ExecuteScalarAsync();
+        AddQuery($"UPDATE `{PLAYERS_ACHIEVEMENTS}` SET `Amount` = `Amount` + {amount} WHERE `SteamID` = {steamID} AND `AchievementID` = {achievementID};");
+        if (!PlayerData.TryGetValue(steamID, out var data))
+            return;
+        
+        if (!data.AchievementsSearchByID.TryGetValue(achievementID, out var achievement))
+            return;
 
-            if (obj is int newAmount)
-            {
-                if (!PlayerData.TryGetValue(steamID, out var data))
-                {
-                    Logger.Log($"Error finding player data for player with steam id {steamID}");
-                    return;
-                }
-
-                if (!data.AchievementsSearchByID.TryGetValue(achievementID, out var achievement))
-                {
-                    Logger.Log($"Error finding achievement with id {achievementID} for player with steam id {steamID}");
-                    return;
-                }
-
-                achievement.Amount = newAmount;
-            }
-        }
-        catch (Exception ex)
-        {
-            Logger.Log($"Error updating player achievement amount of {steamID} for achievement {achievementID} by amount {amount}");
-            Logger.Log(ex);
-        }
-        finally
-        {
-            await conn.CloseAsync();
-        }
+        achievement.Amount += amount;
     }
 
     public async Task GenerateAchievementTiersAsync(int achievementID, string tierTitle)
@@ -4923,259 +4866,124 @@ public class DatabaseManager
         }
     }
 
-    // Player Battlepass
-    public async Task IncreasePlayerBPXPAsync(CSteamID steamID, int xp)
+    // Player Battle-pass
+    
+    public void IncreasePlayerBPXP(CSteamID steamID, int xp)
     {
-        using MySqlConnection conn = new(ConnectionString);
-        try
+        AddQuery($"UPDATE `{PLAYERS_BATTLEPASS}` SET `XP` = `XP` + {xp} WHERE `SteamID` = {steamID};");
+        if (!PlayerData.TryGetValue(steamID, out var data))
+            return;
+
+        data.Battlepass.XP += xp;
+        var tierUp = false;
+        var player = Plugin.Instance.Game.GetGamePlayer(data.SteamID);
+        if (player == null)
+            return;
+        
+        while (data.Battlepass.TryGetNeededXP(out var neededXP) && data.Battlepass.XP >= neededXP)
         {
-            await conn.OpenAsync();
+            data.Battlepass.XP -= neededXP;
+            data.Battlepass.CurrentTier++;
+            tierUp = true;
 
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_BATTLEPASS}` SET `XP` = `XP` + {xp} WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-            var obj = await new MySqlCommand($"Select `XP` FROM `{PLAYERS_BATTLEPASS}` WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-
-            if (PlayerData.TryGetValue(steamID, out var data))
+            if (BattlepassTiersSearchByID.TryGetValue(data.Battlepass.CurrentTier, out var currentTier))
             {
-                if (obj is int newXp)
-                    data.Battlepass.XP = newXp;
-
-                while (data.Battlepass.TryGetNeededXP(out var neededXP) && data.Battlepass.XP >= neededXP)
-                {
-                    var newXP = data.Battlepass.XP - neededXP;
-                    _ = await new MySqlCommand($"UPDATE `{PLAYERS_BATTLEPASS}` SET `XP` = {newXP}, `CurrentTier` = `CurrentTier` + 1 WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-                    obj = await new MySqlCommand($"Select `CurrentTier` FROM `{PLAYERS_BATTLEPASS}` WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-                    if (obj is int tier)
-                    {
-                        data.Battlepass.CurrentTier = tier;
-                        TaskDispatcher.QueueOnMainThread(() =>
-                        {
-                            var player = Plugin.Instance.Game.GetGamePlayer(data.SteamID);
-                            if (player != null)
-                            {
-                                // Code to send battlepass level up
-                            }
-                        });
-                    }
-
-                    data.Battlepass.XP = newXP;
-                }
+                Plugin.Instance.UI.SendAnimation(player, new(EAnimationType.BATTLEPASS_TIER_COMPLETION, currentTier));
             }
         }
-        catch (Exception ex)
-        {
-            Logger.Log($"Error adding {xp} battlepass xp for player with steam id {steamID}");
-            Logger.Log(ex);
-        }
-        finally
-        {
-            await conn.CloseAsync();
-        }
+        
+        if (tierUp)
+            AddQuery($"UPDATE `{PLAYERS_BATTLEPASS}` SET `CurrentTier` = {data.Battlepass.CurrentTier}, `XP` = {data.Battlepass.XP} WHERE `SteamID` = {steamID}");
     }
 
-    public async Task UpdateBPTierAsync(CSteamID steamID, int tierID)
+    public void UpdatePlayerBPTier(CSteamID steamID, int tier)
     {
-        using MySqlConnection conn = new(ConnectionString);
-        try
-        {
-            await conn.OpenAsync();
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_BATTLEPASS}` SET `CurrentTier` = {tierID} WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-        }
-        catch (Exception ex)
-        {
-            Logger.Log($"Error updating player battlepass tier of {steamID} for battlepass to {tierID}");
-            Logger.Log(ex);
-        }
-        finally
-        {
-            await conn.CloseAsync();
-        }
+        AddQuery($"UPDATE `{PLAYERS_BATTLEPASS}` SET `CurrentTier` = {tier} WHERE `SteamID` = {steamID};");
+        if (!PlayerData.TryGetValue(steamID, out var data))
+            return;
+
+        data.Battlepass.CurrentTier = tier;
+    }
+    
+    public void UpdatePlayerBPClaimedFreeRewards(CSteamID steamID)
+    {
+        if (!PlayerData.TryGetValue(steamID, out var data))
+            throw new ArgumentNullException(nameof(steamID), $"Player with steamID {steamID} doesn't exist in the database, while updating BP claimed free rewards");
+        
+        AddQuery($"UPDATE `{PLAYERS_BATTLEPASS}` SET `ClaimedFreeRewards` = '{data.Battlepass.ClaimedFreeRewards.GetStringFromHashSetInt()}' WHERE `SteamID` = {steamID};");
     }
 
-    public async Task UpdatePlayerBPClaimedFreeRewardsAsync(CSteamID steamID)
+    public void UpdatePlayerBPClaimedPremiumRewards(CSteamID steamID)
     {
-        using MySqlConnection conn = new(ConnectionString);
-        try
-        {
-            await conn.OpenAsync();
-            if (!PlayerData.TryGetValue(steamID, out var data))
-            {
-                Logging.Debug($"Error finding player data for steam id {steamID}");
-                return;
-            }
-
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_BATTLEPASS}` SET `ClaimedFreeRewards` = '{data.Battlepass.ClaimedFreeRewards.GetStringFromHashSetInt()}' WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-        }
-        catch (Exception ex)
-        {
-            Logger.Log($"Error updating claimed free rewards for player with steam id {steamID}");
-            Logger.Log(ex);
-        }
-        finally
-        {
-            await conn.CloseAsync();
-        }
-    }
-
-    public async Task UpdatePlayerBPClaimedPremiumRewardsAsync(CSteamID steamID)
-    {
-        using MySqlConnection conn = new(ConnectionString);
-        try
-        {
-            await conn.OpenAsync();
-            if (!PlayerData.TryGetValue(steamID, out var data))
-            {
-                Logging.Debug($"Error finding player data for steam id {steamID}");
-                return;
-            }
-
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_BATTLEPASS}` SET `ClaimedPremiumRewards` = '{data.Battlepass.ClaimedPremiumRewards.GetStringFromHashSetInt()}' WHERE `SteamID` = {steamID};", conn).ExecuteScalarAsync();
-        }
-        catch (Exception ex)
-        {
-            Logger.Log($"Error updating claimed premium rewards for player with steam id {steamID}");
-            Logger.Log(ex);
-        }
-        finally
-        {
-            await conn.CloseAsync();
-        }
+        if (!PlayerData.TryGetValue(steamID, out var data))
+            throw new ArgumentNullException(nameof(steamID), $"Player with steamID {steamID} doesn't exist in the database, while updating BP claimed premium rewards");
+        
+        AddQuery($"UPDATE `{PLAYERS_BATTLEPASS}` SET `ClaimedPremiumRewards` = '{data.Battlepass.ClaimedPremiumRewards.GetStringFromHashSetInt()}' WHERE `SteamID` = {steamID};");
     }
 
     // Player Cases
-    public async Task IncreasePlayerCaseAsync(CSteamID steamID, int caseID, int amount)
+    public void IncreasePlayerCase(CSteamID steamID, int caseID, int amount)
     {
-        using MySqlConnection conn = new(ConnectionString);
-        try
+        AddQuery($"INSERT INTO `{PLAYERS_CASES}` ( `SteamID` , `CaseID` , `Amount` ) VALUES ({steamID}, {caseID}, {amount}) ON DUPLICATE KEY UPDATE `Amount` = `Amount` + {amount};");
+        if (!PlayerData.TryGetValue(steamID, out var data))
+            return;
+
+        if (!Cases.TryGetValue(caseID, out var @case))
+            return;
+
+        if (data.CasesSearchByID.TryGetValue(caseID, out var playerCase))
         {
-            await conn.OpenAsync();
-            _ = await new MySqlCommand($"INSERT INTO `{PLAYERS_CASES}` ( `SteamID` , `CaseID` , `Amount` ) VALUES ({steamID}, {caseID}, {amount}) ON DUPLICATE KEY UPDATE `Amount` = `Amount` + {amount};", conn).ExecuteScalarAsync();
-            var obj = await new MySqlCommand($"SELECT `Amount` FROM `{PLAYERS_CASES}` WHERE `SteamID` = {steamID} AND `CaseID` = {caseID};", conn).ExecuteScalarAsync();
-
-            if (obj is not int updatedAmount)
-            {
-                Logging.Debug($"Error getting updated amount for player with steam id {steamID}");
-                return;
-            }
-
-            if (!PlayerData.TryGetValue(steamID, out var data))
-            {
-                Logging.Debug($"Error getting data for player with steam id {steamID}, maybe the player is offline");
-                return;
-            }
-
-            if (!Cases.TryGetValue(caseID, out var @case))
-            {
-                Logging.Debug($"Error finding case with id {caseID} for player with steam id {steamID}");
-                return;
-            }
-
-            if (data.CasesSearchByID.TryGetValue(caseID, out var playerCase))
-            {
-                playerCase.Amount = updatedAmount;
-                return;
-            }
-
-            playerCase = new(steamID, @case, updatedAmount);
-
-            data.Cases.Add(playerCase);
-            data.CasesSearchByID.Add(caseID, playerCase);
-
-            // Code to update case pages
-            Plugin.Instance.UI.OnUIUpdated(steamID, EUIPage.CASE);
+            playerCase.Amount += amount;
+            return;
         }
-        catch (Exception ex)
-        {
-            Logger.Log($"Error updating player case with amount {amount} with case ID {caseID}");
-            Logger.Log(ex);
-        }
-        finally
-        {
-            await conn.CloseAsync();
-        }
+        
+        playerCase = new(steamID, @case, amount);
+
+        data.Cases.Add(playerCase);
+        data.CasesSearchByID.Add(caseID, playerCase);
+        Plugin.Instance.UI.OnUIUpdated(steamID, EUIPage.CASE);
     }
 
-    public async Task DecreasePlayerCaseAsync(CSteamID steamID, int caseID, int amount)
+    public void DecreasePlayerCase(CSteamID steamID, int caseID, int amount)
     {
-        using MySqlConnection conn = new(ConnectionString);
-        try
+        if (!PlayerData.TryGetValue(steamID, out var data))
+            throw new ArgumentNullException(nameof(steamID), $"Player with steamID {steamID} doesn't exist in the database, while decreasing case");
+        
+        if (!data.CasesSearchByID.TryGetValue(caseID, out var playerCase))
+            throw new ArgumentNullException(nameof(caseID), $"Case with id {caseID} doesn't exist in the database, while decreasing case");
+        
+        if (playerCase.Amount >= amount)
         {
-            await conn.OpenAsync();
-            _ = await new MySqlCommand($"UPDATE `{PLAYERS_CASES}` SET `Amount` = `Amount` - {amount} WHERE `SteamID` = {steamID} AND `CaseID` = {caseID};", conn).ExecuteScalarAsync();
-            var obj = await new MySqlCommand($"SELECT `Amount` FROM `{PLAYERS_CASES}` WHERE `SteamID` = {steamID} AND `CaseID` = {caseID};", conn).ExecuteScalarAsync();
-
-            if (obj is not int updatedAmount)
-            {
-                Logging.Debug($"Error getting updated amount for player with steam id {steamID}");
-                return;
-            }
-
-            if (updatedAmount <= 0)
-                _ = await new MySqlCommand($"DELETE FROM `{PLAYERS_CASES}` WHERE `SteamID` = {steamID} AND `CaseID` = {caseID};", conn).ExecuteScalarAsync();
-
-            if (!PlayerData.TryGetValue(steamID, out var data))
-            {
-                Logging.Debug($"Error getting data for player with steam id {steamID}, maybe the player is offline");
-                return;
-            }
-
-            if (!data.CasesSearchByID.TryGetValue(caseID, out var playerCase))
-            {
-                Logging.Debug($"Error finding case with id {caseID} to decrease amount of for player with steam id {steamID}");
-                return;
-            }
-
-            if (updatedAmount <= 0)
-            {
-                _ = data.CasesSearchByID.Remove(caseID);
-                _ = data.Cases.RemoveAll(k => k.Case.CaseID == caseID);
-
-                // Code to update case pages
-                Plugin.Instance.UI.OnUIUpdated(steamID, EUIPage.CASE);
-            }
-            else
-                playerCase.Amount = updatedAmount;
+            playerCase.Amount -= amount;
+            AddQuery($"UPDATE `{PLAYERS_CASES}` SET `Amount` = `Amount` - {amount} WHERE `SteamID` = {steamID} AND `CaseID` = {caseID};");
         }
-        catch (Exception ex)
+        else
         {
-            Logger.Log($"Error updating player case with amount {amount} with case ID {caseID}");
-            Logger.Log(ex);
-        }
-        finally
-        {
-            await conn.CloseAsync();
+            _ = data.CasesSearchByID.Remove(caseID);
+            _ = data.Cases.RemoveAll(k => k.Case.CaseID == caseID);
+            Plugin.Instance.UI.OnUIUpdated(steamID, EUIPage.CASE);
+            AddQuery($"DELETE FROM `{PLAYERS_CASES}` WHERE `SteamID` = {steamID} AND `CaseID` = {caseID};");
         }
     }
 
     // Player Boosters
-    public async Task AddPlayerBoosterAsync(CSteamID steamID, EBoosterType boosterType, float boosterValue, int days)
+    public void AddPlayerBooster(CSteamID steamID, EBoosterType boosterType, float boosterValue, int days)
     {
-        using MySqlConnection conn = new(ConnectionString);
-        try
-        {
-            await conn.OpenAsync();
-            var expiryDate = DateTimeOffset.UtcNow.AddDays(days);
-            _ = await new MySqlCommand($"INSERT INTO `{PLAYERS_BOOSTERS}` (`SteamID` , `BoosterType` , `BoosterValue` , `BoosterExpiration`) VALUES ({steamID} , '{boosterType}' , {boosterValue} , {expiryDate.ToUnixTimeSeconds()}) ON DUPLICATE KEY UPDATE `BoosterExpiration` = `BoosterExpiration` + {days * 24 * 60 * 60};", conn).ExecuteScalarAsync();
+        // get player data, throw error
+        if (!PlayerData.TryGetValue(steamID, out var data))
+            throw new ArgumentNullException(nameof(steamID), $"Player with steamID {steamID} doesn't exist in the database, while adding booster");
 
-            if (!PlayerData.TryGetValue(steamID, out var data))
-            {
-                Logging.Debug($"Could'nt find player data for player with steam id {steamID}, probably player is offline");
-                return;
-            }
-
-            var booster = data.ActiveBoosters.FirstOrDefault(k => k.BoosterType == boosterType && k.BoosterValue == boosterValue);
-            if (booster != null)
-                booster.BoosterExpiration = booster.BoosterExpiration.AddDays(days);
-            else
-                data.ActiveBoosters.Add(new(steamID, boosterType, boosterValue, expiryDate));
-        }
-        catch (Exception ex)
+        var booster = data.ActiveBoosters.FirstOrDefault(k => k.BoosterType == boosterType && k.BoosterValue == boosterValue);
+        if (booster != null)
         {
-            Logger.Log($"Error adding booster with type {boosterType}, value {boosterValue}, days {days} to player with steam id {steamID}");
-            Logger.Log(ex);
+            booster.BoosterExpiration = booster.BoosterExpiration.AddDays(days);
+            AddQuery($"UPDATE `{PLAYERS_BOOSTERS}` SET `BoosterExpiration` = {booster.BoosterExpiration.ToUnixTimeSeconds()} WHERE `SteamID` = {steamID} AND `BoosterType` = '{boosterType}' AND `BoosterValue` = {boosterValue};");
         }
-        finally
+        else
         {
-            await conn.CloseAsync();
+            booster = new(steamID, boosterType, boosterValue, DateTimeOffset.UtcNow.AddDays(days));
+            data.ActiveBoosters.Add(booster);
+            AddQuery($"INSERT INTO `{PLAYERS_BOOSTERS}` (`SteamID` , `BoosterType` , `BoosterValue` , `BoosterExpiration`) VALUES ({steamID} , '{boosterType}' , {boosterValue} , {booster.BoosterExpiration.ToUnixTimeSeconds()})");
         }
     }
 }
