@@ -12,8 +12,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
-using System.Management.Instrumentation;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 using UnityEngine;
@@ -2641,7 +2639,7 @@ public class DatabaseManager
 
             Logging.Debug($"Getting cases for {player.CharacterName}");
             TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new(' ', (int)(96 * 0.99f)), "PREPARING CASES..."));
-            rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS_CASES}` WHERE `SteamID` = {player.CSteamID} ORDER BY `CaseID` ASC;", conn).ExecuteReaderAsync();
+            rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS_CASES}` WHERE `SteamID` = {player.CSteamID} ORDER BY `CaseID`;", conn).ExecuteReaderAsync();
             try
             {
                 List<PlayerCase> playerCases = new();
@@ -2816,9 +2814,7 @@ public class DatabaseManager
             {
                 pendingQueries.RemoveAll(k => processedQueries.Contains(k));
                 lock (PendingQueries)
-                {
                     PendingQueries.InsertRange(PendingQueries.Count - 1, pendingQueries);
-                }
             }
         }
         catch (Exception ex)
@@ -2832,7 +2828,7 @@ public class DatabaseManager
         }
     }
     
-    private void RefreshData(object sender, System.Timers.ElapsedEventArgs e)
+    private void RefreshData(object sender, ElapsedEventArgs e)
     {
         using MySqlConnection conn = new(ConnectionString);
 
@@ -3617,24 +3613,16 @@ public class DatabaseManager
 
         AddQuery($"UPDATE `{PLAYERS}` SET `Level` = {data.Level}, `XP` = {data.XP} WHERE `SteamID` = {steamID}");
         if (PlayerDailyLeaderboardLookup.TryGetValue(steamID, out var dailyLeaderboard))
-        {
             dailyLeaderboard.Level = data.Level;
-        }
-        
+
         if (PlayerWeeklyLeaderboardLookup.TryGetValue(steamID, out var weeklyLeaderboard))
-        {
             weeklyLeaderboard.Level = data.Level;
-        }
 
         if (PlayerSeasonalLeaderboardLookup.TryGetValue(steamID, out var seasonalLeaderboard))
-        {
             seasonalLeaderboard.Level = data.Level;
-        }
 
         if (PlayerAllTimeLeaderboardLookup.TryGetValue(steamID, out var allTimeLeaderboard))
-        {
             allTimeLeaderboard.Level = data.Level;
-        }
     }
     
     public void IncreasePlayerCredits(CSteamID steamID, int credits)
@@ -3708,29 +3696,19 @@ public class DatabaseManager
         });
 
         if (PlayerData.TryGetValue(steamID, out var data))
-        {
             data.Kills += kills;
-        }
-        
+
         if (PlayerDailyLeaderboardLookup.TryGetValue(steamID, out var dailyLeaderboard))
-        {
             dailyLeaderboard.Kills += kills;
-        }
 
         if (PlayerWeeklyLeaderboardLookup.TryGetValue(steamID, out var weeklyLeaderboard))
-        {
             weeklyLeaderboard.Kills += kills;
-        }
 
         if (PlayerSeasonalLeaderboardLookup.TryGetValue(steamID, out var seasonalLeaderboard))
-        {
             seasonalLeaderboard.Kills += kills;
-        }
 
         if (PlayerAllTimeLeaderboardLookup.TryGetValue(steamID, out var allTimeLeaderboard))
-        {
             allTimeLeaderboard.Kills += kills;
-        }
     }
     
     public void IncreasePlayerHeadshotKills(CSteamID steamID, int headshotKills)
@@ -3744,29 +3722,19 @@ public class DatabaseManager
         });
 
         if (PlayerData.TryGetValue(steamID, out var data))
-        {
             data.HeadshotKills += headshotKills;
-        }
 
         if (PlayerDailyLeaderboardLookup.TryGetValue(steamID, out var dailyLeaderboard))
-        {
             dailyLeaderboard.HeadshotKills += headshotKills;
-        }
 
         if (PlayerWeeklyLeaderboardLookup.TryGetValue(steamID, out var weeklyLeaderboard))
-        {
             weeklyLeaderboard.HeadshotKills += headshotKills;
-        }
 
         if (PlayerSeasonalLeaderboardLookup.TryGetValue(steamID, out var seasonalLeaderboard))
-        {
             seasonalLeaderboard.HeadshotKills += headshotKills;
-        }
 
         if (PlayerAllTimeLeaderboardLookup.TryGetValue(steamID, out var allTimeLeaderboard))
-        {
             allTimeLeaderboard.HeadshotKills += headshotKills;
-        }
     }
 
     public void UpdatePlayerHighestKillstreak(CSteamID steamID, int killstreak)
@@ -3843,29 +3811,19 @@ public class DatabaseManager
         });
 
         if (PlayerData.TryGetValue(steamID, out var data))
-        {
             data.Deaths += deaths;
-        }
 
         if (PlayerDailyLeaderboardLookup.TryGetValue(steamID, out var dailyLeaderboard))
-        {
             dailyLeaderboard.Deaths += deaths;
-        }
 
         if (PlayerWeeklyLeaderboardLookup.TryGetValue(steamID, out var weeklyLeaderboard))
-        {
             weeklyLeaderboard.Deaths += deaths;
-        }
 
         if (PlayerSeasonalLeaderboardLookup.TryGetValue(steamID, out var seasonalLeaderboard))
-        {
             seasonalLeaderboard.Deaths += deaths;
-        }
 
         if (PlayerAllTimeLeaderboardLookup.TryGetValue(steamID, out var allTimeLeaderboard))
-        {
             allTimeLeaderboard.Deaths += deaths;
-        }
     }
 
     public void ChangePlayerMusic(CSteamID steamID, bool music)
@@ -3881,58 +3839,38 @@ public class DatabaseManager
     {
         AddQuery($"UPDATE `{PLAYERS}` SET `CountryCode` = '{countryCode}' WHERE `SteamID` = {steamID};");
         if (PlayerData.TryGetValue(steamID, out var data))
-        {
             data.CountryCode = countryCode;
-        }
 
         if (PlayerDailyLeaderboardLookup.TryGetValue(steamID, out var dailyLeaderboard))
-        {
             dailyLeaderboard.CountryCode = countryCode;
-        }
 
         if (PlayerWeeklyLeaderboardLookup.TryGetValue(steamID, out var weeklyLeaderboard))
-        {
             weeklyLeaderboard.CountryCode = countryCode;
-        }
 
         if (PlayerSeasonalLeaderboardLookup.TryGetValue(steamID, out var seasonalLeaderboard))
-        {
             seasonalLeaderboard.CountryCode = countryCode;
-        }
 
         if (PlayerAllTimeLeaderboardLookup.TryGetValue(steamID, out var allTimeLeaderboard))
-        {
             allTimeLeaderboard.CountryCode = countryCode;
-        }
     }
 
     public void ChangePlayerHideFlag(CSteamID steamID, bool hideFlag)
     {
         AddQuery($"UPDATE `{PLAYERS}` SET `HideFlag` = {hideFlag} WHERE `SteamID` = {steamID};");
         if (PlayerData.TryGetValue(steamID, out var data))
-        {
             data.HideFlag = hideFlag;
-        }
 
         if (PlayerDailyLeaderboardLookup.TryGetValue(steamID, out var dailyLeaderboard))
-        {
             dailyLeaderboard.HideFlag = hideFlag;
-        }
 
         if (PlayerWeeklyLeaderboardLookup.TryGetValue(steamID, out var weeklyLeaderboard))
-        {
             weeklyLeaderboard.HideFlag = hideFlag;
-        }
 
         if (PlayerSeasonalLeaderboardLookup.TryGetValue(steamID, out var seasonalLeaderboard))
-        {
             seasonalLeaderboard.HideFlag = hideFlag;
-        }
 
         if (PlayerAllTimeLeaderboardLookup.TryGetValue(steamID, out var allTimeLeaderboard))
-        {
             allTimeLeaderboard.HideFlag = hideFlag;
-        }
     }
     
     public void ChangePlayerMuted(CSteamID steamID, bool muted)
@@ -3996,24 +3934,16 @@ public class DatabaseManager
         }
 
         if (PlayerDailyLeaderboardLookup.TryGetValue(steamID, out var dailyLeaderboard))
-        {
             dailyLeaderboard.HasPrime = true;
-        }
 
         if (PlayerWeeklyLeaderboardLookup.TryGetValue(steamID, out var weeklyLeaderboard))
-        {
             weeklyLeaderboard.HasPrime = true;
-        }
 
         if (PlayerSeasonalLeaderboardLookup.TryGetValue(steamID, out var seasonalLeaderboard))
-        {
             seasonalLeaderboard.HasPrime = true;
-        }
 
         if (PlayerAllTimeLeaderboardLookup.TryGetValue(steamID, out var allTimeLeaderboard))
-        {
             allTimeLeaderboard.HasPrime = true;
-        }
     }
 
     // Player Guns
@@ -4021,15 +3951,9 @@ public class DatabaseManager
     public void AddPlayerGunBought(CSteamID steamID, ushort gunID)
     {
         if (!Guns.TryGetValue(gunID, out var gun))
-        {
             throw new ArgumentNullException("gun", $"Gun {gunID} is not found, adding gun to player with steam id {steamID}");
-        }
-        
+
         AddQuery($"INSERT INTO `{PLAYERS_GUNS}` (`SteamID` , `GunID` , `Level` , `XP` , `GunKills` , `IsBought` , `Attachments`) VALUES ({steamID} , {gunID} , 1 , 0 , 0 , true , '{Utility.CreateStringFromDefaultAttachments(gun.DefaultAttachments) + Utility.CreateStringFromRewardAttachments(gun.RewardAttachments.Values.ToList())}') ON DUPLICATE KEY UPDATE `IsBought` = true;");
-
-        if (!PlayerData.TryGetValue(steamID, out var data))
-            return;
-
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
             return;
         
@@ -4092,9 +4016,9 @@ public class DatabaseManager
 
             var icon = gun.Gun.IconLink;
             if ((player.ActiveLoadout?.Primary?.Gun?.GunID ?? 0) == gun.Gun.GunID && (player.ActiveLoadout?.PrimarySkin?.Gun?.GunID ?? 0) == gun.Gun.GunID)
-                icon = player.ActiveLoadout.PrimarySkin.IconLink;
+                icon = player.ActiveLoadout?.PrimarySkin?.IconLink ?? string.Empty;
             else if ((player.ActiveLoadout?.Secondary?.Gun?.GunID ?? 0) == gun.Gun.GunID && (player.ActiveLoadout?.SecondarySkin?.Gun?.GunID ?? 0) == gun.Gun.GunID)
-                icon = player.ActiveLoadout.SecondarySkin.IconLink;
+                icon = player.ActiveLoadout?.SecondarySkin?.IconLink ?? string.Empty;
 
             Plugin.Instance.UI.SendAnimation(player, new(EAnimationType.GUN_LEVEL_UP, new AnimationItemUnlock(icon, gun.Level.ToString(), gun.Gun.GunName)));
             if (gun.Gun.RewardAttachments.TryGetValue(gun.Level, out var attachment))
@@ -4148,19 +4072,13 @@ public class DatabaseManager
     public bool UpdatePlayerGunAttachmentBought(CSteamID steamID, ushort gunID, ushort attachmentID, bool isBought)
     {
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
-        {
             throw new ArgumentNullException("loadout", $"Could'nt find loadout for {steamID} while adding gun attachment bought to {attachmentID} for gun with id {gunID}");
-        }
 
         if (!loadout.Guns.TryGetValue(gunID, out var gun))
-        {
             throw new ArgumentNullException("gun", $"Could'nt find loadout gun with id {gunID} in player ({steamID}) loadout");
-        }
 
         if (!gun.Attachments.TryGetValue(attachmentID, out var attachment))
-        {
             throw new ArgumentNullException("attachment", $"Could'nt find attachment with id {attachmentID} for gun with id {gunID} for player ({steamID})");
-        }
 
         attachment.IsBought = isBought;
         AddQuery($"UPDATE `{PLAYERS_GUNS}` SET `Attachments` = '{Utility.GetStringFromAttachments(gun.Attachments.Values.ToList())}' WHERE `SteamID` = {steamID} AND `GunID` = {gunID};");
@@ -4170,19 +4088,13 @@ public class DatabaseManager
     public bool UpdatePlayerGunAttachmentUnlocked(CSteamID steamID, ushort gunID, ushort attachmentID, bool isUnlocked)
     {
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
-        {
             throw new ArgumentNullException("loadout", $"Could'nt find loadout for {steamID} while adding gun attachment unlocked to {attachmentID} for gun with id {gunID}");
-        }
 
         if (!loadout.Guns.TryGetValue(gunID, out var gun))
-        {
             throw new ArgumentNullException("gun", $"Could'nt find loadout gun with id {gunID} in player ({steamID}) loadout");
-        }
 
         if (!gun.Attachments.TryGetValue(attachmentID, out var attachment))
-        {
             throw new ArgumentNullException("attachment", $"Could'nt find attachment with id {attachmentID} for gun with id {gunID} for player ({steamID})");
-        }
 
         attachment.IsUnlocked = isUnlocked;
         AddQuery($"UPDATE `{PLAYERS_GUNS}` SET `Attachments` = '{Utility.GetStringFromAttachments(gun.Attachments.Values.ToList())}' WHERE `SteamID` = {steamID} AND `GunID` = {gunID};");
@@ -4194,14 +4106,10 @@ public class DatabaseManager
     public void AddPlayerGunSkin(CSteamID steamID, int id)
     {
         if (!GunSkinsSearchByID.TryGetValue(id, out var skin))
-        {
             throw new ArgumentNullException("id", $"Skin with id {id} doesn't exist in the database, while adding to {steamID}");
-        }
 
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
-        {
             throw new ArgumentNullException("loadout", $"Loadout for player with steam id {steamID} is not found, please ensure that the player is online");
-        }
 
         if (loadout.GunSkinsSearchByID.ContainsKey(id))
             return;
@@ -4232,16 +4140,12 @@ public class DatabaseManager
     public void AddPlayerGunCharmBought(CSteamID steamID, ushort gunCharmID)
     {
         if (!GunCharms.TryGetValue(gunCharmID, out var charm))
-        {
             throw new ArgumentNullException("id", $"Charm with id {gunCharmID} doesn't exist in the database, while adding to {steamID}");
-        }
 
         AddQuery($"INSERT INTO `{PLAYERS_GUNS_CHARMS}` (`SteamID` , `CharmID` , `IsBought`) VALUES ({steamID} , {gunCharmID} , true) ON DUPLICATE KEY UPDATE `IsBought` = true;");
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
-        {
             throw new ArgumentNullException("loadout", $"Loadout for player with steam id {steamID} is not found, please ensure that the player is online");
-        }
-        
+
         if (loadout.GunCharms.TryGetValue(gunCharmID, out var gunCharm))
         {
             gunCharm.IsBought = true;
@@ -4254,16 +4158,14 @@ public class DatabaseManager
     
     public void RemovePlayerGunCharm(CSteamID steamID, ushort gunCharmID)
     {
-        if (!GunCharms.TryGetValue(gunCharmID, out var charm))
-        {
+        if (!GunCharms.ContainsKey(gunCharmID))
             throw new ArgumentNullException("id", $"Charm with id {gunCharmID} doesn't exist in the database, while removing from {steamID}");
-        }
 
         AddQuery($"DELETE FROM `{PLAYERS_GUNS_CHARMS}` WHERE `SteamID` = {steamID} AND `CharmID` = {gunCharmID};");
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
             return;
         
-        if (!loadout.GunCharms.TryGetValue(gunCharmID, out var gunCharm))
+        if (!loadout.GunCharms.ContainsKey(gunCharmID))
             return;
         
         loadout.GunCharms.Remove(gunCharmID);
@@ -4272,10 +4174,8 @@ public class DatabaseManager
     
     public bool UpdatePlayerGunCharmBought(CSteamID steamID, ushort gunCharmID, bool isBought)
     {
-        if (!GunCharms.TryGetValue(gunCharmID, out var charm))
-        {
+        if (!GunCharms.ContainsKey(gunCharmID))
             throw new ArgumentNullException("id", $"Charm with id {gunCharmID} doesn't exist in the database, while updating bought for {steamID}");
-        }
 
         AddQuery($"UPDATE `{PLAYERS_GUNS_CHARMS}` SET `IsBought` = {isBought} WHERE `SteamID` = {steamID} AND `CharmID` = {gunCharmID};");
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
@@ -4290,10 +4190,8 @@ public class DatabaseManager
     
     public bool UpdatePlayerGunCharmUnlocked(CSteamID steamID, ushort gunCharmID, bool isUnlocked)
     {
-        if (!GunCharms.TryGetValue(gunCharmID, out var charm))
-        {
+        if (!GunCharms.ContainsKey(gunCharmID))
             throw new ArgumentNullException("id", $"Charm with id {gunCharmID} doesn't exist in the database, while updating unlocked for {steamID}");
-        }
 
         AddQuery($"UPDATE `{PLAYERS_GUNS_CHARMS}` SET `IsUnlocked` = {isUnlocked} WHERE `SteamID` = {steamID} AND `CharmID` = {gunCharmID};");
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
@@ -4311,9 +4209,7 @@ public class DatabaseManager
     public void AddPlayerKnifeBought(CSteamID steamID, ushort knifeID)
     {
         if (!Knives.TryGetValue(knifeID, out var knife))
-        {
             throw new ArgumentNullException("id", $"Knife with id {knifeID} doesn't exist in the database, while adding to {steamID}");
-        }
 
         AddQuery($"INSERT INTO `{PLAYERS_KNIVES}` (`SteamID` , `KnifeID` , `KnifeKills` , `IsBought`) VALUES ({steamID} , {knifeID} , 0 , true) ON DUPLICATE KEY UPDATE `IsBought` = true;");
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
@@ -4332,9 +4228,7 @@ public class DatabaseManager
     public void IncreasePlayerKnifeKills(CSteamID steamID, ushort knifeID, int amount)
     {
         if (!Knives.TryGetValue(knifeID, out var knife))
-        {
             throw new ArgumentNullException("id", $"Knife with id {knifeID} doesn't exist in the database, while increasing kills for {steamID}");
-        }
 
         AddQuery($"UPDATE `{PLAYERS_KNIVES}` SET `KnifeKills` = `KnifeKills` + {amount} WHERE `SteamID` = {steamID} AND `KnifeID` = {knifeID};");
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
@@ -4349,9 +4243,7 @@ public class DatabaseManager
     public bool UpdatePlayerKnifeBought(CSteamID steamID, ushort knifeID, bool isBought)
     {
         if (!Knives.TryGetValue(knifeID, out var knife))
-        {
             throw new ArgumentNullException("id", $"Knife with id {knifeID} doesn't exist in the database, while updating bought for {steamID}");
-        }
 
         AddQuery($"UPDATE `{PLAYERS_KNIVES}` SET `IsBought` = {isBought} WHERE `SteamID` = {steamID} AND `KnifeID` = {knifeID};");
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
@@ -4367,9 +4259,7 @@ public class DatabaseManager
     public bool UpdatePlayerKnifeUnlocked(CSteamID steamID, ushort knifeID, bool isUnlocked)
     {
         if (!Knives.TryGetValue(knifeID, out var knife))
-        {
             throw new ArgumentNullException("id", $"Knife with id {knifeID} doesn't exist in the database, while updating unlocked for {steamID}");
-        }
 
         AddQuery($"UPDATE `{PLAYERS_KNIVES}` SET `IsUnlocked` = {isUnlocked} WHERE `SteamID` = {steamID} AND `KnifeID` = {knifeID};");
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
@@ -4385,9 +4275,7 @@ public class DatabaseManager
     public void UpdatePlayerKnifeUnboxed(ushort knifeID, int amount)
     {
         if (!Knives.TryGetValue(knifeID, out var knife))
-        {
             throw new ArgumentNullException("id", $"Knife with id {knifeID} doesn't exist in the database, while updating unboxed");
-        }
 
         AddQuery($"UPDATE `{KNIVES}` SET `UnboxedAmount` = `UnboxedAmount` + {amount} WHERE `KnifeID` = {knifeID};");
         knife.UnboxedAmount += amount;
@@ -4398,9 +4286,7 @@ public class DatabaseManager
     public void AddPlayerPerkBought(CSteamID steamID, int perkID)
     {
         if (!Perks.TryGetValue(perkID, out var perk))
-        {
             throw new ArgumentNullException("id", $"Perk with id {perkID} doesn't exist in the database, while adding to {steamID}");
-        }
 
         AddQuery($"INSERT INTO `{PLAYERS_PERKS}` (`SteamID` , `PerkID` , `IsBought`) VALUES ({steamID} , {perkID} , true) ON DUPLICATE KEY UPDATE `IsBought` = true;");
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
@@ -4419,9 +4305,7 @@ public class DatabaseManager
     public bool UpdatePlayerPerkBought(CSteamID steamID, int perkID, bool isBought)
     {
         if (!Perks.TryGetValue(perkID, out var perk))
-        {
             throw new ArgumentNullException("id", $"Perk with id {perkID} doesn't exist in the database, while updating bought for {steamID}");
-        }
 
         AddQuery($"UPDATE `{PLAYERS_PERKS}` SET `IsBought` = {isBought} WHERE `SteamID` = {steamID} AND `PerkID` = {perkID};");
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
@@ -4437,9 +4321,7 @@ public class DatabaseManager
     public bool UpdatePlayerPerkUnlocked(CSteamID steamID, int perkID, bool isUnlocked)
     {
         if (!Perks.TryGetValue(perkID, out var perk))
-        {
             throw new ArgumentNullException("id", $"Perk with id {perkID} doesn't exist in the database, while updating unlocked for {steamID}");
-        }
 
         AddQuery($"UPDATE `{PLAYERS_PERKS}` SET `IsUnlocked` = {isUnlocked} WHERE `SteamID` = {steamID} AND `PerkID` = {perkID};");
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
@@ -4457,9 +4339,7 @@ public class DatabaseManager
     public void AddPlayerGadgetBought(CSteamID steamID, ushort gadgetID)
     {
         if (!Gadgets.TryGetValue(gadgetID, out var gadget))
-        {
             throw new ArgumentNullException("id", $"Gadget with id {gadgetID} doesn't exist in the database, while adding to {steamID}");
-        }
 
         AddQuery($"INSERT INTO `{PLAYERS_GADGETS}` (`SteamID` , `GadgetID` , `GadgetKills` , `IsBought`) VALUES ({steamID} , {gadgetID} , 0 , true) ON DUPLICATE KEY UPDATE `IsBought` = true;");
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
@@ -4478,9 +4358,7 @@ public class DatabaseManager
     public void IncreasePlayerGadgetKills(CSteamID steamID, ushort gadgetID, int amount)
     {
         if (!Gadgets.TryGetValue(gadgetID, out var gadget))
-        {
             throw new ArgumentNullException("id", $"Gadget with id {gadgetID} doesn't exist in the database, while increasing kills for {steamID}");
-        }
 
         AddQuery($"UPDATE `{PLAYERS_GADGETS}` SET `GadgetKills` = `GadgetKills` + {amount} WHERE `SteamID` = {steamID} AND `GadgetID` = {gadgetID};");
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
@@ -4495,9 +4373,7 @@ public class DatabaseManager
     public bool UpdatePlayerGadgetBought(CSteamID steamID, ushort gadgetID, bool isBought)
     {
         if (!Gadgets.TryGetValue(gadgetID, out var gadget))
-        {
             throw new ArgumentNullException("id", $"Gadget with id {gadgetID} doesn't exist in the database, while updating bought for {steamID}");
-        }
 
         AddQuery($"UPDATE `{PLAYERS_GADGETS}` SET `IsBought` = {isBought} WHERE `SteamID` = {steamID} AND `GadgetID` = {gadgetID};");
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
@@ -4513,9 +4389,7 @@ public class DatabaseManager
     public bool UpdatePlayerGadgetUnlocked(CSteamID steamID, ushort gadgetID, bool isUnlocked)
     {
         if (!Gadgets.TryGetValue(gadgetID, out var gadget))
-        {
             throw new ArgumentNullException("id", $"Gadget with id {gadgetID} doesn't exist in the database, while updating unlocked for {steamID}");
-        }
 
         AddQuery($"UPDATE `{PLAYERS_GADGETS}` SET `IsUnlocked` = {isUnlocked} WHERE `SteamID` = {steamID} AND `GadgetID` = {gadgetID};");
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
@@ -4533,9 +4407,7 @@ public class DatabaseManager
     public void AddPlayerKillstreakBought(CSteamID steamID, int killstreakID)
     {
         if (!Killstreaks.TryGetValue(killstreakID, out var killstreak))
-        {
             throw new ArgumentNullException("id", $"Killstreak with id {killstreakID} doesn't exist in the database, while adding to {steamID}");
-        }
 
         AddQuery($"INSERT INTO `{PLAYERS_KILLSTREAKS}` (`SteamID` , `KillstreakID` , `KillstreakKills` , `IsBought`) VALUES ({steamID} , {killstreakID} , 0 , true) ON DUPLICATE KEY UPDATE `IsBought` = true;");
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
@@ -4554,9 +4426,7 @@ public class DatabaseManager
     public void IncreasePlayerKillstreakKills(CSteamID steamID, int killstreakID, int amount)
     {
         if (!Killstreaks.TryGetValue(killstreakID, out var killstreak))
-        {
             throw new ArgumentNullException("id", $"Killstreak with id {killstreakID} doesn't exist in the database, while increasing kills for {steamID}");
-        }
 
         AddQuery($"UPDATE `{PLAYERS_KILLSTREAKS}` SET `KillstreakKills` = `KillstreakKills` + {amount} WHERE `SteamID` = {steamID} AND `KillstreakID` = {killstreakID};");
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
@@ -4571,9 +4441,7 @@ public class DatabaseManager
     public bool UpdatePlayerKillstreakBought(CSteamID steamID, int killstreakID, bool isBought)
     {
         if (!Killstreaks.TryGetValue(killstreakID, out var killstreak))
-        {
             throw new ArgumentNullException("id", $"Killstreak with id {killstreakID} doesn't exist in the database, while updating bought for {steamID}");
-        }
 
         AddQuery($"UPDATE `{PLAYERS_KILLSTREAKS}` SET `IsBought` = {isBought} WHERE `SteamID` = {steamID} AND `KillstreakID` = {killstreakID};");
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
@@ -4589,9 +4457,7 @@ public class DatabaseManager
     public bool UpdatePlayerKillstreakUnlocked(CSteamID steamID, int killstreakID, bool isUnlocked)
     {
         if (!Killstreaks.TryGetValue(killstreakID, out var killstreak))
-        {
             throw new ArgumentNullException("id", $"Killstreak with id {killstreakID} doesn't exist in the database, while updating unlocked for {steamID}");
-        }
 
         AddQuery($"UPDATE `{PLAYERS_KILLSTREAKS}` SET `IsUnlocked` = {isUnlocked} WHERE `SteamID` = {steamID} AND `KillstreakID` = {killstreakID};");
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
@@ -4609,9 +4475,7 @@ public class DatabaseManager
     public void AddPlayerCardBought(CSteamID steamID, int cardID)
     {
         if (!Cards.TryGetValue(cardID, out var card))
-        {
             throw new ArgumentNullException("id", $"Card with id {cardID} doesn't exist in the database, while adding to {steamID}");
-        }
 
         AddQuery($"INSERT INTO `{PLAYERS_CARDS}` (`SteamID` , `CardID` , `IsBought`) VALUES ({steamID} , {cardID} , true) ON DUPLICATE KEY UPDATE `IsBought` = true;");
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
@@ -4630,9 +4494,7 @@ public class DatabaseManager
     public void RemovePlayerCard(CSteamID steamID, int cardID)
     {
         if (!Cards.TryGetValue(cardID, out var card))
-        {
             throw new ArgumentNullException("id", $"Card with id {cardID} doesn't exist in the database, while removing from {steamID}");
-        }
 
         AddQuery($"DELETE FROM `{PLAYERS_CARDS}` WHERE `SteamID` = {steamID} AND `CardID` = {cardID};");
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
@@ -4644,9 +4506,7 @@ public class DatabaseManager
     public bool UpdatePlayerCardBought(CSteamID steamID, int cardID, bool isBought)
     {
         if (!Cards.TryGetValue(cardID, out var card))
-        {
             throw new ArgumentNullException("id", $"Card with id {cardID} doesn't exist in the database, while updating bought for {steamID}");
-        }
 
         AddQuery($"UPDATE `{PLAYERS_CARDS}` SET `IsBought` = {isBought} WHERE `SteamID` = {steamID} AND `CardID` = {cardID};");
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
@@ -4662,9 +4522,7 @@ public class DatabaseManager
     public bool UpdatePlayerCardUnlocked(CSteamID steamID, int cardID, bool isUnlocked)
     {
         if (!Cards.TryGetValue(cardID, out var card))
-        {
             throw new ArgumentNullException("id", $"Card with id {cardID} doesn't exist in the database, while updating unlocked for {steamID}");
-        }
 
         AddQuery($"UPDATE `{PLAYERS_CARDS}` SET `IsUnlocked` = {isUnlocked} WHERE `SteamID` = {steamID} AND `CardID` = {cardID};");
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
@@ -4682,9 +4540,7 @@ public class DatabaseManager
     public void AddPlayerGloveBought(CSteamID steamID, int gloveID)
     {
         if (!Gloves.TryGetValue(gloveID, out var glove))
-        {
             throw new ArgumentNullException("id", $"Glove with id {gloveID} doesn't exist in the database, while adding to {steamID}");
-        }
 
         AddQuery($"INSERT INTO `{PLAYERS_GLOVES}` (`SteamID` , `GloveID` , `IsBought`) VALUES ({steamID} , {gloveID} , true) ON DUPLICATE KEY UPDATE `IsBought` = true;");
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
@@ -4703,9 +4559,7 @@ public class DatabaseManager
     public bool UpdatePlayerGloveBought(CSteamID steamID, int gloveID, bool isBought)
     {
         if (!Gloves.TryGetValue(gloveID, out var glove))
-        {
             throw new ArgumentNullException("id", $"Glove with id {gloveID} doesn't exist in the database, while updating bought for {steamID}");
-        }
 
         AddQuery($"UPDATE `{PLAYERS_GLOVES}` SET `IsBought` = {isBought} WHERE `SteamID` = {steamID} AND `GloveID` = {gloveID};");
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
@@ -4721,9 +4575,7 @@ public class DatabaseManager
     public bool UpdatePlayerGloveUnlocked(CSteamID steamID, int gloveID, bool isUnlocked)
     {
         if (!Gloves.TryGetValue(gloveID, out var glove))
-        {
             throw new ArgumentNullException("id", $"Glove with id {gloveID} doesn't exist in the database, while updating unlocked for {steamID}");
-        }
 
         AddQuery($"UPDATE `{PLAYERS_GLOVES}` SET `IsUnlocked` = {isUnlocked} WHERE `SteamID` = {steamID} AND `GloveID` = {gloveID};");
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
@@ -4740,10 +4592,8 @@ public class DatabaseManager
     {
         // get glove from Gloves, throw an error if not
         if (!Gloves.TryGetValue(gloveID, out var glove))
-        {
             throw new ArgumentNullException("id", $"Glove with id {gloveID} doesn't exist in the database, while updating unboxed amount");
-        }
-        
+
         AddQuery($"UPDATE `{GLOVES}` SET `UnboxedAmount` = `UnboxedAmount` + {amount} WHERE `GloveID` = {gloveID};");
         glove.UnboxedAmount += amount;
     }
@@ -4753,14 +4603,10 @@ public class DatabaseManager
     public void UpdatePlayerLoadout(CSteamID steamID, int loadoutID)
     {
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
-        {
             throw new ArgumentNullException("steamID", $"Player with steamID {steamID} doesn't exist in the database, while updating loadout");
-        }
-        
+
         if (!loadout.Loadouts.TryGetValue(loadoutID, out var playerLoadout))
-        {
             throw new ArgumentNullException("loadoutID", $"Loadout with id {loadoutID} doesn't exist in the database, while updating loadout for {steamID}");
-        }
 
         LoadoutData loadoutData = new(playerLoadout);
         AddQuery($"UPDATE `{PLAYERS_LOADOUTS}` SET `Loadout` = '{Plugin.Instance.Data.ConvertLoadoutToJson(loadoutData)}' WHERE `SteamID` = {steamID} AND `LoadoutID` = {loadoutID};");
@@ -4769,15 +4615,11 @@ public class DatabaseManager
     public void UpdatePlayerLoadoutActive(CSteamID steamID, int loadoutID, bool isActive)
     {
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
-        {
             throw new ArgumentNullException("steamID", $"Player with steamID {steamID} doesn't exist in the database, while updating loadout");
-        }
-        
+
         if (!loadout.Loadouts.TryGetValue(loadoutID, out var playerLoadout))
-        {
             throw new ArgumentNullException("loadoutID", $"Loadout with id {loadoutID} doesn't exist in the database, while updating loadout for {steamID}");
-        }
-        
+
         AddQuery($"UPDATE `{PLAYERS_LOADOUTS}` SET `IsActive` = {isActive} WHERE `SteamID` = {steamID} AND `LoadoutID` = {loadoutID};");
         playerLoadout.IsActive = isActive;
     }
@@ -4787,10 +4629,8 @@ public class DatabaseManager
     public void UpdatePlayerQuestAmount(CSteamID steamID, int questID, int amount)
     {
         if (!QuestsSearchByID.ContainsKey(questID))
-        {
             throw new ArgumentNullException("id", $"Quest with id {questID} doesn't exist in the database, while updating amount for {steamID}");
-        }
-        
+
         AddQuery($"UPDATE `{PLAYERS_QUESTS}` SET `Amount` = `Amount` + {amount} WHERE `SteamID` = {steamID} AND `QuestID` = {questID};");
         if (!PlayerData.TryGetValue(steamID, out var data))
             return;
@@ -4887,9 +4727,7 @@ public class DatabaseManager
             tierUp = true;
 
             if (BattlepassTiersSearchByID.TryGetValue(data.Battlepass.CurrentTier, out var currentTier))
-            {
                 Plugin.Instance.UI.SendAnimation(player, new(EAnimationType.BATTLEPASS_TIER_COMPLETION, currentTier));
-            }
         }
         
         if (tierUp)
@@ -4969,7 +4807,6 @@ public class DatabaseManager
     // Player Boosters
     public void AddPlayerBooster(CSteamID steamID, EBoosterType boosterType, float boosterValue, int days)
     {
-        // get player data, throw error
         if (!PlayerData.TryGetValue(steamID, out var data))
             throw new ArgumentNullException(nameof(steamID), $"Player with steamID {steamID} doesn't exist in the database, while adding booster");
 
