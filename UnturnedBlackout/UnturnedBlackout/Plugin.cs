@@ -48,6 +48,7 @@ public class Plugin : RocketPlugin<Config>
     {
         Game.Destroy();
         UI.Destroy();
+        DB.Destroy();
 
         Level.onLevelLoaded -= OnLevelLoaded;
         PlayerVoice.onRelayVoice -= OnVoice;

@@ -38,7 +38,7 @@ public class UIHandler
     private const int MINIMUM_LOADOUT_PAGE_ATTACHMENT_PRIMARY = 4;
     private const int MAXIMUM_LOADOUT_PAGE_ATTACHMENT_PRIMARY = 8;
 
-    private DatabaseManager DB => DB;
+    private DatabaseManager DB => Plugin.Instance.DB;
     public CSteamID SteamID { get; set; }
     public UnturnedPlayer Player { get; set; }
     public PlayerLoadout PlayerLoadout { get; set; }

@@ -43,7 +43,7 @@ public class DataManager
 
     public string ConvertLoadoutToJson(LoadoutData data)
     {
-        var serialized = JsonSerializer.Serialize(data, new JsonSerializerOptions() { WriteIndented = true });
+        var serialized = JsonSerializer.Serialize(data, new JsonSerializerOptions() { WriteIndented = false });
         return serialized;
     }
 

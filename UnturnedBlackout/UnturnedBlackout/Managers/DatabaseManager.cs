@@ -234,6 +234,13 @@ public class DatabaseManager
         BatchQueryCleaner.Start();
     }
 
+    public void Destroy()
+    {
+        CacheRefresher.Stop();
+        BatchQueryCleaner.Stop();
+        CleanQueries(null, null);
+    }
+    
     public async Task LoadDatabaseAsync()
     {
         using MySqlConnection conn = new(ConnectionString);
@@ -2897,50 +2904,41 @@ public class DatabaseManager
             stopWatch.Stop();
             Logging.Debug($"Connction established, took {stopWatch.ElapsedMilliseconds}ms");
             stopWatch.Reset();
-            Dictionary<int, string> pendingQueries = new();
-            var i = 1;
+            List<string> pendingQueries = new();
             lock (PendingQueries)
             {
-                foreach (var pendingQuery in PendingQueries)
-                    pendingQueries.Add(i++, pendingQuery);
-
+                pendingQueries = PendingQueries.ToList();
                 PendingQueries.Clear();
             }
 
-            Logging.Debug($"Found {pendingQueries.Count} to go through");
+            Logging.Debug($"Found {pendingQueries.Count} queries to go through");
             MySqlCommand comm = new();
             comm.Connection = conn;
-            Dictionary<int, string> processedQueries = new();
+            var cmdText = string.Join("", pendingQueries);
             stopWatch.Start();
-            foreach (var query in pendingQueries)
+            bool failed = false;
+            comm.CommandText = cmdText;
+            try
             {
-                try
-                {
-                    comm.CommandText = query.Value;
-                    comm.ExecuteNonQuery();
-                    processedQueries.Add(query.Key, query.Value);
-                }
-                catch (Exception ex)
-                {
-                    Logger.Log($"Error running query: \n{query}");
-                    Logger.Log(ex);
-                }
+                comm.ExecuteNonQuery();
             }
-
+            catch (Exception ex)
+            {
+                Logger.Log($"Error executing query: \n{cmdText}");
+                Logger.Log(ex);
+                failed = true;
+            }
             stopWatch.Stop();
-            Logging.Debug($"Pending queries: {pendingQueries.Count}, Processed Queries: {processedQueries.Count}, Time Elapsed = {stopWatch.ElapsedMilliseconds}ms");
-            if (pendingQueries.Count <= processedQueries.Count)
-                return;
-
-            foreach (var processedQuery in processedQueries)
-                pendingQueries.Remove(processedQuery.Key);
-
-            lock (PendingQueries)
-                PendingQueries.AddRange(pendingQueries.Values);
+            if (failed)
+            {
+                lock (PendingQueries)
+                    PendingQueries.AddRange(pendingQueries);
+            }
+            Logging.Debug($"Pending queries: {pendingQueries.Count}, Time Elapsed = {stopWatch.ElapsedMilliseconds}ms");
         }
         catch (Exception ex)
         {
-            Logger.Log($"Error cleaning the queries, connection string: {ConnectionString}");
+            Logger.Log($"Error cleaning the queries");
             Logger.Log(ex);
         }
         finally
@@ -2956,6 +2954,8 @@ public class DatabaseManager
         try
         {
             conn.Open();
+            Logging.Debug($"Refreshing data");
+            Logging.Debug("Getting server options");
             var rdr = new MySqlCommand($"SELECT * FROM `{OPTIONS}`;", conn).ExecuteReader();
             try
             {
@@ -3024,6 +3024,7 @@ public class DatabaseManager
                 $"SELECT `{PLAYERS_LEADERBOARD_DAILY}`.`SteamID`, `{PLAYERS}`.`SteamName`, `{PLAYERS}`.`CountryCode`, `{PLAYERS}`.`HideFlag`, `{PLAYERS}`.`Level`, `{PLAYERS}`.`HasPrime` , `{PLAYERS_LEADERBOARD_DAILY}`.`Kills`, `{PLAYERS_LEADERBOARD_DAILY}`.`HeadshotKills`, `{PLAYERS_LEADERBOARD_DAILY}`.`Deaths` FROM `{PLAYERS_LEADERBOARD_DAILY}` INNER JOIN `{PLAYERS}` ON `{PLAYERS_LEADERBOARD_DAILY}`.`SteamID` = `{PLAYERS}`.`SteamID` ORDER BY (`{PLAYERS_LEADERBOARD_DAILY}`.`Kills` + `{PLAYERS_LEADERBOARD_DAILY}`.`HeadshotKills`) DESC;",
                 conn).ExecuteReader();
 
+            Logging.Debug("Getting daily leaderboard data");
             try
             {
                 List<LeaderboardData> playerDailyLeaderboard = new();
@@ -3079,6 +3080,7 @@ public class DatabaseManager
                 $"SELECT `{PLAYERS_LEADERBOARD_WEEKLY}`.`SteamID`, `{PLAYERS}`.`SteamName`, `{PLAYERS}`.`CountryCode`, `{PLAYERS}`.`HideFlag`, `{PLAYERS}`.`Level`, `{PLAYERS}`.`HasPrime` , `{PLAYERS_LEADERBOARD_WEEKLY}`.`Kills`, `{PLAYERS_LEADERBOARD_WEEKLY}`.`HeadshotKills`, `{PLAYERS_LEADERBOARD_WEEKLY}`.`Deaths` FROM `{PLAYERS_LEADERBOARD_WEEKLY}` INNER JOIN `{PLAYERS}` ON `{PLAYERS_LEADERBOARD_WEEKLY}`.`SteamID` = `{PLAYERS}`.`SteamID` ORDER BY (`{PLAYERS_LEADERBOARD_WEEKLY}`.`Kills` + `{PLAYERS_LEADERBOARD_WEEKLY}`.`HeadshotKills`) DESC;",
                 conn).ExecuteReader();
 
+            Logging.Debug("Getting weekly leaderboard data");
             try
             {
                 List<LeaderboardData> playerWeeklyLeaderboard = new();
@@ -3130,6 +3132,7 @@ public class DatabaseManager
                 rdr.Close();
             }
 
+            Logging.Debug("Adding any players that are not added in daily or weekly leaderboards");
             foreach (var data in PlayerData.Values)
             {
                 if (!PlayerDailyLeaderboardLookup.ContainsKey(data.SteamID))
@@ -3153,6 +3156,7 @@ public class DatabaseManager
                 $"SELECT `{PLAYERS_LEADERBOARD_SEASONAL}`.`SteamID`, `{PLAYERS}`.`SteamName`, `{PLAYERS}`.`CountryCode`, `{PLAYERS}`.`HideFlag`, `{PLAYERS}`.`Level`, `{PLAYERS}`.`HasPrime` , `{PLAYERS_LEADERBOARD_SEASONAL}`.`Kills`, `{PLAYERS_LEADERBOARD_SEASONAL}`.`HeadshotKills`, `{PLAYERS_LEADERBOARD_SEASONAL}`.`Deaths` FROM `{PLAYERS_LEADERBOARD_SEASONAL}` INNER JOIN `{PLAYERS}` ON `{PLAYERS_LEADERBOARD_SEASONAL}`.`SteamID` = `{PLAYERS}`.`SteamID` ORDER BY (`{PLAYERS_LEADERBOARD_SEASONAL}`.`Kills` + `{PLAYERS_LEADERBOARD_SEASONAL}`.`HeadshotKills`) DESC;",
                 conn).ExecuteReader();
 
+            Logging.Debug("Getting seasonal leaderboard data");
             try
             {
                 List<LeaderboardData> playerSeasonalLeaderboard = new();
@@ -3205,6 +3209,7 @@ public class DatabaseManager
             }
 
             rdr = new MySqlCommand($"SELECT `SteamID`, `SteamName`, `CountryCode`, `HideFlag`, `Level`, `HasPrime`, `Kills`, `HeadshotKills`, `Deaths` FROM `{PLAYERS}` ORDER BY (`Kills` + `HeadshotKills`) DESC;", conn).ExecuteReader();
+            Logging.Debug("Getting all time leaderboard data");
             try
             {
                 Dictionary<CSteamID, LeaderboardData> playerAllTimeLeaderboardLookup = new();
@@ -3258,8 +3263,10 @@ public class DatabaseManager
                 rdr.Close();
             }
 
+            Logging.Debug($"Loaded {PlayerDailyLeaderboardLookup.Count} daily leaderboard entries, {PlayerWeeklyLeaderboardLookup.Count} weekly leaderboard entries, {PlayerSeasonalLeaderboardLookup.Count} seasonal leaderboard entries, {PlayerAllTimeLeaderboardLookup.Count} all time leaderboard entries");
             List<(CSteamID, List<Reward>)> bulkRewards = new();
 
+            Logging.Debug("Checking if daily leaderboard needs to be wiped");
             if (ServerOptions.DailyLeaderboardWipe < DateTimeOffset.UtcNow)
             {
                 // Give all ranked rewards
@@ -3331,6 +3338,7 @@ public class DatabaseManager
                 ServerOptions.DailyLeaderboardWipe = newWipeDate;
             }
 
+            Logging.Debug("Checking if weekly leaderboard needs to be wiped");
             if (ServerOptions.WeeklyLeaderboardWipe < DateTimeOffset.UtcNow)
             {
                 // Give all ranked rewards
@@ -3397,7 +3405,8 @@ public class DatabaseManager
                 _ = new MySqlCommand($"UPDATE `{OPTIONS}` SET `WeeklyLeaderboardWipe` = {newWipeDate.ToUnixTimeSeconds()};", conn).ExecuteScalar();
                 ServerOptions.WeeklyLeaderboardWipe = newWipeDate;
             }
-
+            
+            Logging.Debug("Checking if seasonal leaderboard needs to be wiped");
             if (IsPendingSeasonalWipe)
             {
                 IsPendingSeasonalWipe = false;
@@ -3447,9 +3456,11 @@ public class DatabaseManager
                 }
             }
 
+            Logging.Debug($"Giving bulk rewards, rewards: {bulkRewards.Count}");
             if (bulkRewards.Count > 0)
-                Plugin.Instance.Reward.GiveBulkRewards(bulkRewards);
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.Reward.GiveBulkRewards(bulkRewards));
 
+            Logging.Debug("Checking if quests need to be wiped");
             foreach (var data in PlayerData.Values)
             {
                 if (data.Quests[0].QuestEnd > DateTimeOffset.UtcNow)
@@ -3483,24 +3494,28 @@ public class DatabaseManager
                 data.QuestsSearchByType = playerQuestsSearchByType;
             }
 
+            Logging.Debug("Checking if global xp booster needs to be wiped");
             if (ServerOptions.XPBoosterWipe < DateTimeOffset.UtcNow && ServerOptions.XPBooster != 0f)
             {
                 ServerOptions.XPBooster = 0f;
                 _ = new MySqlCommand($"UPDATE `{OPTIONS}` SET `XPBooster` = 0;", conn).ExecuteScalar();
             }
 
+            Logging.Debug("Checking if global bp booster needs to be wiped");
             if (ServerOptions.BPBoosterWipe < DateTimeOffset.UtcNow && ServerOptions.BPBooster != 0f)
             {
                 ServerOptions.BPBooster = 0f;
                 _ = new MySqlCommand($"UPDATE `{OPTIONS}` SET `BPBooster` = 0;", conn).ExecuteScalar();
             }
 
+            Logging.Debug("Checking if global gunxp booster needs to be wiped");
             if (ServerOptions.GunXPBoosterWipe < DateTimeOffset.UtcNow && ServerOptions.GunXPBooster != 0f)
             {
                 ServerOptions.GunXPBooster = 0f;
                 _ = new MySqlCommand($"UPDATE `{OPTIONS}` SET `GunXPBooster` = 0;", conn).ExecuteScalar();
             }
-
+            
+            Logging.Debug("Reloading boosters, checking prime, mute for all players");
             foreach (var data in PlayerData.Values)
             {
                 _ = new MySqlCommand($"DELETE FROM `{PLAYERS_BOOSTERS}` WHERE `SteamID` = {data.SteamID} AND `BoosterExpiration` < {DateTimeOffset.UtcNow.ToUnixTimeSeconds()};", conn).ExecuteScalar();
@@ -3548,7 +3563,7 @@ public class DatabaseManager
                     {
                         maxRewardDate = data.PrimeExpiry.UtcDateTime;
                         data.HasPrime = false;
-                        Plugin.Instance.Reward.RemoveRewards(data.SteamID, ServerOptions.PrimeRewards);
+                        TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.Reward.RemoveRewards(data.SteamID, ServerOptions.PrimeRewards));
                         _ = new MySqlCommand($"UPDATE `{PLAYERS}` SET `HasPrime` = false WHERE `SteamID` = {data.SteamID};", conn).ExecuteScalar();
                         _ = R.Permissions.RemovePlayerFromGroup("Prime", new RocketPlayer(data.SteamID.ToString()));
                     }
@@ -3561,7 +3576,7 @@ public class DatabaseManager
                     if (daysWorthReward > 1)
                         Plugin.Instance.Reward.MultiplyRewards(dailyRewards, daysWorthReward);
 
-                    Plugin.Instance.Reward.GiveRewards(data.SteamID, dailyRewards);
+                    TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.Reward.GiveRewards(data.SteamID, dailyRewards));
                     var lastDailyRewardDate = data.PrimeLastDailyReward.AddDays(daysWorthReward);
                     data.PrimeLastDailyReward = lastDailyRewardDate;
                     _ = new MySqlCommand($"UPDATE `{PLAYERS}` SET `PrimeLastDailyReward` = {lastDailyRewardDate.ToUnixTimeSeconds()} WHERE `SteamID` = {data.SteamID};", conn).ExecuteScalar();
@@ -3589,6 +3604,7 @@ public class DatabaseManager
                 }
             }
 
+            Logging.Debug("Reloading unboxed amount for skins");
             rdr = new MySqlCommand($"SELECT `ID`,`UnboxedAmount` FROM `{GUNS_SKINS}`;", conn).ExecuteReader();
             try
             {
@@ -3616,6 +3632,7 @@ public class DatabaseManager
                 rdr.Close();
             }
 
+            Logging.Debug("Reloading unboxed amount for knives");
             rdr = new MySqlCommand($"SELECT `KnifeID`,`UnboxedAmount` FROM `{KNIVES}`;", conn).ExecuteReader();
             try
             {
@@ -3643,6 +3660,7 @@ public class DatabaseManager
                 rdr.Close();
             }
 
+            Logging.Debug("Reloading unboxed amount for gloves");
             rdr = new MySqlCommand($"SELECT `GloveID`,`UnboxedAmount` FROM `{GLOVES}`;", conn).ExecuteReader();
             try
             {
@@ -3671,7 +3689,7 @@ public class DatabaseManager
             }
 
             Logging.Debug($"Querying servers to get their info");
-            foreach (var server in Plugin.Instance.DB.Servers)
+            foreach (var server in Servers)
             {
                 Logging.Debug($"Querying server with IP: {server.FriendlyIP}, Port: {server.Port}");
                 try
@@ -3739,7 +3757,7 @@ public class DatabaseManager
         if (!updatedLevel)
             return;
 
-        AddQuery($"UPDATE `{PLAYERS}` SET `Level` = {data.Level}, `XP` = {data.XP} WHERE `SteamID` = {steamID}");
+        AddQuery($"UPDATE `{PLAYERS}` SET `Level` = {data.Level}, `XP` = {data.XP} WHERE `SteamID` = {steamID};");
         if (PlayerDailyLeaderboardLookup.TryGetValue(steamID, out var dailyLeaderboard))
             dailyLeaderboard.Level = data.Level;
 
@@ -4143,7 +4161,7 @@ public class DatabaseManager
         {
             updatedLevel = true;
             gun.XP -= neededXP;
-            data.Level++;
+            gun.Level++;
 
             var icon = gun.Gun.IconLink;
             if ((player.ActiveLoadout?.Primary?.Gun?.GunID ?? 0) == gun.Gun.GunID && (player.ActiveLoadout?.PrimarySkin?.Gun?.GunID ?? 0) == gun.Gun.GunID)
@@ -4864,7 +4882,7 @@ public class DatabaseManager
         }
 
         if (tierUp)
-            AddQuery($"UPDATE `{PLAYERS_BATTLEPASS}` SET `CurrentTier` = {data.Battlepass.CurrentTier}, `XP` = {data.Battlepass.XP} WHERE `SteamID` = {steamID}");
+            AddQuery($"UPDATE `{PLAYERS_BATTLEPASS}` SET `CurrentTier` = {data.Battlepass.CurrentTier}, `XP` = {data.Battlepass.XP} WHERE `SteamID` = {steamID};");
     }
 
     public void UpdatePlayerBPTier(CSteamID steamID, int tier)
@@ -4953,7 +4971,7 @@ public class DatabaseManager
         {
             booster = new(steamID, boosterType, boosterValue, DateTimeOffset.UtcNow.AddDays(days));
             data.ActiveBoosters.Add(booster);
-            AddQuery($"INSERT INTO `{PLAYERS_BOOSTERS}` (`SteamID` , `BoosterType` , `BoosterValue` , `BoosterExpiration`) VALUES ({steamID} , '{boosterType}' , {boosterValue} , {booster.BoosterExpiration.ToUnixTimeSeconds()})");
+            AddQuery($"INSERT INTO `{PLAYERS_BOOSTERS}` (`SteamID` , `BoosterType` , `BoosterValue` , `BoosterExpiration`) VALUES ({steamID} , '{boosterType}' , {boosterValue} , {booster.BoosterExpiration.ToUnixTimeSeconds()});");
         }
     }
 }
