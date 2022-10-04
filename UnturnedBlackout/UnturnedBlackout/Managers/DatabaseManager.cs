@@ -2867,7 +2867,6 @@ public class DatabaseManager
         if (string.IsNullOrEmpty(query))
             return;
 
-        Logging.Debug($"Adding query to pending queries: {query}");
         lock (PendingQueries)
             PendingQueries.Add(query);
     }
@@ -2877,7 +2876,6 @@ public class DatabaseManager
         if (queries == null || queries.Count == 0)
             return;
 
-        Logging.Debug($"Adding {queries.Count} queries to pending queries");
         lock (PendingQueries)
             PendingQueries.AddRange(queries);
     }
@@ -2913,38 +2911,21 @@ public class DatabaseManager
 
             var pendingQueriesCount = pendingQueries.Count;
             Logging.Debug($"Found {pendingQueriesCount} queries to go through");
-            
             MySqlCommand comm = new();
             comm.Connection = conn;
-
-            var lineRegex = new Regex("at line ([0-9]+)");
-            var fullyProcessed = false;
-            int failedQueries;
             stopWatch.Start();
-            while (!fullyProcessed)
+            var cmdText = string.Join("", pendingQueries);
+            comm.CommandText = cmdText;
+            try
             {
-                var cmdText = string.Join("\n", pendingQueries);
-                var failed = false;
-                int failedLineNumber;
-                comm.CommandText = cmdText;
-                try
-                {
-                    comm.ExecuteNonQuery();
-                }
-                catch (Exception ex)
-                {
-                    Logger.Log($"Error executing query: \n{cmdText}");
-                    Console.WriteLine(ex.ToString());
-                    failed = true;
-                    // match lineRegex with ex.ToString() and figure out the line number
-                    var match = lineRegex.Match(ex.ToString());
-                    Logger.Log($"match: {match.Value}");
-                    failedLineNumber = match.Success ? (int.TryParse(match.Groups[0].Value, out var num) ? num : -1) : -1;
-                    Logger.Log($"Line number: {failedLineNumber}");
-                }
-
-                fullyProcessed = true;
+                comm.ExecuteNonQuery();
             }
+            catch (Exception ex)
+            {
+                Logger.Log($"Error executing query: \n{cmdText}");
+                Logger.Log(ex);
+            }
+            
             stopWatch.Stop();
             Logging.Debug($"Pending queries: {pendingQueries.Count}, Time Elapsed = {stopWatch.ElapsedMilliseconds}ms");
         }
@@ -3825,7 +3806,7 @@ public class DatabaseManager
 
     public void IncreasePlayerCoins(CSteamID steamID, int coins)
     {
-        AddQuery($"UPDATE `{PLAYERS}` SET `Coins = `Coins` + {coins} WHERE `SteamID` = {steamID};");
+        AddQuery($"UPDATE `{PLAYERS}` SET `Coins` = `Coins` + {coins} WHERE `SteamID` = {steamID};");
         if (!PlayerData.TryGetValue(steamID, out var data))
             return;
 
