@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Timers;
 using UnityEngine;
@@ -207,8 +208,7 @@ public class DatabaseManager
             Database = Config.DatabaseName,
             UserID = Config.DatabaseUsername,
             Password = Config.DatabasePassword,
-            MaximumPoolSize = 500,
-            ConnectionLifeTime = 20
+            MaximumPoolSize = 50
         };
 
         CacheRefresher = new(120 * 1000);
@@ -2911,29 +2911,41 @@ public class DatabaseManager
                 PendingQueries.Clear();
             }
 
-            Logging.Debug($"Found {pendingQueries.Count} queries to go through");
+            var pendingQueriesCount = pendingQueries.Count;
+            Logging.Debug($"Found {pendingQueriesCount} queries to go through");
+            
             MySqlCommand comm = new();
             comm.Connection = conn;
-            var cmdText = string.Join("", pendingQueries);
+
+            var lineRegex = new Regex("at line ([0-9]+)");
+            var fullyProcessed = false;
+            int failedQueries;
             stopWatch.Start();
-            bool failed = false;
-            comm.CommandText = cmdText;
-            try
+            while (!fullyProcessed)
             {
-                comm.ExecuteNonQuery();
-            }
-            catch (Exception ex)
-            {
-                Logger.Log($"Error executing query: \n{cmdText}");
-                Logger.Log(ex);
-                failed = true;
+                var cmdText = string.Join("\n", pendingQueries);
+                var failed = false;
+                int failedLineNumber;
+                comm.CommandText = cmdText;
+                try
+                {
+                    comm.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log($"Error executing query: \n{cmdText}");
+                    Console.WriteLine(ex.ToString());
+                    failed = true;
+                    // match lineRegex with ex.ToString() and figure out the line number
+                    var match = lineRegex.Match(ex.ToString());
+                    Logger.Log($"match: {match.Value}");
+                    failedLineNumber = match.Success ? (int.TryParse(match.Groups[0].Value, out var num) ? num : -1) : -1;
+                    Logger.Log($"Line number: {failedLineNumber}");
+                }
+
+                fullyProcessed = true;
             }
             stopWatch.Stop();
-            if (failed)
-            {
-                lock (PendingQueries)
-                    PendingQueries.AddRange(pendingQueries);
-            }
             Logging.Debug($"Pending queries: {pendingQueries.Count}, Time Elapsed = {stopWatch.ElapsedMilliseconds}ms");
         }
         catch (Exception ex)
@@ -3813,7 +3825,7 @@ public class DatabaseManager
 
     public void IncreasePlayerCoins(CSteamID steamID, int coins)
     {
-        AddQuery($"UPDATE `{PLAYERS}` SET `Coins` = `Coins` + {coins} WHERE `SteamID` = {steamID};");
+        AddQuery($"UPDATE `{PLAYERS}` SET `Coins = `Coins` + {coins} WHERE `SteamID` = {steamID};");
         if (!PlayerData.TryGetValue(steamID, out var data))
             return;
 

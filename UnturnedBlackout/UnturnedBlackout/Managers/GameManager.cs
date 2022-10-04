@@ -159,6 +159,9 @@ public class GameManager
                 Logger.Log(ex);
             }
 
+            if (string.IsNullOrEmpty(avatarURL))
+                avatarURL = "https://cdn.discordapp.com/attachments/458038940847439903/1026880604287012995/unknown.png";
+            
             try
             {
                 using HttpClient wc = new();
