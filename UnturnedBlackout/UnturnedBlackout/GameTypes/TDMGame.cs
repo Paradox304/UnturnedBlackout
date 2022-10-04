@@ -62,9 +62,9 @@ public class TDMGame : Game
         {
             if (player.GamePlayer.IsLoading)
                 continue;
-            Plugin.Instance.UI.ClearWaitingForPlayersUI(player.GamePlayer);
+            UI.ClearWaitingForPlayersUI(player.GamePlayer);
             player.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(0);
-            Plugin.Instance.UI.ShowCountdownUI(player.GamePlayer);
+            UI.ShowCountdownUI(player.GamePlayer);
             SpawnPlayer(player);
         }
 
@@ -72,7 +72,7 @@ public class TDMGame : Game
         {
             yield return new WaitForSeconds(1);
             foreach (var player in Players)
-                Plugin.Instance.UI.SendCountdownSeconds(player.GamePlayer, seconds);
+                UI.SendCountdownSeconds(player.GamePlayer, seconds);
         }
 
         GamePhase = EGamePhase.STARTED;
@@ -81,8 +81,8 @@ public class TDMGame : Game
         {
             player.GamePlayer.GiveMovement(player.GamePlayer.Player.Player.equipment.useable is UseableGun gun && gun.isAiming, false, false);
             player.StartTime = DateTime.UtcNow;
-            Plugin.Instance.UI.SendTDMHUD(player, BlueTeam, RedTeam);
-            Plugin.Instance.UI.ClearCountdownUI(player.GamePlayer);
+            UI.SendTDMHUD(player, BlueTeam, RedTeam);
+            UI.ClearCountdownUI(player.GamePlayer);
         }
 
         SpawnSwitcher = Plugin.Instance.StartCoroutine(SpawnSwitch());
@@ -96,7 +96,7 @@ public class TDMGame : Game
             yield return new WaitForSeconds(1);
             var timeSpan = TimeSpan.FromSeconds(seconds);
             foreach (var player in Players)
-                Plugin.Instance.UI.UpdateTDMTimer(player.GamePlayer, timeSpan.ToString(@"m\:ss"));
+                UI.UpdateTDMTimer(player.GamePlayer, timeSpan.ToString(@"m\:ss"));
         }
 
         var wonTeam = BlueTeam.Score > RedTeam.Score ? BlueTeam : RedTeam.Score > BlueTeam.Score ? RedTeam : new(this, -1, true, new());
@@ -109,7 +109,7 @@ public class TDMGame : Game
             Plugin.Instance.StopCoroutine(GameEnder);
 
         GamePhase = EGamePhase.ENDING;
-        Plugin.Instance.UI.OnGameUpdated();
+        UI.OnGameUpdated();
 
         var endTime = DateTime.UtcNow;
         List<GamePlayer> roundEndCasesPlayers = new();
@@ -136,54 +136,52 @@ public class TDMGame : Game
                 continue;
 
             roundEndCases.Add((roundEndCasePlayer, @case));
-            _ = Task.Run(async () => await Plugin.Instance.DB.IncreasePlayerCaseAsync(roundEndCasePlayer.SteamID, @case.CaseID, 1));
+            DB.IncreasePlayerCase(roundEndCasePlayer.SteamID, @case.CaseID, 1);
         }
 
         Dictionary<GamePlayer, MatchEndSummary> summaries = new();
         foreach (var player in Players)
         {
-            Plugin.Instance.UI.ClearTDMHUD(player.GamePlayer);
-            Plugin.Instance.UI.ClearMidgameLoadoutUI(player.GamePlayer);
+            UI.ClearTDMHUD(player.GamePlayer);
+            UI.ClearMidgameLoadoutUI(player.GamePlayer);
             if (player.GamePlayer.Player.Player.life.isDead)
                 player.GamePlayer.Player.Player.life.ServerRespawn(false);
 
-            Plugin.Instance.UI.RemoveKillCard(player.GamePlayer);
-            Plugin.Instance.UI.ClearAnimations(player.GamePlayer);
+            UI.RemoveKillCard(player.GamePlayer);
+            UI.ClearAnimations(player.GamePlayer);
 
             if (player.GamePlayer.HasScoreboard)
             {
                 player.GamePlayer.HasScoreboard = false;
-                Plugin.Instance.UI.HideTDMLeaderboard(player.GamePlayer);
+                UI.HideTDMLeaderboard(player.GamePlayer);
             }
 
             MatchEndSummary summary = new(player.GamePlayer, player.XP, player.StartingLevel, player.StartingXP, player.Kills, player.Deaths, player.Assists, player.HighestKillstreak, player.HighestMK, player.StartTime, GameMode, player.Team == wonTeam);
             summaries.Add(player.GamePlayer, summary);
-            _ = Task.Run(async () =>
-            {
-                await Plugin.Instance.DB.IncreasePlayerXPAsync(player.GamePlayer.SteamID, summary.PendingXP);
-                await Plugin.Instance.DB.IncreasePlayerCreditsAsync(player.GamePlayer.SteamID, summary.PendingCredits);
-                await Plugin.Instance.DB.IncreasePlayerBPXPAsync(player.GamePlayer.SteamID, summary.BattlepassXP + summary.BattlepassBonusXP);
-            });
 
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.Quest.CheckQuest(player.GamePlayer, EQuestType.FINISH_MATCH, new() { { EQuestCondition.MAP, Location.LocationID }, { EQuestCondition.GAMEMODE, (int)GameMode }, { EQuestCondition.WIN_KILLS, player.Kills } }));
+            DB.IncreasePlayerXP(player.GamePlayer.SteamID, summary.PendingXP);
+            DB.IncreasePlayerCredits(player.GamePlayer.SteamID, summary.PendingCredits);
+            DB.IncreasePlayerBPXP(player.GamePlayer.SteamID, summary.BattlepassXP + summary.BattlepassBonusXP);
+
+            TaskDispatcher.QueueOnMainThread(() => Quest.CheckQuest(player.GamePlayer, EQuestType.FINISH_MATCH, new() { { EQuestCondition.MAP, Location.LocationID }, { EQuestCondition.GAMEMODE, (int)GameMode }, { EQuestCondition.WIN_KILLS, player.Kills } }));
             if (player.Team == wonTeam)
-                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.Quest.CheckQuest(player.GamePlayer, EQuestType.WIN, new() { { EQuestCondition.MAP, Location.LocationID }, { EQuestCondition.GAMEMODE, (int)GameMode }, { EQuestCondition.WIN_KILLS, player.Kills } }));
+                TaskDispatcher.QueueOnMainThread(() => Quest.CheckQuest(player.GamePlayer, EQuestType.WIN, new() { { EQuestCondition.MAP, Location.LocationID }, { EQuestCondition.GAMEMODE, (int)GameMode }, { EQuestCondition.WIN_KILLS, player.Kills } }));
 
-            Plugin.Instance.UI.SetupPreEndingUI(player.GamePlayer, EGameType.TDM, player.Team.TeamID == wonTeam.TeamID, BlueTeam.Score, RedTeam.Score, BlueTeam.Info.TeamName, RedTeam.Info.TeamName);
+            UI.SetupPreEndingUI(player.GamePlayer, EGameType.TDM, player.Team.TeamID == wonTeam.TeamID, BlueTeam.Score, RedTeam.Score, BlueTeam.Info.TeamName, RedTeam.Info.TeamName);
             player.GamePlayer.Player.Player.quests.askSetRadioFrequency(CSteamID.Nil, Frequency);
         }
 
         TaskDispatcher.QueueOnMainThread(() =>
         {
-            Plugin.Instance.UI.SetupTDMLeaderboard(Players, Location, wonTeam, BlueTeam, RedTeam, false, IsHardcore);
+            UI.SetupTDMLeaderboard(Players, Location, wonTeam, BlueTeam, RedTeam, false, IsHardcore);
             CleanMap();
         });
         yield return new WaitForSeconds(5);
         foreach (var player in Players)
-            Plugin.Instance.UI.ShowTDMLeaderboard(player.GamePlayer);
+            UI.ShowTDMLeaderboard(player.GamePlayer);
 
         if (roundEndCases.Count > 0)
-            _ = Plugin.Instance.StartCoroutine(Plugin.Instance.UI.SetupRoundEndDrops(Players.Select(k => k.GamePlayer).ToList(), roundEndCases, 0));
+            _ = Plugin.Instance.StartCoroutine(UI.SetupRoundEndDrops(Players.Select(k => k.GamePlayer).ToList(), roundEndCases, 0));
 
         yield return new WaitForSeconds(Config.Base.FileData.EndingLeaderboardSeconds);
         foreach (var player in Players.ToList())
@@ -231,21 +229,21 @@ public class TDMGame : Game
 
         PlayersLookup.Add(player.SteamID, tPlayer);
 
-        Plugin.Instance.UI.OnGameCountUpdated(this);
-        Plugin.Instance.UI.SendLoadingUI(player.Player, true, GameMode, Location);
+        UI.OnGameCountUpdated(this);
+        UI.SendLoadingUI(player.Player, true, GameMode, Location);
         for (var seconds = 1; seconds <= 5; seconds++)
         {
             yield return new WaitForSeconds(1);
-            Plugin.Instance.UI.UpdateLoadingBar(player.Player, new('　', Math.Min(96, seconds * 96 / 5)));
+            UI.UpdateLoadingBar(player.Player, new('　', Math.Min(96, seconds * 96 / 5)));
         }
 
         var currentPos = player.Player.Position;
         player.Player.Player.teleportToLocationUnsafe(new(currentPos.x, currentPos.y + 100, currentPos.z), 0);
         GiveLoadout(tPlayer);
-        Plugin.Instance.UI.SendPreEndingUI(tPlayer.GamePlayer);
+        UI.SendPreEndingUI(tPlayer.GamePlayer);
         SpawnPlayer(tPlayer);
-        Plugin.Instance.UI.ClearLoadingUI(player.Player);
-        Plugin.Instance.UI.SendVoiceChatUI(player);
+        UI.ClearLoadingUI(player.Player);
+        UI.SendVoiceChatUI(player);
 
         player.IsLoading = false;
         switch (GamePhase)
@@ -256,30 +254,30 @@ public class TDMGame : Game
                     GameStarter = Plugin.Instance.StartCoroutine(StartGame());
                 else
                 {
-                    Plugin.Instance.UI.SendWaitingForPlayersUI(player, Players.Count, minPlayers);
+                    UI.SendWaitingForPlayersUI(player, Players.Count, minPlayers);
                     foreach (var ply in Players)
                     {
                         if (ply == tPlayer)
                             continue;
 
-                        Plugin.Instance.UI.UpdateWaitingForPlayersUI(ply.GamePlayer, Players.Count, minPlayers);
+                        UI.UpdateWaitingForPlayersUI(ply.GamePlayer, Players.Count, minPlayers);
                     }
                 }
 
                 break;
             case EGamePhase.STARTING:
                 player.Player.Player.movement.sendPluginSpeedMultiplier(0);
-                Plugin.Instance.UI.ShowCountdownUI(player);
+                UI.ShowCountdownUI(player);
                 break;
             case EGamePhase.ENDING:
                 TDMTeam wonTeam;
                 wonTeam = BlueTeam.Score > RedTeam.Score ? BlueTeam : RedTeam.Score > BlueTeam.Score ? RedTeam : new(this, -1, true, new());
 
-                Plugin.Instance.UI.SetupTDMLeaderboard(tPlayer, Players, Location, wonTeam, BlueTeam, RedTeam, true, IsHardcore);
-                Plugin.Instance.UI.ShowTDMLeaderboard(tPlayer.GamePlayer);
+                UI.SetupTDMLeaderboard(tPlayer, Players, Location, wonTeam, BlueTeam, RedTeam, true, IsHardcore);
+                UI.ShowTDMLeaderboard(tPlayer.GamePlayer);
                 break;
             default:
-                Plugin.Instance.UI.SendTDMHUD(tPlayer, BlueTeam, RedTeam);
+                UI.SendTDMHUD(tPlayer, BlueTeam, RedTeam);
                 break;
         }
     }
@@ -291,26 +289,26 @@ public class TDMGame : Game
 
         var tPlayer = GetTDMPlayer(player.Player);
 
-        Plugin.Instance.UI.ClearTDMHUD(player);
-        Plugin.Instance.UI.ClearPreEndingUI(player);
-        Plugin.Instance.UI.ClearVoiceChatUI(player);
-        Plugin.Instance.UI.ClearKillstreakUI(player);
+        UI.ClearTDMHUD(player);
+        UI.ClearPreEndingUI(player);
+        UI.ClearVoiceChatUI(player);
+        UI.ClearKillstreakUI(player);
         OnStoppedTalking(player);
 
         if (GamePhase == EGamePhase.STARTING)
         {
-            Plugin.Instance.UI.ClearCountdownUI(player);
+            UI.ClearCountdownUI(player);
             tPlayer.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1);
         }
         else if (GamePhase == EGamePhase.WAITING_FOR_PLAYERS)
         {
-            Plugin.Instance.UI.ClearWaitingForPlayersUI(player);
+            UI.ClearWaitingForPlayersUI(player);
             foreach (var ply in Players)
             {
                 if (ply == tPlayer)
                     continue;
 
-                Plugin.Instance.UI.UpdateWaitingForPlayersUI(ply.GamePlayer, Players.Count - 1, Location.GetMinPlayers(GameMode));
+                UI.UpdateWaitingForPlayersUI(ply.GamePlayer, Players.Count - 1, Location.GetMinPlayers(GameMode));
             }
         }
 
@@ -322,7 +320,7 @@ public class TDMGame : Game
         _ = Players.Remove(tPlayer);
         _ = PlayersLookup.Remove(tPlayer.GamePlayer.SteamID);
 
-        Plugin.Instance.UI.OnGameCountUpdated(this);
+        UI.OnGameCountUpdated(this);
     }
 
     public override void OnPlayerDead(Player player, CSteamID killer, ELimb limb, EDeathCause cause)
@@ -340,7 +338,7 @@ public class TDMGame : Game
         if (tPlayer.GamePlayer.HasScoreboard)
         {
             tPlayer.GamePlayer.HasScoreboard = false;
-            Plugin.Instance.UI.HideTDMLeaderboard(tPlayer.GamePlayer);
+            UI.HideTDMLeaderboard(tPlayer.GamePlayer);
         }
 
         var victimKS = tPlayer.Killstreak;
@@ -351,7 +349,7 @@ public class TDMGame : Game
         tPlayer.GamePlayer.OnDeath(updatedKiller, Config.TDM.FileData.RespawnSeconds);
         tPlayer.Team.OnDeath(tPlayer.GamePlayer.SteamID);
 
-        _ = Task.Run(async () => await Plugin.Instance.DB.IncreasePlayerDeathsAsync(tPlayer.GamePlayer.SteamID, 1));
+        DB.IncreasePlayerDeaths(tPlayer.GamePlayer.SteamID, 1);
 
         TaskDispatcher.QueueOnMainThread(() =>
         {
@@ -385,9 +383,9 @@ public class TDMGame : Game
                     assister.Assists++;
                     assister.Score += Config.Points.FileData.AssistPoints;
                     if (!assister.GamePlayer.Player.Player.life.isDead)
-                        Plugin.Instance.UI.ShowXPUI(assister.GamePlayer, Config.Medals.FileData.AssistKillXP, Plugin.Instance.Translate("Assist_Kill", tPlayer.GamePlayer.Player.CharacterName.ToUnrich()));
+                        UI.ShowXPUI(assister.GamePlayer, Config.Medals.FileData.AssistKillXP, Plugin.Instance.Translate("Assist_Kill", tPlayer.GamePlayer.Player.CharacterName.ToUnrich()));
 
-                    _ = Task.Run(async () => await Plugin.Instance.DB.IncreasePlayerXPAsync(assister.GamePlayer.SteamID, Config.Medals.FileData.AssistKillXP));
+                    DB.IncreasePlayerXP(assister.GamePlayer.SteamID, Config.Medals.FileData.AssistKillXP);
                 }
 
                 tPlayer.GamePlayer.LastDamager.Clear();
@@ -499,7 +497,7 @@ public class TDMGame : Game
             {
                 xpGained += Config.Medals.FileData.ShutdownXP;
                 xpText += Plugin.Instance.Translate("Shutdown_Kill").ToRich() + "\n";
-                Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.SHUTDOWN, questConditions);
+                Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.SHUTDOWN, questConditions);
             }
 
             if (kPlayer.PlayersKilled.ContainsKey(tPlayer.GamePlayer.SteamID))
@@ -509,7 +507,7 @@ public class TDMGame : Game
                 {
                     xpGained += Config.Medals.FileData.DominationXP;
                     xpText += Plugin.Instance.Translate("Domination_Kill").ToRich() + "\n";
-                    Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.DOMINATION, questConditions);
+                    Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.DOMINATION, questConditions);
                 }
             }
             else
@@ -519,28 +517,28 @@ public class TDMGame : Game
             {
                 xpGained += Config.Medals.FileData.RevengeXP;
                 xpText += Plugin.Instance.Translate("Revenge_Kill").ToRich() + "\n";
-                Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.REVENGE, questConditions);
+                Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.REVENGE, questConditions);
             }
 
             if (isFirstKill)
             {
                 xpGained += Config.Medals.FileData.FirstKillXP;
                 xpText += Plugin.Instance.Translate("First_Kill").ToRich() + "\n";
-                Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.FIRST_KILL, questConditions);
+                Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.FIRST_KILL, questConditions);
             }
 
             if (!usedKillstreak && cause == EDeathCause.GUN && (tPlayer.GamePlayer.Player.Position - kPlayer.GamePlayer.Player.Position).sqrMagnitude > longshotRange)
             {
                 xpGained += Config.Medals.FileData.LongshotXP;
                 xpText += Plugin.Instance.Translate("Longshot_Kill").ToRich() + "\n";
-                Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.LONGSHOT, questConditions);
+                Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.LONGSHOT, questConditions);
             }
 
             if (kPlayer.GamePlayer.Player.Player.life.health < Config.Medals.FileData.HealthSurvivorKill)
             {
                 xpGained += Config.Medals.FileData.SurvivorXP;
                 xpText += Plugin.Instance.Translate("Survivor_Kill").ToRich() + "\n";
-                Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.SURVIVOR, questConditions);
+                Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.SURVIVOR, questConditions);
             }
 
             kPlayer.GamePlayer.LastKiller = CSteamID.Nil;
@@ -548,13 +546,13 @@ public class TDMGame : Game
             kPlayer.XP += xpGained;
             Players.Sort((x, y) => y.Kills.CompareTo(x.Kills));
 
-            Plugin.Instance.UI.ShowXPUI(kPlayer.GamePlayer, xpGained, xpText);
-            Plugin.Instance.UI.SendMultiKillSound(kPlayer.GamePlayer, kPlayer.MultipleKills);
+            UI.ShowXPUI(kPlayer.GamePlayer, xpGained, xpText);
+            UI.SendMultiKillSound(kPlayer.GamePlayer, kPlayer.MultipleKills);
             kPlayer.CheckKills();
             kPlayer.GamePlayer.OnKilled(tPlayer.GamePlayer);
 
             foreach (var ply in Players)
-                Plugin.Instance.UI.UpdateTDMScore(ply, kPlayer.Team);
+                UI.UpdateTDMScore(ply, kPlayer.Team);
 
             if (kPlayer.Team.Score == Config.TDM.FileData.ScoreLimit)
                 _ = Plugin.Instance.StartCoroutine(GameEnd(kPlayer.Team));
@@ -562,34 +560,31 @@ public class TDMGame : Game
             if (equipmentUsed != 0)
                 OnKill(kPlayer.GamePlayer, tPlayer.GamePlayer, equipmentUsed, kPlayer.Team.Info.KillFeedHexCode, tPlayer.Team.Info.KillFeedHexCode);
 
-            Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.KILL, questConditions);
-            Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.MULTI_KILL, questConditions);
-            Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.KILLSTREAK, questConditions);
+            Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.KILL, questConditions);
+            Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.MULTI_KILL, questConditions);
+            Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.KILLSTREAK, questConditions);
             if (limb == ELimb.SKULL && cause == EDeathCause.GUN)
-                Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.HEADSHOTS, questConditions);
+                Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.HEADSHOTS, questConditions);
 
-            Plugin.Instance.Quest.CheckQuest(tPlayer.GamePlayer, EQuestType.DEATH, questConditions);
+            Quest.CheckQuest(tPlayer.GamePlayer, EQuestType.DEATH, questConditions);
 
-            _ = Task.Run(async () =>
+            DB.IncreasePlayerXP(kPlayer.GamePlayer.SteamID, xpGained);
+            if (cause == EDeathCause.GUN && limb == ELimb.SKULL)
+                DB.IncreasePlayerHeadshotKills(kPlayer.GamePlayer.SteamID, 1);
+            else
+                DB.IncreasePlayerKills(kPlayer.GamePlayer.SteamID, 1);
+
+            if (usedKillstreak)
+                DB.IncreasePlayerKillstreakKills(kPlayer.GamePlayer.SteamID, killstreakID, 1);
+            else if ((kPlayer.GamePlayer.ActiveLoadout.Primary != null && kPlayer.GamePlayer.ActiveLoadout.Primary.Gun.GunID == equipmentUsed) || (kPlayer.GamePlayer.ActiveLoadout.Secondary != null && kPlayer.GamePlayer.ActiveLoadout.Secondary.Gun.GunID == equipmentUsed))
             {
-                await Plugin.Instance.DB.IncreasePlayerXPAsync(kPlayer.GamePlayer.SteamID, xpGained);
-                if (cause == EDeathCause.GUN && limb == ELimb.SKULL)
-                    await Plugin.Instance.DB.IncreasePlayerHeadshotKillsAsync(kPlayer.GamePlayer.SteamID, 1);
-                else
-                    await Plugin.Instance.DB.IncreasePlayerKillsAsync(kPlayer.GamePlayer.SteamID, 1);
-
-                if (usedKillstreak)
-                    await Plugin.Instance.DB.IncreasePlayerKillstreakKillsAsync(kPlayer.GamePlayer.SteamID, killstreakID, 1);
-                else if ((kPlayer.GamePlayer.ActiveLoadout.Primary != null && kPlayer.GamePlayer.ActiveLoadout.Primary.Gun.GunID == equipmentUsed) || (kPlayer.GamePlayer.ActiveLoadout.Secondary != null && kPlayer.GamePlayer.ActiveLoadout.Secondary.Gun.GunID == equipmentUsed))
-                {
-                    await Plugin.Instance.DB.IncreasePlayerGunXPAsync(kPlayer.GamePlayer.SteamID, equipmentUsed, xpGained);
-                    await Plugin.Instance.DB.IncreasePlayerGunKillsAsync(kPlayer.GamePlayer.SteamID, equipmentUsed, 1);
-                }
-                else if (kPlayer.GamePlayer.ActiveLoadout.Lethal != null && kPlayer.GamePlayer.ActiveLoadout.Lethal.Gadget.GadgetID == equipmentUsed)
-                    await Plugin.Instance.DB.IncreasePlayerGadgetKillsAsync(kPlayer.GamePlayer.SteamID, equipmentUsed, 1);
-                else if (kPlayer.GamePlayer.ActiveLoadout.Knife != null && kPlayer.GamePlayer.ActiveLoadout.Knife.Knife.KnifeID == equipmentUsed)
-                    await Plugin.Instance.DB.IncreasePlayerKnifeKillsAsync(kPlayer.GamePlayer.SteamID, equipmentUsed, 1);
-            });
+                DB.IncreasePlayerGunXP(kPlayer.GamePlayer.SteamID, equipmentUsed, xpGained);
+                DB.IncreasePlayerGunKills(kPlayer.GamePlayer.SteamID, equipmentUsed, 1);
+            }
+            else if (kPlayer.GamePlayer.ActiveLoadout.Lethal != null && kPlayer.GamePlayer.ActiveLoadout.Lethal.Gadget.GadgetID == equipmentUsed)
+                DB.IncreasePlayerGadgetKills(kPlayer.GamePlayer.SteamID, equipmentUsed, 1);
+            else if (kPlayer.GamePlayer.ActiveLoadout.Knife != null && kPlayer.GamePlayer.ActiveLoadout.Knife.Knife.KnifeID == equipmentUsed)
+                DB.IncreasePlayerKnifeKills(kPlayer.GamePlayer.SteamID, equipmentUsed, 1);
         });
     }
 
@@ -649,7 +644,7 @@ public class TDMGame : Game
         parameters.damage += (kPlayer.GamePlayer.ActiveLoadout.PerksSearchByType.TryGetValue(damageIncreasePerkName, out var damageIncreaserPerk) ? (float)damageIncreaserPerk.Perk.SkillLevel / 100 : 0f) * parameters.damage;
 
         if (parameters.cause == EDeathCause.GRENADE && parameters.damage < player.GamePlayer.Player.Player.life.health)
-            Plugin.Instance.UI.ShowXPUI(kPlayer.GamePlayer, Config.Medals.FileData.LethalHitXP, Plugin.Instance.Translate("Lethal_Hit"));
+            UI.ShowXPUI(kPlayer.GamePlayer, Config.Medals.FileData.LethalHitXP, Plugin.Instance.Translate("Lethal_Hit"));
 
         if (kPlayer.GamePlayer.HasSpawnProtection)
         {
@@ -706,7 +701,7 @@ public class TDMGame : Game
                 return;
             }
 
-            var iconLink = Plugin.Instance.DB.Levels.TryGetValue(data.Level, out var level) ? level.IconLinkSmall : "";
+            var iconLink = DB.Levels.TryGetValue(data.Level, out var level) ? level.IconLinkSmall : "";
             var updatedText = $"[{Utility.ToFriendlyName(chatMode)}] <color={Utility.GetLevelColor(player.Data.Level)}>[{player.Data.Level}]</color> <color={tPlayer.Team.Info.ChatPlayerHexCode}>{player.Player.CharacterName.ToUnrich()}</color>: <color={tPlayer.Team.Info.ChatMessageHexCode}>{text.ToUnrich()}</color>";
 
             var loopPlayers = chatMode == EChatMode.GLOBAL ? Players : Players.Where(k => k.Team == tPlayer.Team);
@@ -822,8 +817,8 @@ public class TDMGame : Game
         if (barricadeData.barricade.health > pendingTotalDamage)
             return;
 
-        Plugin.Instance.UI.ShowXPUI(player, Config.Medals.FileData.TurretDestroyXP, Plugin.Instance.Translate("Turret_Destroy"));
-        _ = Task.Run(async () => await Plugin.Instance.DB.IncreasePlayerXPAsync(player.SteamID, Config.Medals.FileData.TurretDestroyXP));
+        UI.ShowXPUI(player, Config.Medals.FileData.TurretDestroyXP, Plugin.Instance.Translate("Turret_Destroy"));
+        DB.IncreasePlayerXP(player.SteamID, Config.Medals.FileData.TurretDestroyXP);
     }
 
     public override void PlayerChangeFiremode(GamePlayer player)
@@ -843,14 +838,14 @@ public class TDMGame : Game
         if (tPlayer.GamePlayer.HasScoreboard)
         {
             tPlayer.GamePlayer.HasScoreboard = false;
-            Plugin.Instance.UI.HideTDMLeaderboard(tPlayer.GamePlayer);
+            UI.HideTDMLeaderboard(tPlayer.GamePlayer);
         }
         else
         {
             tPlayer.GamePlayer.HasScoreboard = true;
             var wonTeam = BlueTeam.Score > RedTeam.Score ? BlueTeam : RedTeam.Score > BlueTeam.Score ? RedTeam : new(this, -1, true, new());
-            Plugin.Instance.UI.SetupTDMLeaderboard(tPlayer, Players, Location, wonTeam, BlueTeam, RedTeam, true, IsHardcore);
-            Plugin.Instance.UI.ShowTDMLeaderboard(tPlayer.GamePlayer);
+            UI.SetupTDMLeaderboard(tPlayer, Players, Location, wonTeam, BlueTeam, RedTeam, true, IsHardcore);
+            UI.ShowTDMLeaderboard(tPlayer.GamePlayer);
         }
     }
 

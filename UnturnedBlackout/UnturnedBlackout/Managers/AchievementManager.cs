@@ -1,7 +1,6 @@
 ﻿using Rocket.Core.Utils;
 using Steamworks;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using UnturnedBlackout.Enums;
 using UnturnedBlackout.Models.Global;
 
@@ -49,7 +48,7 @@ public class AchievementManager
                     TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.SendAnimation(player, new(EAnimationType.ACHIEVEMENT_COMPLETION, nextTier)));
             }
 
-            _ = Task.Run(async () => await db.IncreasePlayerAchievementAmountAsync(steamID, achievement.Achievement.AchievementID, 1));
+            db.IncreasePlayerAchievementAmount(steamID, achievement.Achievement.AchievementID, 1);
         }
     }
 
@@ -86,12 +85,12 @@ public class AchievementManager
         Plugin.Instance.UI.OnAchievementsUpdated(steamID);
 
         data.SetAchievementXPBooster();
-        _ = Task.Run(async () => await Plugin.Instance.DB.UpdatePlayerAchievementTierAsync(steamID, achievementID, nextTier.TierID));
+        Plugin.Instance.DB.UpdatePlayerAchievementTier(steamID, achievementID, nextTier.TierID);
     }
 
     private static bool IsConditionMinimum(EQuestCondition condition)
     {
         var conditionInt = (int)condition;
-        return conditionInt >= 9 && conditionInt <= 12;
+        return conditionInt is >= 9 and <= 12;
     }
 }

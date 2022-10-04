@@ -41,8 +41,7 @@ internal class AddPrimeCommand : IRocketCommand
             return;
         }
 
-        _ = Task.Run(async () => await Plugin.Instance.DB.AddPlayerPrimeAsync(steamID, days));
-
+        Plugin.Instance.DB.AddPlayerPrime(steamID, days);
         Utility.Say(caller, $"<color=green>Added prime with days {days} to {steamID}</color>");
     }
 }

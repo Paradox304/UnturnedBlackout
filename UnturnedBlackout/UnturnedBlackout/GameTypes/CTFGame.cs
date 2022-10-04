@@ -6,6 +6,7 @@ using Steamworks;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -75,9 +76,9 @@ public class CTFGame : Game
         {
             if (player.GamePlayer.IsLoading)
                 continue;
-            Plugin.Instance.UI.ClearWaitingForPlayersUI(player.GamePlayer);
+            UI.ClearWaitingForPlayersUI(player.GamePlayer);
             player.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(0);
-            Plugin.Instance.UI.ShowCountdownUI(player.GamePlayer);
+            UI.ShowCountdownUI(player.GamePlayer);
             SpawnPlayer(player);
         }
 
@@ -85,7 +86,7 @@ public class CTFGame : Game
         {
             yield return new WaitForSeconds(1);
             foreach (var player in Players)
-                Plugin.Instance.UI.SendCountdownSeconds(player.GamePlayer, seconds);
+                UI.SendCountdownSeconds(player.GamePlayer, seconds);
         }
 
         GamePhase = EGamePhase.STARTED;
@@ -93,10 +94,10 @@ public class CTFGame : Game
         {
             player.GamePlayer.GiveMovement(player.GamePlayer.Player.Player.equipment.useable is UseableGun gun && gun.isAiming, false, false);
             player.StartTime = DateTime.UtcNow;
-            Plugin.Instance.UI.ClearCountdownUI(player.GamePlayer);
+            UI.ClearCountdownUI(player.GamePlayer);
         }
 
-        Plugin.Instance.UI.SendCTFHUD(BlueTeam, RedTeam, Players);
+        UI.SendCTFHUD(BlueTeam, RedTeam, Players);
 
         TaskDispatcher.QueueOnMainThread(() =>
         {
@@ -115,7 +116,7 @@ public class CTFGame : Game
             yield return new WaitForSeconds(1);
             var timeSpan = TimeSpan.FromSeconds(seconds);
             foreach (var player in Players)
-                Plugin.Instance.UI.UpdateCTFTimer(player.GamePlayer, timeSpan.ToString(@"m\:ss"));
+                UI.UpdateCTFTimer(player.GamePlayer, timeSpan.ToString(@"m\:ss"));
         }
 
         var wonTeam = BlueTeam.Score > RedTeam.Score ? BlueTeam : RedTeam.Score > BlueTeam.Score ? RedTeam : new(-1, true, new(), 0, Vector3.zero);
@@ -128,7 +129,7 @@ public class CTFGame : Game
             Plugin.Instance.StopCoroutine(GameEnder);
 
         GamePhase = EGamePhase.ENDING;
-        Plugin.Instance.UI.OnGameUpdated();
+        UI.OnGameUpdated();
 
         var endTime = DateTime.UtcNow;
         List<GamePlayer> roundEndCasesPlayers = new();
@@ -155,36 +156,32 @@ public class CTFGame : Game
                 continue;
 
             roundEndCases.Add((roundEndCasePlayer, @case));
-            _ = Task.Run(async () => await Plugin.Instance.DB.IncreasePlayerCaseAsync(roundEndCasePlayer.SteamID, @case.CaseID, 1));
+            DB.IncreasePlayerCase(roundEndCasePlayer.SteamID, @case.CaseID, 1);
         }
 
         Dictionary<GamePlayer, MatchEndSummary> summaries = new();
         foreach (var player in Players)
         {
-            Plugin.Instance.UI.ClearCTFHUD(player.GamePlayer);
-            Plugin.Instance.UI.ClearMidgameLoadoutUI(player.GamePlayer);
+            UI.ClearCTFHUD(player.GamePlayer);
+            UI.ClearMidgameLoadoutUI(player.GamePlayer);
             if (player.GamePlayer.Player.Player.life.isDead)
                 player.GamePlayer.Player.Player.life.ServerRespawn(false);
 
-            Plugin.Instance.UI.RemoveKillCard(player.GamePlayer);
-            Plugin.Instance.UI.ClearAnimations(player.GamePlayer);
+            UI.RemoveKillCard(player.GamePlayer);
+            UI.ClearAnimations(player.GamePlayer);
 
             if (player.GamePlayer.HasScoreboard)
             {
                 player.GamePlayer.HasScoreboard = false;
-                Plugin.Instance.UI.HideCTFLeaderboard(player.GamePlayer);
+                UI.HideCTFLeaderboard(player.GamePlayer);
             }
 
             MatchEndSummary summary = new(player.GamePlayer, player.XP, player.StartingLevel, player.StartingXP, player.Kills, player.Deaths, player.Assists, player.HighestKillstreak, player.HighestMK, player.StartTime, GameMode, player.Team == wonTeam);
             summaries.Add(player.GamePlayer, summary);
-            _ = Task.Run(async () =>
-            {
-                await Plugin.Instance.DB.IncreasePlayerXPAsync(player.GamePlayer.SteamID, summary.PendingXP);
-                await Plugin.Instance.DB.IncreasePlayerCreditsAsync(player.GamePlayer.SteamID, summary.PendingCredits);
-                await Plugin.Instance.DB.IncreasePlayerBPXPAsync(player.GamePlayer.SteamID, summary.BattlepassXP + summary.BattlepassBonusXP);
-            });
-
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.Quest.CheckQuest(player.GamePlayer, EQuestType.FINISH_MATCH, new()
+            DB.IncreasePlayerXP(player.GamePlayer.SteamID, summary.PendingXP);
+            DB.IncreasePlayerCredits(player.GamePlayer.SteamID, summary.PendingCredits);
+            DB.IncreasePlayerBPXP(player.GamePlayer.SteamID, summary.BattlepassXP + summary.BattlepassBonusXP);
+            TaskDispatcher.QueueOnMainThread(() => Quest.CheckQuest(player.GamePlayer, EQuestType.FINISH_MATCH, new()
             {
                 { EQuestCondition.MAP, Location.LocationID },
                 { EQuestCondition.GAMEMODE, (int)GameMode },
@@ -192,9 +189,10 @@ public class CTFGame : Game
                 { EQuestCondition.WIN_FLAGS_SAVED, player.FlagsSaved },
                 { EQuestCondition.WIN_KILLS, player.Kills }
             }));
+            
             if (player.Team == wonTeam)
             {
-                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.Quest.CheckQuest(player.GamePlayer, EQuestType.WIN, new()
+                TaskDispatcher.QueueOnMainThread(() => Quest.CheckQuest(player.GamePlayer, EQuestType.WIN, new()
                 {
                     { EQuestCondition.MAP, Location.LocationID },
                     { EQuestCondition.GAMEMODE, (int)GameMode },
@@ -204,21 +202,21 @@ public class CTFGame : Game
                 }));
             }
 
-            Plugin.Instance.UI.SetupPreEndingUI(player.GamePlayer, EGameType.CTF, player.Team.TeamID == wonTeam.TeamID, BlueTeam.Score, RedTeam.Score, BlueTeam.Info.TeamName, RedTeam.Info.TeamName);
+            UI.SetupPreEndingUI(player.GamePlayer, EGameType.CTF, player.Team.TeamID == wonTeam.TeamID, BlueTeam.Score, RedTeam.Score, BlueTeam.Info.TeamName, RedTeam.Info.TeamName);
             player.GamePlayer.Player.Player.quests.askSetRadioFrequency(CSteamID.Nil, Frequency);
         }
 
         TaskDispatcher.QueueOnMainThread(() =>
         {
-            Plugin.Instance.UI.SetupCTFLeaderboard(Players, Location, wonTeam, BlueTeam, RedTeam, false, IsHardcore);
+            UI.SetupCTFLeaderboard(Players, Location, wonTeam, BlueTeam, RedTeam, false, IsHardcore);
             CleanMap();
         });
         yield return new WaitForSeconds(5);
         foreach (var player in Players)
-            Plugin.Instance.UI.ShowCTFLeaderboard(player.GamePlayer);
+            UI.ShowCTFLeaderboard(player.GamePlayer);
 
         if (roundEndCases.Count > 0)
-            _ = Plugin.Instance.StartCoroutine(Plugin.Instance.UI.SetupRoundEndDrops(Players.Select(k => k.GamePlayer).ToList(), roundEndCases, 2));
+            _ = Plugin.Instance.StartCoroutine(UI.SetupRoundEndDrops(Players.Select(k => k.GamePlayer).ToList(), roundEndCases, 2));
 
         yield return new WaitForSeconds(Config.Base.FileData.EndingLeaderboardSeconds);
         foreach (var player in Players.ToList())
@@ -258,21 +256,21 @@ public class CTFGame : Game
 
         PlayersLookup.Add(player.SteamID, cPlayer);
 
-        Plugin.Instance.UI.OnGameCountUpdated(this);
-        Plugin.Instance.UI.SendLoadingUI(player.Player, true, GameMode, Location);
+        UI.OnGameCountUpdated(this);
+        UI.SendLoadingUI(player.Player, true, GameMode, Location);
         for (var seconds = 1; seconds <= 5; seconds++)
         {
             yield return new WaitForSeconds(1);
-            Plugin.Instance.UI.UpdateLoadingBar(player.Player, new('　', Math.Min(96, seconds * 96 / 5)));
+            UI.UpdateLoadingBar(player.Player, new('　', Math.Min(96, seconds * 96 / 5)));
         }
 
         var currentPos = player.Player.Position;
         player.Player.Player.teleportToLocationUnsafe(new(currentPos.x, currentPos.y + 100, currentPos.z), 0);
         GiveLoadout(cPlayer);
-        Plugin.Instance.UI.SendPreEndingUI(cPlayer.GamePlayer);
+        UI.SendPreEndingUI(cPlayer.GamePlayer);
         SpawnPlayer(cPlayer);
-        Plugin.Instance.UI.ClearLoadingUI(player.Player);
-        Plugin.Instance.UI.SendVoiceChatUI(player);
+        UI.ClearLoadingUI(player.Player);
+        UI.SendVoiceChatUI(player);
 
         player.IsLoading = false;
         switch (GamePhase)
@@ -283,30 +281,30 @@ public class CTFGame : Game
                     GameStarter = Plugin.Instance.StartCoroutine(StartGame());
                 else
                 {
-                    Plugin.Instance.UI.SendWaitingForPlayersUI(player, Players.Count, minPlayers);
+                    UI.SendWaitingForPlayersUI(player, Players.Count, minPlayers);
                     foreach (var ply in Players)
                     {
                         if (ply == cPlayer)
                             continue;
 
-                        Plugin.Instance.UI.UpdateWaitingForPlayersUI(ply.GamePlayer, Players.Count, minPlayers);
+                        UI.UpdateWaitingForPlayersUI(ply.GamePlayer, Players.Count, minPlayers);
                     }
                 }
 
                 break;
             case EGamePhase.STARTING:
                 player.Player.Player.movement.sendPluginSpeedMultiplier(0);
-                Plugin.Instance.UI.ShowCountdownUI(player);
+                UI.ShowCountdownUI(player);
                 break;
             case EGamePhase.ENDING:
                 CTFTeam wonTeam;
                 wonTeam = BlueTeam.Score > RedTeam.Score ? BlueTeam : RedTeam.Score > BlueTeam.Score ? RedTeam : new(-1, true, new(), 0, Vector3.zero);
 
-                Plugin.Instance.UI.SetupCTFLeaderboard(cPlayer, Players, Location, wonTeam, BlueTeam, RedTeam, true, IsHardcore);
-                Plugin.Instance.UI.ShowCTFLeaderboard(cPlayer.GamePlayer);
+                UI.SetupCTFLeaderboard(cPlayer, Players, Location, wonTeam, BlueTeam, RedTeam, true, IsHardcore);
+                UI.ShowCTFLeaderboard(cPlayer.GamePlayer);
                 break;
             default:
-                Plugin.Instance.UI.SendCTFHUD(cPlayer, BlueTeam, RedTeam, Players);
+                UI.SendCTFHUD(cPlayer, BlueTeam, RedTeam, Players);
                 break;
         }
     }
@@ -318,20 +316,20 @@ public class CTFGame : Game
 
         var cPlayer = GetCTFPlayer(player.Player);
 
-        Plugin.Instance.UI.ClearCTFHUD(player);
-        Plugin.Instance.UI.ClearPreEndingUI(player);
-        Plugin.Instance.UI.ClearVoiceChatUI(player);
-        Plugin.Instance.UI.ClearKillstreakUI(player);
+        UI.ClearCTFHUD(player);
+        UI.ClearPreEndingUI(player);
+        UI.ClearVoiceChatUI(player);
+        UI.ClearKillstreakUI(player);
 
         OnStoppedTalking(player);
 
         if (GamePhase == EGamePhase.STARTING)
         {
-            Plugin.Instance.UI.ClearCountdownUI(player);
+            UI.ClearCountdownUI(player);
             cPlayer.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1);
         }
         else if (GamePhase == EGamePhase.WAITING_FOR_PLAYERS)
-            Plugin.Instance.UI.ClearWaitingForPlayersUI(player);
+            UI.ClearWaitingForPlayersUI(player);
 
         if (GamePhase != EGamePhase.ENDING)
             TaskDispatcher.QueueOnMainThread(() => BarricadeManager.BarricadeRegions.Cast<BarricadeRegion>().SelectMany(k => k.drops).Where(k => (k.GetServersideData()?.owner ?? 0UL) == player.SteamID.m_SteamID && LevelNavigation.tryGetNavigation(k.model.transform.position, out var nav) && nav == Location.NavMesh).Select(k => BarricadeManager.tryGetRegion(k.model.transform, out var x, out var y, out var plant, out var _) ? (k, x, y, plant) : (k, byte.MaxValue, byte.MaxValue, ushort.MaxValue)).ToList().ForEach(k => BarricadeManager.destroyBarricade(k.k, k.Item2, k.Item3, k.Item4)));
@@ -353,13 +351,13 @@ public class CTFGame : Game
                 cPlayer.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1f);
                 TaskDispatcher.QueueOnMainThread(() =>
                 {
-                    Plugin.Instance.UI.UpdateCTFHUD(Players, otherTeam);
-                    Plugin.Instance.UI.SendCTFFlagStates(cPlayer.Team, (ETeam)otherTeam.TeamID, Players, EFlagState.DROPPED);
+                    UI.UpdateCTFHUD(Players, otherTeam);
+                    UI.SendCTFFlagStates(cPlayer.Team, (ETeam)otherTeam.TeamID, Players, EFlagState.DROPPED);
                 });
             }
         }
 
-        Plugin.Instance.UI.OnGameCountUpdated(this);
+        UI.OnGameCountUpdated(this);
     }
 
     public override void OnPlayerDead(Player player, CSteamID killer, ELimb limb, EDeathCause cause)
@@ -377,7 +375,7 @@ public class CTFGame : Game
         if (cPlayer.GamePlayer.HasScoreboard)
         {
             cPlayer.GamePlayer.HasScoreboard = false;
-            Plugin.Instance.UI.HideCTFLeaderboard(cPlayer.GamePlayer);
+            UI.HideCTFLeaderboard(cPlayer.GamePlayer);
         }
 
         var victimKS = cPlayer.Killstreak;
@@ -401,13 +399,12 @@ public class CTFGame : Game
             cPlayer.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1f);
             TaskDispatcher.QueueOnMainThread(() =>
             {
-                Plugin.Instance.UI.UpdateCTFHUD(Players, otherTeam);
-                Plugin.Instance.UI.SendCTFFlagStates(cPlayer.Team, (ETeam)otherTeam.TeamID, Players, EFlagState.DROPPED);
+                UI.UpdateCTFHUD(Players, otherTeam);
+                UI.SendCTFFlagStates(cPlayer.Team, (ETeam)otherTeam.TeamID, Players, EFlagState.DROPPED);
             });
         }
-
-        _ = Task.Run(async () => await Plugin.Instance.DB.IncreasePlayerDeathsAsync(cPlayer.GamePlayer.SteamID, 1));
-
+        
+        DB.IncreasePlayerDeaths(cPlayer.GamePlayer.SteamID, 1);
         TaskDispatcher.QueueOnMainThread(() =>
         {
             var kPlayer = GetCTFPlayer(updatedKiller);
@@ -440,9 +437,9 @@ public class CTFGame : Game
                     assister.Assists++;
                     assister.Score += Config.Points.FileData.AssistPoints;
                     if (!assister.GamePlayer.Player.Player.life.isDead)
-                        Plugin.Instance.UI.ShowXPUI(assister.GamePlayer, Config.Medals.FileData.AssistKillXP, Plugin.Instance.Translate("Assist_Kill", cPlayer.GamePlayer.Player.CharacterName.ToUnrich()));
+                        UI.ShowXPUI(assister.GamePlayer, Config.Medals.FileData.AssistKillXP, Plugin.Instance.Translate("Assist_Kill", cPlayer.GamePlayer.Player.CharacterName.ToUnrich()));
 
-                    _ = Task.Run(async () => await Plugin.Instance.DB.IncreasePlayerXPAsync(assister.GamePlayer.SteamID, Config.Medals.FileData.AssistKillXP));
+                    DB.IncreasePlayerXP(assister.GamePlayer.SteamID, Config.Medals.FileData.AssistKillXP);
                 }
 
                 cPlayer.GamePlayer.LastDamager.Clear();
@@ -552,7 +549,7 @@ public class CTFGame : Game
             {
                 xpGained += Config.Medals.FileData.ShutdownXP;
                 xpText += Plugin.Instance.Translate("Shutdown_Kill").ToRich() + "\n";
-                Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.SHUTDOWN, questConditions);
+                Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.SHUTDOWN, questConditions);
             }
 
             if (kPlayer.PlayersKilled.ContainsKey(cPlayer.GamePlayer.SteamID))
@@ -562,7 +559,7 @@ public class CTFGame : Game
                 {
                     xpGained += Config.Medals.FileData.DominationXP;
                     xpText += Plugin.Instance.Translate("Domination_Kill").ToRich() + "\n";
-                    Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.DOMINATION, questConditions);
+                    Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.DOMINATION, questConditions);
                 }
             }
             else
@@ -572,42 +569,42 @@ public class CTFGame : Game
             {
                 xpGained += Config.Medals.FileData.FlagCarrierKilledXP;
                 xpText += Plugin.Instance.Translate("Flag_Killer").ToRich() + "\n";
-                Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.FLAG_KILLER, questConditions);
+                Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.FLAG_KILLER, questConditions);
             }
 
             if (kPlayer.IsCarryingFlag)
             {
                 xpGained += Config.Medals.FileData.KillWhileCarryingFlagXP;
                 xpText += Plugin.Instance.Translate("Flag_Denied").ToRich() + "\n";
-                Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.FLAG_DENIED, questConditions);
+                Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.FLAG_DENIED, questConditions);
             }
 
             if (cPlayer.GamePlayer.SteamID == kPlayer.GamePlayer.LastKiller)
             {
                 xpGained += Config.Medals.FileData.RevengeXP;
                 xpText += Plugin.Instance.Translate("Revenge_Kill").ToRich() + "\n";
-                Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.REVENGE, questConditions);
+                Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.REVENGE, questConditions);
             }
 
             if (isFirstKill)
             {
                 xpGained += Config.Medals.FileData.FirstKillXP;
                 xpText += Plugin.Instance.Translate("First_Kill").ToRich() + "\n";
-                Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.FIRST_KILL, questConditions);
+                Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.FIRST_KILL, questConditions);
             }
 
             if (!usedKillstreak && cause == EDeathCause.GUN && (cPlayer.GamePlayer.Player.Position - kPlayer.GamePlayer.Player.Position).sqrMagnitude > longshotRange)
             {
                 xpGained += Config.Medals.FileData.LongshotXP;
                 xpText += Plugin.Instance.Translate("Longshot_Kill").ToRich() + "\n";
-                Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.LONGSHOT, questConditions);
+                Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.LONGSHOT, questConditions);
             }
 
             if (kPlayer.GamePlayer.Player.Player.life.health < Config.Medals.FileData.HealthSurvivorKill)
             {
                 xpGained += Config.Medals.FileData.SurvivorXP;
                 xpText += Plugin.Instance.Translate("Survivor_Kill").ToRich() + "\n";
-                Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.SURVIVOR, questConditions);
+                Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.SURVIVOR, questConditions);
             }
 
             kPlayer.GamePlayer.LastKiller = CSteamID.Nil;
@@ -615,42 +612,39 @@ public class CTFGame : Game
             kPlayer.XP += xpGained;
             Players.Sort((x, y) => y.Kills.CompareTo(x.Kills));
 
-            Plugin.Instance.UI.ShowXPUI(kPlayer.GamePlayer, xpGained, xpText);
-            Plugin.Instance.UI.SendMultiKillSound(kPlayer.GamePlayer, kPlayer.MultipleKills);
+            UI.ShowXPUI(kPlayer.GamePlayer, xpGained, xpText);
+            UI.SendMultiKillSound(kPlayer.GamePlayer, kPlayer.MultipleKills);
             kPlayer.CheckKills();
             kPlayer.GamePlayer.OnKilled(cPlayer.GamePlayer);
 
             if (equipmentUsed != 0)
                 OnKill(kPlayer.GamePlayer, cPlayer.GamePlayer, equipmentUsed, kPlayer.Team.Info.KillFeedHexCode, cPlayer.Team.Info.KillFeedHexCode);
 
-            Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.KILL, questConditions);
-            Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.MULTI_KILL, questConditions);
-            Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.KILLSTREAK, questConditions);
+            Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.KILL, questConditions);
+            Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.MULTI_KILL, questConditions);
+            Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.KILLSTREAK, questConditions);
             if (limb == ELimb.SKULL && cause == EDeathCause.GUN)
-                Plugin.Instance.Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.HEADSHOTS, questConditions);
+                Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.HEADSHOTS, questConditions);
 
-            Plugin.Instance.Quest.CheckQuest(cPlayer.GamePlayer, EQuestType.DEATH, questConditions);
+            Quest.CheckQuest(cPlayer.GamePlayer, EQuestType.DEATH, questConditions);
 
-            _ = Task.Run(async () =>
+            DB.IncreasePlayerXP(kPlayer.GamePlayer.SteamID, xpGained);
+            if (cause == EDeathCause.GUN && limb == ELimb.SKULL)
+                DB.IncreasePlayerHeadshotKills(kPlayer.GamePlayer.SteamID, 1);
+            else
+                DB.IncreasePlayerKills(kPlayer.GamePlayer.SteamID, 1);
+
+            if (usedKillstreak)
+                DB.IncreasePlayerKillstreakKills(kPlayer.GamePlayer.SteamID, killstreakID, 1);
+            else if ((kPlayer.GamePlayer.ActiveLoadout.Primary != null && kPlayer.GamePlayer.ActiveLoadout.Primary.Gun.GunID == equipmentUsed) || (kPlayer.GamePlayer.ActiveLoadout.Secondary != null && kPlayer.GamePlayer.ActiveLoadout.Secondary.Gun.GunID == equipmentUsed))
             {
-                await Plugin.Instance.DB.IncreasePlayerXPAsync(kPlayer.GamePlayer.SteamID, xpGained);
-                if (cause == EDeathCause.GUN && limb == ELimb.SKULL)
-                    await Plugin.Instance.DB.IncreasePlayerHeadshotKillsAsync(kPlayer.GamePlayer.SteamID, 1);
-                else
-                    await Plugin.Instance.DB.IncreasePlayerKillsAsync(kPlayer.GamePlayer.SteamID, 1);
-
-                if (usedKillstreak)
-                    await Plugin.Instance.DB.IncreasePlayerKillstreakKillsAsync(kPlayer.GamePlayer.SteamID, killstreakID, 1);
-                else if ((kPlayer.GamePlayer.ActiveLoadout.Primary != null && kPlayer.GamePlayer.ActiveLoadout.Primary.Gun.GunID == equipmentUsed) || (kPlayer.GamePlayer.ActiveLoadout.Secondary != null && kPlayer.GamePlayer.ActiveLoadout.Secondary.Gun.GunID == equipmentUsed))
-                {
-                    await Plugin.Instance.DB.IncreasePlayerGunXPAsync(kPlayer.GamePlayer.SteamID, equipmentUsed, xpGained);
-                    await Plugin.Instance.DB.IncreasePlayerGunKillsAsync(kPlayer.GamePlayer.SteamID, equipmentUsed, 1);
-                }
-                else if (kPlayer.GamePlayer.ActiveLoadout.Lethal != null && kPlayer.GamePlayer.ActiveLoadout.Lethal.Gadget.GadgetID == equipmentUsed)
-                    await Plugin.Instance.DB.IncreasePlayerGadgetKillsAsync(kPlayer.GamePlayer.SteamID, equipmentUsed, 1);
-                else if (kPlayer.GamePlayer.ActiveLoadout.Knife != null && kPlayer.GamePlayer.ActiveLoadout.Knife.Knife.KnifeID == equipmentUsed)
-                    await Plugin.Instance.DB.IncreasePlayerKnifeKillsAsync(kPlayer.GamePlayer.SteamID, equipmentUsed, 1);
-            });
+                DB.IncreasePlayerGunXP(kPlayer.GamePlayer.SteamID, equipmentUsed, xpGained);
+                DB.IncreasePlayerGunKills(kPlayer.GamePlayer.SteamID, equipmentUsed, 1);
+            }
+            else if (kPlayer.GamePlayer.ActiveLoadout.Lethal != null && kPlayer.GamePlayer.ActiveLoadout.Lethal.Gadget.GadgetID == equipmentUsed)
+                DB.IncreasePlayerGadgetKills(kPlayer.GamePlayer.SteamID, equipmentUsed, 1);
+            else if (kPlayer.GamePlayer.ActiveLoadout.Knife != null && kPlayer.GamePlayer.ActiveLoadout.Knife.Knife.KnifeID == equipmentUsed)
+                DB.IncreasePlayerKnifeKills(kPlayer.GamePlayer.SteamID, equipmentUsed, 1);
         });
     }
 
@@ -710,7 +704,10 @@ public class CTFGame : Game
         parameters.damage += (kPlayer.GamePlayer.ActiveLoadout.PerksSearchByType.TryGetValue(damageIncreasePerkName, out var damageIncreaserPerk) ? (float)damageIncreaserPerk.Perk.SkillLevel / 100 : 0f) * parameters.damage;
 
         if (parameters.cause == EDeathCause.GRENADE && parameters.damage < player.GamePlayer.Player.Player.life.health)
-            Plugin.Instance.UI.ShowXPUI(kPlayer.GamePlayer, Config.Medals.FileData.LethalHitXP, Plugin.Instance.Translate("Lethal_Hit"));
+        {
+            UI.ShowXPUI(kPlayer.GamePlayer, Config.Medals.FileData.LethalHitXP, Plugin.Instance.Translate("Lethal_Hit"));
+            DB.IncreasePlayerXP(kPlayer.GamePlayer.SteamID, Config.Medals.FileData.LethalHitXP);
+        }
 
         if (kPlayer.GamePlayer.HasSpawnProtection)
         {
@@ -785,21 +782,18 @@ public class CTFGame : Game
                 cPlayer.Score += Config.Points.FileData.FlagSavedPoints;
                 cPlayer.XP += Config.Medals.FileData.FlagSavedXP;
                 cPlayer.FlagsSaved++;
-                Plugin.Instance.UI.ShowXPUI(cPlayer.GamePlayer, Config.Medals.FileData.FlagSavedXP, Plugin.Instance.Translate("Flag_Saved").ToRich());
-                Plugin.Instance.UI.SendFlagSavedSound(cPlayer.GamePlayer);
+                UI.ShowXPUI(cPlayer.GamePlayer, Config.Medals.FileData.FlagSavedXP, Plugin.Instance.Translate("Flag_Saved").ToRich());
+                UI.SendFlagSavedSound(cPlayer.GamePlayer);
 
                 TaskDispatcher.QueueOnMainThread(() =>
                 {
-                    Plugin.Instance.UI.UpdateCTFHUD(Players, cPlayer.Team);
-                    Plugin.Instance.UI.SendCTFFlagStates(cPlayer.Team, (ETeam)cPlayer.Team.TeamID, Players, EFlagState.RECOVERED);
-                    Plugin.Instance.Quest.CheckQuest(player, EQuestType.FLAGS_SAVED, questConditions);
+                    UI.UpdateCTFHUD(Players, cPlayer.Team);
+                    UI.SendCTFFlagStates(cPlayer.Team, (ETeam)cPlayer.Team.TeamID, Players, EFlagState.RECOVERED);
+                    Quest.CheckQuest(player, EQuestType.FLAGS_SAVED, questConditions);
                 });
 
-                _ = Task.Run(async () =>
-                {
-                    await Plugin.Instance.DB.IncreasePlayerFlagsSavedAsync(cPlayer.GamePlayer.SteamID, 1);
-                    await Plugin.Instance.DB.IncreasePlayerXPAsync(cPlayer.GamePlayer.SteamID, Config.Medals.FileData.FlagSavedXP);
-                });
+                DB.IncreasePlayerFlagsSaved(cPlayer.GamePlayer.SteamID, 1);
+                DB.IncreasePlayerXP(cPlayer.GamePlayer.SteamID, Config.Medals.FileData.FlagSavedXP);
                 return;
             }
 
@@ -824,25 +818,22 @@ public class CTFGame : Game
                 cPlayer.FlagsCaptured++;
                 player.GiveMovement(player.Player.Player.equipment.useable is UseableGun gun && gun.isAiming, false, false);
 
-                Plugin.Instance.UI.ShowXPUI(cPlayer.GamePlayer, Config.Medals.FileData.FlagCapturedXP, Plugin.Instance.Translate("Flag_Captured").ToRich());
-                Plugin.Instance.UI.SendFlagCapturedSound(cPlayer.GamePlayer);
+                UI.ShowXPUI(cPlayer.GamePlayer, Config.Medals.FileData.FlagCapturedXP, Plugin.Instance.Translate("Flag_Captured").ToRich());
+                UI.SendFlagCapturedSound(cPlayer.GamePlayer);
 
                 TaskDispatcher.QueueOnMainThread(() =>
                 {
-                    Plugin.Instance.UI.UpdateCTFHUD(Players, cPlayer.Team);
-                    Plugin.Instance.UI.UpdateCTFHUD(Players, otherTeam);
-                    Plugin.Instance.UI.SendCTFFlagStates(cPlayer.Team, (ETeam)otherTeam.TeamID, Players, EFlagState.CAPTURED);
-                    Plugin.Instance.Quest.CheckQuest(player, EQuestType.FLAGS_CAPTURED, questConditions);
+                    UI.UpdateCTFHUD(Players, cPlayer.Team);
+                    UI.UpdateCTFHUD(Players, otherTeam);
+                    UI.SendCTFFlagStates(cPlayer.Team, (ETeam)otherTeam.TeamID, Players, EFlagState.CAPTURED);
+                    Quest.CheckQuest(player, EQuestType.FLAGS_CAPTURED, questConditions);
                 });
 
                 if (cPlayer.Team.Score >= Config.CTF.FileData.ScoreLimit)
                     _ = Plugin.Instance.StartCoroutine(GameEnd(cPlayer.Team));
 
-                _ = Task.Run(async () =>
-                {
-                    await Plugin.Instance.DB.IncreasePlayerFlagsCapturedAsync(cPlayer.GamePlayer.SteamID, 1);
-                    await Plugin.Instance.DB.IncreasePlayerXPAsync(cPlayer.GamePlayer.SteamID, Config.Medals.FileData.FlagCapturedXP);
-                });
+                DB.IncreasePlayerFlagsCaptured(cPlayer.GamePlayer.SteamID, 1);
+                DB.IncreasePlayerXP(cPlayer.GamePlayer.SteamID, Config.Medals.FileData.FlagCapturedXP);
             }
             else
                 Logging.Debug($"[ERROR] Could'nt find the other team's flag as the player's backpack");
@@ -855,11 +846,11 @@ public class CTFGame : Game
 
             if (otherTeam.HasFlag)
             {
-                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.SendCTFFlagStates(cPlayer.Team, (ETeam)otherTeam.TeamID, Players, EFlagState.TAKEN));
+                TaskDispatcher.QueueOnMainThread(() => UI.SendCTFFlagStates(cPlayer.Team, (ETeam)otherTeam.TeamID, Players, EFlagState.TAKEN));
                 otherTeam.HasFlag = false;
             }
             else
-                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.SendCTFFlagStates(cPlayer.Team, (ETeam)otherTeam.TeamID, Players, EFlagState.PICKED));
+                TaskDispatcher.QueueOnMainThread(() => UI.SendCTFFlagStates(cPlayer.Team, (ETeam)otherTeam.TeamID, Players, EFlagState.PICKED));
 
             TaskDispatcher.QueueOnMainThread(() =>
             {
@@ -878,7 +869,7 @@ public class CTFGame : Game
 
             player.GiveMovement(player.Player.Player.equipment.useable is UseableGun gun && gun.isAiming, true, false);
             cPlayer.IsCarryingFlag = true;
-            Plugin.Instance.UI.UpdateCTFHUD(Players, otherTeam);
+            UI.UpdateCTFHUD(Players, otherTeam);
         }
     }
 
@@ -902,7 +893,7 @@ public class CTFGame : Game
                 return;
             }
 
-            var iconLink = Plugin.Instance.DB.Levels.TryGetValue(data.Level, out var level) ? level.IconLinkSmall : "";
+            var iconLink = DB.Levels.TryGetValue(data.Level, out var level) ? level.IconLinkSmall : "";
             var updatedText = $"[{Utility.ToFriendlyName(chatMode)}] <color={Utility.GetLevelColor(player.Data.Level)}>[{player.Data.Level}]</color> <color={tPlayer.Team.Info.ChatPlayerHexCode}>{player.Player.CharacterName.ToUnrich()}</color>: <color={tPlayer.Team.Info.ChatMessageHexCode}>{text.ToUnrich()}</color>";
 
             var loopPlayers = chatMode == EChatMode.GLOBAL ? Players : Players.Where(k => k.Team == tPlayer.Team);
@@ -1019,8 +1010,8 @@ public class CTFGame : Game
         if (barricadeData.barricade.health > pendingTotalDamage)
             return;
 
-        Plugin.Instance.UI.ShowXPUI(player, Config.Medals.FileData.TurretDestroyXP, Plugin.Instance.Translate("Turret_Destroy"));
-        _ = Task.Run(async () => await Plugin.Instance.DB.IncreasePlayerXPAsync(player.SteamID, Config.Medals.FileData.TurretDestroyXP));
+        UI.ShowXPUI(player, Config.Medals.FileData.TurretDestroyXP, Plugin.Instance.Translate("Turret_Destroy"));
+        DB.IncreasePlayerXP(player.SteamID, Config.Medals.FileData.TurretDestroyXP);
     }
 
     public override void PlayerChangeFiremode(GamePlayer player)
@@ -1040,14 +1031,14 @@ public class CTFGame : Game
         if (cPlayer.GamePlayer.HasScoreboard)
         {
             cPlayer.GamePlayer.HasScoreboard = false;
-            Plugin.Instance.UI.HideCTFLeaderboard(cPlayer.GamePlayer);
+            UI.HideCTFLeaderboard(cPlayer.GamePlayer);
         }
         else
         {
             cPlayer.GamePlayer.HasScoreboard = true;
             var wonTeam = BlueTeam.Score > RedTeam.Score ? BlueTeam : RedTeam.Score > BlueTeam.Score ? RedTeam : new(-1, true, new(), 0, Vector3.zero);
-            Plugin.Instance.UI.SetupCTFLeaderboard(cPlayer, Players, Location, wonTeam, BlueTeam, RedTeam, true, IsHardcore);
-            Plugin.Instance.UI.ShowCTFLeaderboard(cPlayer.GamePlayer);
+            UI.SetupCTFLeaderboard(cPlayer, Players, Location, wonTeam, BlueTeam, RedTeam, true, IsHardcore);
+            UI.ShowCTFLeaderboard(cPlayer.GamePlayer);
         }
     }
 

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Rocket.Core.Utils;
 using UnturnedBlackout.Database.Data;
 using UnturnedBlackout.Enums;
@@ -27,18 +26,17 @@ public class QuestManager
             var conditionsMet = true;
             foreach (var condition in quest.Quest.QuestConditions)
             {
-                if (!questConditions.TryGetValue(condition.Key, out var conditionValue))
+                if (questConditions.TryGetValue(condition.Key, out var conditionValue))
                 {
+                    var isConditionMinimum = IsConditionMinimum(condition.Key);
+                    if (condition.Value.Contains(conditionValue) || condition.Value.Exists(k => isConditionMinimum && conditionValue >= k) || condition.Value.Contains(-1))
+                        continue;
                     conditionsMet = false;
                     break;
                 }
 
-                var isConditionMinimum = IsConditionMinimum(condition.Key);
-                if (!condition.Value.Contains(conditionValue) && !condition.Value.Exists(k => isConditionMinimum && conditionValue >= k) && !condition.Value.Contains(-1))
-                {
-                    conditionsMet = false;
-                    break;
-                }
+                conditionsMet = false;
+                break;
             }
 
             if (!conditionsMet)
@@ -48,12 +46,12 @@ public class QuestManager
             if (quest.Amount >= quest.Quest.TargetAmount)
             {
                 Plugin.Instance.UI.SendAnimation(player, new(EAnimationType.QUEST_COMPLETION, quest.Quest));
-                _ = Task.Run(async () => await db.IncreasePlayerBPXPAsync(steamID, quest.Quest.XP));
+                db.IncreasePlayerBPXP(steamID, quest.Quest.XP);
             }
             else if (quest.Amount * 100 / quest.Quest.TargetAmount % 10 == 0)
                 pendingQuestsProgression.Add(quest);
 
-            _ = Task.Run(async () => await db.IncreasePlayerQuestAmountAsync(steamID, quest.Quest.QuestID, 1));
+            db.IncreasePlayerQuestAmount(steamID, quest.Quest.QuestID, 1);
         }
 
         if (pendingQuestsProgression.Count > 0)

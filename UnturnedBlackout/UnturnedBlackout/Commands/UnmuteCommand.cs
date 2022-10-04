@@ -44,7 +44,7 @@ internal class UnmuteCommand : IRocketCommand
             return;
         }
 
-        _ = Task.Run(async () =>
+        _ = Task.Run(() =>
         {
             Profile profile;
             try
@@ -57,7 +57,7 @@ internal class UnmuteCommand : IRocketCommand
                 return;
             }
 
-            await Plugin.Instance.DB.ChangePlayerMutedAsync(steamID, false);
+            Plugin.Instance.DB.ChangePlayerMuted(steamID, false);
 
             if (Provider.clients.Exists(k => k.playerID.steamID == steamID))
                 TaskDispatcher.QueueOnMainThread(() => Utility.Say(UnturnedPlayer.FromCSteamID(steamID), Plugin.Instance.Translate("Unmuted").ToRich()));

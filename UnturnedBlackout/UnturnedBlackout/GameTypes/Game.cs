@@ -20,7 +20,10 @@ namespace UnturnedBlackout.GameTypes;
 
 public abstract class Game
 {
-    public ConfigManager Config => Plugin.Instance.Config;
+    protected QuestManager Quest => Plugin.Instance.Quest;
+    protected UIManager UI => Plugin.Instance.UI;
+    protected DatabaseManager DB => Plugin.Instance.DB;
+    protected ConfigManager Config => Plugin.Instance.Config;
 
     public EGameType GameMode { get; set; }
     public ArenaLocation Location { get; set; }

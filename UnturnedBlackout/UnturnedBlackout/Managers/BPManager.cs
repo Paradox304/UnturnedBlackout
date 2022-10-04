@@ -60,13 +60,11 @@ public class BPManager
         Plugin.Instance.UI.OnBattlepassTierUpdated(player.SteamID, tierID);
 
         _ = PendingWork.Remove(player.SteamID);
-        _ = Task.Run(async () =>
-        {
-            if (isTop)
-                await DB.UpdatePlayerBPClaimedFreeRewardsAsync(player.SteamID);
-            else
-                await DB.UpdatePlayerBPClaimedPremiumRewardsAsync(player.SteamID);
-        });
+
+        if (isTop)
+            DB.UpdatePlayerBPClaimedFreeRewards(player.SteamID);
+        else
+            DB.UpdatePlayerBPClaimedPremiumRewards(player.SteamID);
     }
 
     public void SkipTier(GamePlayer player)
@@ -86,28 +84,25 @@ public class BPManager
 
         _ = PendingWork.Add(player.SteamID);
 
-        _ = Task.Run(async () =>
+        if (player.Data.Coins >= Config.Base.FileData.BattlepassTierSkipCost)
         {
-            if (player.Data.Coins >= Config.Base.FileData.BattlepassTierSkipCost)
+            var oldTier = bp.CurrentTier;
+            bp.CurrentTier += 1;
+            player.Data.Coins -= Config.Base.FileData.BattlepassTierSkipCost;
+
+            DB.DecreasePlayerCoins(player.SteamID, Config.Base.FileData.BattlepassTierSkipCost);
+            DB.UpdatePlayerBPTier(player.SteamID, bp.CurrentTier);
+
+            TaskDispatcher.QueueOnMainThread(() =>
             {
-                var oldTier = bp.CurrentTier;
-                bp.CurrentTier += 1;
-                player.Data.Coins -= Config.Base.FileData.BattlepassTierSkipCost;
+                Plugin.Instance.UI.OnBattlepassUpdated(player.SteamID);
+                Plugin.Instance.UI.OnBattlepassTierUpdated(player.SteamID, oldTier);
+                Plugin.Instance.UI.OnBattlepassTierUpdated(player.SteamID, bp.CurrentTier);
+            });
+        }
+        else
+            Plugin.Instance.UI.SendNotEnoughCurrencyModal(player.SteamID, ECurrency.COINS);
 
-                await DB.DecreasePlayerCoinsAsync(player.SteamID, Config.Base.FileData.BattlepassTierSkipCost);
-                await DB.UpdateBPTierAsync(player.SteamID, bp.CurrentTier);
-
-                TaskDispatcher.QueueOnMainThread(() =>
-                {
-                    Plugin.Instance.UI.OnBattlepassUpdated(player.SteamID);
-                    Plugin.Instance.UI.OnBattlepassTierUpdated(player.SteamID, oldTier);
-                    Plugin.Instance.UI.OnBattlepassTierUpdated(player.SteamID, bp.CurrentTier);
-                });
-            }
-            else
-                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.SendNotEnoughCurrencyModal(player.SteamID, ECurrency.COINS));
-
-            _ = PendingWork.Remove(player.SteamID);
-        });
+        _ = PendingWork.Remove(player.SteamID);
     }
 }

@@ -4126,7 +4126,7 @@ public class DatabaseManager
         Plugin.Instance.UI.OnUIUpdated(steamID, EUIPage.GUN_SKIN);
     }
     
-    public void UpdatePlayerGunSkinUnboxedAmount(int id, int amount)
+    public void IncreasePlayerGunSkinUnboxedAmount(int id, int amount)
     {
         if (!GunSkinsSearchByID.TryGetValue(id, out var skin))
             throw new ArgumentNullException("id", $"Skin with id {id} is not found");
@@ -4272,7 +4272,7 @@ public class DatabaseManager
         return true;
     }
     
-    public void UpdatePlayerKnifeUnboxed(ushort knifeID, int amount)
+    public void IncreasePlayerKnifeUnboxedAmount(ushort knifeID, int amount)
     {
         if (!Knives.TryGetValue(knifeID, out var knife))
             throw new ArgumentNullException("id", $"Knife with id {knifeID} doesn't exist in the database, while updating unboxed");
@@ -4588,7 +4588,7 @@ public class DatabaseManager
         return true;
     }
 
-    public void UpdatePlayerGloveUnboxedAmount(int gloveID, int amount)
+    public void IncreasePlayerGloveUnboxedAmount(int gloveID, int amount)
     {
         // get glove from Gloves, throw an error if not
         if (!Gloves.TryGetValue(gloveID, out var glove))
@@ -4626,7 +4626,7 @@ public class DatabaseManager
 
     // Player Quest
     
-    public void UpdatePlayerQuestAmount(CSteamID steamID, int questID, int amount)
+    public void IncreasePlayerQuestAmount(CSteamID steamID, int questID, int amount)
     {
         if (!QuestsSearchByID.ContainsKey(questID))
             throw new ArgumentNullException("id", $"Quest with id {questID} doesn't exist in the database, while updating amount for {steamID}");

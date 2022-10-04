@@ -49,7 +49,7 @@ internal class MuteCommand : IRocketCommand
             return;
         }
 
-        _ = Task.Run(async () =>
+        _ = Task.Run(() =>
         {
             Profile profile;
             try
@@ -63,8 +63,8 @@ internal class MuteCommand : IRocketCommand
             }
 
             var expiry = DateTimeOffset.UtcNow.AddSeconds(seconds);
-            await Plugin.Instance.DB.ChangePlayerMutedAsync(steamID, true);
-            await Plugin.Instance.DB.ChangePlayerMuteExpiryAsync(steamID, expiry);
+            Plugin.Instance.DB.ChangePlayerMuted(steamID, true);
+            Plugin.Instance.DB.ChangePlayerMuteExpiry(steamID, expiry);
 
             if (Provider.clients.Exists(k => k.playerID.steamID == steamID))
                 TaskDispatcher.QueueOnMainThread(() => Utility.Say(UnturnedPlayer.FromCSteamID(steamID), Plugin.Instance.Translate("Muted", seconds, command[2]).ToRich()));

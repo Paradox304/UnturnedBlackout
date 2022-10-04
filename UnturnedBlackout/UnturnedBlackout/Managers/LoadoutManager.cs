@@ -3,7 +3,6 @@ using SDG.Unturned;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using UnturnedBlackout.Enums;
 using UnturnedBlackout.Models.Global;
 
@@ -11,7 +10,7 @@ namespace UnturnedBlackout.Managers;
 
 public class LoadoutManager
 {
-    public DatabaseManager DB { get; set; }
+    private DatabaseManager DB { get; set; }
 
     public LoadoutManager()
     {
@@ -79,14 +78,8 @@ public class LoadoutManager
                 }
             }
         }
-
-        Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
-        _ = Task.Run(async () =>
-        {
-            Logging.Debug($"TASK ENTERED LOADOUT CHECK {player.CharacterName}");
-            await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
-            Logging.Debug($"SQL QUERY EXECUTED LOADOUT CHECK {player.CharacterName}");
-        });
+        
+        DB.UpdatePlayerLoadout(player.CSteamID, loadoutID);
     }
 
     public void EquipAttachment(UnturnedPlayer player, ushort attachmentID, int loadoutID, bool isPrimary)
@@ -123,13 +116,7 @@ public class LoadoutManager
         else
             attachments.Add(attachment.Attachment.AttachmentType, attachment);
 
-        Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
-        _ = Task.Run(async () =>
-        {
-            Logging.Debug($"TASK ENTERED LOADOUT CHECK {player.CharacterName}");
-            await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
-            Logging.Debug($"SQL QUERY EXECUTED LOADOUT CHECK {player.CharacterName}");
-        });
+        DB.UpdatePlayerLoadout(player.CSteamID, loadoutID);
     }
 
     public void DequipAttachment(UnturnedPlayer player, ushort attachmentID, int loadoutID, bool isPrimary)
@@ -164,14 +151,7 @@ public class LoadoutManager
         if (attachments.ContainsValue(attachment))
         {
             _ = attachments.Remove(attachment.Attachment.AttachmentType);
-
-            Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
-            _ = Task.Run(async () =>
-            {
-                Logging.Debug($"TASK ENTERED LOADOUT CHECK {player.CharacterName}");
-                await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
-                Logging.Debug($"SQL QUERY EXECUTED LOADOUT CHECK {player.CharacterName}");
-            });
+            DB.UpdatePlayerLoadout(player.CSteamID, loadoutID);
         }
         else
             Logging.Debug($"Attachment was not found equipped on the gun");
@@ -203,13 +183,7 @@ public class LoadoutManager
         else
             playerLoadout.SecondaryGunCharm = gunCharm;
 
-        Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
-        _ = Task.Run(async () =>
-        {
-            Logging.Debug($"TASK ENTERED LOADOUT CHECK {player.CharacterName}");
-            await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
-            Logging.Debug($"SQL QUERY EXECUTED LOADOUT CHECK {player.CharacterName}");
-        });
+        DB.UpdatePlayerLoadout(player.CSteamID, loadoutID);
     }
 
     public void EquipKnife(UnturnedPlayer player, int loadoutID, ushort newKnife)
@@ -235,12 +209,7 @@ public class LoadoutManager
 
         playerLoadout.Knife = knife;
         Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
-        _ = Task.Run(async () =>
-        {
-            Logging.Debug($"TASK ENTERED LOADOUT CHECK {player.CharacterName}");
-            await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
-            Logging.Debug($"SQL QUERY EXECUTED LOADOUT CHECK {player.CharacterName}");
-        });
+        DB.UpdatePlayerLoadout(player.CSteamID, loadoutID);
     }
 
     public void EquipTactical(UnturnedPlayer player, int loadoutID, ushort newTactical)
@@ -266,12 +235,7 @@ public class LoadoutManager
 
         playerLoadout.Tactical = tactical;
         Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
-        _ = Task.Run(async () =>
-        {
-            Logging.Debug($"TASK ENTERED LOADOUT CHECK {player.CharacterName}");
-            await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
-            Logging.Debug($"SQL QUERY EXECUTED LOADOUT CHECK {player.CharacterName}");
-        });
+        DB.UpdatePlayerLoadout(player.CSteamID, loadoutID);
     }
 
     public void EquipLethal(UnturnedPlayer player, int loadoutID, ushort newLethal)
@@ -297,12 +261,7 @@ public class LoadoutManager
 
         playerLoadout.Lethal = lethal;
         Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
-        _ = Task.Run(async () =>
-        {
-            Logging.Debug($"TASK ENTERED LOADOUT CHECK {player.CharacterName}");
-            await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
-            Logging.Debug($"SQL QUERY EXECUTED LOADOUT CHECK {player.CharacterName}");
-        });
+        DB.UpdatePlayerLoadout(player.CSteamID, loadoutID);
     }
 
     public void EquipGlove(UnturnedPlayer player, int loadoutID, int newGlove)
@@ -327,13 +286,7 @@ public class LoadoutManager
         }
 
         playerLoadout.Glove = glove;
-        Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
-        _ = Task.Run(async () =>
-        {
-            Logging.Debug($"TASK ENTERED LOADOUT CHECK {player.CharacterName}");
-            await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
-            Logging.Debug($"SQL QUERY EXECUTED LOADOUT CHECK {player.CharacterName}");
-        });
+        DB.UpdatePlayerLoadout(player.CSteamID, loadoutID);
     }
 
     public void EquipCard(UnturnedPlayer player, int loadoutID, int newCard)
@@ -358,13 +311,7 @@ public class LoadoutManager
         }
 
         playerLoadout.Card = card;
-        Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
-        _ = Task.Run(async () =>
-        {
-            Logging.Debug($"TASK ENTERED LOADOUT CHECK {player.CharacterName}");
-            await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
-            Logging.Debug($"SQL QUERY EXECUTED LOADOUT CHECK {player.CharacterName}");
-        });
+        DB.UpdatePlayerLoadout(player.CSteamID, loadoutID);
     }
 
     public void EquipPerk(UnturnedPlayer player, int loadoutID, int newPerkID)
@@ -397,13 +344,7 @@ public class LoadoutManager
             playerLoadout.Perks.Add(newPerk.Perk.PerkType, newPerk);
 
         playerLoadout.PerksSearchByType.Add(newPerk.Perk.SkillType, newPerk);
-        Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
-        _ = Task.Run(async () =>
-        {
-            Logging.Debug($"TASK ENTERED LOADOUT CHECK {player.CharacterName}");
-            await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
-            Logging.Debug($"SQL QUERY EXECUTED LOADOUT CHECK {player.CharacterName}");
-        });
+        DB.UpdatePlayerLoadout(player.CSteamID, loadoutID);
     }
 
     public void DequipPerk(UnturnedPlayer player, int loadoutID, int oldPerk)
@@ -433,13 +374,7 @@ public class LoadoutManager
             return;
         }
 
-        Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
-        _ = Task.Run(async () =>
-        {
-            Logging.Debug($"TASK ENTERED LOADOUT CHECK {player.CharacterName}");
-            await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
-            Logging.Debug($"SQL QUERY EXECUTED LOADOUT CHECK {player.CharacterName}");
-        });
+        DB.UpdatePlayerLoadout(player.CSteamID, loadoutID);
     }
 
     public void EquipKillstreak(UnturnedPlayer player, int loadoutID, int newKillstreak)
@@ -474,14 +409,7 @@ public class LoadoutManager
             playerLoadout.Killstreaks.Add(killstreak);
 
         playerLoadout.Killstreaks.Sort((x, y) => x.Killstreak.KillstreakRequired.CompareTo(y.Killstreak.KillstreakRequired));
-
-        Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
-        _ = Task.Run(async () =>
-        {
-            Logging.Debug($"TASK ENTERED LOADOUT CHECK {player.CharacterName}");
-            await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
-            Logging.Debug($"SQL QUERY EXECUTED LOADOUT CHECK {player.CharacterName}");
-        });
+        DB.UpdatePlayerLoadout(player.CSteamID, loadoutID);
     }
 
     public void DequipKillstreak(UnturnedPlayer player, int loadoutID, int oldKillstreak)
@@ -511,13 +439,7 @@ public class LoadoutManager
             return;
         }
 
-        Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
-        _ = Task.Run(async () =>
-        {
-            Logging.Debug($"TASK ENTERED LOADOUT CHECK {player.CharacterName}");
-            await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
-            Logging.Debug($"SQL QUERY EXECUTED LOADOUT CHECK {player.CharacterName}");
-        });
+        DB.UpdatePlayerLoadout(player.CSteamID, loadoutID);
     }
 
     public void EquipGunSkin(UnturnedPlayer player, int loadoutID, int id, bool isPrimary)
@@ -562,13 +484,7 @@ public class LoadoutManager
             playerLoadout.SecondarySkin = gunSkin;
         }
 
-        Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
-        _ = Task.Run(async () =>
-        {
-            Logging.Debug($"TASK ENTERED LOADOUT CHECK {player.CharacterName}");
-            await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
-            Logging.Debug($"SQL QUERY EXECUTED LOADOUT CHECK {player.CharacterName}");
-        });
+        DB.UpdatePlayerLoadout(player.CSteamID, loadoutID);
     }
 
     public void DequipGunSkin(UnturnedPlayer player, int loadoutID, bool isPrimary)
@@ -591,13 +507,7 @@ public class LoadoutManager
         else
             playerLoadout.SecondarySkin = null;
 
-        Logging.Debug($"PRE LOADOUT CHECK {player.CharacterName}");
-        _ = Task.Run(async () =>
-        {
-            Logging.Debug($"TASK ENTERED LOADOUT CHECK {player.CharacterName}");
-            await DB.UpdatePlayerLoadoutAsync(player.CSteamID, loadoutID);
-            Logging.Debug($"SQL QUERY EXECUTED LOADOUT CHECK {player.CharacterName}");
-        });
+        DB.UpdatePlayerLoadout(player.CSteamID, loadoutID);
     }
 
     public void GiveLoadout(GamePlayer player)
@@ -634,14 +544,14 @@ public class LoadoutManager
         {
             var glove = gloves.FirstOrDefault(k => k.GloveID == activeLoadout.Glove.Glove.GloveID);
             player.Player.Player.clothing.thirdClothes.shirt = 0;
-            player.Player.Player.clothing.askWearShirt(0, 0, new byte[0], true);
+            player.Player.Player.clothing.askWearShirt(0, 0, Array.Empty<byte>(), true);
             inv.forceAddItem(new(glove.ItemID, true), true);
         }
 
         // Giving primary to player
         if (activeLoadout.Primary != null)
         {
-            Item item = new(activeLoadout.PrimarySkin == null ? activeLoadout.Primary.Gun.GunID : activeLoadout.PrimarySkin.SkinID, false);
+            Item item = new(activeLoadout.PrimarySkin?.SkinID ?? activeLoadout.Primary.Gun.GunID, false);
 
             // Setting up attachments
             for (var i = 0; i <= 3; i++)
@@ -679,7 +589,7 @@ public class LoadoutManager
         // Giving secondary to player
         if (activeLoadout.Secondary != null)
         {
-            Item item = new(activeLoadout.SecondarySkin == null ? activeLoadout.Secondary.Gun.GunID : activeLoadout.SecondarySkin.SkinID, true);
+            Item item = new(activeLoadout.SecondarySkin?.SkinID ?? activeLoadout.Secondary.Gun.GunID, true);
 
             // Setting up attachments
             for (var i = 0; i <= 3; i++)
@@ -770,9 +680,7 @@ public class LoadoutManager
             inv.forceAddItem(new(lethalID, false), false);
             inv.TryGetItemIndex(lethalID, out var lethalX, out var lethalY, out var lethalPage, out var _);
             if (Assets.find(EAssetType.ITEM, lethalID) is ItemAsset lethalAsset)
-            {
                 player.Player.Player.equipment.ServerBindItemHotkey(0, lethalAsset, lethalPage, lethalX, lethalY);
-            }
         }
 
         if (activeLoadout.Tactical != null)
@@ -781,9 +689,7 @@ public class LoadoutManager
             inv.forceAddItem(new(tacticalID, false), false);
             inv.TryGetItemIndex(tacticalID, out var tacticalX, out var tacticalY, out var tacticalPage, out var _);
             if (Assets.find(EAssetType.ITEM, tacticalID) is ItemAsset tacticalAsset)
-            {
                 player.Player.Player.equipment.ServerBindItemHotkey(1, tacticalAsset, tacticalPage, tacticalX, tacticalY);
-            }
         }
 
         // Giving killstreaks to player
