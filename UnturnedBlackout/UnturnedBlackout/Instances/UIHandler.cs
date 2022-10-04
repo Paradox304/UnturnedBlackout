@@ -37,8 +37,8 @@ public class UIHandler
 
     private const int MINIMUM_LOADOUT_PAGE_ATTACHMENT_PRIMARY = 4;
     private const int MAXIMUM_LOADOUT_PAGE_ATTACHMENT_PRIMARY = 8;
-    
-    public DatabaseManager DB { get; set; }
+
+    private DatabaseManager DB => DB;
     public CSteamID SteamID { get; set; }
     public UnturnedPlayer Player { get; set; }
     public PlayerLoadout PlayerLoadout { get; set; }
@@ -118,7 +118,6 @@ public class UIHandler
         SteamID = player.CSteamID;
         Player = player;
         TransportConnection = player.Player.channel.GetOwnerTransportConnection();
-        DB = Plugin.Instance.DB;
         if (!DB.PlayerLoadouts.TryGetValue(player.CSteamID, out var loadout))
         {
             Logging.Debug($"Error finding player loadout for {player.CharacterName}, failed to initialize UIHandler for player");
@@ -798,7 +797,7 @@ public class UIHandler
     public void ShowXP()
     {
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER XP Num", Plugin.Instance.Translate("Level_Show", PlayerData.Level).ToRich());
-        EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER XP Icon", Plugin.Instance.DB.Levels.TryGetValue(PlayerData.Level, out var level) ? level.IconLinkMedium : "");
+        EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER XP Icon", DB.Levels.TryGetValue(PlayerData.Level, out var level) ? level.IconLinkMedium : "");
         var spaces = 0;
         if (PlayerData.TryGetNeededXP(out var neededXP))
             spaces = Math.Min(176, neededXP == 0 ? 0 : PlayerData.XP * 176 / neededXP);
@@ -837,7 +836,7 @@ public class UIHandler
     public void SelectedPlayButton(int selected)
     {
         var games = Plugin.Instance.Game.Games;
-        var servers = Plugin.Instance.DB.Servers;
+        var servers = DB.Servers;
         if (PlayPage == EPlayPage.GAMES)
         {
             if (selected + 1 > games.Count)
@@ -862,7 +861,7 @@ public class UIHandler
             Plugin.Instance.Game.AddPlayerToGame(Player, SelectedGameID);
         else if (PlayPage == EPlayPage.SERVERS)
         {
-            var server = Plugin.Instance.DB.Servers[SelectedGameID];
+            var server = DB.Servers[SelectedGameID];
             if (server.IsOnline)
                 Player.Player.sendRelayToServer(server.IPNo, server.PortNo, "", false);
         }
@@ -958,7 +957,7 @@ public class UIHandler
 
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Options Audio Music Toggler", PlayerData.Music);
 
-        _ = Task.Run(async () => await Plugin.Instance.DB.ChangePlayerMusicAsync(SteamID, PlayerData.Music));
+        DB.ChangePlayerMusic(SteamID, PlayerData.Music);
     }
 
     public void FlagButtonPressed()
@@ -967,7 +966,7 @@ public class UIHandler
 
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Options Audio Flag Toggler", PlayerData.HideFlag);
 
-        _ = Task.Run(async () => await Plugin.Instance.DB.ChangePlayerHideFlagAsync(SteamID, PlayerData.HideFlag));
+        DB.ChangePlayerHideFlag(SteamID, PlayerData.HideFlag);
     }
 
     public void ShowLoadouts()
@@ -1151,22 +1150,13 @@ public class UIHandler
             Logging.Debug($"Error finding loadout with id {LoadoutID} for {Player.CharacterName}");
             return;
         }
-
-        Logging.Debug($"PRE LOADOUT EQUIP CHECK {Player.CharacterName}");
-        _ = Task.Run(async () =>
-        {
-            Logging.Debug($"TASK ENTERED LOADOUT CHECK {Player.CharacterName}");
-            foreach (var activeLoadout in PlayerLoadout.Loadouts.Values.Where(k => k.IsActive))
-                await DB.UpdatePlayerLoadoutActiveAsync(Player.CSteamID, activeLoadout.LoadoutID, false);
-
-            await DB.UpdatePlayerLoadoutActiveAsync(Player.CSteamID, LoadoutID, true);
-            Logging.Debug($"SQL QUERY EXECUTED LOADOUT CHECK {Player.CharacterName}");
-            TaskDispatcher.QueueOnMainThread(() =>
-            {
-                ReloadLoadoutPage();
-                ReloadLoadout();
-            });
-        });
+        
+        foreach (var activeLoadout in PlayerLoadout.Loadouts.Values.Where(k => k.IsActive))
+            DB.UpdatePlayerLoadoutActive(Player.CSteamID, activeLoadout.LoadoutID, false);
+        
+        DB.UpdatePlayerLoadoutActive(Player.CSteamID, LoadoutID, true);
+        ReloadLoadoutPage();
+        ReloadLoadout();
     }
 
     public void SendLoadoutName(string name) => LoadoutNameText = name;
@@ -1185,7 +1175,7 @@ public class UIHandler
                 return;
 
             loadout.LoadoutName = LoadoutNameText;
-            _ = Task.Run(async () => await DB.UpdatePlayerLoadoutAsync(Player.CSteamID, LoadoutID));
+            DB.UpdatePlayerLoadout(Player.CSteamID, LoadoutID);
             ReloadLoadoutPage();
         }
     }
@@ -1354,23 +1344,13 @@ public class UIHandler
             return;
         }
 
-        Logging.Debug($"PRE LOADOUT ACTIVE CHECK {Player.CharacterName}");
-        _ = Task.Run(async () =>
-        {
-            Logging.Debug($"TASK ENTERED LOADOUT CHECK {Player.CharacterName}");
-            foreach (var activeLoadout in PlayerLoadout.Loadouts.Values.Where(k => k.IsActive))
-                await DB.UpdatePlayerLoadoutActiveAsync(Player.CSteamID, activeLoadout.LoadoutID, false);
-
-            await DB.UpdatePlayerLoadoutActiveAsync(Player.CSteamID, LoadoutID, true);
-            Logging.Debug($"SQL QUERY EXECUTED LOADOUT CHECK {Player.CharacterName}");
-            TaskDispatcher.QueueOnMainThread(() =>
-            {
-                ClearMidgameLoadouts();
-                var gPlayer = Plugin.Instance.Game.GetGamePlayer(Player);
-                if (gPlayer != null)
-                    gPlayer.IsPendingLoadoutChange = true;
-            });
-        });
+        foreach (var activeLoadout in PlayerLoadout.Loadouts.Values.Where(k => k.IsActive))
+            DB.UpdatePlayerLoadoutActive(Player.CSteamID, activeLoadout.LoadoutID, false);
+        DB.UpdatePlayerLoadoutActive(Player.CSteamID, LoadoutID, true);
+        ClearMidgameLoadouts();
+        var gPlayer = Plugin.Instance.Game.GetGamePlayer(Player);
+        if (gPlayer != null)
+            gPlayer.IsPendingLoadoutChange = true;
     }
 
     public void ClearMidgameLoadouts()
@@ -3943,6 +3923,7 @@ public class UIHandler
         switch (LoadoutPage)
         {
             case ELoadoutPage.PRIMARY:
+            case ELoadoutPage.SECONDARY:
             {
                 if (!PlayerLoadout.Guns.TryGetValue((ushort)SelectedItemID, out var gun))
                 {
@@ -3950,21 +3931,18 @@ public class UIHandler
                     return;
                 }
 
-                _ = Task.Run(async () =>
+                if (PlayerData.Credits >= gun.Gun.BuyPrice && !gun.IsBought)
                 {
-                    if (PlayerData.Credits >= gun.Gun.BuyPrice && !gun.IsBought)
+                    if (DB.UpdatePlayerGunBought(Player.CSteamID, gun.Gun.GunID, true))
                     {
-                        await DB.DecreasePlayerCreditsAsync(Player.CSteamID, gun.Gun.BuyPrice);
-                        await DB.UpdatePlayerGunBoughtAsync(Player.CSteamID, gun.Gun.GunID, true);
-                        TaskDispatcher.QueueOnMainThread(() =>
-                        {
-                            EquipSelectedItem();
-                            BackToLoadout();
-                        });
+                        DB.DecreasePlayerCredits(Player.CSteamID, gun.Gun.BuyPrice);
+                        EquipSelectedItem();
+                        BackToLoadout();
                     }
-                    else
-                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.CREDITS));
-                });
+                }
+                else
+                    SendNotEnoughCurrencyModal(ECurrency.CREDITS);
+                
                 break;
             }
 
@@ -3984,48 +3962,18 @@ public class UIHandler
                     Logging.Debug($"Error finding attachment with id {SelectedItemID} for {Player.CharacterName}");
                     return;
                 }
-
-                _ = Task.Run(async () =>
+                
+                if (PlayerData.Credits >= attachment.Attachment.BuyPrice && !attachment.IsBought)
                 {
-                    if (PlayerData.Credits >= attachment.Attachment.BuyPrice && !attachment.IsBought)
+                    if (DB.UpdatePlayerGunAttachmentBought(Player.CSteamID, gun.Gun.GunID, attachment.Attachment.AttachmentID, true))
                     {
-                        await DB.DecreasePlayerCreditsAsync(Player.CSteamID, attachment.Attachment.BuyPrice);
-                        await DB.UpdatePlayerGunAttachmentBoughtAsync(Player.CSteamID, gun.Gun.GunID, attachment.Attachment.AttachmentID, true);
-                        TaskDispatcher.QueueOnMainThread(() =>
-                        {
-                            EquipSelectedItem();
-                            BackToLoadout();
-                        });
+                        DB.DecreasePlayerCredits(Player.CSteamID, attachment.Attachment.BuyPrice);
+                        EquipSelectedItem();
+                        BackToLoadout();
                     }
-                    else
-                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.CREDITS));
-                });
-                break;
-            }
-
-            case ELoadoutPage.SECONDARY:
-            {
-                if (!PlayerLoadout.Guns.TryGetValue((ushort)SelectedItemID, out var gun))
-                {
-                    Logging.Debug($"Error finding gun with id {SelectedItemID} for {Player.CharacterName}");
-                    return;
                 }
-
-                _ = Task.Run(async () =>
-                {
-                    if (PlayerData.Credits >= gun.Gun.BuyPrice && !gun.IsBought)
-                    {
-                        await DB.DecreasePlayerCreditsAsync(Player.CSteamID, gun.Gun.BuyPrice);
-                        await DB.UpdatePlayerGunBoughtAsync(Player.CSteamID, gun.Gun.GunID, true);
-                        TaskDispatcher.QueueOnMainThread(() =>
-                        {
-                            EquipSelectedItem();
-                            BackToLoadout();
-                        });
-                    }
-                    else
-                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.CREDITS));
-                });
+                else
+                    SendNotEnoughCurrencyModal(ECurrency.CREDITS);
                 break;
             }
 
@@ -4045,21 +3993,17 @@ public class UIHandler
                     return;
                 }
 
-                _ = Task.Run(async () =>
+                if (PlayerData.Credits >= attachment.Attachment.BuyPrice && !attachment.IsBought)
                 {
-                    if (PlayerData.Credits >= attachment.Attachment.BuyPrice && !attachment.IsBought)
+                    if (DB.UpdatePlayerGunAttachmentBought(Player.CSteamID, gun.Gun.GunID, attachment.Attachment.AttachmentID, true))
                     {
-                        await DB.DecreasePlayerCreditsAsync(Player.CSteamID, attachment.Attachment.BuyPrice);
-                        await DB.UpdatePlayerGunAttachmentBoughtAsync(Player.CSteamID, gun.Gun.GunID, attachment.Attachment.AttachmentID, true);
-                        TaskDispatcher.QueueOnMainThread(() =>
-                        {
-                            EquipSelectedItem();
-                            BackToLoadout();
-                        });
+                        DB.DecreasePlayerCredits(Player.CSteamID, attachment.Attachment.BuyPrice);
+                        EquipSelectedItem();
+                        BackToLoadout();
                     }
-                    else
-                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.CREDITS));
-                });
+                }
+                else
+                    SendNotEnoughCurrencyModal(ECurrency.CREDITS);
                 break;
             }
 
@@ -4072,21 +4016,18 @@ public class UIHandler
                     return;
                 }
 
-                _ = Task.Run(async () =>
+                // buy gun charm
+                if (PlayerData.Credits >= gunCharm.GunCharm.BuyPrice && !gunCharm.IsBought)
                 {
-                    if (PlayerData.Credits >= gunCharm.GunCharm.BuyPrice && !gunCharm.IsBought)
+                    if (DB.UpdatePlayerGunCharmBought(Player.CSteamID, gunCharm.GunCharm.CharmID, true))
                     {
-                        await DB.DecreasePlayerCreditsAsync(Player.CSteamID, gunCharm.GunCharm.BuyPrice);
-                        await DB.UpdatePlayerGunCharmBoughtAsync(Player.CSteamID, gunCharm.GunCharm.CharmID, true);
-                        TaskDispatcher.QueueOnMainThread(() =>
-                        {
-                            EquipSelectedItem();
-                            BackToLoadout();
-                        });
+                        DB.DecreasePlayerCredits(Player.CSteamID, gunCharm.GunCharm.BuyPrice);
+                        EquipSelectedItem();
+                        BackToLoadout();
                     }
-                    else
-                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.CREDITS));
-                });
+                }
+                else
+                    SendNotEnoughCurrencyModal(ECurrency.CREDITS);
                 break;
             }
 
@@ -4098,50 +4039,22 @@ public class UIHandler
                     return;
                 }
 
-                _ = Task.Run(async () =>
+                // buy knife
+                if (PlayerData.Credits >= knife.Knife.BuyPrice && !knife.IsBought)
                 {
-                    if (PlayerData.Credits >= knife.Knife.BuyPrice && !knife.IsBought)
+                    if (DB.UpdatePlayerKnifeBought(Player.CSteamID, knife.Knife.KnifeID, true))
                     {
-                        await DB.DecreasePlayerCreditsAsync(Player.CSteamID, knife.Knife.BuyPrice);
-                        await DB.UpdatePlayerKnifeBoughtAsync(Player.CSteamID, knife.Knife.KnifeID, true);
-                        TaskDispatcher.QueueOnMainThread(() =>
-                        {
-                            EquipSelectedItem();
-                            BackToLoadout();
-                        });
+                        DB.DecreasePlayerCredits(Player.CSteamID, knife.Knife.BuyPrice);
+                        EquipSelectedItem();
+                        BackToLoadout();
                     }
-                    else
-                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.CREDITS));
-                });
-                break;
-            }
-
-            case ELoadoutPage.TACTICAL:
-            {
-                if (!PlayerLoadout.Gadgets.TryGetValue((ushort)SelectedItemID, out var gadget))
-                {
-                    Logging.Debug($"Error finding gadget with id {SelectedItemID} for {Player.CharacterName}");
-                    return;
                 }
-
-                _ = Task.Run(async () =>
-                {
-                    if (PlayerData.Credits >= gadget.Gadget.BuyPrice && !gadget.IsBought)
-                    {
-                        await DB.DecreasePlayerCreditsAsync(Player.CSteamID, gadget.Gadget.BuyPrice);
-                        await DB.UpdatePlayerGadgetBoughtAsync(Player.CSteamID, gadget.Gadget.GadgetID, true);
-                        TaskDispatcher.QueueOnMainThread(() =>
-                        {
-                            EquipSelectedItem();
-                            BackToLoadout();
-                        });
-                    }
-                    else
-                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.CREDITS));
-                });
+                else
+                    SendNotEnoughCurrencyModal(ECurrency.CREDITS);
                 break;
             }
 
+            case ELoadoutPage.TACTICAL: 
             case ELoadoutPage.LETHAL:
             {
                 if (!PlayerLoadout.Gadgets.TryGetValue((ushort)SelectedItemID, out var gadget))
@@ -4150,21 +4063,17 @@ public class UIHandler
                     return;
                 }
 
-                _ = Task.Run(async () =>
+                if (PlayerData.Credits >= gadget.Gadget.BuyPrice && !gadget.IsBought)
                 {
-                    if (PlayerData.Credits >= gadget.Gadget.BuyPrice && !gadget.IsBought)
+                    if (DB.UpdatePlayerGadgetBought(Player.CSteamID, gadget.Gadget.GadgetID, true))
                     {
-                        await DB.DecreasePlayerCreditsAsync(Player.CSteamID, gadget.Gadget.BuyPrice);
-                        await DB.UpdatePlayerGadgetBoughtAsync(Player.CSteamID, gadget.Gadget.GadgetID, true);
-                        TaskDispatcher.QueueOnMainThread(() =>
-                        {
-                            EquipSelectedItem();
-                            BackToLoadout();
-                        });
+                        DB.DecreasePlayerCredits(Player.CSteamID, gadget.Gadget.BuyPrice);
+                        EquipSelectedItem();
+                        BackToLoadout();
                     }
-                    else
-                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.CREDITS));
-                });
+                }
+                else
+                    SendNotEnoughCurrencyModal(ECurrency.CREDITS);
                 break;
             }
 
@@ -4178,21 +4087,18 @@ public class UIHandler
                     return;
                 }
 
-                _ = Task.Run(async () =>
+                // buy perk
+                if (PlayerData.Credits >= perk.Perk.BuyPrice && !perk.IsBought)
                 {
-                    if (PlayerData.Credits >= perk.Perk.BuyPrice && !perk.IsBought)
+                    if (DB.UpdatePlayerPerkBought(Player.CSteamID, perk.Perk.PerkID, true))
                     {
-                        await DB.DecreasePlayerCreditsAsync(Player.CSteamID, perk.Perk.BuyPrice);
-                        await DB.UpdatePlayerPerkBoughtAsync(Player.CSteamID, perk.Perk.PerkID, true);
-                        TaskDispatcher.QueueOnMainThread(() =>
-                        {
-                            EquipSelectedItem();
-                            BackToLoadout();
-                        });
+                        DB.DecreasePlayerCredits(Player.CSteamID, perk.Perk.BuyPrice);
+                        EquipSelectedItem();
+                        BackToLoadout();
                     }
-                    else
-                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.CREDITS));
-                });
+                }
+                else
+                    SendNotEnoughCurrencyModal(ECurrency.CREDITS);
                 break;
             }
 
@@ -4204,22 +4110,18 @@ public class UIHandler
                     return;
                 }
 
-                _ = Task.Run(async () =>
+                // buy killstreak
+                if (PlayerData.Credits >= killstreak.Killstreak.BuyPrice && !killstreak.IsBought)
                 {
-                    if (PlayerData.Credits >= killstreak.Killstreak.BuyPrice && !killstreak.IsBought)
+                    if (DB.UpdatePlayerKillstreakBought(Player.CSteamID, killstreak.Killstreak.KillstreakID, true))
                     {
-                        await DB.DecreasePlayerCreditsAsync(Player.CSteamID, killstreak.Killstreak.BuyPrice);
-                        await DB.UpdatePlayerKillstreakBoughtAsync(Player.CSteamID, killstreak.Killstreak.KillstreakID, true);
-                        TaskDispatcher.QueueOnMainThread(() =>
-                        {
-                            EquipSelectedItem();
-                            ReloadLoadoutTab();
-                            ReloadSelectedItem();
-                        });
+                        DB.DecreasePlayerCredits(Player.CSteamID, killstreak.Killstreak.BuyPrice);
+                        EquipSelectedItem();
+                        BackToLoadout();
                     }
-                    else
-                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.CREDITS));
-                });
+                }
+                else
+                    SendNotEnoughCurrencyModal(ECurrency.CREDITS);
                 break;
             }
 
@@ -4231,21 +4133,18 @@ public class UIHandler
                     return;
                 }
 
-                _ = Task.Run(async () =>
+                // buy card
+                if (PlayerData.Credits >= card.Card.BuyPrice && !card.IsBought)
                 {
-                    if (PlayerData.Credits >= card.Card.BuyPrice && !card.IsBought)
+                    if (DB.UpdatePlayerCardBought(Player.CSteamID, card.Card.CardID, true))
                     {
-                        await DB.DecreasePlayerCreditsAsync(Player.CSteamID, card.Card.BuyPrice);
-                        await DB.UpdatePlayerCardBoughtAsync(Player.CSteamID, card.Card.CardID, true);
-                        TaskDispatcher.QueueOnMainThread(() =>
-                        {
-                            EquipSelectedItem();
-                            BackToLoadout();
-                        });
+                        DB.DecreasePlayerCredits(Player.CSteamID, card.Card.BuyPrice);
+                        EquipSelectedItem();
+                        BackToLoadout();
                     }
-                    else
-                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.CREDITS));
-                });
+                }
+                else
+                    SendNotEnoughCurrencyModal(ECurrency.CREDITS);
                 break;
             }
 
@@ -4257,21 +4156,18 @@ public class UIHandler
                     return;
                 }
 
-                _ = Task.Run(async () =>
+                // buy glove
+                if (PlayerData.Credits >= glove.Glove.BuyPrice && !glove.IsBought)
                 {
-                    if (PlayerData.Credits >= glove.Glove.BuyPrice && !glove.IsBought)
+                    if (DB.UpdatePlayerGloveBought(Player.CSteamID, glove.Glove.GloveID, true))
                     {
-                        await DB.DecreasePlayerCreditsAsync(Player.CSteamID, glove.Glove.BuyPrice);
-                        await DB.UpdatePlayerGloveBoughtAsync(Player.CSteamID, glove.Glove.GloveID, true);
-                        TaskDispatcher.QueueOnMainThread(() =>
-                        {
-                            EquipSelectedItem();
-                            BackToLoadout();
-                        });
+                        DB.DecreasePlayerCredits(Player.CSteamID, glove.Glove.BuyPrice);
+                        EquipSelectedItem();
+                        BackToLoadout();
                     }
-                    else
-                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.CREDITS));
-                });
+                }
+                else
+                    SendNotEnoughCurrencyModal(ECurrency.CREDITS);
                 break;
             }
         }
@@ -4295,24 +4191,19 @@ public class UIHandler
                     Logging.Debug($"Error finding gun with id {SelectedItemID} for {Player.CharacterName}");
                     return;
                 }
-
-                _ = Task.Run(async () =>
+                
+                var cost = gun.Gun.GetCoins(PlayerData.Level);
+                if (PlayerData.Coins >= cost && !gun.IsBought && !gun.IsUnlocked && gun.Gun.LevelRequirement > PlayerData.Level)
                 {
-                    var cost = gun.Gun.GetCoins(PlayerData.Level);
-                    if (PlayerData.Coins >= cost && !gun.IsBought && !gun.IsUnlocked && gun.Gun.LevelRequirement > PlayerData.Level)
+                    if (DB.UpdatePlayerGunUnlocked(Player.CSteamID, gun.Gun.GunID, true))
                     {
-                        await DB.DecreasePlayerCoinsAsync(Player.CSteamID, cost);
-                        await DB.UpdatePlayerGunUnlockedAsync(Player.CSteamID, gun.Gun.GunID, true);
-                        TaskDispatcher.QueueOnMainThread(() =>
-                        {
-                            EquipSelectedItem();
-                            ReloadSelectedItem();
-                            ReloadLoadoutTab();
-                        });
+                        DB.DecreasePlayerCoins(Player.CSteamID, cost);
+                        ReloadSelectedItem();
+                        ReloadLoadoutTab();
                     }
-                    else
-                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.COINS));
-                });
+                }
+                else
+                    SendNotEnoughCurrencyModal(ECurrency.COINS);
                 break;
             }
 
@@ -4332,24 +4223,19 @@ public class UIHandler
                     Logging.Debug($"Error finding attachment with id {SelectedItemID} for {Player.CharacterName}");
                     return;
                 }
-
-                _ = Task.Run(async () =>
+                
+                var cost = attachment.GetCoins(gun.Level);
+                if (PlayerData.Coins >= cost && !attachment.IsBought && !attachment.IsUnlocked && attachment.LevelRequirement > gun.Level)
                 {
-                    var cost = attachment.GetCoins(gun.Level);
-                    if (PlayerData.Coins >= cost && !attachment.IsBought && !attachment.IsUnlocked && attachment.LevelRequirement > gun.Level)
+                    if (DB.UpdatePlayerGunAttachmentUnlocked(Player.CSteamID, gun.Gun.GunID, attachment.Attachment.AttachmentID, true))
                     {
-                        await DB.DecreasePlayerCoinsAsync(Player.CSteamID, cost);
-                        await DB.UpdatePlayerGunAttachmentUnlockedAsync(Player.CSteamID, gun.Gun.GunID, attachment.Attachment.AttachmentID, true);
-                        TaskDispatcher.QueueOnMainThread(() =>
-                        {
-                            EquipSelectedItem();
-                            ReloadSelectedItem();
-                            ReloadLoadoutTab();
-                        });
+                        DB.DecreasePlayerCoins(Player.CSteamID, cost);
+                        ReloadSelectedItem();
+                        ReloadLoadoutTab();
                     }
-                    else
-                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.COINS));
-                });
+                }
+                else
+                    SendNotEnoughCurrencyModal(ECurrency.COINS);
                 break;
             }
 
@@ -4369,23 +4255,18 @@ public class UIHandler
                     return;
                 }
 
-                _ = Task.Run(async () =>
+                var cost = attachment.GetCoins(gun.Level);
+                if (PlayerData.Coins >= cost && !attachment.IsBought && !attachment.IsUnlocked && attachment.LevelRequirement > gun.Level)
                 {
-                    var cost = attachment.GetCoins(gun.Level);
-                    if (PlayerData.Coins >= cost && !attachment.IsBought && !attachment.IsUnlocked && attachment.LevelRequirement > gun.Level)
+                    if (DB.UpdatePlayerGunAttachmentUnlocked(Player.CSteamID, gun.Gun.GunID, attachment.Attachment.AttachmentID, true))
                     {
-                        await DB.DecreasePlayerCoinsAsync(Player.CSteamID, cost);
-                        await DB.UpdatePlayerGunAttachmentUnlockedAsync(Player.CSteamID, gun.Gun.GunID, attachment.Attachment.AttachmentID, true);
-                        TaskDispatcher.QueueOnMainThread(() =>
-                        {
-                            EquipSelectedItem();
-                            ReloadSelectedItem();
-                            ReloadLoadoutTab();
-                        });
+                        DB.DecreasePlayerCoins(Player.CSteamID, cost);
+                        ReloadSelectedItem();
+                        ReloadLoadoutTab();
                     }
-                    else
-                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.COINS));
-                });
+                }
+                else
+                    SendNotEnoughCurrencyModal(ECurrency.COINS);
                 break;
             }
 
@@ -4398,23 +4279,18 @@ public class UIHandler
                     return;
                 }
 
-                _ = Task.Run(async () =>
+                var cost = gunCharm.GunCharm.GetCoins(PlayerData.Level);
+                if (PlayerData.Coins >= cost && !gunCharm.IsBought && !gunCharm.IsUnlocked && gunCharm.GunCharm.LevelRequirement > PlayerData.Level)
                 {
-                    var cost = gunCharm.GunCharm.GetCoins(PlayerData.Level);
-                    if (PlayerData.Coins >= cost && !gunCharm.IsBought && !gunCharm.IsUnlocked && gunCharm.GunCharm.LevelRequirement > PlayerData.Level)
+                    if (DB.UpdatePlayerGunCharmUnlocked(Player.CSteamID, gunCharm.GunCharm.CharmID, true))
                     {
-                        await DB.DecreasePlayerCoinsAsync(Player.CSteamID, cost);
-                        await DB.UpdatePlayerGunCharmUnlockedAsync(Player.CSteamID, gunCharm.GunCharm.CharmID, true);
-                        TaskDispatcher.QueueOnMainThread(() =>
-                        {
-                            EquipSelectedItem();
-                            ReloadSelectedItem();
-                            ReloadLoadoutTab();
-                        });
+                        DB.DecreasePlayerCoins(Player.CSteamID, cost);
+                        ReloadSelectedItem();
+                        ReloadLoadoutTab();
                     }
-                    else
-                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.COINS));
-                });
+                }
+                else
+                    SendNotEnoughCurrencyModal(ECurrency.COINS);
                 break;
             }
 
@@ -4426,23 +4302,18 @@ public class UIHandler
                     return;
                 }
 
-                _ = Task.Run(async () =>
+                var cost = knife.Knife.GetCoins(PlayerData.Level);
+                if (PlayerData.Coins >= cost && !knife.IsBought && !knife.IsUnlocked && knife.Knife.LevelRequirement > PlayerData.Level)
                 {
-                    var cost = knife.Knife.GetCoins(PlayerData.Level);
-                    if (PlayerData.Coins >= cost && !knife.IsBought && !knife.IsUnlocked && knife.Knife.LevelRequirement > PlayerData.Level)
+                    if (DB.UpdatePlayerKnifeUnlocked(Player.CSteamID, knife.Knife.KnifeID, true))
                     {
-                        await DB.DecreasePlayerCoinsAsync(Player.CSteamID, cost);
-                        await DB.UpdatePlayerKnifeUnlockedAsync(Player.CSteamID, knife.Knife.KnifeID, true);
-                        TaskDispatcher.QueueOnMainThread(() =>
-                        {
-                            EquipSelectedItem();
-                            ReloadSelectedItem();
-                            ReloadLoadoutTab();
-                        });
+                        DB.DecreasePlayerCoins(Player.CSteamID, cost);
+                        ReloadSelectedItem();
+                        ReloadLoadoutTab();
                     }
-                    else
-                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.COINS));
-                });
+                }
+                else
+                    SendNotEnoughCurrencyModal(ECurrency.COINS);
                 break;
             }
 
@@ -4455,23 +4326,18 @@ public class UIHandler
                     return;
                 }
 
-                _ = Task.Run(async () =>
+                var cost = gadget.Gadget.GetCoins(PlayerData.Level);
+                if (PlayerData.Coins >= cost && !gadget.IsBought && !gadget.IsUnlocked && gadget.Gadget.LevelRequirement > PlayerData.Level)
                 {
-                    var cost = gadget.Gadget.GetCoins(PlayerData.Level);
-                    if (PlayerData.Coins >= cost && !gadget.IsBought && !gadget.IsUnlocked && gadget.Gadget.LevelRequirement > PlayerData.Level)
+                    if (DB.UpdatePlayerGadgetUnlocked(Player.CSteamID, gadget.Gadget.GadgetID, true))
                     {
-                        await DB.DecreasePlayerCoinsAsync(Player.CSteamID, cost);
-                        await DB.UpdatePlayerGadgetUnlockedAsync(Player.CSteamID, gadget.Gadget.GadgetID, true);
-                        TaskDispatcher.QueueOnMainThread(() =>
-                        {
-                            EquipSelectedItem();
-                            ReloadSelectedItem();
-                            ReloadLoadoutTab();
-                        });
+                        DB.DecreasePlayerCoins(Player.CSteamID, cost);
+                        ReloadSelectedItem();
+                        ReloadLoadoutTab();
                     }
-                    else
-                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.COINS));
-                });
+                }
+                else
+                    SendNotEnoughCurrencyModal(ECurrency.COINS);
                 break;
             }
 
@@ -4485,23 +4351,18 @@ public class UIHandler
                     return;
                 }
 
-                _ = Task.Run(async () =>
+                var cost = perk.Perk.GetCoins(PlayerData.Level);
+                if (PlayerData.Coins >= cost && !perk.IsBought && !perk.IsUnlocked && perk.Perk.LevelRequirement > PlayerData.Level)
                 {
-                    var cost = perk.Perk.GetCoins(PlayerData.Level);
-                    if (PlayerData.Coins >= cost && !perk.IsBought && !perk.IsUnlocked && perk.Perk.LevelRequirement > PlayerData.Level)
+                    if (DB.UpdatePlayerPerkUnlocked(Player.CSteamID, perk.Perk.PerkID, true))
                     {
-                        await DB.DecreasePlayerCoinsAsync(Player.CSteamID, perk.Perk.GetCoins(PlayerData.Level));
-                        await DB.UpdatePlayerPerkUnlockedAsync(Player.CSteamID, perk.Perk.PerkID, true);
-                        TaskDispatcher.QueueOnMainThread(() =>
-                        {
-                            EquipSelectedItem();
-                            ReloadSelectedItem();
-                            ReloadLoadoutTab();
-                        });
+                        DB.DecreasePlayerCoins(Player.CSteamID, cost);
+                        ReloadSelectedItem();
+                        ReloadLoadoutTab();
                     }
-                    else
-                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.COINS));
-                });
+                }
+                else
+                    SendNotEnoughCurrencyModal(ECurrency.COINS);
                 break;
             }
 
@@ -4513,23 +4374,18 @@ public class UIHandler
                     return;
                 }
 
-                _ = Task.Run(async () =>
+                var cost = killstreak.Killstreak.GetCoins(PlayerData.Level);
+                if (PlayerData.Coins >= cost && !killstreak.IsBought && !killstreak.IsUnlocked && killstreak.Killstreak.LevelRequirement > PlayerData.Level)
                 {
-                    var cost = killstreak.Killstreak.GetCoins(PlayerData.Level);
-                    if (PlayerData.Coins >= cost && !killstreak.IsBought && !killstreak.IsUnlocked && killstreak.Killstreak.LevelRequirement > PlayerData.Level)
+                    if (DB.UpdatePlayerKillstreakUnlocked(Player.CSteamID, killstreak.Killstreak.KillstreakID, true))
                     {
-                        await DB.DecreasePlayerCoinsAsync(Player.CSteamID, cost);
-                        await DB.UpdatePlayerKillstreakUnlockedAsync(Player.CSteamID, killstreak.Killstreak.KillstreakID, true);
-                        TaskDispatcher.QueueOnMainThread(() =>
-                        {
-                            EquipSelectedItem();
-                            ReloadSelectedItem();
-                            ReloadLoadoutTab();
-                        });
+                        DB.DecreasePlayerCoins(Player.CSteamID, cost);
+                        ReloadSelectedItem();
+                        ReloadLoadoutTab();
                     }
-                    else
-                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.COINS));
-                });
+                }
+                else
+                    SendNotEnoughCurrencyModal(ECurrency.COINS);
                 break;
             }
 
@@ -4541,23 +4397,18 @@ public class UIHandler
                     return;
                 }
 
-                _ = Task.Run(async () =>
+                var cost = card.Card.GetCoins(PlayerData.Level);
+                if (PlayerData.Coins >= cost && !card.IsBought && !card.IsUnlocked && card.Card.LevelRequirement > PlayerData.Level)
                 {
-                    var cost = card.Card.GetCoins(PlayerData.Level);
-                    if (PlayerData.Coins >= cost && !card.IsBought && !card.IsUnlocked && card.Card.LevelRequirement > PlayerData.Level)
+                    if (DB.UpdatePlayerCardUnlocked(Player.CSteamID, card.Card.CardID, true))
                     {
-                        await DB.DecreasePlayerCoinsAsync(Player.CSteamID, cost);
-                        await DB.UpdatePlayerCardUnlockedAsync(Player.CSteamID, card.Card.CardID, true);
-                        TaskDispatcher.QueueOnMainThread(() =>
-                        {
-                            EquipSelectedItem();
-                            ReloadSelectedItem();
-                            ReloadLoadoutTab();
-                        });
+                        DB.DecreasePlayerCoins(Player.CSteamID, cost);
+                        ReloadSelectedItem();
+                        ReloadLoadoutTab();
                     }
-                    else
-                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.COINS));
-                });
+                }
+                else
+                    SendNotEnoughCurrencyModal(ECurrency.COINS);
                 break;
             }
 
@@ -4569,23 +4420,18 @@ public class UIHandler
                     return;
                 }
 
-                _ = Task.Run(async () =>
+                var cost = glove.Glove.GetCoins(PlayerData.Level);
+                if (PlayerData.Coins >= cost && !glove.IsBought && !glove.IsUnlocked && glove.Glove.LevelRequirement > PlayerData.Level)
                 {
-                    var cost = glove.Glove.GetCoins(PlayerData.Level);
-                    if (PlayerData.Coins >= cost && !glove.IsBought && !glove.IsUnlocked && glove.Glove.LevelRequirement > PlayerData.Level)
+                    if (DB.UpdatePlayerGloveUnlocked(Player.CSteamID, glove.Glove.GloveID, true))
                     {
-                        await DB.DecreasePlayerCoinsAsync(Player.CSteamID, cost);
-                        await DB.UpdatePlayerGloveUnlockedAsync(Player.CSteamID, glove.Glove.GloveID, true);
-                        TaskDispatcher.QueueOnMainThread(() =>
-                        {
-                            EquipSelectedItem();
-                            ReloadSelectedItem();
-                            ReloadLoadoutTab();
-                        });
+                        DB.DecreasePlayerCoins(Player.CSteamID, cost);
+                        ReloadSelectedItem();
+                        ReloadLoadoutTab();
                     }
-                    else
-                        TaskDispatcher.QueueOnMainThread(() => SendNotEnoughCurrencyModal(ECurrency.COINS));
-                });
+                }
+                else
+                    SendNotEnoughCurrencyModal(ECurrency.COINS);
                 break;
             }
         }
@@ -5034,7 +4880,7 @@ public class UIHandler
         MainPage = EMainPage.LEADERBOARD;
 
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Leaderboards Level TEXT 10", PlayerData.Level.ToString());
-        EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Leaderboards Level IMAGE 10", Plugin.Instance.DB.Levels.TryGetValue(PlayerData.Level, out var level) ? level.IconLinkMedium : "");
+        EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Leaderboards Level IMAGE 10", DB.Levels.TryGetValue(PlayerData.Level, out var level) ? level.IconLinkMedium : "");
         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Leaderboards Flag IMAGE 10", PlayerData.HideFlag ? Config.Icons.FileData.HiddenFlagIconLink : Utility.GetFlag(PlayerData.CountryCode));
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Leaderboards Name TEXT 10", (PlayerData.HasPrime ? UIManager.PRIME_SYMBOL : "") + PlayerData.SteamName);
 
@@ -5109,7 +4955,7 @@ public class UIHandler
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards BUTTON {index}", true);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Rank TEXT {index}", $"#{i + 1}");
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Level TEXT {index}", playerData.Level.ToString());
-            EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Level IMAGE {index}", Plugin.Instance.DB.Levels.TryGetValue(playerData.Level, out var level) ? level.IconLinkMedium : "");
+            EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Level IMAGE {index}", DB.Levels.TryGetValue(playerData.Level, out var level) ? level.IconLinkMedium : "");
             EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Flag IMAGE {index}", playerData.HideFlag ? Config.Icons.FileData.HiddenFlagIconLink : Utility.GetFlag(playerData.CountryCode));
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Name TEXT {index}", (playerData.HasPrime ? UIManager.PRIME_SYMBOL : "") + playerData.SteamName);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Kills TEXT {index}", (playerData.Kills + playerData.HeadshotKills).ToString());
@@ -5163,7 +5009,7 @@ public class UIHandler
                     EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards BUTTON {i}", true);
                     EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Rank TEXT {i}", $"#{data.IndexOf(playerData) + 1}");
                     EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Level TEXT {i}", playerData.Level.ToString());
-                    EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Level IMAGE {i}", Plugin.Instance.DB.Levels.TryGetValue(playerData.Level, out var level) ? level.IconLinkMedium : "");
+                    EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Level IMAGE {i}", DB.Levels.TryGetValue(playerData.Level, out var level) ? level.IconLinkMedium : "");
                     EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Flag IMAGE {i}", playerData.HideFlag ? Config.Icons.FileData.HiddenFlagIconLink : Utility.GetFlag(playerData.CountryCode));
                     EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Name TEXT {i}", playerData.SteamName);
                     EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Kills TEXT {i}", (playerData.Kills + playerData.HeadshotKills).ToString());
@@ -5925,10 +5771,10 @@ public class UIHandler
         }
 
         @case.Amount--;
-        _ = Task.Run(async () => await DB.DecreasePlayerCaseAsync(SteamID, @case.Case.CaseID, 1));
+        DB.DecreasePlayerCase(SteamID, @case.Case.CaseID, 1);
 
         if (isDuplicate)
-            _ = Task.Run(async () => await DB.IncreasePlayerScrapAsync(SteamID, duplicateScrapAmount));
+            DB.IncreasePlayerScrap(SteamID, duplicateScrapAmount);
         else
             Plugin.Instance.Reward.GiveRewards(SteamID, new() { reward });
 
@@ -6132,17 +5978,17 @@ public class UIHandler
         {
             case ECurrency.COINS:
                 PlayerData.Coins -= buyPrice;
-                _ = Task.Run(async () => await DB.DecreasePlayerCoinsAsync(SteamID, buyPrice));
+                DB.DecreasePlayerCoins(SteamID, buyPrice);
                 break;
             case ECurrency.SCRAP:
                 PlayerData.Scrap -= buyPrice;
-                _ = Task.Run(async () => await DB.DecreasePlayerScrapAsync(SteamID, buyPrice));
+                DB.DecreasePlayerScrap(SteamID, buyPrice);
                 break;
             default:
                 return;
         }
 
-        _ = Task.Run(async () => await DB.IncreasePlayerCaseAsync(SteamID, @case.CaseID, 1));
+        DB.IncreasePlayerCase(SteamID, @case.CaseID, 1);
     }
 
     public bool TryGetUnboxRewardInfo(Reward reward, out string rewardName, out string rewardImage, out ERarity rewardRarity)

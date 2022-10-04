@@ -3164,18 +3164,15 @@ public class DatabaseManager
                     embed.Fields[1].Value += $"**Top {percentileReward.UpperPercentile}%:** {upperIndex - lowerIndex} players \n";
                 }
 
-                _ = Task.Run(() =>
+                try
                 {
-                    try
-                    {
-                        DiscordManager.SendEmbed(embed, "Leaderboard", "https://discord.com/api/webhooks/983367340525760542/RfPxBseRKp3kffBEaHovRBRsLpIR4A-pvAXbQWzknDMohxCiawGlsZw6U_ehXukPreb_");
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.Log("Error sending embed");
-                        Logger.Log(ex);
-                    }
-                });
+                    DiscordManager.SendEmbed(embed, "Leaderboard", "https://discord.com/api/webhooks/983367340525760542/RfPxBseRKp3kffBEaHovRBRsLpIR4A-pvAXbQWzknDMohxCiawGlsZw6U_ehXukPreb_");
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log("Error sending embed");
+                    Logger.Log(ex);
+                }
 
                 // Wipe the Daily leaderboard data
                 _ = new MySqlCommand($"DELETE FROM `{PLAYERS_LEADERBOARD_DAILY}`;", conn).ExecuteScalar();
@@ -3237,18 +3234,15 @@ public class DatabaseManager
                     embed.Fields[1].Value += $"**Top {percentileReward.UpperPercentile}%:** {upperIndex - lowerIndex} players \n";
                 }
 
-                _ = Task.Run(() =>
+                try
                 {
-                    try
-                    {
-                        DiscordManager.SendEmbed(embed, "Leaderboard", "https://discord.com/api/webhooks/983367340525760542/RfPxBseRKp3kffBEaHovRBRsLpIR4A-pvAXbQWzknDMohxCiawGlsZw6U_ehXukPreb_");
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.Log("Error sending embed");
-                        Logger.Log(ex);
-                    }
-                });
+                    DiscordManager.SendEmbed(embed, "Leaderboard", "https://discord.com/api/webhooks/983367340525760542/RfPxBseRKp3kffBEaHovRBRsLpIR4A-pvAXbQWzknDMohxCiawGlsZw6U_ehXukPreb_");
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log("Error sending embed");
+                    Logger.Log(ex);
+                }
 
                 // Wipe the Weekly leaderboard data
                 _ = new MySqlCommand($"DELETE FROM `{PLAYERS_LEADERBOARD_WEEKLY}`;", conn).ExecuteScalar();
@@ -3308,18 +3302,15 @@ public class DatabaseManager
                     embed.Fields[1].Value += $"**Top {percentileReward.UpperPercentile}%:** {upperIndex - lowerIndex} players \n";
                 }
 
-                _ = Task.Run(() =>
+                try
                 {
-                    try
-                    {
-                        DiscordManager.SendEmbed(embed, "Leaderboard", "https://discord.com/api/webhooks/983367340525760542/RfPxBseRKp3kffBEaHovRBRsLpIR4A-pvAXbQWzknDMohxCiawGlsZw6U_ehXukPreb_");
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.Log("Error sending embed");
-                        Logger.Log(ex);
-                    }
-                });
+                    DiscordManager.SendEmbed(embed, "Leaderboard", "https://discord.com/api/webhooks/983367340525760542/RfPxBseRKp3kffBEaHovRBRsLpIR4A-pvAXbQWzknDMohxCiawGlsZw6U_ehXukPreb_");
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log("Error sending embed");
+                    Logger.Log(ex);
+                }
             }
 
             if (bulkRewards.Count > 0)
