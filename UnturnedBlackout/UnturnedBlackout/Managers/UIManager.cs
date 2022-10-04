@@ -199,7 +199,8 @@ public class UIManager
 
     // WAITING FOR PLAYERS
 
-    public void SendWaitingForPlayersUI(GamePlayer player, int playerCount, int waitingPlayers) => EffectManager.sendUIEffect(WAITING_FOR_PLAYERS_ID, WAITING_FOR_PLAYERS_KEY, player.TransportConnection, true, Plugin.Instance.Translate("Waiting_For_Players_Show", playerCount, waitingPlayers).ToRich());
+    public void SendWaitingForPlayersUI(GamePlayer player, int playerCount, int waitingPlayers) =>
+        EffectManager.sendUIEffect(WAITING_FOR_PLAYERS_ID, WAITING_FOR_PLAYERS_KEY, player.TransportConnection, true, Plugin.Instance.Translate("Waiting_For_Players_Show", playerCount, waitingPlayers).ToRich());
 
     public void UpdateWaitingForPlayersUI(GamePlayer player, int playerCount, int waitingPlayers) => EffectManager.sendUIEffectText(WAITING_FOR_PLAYERS_KEY, player.TransportConnection, true, "Waiting", Plugin.Instance.Translate("Waiting_For_Players_Show", playerCount, waitingPlayers).ToRich());
 
@@ -438,6 +439,7 @@ public class UIManager
     {
         if (!player.HasMidgameLoadout)
             player.Player.Player.disablePluginWidgetFlag(EPluginWidgetFlags.Modal);
+
         EffectManager.askEffectClearByID(DEATH_ID, player.TransportConnection);
     }
 
@@ -601,6 +603,7 @@ public class UIManager
         for (var i = 0; i < roundEndCases.Count; i++)
         {
             yield return new WaitForSeconds(1f);
+
             var roundEndCase = roundEndCases[i];
             foreach (var player in players)
             {
@@ -784,7 +787,9 @@ public class UIManager
                 player.RemoveActiveKillstreak();
 
             EffectManager.sendUIEffectText(HUD_KEY, connection, true, "WeaponName", asset.itemName);
-            var isPrimarySecondaryMelee = asset.id == (player.ActiveLoadout.PrimarySkin?.SkinID ?? 0) || asset.id == (player.ActiveLoadout.Primary?.Gun?.GunID ?? 0) || asset.id == (player.ActiveLoadout.SecondarySkin?.SkinID ?? 0) || asset.id == (player.ActiveLoadout.Secondary?.Gun?.GunID ?? 0) || asset.id == (player.ActiveLoadout.Knife?.Knife?.KnifeID ?? 0);
+            var isPrimarySecondaryMelee = asset.id == (player.ActiveLoadout.PrimarySkin?.SkinID ?? 0) || asset.id == (player.ActiveLoadout.Primary?.Gun?.GunID ?? 0) || asset.id == (player.ActiveLoadout.SecondarySkin?.SkinID ?? 0) || asset.id == (player.ActiveLoadout.Secondary?.Gun?.GunID ?? 0) ||
+                                          asset.id == (player.ActiveLoadout.Knife?.Knife?.KnifeID ?? 0);
+
             player.ForceEquip = !isPrimarySecondaryMelee;
             if (!player.ForceEquip)
             {
@@ -858,6 +863,7 @@ public class UIManager
     public IEnumerator DelayedEquip(PlayerEquipment equipment, byte page, byte x, byte y)
     {
         yield return new WaitForSeconds(0.2f);
+
         if (equipment.itemID == 0 && equipment.canEquip)
             equipment.ServerEquip(page, x, y);
     }
@@ -893,10 +899,11 @@ public class UIManager
         var ammo = ids.Contains(bullet.magazineAsset.id) ? 1 : gun.player.equipment.state[10];
         var player = Plugin.Instance.Game.GetGamePlayer(gun.player);
         EffectManager.sendUIEffectText(HUD_KEY, player.TransportConnection, true, "AmmoNum", ammo.ToString());
-        
+
         var info = player.ActiveKillstreak?.Killstreak?.KillstreakInfo;
         if (ammo != 0 || !player.HasKillstreakActive || !player.ActiveKillstreak.Killstreak.KillstreakInfo.IsItem || !info.RemoveWhenAmmoEmpty)
             return;
+
         if (info.MagAmount > 0)
         {
             var inv = gun.player.inventory;
@@ -940,6 +947,7 @@ public class UIManager
     public IEnumerator DelayedRemoveActiveKillstreak(GamePlayer player)
     {
         yield return new WaitForSeconds(0.5f);
+
         player.RemoveActiveKillstreak();
     }
 
@@ -1444,6 +1452,7 @@ public class UIManager
         {
             if (player.GamePlayer.IsLoading)
                 continue;
+
             EffectManager.sendUIEffect(FLAG_POPUP_UI, FLAG_POPUP_KEY, player.GamePlayer.TransportConnection, true);
             EffectManager.sendUIEffectVisibility(FLAG_POPUP_KEY, player.GamePlayer.TransportConnection, true, $"FLAG {flag} Toggler", true);
             EffectManager.sendUIEffectText(FLAG_POPUP_KEY, player.GamePlayer.TransportConnection, true, "FlagTxt", Plugin.Instance.Translate($"CTF_{(player.Team.TeamID == team.TeamID ? "Team" : "Enemy")}_{state}_Flag").ToRich());
@@ -1839,6 +1848,7 @@ public class UIManager
             case "SERVER Battlepass Confirm BUTTON":
                 if (handler.MainPage == EMainPage.BATTLEPASS)
                     Plugin.Instance.BP.SkipTier(gPly);
+
                 return;
             case "SERVER Battlepass Claim BUTTON":
                 if (handler.MainPage == EMainPage.BATTLEPASS)

@@ -47,6 +47,7 @@ public class FFAGame : Game
         {
             if (player.GamePlayer.IsLoading)
                 continue;
+
             UI.ClearWaitingForPlayersUI(player.GamePlayer);
             player.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(0);
             UI.ShowCountdownUI(player.GamePlayer);
@@ -56,6 +57,7 @@ public class FFAGame : Game
         for (var seconds = Config.FFA.FileData.StartSeconds; seconds >= 0; seconds--)
         {
             yield return new WaitForSeconds(1);
+
             foreach (var player in Players)
                 UI.SendCountdownSeconds(player.GamePlayer, seconds);
         }
@@ -80,6 +82,7 @@ public class FFAGame : Game
         for (var seconds = Config.FFA.FileData.EndSeconds; seconds >= 0; seconds--)
         {
             yield return new WaitForSeconds(1);
+
             var timeSpan = TimeSpan.FromSeconds(seconds);
             foreach (var player in Players)
                 UI.UpdateFFATimer(player.GamePlayer, timeSpan.ToString(@"m\:ss"));
@@ -160,7 +163,9 @@ public class FFAGame : Game
             UI.SetupFFALeaderboard(Players, Location, false, IsHardcore);
             CleanMap();
         });
+
         yield return new WaitForSeconds(5);
+
         foreach (var player in Players)
             UI.ShowFFALeaderboard(player.GamePlayer);
 
@@ -168,6 +173,7 @@ public class FFAGame : Game
             _ = Plugin.Instance.StartCoroutine(UI.SetupRoundEndDrops(Players.Select(k => k.GamePlayer).ToList(), roundEndCases, 1));
 
         yield return new WaitForSeconds(Config.Base.FileData.EndingLeaderboardSeconds);
+
         foreach (var player in Players.ToList())
         {
             RemovePlayerFromGame(player.GamePlayer);
@@ -209,6 +215,7 @@ public class FFAGame : Game
         for (var seconds = 1; seconds <= 5; seconds++)
         {
             yield return new WaitForSeconds(1);
+
             UI.UpdateLoadingBar(player.Player, new('　', Math.Min(96, seconds * 96 / 5)));
         }
 
@@ -278,7 +285,9 @@ public class FFAGame : Game
         }
 
         if (GamePhase != EGamePhase.ENDING)
-            TaskDispatcher.QueueOnMainThread(() => BarricadeManager.BarricadeRegions.Cast<BarricadeRegion>().SelectMany(k => k.drops).Where(k => (k.GetServersideData()?.owner ?? 0UL) == player.SteamID.m_SteamID && LevelNavigation.tryGetNavigation(k.model.transform.position, out var nav) && nav == Location.NavMesh).Select(k => BarricadeManager.tryGetRegion(k.model.transform, out var x, out var y, out var plant, out var _) ? (k, x, y, plant) : (k, byte.MaxValue, byte.MaxValue, ushort.MaxValue)).ToList().ForEach(k => BarricadeManager.destroyBarricade(k.k, k.Item2, k.Item3, k.Item4)));
+            TaskDispatcher.QueueOnMainThread(() =>
+                BarricadeManager.BarricadeRegions.Cast<BarricadeRegion>().SelectMany(k => k.drops).Where(k => (k.GetServersideData()?.owner ?? 0UL) == player.SteamID.m_SteamID && LevelNavigation.tryGetNavigation(k.model.transform.position, out var nav) && nav == Location.NavMesh)
+                    .Select(k => BarricadeManager.tryGetRegion(k.model.transform, out var x, out var y, out var plant, out var _) ? (k, x, y, plant) : (k, byte.MaxValue, byte.MaxValue, ushort.MaxValue)).ToList().ForEach(k => BarricadeManager.destroyBarricade(k.k, k.Item2, k.Item3, k.Item4)));
 
         player.Player.Player.quests.askSetRadioFrequency(CSteamID.Nil, 0);
         fPlayer.GamePlayer.OnGameLeft();
@@ -532,7 +541,6 @@ public class FFAGame : Game
 
             Quest.CheckQuest(fPlayer.GamePlayer, EQuestType.DEATH, questConditions);
 
-
             DB.IncreasePlayerXP(kPlayer.GamePlayer.SteamID, xpGained);
             if (cause == EDeathCause.GUN && limb == ELimb.SKULL)
                 DB.IncreasePlayerHeadshotKills(kPlayer.GamePlayer.SteamID, 1);
@@ -657,8 +665,9 @@ public class FFAGame : Game
                 Utility.Say(player.Player, $"<color=red>You are muted for{(expiryTime.Days == 0 ? "" : $" {expiryTime.Days} Days ")}{(expiryTime.Hours == 0 ? "" : $" {expiryTime.Hours} Hours")} {expiryTime.Minutes} Minutes");
                 return;
             }
-            
-            var updatedText = $"[{chatMode.ToFriendlyName()}] <color={Utility.GetLevelColor(player.Data.Level)}>[{player.Data.Level}]</color> <color={Config.FFA.FileData.FFATeam.ChatPlayerHexCode}>{player.Player.CharacterName.ToUnrich()}</color>: <color={Config.FFA.FileData.FFATeam.ChatMessageHexCode}>{text.ToUnrich()}</color>";
+
+            var updatedText =
+                $"[{chatMode.ToFriendlyName()}] <color={Utility.GetLevelColor(player.Data.Level)}>[{player.Data.Level}]</color> <color={Config.FFA.FileData.FFATeam.ChatPlayerHexCode}>{player.Player.CharacterName.ToUnrich()}</color>: <color={Config.FFA.FileData.FFATeam.ChatMessageHexCode}>{text.ToUnrich()}</color>";
 
             foreach (var reciever in Players)
                 ChatManager.serverSendMessage(updatedText, Color.white, toPlayer: reciever.GamePlayer.Player.SteamPlayer(), iconURL: player.Data.AvatarLink, useRichTextFormatting: true);
@@ -822,6 +831,7 @@ public class FFAGame : Game
         _ = SpawnPoints.Remove(spawnPoint);
         UnavailableSpawnPoints.Add(spawnPoint);
         yield return new WaitForSeconds(Config.Base.FileData.SpawnUnavailableSeconds);
+
         SpawnPoints.Add(spawnPoint);
         _ = UnavailableSpawnPoints.Remove(spawnPoint);
     }

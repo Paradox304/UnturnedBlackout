@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using SDG.Unturned;
 using UnityEngine;
+
 // ReSharper disable InconsistentNaming
 
 namespace UnturnedBlackout.Patches;

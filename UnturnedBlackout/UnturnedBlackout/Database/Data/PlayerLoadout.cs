@@ -18,7 +18,9 @@ public class PlayerLoadout
     public Dictionary<int, LoadoutGlove> Gloves { get; set; }
     public Dictionary<int, Loadout> Loadouts { get; set; }
 
-    public PlayerLoadout(Dictionary<ushort, LoadoutGun> guns, Dictionary<ushort, LoadoutGunCharm> gunCharms, Dictionary<ushort, LoadoutKnife> knives, Dictionary<int, GunSkin> gunSkinsSearchByID, Dictionary<ushort, List<GunSkin>> gunSkinsSearchByGunID, Dictionary<ushort, GunSkin> gunSkinsSearchBySkinID, Dictionary<int, LoadoutPerk> perks, Dictionary<ushort, LoadoutGadget> gadgets, Dictionary<int, LoadoutKillstreak> killstreaks, Dictionary<int, LoadoutCard> cards, Dictionary<int, LoadoutGlove> gloves, Dictionary<int, Loadout> loadouts)
+    public PlayerLoadout(
+        Dictionary<ushort, LoadoutGun> guns, Dictionary<ushort, LoadoutGunCharm> gunCharms, Dictionary<ushort, LoadoutKnife> knives, Dictionary<int, GunSkin> gunSkinsSearchByID, Dictionary<ushort, List<GunSkin>> gunSkinsSearchByGunID, Dictionary<ushort, GunSkin> gunSkinsSearchBySkinID,
+        Dictionary<int, LoadoutPerk> perks, Dictionary<ushort, LoadoutGadget> gadgets, Dictionary<int, LoadoutKillstreak> killstreaks, Dictionary<int, LoadoutCard> cards, Dictionary<int, LoadoutGlove> gloves, Dictionary<int, Loadout> loadouts)
     {
         Guns = guns;
         GunCharms = gunCharms;

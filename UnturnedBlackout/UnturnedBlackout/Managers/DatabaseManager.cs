@@ -25,6 +25,7 @@ using Achievement = UnturnedBlackout.Database.Base.Achievement;
 using Logger = Rocket.Core.Logging.Logger;
 using PlayerQuest = UnturnedBlackout.Database.Data.PlayerQuest;
 using Timer = System.Timers.Timer;
+
 // ReSharper disable NotResolvedInText
 
 namespace UnturnedBlackout.Managers;
@@ -37,14 +38,14 @@ public class DatabaseManager
 
     public Timer CacheRefresher { get; set; }
     public Timer BatchQueryCleaner { get; set; }
-    
+
     // Pending Queries
     public List<string> PendingQueries { get; set; }
-    
+
     // Server Data
     public Options ServerOptions { get; set; }
     public bool IsPendingSeasonalWipe { get; set; }
-    
+
     // Players Data
     public Dictionary<CSteamID, PlayerData> PlayerData { get; set; }
     public Dictionary<CSteamID, PlayerLoadout> PlayerLoadouts { get; set; }
@@ -207,8 +208,7 @@ public class DatabaseManager
             UserID = Config.DatabaseUsername,
             Password = Config.DatabasePassword,
             MaximumPoolSize = 500,
-            ConnectionLifeTime = Config.ConnectionTimeout,
-            CacheServerProperties = true
+            ConnectionLifeTime = 20
         };
 
         CacheRefresher = new(120 * 1000);
@@ -217,7 +217,7 @@ public class DatabaseManager
         BatchQueryCleaner = new(10 * 1000);
         BatchQueryCleaner.Elapsed += CleanQueries;
         PendingQueries = new();
-        
+
         PlayerData = new();
         PlayerLoadouts = new();
 
@@ -242,45 +242,145 @@ public class DatabaseManager
             await conn.OpenAsync();
 
             // BASE DATA
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{GUNS}` ( `GunID` SMALLINT UNSIGNED NOT NULL , `GunName` VARCHAR(255) NOT NULL , `GunDesc` TEXT NOT NULL , `GunType` ENUM('Pistol','SMG','Shotgun','LMG','AR','SNIPER','CARBINE') NOT NULL , `GunRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `MovementChange` DECIMAL(4,3) NOT NULL , `MovementChangeADS` DECIMAL(4,3) NOT NULL , `IconLink` TEXT NOT NULL , `MagAmount` TINYINT NOT NULL , `Coins` INT NOT NULL , `BuyPrice` INT NOT NULL ,  `ScrapAmount` INT NOT NULL , `LevelRequirement` INT NOT NULL , `IsPrimary` BOOLEAN NOT NULL , `DefaultAttachments` TEXT NOT NULL , `LevelXPNeeded` TEXT NOT NULL , `LevelRewards` TEXT NOT NULL , PRIMARY KEY (`GunID`));", conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{ATTACHMENTS}` ( `AttachmentID` SMALLINT UNSIGNED NOT NULL , `AttachmentName` VARCHAR(255) NOT NULL , `AttachmentDesc` TEXT NOT NULL , `AttachmentPros` TEXT NOT NULL , `AttachmentCons` TEXT NOT NULL , `AttachmentType` ENUM('Sights','Grip','Barrel','Magazine') NOT NULL , `AttachmentRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `MovementChange` DECIMAL(4,3) NOT NULL , `MovementChangeADS` DECIMAL (4,3) NOT NULL , `IconLink` TEXT NOT NULL , `BuyPrice` INT NOT NULL , `Coins` INT NOT NULL , PRIMARY KEY (`AttachmentID`));", conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{GUNS_SKINS}` ( `ID` INT NOT NULL AUTO_INCREMENT , `GunID` SMALLINT UNSIGNED NOT NULL , `SkinID` SMALLINT UNSIGNED NOT NULL , `SkinName` VARCHAR(255) NOT NULL , `SkinDesc` TEXT NOT NULL , `SkinRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `PatternLink` TEXT NOT NULL , `IconLink` TEXT NOT NULL , `ScrapAmount` INT  NOT NULL , `MaxAmount` INT NOT NULL , `UnboxedAmount` INT NOT NULL , CONSTRAINT `ub_gun_id` FOREIGN KEY (`GunID`) REFERENCES `{GUNS}` (`GunID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`ID`));", conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{GUNS_CHARMS}` ( `CharmID` SMALLINT UNSIGNED NOT NULL , `CharmName` VARCHAR(255) NOT NULL , `CharmDesc` TEXT NOT NULL , `CharmRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `IconLink` TEXT NOT NULL , `BuyPrice` INT NOT NULL , `Coins` INT NOT NULL , `ScrapAmount` INT  NOT NULL , `LevelRequirement` INT NOT NULL , `AuthorCredits` TEXT NOT NULL , PRIMARY KEY (`CharmID`));", conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{KNIVES}` ( `KnifeID` SMALLINT UNSIGNED NOT NULL , `KnifeName` VARCHAR(255) NOT NULL , `KnifeDesc` TEXT NOT NULL , `KnifeRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `MovementChange` DECIMAL(4,3) NOT NULL , `IconLink` TEXT NOT NULL , `ScrapAmount` INT NOT NULL , `Coins` INT NOT NULL , `BuyPrice` INT NOT NULL , `LevelRequirement` INT NOT NULL , `KnifeWeight` INT NOT NULL , `MaxAmount` INT NOT NULL , `UnboxedAmount` INT NOT NULL , PRIMARY KEY (`KnifeID`));", conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PERKS}` ( `PerkID` INT NOT NULL , `PerkName` VARCHAR(255) NOT NULL , `PerkDesc` TEXT NOT NULL , `PerkType` ENUM('1','2','3') NOT NULL , `PerkRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `IconLink` TEXT NOT NULL , `SkillType` TEXT NOT NULL , `SkillLevel` INT NOT NULL , `Coins` INT NOT NULL , `BuyPrice` INT NOT NULL , `ScrapAmount` INT  NOT NULL , `LevelRequirement` INT NOT NULL , PRIMARY KEY (`PerkID`));", conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{GADGETS}` ( `GadgetID` SMALLINT UNSIGNED NOT NULL , `GadgetName` VARCHAR(255) NOT NULL , `GadgetDesc` TEXT NOT NULL , `GadgetRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `IconLink` TEXT NOT NULL , `Coins` INT NOT NULL , `BuyPrice` INT NOT NULL , `ScrapAmount` INT NOT NULL , `GiveSeconds` INT  NOT NULL , `LevelRequirement` INT NOT NULL , `IsTactical` BOOLEAN NOT NULL , PRIMARY KEY (`GadgetID`));", conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{KILLSTREAKS}` ( `KillstreakID` INT NOT NULL , `KillstreakName` VARCHAR(255) NOT NULL , `KillstreakDesc` TEXT NOT NULL , `KillstreakRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `IconLink` TEXT NOT NULL , `KillstreakRequired` INT NOT NULL , `BuyPrice` INT NOT NULL , `Coins` INT  NOT NULL , `ScrapAmount` INT NOT NULL , `LevelRequirement` INT NOT NULL , PRIMARY KEY (`KillstreakID`));", conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{CARDS}` ( `CardID` INT NOT NULL , `CardName` VARCHAR(255) NOT NULL , `CardDesc` TEXT NOT NULL , `CardRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `IconLink` TEXT NOT NULL , `CardLink` TEXT NOT NULL , `ScrapAmount` INT NOT NULL , `BuyPrice` INT NOT NULL , `Coins` INT NOT NULL , `LevelRequirement` INT NOT NULL , `AuthorCredits` TEXT NOT NULL , PRIMARY KEY (`CardID`));", conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{GLOVES}` ( `GloveID` INT NOT NULL , `GloveName` VARCHAR(255) NOT NULL , `GloveDesc` TEXT NOT NULL , `GloveRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `IconLink` TEXT NOT NULL , `ScrapAmount` INT NOT NULL , `BuyPrice` INT NOT NULL , `Coins` INT NOT NULL , `LevelRequirement` INT NOT NULL , `GloveWeight` INT NOT NULL , `MaxAmount` INT NOT NULL , `UnboxedAmount` INT NOT NULL , PRIMARY KEY (`GloveID`));", conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{GUNS}` ( `GunID` SMALLINT UNSIGNED NOT NULL , `GunName` VARCHAR(255) NOT NULL , `GunDesc` TEXT NOT NULL , `GunType` ENUM('Pistol','SMG','Shotgun','LMG','AR','SNIPER','CARBINE') NOT NULL , `GunRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `MovementChange` DECIMAL(4,3) NOT NULL , `MovementChangeADS` DECIMAL(4,3) NOT NULL , `IconLink` TEXT NOT NULL , `MagAmount` TINYINT NOT NULL , `Coins` INT NOT NULL , `BuyPrice` INT NOT NULL ,  `ScrapAmount` INT NOT NULL , `LevelRequirement` INT NOT NULL , `IsPrimary` BOOLEAN NOT NULL , `DefaultAttachments` TEXT NOT NULL , `LevelXPNeeded` TEXT NOT NULL , `LevelRewards` TEXT NOT NULL , PRIMARY KEY (`GunID`));",
+                conn).ExecuteScalarAsync();
+
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{ATTACHMENTS}` ( `AttachmentID` SMALLINT UNSIGNED NOT NULL , `AttachmentName` VARCHAR(255) NOT NULL , `AttachmentDesc` TEXT NOT NULL , `AttachmentPros` TEXT NOT NULL , `AttachmentCons` TEXT NOT NULL , `AttachmentType` ENUM('Sights','Grip','Barrel','Magazine') NOT NULL , `AttachmentRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `MovementChange` DECIMAL(4,3) NOT NULL , `MovementChangeADS` DECIMAL (4,3) NOT NULL , `IconLink` TEXT NOT NULL , `BuyPrice` INT NOT NULL , `Coins` INT NOT NULL , PRIMARY KEY (`AttachmentID`));",
+                conn).ExecuteScalarAsync();
+
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{GUNS_SKINS}` ( `ID` INT NOT NULL AUTO_INCREMENT , `GunID` SMALLINT UNSIGNED NOT NULL , `SkinID` SMALLINT UNSIGNED NOT NULL , `SkinName` VARCHAR(255) NOT NULL , `SkinDesc` TEXT NOT NULL , `SkinRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `PatternLink` TEXT NOT NULL , `IconLink` TEXT NOT NULL , `ScrapAmount` INT  NOT NULL , `MaxAmount` INT NOT NULL , `UnboxedAmount` INT NOT NULL , CONSTRAINT `ub_gun_id` FOREIGN KEY (`GunID`) REFERENCES `{GUNS}` (`GunID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`ID`));",
+                conn).ExecuteScalarAsync();
+
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{GUNS_CHARMS}` ( `CharmID` SMALLINT UNSIGNED NOT NULL , `CharmName` VARCHAR(255) NOT NULL , `CharmDesc` TEXT NOT NULL , `CharmRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `IconLink` TEXT NOT NULL , `BuyPrice` INT NOT NULL , `Coins` INT NOT NULL , `ScrapAmount` INT  NOT NULL , `LevelRequirement` INT NOT NULL , `AuthorCredits` TEXT NOT NULL , PRIMARY KEY (`CharmID`));",
+                conn).ExecuteScalarAsync();
+
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{KNIVES}` ( `KnifeID` SMALLINT UNSIGNED NOT NULL , `KnifeName` VARCHAR(255) NOT NULL , `KnifeDesc` TEXT NOT NULL , `KnifeRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `MovementChange` DECIMAL(4,3) NOT NULL , `IconLink` TEXT NOT NULL , `ScrapAmount` INT NOT NULL , `Coins` INT NOT NULL , `BuyPrice` INT NOT NULL , `LevelRequirement` INT NOT NULL , `KnifeWeight` INT NOT NULL , `MaxAmount` INT NOT NULL , `UnboxedAmount` INT NOT NULL , PRIMARY KEY (`KnifeID`));",
+                conn).ExecuteScalarAsync();
+
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{PERKS}` ( `PerkID` INT NOT NULL , `PerkName` VARCHAR(255) NOT NULL , `PerkDesc` TEXT NOT NULL , `PerkType` ENUM('1','2','3') NOT NULL , `PerkRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `IconLink` TEXT NOT NULL , `SkillType` TEXT NOT NULL , `SkillLevel` INT NOT NULL , `Coins` INT NOT NULL , `BuyPrice` INT NOT NULL , `ScrapAmount` INT  NOT NULL , `LevelRequirement` INT NOT NULL , PRIMARY KEY (`PerkID`));",
+                conn).ExecuteScalarAsync();
+
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{GADGETS}` ( `GadgetID` SMALLINT UNSIGNED NOT NULL , `GadgetName` VARCHAR(255) NOT NULL , `GadgetDesc` TEXT NOT NULL , `GadgetRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `IconLink` TEXT NOT NULL , `Coins` INT NOT NULL , `BuyPrice` INT NOT NULL , `ScrapAmount` INT NOT NULL , `GiveSeconds` INT  NOT NULL , `LevelRequirement` INT NOT NULL , `IsTactical` BOOLEAN NOT NULL , PRIMARY KEY (`GadgetID`));",
+                conn).ExecuteScalarAsync();
+
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{KILLSTREAKS}` ( `KillstreakID` INT NOT NULL , `KillstreakName` VARCHAR(255) NOT NULL , `KillstreakDesc` TEXT NOT NULL , `KillstreakRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `IconLink` TEXT NOT NULL , `KillstreakRequired` INT NOT NULL , `BuyPrice` INT NOT NULL , `Coins` INT  NOT NULL , `ScrapAmount` INT NOT NULL , `LevelRequirement` INT NOT NULL , PRIMARY KEY (`KillstreakID`));",
+                conn).ExecuteScalarAsync();
+
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{CARDS}` ( `CardID` INT NOT NULL , `CardName` VARCHAR(255) NOT NULL , `CardDesc` TEXT NOT NULL , `CardRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `IconLink` TEXT NOT NULL , `CardLink` TEXT NOT NULL , `ScrapAmount` INT NOT NULL , `BuyPrice` INT NOT NULL , `Coins` INT NOT NULL , `LevelRequirement` INT NOT NULL , `AuthorCredits` TEXT NOT NULL , PRIMARY KEY (`CardID`));",
+                conn).ExecuteScalarAsync();
+
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{GLOVES}` ( `GloveID` INT NOT NULL , `GloveName` VARCHAR(255) NOT NULL , `GloveDesc` TEXT NOT NULL , `GloveRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `IconLink` TEXT NOT NULL , `ScrapAmount` INT NOT NULL , `BuyPrice` INT NOT NULL , `Coins` INT NOT NULL , `LevelRequirement` INT NOT NULL , `GloveWeight` INT NOT NULL , `MaxAmount` INT NOT NULL , `UnboxedAmount` INT NOT NULL , PRIMARY KEY (`GloveID`));",
+                conn).ExecuteScalarAsync();
+
             _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{LEVELS}` ( `Level` INT NOT NULL , `XPNeeded` INT NOT NULL , `IconLinkLarge` TEXT NOT NULL , `IconLinkMedium` TEXT NOT NULL , `IconLinkSmall` TEXT NOT NULL , PRIMARY KEY (`Level`));", conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{OPTIONS}` ( `DailyLeaderboardWipe` BIGINT NOT NULL , `WeeklyLeaderboardWipe` BIGINT NOT NULL , `DailyLeaderboardRankedRewards` TEXT NOT NULL , `DailyLeaderboardPercentileRewards` TEXT NOT NULL , `WeeklyLeaderboardRankedRewards` TEXT NOT NULL , `WeeklyLeaderboardPercentileRewards` TEXT NOT NULL, `SeasonalLeaderboardRankedRewards` TEXT NOT NULL , `SeasonalLeaderboardPercentileRewards` TEXT NOT NULL , `XPBooster` DECIMAL(6,3) NOT NULL , `BPBooster` DECIMAL(6,3) NOT NULL , `GunXPBooster` DECIMAL(6,3) NOT NULL , `XPBoosterWipe` BIGINT NOT NULL , `BPBoosterWipe` BIGINT NOT NULL , `GunXPBoosterWipe` BIGINT NOT NULL , `GameTips` TEXT NOT NULL , `PrimeRewards` TEXT NOT NULL , `PrimeDailyRewards` TEXT NOT NULL);", conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{OPTIONS}` ( `DailyLeaderboardWipe` BIGINT NOT NULL , `WeeklyLeaderboardWipe` BIGINT NOT NULL , `DailyLeaderboardRankedRewards` TEXT NOT NULL , `DailyLeaderboardPercentileRewards` TEXT NOT NULL , `WeeklyLeaderboardRankedRewards` TEXT NOT NULL , `WeeklyLeaderboardPercentileRewards` TEXT NOT NULL, `SeasonalLeaderboardRankedRewards` TEXT NOT NULL , `SeasonalLeaderboardPercentileRewards` TEXT NOT NULL , `XPBooster` DECIMAL(6,3) NOT NULL , `BPBooster` DECIMAL(6,3) NOT NULL , `GunXPBooster` DECIMAL(6,3) NOT NULL , `XPBoosterWipe` BIGINT NOT NULL , `BPBoosterWipe` BIGINT NOT NULL , `GunXPBoosterWipe` BIGINT NOT NULL , `GameTips` TEXT NOT NULL , `PrimeRewards` TEXT NOT NULL , `PrimeDailyRewards` TEXT NOT NULL);",
+                conn).ExecuteScalarAsync();
+
             _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{SERVERS}`  ( `IP` TEXT NOT NULL , `Port` TEXT NOT NULL , `ServerName` TEXT NOT NULL , `FriendlyIP` TEXT NOT NULL , `ServerBanner` TEXT NOT NULL , `ServerDesc` TEXT NOT NULL );", conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{QUESTS}` ( `QuestID` INT NOT NULL AUTO_INCREMENT , `QuestTitle` TEXT NOT NULL , `QuestDesc` TEXT NOT NULL , QuestType ENUM('Kill', 'Death', 'Win', 'FinishMatch', 'MultiKill', 'Killstreak', 'Headshots', 'GadgetsUsed', 'FlagsCaptured', 'FlagsSaved', 'Dogtags', 'Shutdown', 'Domination', 'FlagKiller', 'FlagDenied', 'Revenge', 'FirstKill', 'Longshot', 'Survivor', 'Collector') NOT NULL , `QuestTier` ENUM('Easy1', 'Easy2', 'Easy3', 'Medium1', 'Medium2', 'Hard1') NOT NULL , `QuestConditions` TEXT NOT NULL , `TargetAmount` INT NOT NULL , `XP` INT NOT NULL , PRIMARY KEY (`QuestID`));", conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{ACHIEVEMENTS}` ( `AchievementID` INT NOT NULL AUTO_INCREMENT , `AchievementType` ENUM('Kill', 'Death', 'Win', 'FinishMatch', 'MultiKill', 'Killstreak', 'Headshots', 'GadgetsUsed', 'FlagsCaptured', 'FlagsSaved', 'Dogtags', 'Shutdown', 'Domination', 'FlagKiller', 'FlagDenied', 'Revenge', 'FirstKill', 'Longshot', 'Survivor', 'Collector') NOT NULL , `AchievementConditions` TEXT NOT NULL , `PageID` INT NOT NULL , PRIMARY KEY (`AchievementID`));", conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{ACHIEVEMENTS_TIERS}` ( `AchievementID` INT NOT NULL , `TierID` INT NOT NULL , `TierTitle` TEXT NOT NULL , `TierDesc` TEXT NOT NULL , `TierPrevSmall` TEXT NOT NULL , `TierPrevLarge` TEXT NOT NULL , `TargetAmount` INT NOT NULL , `Rewards` TEXT NOT NULL , `RemoveRewards` TEXT NOT NULL , CONSTRAINT `ub_achievement_id` FOREIGN KEY (`AchievementID`) REFERENCES `{ACHIEVEMENTS}` (`AchievementID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`AchievementID`, `TierID`));", conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{QUESTS}` ( `QuestID` INT NOT NULL AUTO_INCREMENT , `QuestTitle` TEXT NOT NULL , `QuestDesc` TEXT NOT NULL , QuestType ENUM('Kill', 'Death', 'Win', 'FinishMatch', 'MultiKill', 'Killstreak', 'Headshots', 'GadgetsUsed', 'FlagsCaptured', 'FlagsSaved', 'Dogtags', 'Shutdown', 'Domination', 'FlagKiller', 'FlagDenied', 'Revenge', 'FirstKill', 'Longshot', 'Survivor', 'Collector') NOT NULL , `QuestTier` ENUM('Easy1', 'Easy2', 'Easy3', 'Medium1', 'Medium2', 'Hard1') NOT NULL , `QuestConditions` TEXT NOT NULL , `TargetAmount` INT NOT NULL , `XP` INT NOT NULL , PRIMARY KEY (`QuestID`));",
+                conn).ExecuteScalarAsync();
+
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{ACHIEVEMENTS}` ( `AchievementID` INT NOT NULL AUTO_INCREMENT , `AchievementType` ENUM('Kill', 'Death', 'Win', 'FinishMatch', 'MultiKill', 'Killstreak', 'Headshots', 'GadgetsUsed', 'FlagsCaptured', 'FlagsSaved', 'Dogtags', 'Shutdown', 'Domination', 'FlagKiller', 'FlagDenied', 'Revenge', 'FirstKill', 'Longshot', 'Survivor', 'Collector') NOT NULL , `AchievementConditions` TEXT NOT NULL , `PageID` INT NOT NULL , PRIMARY KEY (`AchievementID`));",
+                conn).ExecuteScalarAsync();
+
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{ACHIEVEMENTS_TIERS}` ( `AchievementID` INT NOT NULL , `TierID` INT NOT NULL , `TierTitle` TEXT NOT NULL , `TierDesc` TEXT NOT NULL , `TierPrevSmall` TEXT NOT NULL , `TierPrevLarge` TEXT NOT NULL , `TargetAmount` INT NOT NULL , `Rewards` TEXT NOT NULL , `RemoveRewards` TEXT NOT NULL , CONSTRAINT `ub_achievement_id` FOREIGN KEY (`AchievementID`) REFERENCES `{ACHIEVEMENTS}` (`AchievementID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`AchievementID`, `TierID`));",
+                conn).ExecuteScalarAsync();
+
             _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{BATTLEPASS}` ( `TierID` INT NOT NULL , `FreeReward` TEXT NOT NULL , `PremiumReward` TEXT NOT NULL , `XP` INT NOT NULL , PRIMARY KEY (`TierID`));", conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{CASES}` ( `CaseID` INT NOT NULL , `CaseName` TEXT NOT NULL , `IconLink` TEXT NOT NULL , `CaseRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `IsBuyable` BOOLEAN NOT NULL , `ScrapPrice` INT NOT NULL , `CoinPrice` INT NOT NULL , `CommonWeight` INT NOT NULL , `UncommonWeight` INT NOT NULL , `RareWeight` INT NOT NULL , `EpicWeight` INT NOT NULL , `LegendaryWeight` INT NOT NULL , `MythicalWeight` INT NOT NULL , `KnifeWeight` INT NOT NULL , `GloveWeight` INT NOT NULL , `LimitedKnifeWeight` INT NOT NULL , `LimitedGloveWeight` INT NOT NULL , `AvailableSkins` TEXT NOT NULL, PRIMARY KEY (`CaseID`))", conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{CASES}` ( `CaseID` INT NOT NULL , `CaseName` TEXT NOT NULL , `IconLink` TEXT NOT NULL , `CaseRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `IsBuyable` BOOLEAN NOT NULL , `ScrapPrice` INT NOT NULL , `CoinPrice` INT NOT NULL , `CommonWeight` INT NOT NULL , `UncommonWeight` INT NOT NULL , `RareWeight` INT NOT NULL , `EpicWeight` INT NOT NULL , `LegendaryWeight` INT NOT NULL , `MythicalWeight` INT NOT NULL , `KnifeWeight` INT NOT NULL , `GloveWeight` INT NOT NULL , `LimitedKnifeWeight` INT NOT NULL , `LimitedGloveWeight` INT NOT NULL , `AvailableSkins` TEXT NOT NULL, PRIMARY KEY (`CaseID`))",
+                conn).ExecuteScalarAsync();
 
             // PLAYERS DATA
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `SteamName` TEXT NOT NULL , `AvatarLink` VARCHAR(200) NOT NULL , `CountryCode` TEXT NOT NULL , `HideFlag` BOOLEAN NOT NULL DEFAULT FALSE , `XP` INT NOT NULL DEFAULT '0' , `Level` INT NOT NULL DEFAULT '1' , `Credits` INT NOT NULL DEFAULT '0' , `Scrap` INT NOT NULL DEFAULT '0' , `Coins` INT NOT NULL DEFAULT '0' , `Kills` INT NOT NULL DEFAULT '0' , `HeadshotKills` INT NOT NULL DEFAULT '0' , `HighestKillstreak` INT NOT NULL DEFAULT '0' , `HighestMultiKills` INT NOT NULL DEFAULT '0' , `KillsConfirmed` INT NOT NULL DEFAULT '0' , `KillsDenied` INT NOT NULL DEFAULT '0' , `FlagsCaptured` INT NOT NULL DEFAULT '0' , `FlagsSaved` INT NOT NULL DEFAULT '0' , `AreasTaken` INT NOT NULL DEFAULT '0' , `Deaths` INT NOT NULL DEFAULT '0' , `Music` BOOLEAN NOT NULL DEFAULT TRUE , `IsMuted` BOOLEAN NOT NULL DEFAULT FALSE , `MuteExpiry` BIGINT NOT NULL DEFAULT '1' , `HasBattlepass` BOOLEAN NOT NULL DEFAULT FALSE , `XPBooster` DECIMAL(6,3) NOT NULL DEFAULT '0' , `BPBooster` DECIMAL(6,3) NOT NULL DEFAULT '0' , `GunXPBooster` DECIMAL(6,3) NOT NULL DEFAULT '0' , `HasPrime` BOOLEAN NOT NULL DEFAULT FALSE , `PrimeExpiry` BIGINT NOT NULL DEFAULT '1' , `PrimeLastDailyReward` BIGINT NOT NULL DEFAULT '1' ,  PRIMARY KEY (`SteamID`));", conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_LEADERBOARD_DAILY}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `Kills` INT NOT NULL DEFAULT '0' , `HeadshotKills` INT NOT NULL DEFAULT '0' , `Deaths` INT NOT NULL DEFAULT '0' , CONSTRAINT `ub_steam_id_11` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID`));", conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_LEADERBOARD_WEEKLY}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `Kills` INT NOT NULL DEFAULT '0' , `HeadshotKills` INT NOT NULL DEFAULT '0' , `Deaths` INT NOT NULL DEFAULT '0' , CONSTRAINT `ub_steam_id_12` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID`));", conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_LEADERBOARD_SEASONAL}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `Kills` INT NOT NULL DEFAULT '0' , `HeadshotKills` INT NOT NULL DEFAULT '0' , `Deaths` INT NOT NULL DEFAULT '0' , CONSTRAINT `ub_steam_id_13` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID`));", conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_GUNS}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `GunID` SMALLINT UNSIGNED NOT NULL , `Level` INT NOT NULL , `XP` INT NOT NULL , `GunKills` INT NOT NULL , `IsBought` BOOLEAN NOT NULL , `IsUnlocked` BOOLEAN NOT NULL DEFAULT False , `Attachments` TEXT NOT NULL , CONSTRAINT `ub_steam_id` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_gun_id_1` FOREIGN KEY (`GunID`) REFERENCES `{GUNS}` (`GunID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `GunID`));", conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_GUNS_SKINS}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `SkinIDs` TEXT NOT NULL , CONSTRAINT `ub_steam_id_1` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID`));", conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_GUNS_CHARMS}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `CharmID` SMALLINT UNSIGNED NOT NULL , `IsBought` BOOLEAN NOT NULL , `IsUnlocked` BOOLEAN NOT NULL DEFAULT False , CONSTRAINT `ub_steam_id_10` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_charm_id` FOREIGN KEY (`CharmID`) REFERENCES `{GUNS_CHARMS}` (`CharmID`) ON DELETE CASCADE ON UPDATE CASCADE , Primary Key (`SteamID`, `CharmID`));", conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_KNIVES}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `KnifeID` SMALLINT UNSIGNED NOT NULL , `KnifeKills` INT NOT NULL , `IsBought` BOOLEAN NOT NULL , `IsUnlocked` BOOLEAN NOT NULL DEFAULT False , CONSTRAINT `ub_steam_id_2` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_knife_id` FOREIGN KEY (`KnifeID`) REFERENCES `{KNIVES}` (`KnifeID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `KnifeID`));", conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_PERKS}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `PerkID` INT NOT NULL , `IsBought` BOOLEAN NOT NULL , `IsUnlocked` BOOLEAN NOT NULL DEFAULT False , CONSTRAINT `ub_steam_id_4` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_perk_id` FOREIGN KEY (`PerkID`) REFERENCES `{PERKS}` (`PerkID`) ON DELETE CASCADE ON UPDATE CASCADE, PRIMARY KEY (`SteamID` , `PerkID`));", conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_GADGETS}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `GadgetID` SMALLINT UNSIGNED NOT NULL , `GadgetKills` INT NOT NULL , `IsBought` BOOLEAN NOT NULL , `IsUnlocked` BOOLEAN NOT NULL DEFAULT False , CONSTRAINT `ub_steam_id_5` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_gadget_id` FOREIGN KEY (`GadgetID`) REFERENCES `{GADGETS}` (`GadgetID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `GadgetID`));", conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_KILLSTREAKS}` (`SteamID` BIGINT UNSIGNED NOT NULL , `KillstreakID` INT NOT NULl , `KillstreakKills` INT NOT NULL , `IsBought` BOOLEAN NOT NULL , `IsUnlocked` BOOLEAN NOT NULL DEFAULT False , CONSTRAINT `ub_steam_id_6` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_killstreak_id` FOREIGN KEY (`KillstreakID`) REFERENCES `{KILLSTREAKS}` (`KillstreakID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `KillstreakID`));", conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_CARDS}` (`SteamID` BIGINT UNSIGNED NOT NULL , `CardID` INT NOT NULL , `IsBought` BOOLEAN NOT NULL , `IsUnlocked` BOOLEAN NOT NULL DEFAULT False , CONSTRAINT `ub_steam_id_7` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_card_id` FOREIGN KEY (`CardID`) REFERENCES `{CARDS}` (`CardID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `CardID`));", conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_GLOVES}` (`SteamID` BIGINT UNSIGNED NOT NULL , `GloveID` INT NOT NULL , `IsBought` BOOLEAN NOT NULl , `IsUnlocked` BOOLEAN NOT NULL DEFAULT False , CONSTRAINT `ub_steam_id_8` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_glove_id` FOREIGN KEY (`GloveID`) REFERENCES `{GLOVES}` (`GloveID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `GloveID`));", conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_LOADOUTS}` (`SteamID` BIGINT UNSIGNED NOT NULL , `LoadoutID` INT NOT NULL , `IsActive` BOOLEAN NOT NULL , `Loadout` TEXT NOT NULL , CONSTRAINT `ub_steam_id_9` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID`, `LoadoutID`));", conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_QUESTS}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `QuestID` INT NOT NULL , `Amount` INT NOT NULL , `QuestEnd` BIGINT NOT NULL , CONSTRAINT `ub_steam_id_14` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_quest_id` FOREIGN KEY (`QuestID`) REFERENCES `{QUESTS}` (`QuestID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `QuestID`));", conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_ACHIEVEMENTS}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `AchievementID` INT NOT NULL , `CurrentTier` INT NOT NULL DEFAULT '0' , `Amount` INT NOT NULL DEFAULT '0' , CONSTRAINT `ub_steam_id_15` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_achievement_id_2` FOREIGN KEY (`AchievementID`) REFERENCES `{ACHIEVEMENTS}` (`AchievementID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID`, `AchievementID`));", conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_BATTLEPASS}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `CurrentTier` INT NOT NULL DEFAULT '1' , `XP` INT NOT NULL DEFAULT '0', `ClaimedFreeRewards` TEXT NOT NULL , `ClaimedPremiumRewards` TEXT NOT NULL , CONSTRAINT `ub_steam_id_16` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID`));", conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_CASES}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `CaseID` INT NOT NULL , `Amount` INT NOT NULL , CONSTRAINT `ub_steam_id_17` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_case_id` FOREIGN KEY (`CaseID`) REFERENCES `{CASES}` (`CaseID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `CaseID`));", conn).ExecuteScalarAsync();
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{PLAYERS_BOOSTERS}` (`SteamID` BIGINT UNSIGNED NOT NULL , `BoosterType` ENUM('XP','BPXP','GUNXP') NOT NULL , `BoosterValue` DECIMAL(6,3) NOT NULL , `BoosterExpiration` BIGINT NOT NULL , CONSTRAINT `ub_steam_id_18` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `BoosterType` , `BoosterValue`));", conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{PLAYERS}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `SteamName` TEXT NOT NULL , `AvatarLink` VARCHAR(200) NOT NULL , `CountryCode` TEXT NOT NULL , `HideFlag` BOOLEAN NOT NULL DEFAULT FALSE , `XP` INT NOT NULL DEFAULT '0' , `Level` INT NOT NULL DEFAULT '1' , `Credits` INT NOT NULL DEFAULT '0' , `Scrap` INT NOT NULL DEFAULT '0' , `Coins` INT NOT NULL DEFAULT '0' , `Kills` INT NOT NULL DEFAULT '0' , `HeadshotKills` INT NOT NULL DEFAULT '0' , `HighestKillstreak` INT NOT NULL DEFAULT '0' , `HighestMultiKills` INT NOT NULL DEFAULT '0' , `KillsConfirmed` INT NOT NULL DEFAULT '0' , `KillsDenied` INT NOT NULL DEFAULT '0' , `FlagsCaptured` INT NOT NULL DEFAULT '0' , `FlagsSaved` INT NOT NULL DEFAULT '0' , `AreasTaken` INT NOT NULL DEFAULT '0' , `Deaths` INT NOT NULL DEFAULT '0' , `Music` BOOLEAN NOT NULL DEFAULT TRUE , `IsMuted` BOOLEAN NOT NULL DEFAULT FALSE , `MuteExpiry` BIGINT NOT NULL DEFAULT '1' , `HasBattlepass` BOOLEAN NOT NULL DEFAULT FALSE , `XPBooster` DECIMAL(6,3) NOT NULL DEFAULT '0' , `BPBooster` DECIMAL(6,3) NOT NULL DEFAULT '0' , `GunXPBooster` DECIMAL(6,3) NOT NULL DEFAULT '0' , `HasPrime` BOOLEAN NOT NULL DEFAULT FALSE , `PrimeExpiry` BIGINT NOT NULL DEFAULT '1' , `PrimeLastDailyReward` BIGINT NOT NULL DEFAULT '1' ,  PRIMARY KEY (`SteamID`));",
+                conn).ExecuteScalarAsync();
+
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{PLAYERS_LEADERBOARD_DAILY}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `Kills` INT NOT NULL DEFAULT '0' , `HeadshotKills` INT NOT NULL DEFAULT '0' , `Deaths` INT NOT NULL DEFAULT '0' , CONSTRAINT `ub_steam_id_11` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID`));",
+                conn).ExecuteScalarAsync();
+
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{PLAYERS_LEADERBOARD_WEEKLY}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `Kills` INT NOT NULL DEFAULT '0' , `HeadshotKills` INT NOT NULL DEFAULT '0' , `Deaths` INT NOT NULL DEFAULT '0' , CONSTRAINT `ub_steam_id_12` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID`));",
+                conn).ExecuteScalarAsync();
+
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{PLAYERS_LEADERBOARD_SEASONAL}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `Kills` INT NOT NULL DEFAULT '0' , `HeadshotKills` INT NOT NULL DEFAULT '0' , `Deaths` INT NOT NULL DEFAULT '0' , CONSTRAINT `ub_steam_id_13` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID`));",
+                conn).ExecuteScalarAsync();
+
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{PLAYERS_GUNS}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `GunID` SMALLINT UNSIGNED NOT NULL , `Level` INT NOT NULL , `XP` INT NOT NULL , `GunKills` INT NOT NULL , `IsBought` BOOLEAN NOT NULL , `IsUnlocked` BOOLEAN NOT NULL DEFAULT False , `Attachments` TEXT NOT NULL , CONSTRAINT `ub_steam_id` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_gun_id_1` FOREIGN KEY (`GunID`) REFERENCES `{GUNS}` (`GunID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `GunID`));",
+                conn).ExecuteScalarAsync();
+
+            _ = await new MySqlCommand(
+                    $"CREATE TABLE IF NOT EXISTS `{PLAYERS_GUNS_SKINS}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `SkinIDs` TEXT NOT NULL , CONSTRAINT `ub_steam_id_1` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID`));", conn)
+                .ExecuteScalarAsync();
+
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{PLAYERS_GUNS_CHARMS}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `CharmID` SMALLINT UNSIGNED NOT NULL , `IsBought` BOOLEAN NOT NULL , `IsUnlocked` BOOLEAN NOT NULL DEFAULT False , CONSTRAINT `ub_steam_id_10` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_charm_id` FOREIGN KEY (`CharmID`) REFERENCES `{GUNS_CHARMS}` (`CharmID`) ON DELETE CASCADE ON UPDATE CASCADE , Primary Key (`SteamID`, `CharmID`));",
+                conn).ExecuteScalarAsync();
+
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{PLAYERS_KNIVES}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `KnifeID` SMALLINT UNSIGNED NOT NULL , `KnifeKills` INT NOT NULL , `IsBought` BOOLEAN NOT NULL , `IsUnlocked` BOOLEAN NOT NULL DEFAULT False , CONSTRAINT `ub_steam_id_2` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_knife_id` FOREIGN KEY (`KnifeID`) REFERENCES `{KNIVES}` (`KnifeID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `KnifeID`));",
+                conn).ExecuteScalarAsync();
+
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{PLAYERS_PERKS}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `PerkID` INT NOT NULL , `IsBought` BOOLEAN NOT NULL , `IsUnlocked` BOOLEAN NOT NULL DEFAULT False , CONSTRAINT `ub_steam_id_4` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_perk_id` FOREIGN KEY (`PerkID`) REFERENCES `{PERKS}` (`PerkID`) ON DELETE CASCADE ON UPDATE CASCADE, PRIMARY KEY (`SteamID` , `PerkID`));",
+                conn).ExecuteScalarAsync();
+
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{PLAYERS_GADGETS}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `GadgetID` SMALLINT UNSIGNED NOT NULL , `GadgetKills` INT NOT NULL , `IsBought` BOOLEAN NOT NULL , `IsUnlocked` BOOLEAN NOT NULL DEFAULT False , CONSTRAINT `ub_steam_id_5` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_gadget_id` FOREIGN KEY (`GadgetID`) REFERENCES `{GADGETS}` (`GadgetID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `GadgetID`));",
+                conn).ExecuteScalarAsync();
+
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{PLAYERS_KILLSTREAKS}` (`SteamID` BIGINT UNSIGNED NOT NULL , `KillstreakID` INT NOT NULl , `KillstreakKills` INT NOT NULL , `IsBought` BOOLEAN NOT NULL , `IsUnlocked` BOOLEAN NOT NULL DEFAULT False , CONSTRAINT `ub_steam_id_6` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_killstreak_id` FOREIGN KEY (`KillstreakID`) REFERENCES `{KILLSTREAKS}` (`KillstreakID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `KillstreakID`));",
+                conn).ExecuteScalarAsync();
+
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{PLAYERS_CARDS}` (`SteamID` BIGINT UNSIGNED NOT NULL , `CardID` INT NOT NULL , `IsBought` BOOLEAN NOT NULL , `IsUnlocked` BOOLEAN NOT NULL DEFAULT False , CONSTRAINT `ub_steam_id_7` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_card_id` FOREIGN KEY (`CardID`) REFERENCES `{CARDS}` (`CardID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `CardID`));",
+                conn).ExecuteScalarAsync();
+
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{PLAYERS_GLOVES}` (`SteamID` BIGINT UNSIGNED NOT NULL , `GloveID` INT NOT NULL , `IsBought` BOOLEAN NOT NULl , `IsUnlocked` BOOLEAN NOT NULL DEFAULT False , CONSTRAINT `ub_steam_id_8` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_glove_id` FOREIGN KEY (`GloveID`) REFERENCES `{GLOVES}` (`GloveID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `GloveID`));",
+                conn).ExecuteScalarAsync();
+
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{PLAYERS_LOADOUTS}` (`SteamID` BIGINT UNSIGNED NOT NULL , `LoadoutID` INT NOT NULL , `IsActive` BOOLEAN NOT NULL , `Loadout` TEXT NOT NULL , CONSTRAINT `ub_steam_id_9` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID`, `LoadoutID`));",
+                conn).ExecuteScalarAsync();
+
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{PLAYERS_QUESTS}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `QuestID` INT NOT NULL , `Amount` INT NOT NULL , `QuestEnd` BIGINT NOT NULL , CONSTRAINT `ub_steam_id_14` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_quest_id` FOREIGN KEY (`QuestID`) REFERENCES `{QUESTS}` (`QuestID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `QuestID`));",
+                conn).ExecuteScalarAsync();
+
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{PLAYERS_ACHIEVEMENTS}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `AchievementID` INT NOT NULL , `CurrentTier` INT NOT NULL DEFAULT '0' , `Amount` INT NOT NULL DEFAULT '0' , CONSTRAINT `ub_steam_id_15` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_achievement_id_2` FOREIGN KEY (`AchievementID`) REFERENCES `{ACHIEVEMENTS}` (`AchievementID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID`, `AchievementID`));",
+                conn).ExecuteScalarAsync();
+
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{PLAYERS_BATTLEPASS}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `CurrentTier` INT NOT NULL DEFAULT '1' , `XP` INT NOT NULL DEFAULT '0', `ClaimedFreeRewards` TEXT NOT NULL , `ClaimedPremiumRewards` TEXT NOT NULL , CONSTRAINT `ub_steam_id_16` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID`));",
+                conn).ExecuteScalarAsync();
+
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{PLAYERS_CASES}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `CaseID` INT NOT NULL , `Amount` INT NOT NULL , CONSTRAINT `ub_steam_id_17` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_case_id` FOREIGN KEY (`CaseID`) REFERENCES `{CASES}` (`CaseID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `CaseID`));",
+                conn).ExecuteScalarAsync();
+
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{PLAYERS_BOOSTERS}` (`SteamID` BIGINT UNSIGNED NOT NULL , `BoosterType` ENUM('XP','BPXP','GUNXP') NOT NULL , `BoosterValue` DECIMAL(6,3) NOT NULL , `BoosterExpiration` BIGINT NOT NULL , CONSTRAINT `ub_steam_id_18` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `BoosterType` , `BoosterValue`));",
+                conn).ExecuteScalarAsync();
         }
         catch (Exception ex)
         {
@@ -312,7 +412,9 @@ public class DatabaseManager
 
             Dictionary<int, List<AnimationItemUnlock>> itemsSearchByLevel = new();
 
-            var rdr = (MySqlDataReader)await new MySqlCommand($"SELECT `AttachmentID`, `AttachmentName`, `AttachmentDesc`, `AttachmentPros` , `AttachmentCons` , `AttachmentType`-1, `AttachmentRarity`, `MovementChange`, `MovementChangeADS`, `IconLink`, `BuyPrice`, `Coins` FROM `{ATTACHMENTS}`;", conn).ExecuteReaderAsync();
+            var rdr = (MySqlDataReader)await new MySqlCommand($"SELECT `AttachmentID`, `AttachmentName`, `AttachmentDesc`, `AttachmentPros` , `AttachmentCons` , `AttachmentType`-1, `AttachmentRarity`, `MovementChange`, `MovementChangeADS`, `IconLink`, `BuyPrice`, `Coins` FROM `{ATTACHMENTS}`;",
+                conn).ExecuteReaderAsync();
+
             try
             {
                 Dictionary<ushort, GunAttachment> gunAttachments = new();
@@ -365,7 +467,10 @@ public class DatabaseManager
             }
 
             Logging.Debug("Reading guns from the base data");
-            rdr = (MySqlDataReader)await new MySqlCommand($"SELECT `GunID`, `GunName`, `GunDesc`, `GunType`-1, `GunRarity`, `MovementChange`, `MovementChangeADS`, `IconLink`, `MagAmount`, `Coins`, `BuyPrice`, `ScrapAmount`, `LevelRequirement`, `IsPrimary`, `DefaultAttachments`, `LevelXPNeeded`, `LevelRewards` FROM `{GUNS}`;", conn).ExecuteReaderAsync();
+            rdr = (MySqlDataReader)await new MySqlCommand(
+                    $"SELECT `GunID`, `GunName`, `GunDesc`, `GunType`-1, `GunRarity`, `MovementChange`, `MovementChangeADS`, `IconLink`, `MagAmount`, `Coins`, `BuyPrice`, `ScrapAmount`, `LevelRequirement`, `IsPrimary`, `DefaultAttachments`, `LevelXPNeeded`, `LevelRewards` FROM `{GUNS}`;", conn)
+                .ExecuteReaderAsync();
+
             try
             {
                 Dictionary<ushort, Gun> guns = new();
@@ -1424,6 +1529,7 @@ public class DatabaseManager
                     var randomPerks = defaultPerks.Where(k => k.PerkType == i).ToList();
                     if (randomPerks.Count == 0)
                         continue;
+
                     var randomPerk = randomPerks[UnityEngine.Random.Range(0, randomPerks.Count)];
                     defaultPerk.Add(randomPerk.PerkID);
                 }
@@ -1448,7 +1554,9 @@ public class DatabaseManager
                 Logging.Debug($"Found default glove with id {defaultGlove?.GloveID ?? 0}");
                 var defaultCard = defaultCards.FirstOrDefault();
                 Logging.Debug($"Found default card with id {defaultCard?.CardID ?? 0}");
-                DefaultLoadout = new("DEFAULT LOADOUT", defaultPrimary?.GunID ?? 0, 0, 0, defaultPrimaryAttachments, defaultSecondary?.GunID ?? 0, 0, 0, defaultSecondaryAttachments, defaultKnife?.KnifeID ?? 0, defaultTactical?.GadgetID ?? 0, defaultLethal?.GadgetID ?? 0, defaultKillstreak, defaultPerk, defaultGlove?.GloveID ?? 0, defaultCard?.CardID ?? 0);
+                DefaultLoadout = new("DEFAULT LOADOUT", defaultPrimary?.GunID ?? 0, 0, 0, defaultPrimaryAttachments, defaultSecondary?.GunID ?? 0, 0, 0, defaultSecondaryAttachments, defaultKnife?.KnifeID ?? 0, defaultTactical?.GadgetID ?? 0, defaultLethal?.GadgetID ?? 0, defaultKillstreak,
+                    defaultPerk, defaultGlove?.GloveID ?? 0, defaultCard?.CardID ?? 0);
+
                 Logging.Debug("Built a default loadout to give to the players when they join");
             }
             catch (Exception ex)
@@ -1486,7 +1594,11 @@ public class DatabaseManager
             Logging.Debug($"Adding {steamName} to the DB");
             TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(96 * 0.1f)), "LOADING PLAYER DATA..."));
             await conn.OpenAsync();
-            MySqlCommand cmd = new($"INSERT INTO `{PLAYERS}` ( `SteamID` , `SteamName` , `AvatarLink` , `CountryCode` , `MuteExpiry`, `Coins` ) VALUES ({player.CSteamID}, @name, '{avatarLink}' , '{countryCode}' , {DateTimeOffset.UtcNow.ToUnixTimeSeconds()} , {(Plugin.Instance.Configuration.Instance.UnlockAllItems ? 10000000 : 0)}) ON DUPLICATE KEY UPDATE `AvatarLink` = '{avatarLink}', `SteamName` = @name, `CountryCode` = '{countryCode}';", conn);
+            MySqlCommand cmd =
+                new(
+                    $"INSERT INTO `{PLAYERS}` ( `SteamID` , `SteamName` , `AvatarLink` , `CountryCode` , `MuteExpiry`, `Coins` ) VALUES ({player.CSteamID}, @name, '{avatarLink}' , '{countryCode}' , {DateTimeOffset.UtcNow.ToUnixTimeSeconds()} , {(Plugin.Instance.Configuration.Instance.UnlockAllItems ? 10000000 : 0)}) ON DUPLICATE KEY UPDATE `AvatarLink` = '{avatarLink}', `SteamName` = @name, `CountryCode` = '{countryCode}';",
+                    conn);
+
             _ = cmd.Parameters.AddWithValue("@name", steamName.ToUnrich());
             _ = await cmd.ExecuteScalarAsync();
 
@@ -1501,7 +1613,9 @@ public class DatabaseManager
                 if (gun.LevelRequirement < 0)
                     continue;
 
-                _ = await new MySqlCommand($"INSERT IGNORE INTO `{PLAYERS_GUNS}` (`SteamID` , `GunID` , `Level` , `XP` , `GunKills` , `IsBought` , `Attachments`) VALUES ({player.CSteamID} , {gun.GunID} , 1 , 0 , 0 , {gun.LevelRequirement == 0} , '{Utility.CreateStringFromDefaultAttachments(gun.DefaultAttachments) + Utility.CreateStringFromRewardAttachments(gun.RewardAttachments.Values.ToList())}');", conn).ExecuteScalarAsync();
+                _ = await new MySqlCommand(
+                    $"INSERT IGNORE INTO `{PLAYERS_GUNS}` (`SteamID` , `GunID` , `Level` , `XP` , `GunKills` , `IsBought` , `Attachments`) VALUES ({player.CSteamID} , {gun.GunID} , 1 , 0 , 0 , {gun.LevelRequirement == 0} , '{Utility.CreateStringFromDefaultAttachments(gun.DefaultAttachments) + Utility.CreateStringFromRewardAttachments(gun.RewardAttachments.Values.ToList())}');",
+                    conn).ExecuteScalarAsync();
             }
 
             _ = await new MySqlCommand($"INSERT IGNORE INTO `{PLAYERS_GUNS_SKINS}` (`SteamID` , `SkinIDs`) VALUES ({player.CSteamID}, '');", conn).ExecuteScalarAsync();
@@ -1601,7 +1715,7 @@ public class DatabaseManager
             await conn.CloseAsync();
         }
     }
-    
+
     public async Task GetPlayerDataAsync(UnturnedPlayer player)
     {
         using MySqlConnection conn = new(ConnectionString);
@@ -1705,7 +1819,9 @@ public class DatabaseManager
                     if (PlayerData.ContainsKey(player.CSteamID))
                         _ = PlayerData.Remove(player.CSteamID);
 
-                    PlayerData.Add(player.CSteamID, new(player.CSteamID, steamName, avatarLink, countryCode, hideFlag, xp, level, credits, scrap, coins, kills, headshotKills, highestKillstreak, highestMultiKills, killsConfirmed, killsDenied, flagsCaptured, flagsSaved, areasTaken, deaths, music, isMuted, muteExpiry, hasBattlepass, xpBooster, bpBooster, gunXPBooster, hasPrime, primeExpiry, primeLastDailyReward));
+                    PlayerData.Add(player.CSteamID,
+                        new(player.CSteamID, steamName, avatarLink, countryCode, hideFlag, xp, level, credits, scrap, coins, kills, headshotKills, highestKillstreak, highestMultiKills, killsConfirmed, killsDenied, flagsCaptured, flagsSaved, areasTaken, deaths, music, isMuted, muteExpiry,
+                            hasBattlepass, xpBooster, bpBooster, gunXPBooster, hasPrime, primeExpiry, primeLastDailyReward));
                 }
             }
             catch (Exception ex)
@@ -2571,7 +2687,8 @@ public class DatabaseManager
                             updateLoadouts.Add(loadoutID);
                     }
 
-                    loadouts.Add(loadoutID, new(loadoutID, loadoutData.LoadoutName, isActive, primary, primarySkin, primaryGunCharm, primaryAttachments, secondary, secondarySkin, secondaryGunCharm, secondaryAttachments, knife, tactical, lethal, loadoutKillstreaks, loadoutPerks, perksSearchByType, glove, card));
+                    loadouts.Add(loadoutID,
+                        new(loadoutID, loadoutData.LoadoutName, isActive, primary, primarySkin, primaryGunCharm, primaryAttachments, secondary, secondarySkin, secondaryGunCharm, secondaryAttachments, knife, tactical, lethal, loadoutKillstreaks, loadoutPerks, perksSearchByType, glove, card));
                 }
 
                 Logging.Debug($"Successfully got {loadouts.Count} loadouts for {player.CharacterName}");
@@ -2757,7 +2874,7 @@ public class DatabaseManager
         lock (PendingQueries)
             PendingQueries.AddRange(queries);
     }
-    
+
     // Timers
     private void CleanQueries(object sender, ElapsedEventArgs e)
     {
@@ -2770,7 +2887,7 @@ public class DatabaseManager
                 return;
             }
         }
-        
+
         var stopWatch = new Stopwatch();
         stopWatch.Start();
         using MySqlConnection conn = new(ConnectionString);
@@ -2780,42 +2897,46 @@ public class DatabaseManager
             stopWatch.Stop();
             Logging.Debug($"Connction established, took {stopWatch.ElapsedMilliseconds}ms");
             stopWatch.Reset();
-            List<string> pendingQueries = new();
+            Dictionary<int, string> pendingQueries = new();
+            var i = 1;
             lock (PendingQueries)
             {
-                pendingQueries = PendingQueries.ToList();
+                foreach (var pendingQuery in PendingQueries)
+                    pendingQueries.Add(i++, pendingQuery);
+
                 PendingQueries.Clear();
             }
 
             Logging.Debug($"Found {pendingQueries.Count} to go through");
             MySqlCommand comm = new();
             comm.Connection = conn;
-            List<string> processedQueries = new();
+            Dictionary<int, string> processedQueries = new();
             stopWatch.Start();
-            try
+            foreach (var query in pendingQueries)
             {
-                foreach (var query in pendingQueries)
+                try
                 {
-                    comm.CommandText = query;
+                    comm.CommandText = query.Value;
                     comm.ExecuteNonQuery();
-                    processedQueries.Add(query);
+                    processedQueries.Add(query.Key, query.Value);
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log($"Error running query: \n{query}");
+                    Logger.Log(ex);
                 }
             }
-            catch (Exception ex)
-            {
-                Logger.Log($"Error processing pending queries");
-                Logger.Log($"Current query: {comm.CommandText}");
-                Logger.Log(ex);
-            }
-            
+
             stopWatch.Stop();
             Logging.Debug($"Pending queries: {pendingQueries.Count}, Processed Queries: {processedQueries.Count}, Time Elapsed = {stopWatch.ElapsedMilliseconds}ms");
-            if (pendingQueries.Count > processedQueries.Count)
-            {
-                pendingQueries.RemoveAll(k => processedQueries.Contains(k));
-                lock (PendingQueries)
-                    PendingQueries.InsertRange(PendingQueries.Count - 1, pendingQueries);
-            }
+            if (pendingQueries.Count <= processedQueries.Count)
+                return;
+
+            foreach (var processedQuery in processedQueries)
+                pendingQueries.Remove(processedQuery.Key);
+
+            lock (PendingQueries)
+                PendingQueries.AddRange(pendingQueries.Values);
         }
         catch (Exception ex)
         {
@@ -2827,7 +2948,7 @@ public class DatabaseManager
             conn.Close();
         }
     }
-    
+
     private void RefreshData(object sender, ElapsedEventArgs e)
     {
         using MySqlConnection conn = new(ConnectionString);
@@ -2885,7 +3006,8 @@ public class DatabaseManager
                     var primeRewards = Utility.GetRewardsFromString(rdr[15].ToString());
                     var primeDailyRewards = Utility.GetRewardsFromString(rdr[16].ToString());
 
-                    ServerOptions = new(dailyLeaderboardWipe, weeklyLeaderboardWipe, dailyRanked, dailyPercentile, weeklyRanked, weeklyPercentile, seasonalRanked, seasonalPercentile, xpBooster, bpBooster, gunXPBooster, xpBoosterWipe, bpBoosterWipe, gunXPBoosterWipe, gameTips, primeRewards, primeDailyRewards);
+                    ServerOptions = new(dailyLeaderboardWipe, weeklyLeaderboardWipe, dailyRanked, dailyPercentile, weeklyRanked, weeklyPercentile, seasonalRanked, seasonalPercentile, xpBooster, bpBooster, gunXPBooster, xpBoosterWipe, bpBoosterWipe, gunXPBoosterWipe, gameTips, primeRewards,
+                        primeDailyRewards);
                 }
             }
             catch (Exception ex)
@@ -2898,7 +3020,10 @@ public class DatabaseManager
                 rdr.Close();
             }
 
-            rdr = new MySqlCommand($"SELECT `{PLAYERS_LEADERBOARD_DAILY}`.`SteamID`, `{PLAYERS}`.`SteamName`, `{PLAYERS}`.`CountryCode`, `{PLAYERS}`.`HideFlag`, `{PLAYERS}`.`Level`, `{PLAYERS}`.`HasPrime` , `{PLAYERS_LEADERBOARD_DAILY}`.`Kills`, `{PLAYERS_LEADERBOARD_DAILY}`.`HeadshotKills`, `{PLAYERS_LEADERBOARD_DAILY}`.`Deaths` FROM `{PLAYERS_LEADERBOARD_DAILY}` INNER JOIN `{PLAYERS}` ON `{PLAYERS_LEADERBOARD_DAILY}`.`SteamID` = `{PLAYERS}`.`SteamID` ORDER BY (`{PLAYERS_LEADERBOARD_DAILY}`.`Kills` + `{PLAYERS_LEADERBOARD_DAILY}`.`HeadshotKills`) DESC;", conn).ExecuteReader();
+            rdr = new MySqlCommand(
+                $"SELECT `{PLAYERS_LEADERBOARD_DAILY}`.`SteamID`, `{PLAYERS}`.`SteamName`, `{PLAYERS}`.`CountryCode`, `{PLAYERS}`.`HideFlag`, `{PLAYERS}`.`Level`, `{PLAYERS}`.`HasPrime` , `{PLAYERS_LEADERBOARD_DAILY}`.`Kills`, `{PLAYERS_LEADERBOARD_DAILY}`.`HeadshotKills`, `{PLAYERS_LEADERBOARD_DAILY}`.`Deaths` FROM `{PLAYERS_LEADERBOARD_DAILY}` INNER JOIN `{PLAYERS}` ON `{PLAYERS_LEADERBOARD_DAILY}`.`SteamID` = `{PLAYERS}`.`SteamID` ORDER BY (`{PLAYERS_LEADERBOARD_DAILY}`.`Kills` + `{PLAYERS_LEADERBOARD_DAILY}`.`HeadshotKills`) DESC;",
+                conn).ExecuteReader();
+
             try
             {
                 List<LeaderboardData> playerDailyLeaderboard = new();
@@ -2950,7 +3075,10 @@ public class DatabaseManager
                 rdr.Close();
             }
 
-            rdr = new MySqlCommand($"SELECT `{PLAYERS_LEADERBOARD_WEEKLY}`.`SteamID`, `{PLAYERS}`.`SteamName`, `{PLAYERS}`.`CountryCode`, `{PLAYERS}`.`HideFlag`, `{PLAYERS}`.`Level`, `{PLAYERS}`.`HasPrime` , `{PLAYERS_LEADERBOARD_WEEKLY}`.`Kills`, `{PLAYERS_LEADERBOARD_WEEKLY}`.`HeadshotKills`, `{PLAYERS_LEADERBOARD_WEEKLY}`.`Deaths` FROM `{PLAYERS_LEADERBOARD_WEEKLY}` INNER JOIN `{PLAYERS}` ON `{PLAYERS_LEADERBOARD_WEEKLY}`.`SteamID` = `{PLAYERS}`.`SteamID` ORDER BY (`{PLAYERS_LEADERBOARD_WEEKLY}`.`Kills` + `{PLAYERS_LEADERBOARD_WEEKLY}`.`HeadshotKills`) DESC;", conn).ExecuteReader();
+            rdr = new MySqlCommand(
+                $"SELECT `{PLAYERS_LEADERBOARD_WEEKLY}`.`SteamID`, `{PLAYERS}`.`SteamName`, `{PLAYERS}`.`CountryCode`, `{PLAYERS}`.`HideFlag`, `{PLAYERS}`.`Level`, `{PLAYERS}`.`HasPrime` , `{PLAYERS_LEADERBOARD_WEEKLY}`.`Kills`, `{PLAYERS_LEADERBOARD_WEEKLY}`.`HeadshotKills`, `{PLAYERS_LEADERBOARD_WEEKLY}`.`Deaths` FROM `{PLAYERS_LEADERBOARD_WEEKLY}` INNER JOIN `{PLAYERS}` ON `{PLAYERS_LEADERBOARD_WEEKLY}`.`SteamID` = `{PLAYERS}`.`SteamID` ORDER BY (`{PLAYERS_LEADERBOARD_WEEKLY}`.`Kills` + `{PLAYERS_LEADERBOARD_WEEKLY}`.`HeadshotKills`) DESC;",
+                conn).ExecuteReader();
+
             try
             {
                 List<LeaderboardData> playerWeeklyLeaderboard = new();
@@ -3021,7 +3149,10 @@ public class DatabaseManager
                 }
             }
 
-            rdr = new MySqlCommand($"SELECT `{PLAYERS_LEADERBOARD_SEASONAL}`.`SteamID`, `{PLAYERS}`.`SteamName`, `{PLAYERS}`.`CountryCode`, `{PLAYERS}`.`HideFlag`, `{PLAYERS}`.`Level`, `{PLAYERS}`.`HasPrime` , `{PLAYERS_LEADERBOARD_SEASONAL}`.`Kills`, `{PLAYERS_LEADERBOARD_SEASONAL}`.`HeadshotKills`, `{PLAYERS_LEADERBOARD_SEASONAL}`.`Deaths` FROM `{PLAYERS_LEADERBOARD_SEASONAL}` INNER JOIN `{PLAYERS}` ON `{PLAYERS_LEADERBOARD_SEASONAL}`.`SteamID` = `{PLAYERS}`.`SteamID` ORDER BY (`{PLAYERS_LEADERBOARD_SEASONAL}`.`Kills` + `{PLAYERS_LEADERBOARD_SEASONAL}`.`HeadshotKills`) DESC;", conn).ExecuteReader();
+            rdr = new MySqlCommand(
+                $"SELECT `{PLAYERS_LEADERBOARD_SEASONAL}`.`SteamID`, `{PLAYERS}`.`SteamName`, `{PLAYERS}`.`CountryCode`, `{PLAYERS}`.`HideFlag`, `{PLAYERS}`.`Level`, `{PLAYERS}`.`HasPrime` , `{PLAYERS_LEADERBOARD_SEASONAL}`.`Kills`, `{PLAYERS_LEADERBOARD_SEASONAL}`.`HeadshotKills`, `{PLAYERS_LEADERBOARD_SEASONAL}`.`Deaths` FROM `{PLAYERS_LEADERBOARD_SEASONAL}` INNER JOIN `{PLAYERS}` ON `{PLAYERS_LEADERBOARD_SEASONAL}`.`SteamID` = `{PLAYERS}`.`SteamID` ORDER BY (`{PLAYERS_LEADERBOARD_SEASONAL}`.`Kills` + `{PLAYERS_LEADERBOARD_SEASONAL}`.`HeadshotKills`) DESC;",
+                conn).ExecuteReader();
+
             try
             {
                 List<LeaderboardData> playerSeasonalLeaderboard = new();
@@ -3132,7 +3263,8 @@ public class DatabaseManager
             if (ServerOptions.DailyLeaderboardWipe < DateTimeOffset.UtcNow)
             {
                 // Give all ranked rewards
-                Embed embed = new(null, $"Last Playtest Rankings ({PlayerDailyLeaderboard.Count} Players)", null, "15105570", DateTime.UtcNow.ToString("s"), new(Provider.serverName, Provider.configData.Browser.Icon), new(Provider.serverName, "", Provider.configData.Browser.Icon), new Field[] { new($"Ranked:", "", false), new("Percentile:", "", false) }, null, null);
+                Embed embed = new(null, $"Last Playtest Rankings ({PlayerDailyLeaderboard.Count} Players)", null, "15105570", DateTime.UtcNow.ToString("s"), new(Provider.serverName, Provider.configData.Browser.Icon), new(Provider.serverName, "", Provider.configData.Browser.Icon),
+                    new Field[] { new($"Ranked:", "", false), new("Percentile:", "", false) }, null, null);
 
                 foreach (var rankedReward in ServerOptions.DailyRankedRewards)
                 {
@@ -3202,7 +3334,8 @@ public class DatabaseManager
             if (ServerOptions.WeeklyLeaderboardWipe < DateTimeOffset.UtcNow)
             {
                 // Give all ranked rewards
-                Embed embed = new(null, $"Last Playtest Rankings ({PlayerWeeklyLeaderboard.Count} Players)", null, "15105570", DateTime.UtcNow.ToString("s"), new(Provider.serverName, Provider.configData.Browser.Icon), new(Provider.serverName, "", Provider.configData.Browser.Icon), new Field[] { new($"Ranked:", "", false), new("Percentile:", "", false) }, null, null);
+                Embed embed = new(null, $"Last Playtest Rankings ({PlayerWeeklyLeaderboard.Count} Players)", null, "15105570", DateTime.UtcNow.ToString("s"), new(Provider.serverName, Provider.configData.Browser.Icon), new(Provider.serverName, "", Provider.configData.Browser.Icon),
+                    new Field[] { new($"Ranked:", "", false), new("Percentile:", "", false) }, null, null);
 
                 foreach (var rankedReward in ServerOptions.WeeklyRankedRewards)
                 {
@@ -3270,7 +3403,8 @@ public class DatabaseManager
                 IsPendingSeasonalWipe = false;
 
                 // Give all ranked rewards
-                Embed embed = new(null, $"Last Playtest Rankings ({PlayerSeasonalLeaderboard.Count} Players)", null, "15105570", DateTime.UtcNow.ToString("s"), new(Provider.serverName, Provider.configData.Browser.Icon), new(Provider.serverName, "", Provider.configData.Browser.Icon), new Field[] { new($"Ranked:", "", false), new("Percentile:", "", false) }, null, null);
+                Embed embed = new(null, $"Last Playtest Rankings ({PlayerSeasonalLeaderboard.Count} Players)", null, "15105570", DateTime.UtcNow.ToString("s"), new(Provider.serverName, Provider.configData.Browser.Icon), new(Provider.serverName, "", Provider.configData.Browser.Icon),
+                    new Field[] { new($"Ranked:", "", false), new("Percentile:", "", false) }, null, null);
 
                 foreach (var rankedReward in ServerOptions.SeasonalRankedRewards)
                 {
@@ -3440,7 +3574,9 @@ public class DatabaseManager
                     {
                         Profile profile = new(data.SteamID.m_SteamID);
 
-                        Embed embed = new(null, $"**{profile.SteamID}** was unmuted", null, "15105570", DateTime.UtcNow.ToString("s"), new(Provider.serverName, Provider.configData.Browser.Icon), new(profile.SteamID, $"https://steamcommunity.com/profiles/{profile.SteamID64}/", profile.AvatarIcon.ToString()), new Field[] { new("**Unmuter:**", $"**Mute Expired**", true), new("**Time:**", DateTime.UtcNow.ToString(CultureInfo.InvariantCulture), true) }, null, null);
+                        Embed embed = new(null, $"**{profile.SteamID}** was unmuted", null, "15105570", DateTime.UtcNow.ToString("s"), new(Provider.serverName, Provider.configData.Browser.Icon),
+                            new(profile.SteamID, $"https://steamcommunity.com/profiles/{profile.SteamID64}/", profile.AvatarIcon.ToString()), new Field[] { new("**Unmuter:**", $"**Mute Expired**", true), new("**Time:**", DateTime.UtcNow.ToString(CultureInfo.InvariantCulture), true) }, null, null);
+
                         if (!string.IsNullOrEmpty(Plugin.Instance.Configuration.Instance.WebhookURL))
                             DiscordManager.SendEmbed(embed, "Player Unmuted", Plugin.Instance.Configuration.Instance.WebhookURL);
 
@@ -3551,7 +3687,7 @@ public class DatabaseManager
                 {
                     Logging.Debug($"Failed to get info, server is probably offline");
                     if (server.IsOnline)
-                    { 
+                    {
                         server.LastOnline = DateTime.UtcNow;
                         server.IsOnline = false;
                     }
@@ -3570,7 +3706,7 @@ public class DatabaseManager
             conn.Close();
         }
     }
-    
+
     // Player Data
 
     public void IncreasePlayerXP(CSteamID steamID, int xp)
@@ -3580,11 +3716,12 @@ public class DatabaseManager
             return;
 
         data.XP += xp;
-        
+
         var updatedLevel = false;
         var player = Plugin.Instance.Game.GetGamePlayer(data.SteamID);
-        if (player == null) return;
-        
+        if (player == null)
+            return;
+
         while (data.TryGetNeededXP(out var neededXP) && data.XP >= neededXP)
         {
             updatedLevel = true;
@@ -3615,17 +3752,17 @@ public class DatabaseManager
         if (PlayerAllTimeLeaderboardLookup.TryGetValue(steamID, out var allTimeLeaderboard))
             allTimeLeaderboard.Level = data.Level;
     }
-    
+
     public void IncreasePlayerCredits(CSteamID steamID, int credits)
     {
         AddQuery($"UPDATE `{PLAYERS}` SET `Credits` = `Credits` + {credits} WHERE `SteamID` = {steamID};");
         if (!PlayerData.TryGetValue(steamID, out var data))
             return;
-        
+
         data.Credits += credits;
         Plugin.Instance.UI.OnCurrencyUpdated(steamID, ECurrency.CREDITS);
     }
-    
+
     public void DecreasePlayerCredits(CSteamID steamID, int credits)
     {
         AddQuery($"UPDATE `{PLAYERS}` SET `Credits` = `Credits` - {credits} WHERE `SteamID` = {steamID};");
@@ -3635,7 +3772,7 @@ public class DatabaseManager
         data.Credits -= credits;
         Plugin.Instance.UI.OnCurrencyUpdated(steamID, ECurrency.CREDITS);
     }
-    
+
     public void IncreasePlayerScrap(CSteamID steamID, int scrap)
     {
         AddQuery($"UPDATE `{PLAYERS}` SET `Scrap` = `Scrap` + {scrap} WHERE `SteamID` = {steamID};");
@@ -3645,7 +3782,7 @@ public class DatabaseManager
         data.Scrap += scrap;
         Plugin.Instance.UI.OnCurrencyUpdated(steamID, ECurrency.SCRAP);
     }
-    
+
     public void DecreasePlayerScrap(CSteamID steamID, int scrap)
     {
         AddQuery($"UPDATE `{PLAYERS}` SET `Scrap` = `Scrap` - {scrap} WHERE `SteamID` = {steamID};");
@@ -3655,7 +3792,7 @@ public class DatabaseManager
         data.Scrap -= scrap;
         Plugin.Instance.UI.OnCurrencyUpdated(steamID, ECurrency.SCRAP);
     }
-    
+
     public void IncreasePlayerCoins(CSteamID steamID, int coins)
     {
         AddQuery($"UPDATE `{PLAYERS}` SET `Coins` = `Coins` + {coins} WHERE `SteamID` = {steamID};");
@@ -3665,7 +3802,7 @@ public class DatabaseManager
         data.Coins += coins;
         Plugin.Instance.UI.OnCurrencyUpdated(steamID, ECurrency.COINS);
     }
-    
+
     public void DecreasePlayerCoins(CSteamID steamID, int coins)
     {
         AddQuery($"UPDATE `{PLAYERS}` SET `Coins` = `Coins` - {coins} WHERE `SteamID` = {steamID};");
@@ -3675,7 +3812,7 @@ public class DatabaseManager
         data.Coins -= coins;
         Plugin.Instance.UI.OnCurrencyUpdated(steamID, ECurrency.COINS);
     }
-    
+
     public void IncreasePlayerKills(CSteamID steamID, int kills)
     {
         AddQueries(new()
@@ -3701,7 +3838,7 @@ public class DatabaseManager
         if (PlayerAllTimeLeaderboardLookup.TryGetValue(steamID, out var allTimeLeaderboard))
             allTimeLeaderboard.Kills += kills;
     }
-    
+
     public void IncreasePlayerHeadshotKills(CSteamID steamID, int headshotKills)
     {
         AddQueries(new()
@@ -3825,7 +3962,7 @@ public class DatabaseManager
 
         data.Music = music;
     }
-    
+
     public void UpdatePlayerCountryCode(CSteamID steamID, string countryCode)
     {
         AddQuery($"UPDATE `{PLAYERS}` SET `CountryCode` = '{countryCode}' WHERE `SteamID` = {steamID};");
@@ -3863,7 +4000,7 @@ public class DatabaseManager
         if (PlayerAllTimeLeaderboardLookup.TryGetValue(steamID, out var allTimeLeaderboard))
             allTimeLeaderboard.HideFlag = hideFlag;
     }
-    
+
     public void ChangePlayerMuted(CSteamID steamID, bool muted)
     {
         AddQuery($"UPDATE `{PLAYERS}` SET `IsMuted` = {muted} WHERE `SteamID` = {steamID};");
@@ -3872,7 +4009,7 @@ public class DatabaseManager
 
         data.IsMuted = muted;
     }
-    
+
     public void ChangePlayerMuteExpiry(CSteamID steamID, DateTimeOffset muteExpiry)
     {
         AddQuery($"UPDATE `{PLAYERS}` SET `MuteExpiry` = {muteExpiry.ToUnixTimeSeconds()} WHERE `SteamID` = {steamID};");
@@ -3901,7 +4038,7 @@ public class DatabaseManager
         AddQuery($"UPDATE `{PLAYERS}` SET `{coloumnName}` = `{coloumnName}` + {increaseBooster} WHERE `SteamID` = {steamID};");
         if (!PlayerData.TryGetValue(steamID, out var data))
             return;
-        
+
         data.SetPersonalBooster(boosterType, data.GetPersonalBooster(boosterType) + increaseBooster);
     }
 
@@ -3938,16 +4075,18 @@ public class DatabaseManager
     }
 
     // Player Guns
-    
+
     public void AddPlayerGunBought(CSteamID steamID, ushort gunID)
     {
         if (!Guns.TryGetValue(gunID, out var gun))
             throw new ArgumentNullException("gun", $"Gun {gunID} is not found, adding gun to player with steam id {steamID}");
 
-        AddQuery($"INSERT INTO `{PLAYERS_GUNS}` (`SteamID` , `GunID` , `Level` , `XP` , `GunKills` , `IsBought` , `Attachments`) VALUES ({steamID} , {gunID} , 1 , 0 , 0 , true , '{Utility.CreateStringFromDefaultAttachments(gun.DefaultAttachments) + Utility.CreateStringFromRewardAttachments(gun.RewardAttachments.Values.ToList())}') ON DUPLICATE KEY UPDATE `IsBought` = true;");
+        AddQuery(
+            $"INSERT INTO `{PLAYERS_GUNS}` (`SteamID` , `GunID` , `Level` , `XP` , `GunKills` , `IsBought` , `Attachments`) VALUES ({steamID} , {gunID} , 1 , 0 , 0 , true , '{Utility.CreateStringFromDefaultAttachments(gun.DefaultAttachments) + Utility.CreateStringFromRewardAttachments(gun.RewardAttachments.Values.ToList())}') ON DUPLICATE KEY UPDATE `IsBought` = true;");
+
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
             return;
-        
+
         Dictionary<ushort, LoadoutAttachment> loadoutAttachments = new();
         foreach (var attachment in gun.DefaultAttachments)
         {
@@ -3981,7 +4120,7 @@ public class DatabaseManager
         loadout.Guns.Add(loadoutGun.Gun.GunID, loadoutGun);
         Plugin.Instance.UI.OnUIUpdated(steamID, (EUIPage)(byte)loadoutGun.Gun.GunType);
     }
-    
+
     public void IncreasePlayerGunXP(CSteamID steamID, ushort gunID, int increaseXP)
     {
         AddQuery($"UPDATE `{PLAYERS_GUNS}` SET `XP` = `XP` + {increaseXP} WHERE `SteamID` = {steamID} AND `GunID` = {gunID};");
@@ -3997,7 +4136,8 @@ public class DatabaseManager
         gun.XP += increaseXP;
         var updatedLevel = false;
         var player = Plugin.Instance.Game.GetGamePlayer(data.SteamID);
-        if (player == null) return;
+        if (player == null)
+            return;
 
         while (gun.TryGetNeededXP(out var neededXP) && gun.XP >= neededXP)
         {
@@ -4019,7 +4159,7 @@ public class DatabaseManager
         if (updatedLevel)
             AddQuery($"UPDATE `{PLAYERS_GUNS}` SET `Level` = {gun.Level}, `XP` = {gun.XP} WHERE `SteamID` = {steamID} AND `GunID` = {gunID};");
     }
-    
+
     public void IncreasePlayerGunKills(CSteamID steamID, ushort gunID, int kills)
     {
         AddQuery($"UPDATE `{PLAYERS_GUNS}` SET `GunKills` = `GunKills` + {kills} WHERE `SteamID` = {steamID} AND `GunID` = {gunID};");
@@ -4029,9 +4169,9 @@ public class DatabaseManager
         if (!loadout.Guns.TryGetValue(gunID, out var gun))
             return;
 
-        gun.GunKills+= kills;
+        gun.GunKills += kills;
     }
-    
+
     public bool UpdatePlayerGunBought(CSteamID steamID, ushort gunID, bool isBought)
     {
         AddQuery($"UPDATE `{PLAYERS_GUNS}` SET `IsBought` = {isBought} WHERE `SteamID` = {steamID} AND `GunID` = {gunID};");
@@ -4044,7 +4184,7 @@ public class DatabaseManager
         gun.IsBought = isBought;
         return true;
     }
-    
+
     public bool UpdatePlayerGunUnlocked(CSteamID steamID, ushort gunID, bool isUnlocked)
     {
         AddQuery($"UPDATE `{PLAYERS_GUNS}` SET `IsUnlocked` = {isUnlocked} WHERE `SteamID` = {steamID} AND `GunID` = {gunID};");
@@ -4093,7 +4233,7 @@ public class DatabaseManager
     }
 
     // Player Guns Skins
-    
+
     public void AddPlayerGunSkin(CSteamID steamID, int id)
     {
         if (!GunSkinsSearchByID.TryGetValue(id, out var skin))
@@ -4108,15 +4248,15 @@ public class DatabaseManager
         loadout.GunSkinsSearchByID.Add(id, skin);
         if (!loadout.GunSkinsSearchByGunID.ContainsKey(skin.Gun.GunID))
             loadout.GunSkinsSearchByGunID.Add(skin.Gun.GunID, new());
-        
+
         loadout.GunSkinsSearchByGunID[skin.Gun.GunID].Add(skin);
         loadout.GunSkinsSearchBySkinID.Add(skin.SkinID, skin);
-        
+
         var skinsString = loadout.GunSkinsSearchByID.Keys.ToList().GetStringFromIntList();
         AddQuery($"UPDATE `{PLAYERS_GUNS_SKINS}` SET `SkinIDs` = '{skinsString}' WHERE `SteamID` = {steamID};");
         Plugin.Instance.UI.OnUIUpdated(steamID, EUIPage.GUN_SKIN);
     }
-    
+
     public void IncreasePlayerGunSkinUnboxedAmount(int id, int amount)
     {
         if (!GunSkinsSearchByID.TryGetValue(id, out var skin))
@@ -4127,7 +4267,7 @@ public class DatabaseManager
     }
 
     // Player Guns Charms
-    
+
     public void AddPlayerGunCharmBought(CSteamID steamID, ushort gunCharmID)
     {
         if (!GunCharms.TryGetValue(gunCharmID, out var charm))
@@ -4142,11 +4282,11 @@ public class DatabaseManager
             gunCharm.IsBought = true;
             return;
         }
-        
+
         loadout.GunCharms.Add(gunCharmID, new(charm, true, false));
         Plugin.Instance.UI.OnUIUpdated(steamID, EUIPage.GUN_CHARM);
     }
-    
+
     public void RemovePlayerGunCharm(CSteamID steamID, ushort gunCharmID)
     {
         if (!GunCharms.ContainsKey(gunCharmID))
@@ -4155,14 +4295,14 @@ public class DatabaseManager
         AddQuery($"DELETE FROM `{PLAYERS_GUNS_CHARMS}` WHERE `SteamID` = {steamID} AND `CharmID` = {gunCharmID};");
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
             return;
-        
+
         if (!loadout.GunCharms.ContainsKey(gunCharmID))
             return;
-        
+
         loadout.GunCharms.Remove(gunCharmID);
         Plugin.Instance.UI.OnUIUpdated(steamID, EUIPage.GUN_CHARM);
     }
-    
+
     public bool UpdatePlayerGunCharmBought(CSteamID steamID, ushort gunCharmID, bool isBought)
     {
         if (!GunCharms.ContainsKey(gunCharmID))
@@ -4171,14 +4311,14 @@ public class DatabaseManager
         AddQuery($"UPDATE `{PLAYERS_GUNS_CHARMS}` SET `IsBought` = {isBought} WHERE `SteamID` = {steamID} AND `CharmID` = {gunCharmID};");
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
             return false;
-        
+
         if (!loadout.GunCharms.TryGetValue(gunCharmID, out var gunCharm))
             return false;
-        
+
         gunCharm.IsBought = isBought;
         return true;
     }
-    
+
     public bool UpdatePlayerGunCharmUnlocked(CSteamID steamID, ushort gunCharmID, bool isUnlocked)
     {
         if (!GunCharms.ContainsKey(gunCharmID))
@@ -4190,7 +4330,7 @@ public class DatabaseManager
 
         if (!loadout.GunCharms.TryGetValue(gunCharmID, out var gunCharm))
             return false;
-        
+
         gunCharm.IsUnlocked = isUnlocked;
         return true;
     }
@@ -4205,13 +4345,13 @@ public class DatabaseManager
         AddQuery($"INSERT INTO `{PLAYERS_KNIVES}` (`SteamID` , `KnifeID` , `KnifeKills` , `IsBought`) VALUES ({steamID} , {knifeID} , 0 , true) ON DUPLICATE KEY UPDATE `IsBought` = true;");
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
             return;
-        
+
         if (loadout.Knives.TryGetValue(knifeID, out var playerKnife))
         {
             playerKnife.IsBought = true;
             return;
         }
-        
+
         loadout.Knives.Add(knifeID, new(knife, 0, true, false));
         Plugin.Instance.UI.OnUIUpdated(steamID, EUIPage.KNIFE);
     }
@@ -4224,13 +4364,13 @@ public class DatabaseManager
         AddQuery($"UPDATE `{PLAYERS_KNIVES}` SET `KnifeKills` = `KnifeKills` + {amount} WHERE `SteamID` = {steamID} AND `KnifeID` = {knifeID};");
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
             return;
-        
+
         if (!loadout.Knives.TryGetValue(knifeID, out var playerKnife))
             return;
-        
+
         playerKnife.KnifeKills += amount;
     }
-    
+
     public bool UpdatePlayerKnifeBought(CSteamID steamID, ushort knifeID, bool isBought)
     {
         if (!Knives.TryGetValue(knifeID, out var knife))
@@ -4239,14 +4379,14 @@ public class DatabaseManager
         AddQuery($"UPDATE `{PLAYERS_KNIVES}` SET `IsBought` = {isBought} WHERE `SteamID` = {steamID} AND `KnifeID` = {knifeID};");
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
             return false;
-        
+
         if (!loadout.Knives.TryGetValue(knifeID, out var playerKnife))
             return false;
-        
+
         playerKnife.IsBought = isBought;
         return true;
     }
-    
+
     public bool UpdatePlayerKnifeUnlocked(CSteamID steamID, ushort knifeID, bool isUnlocked)
     {
         if (!Knives.TryGetValue(knifeID, out var knife))
@@ -4255,14 +4395,14 @@ public class DatabaseManager
         AddQuery($"UPDATE `{PLAYERS_KNIVES}` SET `IsUnlocked` = {isUnlocked} WHERE `SteamID` = {steamID} AND `KnifeID` = {knifeID};");
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
             return false;
-        
+
         if (!loadout.Knives.TryGetValue(knifeID, out var playerKnife))
             return false;
-        
+
         playerKnife.IsUnlocked = isUnlocked;
         return true;
     }
-    
+
     public void IncreasePlayerKnifeUnboxedAmount(ushort knifeID, int amount)
     {
         if (!Knives.TryGetValue(knifeID, out var knife))
@@ -4282,13 +4422,13 @@ public class DatabaseManager
         AddQuery($"INSERT INTO `{PLAYERS_PERKS}` (`SteamID` , `PerkID` , `IsBought`) VALUES ({steamID} , {perkID} , true) ON DUPLICATE KEY UPDATE `IsBought` = true;");
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
             return;
-        
+
         if (loadout.Perks.TryGetValue(perkID, out var playerPerk))
         {
             playerPerk.IsBought = true;
             return;
         }
-        
+
         loadout.Perks.Add(perkID, new(perk, true, false));
         Plugin.Instance.UI.OnUIUpdated(steamID, EUIPage.PERK);
     }
@@ -4301,14 +4441,14 @@ public class DatabaseManager
         AddQuery($"UPDATE `{PLAYERS_PERKS}` SET `IsBought` = {isBought} WHERE `SteamID` = {steamID} AND `PerkID` = {perkID};");
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
             return false;
-        
+
         if (!loadout.Perks.TryGetValue(perkID, out var playerPerk))
             return false;
-        
+
         playerPerk.IsBought = isBought;
         return true;
     }
-    
+
     public bool UpdatePlayerPerkUnlocked(CSteamID steamID, int perkID, bool isUnlocked)
     {
         if (!Perks.TryGetValue(perkID, out var perk))
@@ -4317,10 +4457,10 @@ public class DatabaseManager
         AddQuery($"UPDATE `{PLAYERS_PERKS}` SET `IsUnlocked` = {isUnlocked} WHERE `SteamID` = {steamID} AND `PerkID` = {perkID};");
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
             return false;
-        
+
         if (!loadout.Perks.TryGetValue(perkID, out var playerPerk))
             return false;
-        
+
         playerPerk.IsUnlocked = isUnlocked;
         return true;
     }
@@ -4335,17 +4475,17 @@ public class DatabaseManager
         AddQuery($"INSERT INTO `{PLAYERS_GADGETS}` (`SteamID` , `GadgetID` , `GadgetKills` , `IsBought`) VALUES ({steamID} , {gadgetID} , 0 , true) ON DUPLICATE KEY UPDATE `IsBought` = true;");
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
             return;
-        
+
         if (loadout.Gadgets.TryGetValue(gadgetID, out var playerGadget))
         {
             playerGadget.IsBought = true;
             return;
         }
-        
+
         loadout.Gadgets.Add(gadgetID, new(gadget, 0, true, false));
         Plugin.Instance.UI.OnUIUpdated(steamID, gadget.IsTactical ? EUIPage.TACTICAL : EUIPage.LETHAL);
     }
-    
+
     public void IncreasePlayerGadgetKills(CSteamID steamID, ushort gadgetID, int amount)
     {
         if (!Gadgets.TryGetValue(gadgetID, out var gadget))
@@ -4354,13 +4494,13 @@ public class DatabaseManager
         AddQuery($"UPDATE `{PLAYERS_GADGETS}` SET `GadgetKills` = `GadgetKills` + {amount} WHERE `SteamID` = {steamID} AND `GadgetID` = {gadgetID};");
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
             return;
-        
+
         if (!loadout.Gadgets.TryGetValue(gadgetID, out var playerGadget))
             return;
-        
+
         playerGadget.GadgetKills += amount;
     }
-    
+
     public bool UpdatePlayerGadgetBought(CSteamID steamID, ushort gadgetID, bool isBought)
     {
         if (!Gadgets.TryGetValue(gadgetID, out var gadget))
@@ -4369,14 +4509,14 @@ public class DatabaseManager
         AddQuery($"UPDATE `{PLAYERS_GADGETS}` SET `IsBought` = {isBought} WHERE `SteamID` = {steamID} AND `GadgetID` = {gadgetID};");
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
             return false;
-        
+
         if (!loadout.Gadgets.TryGetValue(gadgetID, out var playerGadget))
             return false;
-        
+
         playerGadget.IsBought = isBought;
         return true;
     }
-    
+
     public bool UpdatePlayerGadgetUnlocked(CSteamID steamID, ushort gadgetID, bool isUnlocked)
     {
         if (!Gadgets.TryGetValue(gadgetID, out var gadget))
@@ -4385,10 +4525,10 @@ public class DatabaseManager
         AddQuery($"UPDATE `{PLAYERS_GADGETS}` SET `IsUnlocked` = {isUnlocked} WHERE `SteamID` = {steamID} AND `GadgetID` = {gadgetID};");
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
             return false;
-        
+
         if (!loadout.Gadgets.TryGetValue(gadgetID, out var playerGadget))
             return false;
-        
+
         playerGadget.IsUnlocked = isUnlocked;
         return true;
     }
@@ -4403,17 +4543,17 @@ public class DatabaseManager
         AddQuery($"INSERT INTO `{PLAYERS_KILLSTREAKS}` (`SteamID` , `KillstreakID` , `KillstreakKills` , `IsBought`) VALUES ({steamID} , {killstreakID} , 0 , true) ON DUPLICATE KEY UPDATE `IsBought` = true;");
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
             return;
-        
+
         if (loadout.Killstreaks.TryGetValue(killstreakID, out var playerKillstreak))
         {
             playerKillstreak.IsBought = true;
             return;
         }
-        
+
         loadout.Killstreaks.Add(killstreakID, new(killstreak, 0, true, false));
         Plugin.Instance.UI.OnUIUpdated(steamID, EUIPage.KILLSTREAK);
     }
-    
+
     public void IncreasePlayerKillstreakKills(CSteamID steamID, int killstreakID, int amount)
     {
         if (!Killstreaks.TryGetValue(killstreakID, out var killstreak))
@@ -4422,13 +4562,13 @@ public class DatabaseManager
         AddQuery($"UPDATE `{PLAYERS_KILLSTREAKS}` SET `KillstreakKills` = `KillstreakKills` + {amount} WHERE `SteamID` = {steamID} AND `KillstreakID` = {killstreakID};");
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
             return;
-        
+
         if (!loadout.Killstreaks.TryGetValue(killstreakID, out var playerKillstreak))
             return;
-        
+
         playerKillstreak.KillstreakKills += amount;
     }
-    
+
     public bool UpdatePlayerKillstreakBought(CSteamID steamID, int killstreakID, bool isBought)
     {
         if (!Killstreaks.TryGetValue(killstreakID, out var killstreak))
@@ -4437,14 +4577,14 @@ public class DatabaseManager
         AddQuery($"UPDATE `{PLAYERS_KILLSTREAKS}` SET `IsBought` = {isBought} WHERE `SteamID` = {steamID} AND `KillstreakID` = {killstreakID};");
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
             return false;
-        
+
         if (!loadout.Killstreaks.TryGetValue(killstreakID, out var playerKillstreak))
             return false;
-        
+
         playerKillstreak.IsBought = isBought;
         return true;
     }
-    
+
     public bool UpdatePlayerKillstreakUnlocked(CSteamID steamID, int killstreakID, bool isUnlocked)
     {
         if (!Killstreaks.TryGetValue(killstreakID, out var killstreak))
@@ -4453,10 +4593,10 @@ public class DatabaseManager
         AddQuery($"UPDATE `{PLAYERS_KILLSTREAKS}` SET `IsUnlocked` = {isUnlocked} WHERE `SteamID` = {steamID} AND `KillstreakID` = {killstreakID};");
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
             return false;
-        
+
         if (!loadout.Killstreaks.TryGetValue(killstreakID, out var playerKillstreak))
             return false;
-        
+
         playerKillstreak.IsUnlocked = isUnlocked;
         return true;
     }
@@ -4471,17 +4611,17 @@ public class DatabaseManager
         AddQuery($"INSERT INTO `{PLAYERS_CARDS}` (`SteamID` , `CardID` , `IsBought`) VALUES ({steamID} , {cardID} , true) ON DUPLICATE KEY UPDATE `IsBought` = true;");
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
             return;
-        
+
         if (loadout.Cards.TryGetValue(cardID, out var playerCard))
         {
             playerCard.IsBought = true;
             return;
         }
-        
+
         loadout.Cards.Add(cardID, new(card, true, false));
         Plugin.Instance.UI.OnUIUpdated(steamID, EUIPage.CARD);
     }
-    
+
     public void RemovePlayerCard(CSteamID steamID, int cardID)
     {
         if (!Cards.TryGetValue(cardID, out var card))
@@ -4490,10 +4630,10 @@ public class DatabaseManager
         AddQuery($"DELETE FROM `{PLAYERS_CARDS}` WHERE `SteamID` = {steamID} AND `CardID` = {cardID};");
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
             return;
-        
+
         loadout.Cards.Remove(cardID);
     }
-    
+
     public bool UpdatePlayerCardBought(CSteamID steamID, int cardID, bool isBought)
     {
         if (!Cards.TryGetValue(cardID, out var card))
@@ -4502,14 +4642,14 @@ public class DatabaseManager
         AddQuery($"UPDATE `{PLAYERS_CARDS}` SET `IsBought` = {isBought} WHERE `SteamID` = {steamID} AND `CardID` = {cardID};");
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
             return false;
-        
+
         if (!loadout.Cards.TryGetValue(cardID, out var playerCard))
             return false;
-        
+
         playerCard.IsBought = isBought;
         return true;
     }
-    
+
     public bool UpdatePlayerCardUnlocked(CSteamID steamID, int cardID, bool isUnlocked)
     {
         if (!Cards.TryGetValue(cardID, out var card))
@@ -4518,16 +4658,16 @@ public class DatabaseManager
         AddQuery($"UPDATE `{PLAYERS_CARDS}` SET `IsUnlocked` = {isUnlocked} WHERE `SteamID` = {steamID} AND `CardID` = {cardID};");
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
             return false;
-        
+
         if (!loadout.Cards.TryGetValue(cardID, out var playerCard))
             return false;
-        
+
         playerCard.IsUnlocked = isUnlocked;
         return true;
     }
 
     // Player Gloves
-    
+
     public void AddPlayerGloveBought(CSteamID steamID, int gloveID)
     {
         if (!Gloves.TryGetValue(gloveID, out var glove))
@@ -4536,17 +4676,17 @@ public class DatabaseManager
         AddQuery($"INSERT INTO `{PLAYERS_GLOVES}` (`SteamID` , `GloveID` , `IsBought`) VALUES ({steamID} , {gloveID} , true) ON DUPLICATE KEY UPDATE `IsBought` = true;");
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
             return;
-        
+
         if (loadout.Gloves.TryGetValue(gloveID, out var playerGlove))
         {
             playerGlove.IsBought = true;
             return;
         }
-        
+
         loadout.Gloves.Add(gloveID, new(glove, true, false));
         Plugin.Instance.UI.OnUIUpdated(steamID, EUIPage.GLOVE);
     }
-    
+
     public bool UpdatePlayerGloveBought(CSteamID steamID, int gloveID, bool isBought)
     {
         if (!Gloves.TryGetValue(gloveID, out var glove))
@@ -4555,14 +4695,14 @@ public class DatabaseManager
         AddQuery($"UPDATE `{PLAYERS_GLOVES}` SET `IsBought` = {isBought} WHERE `SteamID` = {steamID} AND `GloveID` = {gloveID};");
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
             return false;
-        
+
         if (!loadout.Gloves.TryGetValue(gloveID, out var playerGlove))
             return false;
-        
+
         playerGlove.IsBought = isBought;
         return true;
     }
-    
+
     public bool UpdatePlayerGloveUnlocked(CSteamID steamID, int gloveID, bool isUnlocked)
     {
         if (!Gloves.TryGetValue(gloveID, out var glove))
@@ -4571,10 +4711,10 @@ public class DatabaseManager
         AddQuery($"UPDATE `{PLAYERS_GLOVES}` SET `IsUnlocked` = {isUnlocked} WHERE `SteamID` = {steamID} AND `GloveID` = {gloveID};");
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
             return false;
-        
+
         if (!loadout.Gloves.TryGetValue(gloveID, out var playerGlove))
             return false;
-        
+
         playerGlove.IsUnlocked = isUnlocked;
         return true;
     }
@@ -4590,7 +4730,7 @@ public class DatabaseManager
     }
 
     // Player Loadouts
-    
+
     public void UpdatePlayerLoadout(CSteamID steamID, int loadoutID)
     {
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
@@ -4616,7 +4756,7 @@ public class DatabaseManager
     }
 
     // Player Quest
-    
+
     public void IncreasePlayerQuestAmount(CSteamID steamID, int questID, int amount)
     {
         if (!QuestsSearchByID.ContainsKey(questID))
@@ -4645,7 +4785,7 @@ public class DatabaseManager
         AddQuery($"UPDATE `{PLAYERS_ACHIEVEMENTS}` SET `Amount` = `Amount` + {amount} WHERE `SteamID` = {steamID} AND `AchievementID` = {achievementID};");
         if (!PlayerData.TryGetValue(steamID, out var data))
             return;
-        
+
         if (!data.AchievementsSearchByID.TryGetValue(achievementID, out var achievement))
             return;
 
@@ -4683,7 +4823,9 @@ public class DatabaseManager
                         break;
                 }
 
-                _ = await new MySqlCommand($"INSERT INTO `{ACHIEVEMENTS_TIERS}` (`AchievementID` , `TierID` , `TierTitle` , `TierDesc` , `TierColor` , `TierPrevSmall` , `TierPrevLarge` , `TargetAmount` , `Rewards` , `RemoveRewards`) VALUES ({achievementID} , {i} , '{tierTitle}' , ' ', '{color}' , ' ', ' ', {targetAmount} , ' ' , ' ' );", conn).ExecuteScalarAsync();
+                _ = await new MySqlCommand(
+                    $"INSERT INTO `{ACHIEVEMENTS_TIERS}` (`AchievementID` , `TierID` , `TierTitle` , `TierDesc` , `TierColor` , `TierPrevSmall` , `TierPrevLarge` , `TargetAmount` , `Rewards` , `RemoveRewards`) VALUES ({achievementID} , {i} , '{tierTitle}' , ' ', '{color}' , ' ', ' ', {targetAmount} , ' ' , ' ' );",
+                    conn).ExecuteScalarAsync();
             }
         }
         catch (Exception ex)
@@ -4698,7 +4840,7 @@ public class DatabaseManager
     }
 
     // Player Battle-pass
-    
+
     public void IncreasePlayerBPXP(CSteamID steamID, int xp)
     {
         AddQuery($"UPDATE `{PLAYERS_BATTLEPASS}` SET `XP` = `XP` + {xp} WHERE `SteamID` = {steamID};");
@@ -4710,7 +4852,7 @@ public class DatabaseManager
         var player = Plugin.Instance.Game.GetGamePlayer(data.SteamID);
         if (player == null)
             return;
-        
+
         while (data.Battlepass.TryGetNeededXP(out var neededXP) && data.Battlepass.XP >= neededXP)
         {
             data.Battlepass.XP -= neededXP;
@@ -4720,7 +4862,7 @@ public class DatabaseManager
             if (BattlepassTiersSearchByID.TryGetValue(data.Battlepass.CurrentTier, out var currentTier))
                 Plugin.Instance.UI.SendAnimation(player, new(EAnimationType.BATTLEPASS_TIER_COMPLETION, currentTier));
         }
-        
+
         if (tierUp)
             AddQuery($"UPDATE `{PLAYERS_BATTLEPASS}` SET `CurrentTier` = {data.Battlepass.CurrentTier}, `XP` = {data.Battlepass.XP} WHERE `SteamID` = {steamID}");
     }
@@ -4733,12 +4875,12 @@ public class DatabaseManager
 
         data.Battlepass.CurrentTier = tier;
     }
-    
+
     public void UpdatePlayerBPClaimedFreeRewards(CSteamID steamID)
     {
         if (!PlayerData.TryGetValue(steamID, out var data))
             throw new ArgumentNullException(nameof(steamID), $"Player with steamID {steamID} doesn't exist in the database, while updating BP claimed free rewards");
-        
+
         AddQuery($"UPDATE `{PLAYERS_BATTLEPASS}` SET `ClaimedFreeRewards` = '{data.Battlepass.ClaimedFreeRewards.GetStringFromHashSetInt()}' WHERE `SteamID` = {steamID};");
     }
 
@@ -4746,7 +4888,7 @@ public class DatabaseManager
     {
         if (!PlayerData.TryGetValue(steamID, out var data))
             throw new ArgumentNullException(nameof(steamID), $"Player with steamID {steamID} doesn't exist in the database, while updating BP claimed premium rewards");
-        
+
         AddQuery($"UPDATE `{PLAYERS_BATTLEPASS}` SET `ClaimedPremiumRewards` = '{data.Battlepass.ClaimedPremiumRewards.GetStringFromHashSetInt()}' WHERE `SteamID` = {steamID};");
     }
 
@@ -4765,7 +4907,7 @@ public class DatabaseManager
             playerCase.Amount += amount;
             return;
         }
-        
+
         playerCase = new(steamID, @case, amount);
 
         data.Cases.Add(playerCase);
@@ -4777,10 +4919,10 @@ public class DatabaseManager
     {
         if (!PlayerData.TryGetValue(steamID, out var data))
             throw new ArgumentNullException(nameof(steamID), $"Player with steamID {steamID} doesn't exist in the database, while decreasing case");
-        
+
         if (!data.CasesSearchByID.TryGetValue(caseID, out var playerCase))
             throw new ArgumentNullException(nameof(caseID), $"Case with id {caseID} doesn't exist in the database, while decreasing case");
-        
+
         if (playerCase.Amount >= amount)
         {
             playerCase.Amount -= amount;

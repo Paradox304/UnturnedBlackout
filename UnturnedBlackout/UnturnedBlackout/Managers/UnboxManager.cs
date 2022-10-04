@@ -170,6 +170,7 @@ public class UnboxManager
         var poolSize = 0;
         foreach (var glove in gloves)
             poolSize += glove.GloveWeight;
+
         var randInt = UnityEngine.Random.Range(0, poolSize) + 1;
 
         Logging.Debug($"Total Poolsize: {poolSize}, random int: {randInt}");
@@ -194,6 +195,7 @@ public class UnboxManager
         var poolSize = 0;
         foreach (var knife in knives)
             poolSize += knife.KnifeWeight;
+
         var randInt = UnityEngine.Random.Range(0, poolSize) + 1;
 
         Logging.Debug($"Total Poolsize: {poolSize}, random int: {randInt}");
@@ -218,6 +220,7 @@ public class UnboxManager
         var poolSize = 0;
         foreach (var weight in weights)
             poolSize += weight.Item2;
+
         var randInt = UnityEngine.Random.Range(0, poolSize) + 1;
 
         Logging.Debug($"Total Poolsize: {poolSize}, random int: {randInt}");

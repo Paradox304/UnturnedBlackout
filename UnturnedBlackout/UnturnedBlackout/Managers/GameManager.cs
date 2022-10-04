@@ -257,6 +257,7 @@ public class GameManager
         var poolSize = 0;
         foreach (var option in options)
             poolSize += option.GamemodeWeight;
+
         var randInt = UnityEngine.Random.Range(0, poolSize) + 1;
 
         var accumulatedProbability = 0;

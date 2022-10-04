@@ -886,7 +886,9 @@ public class UIHandler
 
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Play BUTTON {index}", true);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Play Map TEXT {index}", game.Location.LocationName);
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Play Mode TEXT {index}", (game.IsHardcore ? $"<color={Config.Base.FileData.HardcoreColor}>Hardcore</color> " : "") + $"<color={gameMode.GamemodeColor}>{Plugin.Instance.Translate($"{game.GameMode}_Name_Full")}</color>");
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Play Mode TEXT {index}",
+                (game.IsHardcore ? $"<color={Config.Base.FileData.HardcoreColor}>Hardcore</color> " : "") + $"<color={gameMode.GamemodeColor}>{Plugin.Instance.Translate($"{game.GameMode}_Name_Full")}</color>");
+
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Play Players TEXT {index}", $"{game.GetPlayerCount()}/{game.Location.GetMaxPlayers(game.GameMode)}");
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Play Status TEXT {index}", game.GamePhase.ToFriendlyName());
         }
@@ -932,7 +934,9 @@ public class UIHandler
                 name = $"<color=#FFFF00>{name}</color>";
 
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Play Server TEXT {index}", name);
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Play Status TEXT {index}", server.IsOnline ? "<color=#36ff3c>Online</color>" : (DateTime.UtcNow - server.LastOnline).TotalSeconds < 120 ? "<color=#f5fa73>Restarting</color>" : "<color=#ed2626>Offline</color>");
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Play Status TEXT {index}",
+                server.IsOnline ? "<color=#36ff3c>Online</color>" : (DateTime.UtcNow - server.LastOnline).TotalSeconds < 120 ? "<color=#f5fa73>Restarting</color>" : "<color=#ed2626>Offline</color>");
+
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Play Players TEXT {index}", server.IsOnline ? $"{server.Players}/{server.MaxPlayers}" : "0/0");
         }
 
@@ -1150,10 +1154,10 @@ public class UIHandler
             Logging.Debug($"Error finding loadout with id {LoadoutID} for {Player.CharacterName}");
             return;
         }
-        
+
         foreach (var activeLoadout in PlayerLoadout.Loadouts.Values.Where(k => k.IsActive))
             DB.UpdatePlayerLoadoutActive(Player.CSteamID, activeLoadout.LoadoutID, false);
-        
+
         DB.UpdatePlayerLoadoutActive(Player.CSteamID, LoadoutID, true);
         ReloadLoadoutPage();
         ReloadLoadout();
@@ -1346,6 +1350,7 @@ public class UIHandler
 
         foreach (var activeLoadout in PlayerLoadout.Loadouts.Values.Where(k => k.IsActive))
             DB.UpdatePlayerLoadoutActive(Player.CSteamID, activeLoadout.LoadoutID, false);
+
         DB.UpdatePlayerLoadoutActive(Player.CSteamID, LoadoutID, true);
         ClearMidgameLoadouts();
         var gPlayer = Plugin.Instance.Game.GetGamePlayer(Player);
@@ -2728,7 +2733,10 @@ public class UIHandler
             EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item IMAGE {i}", gun.Gun.IconLink);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item TEXT {i}", gun.Gun.GunName);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay {i}", !gun.IsBought);
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", gun.Gun.LevelRequirement > PlayerData.Level && !gun.IsUnlocked ? Plugin.Instance.Translate("Unlock_Level", gun.Gun.LevelRequirement) : $"{Utility.GetCurrencySymbol(ECurrency.CREDITS)} <color={(PlayerData.Credits >= gun.Gun.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{gun.Gun.BuyPrice}</color>");
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}",
+                gun.Gun.LevelRequirement > PlayerData.Level && !gun.IsUnlocked ? Plugin.Instance.Translate("Unlock_Level", gun.Gun.LevelRequirement) :
+                    $"{Utility.GetCurrencySymbol(ECurrency.CREDITS)} <color={(PlayerData.Credits >= gun.Gun.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{gun.Gun.BuyPrice}</color>");
+
             SendRarity("SERVER Item", gun.Gun.GunRarity, i);
         }
     }
@@ -2758,7 +2766,10 @@ public class UIHandler
             EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item IMAGE {i}", attachment.Attachment.IconLink);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item TEXT {i}", attachment.Attachment.AttachmentName);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay {i}", !attachment.IsBought);
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", attachment.LevelRequirement > gun.Level && !attachment.IsUnlocked ? Plugin.Instance.Translate("Unlock_Gun_Level", attachment.LevelRequirement) : $"{Utility.GetCurrencySymbol(ECurrency.CREDITS)} <color={(PlayerData.Credits >= attachment.Attachment.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{attachment.Attachment.BuyPrice}</color>");
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}",
+                attachment.LevelRequirement > gun.Level && !attachment.IsUnlocked ? Plugin.Instance.Translate("Unlock_Gun_Level", attachment.LevelRequirement) :
+                    $"{Utility.GetCurrencySymbol(ECurrency.CREDITS)} <color={(PlayerData.Credits >= attachment.Attachment.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{attachment.Attachment.BuyPrice}</color>");
+
             SendRarity("SERVER Item", attachment.Attachment.AttachmentRarity, i);
         }
     }
@@ -2866,7 +2877,10 @@ public class UIHandler
             EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item IMAGE {i}", perk.Perk.IconLink);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item TEXT {i}", perk.Perk.PerkName);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay {i}", !perk.IsBought);
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", perk.Perk.LevelRequirement > PlayerData.Level && !perk.IsUnlocked ? Plugin.Instance.Translate("Unlock_Level", perk.Perk.LevelRequirement) : $"{Utility.GetCurrencySymbol(ECurrency.CREDITS)} <color={(PlayerData.Credits >= perk.Perk.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{perk.Perk.BuyPrice}</color>");
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}",
+                perk.Perk.LevelRequirement > PlayerData.Level && !perk.IsUnlocked ? Plugin.Instance.Translate("Unlock_Level", perk.Perk.LevelRequirement) :
+                    $"{Utility.GetCurrencySymbol(ECurrency.CREDITS)} <color={(PlayerData.Credits >= perk.Perk.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{perk.Perk.BuyPrice}</color>");
+
             switch (perk.Perk.PerkType)
             {
                 case 1:
@@ -2906,7 +2920,10 @@ public class UIHandler
             EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item IMAGE {i}", gadget.Gadget.IconLink);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item TEXT {i}", gadget.Gadget.GadgetName);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay {i}", !gadget.IsBought);
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}", gadget.Gadget.LevelRequirement > PlayerData.Level && !gadget.IsUnlocked ? Plugin.Instance.Translate("Unlock_Level", gadget.Gadget.LevelRequirement) : $"{Utility.GetCurrencySymbol(ECurrency.CREDITS)} <color={(PlayerData.Credits >= gadget.Gadget.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{gadget.Gadget.BuyPrice}</color>");
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}",
+                gadget.Gadget.LevelRequirement > PlayerData.Level && !gadget.IsUnlocked ? Plugin.Instance.Translate("Unlock_Level", gadget.Gadget.LevelRequirement) :
+                    $"{Utility.GetCurrencySymbol(ECurrency.CREDITS)} <color={(PlayerData.Credits >= gadget.Gadget.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{gadget.Gadget.BuyPrice}</color>");
+
             SendRarity("SERVER Item", gadget.Gadget.GadgetRarity, i);
         }
     }
@@ -3647,9 +3664,12 @@ public class UIHandler
         var coins = attachment.GetCoins(gun.Level);
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.COINS)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
         var isAttachmentPrimary = IsAttachmentPagePrimary();
-        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Equip BUTTON", attachment.IsBought && ((isAttachmentPrimary && !loadout.PrimaryAttachments.ContainsValue(attachment)) || (!isAttachmentPrimary && !loadout.SecondaryAttachments.ContainsValue(attachment))));
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Equip BUTTON",
+            attachment.IsBought && ((isAttachmentPrimary && !loadout.PrimaryAttachments.ContainsValue(attachment)) || (!isAttachmentPrimary && !loadout.SecondaryAttachments.ContainsValue(attachment))));
+
         if (attachment.Attachment.AttachmentType != EAttachment.MAGAZINE)
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Dequip BUTTON", attachment.IsBought && ((isAttachmentPrimary && loadout.PrimaryAttachments.ContainsValue(attachment)) || (!isAttachmentPrimary && loadout.SecondaryAttachments.ContainsValue(attachment))));
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Dequip BUTTON",
+                attachment.IsBought && ((isAttachmentPrimary && loadout.PrimaryAttachments.ContainsValue(attachment)) || (!isAttachmentPrimary && loadout.SecondaryAttachments.ContainsValue(attachment))));
         else
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Dequip BUTTON", false);
 
@@ -3942,7 +3962,7 @@ public class UIHandler
                 }
                 else
                     SendNotEnoughCurrencyModal(ECurrency.CREDITS);
-                
+
                 break;
             }
 
@@ -3962,7 +3982,7 @@ public class UIHandler
                     Logging.Debug($"Error finding attachment with id {SelectedItemID} for {Player.CharacterName}");
                     return;
                 }
-                
+
                 if (PlayerData.Credits >= attachment.Attachment.BuyPrice && !attachment.IsBought)
                 {
                     if (DB.UpdatePlayerGunAttachmentBought(Player.CSteamID, gun.Gun.GunID, attachment.Attachment.AttachmentID, true))
@@ -3974,6 +3994,7 @@ public class UIHandler
                 }
                 else
                     SendNotEnoughCurrencyModal(ECurrency.CREDITS);
+
                 break;
             }
 
@@ -4004,6 +4025,7 @@ public class UIHandler
                 }
                 else
                     SendNotEnoughCurrencyModal(ECurrency.CREDITS);
+
                 break;
             }
 
@@ -4028,6 +4050,7 @@ public class UIHandler
                 }
                 else
                     SendNotEnoughCurrencyModal(ECurrency.CREDITS);
+
                 break;
             }
 
@@ -4051,10 +4074,11 @@ public class UIHandler
                 }
                 else
                     SendNotEnoughCurrencyModal(ECurrency.CREDITS);
+
                 break;
             }
 
-            case ELoadoutPage.TACTICAL: 
+            case ELoadoutPage.TACTICAL:
             case ELoadoutPage.LETHAL:
             {
                 if (!PlayerLoadout.Gadgets.TryGetValue((ushort)SelectedItemID, out var gadget))
@@ -4074,6 +4098,7 @@ public class UIHandler
                 }
                 else
                     SendNotEnoughCurrencyModal(ECurrency.CREDITS);
+
                 break;
             }
 
@@ -4099,6 +4124,7 @@ public class UIHandler
                 }
                 else
                     SendNotEnoughCurrencyModal(ECurrency.CREDITS);
+
                 break;
             }
 
@@ -4122,6 +4148,7 @@ public class UIHandler
                 }
                 else
                     SendNotEnoughCurrencyModal(ECurrency.CREDITS);
+
                 break;
             }
 
@@ -4145,6 +4172,7 @@ public class UIHandler
                 }
                 else
                     SendNotEnoughCurrencyModal(ECurrency.CREDITS);
+
                 break;
             }
 
@@ -4168,6 +4196,7 @@ public class UIHandler
                 }
                 else
                     SendNotEnoughCurrencyModal(ECurrency.CREDITS);
+
                 break;
             }
         }
@@ -4191,7 +4220,7 @@ public class UIHandler
                     Logging.Debug($"Error finding gun with id {SelectedItemID} for {Player.CharacterName}");
                     return;
                 }
-                
+
                 var cost = gun.Gun.GetCoins(PlayerData.Level);
                 if (PlayerData.Coins >= cost && !gun.IsBought && !gun.IsUnlocked && gun.Gun.LevelRequirement > PlayerData.Level)
                 {
@@ -4204,6 +4233,7 @@ public class UIHandler
                 }
                 else
                     SendNotEnoughCurrencyModal(ECurrency.COINS);
+
                 break;
             }
 
@@ -4223,7 +4253,7 @@ public class UIHandler
                     Logging.Debug($"Error finding attachment with id {SelectedItemID} for {Player.CharacterName}");
                     return;
                 }
-                
+
                 var cost = attachment.GetCoins(gun.Level);
                 if (PlayerData.Coins >= cost && !attachment.IsBought && !attachment.IsUnlocked && attachment.LevelRequirement > gun.Level)
                 {
@@ -4236,6 +4266,7 @@ public class UIHandler
                 }
                 else
                     SendNotEnoughCurrencyModal(ECurrency.COINS);
+
                 break;
             }
 
@@ -4267,6 +4298,7 @@ public class UIHandler
                 }
                 else
                     SendNotEnoughCurrencyModal(ECurrency.COINS);
+
                 break;
             }
 
@@ -4291,6 +4323,7 @@ public class UIHandler
                 }
                 else
                     SendNotEnoughCurrencyModal(ECurrency.COINS);
+
                 break;
             }
 
@@ -4314,6 +4347,7 @@ public class UIHandler
                 }
                 else
                     SendNotEnoughCurrencyModal(ECurrency.COINS);
+
                 break;
             }
 
@@ -4338,6 +4372,7 @@ public class UIHandler
                 }
                 else
                     SendNotEnoughCurrencyModal(ECurrency.COINS);
+
                 break;
             }
 
@@ -4363,6 +4398,7 @@ public class UIHandler
                 }
                 else
                     SendNotEnoughCurrencyModal(ECurrency.COINS);
+
                 break;
             }
 
@@ -4386,6 +4422,7 @@ public class UIHandler
                 }
                 else
                     SendNotEnoughCurrencyModal(ECurrency.COINS);
+
                 break;
             }
 
@@ -4409,6 +4446,7 @@ public class UIHandler
                 }
                 else
                     SendNotEnoughCurrencyModal(ECurrency.COINS);
+
                 break;
             }
 
@@ -4432,6 +4470,7 @@ public class UIHandler
                 }
                 else
                     SendNotEnoughCurrencyModal(ECurrency.COINS);
+
                 break;
             }
         }
@@ -4993,30 +5032,30 @@ public class UIHandler
         for (var i = 0; i <= 9; i++)
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards BUTTON {i}", false);
 
-            var inputLower = input.ToLower();
-            var searchPlayers = data.Where(k => k.SteamName.ToLower().Contains(inputLower)).Take(10).ToList();
-            TaskDispatcher.QueueOnMainThread(() =>
+        var inputLower = input.ToLower();
+        var searchPlayers = data.Where(k => k.SteamName.ToLower().Contains(inputLower)).Take(10).ToList();
+        TaskDispatcher.QueueOnMainThread(() =>
+        {
+            var maxCount = Math.Min(10, searchPlayers.Count);
+            for (var i = 0; i < maxCount; i++)
             {
-                var maxCount = Math.Min(10, searchPlayers.Count);
-                for (var i = 0; i < maxCount; i++)
-                {
-                    var playerData = searchPlayers[i];
-                    decimal kills = playerData.Kills + playerData.HeadshotKills;
-                    decimal deaths = playerData.Deaths;
+                var playerData = searchPlayers[i];
+                decimal kills = playerData.Kills + playerData.HeadshotKills;
+                decimal deaths = playerData.Deaths;
 
-                    var ratio = playerData.Deaths == 0 ? string.Format("{0:n}", kills) : string.Format("{0:n}", Math.Round(kills / deaths, 2));
+                var ratio = playerData.Deaths == 0 ? string.Format("{0:n}", kills) : string.Format("{0:n}", Math.Round(kills / deaths, 2));
 
-                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards BUTTON {i}", true);
-                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Rank TEXT {i}", $"#{data.IndexOf(playerData) + 1}");
-                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Level TEXT {i}", playerData.Level.ToString());
-                    EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Level IMAGE {i}", DB.Levels.TryGetValue(playerData.Level, out var level) ? level.IconLinkMedium : "");
-                    EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Flag IMAGE {i}", playerData.HideFlag ? Config.Icons.FileData.HiddenFlagIconLink : Utility.GetFlag(playerData.CountryCode));
-                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Name TEXT {i}", playerData.SteamName);
-                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Kills TEXT {i}", (playerData.Kills + playerData.HeadshotKills).ToString());
-                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Deaths TEXT {i}", playerData.Deaths.ToString());
-                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards KDR TEXT {i}", ratio.ToString());
-                }
-            });
+                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards BUTTON {i}", true);
+                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Rank TEXT {i}", $"#{data.IndexOf(playerData) + 1}");
+                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Level TEXT {i}", playerData.Level.ToString());
+                EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Level IMAGE {i}", DB.Levels.TryGetValue(playerData.Level, out var level) ? level.IconLinkMedium : "");
+                EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Flag IMAGE {i}", playerData.HideFlag ? Config.Icons.FileData.HiddenFlagIconLink : Utility.GetFlag(playerData.CountryCode));
+                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Name TEXT {i}", playerData.SteamName);
+                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Kills TEXT {i}", (playerData.Kills + playerData.HeadshotKills).ToString());
+                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Deaths TEXT {i}", playerData.Deaths.ToString());
+                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards KDR TEXT {i}", ratio.ToString());
+            }
+        });
     }
 
     public List<LeaderboardData> GetLeaderboardData() => LeaderboardPage switch
@@ -5119,6 +5158,7 @@ public class UIHandler
         for (var i = 0; i <= 48; i++)
         {
             yield return new WaitForSeconds(0.01f);
+
             if (!page.Achievements.TryGetValue(i, out var achievement))
                 break;
 
@@ -5410,7 +5450,9 @@ public class UIHandler
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass Expire TEXT", "365 Days");
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass Buy Pass BUTTON", !PlayerData.HasBattlepass);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass Tier Skip", !isBattlePassCompleted);
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass Tier Skip TEXT", $"{Utility.GetCurrencySymbol(ECurrency.COINS)} <color={(PlayerData.Coins >= Config.Base.FileData.BattlepassTierSkipCost ? "#9CFF84" : "#FF6E6E")}>{Config.Base.FileData.BattlepassTierSkipCost}</color>");
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass Tier Skip TEXT",
+            $"{Utility.GetCurrencySymbol(ECurrency.COINS)} <color={(PlayerData.Coins >= Config.Base.FileData.BattlepassTierSkipCost ? "#9CFF84" : "#FF6E6E")}>{Config.Base.FileData.BattlepassTierSkipCost}</color>");
+
         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass Tier Skip IMAGE", "");
     }
 
@@ -5727,7 +5769,9 @@ public class UIHandler
         {
             if (i == 20)
             {
-                EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Rolling IMAGE {i}", reward.RewardType == ERewardType.KNIFE ? Config.Icons.FileData.KnifeUnboxingIconLink : reward.RewardType == ERewardType.GLOVE ? Config.Icons.FileData.GloveUnboxingIconLink : rewardImage);
+                EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Rolling IMAGE {i}",
+                    reward.RewardType == ERewardType.KNIFE ? Config.Icons.FileData.KnifeUnboxingIconLink : reward.RewardType == ERewardType.GLOVE ? Config.Icons.FileData.GloveUnboxingIconLink : rewardImage);
+
                 SendRarity("SERVER Unbox Content Rolling", reward.RewardType == ERewardType.KNIFE || reward.RewardType == ERewardType.GLOVE ? ERarity.YELLOW : rewardRarity, i);
                 continue;
             }
@@ -6076,6 +6120,7 @@ public class UIHandler
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", UIManager.HAIRSPACE_SYMBOL_STRING);
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 0", new(' ', boldSpaces));
         yield return new WaitForSeconds(0.7f);
+
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Type TEXT", "Match XP");
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP 0 TEXT", $"+{summary.MatchXP} XP");
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary XP 0 Toggle", true);
@@ -6093,6 +6138,7 @@ public class UIHandler
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary LevelUp Toggle", true);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", new(' ', MAX_SPACES_MATCH_END_SUMMARY - boldSpaces));
             yield return new WaitForSeconds(0.5f);
+
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 0", UIManager.HAIRSPACE_SYMBOL_STRING);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", UIManager.HAIRSPACE_SYMBOL_STRING);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary LevelUp Toggle", false);
@@ -6106,8 +6152,10 @@ public class UIHandler
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", new(' ', highlightedSpaces));
         currentXP += b;
         yield return new WaitForSeconds(0.7f);
+
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary XP 0 Toggle", false);
         yield return new WaitForSeconds(0.18f);
+
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary XP 1 Toggle", true);
 
         // --------------------------
@@ -6118,6 +6166,7 @@ public class UIHandler
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", UIManager.HAIRSPACE_SYMBOL_STRING);
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 0", new(' ', boldSpaces));
         yield return new WaitForSeconds(0.7f);
+
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Type TEXT", "Match Bonus XP");
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP 0 TEXT", $"+{summary.MatchXPBonus} XP");
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary XP 0 Toggle", true);
@@ -6135,6 +6184,7 @@ public class UIHandler
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary LevelUp Toggle", true);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", new(' ', MAX_SPACES_MATCH_END_SUMMARY - boldSpaces));
             yield return new WaitForSeconds(0.5f);
+
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 0", UIManager.HAIRSPACE_SYMBOL_STRING);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", UIManager.HAIRSPACE_SYMBOL_STRING);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary LevelUp Toggle", false);
@@ -6148,8 +6198,10 @@ public class UIHandler
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", new(' ', highlightedSpaces));
         currentXP += b;
         yield return new WaitForSeconds(0.7f);
+
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary XP 0 Toggle", false);
         yield return new WaitForSeconds(0.18f);
+
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary XP 2 Toggle", true);
 
         // --------------------------
@@ -6160,6 +6212,7 @@ public class UIHandler
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", UIManager.HAIRSPACE_SYMBOL_STRING);
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 0", new(' ', boldSpaces));
         yield return new WaitForSeconds(0.7f);
+
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Type TEXT", "Achievement Bonus XP");
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP 0 TEXT", $"+{summary.AchievementXPBonus} XP");
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary XP 0 Toggle", true);
@@ -6177,6 +6230,7 @@ public class UIHandler
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary LevelUp Toggle", true);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", new(' ', MAX_SPACES_MATCH_END_SUMMARY - boldSpaces));
             yield return new WaitForSeconds(0.5f);
+
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 0", UIManager.HAIRSPACE_SYMBOL_STRING);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", UIManager.HAIRSPACE_SYMBOL_STRING);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary LevelUp Toggle", false);
@@ -6190,8 +6244,10 @@ public class UIHandler
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", new(' ', highlightedSpaces));
         currentXP += b;
         yield return new WaitForSeconds(0.7f);
+
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary XP 0 Toggle", false);
         yield return new WaitForSeconds(0.18f);
+
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary XP 3 Toggle", true);
 
         // --------------------------
@@ -6202,6 +6258,7 @@ public class UIHandler
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", UIManager.HAIRSPACE_SYMBOL_STRING);
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 0", new(' ', boldSpaces));
         yield return new WaitForSeconds(0.7f);
+
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Type TEXT", "Other Bonus XP");
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP 0 TEXT", $"+{summary.OtherXPBonus} XP");
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary XP 0 Toggle", true);
@@ -6219,6 +6276,7 @@ public class UIHandler
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary LevelUp Toggle", true);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", new(' ', MAX_SPACES_MATCH_END_SUMMARY - boldSpaces));
             yield return new WaitForSeconds(0.5f);
+
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 0", UIManager.HAIRSPACE_SYMBOL_STRING);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", UIManager.HAIRSPACE_SYMBOL_STRING);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary LevelUp Toggle", false);
@@ -6232,8 +6290,10 @@ public class UIHandler
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", new(' ', highlightedSpaces));
         currentXP += b;
         yield return new WaitForSeconds(0.7f);
+
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary XP 0 Toggle", false);
         yield return new WaitForSeconds(0.18f);
+
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary XP 4 Toggle", true);
 
         // --------------------------
@@ -6286,6 +6346,7 @@ public class UIHandler
         while (PlayerData != null)
         {
             yield return new WaitForSeconds(1f);
+
             if (MainPage == EMainPage.LEADERBOARD)
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Leaderboards Reset TEXT", GetLeaderboardRefreshTime());
 

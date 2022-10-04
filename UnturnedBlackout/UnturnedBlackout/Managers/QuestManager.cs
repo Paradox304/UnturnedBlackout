@@ -31,6 +31,7 @@ public class QuestManager
                     var isConditionMinimum = IsConditionMinimum(condition.Key);
                     if (condition.Value.Contains(conditionValue) || condition.Value.Exists(k => isConditionMinimum && conditionValue >= k) || condition.Value.Contains(-1))
                         continue;
+
                     conditionsMet = false;
                     break;
                 }

@@ -158,6 +158,7 @@ public abstract class Game
         while (!data.barricade.isDead)
         {
             yield return new WaitForSeconds(1f);
+
             BarricadeManager.damage(drop.model.transform, healthPerSecond, 1, false);
         }
     }
@@ -256,7 +257,9 @@ public abstract class Game
         if (!Plugin.Instance.UI.KillFeedIcons.TryGetValue(weaponID, out var icon) && weaponID != 0 && weaponID != 1)
             return;
 
-        var feed = weaponID == 0 || weaponID == 1 ? new($"{(victim.Data.HasPrime ? UIManager.PRIME_SYMBOL : "")}<color={victimColor}>{victim.Player.CharacterName.ToUnrich()}</color> {(weaponID == 0 ? "" : "")} ", DateTime.UtcNow) : new Feed($"{(killer.Data.HasPrime ? UIManager.PRIME_SYMBOL : "")}<color={killerColor}>{killer.Player.CharacterName.ToUnrich()}</color> {icon.Symbol} {(victim.Data.HasPrime ? UIManager.PRIME_SYMBOL : "")}<color={victimColor}>{victim.Player.CharacterName.ToUnrich()}</color>", DateTime.UtcNow);
+        var feed = weaponID == 0 || weaponID == 1 ? new($"{(victim.Data.HasPrime ? UIManager.PRIME_SYMBOL : "")}<color={victimColor}>{victim.Player.CharacterName.ToUnrich()}</color> {(weaponID == 0 ? "" : "")} ", DateTime.UtcNow) : new Feed(
+            $"{(killer.Data.HasPrime ? UIManager.PRIME_SYMBOL : "")}<color={killerColor}>{killer.Player.CharacterName.ToUnrich()}</color> {icon.Symbol} {(victim.Data.HasPrime ? UIManager.PRIME_SYMBOL : "")}<color={victimColor}>{victim.Player.CharacterName.ToUnrich()}</color>", DateTime.UtcNow);
+
         if (Killfeed.Count < Config.Base.FileData.MaxKillFeed)
         {
             Killfeed.Add(feed);
@@ -278,6 +281,7 @@ public abstract class Game
         while (true)
         {
             yield return new WaitForSeconds(Config.Base.FileData.KillFeedSeconds);
+
             if (Killfeed.RemoveAll(k => (DateTime.UtcNow - k.Time).TotalSeconds >= Config.Base.FileData.KillFeedSeconds) > 0)
                 OnKillfeedUpdated();
         }
@@ -298,6 +302,7 @@ public abstract class Game
         var poolSize = 0;
         foreach (var roundEndCase in cases)
             poolSize += roundEndCase.Weight;
+
         var randInt = UnityEngine.Random.Range(0, poolSize) + 1;
 
         var accumulatedProbability = 0;
@@ -326,7 +331,9 @@ public abstract class Game
 
         var stopWatch = new Stopwatch();
         stopWatch.Start();
-        BarricadeManager.BarricadeRegions.Cast<BarricadeRegion>().SelectMany(k => k.drops).Where(k => LevelNavigation.tryGetNavigation(k.model.transform.position, out var nav) && nav == Location.NavMesh).Select(k => BarricadeManager.tryGetRegion(k.model.transform, out var x, out var y, out var plant, out _) ? (k, x, y, plant) : (k, byte.MaxValue, byte.MaxValue, ushort.MaxValue)).ToList().ForEach(k => BarricadeManager.destroyBarricade(k.k, k.Item2, k.Item3, k.Item4));
+        BarricadeManager.BarricadeRegions.Cast<BarricadeRegion>().SelectMany(k => k.drops).Where(k => LevelNavigation.tryGetNavigation(k.model.transform.position, out var nav) && nav == Location.NavMesh)
+            .Select(k => BarricadeManager.tryGetRegion(k.model.transform, out var x, out var y, out var plant, out _) ? (k, x, y, plant) : (k, byte.MaxValue, byte.MaxValue, ushort.MaxValue)).ToList().ForEach(k => BarricadeManager.destroyBarricade(k.k, k.Item2, k.Item3, k.Item4));
+
         stopWatch.Stop();
         Logging.Debug($"Clearing all barricades in a game, that one liner took {stopWatch.ElapsedTicks} ticks, {stopWatch.ElapsedMilliseconds}ms");
     }

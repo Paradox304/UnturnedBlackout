@@ -1,4 +1,5 @@
 ﻿// ReSharper disable UnusedAutoPropertyAccessor.Local
+
 namespace UnturnedBlackout.Models.Webhook;
 
 public class Embed

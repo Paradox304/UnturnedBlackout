@@ -78,7 +78,7 @@ public class LoadoutManager
                 }
             }
         }
-        
+
         DB.UpdatePlayerLoadout(player.CSteamID, loadoutID);
     }
 

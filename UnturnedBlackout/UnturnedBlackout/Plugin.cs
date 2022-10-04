@@ -11,6 +11,7 @@ using System.Reflection;
 using UnityEngine;
 using UnturnedBlackout.Managers;
 using Logger = Rocket.Core.Logging.Logger;
+
 // ReSharper disable RedundantAssignment
 
 namespace UnturnedBlackout;
@@ -25,7 +26,7 @@ public class Plugin : RocketPlugin<Config>
             Harmony = new("UnturnedBlackout");
             Harmony.PatchAll(Assembly);
         }
-        
+
         Level.onLevelLoaded += OnLevelLoaded;
         PlayerVoice.onRelayVoice += OnVoice;
 
@@ -47,7 +48,7 @@ public class Plugin : RocketPlugin<Config>
     {
         Game.Destroy();
         UI.Destroy();
-        
+
         Level.onLevelLoaded -= OnLevelLoaded;
         PlayerVoice.onRelayVoice -= OnVoice;
 
@@ -106,10 +107,10 @@ public class Plugin : RocketPlugin<Config>
         ply.skinItems = Array.Empty<int>();
 
         //var randColor = _allowedColors[UnityEngine.Random.Range(0, _allowedColors.Length)];
-        
+
         //var field = typeof(SteamPending).GetField("_color", BindingFlags.Instance | BindingFlags.NonPublic);
         //if (field == null)
-            //return;
+        //return;
         //Logging.Debug($"Field found for {ply.playerID.characterName}, setting color: {randColor[0]}, {randColor[1]}, {randColor[2]}");
         //field.SetValue(ply, new Color(randColor[0], randColor[1], randColor[2]));
     }
@@ -126,7 +127,7 @@ public class Plugin : RocketPlugin<Config>
         var game = gPlayer.CurrentGame;
         if (game == null)
             return;
-        
+
         switch (key)
         {
             case 0:
@@ -150,6 +151,7 @@ public class Plugin : RocketPlugin<Config>
         while (true)
         {
             yield return new WaitForSeconds(60);
+
             //LightingManager.time = (uint)(LightingManager.cycle * LevelLighting.transition);
             Logging.Debug($"TPS: {Provider.debugTPS}", ConsoleColor.Yellow);
             Logging.Debug($"UPS: {Provider.debugUPS}", ConsoleColor.Yellow);
@@ -321,12 +323,14 @@ public class Plugin : RocketPlugin<Config>
     public LoadoutManager Loadout { get; set; }
     public RewardManager Reward { get; set; }
     public UnboxManager Unbox { get; set; }
+
     // ReSharper disable once InconsistentNaming
     public BPManager BP { get; set; }
     private static Harmony Harmony { get; set; }
     public static Plugin Instance { get; private set; }
-    
-    private static int[][] _allowedColors = new int[][] {
-        new int[] {244, 230, 210}, new int[] {217, 202, 180}, new int[] {190, 165, 130}, new int[] {157, 136, 107}, new int[] {148, 118, 75}, new int[] {112, 96, 73}, new int[] {83, 71, 54}, new int[] {75, 61, 49}, new int[] {51, 44, 37}, new int[] {35, 31, 28}
+
+    private static int[][] _allowedColors = new int[][]
+    {
+        new int[] { 244, 230, 210 }, new int[] { 217, 202, 180 }, new int[] { 190, 165, 130 }, new int[] { 157, 136, 107 }, new int[] { 148, 118, 75 }, new int[] { 112, 96, 73 }, new int[] { 83, 71, 54 }, new int[] { 75, 61, 49 }, new int[] { 51, 44, 37 }, new int[] { 35, 31, 28 }
     };
 }

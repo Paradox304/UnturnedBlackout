@@ -135,6 +135,7 @@ public class GamePlayer
     public IEnumerator RemoveSpawnProtection(int seconds)
     {
         yield return new WaitForSeconds(seconds);
+
         Logging.Debug($"Timer to remove spawn protection for {Player.CharacterName} has passed at {DateTime.UtcNow} removing spawn protection");
         HasSpawnProtection = false;
     }
@@ -164,7 +165,9 @@ public class GamePlayer
 
         KnifeMovementChange = primaryMovementChange + secondaryMovementChange + loadout.GetKnifeMovement();
 
-        Logging.Debug($"Setting movement for {Player.CharacterName} with PrimaryMovementChange {PrimaryMovementChange}, PrimaryMovementChangeADS {PrimaryMovementChangeADS}, SecondaryMovementChange {SecondaryMovementChange}, SecondaryMovementChangeADS {SecondaryMovementChangeADS}, KnifeMovementChange {KnifeMovementChange}");
+        Logging.Debug(
+            $"Setting movement for {Player.CharacterName} with PrimaryMovementChange {PrimaryMovementChange}, PrimaryMovementChangeADS {PrimaryMovementChangeADS}, SecondaryMovementChange {SecondaryMovementChange}, SecondaryMovementChangeADS {SecondaryMovementChangeADS}, KnifeMovementChange {KnifeMovementChange}");
+
         LethalChecker.Stop();
         TacticalChecker.Stop();
 
@@ -233,6 +236,7 @@ public class GamePlayer
     {
         Logging.Debug($"Enabling lethal for {Player.CharacterName}, time to wait {LethalIntervalSeconds}");
         yield return new WaitForSeconds(LethalIntervalSeconds);
+
         Logging.Debug($"Waited enough, giving lethal");
         HasLethal = true;
         Plugin.Instance.UI.UpdateGadgetUsed(this, false, false);
@@ -242,6 +246,7 @@ public class GamePlayer
     {
         Logging.Debug($"Enabling tactical for {Player.CharacterName}, time to wait {LethalIntervalSeconds}");
         yield return new WaitForSeconds(LethalIntervalSeconds);
+
         Logging.Debug($"Waited enough, giving tactical");
         HasTactical = true;
         Plugin.Instance.UI.UpdateGadgetUsed(this, true, false);
@@ -250,11 +255,13 @@ public class GamePlayer
     public IEnumerator GiveGadget(ushort id)
     {
         yield return new WaitForSeconds(1);
+
         while (true)
         {
             if (Player.Player.life.isDead)
             {
                 yield return new WaitForSeconds(1);
+
                 continue;
             }
 
@@ -283,6 +290,7 @@ public class GamePlayer
     public IEnumerator CheckDamage()
     {
         yield return new WaitForSeconds(Config.Base.FileData.LastDamageAfterHealSeconds);
+
         Healer = Plugin.Instance.StartCoroutine(HealPlayer());
     }
 
@@ -292,6 +300,7 @@ public class GamePlayer
         while (true)
         {
             yield return new WaitForSeconds(seconds);
+
             var health = Player.Player.life.health;
             if (health == 100)
             {
@@ -345,6 +354,7 @@ public class GamePlayer
         for (var seconds = respawnSeconds; seconds >= 0; seconds--)
         {
             yield return new WaitForSeconds(1);
+
             Plugin.Instance.UI.UpdateRespawnTimer(this, $"{seconds}s");
         }
 
@@ -423,6 +433,7 @@ public class GamePlayer
     public IEnumerator CheckVoiceChat()
     {
         yield return new WaitForSeconds(0.5f);
+
         if (CurrentGame != null && !Player.Player.voice.isTalking)
             CurrentGame.OnStoppedTalking(this);
 
@@ -434,6 +445,7 @@ public class GamePlayer
     {
         HasAnimationGoingOn = true;
         yield return new WaitForSeconds(5);
+
         HasAnimationGoingOn = false;
 
         if (PendingAnimations.Count > 0)
@@ -480,6 +492,7 @@ public class GamePlayer
         var value = info.GetValue(null);
         ((ClientInstanceMethod<float>)value).Invoke(Player.Player.movement.GetNetId(), ENetReliability.Reliable, Player.Player.channel.GetOwnerTransportConnection(), newMovement);
         yield return new WaitForSeconds(Player.Ping - 0.01f);
+
         Player.Player.movement.pluginSpeedMultiplier = newMovement;
     }
 
@@ -571,7 +584,7 @@ public class GamePlayer
                 Logging.Debug($"Failed to add turret to inventory, probably no space?");
                 return;
             }
-            
+
             Player.Player.equipment.ServerEquip(page, x, y);
 
             AvailableKillstreaks[killstreak] = false;
@@ -670,6 +683,7 @@ public class GamePlayer
             if (Player.Player.life.isDead)
             {
                 yield return new WaitForSeconds(1f);
+
                 continue;
             }
 
@@ -698,6 +712,7 @@ public class GamePlayer
             if (Player.Player.life.isDead)
             {
                 yield return new WaitForSeconds(1f);
+
                 continue;
             }
 

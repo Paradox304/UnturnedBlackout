@@ -49,6 +49,7 @@ public class XmlFileReader<T> : IFileReader<T> where T : class, new()
                 var deserializedData = Serializer.Deserialize(reader);
                 if (deserializedData is T t)
                     FileData = t;
+
                 Save();
             }
         }

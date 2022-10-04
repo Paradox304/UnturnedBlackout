@@ -51,7 +51,9 @@ public class PlayerData
     public List<PlayerCase> Cases { get; set; }
     public Dictionary<int, PlayerCase> CasesSearchByID { get; set; }
 
-    public PlayerData(CSteamID steamID, string steamName, string avatarLink, string countryCode, bool hideFlag, int xP, int level, int credits, int scrap, int coins, int kills, int headshotKills, int highestKillstreak, int highestMultiKills, int killsConfirmed, int killsDenied, int flagsCaptured, int flagsSaved, int areasTaken, int deaths, bool music, bool isMuted, DateTimeOffset muteExpiry, bool hasBattlepass, float xPBooster, float bPBooster, float gunXPBooster, bool hasPrime, DateTimeOffset primeExpiry, DateTimeOffset primeLastDailyReward)
+    public PlayerData(
+        CSteamID steamID, string steamName, string avatarLink, string countryCode, bool hideFlag, int xP, int level, int credits, int scrap, int coins, int kills, int headshotKills, int highestKillstreak, int highestMultiKills, int killsConfirmed, int killsDenied, int flagsCaptured, int flagsSaved,
+        int areasTaken, int deaths, bool music, bool isMuted, DateTimeOffset muteExpiry, bool hasBattlepass, float xPBooster, float bPBooster, float gunXPBooster, bool hasPrime, DateTimeOffset primeExpiry, DateTimeOffset primeLastDailyReward)
     {
         SteamID = steamID;
         SteamName = steamName;
@@ -154,7 +156,7 @@ public class PlayerData
         EBoosterType.GUNXP => GunXPBooster,
         var _ => throw new ArgumentOutOfRangeException("type", type, "Booster type is not as expected")
     };
-    
+
     public int GetCurrency(ECurrency currency) => currency switch
     {
         ECurrency.COINS => Coins,

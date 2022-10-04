@@ -62,6 +62,7 @@ public class TDMGame : Game
         {
             if (player.GamePlayer.IsLoading)
                 continue;
+
             UI.ClearWaitingForPlayersUI(player.GamePlayer);
             player.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(0);
             UI.ShowCountdownUI(player.GamePlayer);
@@ -71,6 +72,7 @@ public class TDMGame : Game
         for (var seconds = Config.TDM.FileData.StartSeconds; seconds >= 0; seconds--)
         {
             yield return new WaitForSeconds(1);
+
             foreach (var player in Players)
                 UI.SendCountdownSeconds(player.GamePlayer, seconds);
         }
@@ -94,6 +96,7 @@ public class TDMGame : Game
         for (var seconds = Config.TDM.FileData.EndSeconds; seconds >= 0; seconds--)
         {
             yield return new WaitForSeconds(1);
+
             var timeSpan = TimeSpan.FromSeconds(seconds);
             foreach (var player in Players)
                 UI.UpdateTDMTimer(player.GamePlayer, timeSpan.ToString(@"m\:ss"));
@@ -176,7 +179,9 @@ public class TDMGame : Game
             UI.SetupTDMLeaderboard(Players, Location, wonTeam, BlueTeam, RedTeam, false, IsHardcore);
             CleanMap();
         });
+
         yield return new WaitForSeconds(5);
+
         foreach (var player in Players)
             UI.ShowTDMLeaderboard(player.GamePlayer);
 
@@ -184,6 +189,7 @@ public class TDMGame : Game
             _ = Plugin.Instance.StartCoroutine(UI.SetupRoundEndDrops(Players.Select(k => k.GamePlayer).ToList(), roundEndCases, 0));
 
         yield return new WaitForSeconds(Config.Base.FileData.EndingLeaderboardSeconds);
+
         foreach (var player in Players.ToList())
         {
             RemovePlayerFromGame(player.GamePlayer);
@@ -234,6 +240,7 @@ public class TDMGame : Game
         for (var seconds = 1; seconds <= 5; seconds++)
         {
             yield return new WaitForSeconds(1);
+
             UI.UpdateLoadingBar(player.Player, new('　', Math.Min(96, seconds * 96 / 5)));
         }
 
@@ -313,7 +320,9 @@ public class TDMGame : Game
         }
 
         if (GamePhase != EGamePhase.ENDING)
-            TaskDispatcher.QueueOnMainThread(() => BarricadeManager.BarricadeRegions.Cast<BarricadeRegion>().SelectMany(k => k.drops).Where(k => (k.GetServersideData()?.owner ?? 0UL) == player.SteamID.m_SteamID && LevelNavigation.tryGetNavigation(k.model.transform.position, out var nav) && nav == Location.NavMesh).Select(k => BarricadeManager.tryGetRegion(k.model.transform, out var x, out var y, out var plant, out _) ? (k, x, y, plant) : (k, byte.MaxValue, byte.MaxValue, ushort.MaxValue)).ToList().ForEach(k => BarricadeManager.destroyBarricade(k.k, k.Item2, k.Item3, k.Item4)));
+            TaskDispatcher.QueueOnMainThread(() =>
+                BarricadeManager.BarricadeRegions.Cast<BarricadeRegion>().SelectMany(k => k.drops).Where(k => (k.GetServersideData()?.owner ?? 0UL) == player.SteamID.m_SteamID && LevelNavigation.tryGetNavigation(k.model.transform.position, out var nav) && nav == Location.NavMesh)
+                    .Select(k => BarricadeManager.tryGetRegion(k.model.transform, out var x, out var y, out var plant, out _) ? (k, x, y, plant) : (k, byte.MaxValue, byte.MaxValue, ushort.MaxValue)).ToList().ForEach(k => BarricadeManager.destroyBarricade(k.k, k.Item2, k.Item3, k.Item4)));
 
         tPlayer.Team.RemovePlayer(tPlayer.GamePlayer.SteamID);
         tPlayer.GamePlayer.OnGameLeft();
@@ -702,7 +711,8 @@ public class TDMGame : Game
             }
 
             var iconLink = DB.Levels.TryGetValue(data.Level, out var level) ? level.IconLinkSmall : "";
-            var updatedText = $"[{Utility.ToFriendlyName(chatMode)}] <color={Utility.GetLevelColor(player.Data.Level)}>[{player.Data.Level}]</color> <color={tPlayer.Team.Info.ChatPlayerHexCode}>{player.Player.CharacterName.ToUnrich()}</color>: <color={tPlayer.Team.Info.ChatMessageHexCode}>{text.ToUnrich()}</color>";
+            var updatedText =
+                $"[{Utility.ToFriendlyName(chatMode)}] <color={Utility.GetLevelColor(player.Data.Level)}>[{player.Data.Level}]</color> <color={tPlayer.Team.Info.ChatPlayerHexCode}>{player.Player.CharacterName.ToUnrich()}</color>: <color={tPlayer.Team.Info.ChatMessageHexCode}>{text.ToUnrich()}</color>";
 
             var loopPlayers = chatMode == EChatMode.GLOBAL ? Players : Players.Where(k => k.Team == tPlayer.Team);
             foreach (var reciever in loopPlayers)
@@ -873,6 +883,7 @@ public class TDMGame : Game
     public IEnumerator SpawnSwitch()
     {
         yield return new WaitForSeconds(Config.Base.FileData.SpawnSwitchSeconds);
+
         SwitchSpawn();
     }
 

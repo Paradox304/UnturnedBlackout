@@ -95,6 +95,7 @@ public class KCTeam
     public IEnumerator SpawnSwitch()
     {
         yield return new WaitForSeconds(Config.Base.FileData.SpawnSwitchTimeFrame);
+
         Logging.Debug($"Spawn switch time frame reached, setting threshold back to 0 and waiting for kills");
         if (SpawnThreshold > Config.Base.FileData.SpawnSwitchThreshold)
             Game.SwitchSpawn();

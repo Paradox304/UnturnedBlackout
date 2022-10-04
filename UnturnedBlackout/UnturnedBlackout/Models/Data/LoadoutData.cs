@@ -47,7 +47,9 @@ public class LoadoutData
         Card = loadout.Card?.Card?.CardID ?? 0;
     }
 
-    public LoadoutData(string loadoutName, ushort primary, int primarySkin, ushort primaryGunCharm, List<ushort> primaryAttachments, ushort secondary, int secondarySkin, ushort secondaryGunCharm, List<ushort> secondaryAttachments, ushort knife, ushort tactical, ushort lethal, List<int> killstreaks, List<int> perks, int glove, int card)
+    public LoadoutData(
+        string loadoutName, ushort primary, int primarySkin, ushort primaryGunCharm, List<ushort> primaryAttachments, ushort secondary, int secondarySkin, ushort secondaryGunCharm, List<ushort> secondaryAttachments, ushort knife, ushort tactical, ushort lethal, List<int> killstreaks,
+        List<int> perks, int glove, int card)
     {
         LoadoutName = loadoutName;
         Primary = primary;

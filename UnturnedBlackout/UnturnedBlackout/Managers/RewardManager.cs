@@ -66,18 +66,21 @@ public class RewardManager
                 {
                     if (float.TryParse(reward.RewardValue.ToString(), out var booster))
                         db.IncreasePlayerBooster(steamID, EBoosterType.BPXP, booster);
+
                     break;
                 }
                 case ERewardType.XP_BOOSTER:
                 {
                     if (float.TryParse(reward.RewardValue.ToString(), out var booster))
                         db.IncreasePlayerBooster(steamID, EBoosterType.XP, booster);
+
                     break;
                 }
                 case ERewardType.GUN_XP_BOOSTER:
                 {
                     if (float.TryParse(reward.RewardValue.ToString(), out var booster))
                         db.IncreasePlayerBooster(steamID, EBoosterType.GUNXP, booster);
+
                     break;
                 }
             }
@@ -158,14 +161,17 @@ public class RewardManager
                     case ERewardType.BP_BOOSTER:
                         if (float.TryParse(reward.RewardValue.ToString(), out var booster))
                             db.IncreasePlayerBooster(bulkReward.Item1, EBoosterType.BPXP, booster);
+
                         break;
                     case ERewardType.XP_BOOSTER:
                         if (float.TryParse(reward.RewardValue.ToString(), out booster))
                             db.IncreasePlayerBooster(bulkReward.Item1, EBoosterType.XP, booster);
+
                         break;
                     case ERewardType.GUN_XP_BOOSTER:
                         if (float.TryParse(reward.RewardValue.ToString(), out booster))
                             db.IncreasePlayerBooster(bulkReward.Item1, EBoosterType.GUNXP, booster);
+
                         break;
                 }
             }

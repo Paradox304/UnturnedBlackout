@@ -48,7 +48,7 @@ public static class Utility
         y = 0;
         page = 0;
         itemJar = null;
-        
+
         var itemCount = inv.getItemCount(PlayerInventory.SLOTS);
         for (byte i = 0; i < itemCount; i++)
         {
@@ -64,7 +64,7 @@ public static class Utility
 
         return false;
     }
-    
+
     public static void Stop(this Coroutine cr)
     {
         if (cr != null)
@@ -386,7 +386,7 @@ public static class Utility
         ELoadoutPage.ATTACHMENT_SECONDARY_SIGHTS or ELoadoutPage.ATTACHMENT_SECONDARY_BARREL or ELoadoutPage.ATTACHMENT_SECONDARY_CHARM or ELoadoutPage.ATTACHMENT_SECONDARY_MAGAZINE => page.ToString().Replace("ATTACHMENT_SECONDARY_", ""),
         var _ => page.ToString()
     };
-    
+
     public static string ToFriendlyName(this EGamePhase gamePhase) => gamePhase switch
     {
         EGamePhase.WAITING_FOR_PLAYERS => "Waiting For Players",
@@ -421,14 +421,15 @@ public static class Utility
     public static string ToUIName(this ETeam team) => team switch
     {
         ETeam.RED => "Red",
-        ETeam.BLUE => "Blue"
+        ETeam.BLUE => "Blue",
+        _ => throw new ArgumentOutOfRangeException(nameof(team), team, null)
     };
-    
+
     public static string ToFriendlyName(this EChatMode chatMode) => chatMode switch
     {
         EChatMode.LOCAL or EChatMode.GROUP => "Team",
         EChatMode.GLOBAL => "All",
-        var _ => throw new ArgumentOutOfRangeException(nameof(chatMode), chatMode,"ChatMode is not as expected")
+        var _ => throw new ArgumentOutOfRangeException(nameof(chatMode), chatMode, "ChatMode is not as expected")
     };
 
     public static string GetDefaultAttachmentImage(string attachmentType) => attachmentType.ToLower() switch
