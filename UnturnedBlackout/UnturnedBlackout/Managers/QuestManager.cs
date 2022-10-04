@@ -43,7 +43,7 @@ public class QuestManager
             if (!conditionsMet)
                 continue;
 
-            quest.Amount += 1;
+            db.IncreasePlayerQuestAmount(steamID, quest.Quest.QuestID, 1);
             if (quest.Amount >= quest.Quest.TargetAmount)
             {
                 Plugin.Instance.UI.SendAnimation(player, new(EAnimationType.QUEST_COMPLETION, quest.Quest));
@@ -51,8 +51,6 @@ public class QuestManager
             }
             else if (quest.Amount * 100 / quest.Quest.TargetAmount % 10 == 0)
                 pendingQuestsProgression.Add(quest);
-
-            db.IncreasePlayerQuestAmount(steamID, quest.Quest.QuestID, 1);
         }
 
         if (pendingQuestsProgression.Count > 0)
