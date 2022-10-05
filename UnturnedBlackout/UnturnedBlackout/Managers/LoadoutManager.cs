@@ -3,6 +3,7 @@ using SDG.Unturned;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnturnedBlackout.Database.Data;
 using UnturnedBlackout.Enums;
 using UnturnedBlackout.Models.Global;
 
@@ -680,7 +681,7 @@ public class LoadoutManager
             inv.forceAddItem(new(lethalID, false), false);
             inv.TryGetItemIndex(lethalID, out var lethalX, out var lethalY, out var lethalPage, out var _);
             if (Assets.find(EAssetType.ITEM, lethalID) is ItemAsset lethalAsset)
-                player.Player.Player.equipment.ServerBindItemHotkey(0, lethalAsset, lethalPage, lethalX, lethalY);
+                player.Player.Player.equipment.ServerBindItemHotkey(player.Data.GetHotkey(EHotkey.LETHAL), lethalAsset, lethalPage, lethalX, lethalY);
         }
 
         if (activeLoadout.Tactical != null)
@@ -689,21 +690,19 @@ public class LoadoutManager
             inv.forceAddItem(new(tacticalID, false), false);
             inv.TryGetItemIndex(tacticalID, out var tacticalX, out var tacticalY, out var tacticalPage, out var _);
             if (Assets.find(EAssetType.ITEM, tacticalID) is ItemAsset tacticalAsset)
-                player.Player.Player.equipment.ServerBindItemHotkey(1, tacticalAsset, tacticalPage, tacticalX, tacticalY);
+                player.Player.Player.equipment.ServerBindItemHotkey(player.Data.GetHotkey(EHotkey.TACTICAL), tacticalAsset, tacticalPage, tacticalX, tacticalY);
         }
 
         // Giving killstreaks to player
         byte killstreakHotkey = 2;
-        foreach (var killstreak in activeLoadout.Killstreaks)
+        foreach (var killstreakID in activeLoadout.Killstreaks.Select(killstreak => killstreak.Killstreak.KillstreakInfo.TriggerItemID))
         {
-            var killstreakID = killstreak.Killstreak.KillstreakInfo.TriggerItemID;
             inv.forceAddItem(new(killstreakID, true), false);
             inv.TryGetItemIndex(killstreakID, out var killstreakX, out var killstreakY, out var killstreakPage, out var _);
             if (Assets.find(EAssetType.ITEM, killstreakID) is ItemAsset killstreakAsset)
-            {
-                player.Player.Player.equipment.ServerBindItemHotkey(killstreakHotkey, killstreakAsset, killstreakPage, killstreakX, killstreakY);
-                killstreakHotkey++;
-            }
+                player.Player.Player.equipment.ServerBindItemHotkey(player.Data.GetHotkey((EHotkey)killstreakHotkey), killstreakAsset, killstreakPage, killstreakX, killstreakY);
+
+            killstreakHotkey++;
         }
 
         player.SetActiveLoadout(activeLoadout, knifePage, knifeX, knifeY);

@@ -314,7 +314,7 @@ public class DatabaseManager
 
             // PLAYERS DATA
             _ = await new MySqlCommand(
-                $"CREATE TABLE IF NOT EXISTS `{PLAYERS}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `SteamName` TEXT NOT NULL , `AvatarLink` VARCHAR(200) NOT NULL , `CountryCode` TEXT NOT NULL , `HideFlag` BOOLEAN NOT NULL DEFAULT FALSE , `XP` INT NOT NULL DEFAULT '0' , `Level` INT NOT NULL DEFAULT '1' , `Credits` INT NOT NULL DEFAULT '0' , `Scrap` INT NOT NULL DEFAULT '0' , `Coins` INT NOT NULL DEFAULT '0' , `Kills` INT NOT NULL DEFAULT '0' , `HeadshotKills` INT NOT NULL DEFAULT '0' , `HighestKillstreak` INT NOT NULL DEFAULT '0' , `HighestMultiKills` INT NOT NULL DEFAULT '0' , `KillsConfirmed` INT NOT NULL DEFAULT '0' , `KillsDenied` INT NOT NULL DEFAULT '0' , `FlagsCaptured` INT NOT NULL DEFAULT '0' , `FlagsSaved` INT NOT NULL DEFAULT '0' , `AreasTaken` INT NOT NULL DEFAULT '0' , `Deaths` INT NOT NULL DEFAULT '0' , `Music` BOOLEAN NOT NULL DEFAULT TRUE , `IsMuted` BOOLEAN NOT NULL DEFAULT FALSE , `MuteExpiry` BIGINT NOT NULL DEFAULT '1' , `HasBattlepass` BOOLEAN NOT NULL DEFAULT FALSE , `XPBooster` DECIMAL(6,3) NOT NULL DEFAULT '0' , `BPBooster` DECIMAL(6,3) NOT NULL DEFAULT '0' , `GunXPBooster` DECIMAL(6,3) NOT NULL DEFAULT '0' , `HasPrime` BOOLEAN NOT NULL DEFAULT FALSE , `PrimeExpiry` BIGINT NOT NULL DEFAULT '1' , `PrimeLastDailyReward` BIGINT NOT NULL DEFAULT '1' ,  PRIMARY KEY (`SteamID`));",
+                $"CREATE TABLE IF NOT EXISTS `{PLAYERS}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `SteamName` TEXT NOT NULL , `AvatarLink` VARCHAR(200) NOT NULL , `CountryCode` TEXT NOT NULL , `HideFlag` BOOLEAN NOT NULL DEFAULT FALSE , `XP` INT NOT NULL DEFAULT '0' , `Level` INT NOT NULL DEFAULT '1' , `Credits` INT NOT NULL DEFAULT '0' , `Scrap` INT NOT NULL DEFAULT '0' , `Coins` INT NOT NULL DEFAULT '0' , `Kills` INT NOT NULL DEFAULT '0' , `HeadshotKills` INT NOT NULL DEFAULT '0' , `HighestKillstreak` INT NOT NULL DEFAULT '0' , `HighestMultiKills` INT NOT NULL DEFAULT '0' , `KillsConfirmed` INT NOT NULL DEFAULT '0' , `KillsDenied` INT NOT NULL DEFAULT '0' , `FlagsCaptured` INT NOT NULL DEFAULT '0' , `FlagsSaved` INT NOT NULL DEFAULT '0' , `AreasTaken` INT NOT NULL DEFAULT '0' , `Deaths` INT NOT NULL DEFAULT '0' , `Music` BOOLEAN NOT NULL DEFAULT TRUE , `IsMuted` BOOLEAN NOT NULL DEFAULT FALSE , `MuteExpiry` BIGINT NOT NULL DEFAULT '1' , `HasBattlepass` BOOLEAN NOT NULL DEFAULT FALSE , `XPBooster` DECIMAL(6,3) NOT NULL DEFAULT '0' , `BPBooster` DECIMAL(6,3) NOT NULL DEFAULT '0' , `GunXPBooster` DECIMAL(6,3) NOT NULL DEFAULT '0' , `HasPrime` BOOLEAN NOT NULL DEFAULT FALSE , `PrimeExpiry` BIGINT NOT NULL DEFAULT '1' , `PrimeLastDailyReward` BIGINT NOT NULL DEFAULT '1' , `Volume` INT NOT NULL DEFAULT '20' , `Hotkeys` TEXT NOT NULL ,  PRIMARY KEY (`SteamID`));",
                 conn).ExecuteScalarAsync();
 
             _ = await new MySqlCommand(
@@ -1603,7 +1603,7 @@ public class DatabaseManager
             await conn.OpenAsync();
             MySqlCommand cmd =
                 new(
-                    $"INSERT INTO `{PLAYERS}` ( `SteamID` , `SteamName` , `AvatarLink` , `CountryCode` , `MuteExpiry`, `Coins` ) VALUES ({player.CSteamID}, @name, '{avatarLink}' , '{countryCode}' , {DateTimeOffset.UtcNow.ToUnixTimeSeconds()} , {(Plugin.Instance.Configuration.Instance.UnlockAllItems ? 10000000 : 0)}) ON DUPLICATE KEY UPDATE `AvatarLink` = '{avatarLink}', `SteamName` = @name, `CountryCode` = '{countryCode}';",
+                    $"INSERT INTO `{PLAYERS}` ( `SteamID` , `SteamName` , `AvatarLink` , `CountryCode` , `MuteExpiry`, `Coins` , `Hotkeys` ) VALUES ({player.CSteamID}, @name, '{avatarLink}' , '{countryCode}' , {DateTimeOffset.UtcNow.ToUnixTimeSeconds()} , {(Plugin.Instance.Configuration.Instance.UnlockAllItems ? 10000000 : 0)} , '3,4,5,6,7' ) ON DUPLICATE KEY UPDATE `AvatarLink` = '{avatarLink}', `SteamName` = @name, `CountryCode` = '{countryCode}';",
                     conn);
 
             _ = cmd.Parameters.AddWithValue("@name", steamName.ToUnrich());
@@ -1823,12 +1823,18 @@ public class DatabaseManager
                         continue;
 
                     var primeLastDailyReward = DateTimeOffset.FromUnixTimeSeconds(primeLastDailyRewardUnixSeconds);
+
+                    if (!int.TryParse(rdr[30].ToString(), out var volume))
+                        continue;
+
+                    var hotkeys = rdr[31].GetIntListFromReaderResult();
+                    
                     if (PlayerData.ContainsKey(player.CSteamID))
                         _ = PlayerData.Remove(player.CSteamID);
-
+                    
                     PlayerData.Add(player.CSteamID,
                         new(player.CSteamID, steamName, avatarLink, countryCode, hideFlag, xp, level, credits, scrap, coins, kills, headshotKills, highestKillstreak, highestMultiKills, killsConfirmed, killsDenied, flagsCaptured, flagsSaved, areasTaken, deaths, music, isMuted, muteExpiry,
-                            hasBattlepass, xpBooster, bpBooster, gunXPBooster, hasPrime, primeExpiry, primeLastDailyReward));
+                            hasBattlepass, xpBooster, bpBooster, gunXPBooster, hasPrime, primeExpiry, primeLastDailyReward, volume, hotkeys));
                 }
             }
             catch (Exception ex)
@@ -2867,6 +2873,8 @@ public class DatabaseManager
         if (string.IsNullOrEmpty(query))
             return;
 
+        Logging.Debug($"Adding pending query: {query}");
+        
         lock (PendingQueries)
             PendingQueries.Add(query);
     }
@@ -4085,6 +4093,20 @@ public class DatabaseManager
             allTimeLeaderboard.HasPrime = true;
     }
 
+    public void SetPlayerVolume(CSteamID id, int volume)
+    {
+        AddQuery($"UPDATE `{PLAYERS}` SET `Volume` = {volume} WHERE `SteamID` = {id};");
+        if (!PlayerData.TryGetValue(id, out var data))
+            return;
+
+        data.Volume = volume;
+    }
+
+    public void SetPlayerHotkeys(CSteamID id, List<int> hotkeys)
+    {
+        AddQuery($"UPDATE `{PLAYERS}` SET `Hotkeys` = '{hotkeys.GetStringFromIntList()}' WHERE `SteamID` = {id};");
+    }
+    
     // Player Guns
 
     public void AddPlayerGunBought(CSteamID steamID, ushort gunID)

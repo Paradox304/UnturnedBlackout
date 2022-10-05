@@ -40,7 +40,9 @@ public class PlayerData
     public bool HasPrime { get; set; }
     public DateTimeOffset PrimeExpiry { get; set; }
     public DateTimeOffset PrimeLastDailyReward { get; set; }
-
+    public int Volume { get; set; }
+    public List<int> Hotkeys { get; set; }
+    
     public List<PlayerQuest> Quests { get; set; }
     public Dictionary<EQuestType, List<PlayerQuest>> QuestsSearchByType { get; set; }
     public List<PlayerAchievement> Achievements { get; set; }
@@ -53,7 +55,7 @@ public class PlayerData
 
     public PlayerData(
         CSteamID steamID, string steamName, string avatarLink, string countryCode, bool hideFlag, int xP, int level, int credits, int scrap, int coins, int kills, int headshotKills, int highestKillstreak, int highestMultiKills, int killsConfirmed, int killsDenied, int flagsCaptured, int flagsSaved,
-        int areasTaken, int deaths, bool music, bool isMuted, DateTimeOffset muteExpiry, bool hasBattlepass, float xPBooster, float bPBooster, float gunXPBooster, bool hasPrime, DateTimeOffset primeExpiry, DateTimeOffset primeLastDailyReward)
+        int areasTaken, int deaths, bool music, bool isMuted, DateTimeOffset muteExpiry, bool hasBattlepass, float xPBooster, float bPBooster, float gunXPBooster, bool hasPrime, DateTimeOffset primeExpiry, DateTimeOffset primeLastDailyReward, int volume, List<int> hotkeys)
     {
         SteamID = steamID;
         SteamName = steamName;
@@ -85,6 +87,8 @@ public class PlayerData
         HasPrime = hasPrime;
         PrimeExpiry = primeExpiry;
         PrimeLastDailyReward = primeLastDailyReward;
+        Volume = volume;
+        Hotkeys = hotkeys;
         Quests = new();
         QuestsSearchByType = new();
         Achievements = new();
@@ -164,4 +168,10 @@ public class PlayerData
         ECurrency.CREDITS => Credits,
         var _ => throw new ArgumentOutOfRangeException("currency", "Currency is not as expected")
     };
+
+    public byte GetHotkey(EHotkey hotkey)
+    {
+        var hotkeyInput = Hotkeys[(int)hotkey];
+        return hotkeyInput == 0 ? (byte)7 : (byte)(hotkeyInput - 3);
+    }
 }

@@ -1606,11 +1606,6 @@ public class UIManager
         var ply = UnturnedPlayer.FromPlayer(player);
         var gPly = Plugin.Instance.Game.GetGamePlayer(ply);
         var isGame = gPly.CurrentGame != null;
-        if (gPly == null)
-        {
-            Logging.Debug($"Error finding game player for {ply.CharacterName}");
-            return;
-        }
 
         if (!UIHandlersLookup.TryGetValue(ply.CSteamID, out var handler))
         {
@@ -1648,6 +1643,7 @@ public class UIManager
                 _ = Plugin.Instance.StartCoroutine(handler.SetupBattlepass());
                 return;
             case "SERVER Options BUTTON":
+                handler.ShowOptions();
                 return;
             case "SERVER Exit BUTTON":
                 Provider.kick(player.channel.owner.playerID.steamID, "You exited");
@@ -1944,6 +1940,8 @@ public class UIManager
             handler.ShowUnboxingPage(EUnboxingPage.OPEN, selected);
         else if (buttonName.StartsWith("SERVER Unbox Buy BUTTON"))
             handler.SelectedUnboxingStoreCase(selected);
+        else if (buttonName.StartsWith("Volume BUTTON"))
+            handler.VolumeButtonPressed(selected);
     }
 
     private void OnTextCommitted(Player player, string buttonName, string text)
@@ -1961,6 +1959,21 @@ public class UIManager
                 return;
             case "SERVER Leaderboards Search INPUTFIELD":
                 handler.SearchLeaderboardPlayer(text);
+                return;
+            case "Tactical Hotkey INPUT":
+                handler.SetHotkey(EHotkey.TACTICAL, text);
+                return;
+            case "Lethal Hotkey INPUT":
+                handler.SetHotkey(EHotkey.LETHAL, text);
+                return;
+            case "Killstreak 1 Hotkey INPUT":
+                handler.SetHotkey(EHotkey.KILLSTREAK_1, text);
+                return;
+            case "Killstreak 2 Hotkey INPUT":
+                handler.SetHotkey(EHotkey.KILLSTREAK_2, text);
+                return;
+            case "Killstreak 3 Hotkey INPUT":
+                handler.SetHotkey(EHotkey.KILLSTREAK_3, text);
                 return;
         }
     }

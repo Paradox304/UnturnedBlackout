@@ -772,9 +772,9 @@ public class UIHandler
     {
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Options Audio Music Toggler", PlayerData.Music);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Options Audio Flag Toggler", PlayerData.HideFlag);
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"Volume {PlayerData.Volume} Enabler", true);
         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Player Icon", PlayerData.AvatarLink);
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Player Name", (PlayerData.HasPrime ? UIManager.PRIME_SYMBOL : "") + PlayerData.SteamName);
-
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Unbox BUTTON", Plugin.Instance.Configuration.Instance.UnlockAllItems);
 
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Version TEXT", Plugin.Instance.Translate("Version").ToRich());
@@ -954,7 +954,13 @@ public class UIHandler
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Play Ping TEXT", " ");
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Play IP TEXT", $"{server.FriendlyIP}:{server.Port}");
     }
-
+    
+    public void ShowOptions()
+    {
+        for (int i = 0; i <= 4; i++)
+            SetHotkeyInput((EHotkey)i);
+    }
+    
     public void MusicButtonPressed()
     {
         PlayerData.Music = !PlayerData.Music;
@@ -971,6 +977,39 @@ public class UIHandler
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Options Audio Flag Toggler", PlayerData.HideFlag);
 
         DB.ChangePlayerHideFlag(SteamID, PlayerData.HideFlag);
+    }
+
+    public void VolumeButtonPressed(int volume)
+    {
+        DB.SetPlayerVolume(SteamID, volume);
+    }
+
+    public void SetHotkey(EHotkey hotkeyType, string hotkeyInput)
+    {
+        if (!int.TryParse(hotkeyInput, out var hotkey) || hotkey is 1 or 2)
+        {
+            SetHotkeyInput(hotkeyType);
+            return;
+        }
+        
+        if (PlayerData.Hotkeys[(int)hotkeyType] == hotkey)
+        {
+            return;
+        }
+
+        if (PlayerData.Hotkeys.Contains(hotkey))
+        {
+            SetHotkeyInput(hotkeyType);
+            return;
+        }
+        
+        PlayerData.Hotkeys[(int)hotkeyType] = hotkey;
+        DB.SetPlayerHotkeys(SteamID, PlayerData.Hotkeys);
+    }
+
+    private void SetHotkeyInput(EHotkey hotkey)
+    {
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{hotkey.ToFriendlyName()} Hotkey INPUT", PlayerData.Hotkeys[(int)hotkey].ToString());
     }
 
     public void ShowLoadouts()

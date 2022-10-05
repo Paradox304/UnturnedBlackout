@@ -39,7 +39,7 @@ public class RewardManager
                     db.AddPlayerPerkBought(steamID, Convert.ToInt32(reward.RewardValue));
                     break;
                 case ERewardType.GLOVE:
-                    db.AddPlayerGloveBought(steamID, Convert.ToUInt16(reward.RewardValue));
+                    db.AddPlayerGloveBought(steamID, Convert.ToInt32(reward.RewardValue));
                     break;
                 case ERewardType.CARD:
                     db.AddPlayerCardBought(steamID, Convert.ToInt32(reward.RewardValue));
@@ -135,7 +135,7 @@ public class RewardManager
                         db.AddPlayerPerkBought(bulkReward.Item1, Convert.ToInt32(reward.RewardValue));
                         break;
                     case ERewardType.GLOVE:
-                        db.AddPlayerGloveBought(bulkReward.Item1, Convert.ToUInt16(reward.RewardValue));
+                        db.AddPlayerGloveBought(bulkReward.Item1, Convert.ToInt32(reward.RewardValue));
                         break;
                     case ERewardType.CARD:
                         db.AddPlayerCardBought(bulkReward.Item1, Convert.ToInt32(reward.RewardValue));

@@ -389,10 +389,20 @@ public static class Utility
 
     public static string ToFriendlyName(this EGamePhase gamePhase) => gamePhase switch
     {
-        EGamePhase.WAITING_FOR_PLAYERS => "Waiting For Players",
+        EGamePhase.WAITING_FOR_PLAYERS => "Waiting",
         var _ => gamePhase.ToString()
     };
 
+    public static string ToFriendlyName(this EHotkey hotkey) => hotkey switch
+    {
+        EHotkey.LETHAL => "Lethal",
+        EHotkey.TACTICAL => "Tactical",
+        EHotkey.KILLSTREAK_1 => "Killstreak 1",
+        EHotkey.KILLSTREAK_2 => "Killstreak 2",
+        EHotkey.KILLSTREAK_3 => "Killstreak 3",
+        _ => throw new ArgumentOutOfRangeException(nameof(hotkey), hotkey, "Hotkey is not as expected")
+    };
+    
     public static string ToFriendlyName(this ECurrency currency) => currency switch
     {
         ECurrency.SCRAP => "Scrap",

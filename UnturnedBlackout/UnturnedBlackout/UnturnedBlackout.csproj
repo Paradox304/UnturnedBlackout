@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-    <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')"/>
+    <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
     <PropertyGroup>
         <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
         <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -13,7 +13,7 @@
         <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
         <FileAlignment>512</FileAlignment>
         <Deterministic>true</Deterministic>
-        <TargetFrameworkProfile/>
+        <TargetFrameworkProfile />
         <NuGetPackageImportStamp>
         </NuGetPackageImportStamp>
         <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
@@ -87,27 +87,27 @@
         <Reference Include="SteamServerQuery.NET, Version=1.0.2.0, Culture=neutral, processorArchitecture=MSIL">
             <HintPath>..\packages\SteamServerQuery.NET.1.0.2\lib\netstandard2.0\SteamServerQuery.NET.dll</HintPath>
         </Reference>
-        <Reference Include="System"/>
+        <Reference Include="System" />
         <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
             <HintPath>..\packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
         </Reference>
-        <Reference Include="System.ComponentModel"/>
-        <Reference Include="System.ComponentModel.Composition"/>
-        <Reference Include="System.ComponentModel.DataAnnotations"/>
-        <Reference Include="System.Configuration"/>
-        <Reference Include="System.Configuration.Install"/>
-        <Reference Include="System.Core"/>
+        <Reference Include="System.ComponentModel" />
+        <Reference Include="System.ComponentModel.Composition" />
+        <Reference Include="System.ComponentModel.DataAnnotations" />
+        <Reference Include="System.Configuration" />
+        <Reference Include="System.Configuration.Install" />
+        <Reference Include="System.Core" />
         <Reference Include="System.IO, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
             <HintPath>..\packages\System.IO.4.3.0\lib\net462\System.IO.dll</HintPath>
             <Private>True</Private>
             <Private>True</Private>
         </Reference>
-        <Reference Include="System.Management"/>
+        <Reference Include="System.Management" />
         <Reference Include="System.Memory, Version=4.0.1.2, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
             <HintPath>..\packages\System.Memory.4.5.5\lib\net461\System.Memory.dll</HintPath>
         </Reference>
-        <Reference Include="System.Net.Http"/>
-        <Reference Include="System.Numerics"/>
+        <Reference Include="System.Net.Http" />
+        <Reference Include="System.Numerics" />
         <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
             <HintPath>..\packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
         </Reference>
@@ -148,15 +148,15 @@
         <Reference Include="System.Threading.Tasks.Extensions, Version=4.2.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
             <HintPath>..\packages\System.Threading.Tasks.Extensions.4.5.4\lib\net461\System.Threading.Tasks.Extensions.dll</HintPath>
         </Reference>
-        <Reference Include="System.Transactions"/>
+        <Reference Include="System.Transactions" />
         <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
             <HintPath>..\packages\System.ValueTuple.4.5.0\lib\net47\System.ValueTuple.dll</HintPath>
         </Reference>
-        <Reference Include="System.Xml.Linq"/>
-        <Reference Include="System.Data.DataSetExtensions"/>
-        <Reference Include="Microsoft.CSharp"/>
-        <Reference Include="System.Data"/>
-        <Reference Include="System.Xml"/>
+        <Reference Include="System.Xml.Linq" />
+        <Reference Include="System.Data.DataSetExtensions" />
+        <Reference Include="Microsoft.CSharp" />
+        <Reference Include="System.Data" />
+        <Reference Include="System.Xml" />
         <Reference Include="Ubiety.Dns.Core, Version=2.2.1.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
             <HintPath>..\packages\MySql.Data.8.0.29\lib\net48\Ubiety.Dns.Core.dll</HintPath>
         </Reference>
@@ -177,204 +177,205 @@
         </Reference>
     </ItemGroup>
     <ItemGroup>
-        <Compile Include="Commands\AddBoosterCommand.cs"/>
-        <Compile Include="Commands\AddPrimeCommand.cs"/>
-        <Compile Include="Commands\CountryCommand.cs"/>
-        <Compile Include="Commands\RemoveRewardCommand.cs"/>
-        <Compile Include="Commands\GiveRewardCommand.cs"/>
-        <Compile Include="Commands\GenAchievementCommand.cs"/>
-        <Compile Include="Commands\CTFSPCommand.cs"/>
-        <Compile Include="Commands\FFASPCommand.cs"/>
-        <Compile Include="Commands\GetCoordsCommand.cs"/>
-        <Compile Include="Commands\GetNavMeshCommand.cs"/>
-        <Compile Include="Commands\GiveSeasonalRewardCommand.cs"/>
-        <Compile Include="Commands\LeaveCommand.cs"/>
-        <Compile Include="Commands\MuteCommand.cs"/>
-        <Compile Include="Commands\SetLobbyCommand.cs"/>
-        <Compile Include="Commands\TDMSPCommand.cs"/>
-        <Compile Include="Commands\UnmuteCommand.cs"/>
-        <Compile Include="Commands\WipeSpawnsCommand.cs"/>
-        <Compile Include="Config.cs"/>
-        <Compile Include="Database\Base\Achievement.cs"/>
-        <Compile Include="Database\Base\AchievementTier.cs"/>
-        <Compile Include="Database\Base\BattlepassTier.cs"/>
-        <Compile Include="Database\Base\Card.cs"/>
-        <Compile Include="Database\Base\Case.cs"/>
-        <Compile Include="Database\Base\Gadget.cs"/>
-        <Compile Include="Database\Base\Glove.cs"/>
-        <Compile Include="Database\Base\Gun.cs"/>
-        <Compile Include="Database\Base\GunAttachment.cs"/>
-        <Compile Include="Database\Base\GunCharm.cs"/>
-        <Compile Include="Database\Base\GunSkin.cs"/>
-        <Compile Include="Database\Base\Killstreak.cs"/>
-        <Compile Include="Database\Base\Knife.cs"/>
-        <Compile Include="Database\Base\LeaderboardData.cs"/>
-        <Compile Include="Database\Base\Options.cs"/>
-        <Compile Include="Database\Base\PercentileReward.cs"/>
-        <Compile Include="Database\Base\Perk.cs"/>
-        <Compile Include="Database\Base\Quest.cs"/>
-        <Compile Include="Database\Base\Reward.cs"/>
-        <Compile Include="Database\Base\Server.cs"/>
-        <Compile Include="Database\Base\XPLevel.cs"/>
-        <Compile Include="Database\Data\Loadout.cs"/>
-        <Compile Include="Database\Data\LoadoutAttachment.cs"/>
-        <Compile Include="Database\Data\LoadoutCard.cs"/>
-        <Compile Include="Database\Data\LoadoutGadget.cs"/>
-        <Compile Include="Database\Data\LoadoutGlove.cs"/>
-        <Compile Include="Database\Data\LoadoutGun.cs"/>
-        <Compile Include="Database\Data\LoadoutGunCharm.cs"/>
-        <Compile Include="Database\Data\LoadoutKillstreak.cs"/>
-        <Compile Include="Database\Data\LoadoutKnife.cs"/>
-        <Compile Include="Database\Data\LoadoutPerk.cs"/>
-        <Compile Include="Database\Data\PlayerAchievement.cs"/>
-        <Compile Include="Database\Data\PlayerBattlepass.cs"/>
-        <Compile Include="Database\Data\PlayerBooster.cs"/>
-        <Compile Include="Database\Data\PlayerCase.cs"/>
-        <Compile Include="Database\Data\PlayerData.cs"/>
-        <Compile Include="Database\Data\PlayerLoadout.cs"/>
-        <Compile Include="Database\Data\PlayerQuest.cs"/>
-        <Compile Include="Enums\EAttachment.cs"/>
-        <Compile Include="Enums\EBoosterType.cs"/>
-        <Compile Include="Enums\ECaseRarity.cs"/>
-        <Compile Include="Enums\ECurrency.cs"/>
-        <Compile Include="Enums\EFlagState.cs"/>
-        <Compile Include="Enums\EGamePhase.cs"/>
-        <Compile Include="Enums\EGameType.cs"/>
-        <Compile Include="Enums\EGun.cs"/>
-        <Compile Include="Enums\ELeaderboardPage.cs"/>
-        <Compile Include="Enums\ELeaderboardTab.cs"/>
-        <Compile Include="Enums\EAnimationType.cs"/>
-        <Compile Include="Enums\ELoadoutPage.cs"/>
-        <Compile Include="Enums\ELoadoutTab.cs"/>
-        <Compile Include="Enums\EMainPage.cs"/>
-        <Compile Include="Enums\EPlayPage.cs"/>
-        <Compile Include="Enums\EQuestCondition.cs"/>
-        <Compile Include="Enums\EQuestTier.cs"/>
-        <Compile Include="Enums\EQuestType.cs"/>
-        <Compile Include="Enums\ERarity.cs"/>
-        <Compile Include="Enums\ERewardType.cs"/>
-        <Compile Include="Enums\ETeam.cs"/>
-        <Compile Include="Enums\EUIPage.cs"/>
-        <Compile Include="Enums\EUnboxingPage.cs"/>
-        <Compile Include="FileReaders\IFileReader.cs"/>
-        <Compile Include="FileReaders\XMLFileReader.cs"/>
-        <Compile Include="GameTypes\CTFGame.cs"/>
-        <Compile Include="GameTypes\FFAGame.cs"/>
-        <Compile Include="GameTypes\Game.cs"/>
-        <Compile Include="GameTypes\KCGame.cs"/>
-        <Compile Include="GameTypes\TDMGame.cs"/>
-        <Compile Include="Helpers\Logging.cs"/>
-        <Compile Include="Instances\UIHandler.cs"/>
-        <Compile Include="Managers\AchievementManager.cs"/>
-        <Compile Include="Managers\BPManager.cs"/>
-        <Compile Include="Managers\ConfigManager.cs"/>
-        <Compile Include="Managers\DatabaseManager.cs"/>
-        <Compile Include="Managers\DataManager.cs"/>
-        <Compile Include="Managers\DiscordManager.cs"/>
-        <Compile Include="Managers\GameManager.cs"/>
-        <Compile Include="Managers\LoadoutManager.cs"/>
-        <Compile Include="Managers\QuestManager.cs"/>
-        <Compile Include="Managers\RewardManager.cs"/>
-        <Compile Include="Managers\UIManager.cs"/>
-        <Compile Include="Managers\UnboxManager.cs"/>
-        <Compile Include="Models\Animation\AnimationItemUnlock.cs"/>
-        <Compile Include="Models\Configuration\BaseValuesConfig.cs"/>
-        <Compile Include="Models\Configuration\DefaultSkillsConfig.cs"/>
-        <Compile Include="Models\Configuration\GamemodeConfig.cs"/>
-        <Compile Include="Models\Configuration\IconsConfig.cs"/>
-        <Compile Include="Models\Configuration\KillFeedConfig.cs"/>
-        <Compile Include="Models\Configuration\KillstreakConfig.cs"/>
-        <Compile Include="Models\Configuration\LoadoutConfig.cs"/>
-        <Compile Include="Models\Configuration\LocationsConfig.cs"/>
-        <Compile Include="Models\Configuration\MedalsConfig.cs"/>
-        <Compile Include="Models\Configuration\PointsConfig.cs"/>
-        <Compile Include="Models\Configuration\RoundEndCasesConfig.cs"/>
-        <Compile Include="Models\Configuration\TeamsConfig.cs"/>
-        <Compile Include="Models\Configuration\WinningValuesConfig.cs"/>
-        <Compile Include="Models\Data\KillstreakData.cs"/>
-        <Compile Include="Models\Data\LoadoutData.cs"/>
-        <Compile Include="Models\Animation\AnimationInfo.cs"/>
-        <Compile Include="Models\Global\ArenaLocation.cs"/>
-        <Compile Include="Models\CTF\CTFConfig.cs"/>
-        <Compile Include="Models\CTF\CTFPlayer.cs"/>
-        <Compile Include="Models\CTF\CTFSpawnPoint.cs"/>
-        <Compile Include="Models\CTF\CTFTeam.cs"/>
-        <Compile Include="Models\Feed\Feed.cs"/>
-        <Compile Include="Models\Feed\FeedIcon.cs"/>
-        <Compile Include="Models\FFA\FFAConfig.cs"/>
-        <Compile Include="Models\Global\DefaultSkill.cs"/>
-        <Compile Include="Models\Global\GamemodeOption.cs"/>
-        <Compile Include="Models\Global\LoadoutAmount.cs"/>
-        <Compile Include="Models\Global\Kit.cs"/>
-        <Compile Include="Models\Global\MatchEndSummary.cs"/>
-        <Compile Include="Models\Global\RoundEndCase.cs"/>
-        <Compile Include="Models\Global\TeamKillstreak.cs"/>
-        <Compile Include="Models\Global\TeamGlove.cs"/>
-        <Compile Include="Models\KC\KCConfig.cs"/>
-        <Compile Include="Models\KC\KCPlayer.cs"/>
-        <Compile Include="Models\KC\KCTeam.cs"/>
-        <Compile Include="Models\TDM\TDMConfig.cs"/>
-        <Compile Include="Models\TDM\TDMPlayer.cs"/>
-        <Compile Include="Models\Global\TeamInfo.cs"/>
-        <Compile Include="Models\Global\VoteChoice.cs"/>
-        <Compile Include="Models\UI\PageAchievement.cs"/>
-        <Compile Include="Models\UI\PageAttachment.cs"/>
-        <Compile Include="Models\UI\PageCard.cs"/>
-        <Compile Include="Models\UI\PageGadget.cs"/>
-        <Compile Include="Models\UI\PageGlove.cs"/>
-        <Compile Include="Models\UI\PageGun.cs"/>
-        <Compile Include="Models\UI\PageGunCharm.cs"/>
-        <Compile Include="Models\UI\PageGunSkin.cs"/>
-        <Compile Include="Models\UI\PageKillstreak.cs"/>
-        <Compile Include="Models\UI\PageKnife.cs"/>
-        <Compile Include="Models\UI\PageLoadout.cs"/>
-        <Compile Include="Models\UI\PagePerk.cs"/>
-        <Compile Include="Models\UI\PageUnboxInventory.cs"/>
-        <Compile Include="Models\UI\PageUnboxStore.cs"/>
-        <Compile Include="Models\Webhook\Author.cs"/>
-        <Compile Include="Models\Webhook\Embed.cs"/>
-        <Compile Include="Models\Webhook\Field.cs"/>
-        <Compile Include="Models\Webhook\Footer.cs"/>
-        <Compile Include="Models\Webhook\Message.cs"/>
-        <Compile Include="Patches\BarricadePatches.cs"/>
-        <Compile Include="Patches\ClothingPatches.cs"/>
-        <Compile Include="Models\FFA\FFAPlayer.cs"/>
-        <Compile Include="Models\Global\GamePlayer.cs"/>
-        <Compile Include="Models\Data\PositionsData.cs"/>
-        <Compile Include="Models\TDM\TDMTeam.cs"/>
-        <Compile Include="Patches\GroupPatch.cs"/>
-        <Compile Include="Patches\InventoryPatches.cs"/>
-        <Compile Include="Patches\TriggerTrapPatch.cs"/>
-        <Compile Include="Plugin.cs"/>
-        <Compile Include="Properties\AssemblyInfo.cs"/>
-        <Compile Include="Models\FFA\FFASpawnPoint.cs"/>
-        <Compile Include="Models\TDM\TDMSpawnPoint.cs"/>
-        <Compile Include="Helpers\Utility.cs"/>
+        <Compile Include="Commands\AddBoosterCommand.cs" />
+        <Compile Include="Commands\AddPrimeCommand.cs" />
+        <Compile Include="Commands\CountryCommand.cs" />
+        <Compile Include="Commands\RemoveRewardCommand.cs" />
+        <Compile Include="Commands\GiveRewardCommand.cs" />
+        <Compile Include="Commands\GenAchievementCommand.cs" />
+        <Compile Include="Commands\CTFSPCommand.cs" />
+        <Compile Include="Commands\FFASPCommand.cs" />
+        <Compile Include="Commands\GetCoordsCommand.cs" />
+        <Compile Include="Commands\GetNavMeshCommand.cs" />
+        <Compile Include="Commands\GiveSeasonalRewardCommand.cs" />
+        <Compile Include="Commands\LeaveCommand.cs" />
+        <Compile Include="Commands\MuteCommand.cs" />
+        <Compile Include="Commands\SetLobbyCommand.cs" />
+        <Compile Include="Commands\TDMSPCommand.cs" />
+        <Compile Include="Commands\UnmuteCommand.cs" />
+        <Compile Include="Commands\WipeSpawnsCommand.cs" />
+        <Compile Include="Config.cs" />
+        <Compile Include="Database\Base\Achievement.cs" />
+        <Compile Include="Database\Base\AchievementTier.cs" />
+        <Compile Include="Database\Base\BattlepassTier.cs" />
+        <Compile Include="Database\Base\Card.cs" />
+        <Compile Include="Database\Base\Case.cs" />
+        <Compile Include="Database\Base\Gadget.cs" />
+        <Compile Include="Database\Base\Glove.cs" />
+        <Compile Include="Database\Base\Gun.cs" />
+        <Compile Include="Database\Base\GunAttachment.cs" />
+        <Compile Include="Database\Base\GunCharm.cs" />
+        <Compile Include="Database\Base\GunSkin.cs" />
+        <Compile Include="Database\Base\Killstreak.cs" />
+        <Compile Include="Database\Base\Knife.cs" />
+        <Compile Include="Database\Base\LeaderboardData.cs" />
+        <Compile Include="Database\Base\Options.cs" />
+        <Compile Include="Database\Base\PercentileReward.cs" />
+        <Compile Include="Database\Base\Perk.cs" />
+        <Compile Include="Database\Base\Quest.cs" />
+        <Compile Include="Database\Base\Reward.cs" />
+        <Compile Include="Database\Base\Server.cs" />
+        <Compile Include="Database\Base\XPLevel.cs" />
+        <Compile Include="Database\Data\Loadout.cs" />
+        <Compile Include="Database\Data\LoadoutAttachment.cs" />
+        <Compile Include="Database\Data\LoadoutCard.cs" />
+        <Compile Include="Database\Data\LoadoutGadget.cs" />
+        <Compile Include="Database\Data\LoadoutGlove.cs" />
+        <Compile Include="Database\Data\LoadoutGun.cs" />
+        <Compile Include="Database\Data\LoadoutGunCharm.cs" />
+        <Compile Include="Database\Data\LoadoutKillstreak.cs" />
+        <Compile Include="Database\Data\LoadoutKnife.cs" />
+        <Compile Include="Database\Data\LoadoutPerk.cs" />
+        <Compile Include="Database\Data\PlayerAchievement.cs" />
+        <Compile Include="Database\Data\PlayerBattlepass.cs" />
+        <Compile Include="Database\Data\PlayerBooster.cs" />
+        <Compile Include="Database\Data\PlayerCase.cs" />
+        <Compile Include="Database\Data\PlayerData.cs" />
+        <Compile Include="Database\Data\PlayerLoadout.cs" />
+        <Compile Include="Database\Data\PlayerQuest.cs" />
+        <Compile Include="Enums\EAttachment.cs" />
+        <Compile Include="Enums\EBoosterType.cs" />
+        <Compile Include="Enums\ECaseRarity.cs" />
+        <Compile Include="Enums\ECurrency.cs" />
+        <Compile Include="Enums\EFlagState.cs" />
+        <Compile Include="Enums\EGamePhase.cs" />
+        <Compile Include="Enums\EGameType.cs" />
+        <Compile Include="Enums\EGun.cs" />
+        <Compile Include="Enums\EHotkey.cs" />
+        <Compile Include="Enums\ELeaderboardPage.cs" />
+        <Compile Include="Enums\ELeaderboardTab.cs" />
+        <Compile Include="Enums\EAnimationType.cs" />
+        <Compile Include="Enums\ELoadoutPage.cs" />
+        <Compile Include="Enums\ELoadoutTab.cs" />
+        <Compile Include="Enums\EMainPage.cs" />
+        <Compile Include="Enums\EPlayPage.cs" />
+        <Compile Include="Enums\EQuestCondition.cs" />
+        <Compile Include="Enums\EQuestTier.cs" />
+        <Compile Include="Enums\EQuestType.cs" />
+        <Compile Include="Enums\ERarity.cs" />
+        <Compile Include="Enums\ERewardType.cs" />
+        <Compile Include="Enums\ETeam.cs" />
+        <Compile Include="Enums\EUIPage.cs" />
+        <Compile Include="Enums\EUnboxingPage.cs" />
+        <Compile Include="FileReaders\IFileReader.cs" />
+        <Compile Include="FileReaders\XMLFileReader.cs" />
+        <Compile Include="GameTypes\CTFGame.cs" />
+        <Compile Include="GameTypes\FFAGame.cs" />
+        <Compile Include="GameTypes\Game.cs" />
+        <Compile Include="GameTypes\KCGame.cs" />
+        <Compile Include="GameTypes\TDMGame.cs" />
+        <Compile Include="Helpers\Logging.cs" />
+        <Compile Include="Instances\UIHandler.cs" />
+        <Compile Include="Managers\AchievementManager.cs" />
+        <Compile Include="Managers\BPManager.cs" />
+        <Compile Include="Managers\ConfigManager.cs" />
+        <Compile Include="Managers\DatabaseManager.cs" />
+        <Compile Include="Managers\DataManager.cs" />
+        <Compile Include="Managers\DiscordManager.cs" />
+        <Compile Include="Managers\GameManager.cs" />
+        <Compile Include="Managers\LoadoutManager.cs" />
+        <Compile Include="Managers\QuestManager.cs" />
+        <Compile Include="Managers\RewardManager.cs" />
+        <Compile Include="Managers\UIManager.cs" />
+        <Compile Include="Managers\UnboxManager.cs" />
+        <Compile Include="Models\Animation\AnimationItemUnlock.cs" />
+        <Compile Include="Models\Configuration\BaseValuesConfig.cs" />
+        <Compile Include="Models\Configuration\DefaultSkillsConfig.cs" />
+        <Compile Include="Models\Configuration\GamemodeConfig.cs" />
+        <Compile Include="Models\Configuration\IconsConfig.cs" />
+        <Compile Include="Models\Configuration\KillFeedConfig.cs" />
+        <Compile Include="Models\Configuration\KillstreakConfig.cs" />
+        <Compile Include="Models\Configuration\LoadoutConfig.cs" />
+        <Compile Include="Models\Configuration\LocationsConfig.cs" />
+        <Compile Include="Models\Configuration\MedalsConfig.cs" />
+        <Compile Include="Models\Configuration\PointsConfig.cs" />
+        <Compile Include="Models\Configuration\RoundEndCasesConfig.cs" />
+        <Compile Include="Models\Configuration\TeamsConfig.cs" />
+        <Compile Include="Models\Configuration\WinningValuesConfig.cs" />
+        <Compile Include="Models\Data\KillstreakData.cs" />
+        <Compile Include="Models\Data\LoadoutData.cs" />
+        <Compile Include="Models\Animation\AnimationInfo.cs" />
+        <Compile Include="Models\Global\ArenaLocation.cs" />
+        <Compile Include="Models\CTF\CTFConfig.cs" />
+        <Compile Include="Models\CTF\CTFPlayer.cs" />
+        <Compile Include="Models\CTF\CTFSpawnPoint.cs" />
+        <Compile Include="Models\CTF\CTFTeam.cs" />
+        <Compile Include="Models\Feed\Feed.cs" />
+        <Compile Include="Models\Feed\FeedIcon.cs" />
+        <Compile Include="Models\FFA\FFAConfig.cs" />
+        <Compile Include="Models\Global\DefaultSkill.cs" />
+        <Compile Include="Models\Global\GamemodeOption.cs" />
+        <Compile Include="Models\Global\LoadoutAmount.cs" />
+        <Compile Include="Models\Global\Kit.cs" />
+        <Compile Include="Models\Global\MatchEndSummary.cs" />
+        <Compile Include="Models\Global\RoundEndCase.cs" />
+        <Compile Include="Models\Global\TeamKillstreak.cs" />
+        <Compile Include="Models\Global\TeamGlove.cs" />
+        <Compile Include="Models\KC\KCConfig.cs" />
+        <Compile Include="Models\KC\KCPlayer.cs" />
+        <Compile Include="Models\KC\KCTeam.cs" />
+        <Compile Include="Models\TDM\TDMConfig.cs" />
+        <Compile Include="Models\TDM\TDMPlayer.cs" />
+        <Compile Include="Models\Global\TeamInfo.cs" />
+        <Compile Include="Models\Global\VoteChoice.cs" />
+        <Compile Include="Models\UI\PageAchievement.cs" />
+        <Compile Include="Models\UI\PageAttachment.cs" />
+        <Compile Include="Models\UI\PageCard.cs" />
+        <Compile Include="Models\UI\PageGadget.cs" />
+        <Compile Include="Models\UI\PageGlove.cs" />
+        <Compile Include="Models\UI\PageGun.cs" />
+        <Compile Include="Models\UI\PageGunCharm.cs" />
+        <Compile Include="Models\UI\PageGunSkin.cs" />
+        <Compile Include="Models\UI\PageKillstreak.cs" />
+        <Compile Include="Models\UI\PageKnife.cs" />
+        <Compile Include="Models\UI\PageLoadout.cs" />
+        <Compile Include="Models\UI\PagePerk.cs" />
+        <Compile Include="Models\UI\PageUnboxInventory.cs" />
+        <Compile Include="Models\UI\PageUnboxStore.cs" />
+        <Compile Include="Models\Webhook\Author.cs" />
+        <Compile Include="Models\Webhook\Embed.cs" />
+        <Compile Include="Models\Webhook\Field.cs" />
+        <Compile Include="Models\Webhook\Footer.cs" />
+        <Compile Include="Models\Webhook\Message.cs" />
+        <Compile Include="Patches\BarricadePatches.cs" />
+        <Compile Include="Patches\ClothingPatches.cs" />
+        <Compile Include="Models\FFA\FFAPlayer.cs" />
+        <Compile Include="Models\Global\GamePlayer.cs" />
+        <Compile Include="Models\Data\PositionsData.cs" />
+        <Compile Include="Models\TDM\TDMTeam.cs" />
+        <Compile Include="Patches\GroupPatch.cs" />
+        <Compile Include="Patches\InventoryPatches.cs" />
+        <Compile Include="Patches\TriggerTrapPatch.cs" />
+        <Compile Include="Plugin.cs" />
+        <Compile Include="Properties\AssemblyInfo.cs" />
+        <Compile Include="Models\FFA\FFASpawnPoint.cs" />
+        <Compile Include="Models\TDM\TDMSpawnPoint.cs" />
+        <Compile Include="Helpers\Utility.cs" />
     </ItemGroup>
     <ItemGroup>
-        <None Include="app.config"/>
-        <None Include="packages.config"/>
+        <None Include="app.config" />
+        <None Include="packages.config" />
     </ItemGroup>
     <ItemGroup>
-        <Content Include="Libraries\Assembly-CSharp.dll"/>
-        <Content Include="Libraries\com.rlabrecque.steamworks.net.dll"/>
-        <Content Include="Libraries\Rocket.API.dll"/>
-        <Content Include="Libraries\Rocket.Core.dll"/>
-        <Content Include="Libraries\Rocket.Unturned.dll"/>
-        <Content Include="Libraries\SDG.NetTransport.dll"/>
-        <Content Include="Libraries\UnityEngine.CoreModule.dll"/>
-        <Content Include="Libraries\UnityEngine.dll"/>
-        <Content Include="Libraries\UnityEngine.PhysicsModule.dll"/>
+        <Content Include="Libraries\Assembly-CSharp.dll" />
+        <Content Include="Libraries\com.rlabrecque.steamworks.net.dll" />
+        <Content Include="Libraries\Rocket.API.dll" />
+        <Content Include="Libraries\Rocket.Core.dll" />
+        <Content Include="Libraries\Rocket.Unturned.dll" />
+        <Content Include="Libraries\SDG.NetTransport.dll" />
+        <Content Include="Libraries\UnityEngine.CoreModule.dll" />
+        <Content Include="Libraries\UnityEngine.dll" />
+        <Content Include="Libraries\UnityEngine.PhysicsModule.dll" />
     </ItemGroup>
-    <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets"/>
+    <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
     <PropertyGroup>
         <PostBuildEvent>C:\Users\maazk\source\repos\UnturnedBlackout\UnturnedBlackout\UnturnedBlackout\bin\Debug\obfuscation.bat</PostBuildEvent>
     </PropertyGroup>
-    <Import Project="..\packages\System.Text.Json.6.0.6\build\System.Text.Json.targets" Condition="Exists('..\packages\System.Text.Json.6.0.6\build\System.Text.Json.targets')"/>
+    <Import Project="..\packages\System.Text.Json.6.0.6\build\System.Text.Json.targets" Condition="Exists('..\packages\System.Text.Json.6.0.6\build\System.Text.Json.targets')" />
     <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
         <PropertyGroup>
             <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them. For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
         </PropertyGroup>
-        <Error Condition="!Exists('..\packages\System.Text.Json.6.0.6\build\System.Text.Json.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\System.Text.Json.6.0.6\build\System.Text.Json.targets'))"/>
+        <Error Condition="!Exists('..\packages\System.Text.Json.6.0.6\build\System.Text.Json.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\System.Text.Json.6.0.6\build\System.Text.Json.targets'))" />
     </Target>
 </Project>
