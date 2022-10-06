@@ -957,7 +957,7 @@ public class UIHandler
     
     public void ShowOptions()
     {
-        for (int i = 0; i <= 4; i++)
+        for (var i = 0; i <= 4; i++)
             SetHotkeyInput((EHotkey)i);
     }
     
@@ -986,24 +986,30 @@ public class UIHandler
 
     public void SetHotkey(EHotkey hotkeyType, string hotkeyInput)
     {
-        if (!int.TryParse(hotkeyInput, out var hotkey) || hotkey is 1 or 2)
+        // Check if the input is a number, and also check if they aren't setting 1 or 2 as that's primary and secondary
+        if (!int.TryParse(hotkeyInput, out var newHotkey) || newHotkey is 1 or 2)
         {
             SetHotkeyInput(hotkeyType);
             return;
         }
         
-        if (PlayerData.Hotkeys[(int)hotkeyType] == hotkey)
+        // Check if the new hotkey is the same previous one, if so ignore
+        var currentHotkey = PlayerData.Hotkeys[(int)hotkeyType];
+        if (currentHotkey == newHotkey)
         {
             return;
         }
 
-        if (PlayerData.Hotkeys.Contains(hotkey))
+        // Check if the set hotkey is set somewhere else for some other thing, if so, swap both the values
+        var index = PlayerData.Hotkeys.IndexOf(newHotkey);
+        if (index != -1)
         {
-            SetHotkeyInput(hotkeyType);
-            return;
+            PlayerData.Hotkeys[index] = currentHotkey;
+            SetHotkeyInput((EHotkey)index);
         }
         
-        PlayerData.Hotkeys[(int)hotkeyType] = hotkey;
+        // Set the new hotkey and update DB side
+        PlayerData.Hotkeys[(int)hotkeyType] = newHotkey;
         DB.SetPlayerHotkeys(SteamID, PlayerData.Hotkeys);
     }
 
