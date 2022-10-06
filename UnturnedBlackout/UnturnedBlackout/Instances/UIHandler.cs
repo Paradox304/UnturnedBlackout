@@ -5072,14 +5072,16 @@ public class UIHandler
 
     public void SearchLeaderboardPlayer(string input)
     {
+        Logging.Debug($"{Player.CharacterName} searched {input} on leaderboards");
         var data = GetLeaderboardData();
-
+        Logging.Debug("Got the leaderboard data");
         for (var i = 0; i <= 9; i++)
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards BUTTON {i}", false);
 
         var inputLower = input.ToLower();
         var searchPlayers = data.Where(k => k.SteamName.ToLower().Contains(inputLower)).Take(10).ToList();
-
+        Logging.Debug($"Found {searchPlayers.Count} players with that name");
+    
         var maxCount = Math.Min(10, searchPlayers.Count);
         for (var i = 0; i < maxCount; i++)
         {
@@ -5088,7 +5090,8 @@ public class UIHandler
             decimal deaths = playerData.Deaths;
 
             var ratio = playerData.Deaths == 0 ? $"{kills:n}" : $"{Math.Round(kills / deaths, 2):n}";
-
+            
+            Logging.Debug($"i: {i}, player name: {playerData.SteamName}");
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards BUTTON {i}", true);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Rank TEXT {i}", $"#{data.IndexOf(playerData) + 1}");
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Level TEXT {i}", playerData.Level.ToString());

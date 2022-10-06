@@ -1613,6 +1613,7 @@ public class UIManager
             return;
         }
 
+        Logging.Debug($"{ply.CharacterName} pressed button {buttonName}");
         switch (buttonName)
         {
             case "SERVER Play BUTTON":
@@ -1952,6 +1953,7 @@ public class UIManager
             return;
         }
 
+        Logging.Debug($"{player.channel.owner.playerID.characterName} committed text: {buttonName} ({text})");
         switch (buttonName)
         {
             case "SERVER Loadout Rename INPUTFIELD":
