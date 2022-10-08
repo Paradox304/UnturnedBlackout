@@ -25,7 +25,7 @@ public class ForceStartGameCommand : IRocketCommand
     public AllowedCaller AllowedCaller => AllowedCaller.Player;
     public string Name => "start";
     public string Help => "Force start the game you're in";
-    public string Syntax => "/forcestart";
+    public string Syntax => "/start";
     public List<string> Aliases => new();
     public List<string> Permissions => new();
 }
