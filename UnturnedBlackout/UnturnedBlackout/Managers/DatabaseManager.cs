@@ -208,7 +208,8 @@ public class DatabaseManager
             Database = Config.DatabaseName,
             UserID = Config.DatabaseUsername,
             Password = Config.DatabasePassword,
-            MaximumPoolSize = 50
+            MaximumPoolSize = 50,
+            ConnectionTimeout = 5
         };
 
         CacheRefresher = new(120 * 1000);
@@ -2872,8 +2873,6 @@ public class DatabaseManager
     {
         if (string.IsNullOrEmpty(query))
             return;
-
-        Logging.Debug($"Adding pending query: {query}");
         
         lock (PendingQueries)
             PendingQueries.Add(query);

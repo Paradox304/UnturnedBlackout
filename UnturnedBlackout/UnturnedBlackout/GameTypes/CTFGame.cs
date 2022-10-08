@@ -69,6 +69,18 @@ public class CTFGame : Game
         Frequency = Utility.GetFreeFrequency();
     }
 
+    
+    public override void ForceStartGame()
+    {
+        GameStarter = Plugin.Instance.StartCoroutine(StartGame());
+    }
+    
+    public override void ForceEndGame()
+    {
+        var wonTeam = BlueTeam.Score > RedTeam.Score ? BlueTeam : RedTeam.Score > BlueTeam.Score ? RedTeam : new(-1, true, new(), 0, Vector3.zero);
+        _ = Plugin.Instance.StartCoroutine(GameEnd(wonTeam));
+    }
+    
     public IEnumerator StartGame()
     {
         GamePhase = EGamePhase.STARTING;
@@ -125,7 +137,7 @@ public class CTFGame : Game
         var wonTeam = BlueTeam.Score > RedTeam.Score ? BlueTeam : RedTeam.Score > BlueTeam.Score ? RedTeam : new(-1, true, new(), 0, Vector3.zero);
         _ = Plugin.Instance.StartCoroutine(GameEnd(wonTeam));
     }
-
+    
     public IEnumerator GameEnd(CTFTeam wonTeam)
     {
         if (GameEnder != null)

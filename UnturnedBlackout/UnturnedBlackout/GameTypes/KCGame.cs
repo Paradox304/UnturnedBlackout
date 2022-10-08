@@ -55,6 +55,18 @@ public class KCGame : Game
         Frequency = Utility.GetFreeFrequency();
     }
 
+    
+    public override void ForceStartGame()
+    {
+        GameStarter = Plugin.Instance.StartCoroutine(StartGame());
+    }
+    
+    public override void ForceEndGame()
+    {
+        var wonTeam = BlueTeam.Score > RedTeam.Score ? BlueTeam : RedTeam.Score > BlueTeam.Score ? RedTeam : new(-1, true, new(), 0, Vector3.zero);
+        _ = Plugin.Instance.StartCoroutine(GameEnd(wonTeam));
+    }
+    
     public IEnumerator StartGame()
     {
         TaskDispatcher.QueueOnMainThread(() => CleanMap());

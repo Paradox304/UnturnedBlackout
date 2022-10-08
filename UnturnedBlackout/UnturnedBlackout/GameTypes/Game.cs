@@ -338,6 +338,8 @@ public abstract class Game
         Logging.Debug($"Clearing all barricades in a game, that one liner took {stopWatch.ElapsedTicks} ticks, {stopWatch.ElapsedMilliseconds}ms");
     }
 
+    public abstract void ForceStartGame();
+    public abstract void ForceEndGame();
     public abstract bool IsPlayerIngame(CSteamID steamID);
     public abstract void OnPlayerRevived(UnturnedPlayer player);
     public abstract void OnPlayerRespawn(GamePlayer player, ref Vector3 respawnPosition, ref float yaw);

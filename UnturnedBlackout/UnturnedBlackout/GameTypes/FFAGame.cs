@@ -37,6 +37,17 @@ public class FFAGame : Game
         UnavailableSpawnPoints = new();
         Frequency = Utility.GetFreeFrequency();
     }
+    
+    public override void ForceStartGame()
+    {
+        GameStarter = Plugin.Instance.StartCoroutine(StartGame());
+    }
+    
+    public override void ForceEndGame()
+    {
+        _ = Plugin.Instance.StartCoroutine(GameEnd());
+    }
+    
 
     public IEnumerator StartGame()
     {
