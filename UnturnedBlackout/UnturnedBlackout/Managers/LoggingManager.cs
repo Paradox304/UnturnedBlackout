@@ -22,9 +22,6 @@ public class LoggingManager
 
         if (!string.IsNullOrWhiteSpace(directoryName) && !Directory.Exists(directoryName))
             _ = Directory.CreateDirectory(directoryName);
-
-        if (!File.Exists(LogDir))
-            File.Create(LogDir);
         
         PendingWrite = new();
         WriteTimer = new(15 * 1000);

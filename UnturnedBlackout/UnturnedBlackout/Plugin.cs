@@ -182,7 +182,6 @@ public class Plugin : RocketPlugin<Config>
     private void OnLevelLoaded(int level)
     {
         Logger = new();
-        Logging.Debug("Initialized logger");
         Config = new();
         Logging.Debug("Initialized Config");
         UI = new();
