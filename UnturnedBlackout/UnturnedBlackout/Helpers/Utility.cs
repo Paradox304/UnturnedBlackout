@@ -390,6 +390,10 @@ public static class Utility
     public static string ToFriendlyName(this EGamePhase gamePhase) => gamePhase switch
     {
         EGamePhase.WAITING_FOR_PLAYERS => "Waiting",
+        EGamePhase.ENDED => "Ended",
+        EGamePhase.ENDING => "Ending",
+        EGamePhase.STARTED => "Started",
+        EGamePhase.STARTING => "Starting",
         var _ => gamePhase.ToString()
     };
 

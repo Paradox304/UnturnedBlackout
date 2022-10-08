@@ -1904,6 +1904,11 @@ public class UIManager
                     Plugin.Instance.StopCoroutine(handler.MatchEndSummaryShower);
 
                 return;
+            case "SERVER Summary Skip BUTTON":
+                if (handler.MatchEndSummaryShower != null)
+                    Plugin.Instance.StopCoroutine(handler.MatchEndSummaryShower);
+
+                return;
             case "Music Toggle BUTTON":
                 handler.MusicButtonPressed();
                 return;
