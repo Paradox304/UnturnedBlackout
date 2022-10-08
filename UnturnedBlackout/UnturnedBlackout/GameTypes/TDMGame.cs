@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnturnedBlackout.Database.Base;
 using UnturnedBlackout.Enums;
+using UnturnedBlackout.Helpers;
 using UnturnedBlackout.Models.Global;
 using UnturnedBlackout.Models.TDM;
 
@@ -62,7 +63,7 @@ public class TDMGame : Game
     
     public override void ForceEndGame()
     {
-        var wonTeam = BlueTeam.Score > RedTeam.Score ? BlueTeam : RedTeam.Score > BlueTeam.Score ? RedTeam : new(-1, true, new(), 0, Vector3.zero);
+        var wonTeam = BlueTeam.Score > RedTeam.Score ? BlueTeam : RedTeam.Score > BlueTeam.Score ? RedTeam : new(this, -1, true, new());
         _ = Plugin.Instance.StartCoroutine(GameEnd(wonTeam));
     }
     

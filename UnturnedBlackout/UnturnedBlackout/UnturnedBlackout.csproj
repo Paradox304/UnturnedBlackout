@@ -276,6 +276,7 @@
         <Compile Include="Managers\DiscordManager.cs" />
         <Compile Include="Managers\GameManager.cs" />
         <Compile Include="Managers\LoadoutManager.cs" />
+        <Compile Include="Managers\LoggingManager.cs" />
         <Compile Include="Managers\QuestManager.cs" />
         <Compile Include="Managers\RewardManager.cs" />
         <Compile Include="Managers\UIManager.cs" />

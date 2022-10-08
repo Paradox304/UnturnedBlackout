@@ -9,6 +9,7 @@ using System.Collections;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
+using UnturnedBlackout.Helpers;
 using UnturnedBlackout.Managers;
 using Logger = Rocket.Core.Logging.Logger;
 
@@ -41,7 +42,7 @@ public class Plugin : RocketPlugin<Config>
 
         PlayerInput.onPluginKeyTick += OnHotkeyPressed;
 
-        Logger.Log("Unturned Blackout has been loaded");
+        Rocket.Core.Logging.Logger.Log("Unturned Blackout has been loaded");
     }
 
     protected override void Unload()
@@ -64,7 +65,7 @@ public class Plugin : RocketPlugin<Config>
         PlayerInput.onPluginKeyTick -= OnHotkeyPressed;
         StopAllCoroutines();
 
-        Logger.Log("Unturned Blackout has been unloaded");
+        Rocket.Core.Logging.Logger.Log("Unturned Blackout has been unloaded");
     }
 
     private void OnStorageOpen(CSteamID instigator, InteractableStorage storage, ref bool shouldAllow) => shouldAllow = false;
@@ -180,28 +181,30 @@ public class Plugin : RocketPlugin<Config>
 
     private void OnLevelLoaded(int level)
     {
+        Logger = new();
+        Logging.Debug("Initialized logger");
         Config = new();
-        Logging.Debug("Init Config");
+        Logging.Debug("Initialized Config");
         UI = new();
-        Logging.Debug("Init UI");
+        Logging.Debug("Initialized UI");
         Reward = new();
-        Logging.Debug("Init Reward");
+        Logging.Debug("Initialized Reward");
         DB = new();
-        Logging.Debug("Init Database");
+        Logging.Debug("Initialized Database");
         BP = new();
-        Logging.Debug("Init BP");
+        Logging.Debug("Initialized BP");
         Loadout = new();
-        Logging.Debug("Init Loadout");
+        Logging.Debug("Initialized Loadout");
         Data = new();
-        Logging.Debug("Init Data");
+        Logging.Debug("Initialized Data");
         Quest = new();
-        Logging.Debug("Init Quest");
+        Logging.Debug("Initialized Quest");
         Achievement = new();
-        Logging.Debug("Init Achievement");
+        Logging.Debug("Initialized Achievement");
         Unbox = new();
-        Logging.Debug("Init Unbox");
+        Logging.Debug("Initialized Unbox");
         Game = new();
-        Logging.Debug("Init Game");
+        Logging.Debug("Initialized Game");
 
         _ = StartCoroutine(Day());
 
@@ -324,6 +327,7 @@ public class Plugin : RocketPlugin<Config>
     public LoadoutManager Loadout { get; set; }
     public RewardManager Reward { get; set; }
     public UnboxManager Unbox { get; set; }
+    public LoggingManager Logger { get; set; }
 
     // ReSharper disable once InconsistentNaming
     public BPManager BP { get; set; }

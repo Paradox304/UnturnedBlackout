@@ -1,26 +1,19 @@
-﻿using Rocket.Core.Logging;
-using System;
+﻿using System;
 
-namespace UnturnedBlackout;
+namespace UnturnedBlackout.Helpers;
 
 public static class Logging
 {
     public static void Debug(string message, ConsoleColor color = ConsoleColor.Green)
     {
-        if (Plugin.Instance.Config.Base.FileData.EnableDebugLogs == true)
+        var updatedMesage = $"[{DateTime.UtcNow:dd/MM/yyyy hh:mm:ss}]: {message}";
+        if (Plugin.Instance.Config.Base.FileData.EnableDebugLogs)
         {
             Console.ForegroundColor = color;
-            Console.WriteLine($"[{DateTime.UtcNow:dd/MM/yyyy hh:mm:ss}]: {message}");
-            Logger.ExternalLog($"{message}", color);
+            Console.WriteLine(updatedMesage);
             Console.ResetColor();
         }
-    }
-
-    public static void Write(object source, object message)
-    {
-        Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine($"[{source}]: {message}");
-        Logger.ExternalLog(message, ConsoleColor.Red);
-        Console.ResetColor();
+        
+        Plugin.Instance.Logger.Log(updatedMesage);
     }
 }
