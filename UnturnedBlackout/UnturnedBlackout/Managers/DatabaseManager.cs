@@ -202,6 +202,7 @@ public class DatabaseManager
     public const string CASES = "UB_Cases";
 
     private const string LEADERBOARD_WEBHOOK_URL = "https://discord.com/api/webhooks/983367340525760542/RfPxBseRKp3kffBEaHovRBRsLpIR4A-pvAXbQWzknDMohxCiawGlsZw6U_ehXukPreb_";
+    public const int LOADING_SPACES = 96;
 
     public DatabaseManager()
     {
@@ -1608,7 +1609,7 @@ public class DatabaseManager
         try
         {
             Logging.Debug($"Adding {steamName} to the DB");
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(96 * 0.1f)), "LOADING PLAYER DATA..."));
+            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(LOADING_SPACES * 0.1f)), "LOADING PLAYER DATA..."));
             await conn.OpenAsync();
             MySqlCommand cmd =
                 new(
@@ -1623,7 +1624,7 @@ public class DatabaseManager
             _ = await new MySqlCommand($"INSERT IGNORE INTO `{PLAYERS_LEADERBOARD_SEASONAL}` ( `SteamID` ) VALUES ({player.CSteamID});", conn).ExecuteScalarAsync();
 
             Logging.Debug($"Giving {steamName} the guns");
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(96 * 0.15f)), "LOADING GUNS..."));
+            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(LOADING_SPACES * 0.15f)), "LOADING GUNS..."));
             foreach (var gun in Guns.Values)
             {
                 if (gun.LevelRequirement < 0)
@@ -1646,7 +1647,7 @@ public class DatabaseManager
             }
 
             Logging.Debug($"Giving {steamName} the knives");
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(96 * 0.2f)), "LOADING KNIVES..."));
+            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(LOADING_SPACES * 0.2f)), "LOADING KNIVES..."));
             foreach (var knife in Knives.Values)
             {
                 if (knife.LevelRequirement < 0)
@@ -1656,7 +1657,7 @@ public class DatabaseManager
             }
 
             Logging.Debug($"Giving {steamName} the gadgets");
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(96 * 0.25f)), "LOADING GADGETS..."));
+            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(LOADING_SPACES * 0.25f)), "LOADING GADGETS..."));
             foreach (var gadget in Gadgets.Values)
             {
                 if (gadget.LevelRequirement < 0)
@@ -1666,7 +1667,7 @@ public class DatabaseManager
             }
 
             Logging.Debug($"Giving {steamName} the killstreaks");
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(96 * 0.3f)), "LOADING KILLSTREAKS..."));
+            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(LOADING_SPACES * 0.3f)), "LOADING KILLSTREAKS..."));
             foreach (var killstreak in Killstreaks.Values)
             {
                 if (killstreak.LevelRequirement < 0)
@@ -1676,7 +1677,7 @@ public class DatabaseManager
             }
 
             Logging.Debug($"Giving {steamName} the perks");
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(96 * 0.35f)), "LOADING PERKS..."));
+            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(LOADING_SPACES * 0.35f)), "LOADING PERKS..."));
             foreach (var perk in Perks.Values)
             {
                 if (perk.LevelRequirement < 0)
@@ -1686,7 +1687,7 @@ public class DatabaseManager
             }
 
             Logging.Debug($"Giving {steamName} the gloves");
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(96 * 0.4f)), "LOADING GLOVES..."));
+            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(LOADING_SPACES * 0.4f)), "LOADING GLOVES..."));
             foreach (var glove in Gloves.Values)
             {
                 if (glove.LevelRequirement < 0)
@@ -1696,7 +1697,7 @@ public class DatabaseManager
             }
 
             Logging.Debug($"Giving {steamName} the cards");
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(96 * 0.45f)), "LOADING CARDS..."));
+            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(LOADING_SPACES * 0.45f)), "LOADING CARDS..."));
             foreach (var card in Cards.Values)
             {
                 if (card.LevelRequirement < 0)
@@ -1706,16 +1707,16 @@ public class DatabaseManager
             }
 
             Logging.Debug($"Giving {steamName} the battlepass");
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(96 * 0.47f)), "LOADING BATTLEPASS..."));
+            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(LOADING_SPACES * 0.47f)), "LOADING BATTLEPASS..."));
             _ = await new MySqlCommand($"INSERT IGNORE INTO `{PLAYERS_BATTLEPASS}` (`SteamID` , `ClaimedFreeRewards` , `ClaimedPremiumRewards`) VALUES ({player.CSteamID} , '' , '');", conn).ExecuteScalarAsync();
 
             Logging.Debug($"Giving {steamName} the achievements");
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(96 * 0.5f)), "LOADING ACHIEVEMENTS..."));
+            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(LOADING_SPACES * 0.5f)), "LOADING ACHIEVEMENTS..."));
             foreach (var achievement in Achievements)
                 _ = await new MySqlCommand($"INSERT IGNORE INTO `{PLAYERS_ACHIEVEMENTS}` (`SteamID`, `AchievementID`) VALUES ({player.CSteamID}, {achievement.AchievementID});", conn).ExecuteScalarAsync();
 
             var loadoutAmount = Utility.GetLoadoutAmount(player);
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(96 * 0.51f)), "LOADING LOADOUTS..."));
+            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(LOADING_SPACES * 0.51f)), "LOADING LOADOUTS..."));
             Logging.Debug($"{steamName} should have {loadoutAmount} loadouts, adding them");
             var data = Plugin.Instance.Data.ConvertLoadoutToJson(DefaultLoadout);
             for (var i = 1; i <= loadoutAmount; i++)
@@ -1738,7 +1739,7 @@ public class DatabaseManager
         try
         {
             Logging.Debug($"Getting data for {player.CharacterName} from the main table");
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(96 * 0.6f)), "PREPARING PLAYER DATA..."));
+            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(LOADING_SPACES * 0.6f)), "PREPARING PLAYER DATA..."));
             await conn.OpenAsync();
             var rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS}` WHERE `SteamID` = {player.CSteamID};", conn).ExecuteReaderAsync();
             try
@@ -1869,7 +1870,7 @@ public class DatabaseManager
             }
 
             Logging.Debug($"Getting leaderboard daily data for {player.CharacterName} from the daily table");
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(96 * 0.65f)), "PREPARING LEADERBOARD DATA..."));
+            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(LOADING_SPACES * 0.65f)), "PREPARING LEADERBOARD DATA..."));
             rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS_LEADERBOARD_DAILY}` WHERE `SteamID` = {player.CSteamID};", conn).ExecuteReaderAsync();
             try
             {
@@ -1978,7 +1979,7 @@ public class DatabaseManager
             }
 
             Logging.Debug($"Getting quests for {player.CharacterName}");
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(96 * 0.7f)), "PREPARING QUESTS..."));
+            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(LOADING_SPACES * 0.7f)), "PREPARING QUESTS..."));
             rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS_QUESTS}` WHERE `SteamID` = {player.CSteamID};", conn).ExecuteReaderAsync();
             try
             {
@@ -2059,7 +2060,7 @@ public class DatabaseManager
                 rdr.Close();
             }
 
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(96 * 0.73f)), "PREPARING ACHIEVEMENTS..."));
+            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(LOADING_SPACES * 0.73f)), "PREPARING ACHIEVEMENTS..."));
             Logging.Debug($"Getting achievements for {player.CharacterName}");
             rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS_ACHIEVEMENTS}` WHERE `SteamID` = {player.CSteamID};", conn).ExecuteReaderAsync();
             try
@@ -2116,7 +2117,7 @@ public class DatabaseManager
 
             playerData.SetAchievementXPBooster();
             Logging.Debug($"Getting battlepass for {player.CharacterName}");
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(96 * 0.8f)), "PREPARING BATTLEPASS..."));
+            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(LOADING_SPACES * 0.8f)), "PREPARING BATTLEPASS..."));
             rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS_BATTLEPASS}` WHERE `SteamID` = {player.CSteamID};", conn).ExecuteReaderAsync();
             try
             {
@@ -2165,7 +2166,7 @@ public class DatabaseManager
             Dictionary<int, Loadout> loadouts = new();
 
             Logging.Debug($"Getting guns for {player.CharacterName}");
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(96 * 0.82f)), "PREPARING GUNS..."));
+            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(LOADING_SPACES * 0.82f)), "PREPARING GUNS..."));
             rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS_GUNS}` WHERE `SteamID` = {player.CSteamID};", conn).ExecuteReaderAsync();
             try
             {
@@ -2215,7 +2216,7 @@ public class DatabaseManager
             }
 
             Logging.Debug($"Checking gun attachments for {player.CharacterName}");
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(96 * 0.84f)), "PREPARING ATTACHMENTS..."));
+            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(LOADING_SPACES * 0.84f)), "PREPARING ATTACHMENTS..."));
             try
             {
                 foreach (var gun in guns.Values)
@@ -2239,7 +2240,7 @@ public class DatabaseManager
             }
 
             Logging.Debug($"Getting gun skins for {player.CharacterName}");
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(96 * 0.86f)), "PREPARING SKINS..."));
+            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(LOADING_SPACES * 0.86f)), "PREPARING SKINS..."));
             var gunSkinsTxt = await new MySqlCommand($"SELECT `SkinIDs` FROM `{PLAYERS_GUNS_SKINS}` WHERE `SteamID` = {player.CSteamID};", conn).ExecuteScalarAsync();
             if (gunSkinsTxt is string gunSkinsText)
             {
@@ -2270,7 +2271,7 @@ public class DatabaseManager
             }
 
             Logging.Debug($"Getting gun charms for {player.CharacterName}");
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(96 * 0.88f)), "PREPARING CHARMS..."));
+            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(LOADING_SPACES * 0.88f)), "PREPARING CHARMS..."));
             rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS_GUNS_CHARMS}` WHERE `SteamID` = {player.CSteamID};", conn).ExecuteReaderAsync();
             try
             {
@@ -2310,7 +2311,7 @@ public class DatabaseManager
             }
 
             Logging.Debug($"Getting knives for {player.CharacterName}");
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(96 * 0.9f)), "PREPARING KNIVES..."));
+            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(LOADING_SPACES * 0.9f)), "PREPARING KNIVES..."));
             rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS_KNIVES}` WHERE `SteamID` = {player.CSteamID};", conn).ExecuteReaderAsync();
             try
             {
@@ -2353,7 +2354,7 @@ public class DatabaseManager
             }
 
             Logging.Debug($"Getting perks for {player.CharacterName}");
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(96 * 0.91f)), "PREPARING PERKS..."));
+            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(LOADING_SPACES * 0.91f)), "PREPARING PERKS..."));
             rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS_PERKS}` WHERE `SteamID` = {player.CSteamID};", conn).ExecuteReaderAsync();
             try
             {
@@ -2393,7 +2394,7 @@ public class DatabaseManager
             }
 
             Logging.Debug($"Getting gadgets for {player.CharacterName}");
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(96 * 0.93f)), "PREPARING GADGETS..."));
+            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(LOADING_SPACES * 0.93f)), "PREPARING GADGETS..."));
             rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS_GADGETS}` WHERE `SteamID` = {player.CSteamID};", conn).ExecuteReaderAsync();
             try
             {
@@ -2436,7 +2437,7 @@ public class DatabaseManager
             }
 
             Logging.Debug($"Getting killstreaks for {player.CharacterName}");
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(96 * 0.94f)), "PREPARING KILLSTREAKS..."));
+            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(LOADING_SPACES * 0.94f)), "PREPARING KILLSTREAKS..."));
             rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS_KILLSTREAKS}` WHERE `SteamID` = {player.CSteamID};", conn).ExecuteReaderAsync();
             try
             {
@@ -2479,7 +2480,7 @@ public class DatabaseManager
             }
 
             Logging.Debug($"Getting cards for {player.CharacterName}");
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(96 * 0.97f)), "PREPARING CARDS..."));
+            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(LOADING_SPACES * 0.97f)), "PREPARING CARDS..."));
             rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS_CARDS}` WHERE `SteamID` = {player.CSteamID};", conn).ExecuteReaderAsync();
             try
             {
@@ -2519,7 +2520,7 @@ public class DatabaseManager
             }
 
             Logging.Debug($"Getting gloves for {player.CharacterName}");
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(96 * 0.98f)), "PREPARING GLOVES..."));
+            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(LOADING_SPACES * 0.98f)), "PREPARING GLOVES..."));
             rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS_GLOVES}` WHERE `SteamID` = {player.CSteamID};", conn).ExecuteReaderAsync();
             try
             {
@@ -2559,7 +2560,7 @@ public class DatabaseManager
             }
 
             Logging.Debug($"Getting loadouts for {player.CharacterName}");
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(96 * 0.99f)), "PREPARING LOADOUTS..."));
+            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(LOADING_SPACES * 0.99f)), "PREPARING LOADOUTS..."));
             rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS_LOADOUTS}` WHERE `SteamID` = {player.CSteamID};", conn).ExecuteReaderAsync();
             List<int> updateLoadouts = new();
             try
@@ -2739,7 +2740,7 @@ public class DatabaseManager
             }
 
             Logging.Debug($"Getting boosters for {player.CharacterName}");
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(96 * 0.99f)), "PREPARING BOOSTERS..."));
+            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(LOADING_SPACES * 0.99f)), "PREPARING BOOSTERS..."));
             _ = await new MySqlCommand($"DELETE FROM `{PLAYERS_BOOSTERS}` WHERE `SteamID` = {player.CSteamID} AND `BoosterExpiration` < {DateTimeOffset.UtcNow.ToUnixTimeSeconds()};", conn).ExecuteScalarAsync();
             rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS_BOOSTERS}` WHERE `SteamID` = {player.CSteamID};", conn).ExecuteReaderAsync();
             try
@@ -2777,7 +2778,7 @@ public class DatabaseManager
             }
 
             Logging.Debug($"Getting cases for {player.CharacterName}");
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new(' ', (int)(96 * 0.99f)), "PREPARING CASES..."));
+            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new(' ', (int)(LOADING_SPACES * 0.99f)), "PREPARING CASES..."));
             rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS_CASES}` WHERE `SteamID` = {player.CSteamID} ORDER BY `CaseID`;", conn).ExecuteReaderAsync();
             try
             {
@@ -2827,7 +2828,7 @@ public class DatabaseManager
             playerData.SetPersonalBooster(EBoosterType.BPXP, playerData.BPBooster);
             playerData.SetPersonalBooster(EBoosterType.GUNXP, playerData.GunXPBooster);
 
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', 96), "FINALISING..."));
+            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', LOADING_SPACES), "FINALISING..."));
             Logging.Debug($"Checking if player has more loadouts for {player.CharacterName}");
             try
             {

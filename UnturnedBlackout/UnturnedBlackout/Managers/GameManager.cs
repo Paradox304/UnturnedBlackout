@@ -4,10 +4,12 @@ using Rocket.Unturned.Player;
 using SDG.Unturned;
 using Steamworks;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using UnityEngine;
 using UnturnedBlackout.Enums;
 using UnturnedBlackout.GameTypes;
 using UnturnedBlackout.Helpers;
@@ -143,9 +145,18 @@ public class GameManager
     private void OnPlayerJoined(UnturnedPlayer player)
     {
         SendPlayerToLobby(player);
+    }
 
+    public IEnumerator DelayedJoin(UnturnedPlayer player)
+    {
         var db = Plugin.Instance.DB;
-        Plugin.Instance.UI.SendLoadingUI(player, false, EGameType.NONE, null);
+        Plugin.Instance.UI.SendLoadingUI(player, false, EGameType.NONE, null, "WAITING FOR DATA FROM OTHER SERVERS...");
+        for (var i = 1; i <= 30; i++)
+        {
+            yield return new WaitForSeconds(1f);
+            Plugin.Instance.UI.UpdateLoadingBar(player, new string(UIManager.HAIRSPACE_SYMBOL_CHAR, i * DatabaseManager.LOADING_SPACES / 30), "WAITING FOR DATA FROM OTHER SERVERS...");
+        }
+        
         _ = Task.Run(async () =>
         {
             var avatarURL = "";
@@ -193,7 +204,7 @@ public class GameManager
             });
         });
     }
-
+    
     private void OnPlayerLeft(UnturnedPlayer player)
     {
         Plugin.Instance.UI.UnregisterUIHandler(player);
