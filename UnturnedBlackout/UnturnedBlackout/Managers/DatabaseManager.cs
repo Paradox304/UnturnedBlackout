@@ -38,6 +38,8 @@ public class DatabaseManager
     public string ConnectionString => Builder.ConnectionString;
     public Config Config { get; set; }
 
+    public bool ForcedShutdown { get; set; }
+    public int ConnectionThreshold { get; set; }
     public Timer CacheRefresher { get; set; }
     public Timer BatchQueryCleaner { get; set; }
 
@@ -199,6 +201,8 @@ public class DatabaseManager
     // CASES
     public const string CASES = "UB_Cases";
 
+    private const string LEADERBOARD_WEBHOOK_URL = "https://discord.com/api/webhooks/983367340525760542/RfPxBseRKp3kffBEaHovRBRsLpIR4A-pvAXbQWzknDMohxCiawGlsZw6U_ehXukPreb_";
+
     public DatabaseManager()
     {
         Config = Plugin.Instance.Configuration.Instance;
@@ -213,6 +217,8 @@ public class DatabaseManager
             ConnectionTimeout = 5
         };
 
+        ConnectionThreshold = 0;
+        
         CacheRefresher = new(120 * 1000);
         CacheRefresher.Elapsed += RefreshData;
 
@@ -240,7 +246,8 @@ public class DatabaseManager
     {
         CacheRefresher.Stop();
         BatchQueryCleaner.Stop();
-        CleanQueries(null, null);
+        if (!ForcedShutdown)
+            CleanQueries(null, null);
     }
     
     public async Task LoadDatabaseAsync()
@@ -2891,14 +2898,10 @@ public class DatabaseManager
     // Timers
     private void CleanQueries(object sender, ElapsedEventArgs e)
     {
-        Logging.Debug($"Cleaning queries");
         lock (PendingQueries)
         {
             if (PendingQueries.Count == 0)
-            {
-                Logging.Debug($"No queries to process, return");
                 return;
-            }
         }
 
         var stopWatch = new Stopwatch();
@@ -2908,25 +2911,22 @@ public class DatabaseManager
         {
             conn.Open();
             stopWatch.Stop();
-            Logging.Debug($"Connction established, took {stopWatch.ElapsedMilliseconds}ms");
+            Logging.Debug($"Cleaning queries");
+            Logging.Debug($"Connection established, took {stopWatch.ElapsedMilliseconds}ms");
             stopWatch.Reset();
-            List<string> pendingQueries = new();
+            List<string> pendingQueries;
             lock (PendingQueries)
             {
                 pendingQueries = PendingQueries.ToList();
                 PendingQueries.Clear();
             }
 
-            var pendingQueriesCount = pendingQueries.Count;
-            Logging.Debug($"Found {pendingQueriesCount} queries to go through");
-            MySqlCommand comm = new();
-            comm.Connection = conn;
+            Logging.Debug($"Found {pendingQueries.Count} queries to go through");
             stopWatch.Start();
             var cmdText = string.Join("", pendingQueries);
-            comm.CommandText = cmdText;
             try
             {
-                comm.ExecuteNonQuery();
+                new MySqlCommand(cmdText, conn).ExecuteNonQuery();
             }
             catch (Exception ex)
             {
@@ -2939,8 +2939,20 @@ public class DatabaseManager
         }
         catch (Exception ex)
         {
-            Logger.Log($"Error cleaning the queries");
+            Logger.Log("Error cleaning the queries");
             Logger.Log(ex);
+            ConnectionThreshold++;
+            if (ConnectionThreshold >= 2)
+            {
+                Logger.Log("Connection threshold reached, shutting down the server");
+                Plugin.Instance.Logger.Dump(PendingQueries);
+                Plugin.Instance.Logger.Warn("Connection threshold reached, shutting down the server");
+                ForcedShutdown = true;
+                Provider.shutdown();
+                return;
+            }
+            
+            Plugin.Instance.Logger.Warn("Failed to run the batch queries, trying once more after 10 seconds");
         }
         finally
         {
@@ -3306,7 +3318,7 @@ public class DatabaseManager
 
                 try
                 {
-                    DiscordManager.SendEmbed(embed, "Leaderboard", "https://discord.com/api/webhooks/983367340525760542/RfPxBseRKp3kffBEaHovRBRsLpIR4A-pvAXbQWzknDMohxCiawGlsZw6U_ehXukPreb_");
+                    DiscordManager.SendEmbed(embed, "Leaderboard", LEADERBOARD_WEBHOOK_URL);
                 }
                 catch (Exception ex)
                 {
@@ -3378,7 +3390,7 @@ public class DatabaseManager
 
                 try
                 {
-                    DiscordManager.SendEmbed(embed, "Leaderboard", "https://discord.com/api/webhooks/983367340525760542/RfPxBseRKp3kffBEaHovRBRsLpIR4A-pvAXbQWzknDMohxCiawGlsZw6U_ehXukPreb_");
+                    DiscordManager.SendEmbed(embed, "Leaderboard", LEADERBOARD_WEBHOOK_URL);
                 }
                 catch (Exception ex)
                 {
@@ -3448,7 +3460,7 @@ public class DatabaseManager
 
                 try
                 {
-                    DiscordManager.SendEmbed(embed, "Leaderboard", "https://discord.com/api/webhooks/983367340525760542/RfPxBseRKp3kffBEaHovRBRsLpIR4A-pvAXbQWzknDMohxCiawGlsZw6U_ehXukPreb_");
+                    DiscordManager.SendEmbed(embed, "Leaderboard", LEADERBOARD_WEBHOOK_URL);
                 }
                 catch (Exception ex)
                 {

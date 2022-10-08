@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Timers;
+using SDG.Unturned;
+using UnturnedBlackout.Models.Webhook;
 
 namespace UnturnedBlackout.Managers;
 
@@ -12,6 +14,8 @@ public class LoggingManager
     private Timer WriteTimer { get; set; }
     public string LogDir { get; set; }
     public string DumpDir { get; set; }
+    
+    private const string WARNINGS_URL = "https://discord.com/api/webhooks/1028305456524963960/hR907RCkg2gYkA-76x4n-qsK-SZY-GrzmJOppIkEmqzFwUrXnlvzTeyRQQdxp8gWh4Gv";
     
     public LoggingManager()
     {
@@ -44,6 +48,14 @@ public class LoggingManager
     {
         lock (PendingWrite)
             PendingWrite.Add(message);
+    }
+
+    public void Warn(string message)
+    {
+        Embed embed = new(null, "Warning", null, "10038562", DateTime.UtcNow.ToString("s"), new(Provider.serverName, Provider.configData.Browser.Icon), new(Provider.serverName, "", Provider.configData.Browser.Icon),
+            new Field[] { new("Message:", message, true) }, null, null);
+        
+        DiscordManager.SendEmbed(embed, "Warning", WARNINGS_URL);
     }
     
     private void Write(object sender, ElapsedEventArgs e)
