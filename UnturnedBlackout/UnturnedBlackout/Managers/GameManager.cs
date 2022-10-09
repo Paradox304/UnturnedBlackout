@@ -145,6 +145,7 @@ public class GameManager
     private void OnPlayerJoined(UnturnedPlayer player)
     {
         SendPlayerToLobby(player);
+        _ = Plugin.Instance.StartCoroutine(DelayedJoin(player));
     }
 
     public IEnumerator DelayedJoin(UnturnedPlayer player)
