@@ -213,7 +213,7 @@ public static class Utility
 
     public static Reward GetRewardFromString(string text)
     {
-        Regex letterRegex = new(@"([a-zA-Z]+)");
+        Regex letterRegex = new(@"([a-zA-Z_]+)");
         Regex numberRegex = new(@"([0-9.]+)");
 
         if (string.IsNullOrEmpty(text))
