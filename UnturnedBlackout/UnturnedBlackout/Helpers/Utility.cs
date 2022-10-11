@@ -208,16 +208,7 @@ public static class Utility
 
     public static List<Reward> GetRewardsFromString(string text)
     {
-        List<Reward> rewards = new();
-
-        foreach (var rewardText in text.Split(' '))
-        {
-            var reward = GetRewardFromString(rewardText);
-            if (reward != null)
-                rewards.Add(reward);
-        }
-
-        return rewards;
+        return text.Split(' ').Select(GetRewardFromString).Where(reward => reward != null).ToList();
     }
 
     public static Reward GetRewardFromString(string text)
@@ -230,21 +221,21 @@ public static class Utility
 
         if (!letterRegex.IsMatch(text) || !numberRegex.IsMatch(text))
         {
-            Logging.Debug($"There isn't a text or number in the reward text");
+            Logging.Debug($"There isn't a text or number in the reward text ({text})");
             return null;
         }
 
         var letterRegexMatch = letterRegex.Match(text).Value;
         if (!Enum.TryParse(letterRegexMatch, true, out ERewardType rewardType))
         {
-            Logging.Debug($"Cant find reward type with the match {letterRegexMatch}");
+            Logging.Debug($"Cant find reward type with the match {letterRegexMatch} ({text})");
             return null;
         }
 
         var numberRegexMatch = numberRegex.Match(text).Value;
         if (string.IsNullOrEmpty(numberRegexMatch))
         {
-            Logging.Debug($"Number regex match is coming empty");
+            Logging.Debug($"Number regex match is coming empty ({text})");
             return null;
         }
 
