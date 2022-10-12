@@ -5462,9 +5462,8 @@ public class UIHandler
         // Setup all 50 objects
         for (var i = 1; i <= 50; i++)
         {
-            if (i > 12)
-                yield return new WaitForSeconds(0.2f);
-
+            yield return new WaitForSeconds(0.1f);
+            
             ShowBattlepassTier(i);
         }
 
