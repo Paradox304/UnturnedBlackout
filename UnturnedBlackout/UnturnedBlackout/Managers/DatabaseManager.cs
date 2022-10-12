@@ -219,7 +219,7 @@ public class DatabaseManager
         };
 
         ConnectionThreshold = 0;
-        
+
         CacheRefresher = new(120 * 1000);
         CacheRefresher.Elapsed += RefreshData;
 
@@ -250,7 +250,7 @@ public class DatabaseManager
         if (!ForcedShutdown)
             CleanQueries(null, null);
     }
-    
+
     public async Task LoadDatabaseAsync()
     {
         using MySqlConnection conn = new(ConnectionString);
@@ -319,7 +319,7 @@ public class DatabaseManager
 
             _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{BATTLEPASS}` ( `TierID` INT NOT NULL , `FreeReward` TEXT NOT NULL , `PremiumReward` TEXT NOT NULL , `XP` INT NOT NULL , PRIMARY KEY (`TierID`));", conn).ExecuteScalarAsync();
             _ = await new MySqlCommand(
-                $"CREATE TABLE IF NOT EXISTS `{CASES}` ( `CaseID` INT NOT NULL , `CaseName` TEXT NOT NULL , `IconLink` TEXT NOT NULL , `CaseRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `IsBuyable` BOOLEAN NOT NULL , `ScrapPrice` INT NOT NULL , `CoinPrice` INT NOT NULL , `CommonWeight` INT NOT NULL , `UncommonWeight` INT NOT NULL , `RareWeight` INT NOT NULL , `EpicWeight` INT NOT NULL , `LegendaryWeight` INT NOT NULL , `MythicalWeight` INT NOT NULL , `KnifeWeight` INT NOT NULL , `GloveWeight` INT NOT NULL , `LimitedKnifeWeight` INT NOT NULL , `LimitedGloveWeight` INT NOT NULL , `AvailableSkins` TEXT NOT NULL, PRIMARY KEY (`CaseID`))",
+                $"CREATE TABLE IF NOT EXISTS `{CASES}` ( `CaseID` INT NOT NULL , `CaseName` TEXT NOT NULL , `IconLink` TEXT NOT NULL , `CaseRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `IsBuyable` BOOLEAN NOT NULL , `ScrapPrice` INT NOT NULL , `CoinPrice` INT NOT NULL , `CommonWeight` INT NOT NULL , `UncommonWeight` INT NOT NULL , `RareWeight` INT NOT NULL , `EpicWeight` INT NOT NULL , `LegendaryWeight` INT NOT NULL , `MythicalWeight` INT NOT NULL , `KnifeWeight` INT NOT NULL , `GloveWeight` INT NOT NULL , `LimitedKnifeWeight` INT NOT NULL , `LimitedGloveWeight` INT NOT NULL , `AvailableSkins` TEXT NOT NULL, `UnboxedAmount` INT NOT NULL, PRIMARY KEY (`CaseID`))",
                 conn).ExecuteScalarAsync();
 
             // PLAYERS DATA
@@ -1451,13 +1451,16 @@ public class DatabaseManager
                         availableSkins.Add(skin);
                     }
 
+                    if (!int.TryParse(rdr[18].ToString(), out var unboxedAmount))
+                        continue;
+
                     if (cases.ContainsKey(caseID))
                     {
                         Logging.Debug($"Found a case with id {caseID} already registered, ignoring");
                         continue;
                     }
 
-                    cases.Add(caseID, new(caseID, caseName, iconLink, caseRarity, isBuyable, scrapPrice, coinPrice, caseRarities, availableSkins, availableSkinsSearchByRarity));
+                    cases.Add(caseID, new(caseID, caseName, iconLink, caseRarity, isBuyable, scrapPrice, coinPrice, caseRarities, availableSkins, availableSkinsSearchByRarity, unboxedAmount));
                 }
 
                 Logging.Debug($"Successfully read {cases.Count} cases from base data");
@@ -1838,10 +1841,10 @@ public class DatabaseManager
                         continue;
 
                     var hotkeys = rdr[31].GetIntListFromReaderResult();
-                    
+
                     if (PlayerData.ContainsKey(player.CSteamID))
                         _ = PlayerData.Remove(player.CSteamID);
-                    
+
                     PlayerData.Add(player.CSteamID,
                         new(player.CSteamID, steamName, avatarLink, countryCode, hideFlag, xp, level, credits, scrap, coins, kills, headshotKills, highestKillstreak, highestMultiKills, killsConfirmed, killsDenied, flagsCaptured, flagsSaved, areasTaken, deaths, music, isMuted, muteExpiry,
                             hasBattlepass, xpBooster, bpBooster, gunXPBooster, hasPrime, primeExpiry, primeLastDailyReward, volume, hotkeys));
@@ -2882,7 +2885,7 @@ public class DatabaseManager
     {
         if (string.IsNullOrEmpty(query))
             return;
-        
+
         lock (PendingQueries)
             PendingQueries.Add(query);
     }
@@ -2934,7 +2937,7 @@ public class DatabaseManager
                 Logger.Log($"Error executing query: \n{cmdText}");
                 Logger.Log(ex);
             }
-            
+
             stopWatch.Stop();
             Logging.Debug($"Pending queries: {pendingQueries.Count}, Time Elapsed = {stopWatch.ElapsedMilliseconds}ms");
         }
@@ -2952,7 +2955,7 @@ public class DatabaseManager
                 Provider.shutdown();
                 return;
             }
-            
+
             Plugin.Instance.Logger.Warn("Failed to run the batch queries, trying once more after 10 seconds");
         }
         finally
@@ -3277,7 +3280,9 @@ public class DatabaseManager
                 rdr.Close();
             }
 
-            Logging.Debug($"Loaded {PlayerDailyLeaderboardLookup.Count} daily leaderboard entries, {PlayerWeeklyLeaderboardLookup.Count} weekly leaderboard entries, {PlayerSeasonalLeaderboardLookup.Count} seasonal leaderboard entries, {PlayerAllTimeLeaderboardLookup.Count} all time leaderboard entries");
+            Logging.Debug(
+                $"Loaded {PlayerDailyLeaderboardLookup.Count} daily leaderboard entries, {PlayerWeeklyLeaderboardLookup.Count} weekly leaderboard entries, {PlayerSeasonalLeaderboardLookup.Count} seasonal leaderboard entries, {PlayerAllTimeLeaderboardLookup.Count} all time leaderboard entries");
+
             List<(CSteamID, List<Reward>)> bulkRewards = new();
 
             Logging.Debug("Checking if daily leaderboard needs to be wiped");
@@ -3419,7 +3424,7 @@ public class DatabaseManager
                 _ = new MySqlCommand($"UPDATE `{OPTIONS}` SET `WeeklyLeaderboardWipe` = {newWipeDate.ToUnixTimeSeconds()};", conn).ExecuteScalar();
                 ServerOptions.WeeklyLeaderboardWipe = newWipeDate;
             }
-            
+
             Logging.Debug("Checking if seasonal leaderboard needs to be wiped");
             if (IsPendingSeasonalWipe)
             {
@@ -3528,7 +3533,7 @@ public class DatabaseManager
                 ServerOptions.GunXPBooster = 0f;
                 _ = new MySqlCommand($"UPDATE `{OPTIONS}` SET `GunXPBooster` = 0;", conn).ExecuteScalar();
             }
-            
+
             Logging.Debug("Reloading boosters, checking prime, mute for all players");
             foreach (var data in PlayerData.Values)
             {
@@ -3725,7 +3730,23 @@ public class DatabaseManager
                     }
                 }
             }
+            
+            Servers.Sort((a, b) =>
+            {
+                if (a.IsCurrentServer)
+                    return -1;
 
+                if (b.IsCurrentServer)
+                    return 1;
+
+                if (a.IsOnline && !b.IsOnline)
+                    return -1;
+                
+                if (!a.IsOnline && b.IsOnline)
+                    return 1;
+
+                return Utility.ServerNameSort(a, b);
+            });
             TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.OnServersUpdated());
         }
         catch (Exception ex)
@@ -4119,7 +4140,16 @@ public class DatabaseManager
     {
         AddQuery($"UPDATE `{PLAYERS}` SET `Hotkeys` = '{hotkeys.GetStringFromIntList()}' WHERE `SteamID` = {id};");
     }
-    
+
+    public void AddPlayerBattlepass(CSteamID steamID)
+    {
+        AddQuery($"UPDATE `{PLAYERS}` SET `HasBattlepass` = true WHERE `SteamID` = {steamID};");
+        if (!PlayerData.TryGetValue(steamID, out var data))
+            return;
+
+        data.HasBattlepass = true;
+    }
+
     // Player Guns
 
     public void AddPlayerGunBought(CSteamID steamID, ushort gunID)
@@ -4969,7 +4999,7 @@ public class DatabaseManager
         if (!data.CasesSearchByID.TryGetValue(caseID, out var playerCase))
             throw new ArgumentNullException(nameof(caseID), $"Case with id {caseID} doesn't exist in the database, while decreasing case");
 
-        if (playerCase.Amount >= amount)
+        if (playerCase.Amount > amount)
         {
             playerCase.Amount -= amount;
             AddQuery($"UPDATE `{PLAYERS_CASES}` SET `Amount` = `Amount` - {amount} WHERE `SteamID` = {steamID} AND `CaseID` = {caseID};");
@@ -4981,6 +5011,15 @@ public class DatabaseManager
             Plugin.Instance.UI.OnUIUpdated(steamID, EUIPage.CASE);
             AddQuery($"DELETE FROM `{PLAYERS_CASES}` WHERE `SteamID` = {steamID} AND `CaseID` = {caseID};");
         }
+    }
+
+    public void IncreaseCaseUnboxedAmount(int caseID, int amount)
+    {
+        if (!Cases.TryGetValue(caseID, out var @case))
+            throw new ArgumentNullException(nameof(caseID), $"Case with id {caseID} doesn't exist in the database, while increasing case unboxed amount");
+
+        AddQuery($"UPDATE `{CASES}` SET `UnboxedAmount` = `UnboxedAmount` + {amount} WHERE `CaseID` = {caseID};");
+        @case.UnboxedAmount += amount;
     }
 
     // Player Boosters

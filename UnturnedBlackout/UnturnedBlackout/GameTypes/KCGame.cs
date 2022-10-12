@@ -56,18 +56,18 @@ public class KCGame : Game
         Frequency = Utility.GetFreeFrequency();
     }
 
-    
+
     public override void ForceStartGame()
     {
         GameStarter = Plugin.Instance.StartCoroutine(StartGame());
     }
-    
+
     public override void ForceEndGame()
     {
         var wonTeam = BlueTeam.Score > RedTeam.Score ? BlueTeam : RedTeam.Score > BlueTeam.Score ? RedTeam : new(this, -1, true, 0, new());
         _ = Plugin.Instance.StartCoroutine(GameEnd(wonTeam));
     }
-    
+
     public IEnumerator StartGame()
     {
         TaskDispatcher.QueueOnMainThread(() => CleanMap());
@@ -185,8 +185,10 @@ public class KCGame : Game
                 new() { { EQuestCondition.MAP, Location.LocationID }, { EQuestCondition.GAMEMODE, (int)GameMode }, { EQuestCondition.WIN_KILLS, player.Kills }, { EQuestCondition.WIN_TAGS, player.KillsDenied + player.KillsConfirmed } }));
 
             if (player.Team == wonTeam)
+            {
                 TaskDispatcher.QueueOnMainThread(() => Quest.CheckQuest(player.GamePlayer, EQuestType.WIN,
                     new() { { EQuestCondition.MAP, Location.LocationID }, { EQuestCondition.GAMEMODE, (int)GameMode }, { EQuestCondition.WIN_KILLS, player.Kills }, { EQuestCondition.WIN_TAGS, player.KillsDenied + player.KillsConfirmed } }));
+            }
 
             UI.SetupPreEndingUI(player.GamePlayer, EGameType.KC, player.Team.TeamID == wonTeam.TeamID, BlueTeam.Score, RedTeam.Score, BlueTeam.Info.TeamName, RedTeam.Info.TeamName);
             player.GamePlayer.Player.Player.quests.askSetRadioFrequency(CSteamID.Nil, Frequency);
@@ -330,9 +332,11 @@ public class KCGame : Game
             UI.ClearWaitingForPlayersUI(player);
 
         if (GamePhase != EGamePhase.ENDING)
+        {
             TaskDispatcher.QueueOnMainThread(() =>
                 BarricadeManager.BarricadeRegions.Cast<BarricadeRegion>().SelectMany(k => k.drops).Where(k => (k.GetServersideData()?.owner ?? 0UL) == player.SteamID.m_SteamID && LevelNavigation.tryGetNavigation(k.model.transform.position, out var nav) && nav == Location.NavMesh)
                     .Select(k => BarricadeManager.tryGetRegion(k.model.transform, out var x, out var y, out var plant, out _) ? (k, x, y, plant) : (k, byte.MaxValue, byte.MaxValue, ushort.MaxValue)).ToList().ForEach(k => BarricadeManager.destroyBarricade(k.k, k.Item2, k.Item3, k.Item4)));
+        }
 
         if (kPlayer != null)
         {
@@ -391,7 +395,7 @@ public class KCGame : Game
 
             if (kPlayer.GamePlayer.SteamID == vPlayer.GamePlayer.SteamID)
             {
-                OnKill(kPlayer.GamePlayer, vPlayer.GamePlayer, cause == EDeathCause.WATER ? (ushort)0 : (ushort)1, kPlayer.Team.Info.KillFeedHexCode, vPlayer.Team.Info.KillFeedHexCode);
+                OnKill(kPlayer.GamePlayer, vPlayer.GamePlayer, cause == EDeathCause.WATER ? (ushort)0 : (ushort)1, kPlayer.Team.Info.KillFeedHexCode, vPlayer.Team.Info.KillFeedHexCode, false);
 
                 Logging.Debug("Player killed themselves, returning");
                 return;
@@ -581,7 +585,7 @@ public class KCGame : Game
             kPlayer.GamePlayer.OnKilled(vPlayer.GamePlayer);
 
             if (equipmentUsed != 0)
-                OnKill(kPlayer.GamePlayer, vPlayer.GamePlayer, equipmentUsed, kPlayer.Team.Info.KillFeedHexCode, vPlayer.Team.Info.KillFeedHexCode);
+                OnKill(kPlayer.GamePlayer, vPlayer.GamePlayer, equipmentUsed, kPlayer.Team.Info.KillFeedHexCode, vPlayer.Team.Info.KillFeedHexCode, cause == EDeathCause.GUN && limb == ELimb.SKULL);
 
             Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.KILL, questConditions);
             Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.MULTI_KILL, questConditions);

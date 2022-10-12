@@ -253,13 +253,13 @@ public abstract class Game
 
     private void OnPlayerPickupItem(UnturnedPlayer player, InventoryGroup inventoryGroup, byte inventoryIndex, ItemJar P) => PlayerPickupItem(player, inventoryGroup, inventoryIndex, P);
 
-    public void OnKill(GamePlayer killer, GamePlayer victim, ushort weaponID, string killerColor, string victimColor)
+    public void OnKill(GamePlayer killer, GamePlayer victim, ushort weaponID, string killerColor, string victimColor, bool isHeadshot)
     {
         if (!Plugin.Instance.UI.KillFeedIcons.TryGetValue(weaponID, out var icon) && weaponID != 0 && weaponID != 1)
             return;
 
-        var feed = weaponID == 0 || weaponID == 1 ? new($"{(victim.Data.HasPrime ? UIManager.PRIME_SYMBOL : "")}<color={victimColor}>{victim.Player.CharacterName.ToUnrich()}</color> {(weaponID == 0 ? "" : "")} ", DateTime.UtcNow) : new Feed(
-            $"{(killer.Data.HasPrime ? UIManager.PRIME_SYMBOL : "")}<color={killerColor}>{killer.Player.CharacterName.ToUnrich()}</color> {icon.Symbol} {(victim.Data.HasPrime ? UIManager.PRIME_SYMBOL : "")}<color={victimColor}>{victim.Player.CharacterName.ToUnrich()}</color>", DateTime.UtcNow);
+        var message = weaponID is 0 or 1 ? $"{(victim.Data.HasPrime ? UIManager.PRIME_SYMBOL : "")}<color={victimColor}>{victim.Player.CharacterName.ToUnrich()}</color> {(weaponID == 0 ? "" : "")}" : $"{(killer.Data.HasPrime ? UIManager.PRIME_SYMBOL : "")}<color={killerColor}>{killer.Player.CharacterName.ToUnrich()}</color> {icon.Symbol}{(isHeadshot ? "" : "")} {(victim.Data.HasPrime ? UIManager.PRIME_SYMBOL : "")}<color={victimColor}>{victim.Player.CharacterName.ToUnrich()}</color>";
+        var feed = new Feed(message, DateTime.UtcNow);
 
         if (Killfeed.Count < Config.Base.FileData.MaxKillFeed)
         {

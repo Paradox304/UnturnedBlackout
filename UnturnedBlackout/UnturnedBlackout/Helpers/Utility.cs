@@ -10,6 +10,7 @@ using UnturnedBlackout.Database.Base;
 using UnturnedBlackout.Database.Data;
 using UnturnedBlackout.Enums;
 using UnturnedBlackout.Helpers;
+using Logger = Rocket.Core.Logging.Logger;
 
 namespace UnturnedBlackout;
 
@@ -23,6 +24,8 @@ public static class Utility
     {
         if (target is UnturnedPlayer player)
             ChatManager.serverSendMessage(message, Color.green, toPlayer: player.SteamPlayer(), useRichTextFormatting: true);
+        else
+            Logger.Log(message.ToUnrich());
     }
 
     public static void Announce(string message) => ChatManager.serverSendMessage(message, Color.green, useRichTextFormatting: true);
@@ -398,7 +401,7 @@ public static class Utility
         EHotkey.KILLSTREAK_3 => "Killstreak 3",
         _ => throw new ArgumentOutOfRangeException(nameof(hotkey), hotkey, "Hotkey is not as expected")
     };
-    
+
     public static string ToFriendlyName(this ECurrency currency) => currency switch
     {
         ECurrency.SCRAP => "Scrap",
@@ -451,6 +454,16 @@ public static class Utility
 
     public static string ToColor(this object value, bool isPlayer) => isPlayer ? $"<color={Plugin.Instance.Config.Base.FileData.PlayerColorHexCode}>{value}</color>" : value.ToString();
 
+    public static int ServerNameSort(Server a, Server b)
+    {
+        var indexA = _serverDenominations.IndexOf(a.FriendlyIP.Substring(0, 2));
+        var indexB = _serverDenominations.IndexOf(b.FriendlyIP.Substring(0, 2));
+
+        return indexA.CompareTo(indexB);
+    }
+
+    private static List<string> _serverDenominations = new() { "eu", "na", "as" };
+    
     public static string GetRarityColor(ERarity rarity) => rarity switch
     {
         ERarity.COMMON => "#FFFFFF",
@@ -463,7 +476,7 @@ public static class Utility
         ERarity.ORANGE => "orange",
         ERarity.CYAN => "#31FFF9",
         ERarity.GREEN => "#00FF00",
-        _ => throw new ArgumentOutOfRangeException(nameof(rarity), rarity, "Rarity is not as expected")
+        var _ => throw new ArgumentOutOfRangeException(nameof(rarity), rarity, "Rarity is not as expected")
     };
 
     public static string GetCurrencySymbol(ECurrency currency) => currency switch
@@ -471,7 +484,7 @@ public static class Utility
         ECurrency.COINS => "",
         ECurrency.SCRAP => "",
         ECurrency.CREDITS => "",
-        _ => throw new ArgumentOutOfRangeException(nameof(currency), currency, "Currency is not as expected")
+        var _ => throw new ArgumentOutOfRangeException(nameof(currency), currency, "Currency is not as expected")
     };
 
     public static string GetFlag(string country) => Plugin.Instance.Config.Icons.FileData.FlagAPILink.Replace("{country}", country.ToLower());

@@ -54,19 +54,19 @@ public class TDMGame : Game
         RedTeam = new(this, (byte)ETeam.RED, false, redTeamInfo);
         Frequency = Utility.GetFreeFrequency();
     }
-    
-    
+
+
     public override void ForceStartGame()
     {
         GameStarter = Plugin.Instance.StartCoroutine(StartGame());
     }
-    
+
     public override void ForceEndGame()
     {
         var wonTeam = BlueTeam.Score > RedTeam.Score ? BlueTeam : RedTeam.Score > BlueTeam.Score ? RedTeam : new(this, -1, true, new());
         _ = Plugin.Instance.StartCoroutine(GameEnd(wonTeam));
     }
-    
+
     public IEnumerator StartGame()
     {
         TaskDispatcher.QueueOnMainThread(() => CleanMap());
@@ -333,9 +333,11 @@ public class TDMGame : Game
         }
 
         if (GamePhase != EGamePhase.ENDING)
+        {
             TaskDispatcher.QueueOnMainThread(() =>
                 BarricadeManager.BarricadeRegions.Cast<BarricadeRegion>().SelectMany(k => k.drops).Where(k => (k.GetServersideData()?.owner ?? 0UL) == player.SteamID.m_SteamID && LevelNavigation.tryGetNavigation(k.model.transform.position, out var nav) && nav == Location.NavMesh)
                     .Select(k => BarricadeManager.tryGetRegion(k.model.transform, out var x, out var y, out var plant, out _) ? (k, x, y, plant) : (k, byte.MaxValue, byte.MaxValue, ushort.MaxValue)).ToList().ForEach(k => BarricadeManager.destroyBarricade(k.k, k.Item2, k.Item3, k.Item4)));
+        }
 
         tPlayer.Team.RemovePlayer(tPlayer.GamePlayer.SteamID);
         tPlayer.GamePlayer.OnGameLeft();
@@ -384,7 +386,7 @@ public class TDMGame : Game
 
             if (kPlayer.GamePlayer.SteamID == tPlayer.GamePlayer.SteamID)
             {
-                OnKill(kPlayer.GamePlayer, tPlayer.GamePlayer, cause == EDeathCause.WATER ? (ushort)0 : (ushort)1, kPlayer.Team.Info.KillFeedHexCode, tPlayer.Team.Info.KillFeedHexCode);
+                OnKill(kPlayer.GamePlayer, tPlayer.GamePlayer, cause == EDeathCause.WATER ? (ushort)0 : (ushort)1, kPlayer.Team.Info.KillFeedHexCode, tPlayer.Team.Info.KillFeedHexCode, false);
 
                 Logging.Debug("Player killed themselves, returning");
                 return;
@@ -580,7 +582,7 @@ public class TDMGame : Game
                 _ = Plugin.Instance.StartCoroutine(GameEnd(kPlayer.Team));
 
             if (equipmentUsed != 0)
-                OnKill(kPlayer.GamePlayer, tPlayer.GamePlayer, equipmentUsed, kPlayer.Team.Info.KillFeedHexCode, tPlayer.Team.Info.KillFeedHexCode);
+                OnKill(kPlayer.GamePlayer, tPlayer.GamePlayer, equipmentUsed, kPlayer.Team.Info.KillFeedHexCode, tPlayer.Team.Info.KillFeedHexCode, cause == EDeathCause.GUN && limb == ELimb.SKULL);
 
             Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.KILL, questConditions);
             Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.MULTI_KILL, questConditions);

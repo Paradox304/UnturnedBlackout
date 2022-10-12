@@ -955,13 +955,13 @@ public class UIHandler
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Play Ping TEXT", " ");
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Play IP TEXT", $"{server.FriendlyIP}:{server.Port}");
     }
-    
+
     public void ShowOptions()
     {
         for (var i = 0; i <= 4; i++)
             SetHotkeyInput((EHotkey)i);
     }
-    
+
     public void MusicButtonPressed()
     {
         PlayerData.Music = !PlayerData.Music;
@@ -993,13 +993,11 @@ public class UIHandler
             SetHotkeyInput(hotkeyType);
             return;
         }
-        
+
         // Check if the new hotkey is the same previous one, if so ignore
         var currentHotkey = PlayerData.Hotkeys[(int)hotkeyType];
         if (currentHotkey == newHotkey)
-        {
             return;
-        }
 
         // Check if the set hotkey is set somewhere else for some other thing, if so, swap both the values
         var index = PlayerData.Hotkeys.IndexOf(newHotkey);
@@ -1008,7 +1006,7 @@ public class UIHandler
             PlayerData.Hotkeys[index] = currentHotkey;
             SetHotkeyInput((EHotkey)index);
         }
-        
+
         // Set the new hotkey and update DB side
         PlayerData.Hotkeys[(int)hotkeyType] = newHotkey;
         DB.SetPlayerHotkeys(SteamID, PlayerData.Hotkeys);
@@ -3714,8 +3712,10 @@ public class UIHandler
             attachment.IsBought && ((isAttachmentPrimary && !loadout.PrimaryAttachments.ContainsValue(attachment)) || (!isAttachmentPrimary && !loadout.SecondaryAttachments.ContainsValue(attachment))));
 
         if (attachment.Attachment.AttachmentType != EAttachment.MAGAZINE)
+        {
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Dequip BUTTON",
                 attachment.IsBought && ((isAttachmentPrimary && loadout.PrimaryAttachments.ContainsValue(attachment)) || (!isAttachmentPrimary && loadout.SecondaryAttachments.ContainsValue(attachment))));
+        }
         else
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Dequip BUTTON", false);
 
@@ -5082,7 +5082,7 @@ public class UIHandler
         var inputLower = input.ToLower();
         var searchPlayers = data.Where(k => k.SteamName.ToLower().Contains(inputLower)).Take(10).ToList();
         Logging.Debug($"Found {searchPlayers.Count} players with that name");
-    
+
         var maxCount = Math.Min(10, searchPlayers.Count);
         for (var i = 0; i < maxCount; i++)
         {
@@ -5091,7 +5091,7 @@ public class UIHandler
             decimal deaths = playerData.Deaths;
 
             var ratio = playerData.Deaths == 0 ? $"{kills:n}" : $"{Math.Round(kills / deaths, 2):n}";
-            
+
             Logging.Debug($"i: {i}, player name: {playerData.SteamName}");
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards BUTTON {i}", true);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Rank TEXT {i}", $"#{data.IndexOf(playerData) + 1}");
@@ -5801,6 +5801,7 @@ public class UIHandler
             yield break;
         }
 
+        DB.IncreaseCaseUnboxedAmount(@case.Case.CaseID, 1);
         if (!Plugin.Instance.Unbox.TryCalculateReward(@case.Case, Player, out var reward, out var rewardImage, out var rewardName, out var rewardDesc, out var rewardRarity, out var isDuplicate, out var duplicateScrapAmount))
         {
             Logging.Debug($"Unable to calculate reward for unboxing case {SelectedCaseID} for {Player.CharacterName}");
@@ -5999,7 +6000,7 @@ public class UIHandler
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Crate EXAMPLE Drop ANIM", true);
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Description TEXT", @case.CaseName);
 
-        var skins = @case.AvailableSkins.Where(k => k.MaxAmount == 0).ToList();
+        var skins = @case.AvailableSkins.Where(k => k.MaxAmount == 0).OrderBy(k => k.SkinRarity).ThenBy(k => k.ID).ToList();
         for (var i = 0; i <= MAX_PREVIEW_CONTENT_PER_CASE; i++)
         {
             if (i == 18 && @case.Weights.Exists(k => k.Item1 == ECaseRarity.GLOVE || k.Item1 == ECaseRarity.LIMITED_GLOVE))
@@ -6031,7 +6032,7 @@ public class UIHandler
             var skin = skins[i];
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content BUTTON {i}", true);
             EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content IMAGE {i}", skin.IconLink);
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Name TEXT {i}", skin.SkinName);
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Name TEXT {i}", $"{skin.Gun.GunName} | {skin.SkinName}");
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Extra TEXT {i}", " ");
 
             SendRarity("SERVER Unbox Content", skin.SkinRarity, i);
@@ -6148,9 +6149,9 @@ public class UIHandler
     {
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary", true);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary XP Toggle", true);
-        
+
         // Send the match end info
-        
+
         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Banner IMAGE", summary.Player.ActiveLoadout?.Card?.Card?.CardLink ?? "");
         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Level IMAGE", DB.Levels.TryGetValue(summary.Player.Data.Level, out var level) ? level.IconLinkLarge : "");
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Level TEXT", summary.Player.Data.Level.ToString());
@@ -6176,7 +6177,7 @@ public class UIHandler
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Battlepass XP TEXT", $"<color=#be69ff>+{summary.BattlepassXP}</color>");
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Battlepass Bonus", $"BATTLEPASS ★ BONUS");
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Battlepass Bonus TEXT", $"<color=#be69ff>+{summary.BattlepassBonusXP}</color>");
-        
+
         // Set the current level, xp and next level xp to animate the bar
         var currentLevel = summary.StartingLevel;
         var currentXP = summary.StartingXP;
@@ -6383,6 +6384,7 @@ public class UIHandler
         // --------------------------
 
         yield return new WaitForSeconds(2f);
+
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary Stats Toggle", true);
     }
 

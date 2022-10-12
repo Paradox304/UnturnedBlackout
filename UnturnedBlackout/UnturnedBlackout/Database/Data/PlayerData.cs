@@ -42,7 +42,7 @@ public class PlayerData
     public DateTimeOffset PrimeLastDailyReward { get; set; }
     public int Volume { get; set; }
     public List<int> Hotkeys { get; set; }
-    
+
     public List<PlayerQuest> Quests { get; set; }
     public Dictionary<EQuestType, List<PlayerQuest>> QuestsSearchByType { get; set; }
     public List<PlayerAchievement> Achievements { get; set; }

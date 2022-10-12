@@ -62,12 +62,12 @@ public class MatchEndSummary
         var global = Plugin.Instance.DB.ServerOptions;
 
         PendingCredits = MatchXP == 0 ? 0 : MatchXP / data.PointsDivisible + minutesPlayed * data.PointsPerMinutePlayed;
-        MatchXPBonus = (int)((Kills > 0 ? MatchXP / (HasWon ? data.BonusXPVictoryDivisible : data.BonusXPDefeatDivisible) : 0) * (1f + player.Data.XPBooster + global.XPBooster + (player.Data.HasPrime ? data.PrimeXPBooster : 0f)));
+        MatchXPBonus = (int)((Kills > 0 ? MatchXP / (HasWon ? data.BonusXPVictoryDivisible : data.BonusXPDefeatDivisible) : 0) * (1f + player.Data.XPBooster + global.XPBooster));
         if (MatchXPBonus != 0)
             MatchXPBonus += minutesPlayed * data.BonusXPPerMinutePlayed;
 
         AchievementXPBonus = (int)Math.Floor(MatchXP * player.Data.AchievementXPBooster);
-        OtherXPBonus = 0; // Havent got formula for this
+        OtherXPBonus = (int)(MatchXPBonus * (player.Data.HasPrime ? data.PrimeXPBooster : 0f));
 
         BattlepassXP = (int)(Kills > 0 ? data.BPXPPerMinutePlayed * minutesPlayed * (1f + (HasWon ? data.BPXPVictoryBonus : data.BPXPDefeatBonus)) : 0);
         BattlepassBonusXP = (int)Math.Floor(BattlepassXP * (player.Data.BPBooster + global.BPBooster + (player.Data.HasPrime ? data.PrimeBPXPBooster : 0f)));

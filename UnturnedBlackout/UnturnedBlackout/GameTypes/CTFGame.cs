@@ -70,18 +70,18 @@ public class CTFGame : Game
         Frequency = Utility.GetFreeFrequency();
     }
 
-    
+
     public override void ForceStartGame()
     {
         GameStarter = Plugin.Instance.StartCoroutine(StartGame());
     }
-    
+
     public override void ForceEndGame()
     {
         var wonTeam = BlueTeam.Score > RedTeam.Score ? BlueTeam : RedTeam.Score > BlueTeam.Score ? RedTeam : new(-1, true, new(), 0, Vector3.zero);
         _ = Plugin.Instance.StartCoroutine(GameEnd(wonTeam));
     }
-    
+
     public IEnumerator StartGame()
     {
         GamePhase = EGamePhase.STARTING;
@@ -138,7 +138,7 @@ public class CTFGame : Game
         var wonTeam = BlueTeam.Score > RedTeam.Score ? BlueTeam : RedTeam.Score > BlueTeam.Score ? RedTeam : new(-1, true, new(), 0, Vector3.zero);
         _ = Plugin.Instance.StartCoroutine(GameEnd(wonTeam));
     }
-    
+
     public IEnumerator GameEnd(CTFTeam wonTeam)
     {
         if (GameEnder != null)
@@ -354,9 +354,11 @@ public class CTFGame : Game
             UI.ClearWaitingForPlayersUI(player);
 
         if (GamePhase != EGamePhase.ENDING)
+        {
             TaskDispatcher.QueueOnMainThread(() =>
                 BarricadeManager.BarricadeRegions.Cast<BarricadeRegion>().SelectMany(k => k.drops).Where(k => (k.GetServersideData()?.owner ?? 0UL) == player.SteamID.m_SteamID && LevelNavigation.tryGetNavigation(k.model.transform.position, out var nav) && nav == Location.NavMesh)
                     .Select(k => BarricadeManager.tryGetRegion(k.model.transform, out var x, out var y, out var plant, out var _) ? (k, x, y, plant) : (k, byte.MaxValue, byte.MaxValue, ushort.MaxValue)).ToList().ForEach(k => BarricadeManager.destroyBarricade(k.k, k.Item2, k.Item3, k.Item4)));
+        }
 
         if (cPlayer != null)
         {
@@ -440,7 +442,7 @@ public class CTFGame : Game
 
             if (kPlayer.GamePlayer.SteamID == cPlayer.GamePlayer.SteamID)
             {
-                OnKill(kPlayer.GamePlayer, cPlayer.GamePlayer, cause == EDeathCause.WATER ? (ushort)0 : (ushort)1, kPlayer.Team.Info.KillFeedHexCode, cPlayer.Team.Info.KillFeedHexCode);
+                OnKill(kPlayer.GamePlayer, cPlayer.GamePlayer, cause == EDeathCause.WATER ? (ushort)0 : (ushort)1, kPlayer.Team.Info.KillFeedHexCode, cPlayer.Team.Info.KillFeedHexCode, false);
 
                 Logging.Debug("Player killed themselves, returning");
                 return;
@@ -642,7 +644,7 @@ public class CTFGame : Game
             kPlayer.GamePlayer.OnKilled(cPlayer.GamePlayer);
 
             if (equipmentUsed != 0)
-                OnKill(kPlayer.GamePlayer, cPlayer.GamePlayer, equipmentUsed, kPlayer.Team.Info.KillFeedHexCode, cPlayer.Team.Info.KillFeedHexCode);
+                OnKill(kPlayer.GamePlayer, cPlayer.GamePlayer, equipmentUsed, kPlayer.Team.Info.KillFeedHexCode, cPlayer.Team.Info.KillFeedHexCode, cause == EDeathCause.GUN && limb == ELimb.SKULL);
 
             Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.KILL, questConditions);
             Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.MULTI_KILL, questConditions);

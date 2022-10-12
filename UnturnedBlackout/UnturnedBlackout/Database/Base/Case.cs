@@ -16,8 +16,9 @@ public class Case
     public List<(ECaseRarity, int)> Weights { get; set; }
     public List<GunSkin> AvailableSkins { get; set; }
     public Dictionary<ERarity, List<GunSkin>> AvailableSkinsSearchByRarity { get; set; }
+    public int UnboxedAmount { get; set; }
 
-    public Case(int caseID, string caseName, string iconLink, ERarity caseRarity, bool isBuyable, int scrapPrice, int coinPrice, List<(ECaseRarity, int)> weights, List<GunSkin> availableSkins, Dictionary<ERarity, List<GunSkin>> availableSkinsSearchByRarity)
+    public Case(int caseID, string caseName, string iconLink, ERarity caseRarity, bool isBuyable, int scrapPrice, int coinPrice, List<(ECaseRarity, int)> weights, List<GunSkin> availableSkins, Dictionary<ERarity, List<GunSkin>> availableSkinsSearchByRarity, int unboxedAmount)
     {
         CaseID = caseID;
         CaseName = caseName;
@@ -29,6 +30,7 @@ public class Case
         Weights = weights;
         AvailableSkins = availableSkins;
         AvailableSkinsSearchByRarity = availableSkinsSearchByRarity;
+        UnboxedAmount = unboxedAmount;
     }
 
     public int GetBuyPrice(ECurrency currency) => currency switch

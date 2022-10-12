@@ -502,6 +502,11 @@ public class UIManager
         EffectManager.sendUIEffectText(LOADING_UI_KEY, transportConnection, true, "LOADING Bar Fill", bar);
     }
 
+    public void UpdateLoadingText(UnturnedPlayer player, string loadingText)
+    {
+        EffectManager.sendUIEffectText(LOADING_UI_KEY, player.Player.channel.owner.transportConnection, true, "LOADING Bar TEXT", loadingText);
+    }
+    
     public void UpdateLoadingTip(UnturnedPlayer player, string tip) => EffectManager.sendUIEffectText(LOADING_UI_KEY, player.Player.channel.owner.transportConnection, true, "LOADING Tip Description TEXT", tip);
 
     public void ClearLoadingUI(UnturnedPlayer player)
@@ -1574,32 +1579,37 @@ public class UIManager
 
     public void OnAchievementsUpdated(CSteamID steamID)
     {
-        if (UIHandlersLookup.TryGetValue(steamID, out var handler))
-        {
-            if (handler.MainPage == EMainPage.ACHIEVEMENTS)
-            {
-                handler.ReloadAchievementSubPage();
-                handler.ReloadSelectedAchievement();
-            }
-        }
+        if (!UIHandlersLookup.TryGetValue(steamID, out var handler))
+            return;
+
+        if (handler.MainPage != EMainPage.ACHIEVEMENTS)
+            return;
+
+        handler.ReloadAchievementSubPage();
+        handler.ReloadSelectedAchievement();
     }
 
     public void OnBattlepassTierUpdated(CSteamID steamID, int tierID)
     {
-        if (UIHandlersLookup.TryGetValue(steamID, out var handler))
-        {
-            if (handler.MainPage == EMainPage.BATTLEPASS)
-                handler.ShowBattlepassTier(tierID);
-        }
+        if (!UIHandlersLookup.TryGetValue(steamID, out var handler))
+            return;
+
+        if (handler.MainPage == EMainPage.BATTLEPASS)
+            handler.ShowBattlepassTier(tierID);
     }
 
-    public void OnBattlepassUpdated(CSteamID steamID)
+    public void OnBattlepassUpdated(CSteamID steamID, bool force = false)
     {
-        if (UIHandlersLookup.TryGetValue(steamID, out var handler))
-        {
-            if (handler.MainPage == EMainPage.BATTLEPASS)
-                handler.ShowBattlepass();
-        }
+        if (!UIHandlersLookup.TryGetValue(steamID, out var handler))
+            return;
+
+        if (handler.MainPage != EMainPage.BATTLEPASS)
+            return;
+
+        if (force)
+            handler.ShowBattlepass();
+        else
+            _ = Plugin.Instance.StartCoroutine(handler.SetupBattlepass());
     }
 
     private void OnButtonClicked(Player player, string buttonName)

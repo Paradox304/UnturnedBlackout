@@ -13,7 +13,7 @@ public static class Logging
             Console.WriteLine(updatedMesage);
             Console.ResetColor();
         }
-        
+
         Plugin.Instance.Logger.Log(updatedMesage);
     }
 }

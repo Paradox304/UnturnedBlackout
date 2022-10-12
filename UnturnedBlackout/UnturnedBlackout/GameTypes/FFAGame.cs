@@ -38,17 +38,17 @@ public class FFAGame : Game
         UnavailableSpawnPoints = new();
         Frequency = Utility.GetFreeFrequency();
     }
-    
+
     public override void ForceStartGame()
     {
         GameStarter = Plugin.Instance.StartCoroutine(StartGame());
     }
-    
+
     public override void ForceEndGame()
     {
         _ = Plugin.Instance.StartCoroutine(GameEnd());
     }
-    
+
 
     public IEnumerator StartGame()
     {
@@ -297,9 +297,11 @@ public class FFAGame : Game
         }
 
         if (GamePhase != EGamePhase.ENDING)
+        {
             TaskDispatcher.QueueOnMainThread(() =>
                 BarricadeManager.BarricadeRegions.Cast<BarricadeRegion>().SelectMany(k => k.drops).Where(k => (k.GetServersideData()?.owner ?? 0UL) == player.SteamID.m_SteamID && LevelNavigation.tryGetNavigation(k.model.transform.position, out var nav) && nav == Location.NavMesh)
                     .Select(k => BarricadeManager.tryGetRegion(k.model.transform, out var x, out var y, out var plant, out var _) ? (k, x, y, plant) : (k, byte.MaxValue, byte.MaxValue, ushort.MaxValue)).ToList().ForEach(k => BarricadeManager.destroyBarricade(k.k, k.Item2, k.Item3, k.Item4)));
+        }
 
         player.Player.Player.quests.askSetRadioFrequency(CSteamID.Nil, 0);
         fPlayer.GamePlayer.OnGameLeft();
@@ -349,7 +351,7 @@ public class FFAGame : Game
 
             if (kPlayer.GamePlayer.SteamID == fPlayer.GamePlayer.SteamID)
             {
-                OnKill(kPlayer.GamePlayer, fPlayer.GamePlayer, cause == EDeathCause.WATER ? (ushort)0 : (ushort)1, Config.FFA.FileData.FFATeam.KillFeedHexCode, Config.FFA.FileData.FFATeam.KillFeedHexCode);
+                OnKill(kPlayer.GamePlayer, fPlayer.GamePlayer, cause == EDeathCause.WATER ? (ushort)0 : (ushort)1, Config.FFA.FileData.FFATeam.KillFeedHexCode, Config.FFA.FileData.FFATeam.KillFeedHexCode, false);
 
                 Logging.Debug("Player killed themselves, returning");
                 return;
@@ -537,7 +539,7 @@ public class FFAGame : Game
             kPlayer.GamePlayer.OnKilled(fPlayer.GamePlayer);
 
             if (equipmentUsed != 0)
-                OnKill(kPlayer.GamePlayer, fPlayer.GamePlayer, equipmentUsed, Config.FFA.FileData.FFATeam.KillFeedHexCode, Config.FFA.FileData.FFATeam.KillFeedHexCode);
+                OnKill(kPlayer.GamePlayer, fPlayer.GamePlayer, equipmentUsed, Config.FFA.FileData.FFATeam.KillFeedHexCode, Config.FFA.FileData.FFATeam.KillFeedHexCode, cause == EDeathCause.GUN && limb == ELimb.SKULL);
 
             foreach (var ply in Players)
                 UI.UpdateFFATopUI(ply, Players);

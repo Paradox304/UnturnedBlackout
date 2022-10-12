@@ -151,13 +151,14 @@ public class GameManager
     public IEnumerator DelayedJoin(UnturnedPlayer player)
     {
         var db = Plugin.Instance.DB;
-        Plugin.Instance.UI.SendLoadingUI(player, false, EGameType.NONE, null, "WAITING FOR DATA FROM OTHER SERVERS...");
-        for (var i = 1; i <= 30; i++)
+        Plugin.Instance.UI.SendLoadingUI(player, false, EGameType.NONE, null, "Syncing Data... (30 seconds)");
+        for (var i = 30; i >= 0; i--)
         {
             yield return new WaitForSeconds(1f);
-            Plugin.Instance.UI.UpdateLoadingBar(player, new string(UIManager.HAIRSPACE_SYMBOL_CHAR, i * DatabaseManager.LOADING_SPACES / 30), "WAITING FOR DATA FROM OTHER SERVERS...");
+            
+            Plugin.Instance.UI.UpdateLoadingText(player, $"Syncing Data... ({i} seconds)");
         }
-        
+
         _ = Task.Run(async () =>
         {
             var avatarURL = "";
@@ -174,7 +175,7 @@ public class GameManager
 
             if (string.IsNullOrEmpty(avatarURL))
                 avatarURL = "https://cdn.discordapp.com/attachments/458038940847439903/1026880604287012995/unknown.png";
-            
+
             try
             {
                 using HttpClient wc = new();
@@ -205,7 +206,7 @@ public class GameManager
             });
         });
     }
-    
+
     private void OnPlayerLeft(UnturnedPlayer player)
     {
         Plugin.Instance.UI.UnregisterUIHandler(player);
@@ -233,7 +234,7 @@ public class GameManager
         }
     }
 
-    private void OnMessageSent(SteamPlayer player, EChatMode mode, ref UnityEngine.Color chatted, ref bool isRich, string text, ref bool isVisible)
+    private void OnMessageSent(SteamPlayer player, EChatMode mode, ref Color chatted, ref bool isRich, string text, ref bool isVisible)
     {
         if (Players.TryGetValue(player.playerID.steamID, out var gPlayer))
         {
