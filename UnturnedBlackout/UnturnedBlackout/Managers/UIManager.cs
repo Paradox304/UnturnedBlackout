@@ -1642,6 +1642,9 @@ public class UIManager
             case "SERVER Quest BUTTON":
                 handler.ShowQuests();
                 return;
+            case "Discord BUTTON":
+                player.sendBrowserRequest("Our Discord:", "discord.gg/Uetk2UgMVs");
+                return;
             case "SERVER Achievements BUTTON":
                 handler.ShowAchievements();
                 return;
