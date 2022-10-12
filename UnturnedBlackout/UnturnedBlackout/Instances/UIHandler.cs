@@ -6069,11 +6069,9 @@ public class UIHandler
         switch (SelectedCaseBuyMethod)
         {
             case ECurrency.COINS:
-                PlayerData.Coins -= buyPrice;
                 DB.DecreasePlayerCoins(SteamID, buyPrice);
                 break;
             case ECurrency.SCRAP:
-                PlayerData.Scrap -= buyPrice;
                 DB.DecreasePlayerScrap(SteamID, buyPrice);
                 break;
             default:
