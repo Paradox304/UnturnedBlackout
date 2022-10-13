@@ -5860,7 +5860,6 @@ public class UIHandler
             SendRarity("SERVER Unbox Content Rolling", randomS.SkinRarity, i);
         }
 
-        @case.Amount--;
         DB.DecreasePlayerCase(SteamID, @case.Case.CaseID, 1);
 
         if (isDuplicate)
