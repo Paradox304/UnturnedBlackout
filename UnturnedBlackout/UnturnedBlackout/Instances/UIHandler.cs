@@ -734,9 +734,9 @@ public class UIHandler
         var index = 0;
         var page = 1;
         Dictionary<int, Case> cases = new();
-        foreach (var @case in DB.Cases)
+        foreach (var @case in DB.Cases.Values.Where(k => k.IsBuyable).OrderByDescending(k => k.CaseID))
         {
-            cases.Add(index, @case.Value);
+            cases.Add(index, @case);
             if (index == MAX_CASES_PER_STORE_PAGE)
             {
                 UnboxStorePages.Add(page, new(page, cases));
@@ -5976,8 +5976,8 @@ public class UIHandler
         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Unbox Buy IMAGE", @case.IconLink);
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Unbox Buy TEXT", @case.CaseName);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Unbox Buy Credits BUTTON", false);
-        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Unbox Buy Coins BUTTON", true);
-        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Unbox Buy Scrap BUTTON", true);
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Unbox Buy Coins BUTTON", @case.CoinPrice != 0);
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Unbox Buy Scrap BUTTON", @case.ScrapPrice != 0);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Unbox Buy Preview BUTTON", true);
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Preview Coins TEXT", $"{Utility.GetCurrencySymbol(ECurrency.COINS)} <color={(PlayerData.Coins >= @case.CoinPrice ? "#9CFF84" : "#FF6E6E")}>{@case.CoinPrice}</color>");
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Preview Scrap TEXT", $"{Utility.GetCurrencySymbol(ECurrency.SCRAP)} <color={(PlayerData.Scrap >= @case.ScrapPrice ? "#9CFF84" : "#FF6E6E")}>{@case.ScrapPrice}</color>");

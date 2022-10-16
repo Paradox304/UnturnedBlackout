@@ -4999,9 +4999,9 @@ public class DatabaseManager
         if (!data.CasesSearchByID.TryGetValue(caseID, out var playerCase))
             throw new ArgumentNullException(nameof(caseID), $"Case with id {caseID} doesn't exist in the database, while decreasing case");
 
-        if (playerCase.Amount > amount)
+        playerCase.Amount -= amount;
+        if (playerCase.Amount > 0)
         {
-            playerCase.Amount -= amount;
             AddQuery($"UPDATE `{PLAYERS_CASES}` SET `Amount` = `Amount` - {amount} WHERE `SteamID` = {steamID} AND `CaseID` = {caseID};");
         }
         else
