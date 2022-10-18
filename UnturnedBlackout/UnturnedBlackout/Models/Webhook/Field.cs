@@ -1,5 +1,8 @@
-﻿namespace UnturnedBlackout.Models.Webhook;
+﻿using System;
 
+namespace UnturnedBlackout.Models.Webhook;
+
+[Serializable]
 public class Field
 {
     public string Name { get; set; }

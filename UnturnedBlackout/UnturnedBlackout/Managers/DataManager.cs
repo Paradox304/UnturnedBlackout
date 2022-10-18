@@ -32,7 +32,7 @@ public class DataManager
     public void SaveJson()
     {
         using var writer = File.Open(Path, FileMode.Create);
-        JsonSerializer.Serialize(writer, Data, new JsonSerializerOptions() { WriteIndented = true });
+        JsonSerializer.Serialize(writer, Data, new JsonSerializerOptions { WriteIndented = true });
     }
 
     public void LoadJson()
@@ -43,7 +43,7 @@ public class DataManager
 
     public string ConvertLoadoutToJson(LoadoutData data)
     {
-        var serialized = JsonSerializer.Serialize(data, new JsonSerializerOptions() { WriteIndented = false });
+        var serialized = JsonSerializer.Serialize(data, new JsonSerializerOptions { WriteIndented = false });
         return serialized;
     }
 

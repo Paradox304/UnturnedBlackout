@@ -1,21 +1,24 @@
 ﻿using System.Net;
 using System.Text;
 using System.Text.Json;
+using UnturnedBlackout.Helpers;
 using UnturnedBlackout.Models.Webhook;
 
 namespace UnturnedBlackout.Managers;
 
 public static class DiscordManager
 {
-    public static void SendEmbed(Embed embed, string name, string webhookurl)
+    public static void SendEmbed(Embed embed, string name, string webhookurl, string avatarURL = "")
     {
-        Message webhookMessage = new(name, null, new[] { embed });
+        Logging.Debug($"Embed Sent: \n {JsonSerializer.Serialize(embed)}");
+        Message webhookMessage = new(name, avatarURL, new[] { embed });
         SendHook(webhookMessage, webhookurl);
     }
 
-    private static void SendHook(Message embed, string webhookUrl)
+    private static void SendHook(Message message, string webhookUrl)
     {
-        var bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(embed));
+        Logging.Debug($"Message Sent: \n {JsonSerializer.Serialize(message)}");
+        var bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(message));
         using WebClient webClient = new();
         var headers = webClient.Headers;
         headers.Set(HttpRequestHeader.ContentType, "application/json");

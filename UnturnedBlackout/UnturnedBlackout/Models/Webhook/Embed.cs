@@ -1,19 +1,22 @@
 ﻿// ReSharper disable UnusedAutoPropertyAccessor.Local
 
+using System;
+
 namespace UnturnedBlackout.Models.Webhook;
 
+[Serializable]
 public class Embed
 {
-    private string Title { get; set; }
-    private string Description { get; set; }
-    private string URL { get; set; }
-    private string Color { get; set; }
-    private string Timestamp { get; set; }
-    private Footer Footer { get; set; }
-    private Author Author { get; set; }
+    public string Title { get; set; }
+    public string Description { get; set; }
+    public string URL { get; set; }
+    public string Color { get; set; }
+    public string Timestamp { get; set; }
+    public Footer Footer { get; set; }
+    public Author Author { get; set; }
     public Field[] Fields { get; set; }
-    private string Thumbnail { get; set; }
-    private string Image { get; set; }
+    public string Thumbnail { get; set; }
+    public string Image { get; set; }
 
     public Embed(string title, string description, string url, string color, string timestamp, Footer footer, Author author, Field[] fields, string thumbnail, string image)
     {

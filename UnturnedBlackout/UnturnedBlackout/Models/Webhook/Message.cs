@@ -1,12 +1,15 @@
-﻿namespace UnturnedBlackout.Models.Webhook;
+﻿using System;
 
+namespace UnturnedBlackout.Models.Webhook;
+
+[Serializable]
 public class Message
 {
-    private string Username { get; set; }
+    public string Username { get; set; }
 
-    private string AvatarURL { get; set; }
+    public string AvatarURL { get; set; }
 
-    private Embed[] Embeds { get; set; }
+    public Embed[] Embeds { get; set; }
 
     public Message()
     {

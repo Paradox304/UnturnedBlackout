@@ -1,9 +1,12 @@
-﻿namespace UnturnedBlackout.Models.Webhook;
+﻿using System;
 
+namespace UnturnedBlackout.Models.Webhook;
+
+[Serializable]
 public class Footer
 {
-    private string Text { get; set; }
-    private string IconURL { get; set; }
+    public string Text { get; set; }
+    public string IconURL { get; set; }
 
     public Footer(string text, string iconURL)
     {

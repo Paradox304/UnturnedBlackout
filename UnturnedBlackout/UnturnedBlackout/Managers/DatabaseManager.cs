@@ -3289,8 +3289,8 @@ public class DatabaseManager
             if (ServerOptions.DailyLeaderboardWipe < DateTimeOffset.UtcNow)
             {
                 // Give all ranked rewards
-                Embed embed = new(null, $"Last Playtest Rankings ({PlayerDailyLeaderboard.Count} Players)", null, "15105570", DateTime.UtcNow.ToString("s"), new(Provider.serverName, Provider.configData.Browser.Icon), new(Provider.serverName, "", Provider.configData.Browser.Icon),
-                    new Field[] { new($"Ranked:", "", false), new("Percentile:", "", false) }, null, null);
+                Embed embed = new(null, $"Last Playtest Rankings ({PlayerDailyLeaderboard.Count} Players)", "", "15105570", DateTime.UtcNow.ToString("s"), new(Provider.serverName, Provider.configData.Browser.Icon), new(Provider.serverName, "", Provider.configData.Browser.Icon),
+                    new Field[] { new($"Ranked:", "", false), new("Percentile:", "", false) }, "", "");
 
                 foreach (var rankedReward in ServerOptions.DailyRankedRewards)
                 {
@@ -3361,8 +3361,8 @@ public class DatabaseManager
             if (ServerOptions.WeeklyLeaderboardWipe < DateTimeOffset.UtcNow)
             {
                 // Give all ranked rewards
-                Embed embed = new(null, $"Last Playtest Rankings ({PlayerWeeklyLeaderboard.Count} Players)", null, "15105570", DateTime.UtcNow.ToString("s"), new(Provider.serverName, Provider.configData.Browser.Icon), new(Provider.serverName, "", Provider.configData.Browser.Icon),
-                    new Field[] { new($"Ranked:", "", false), new("Percentile:", "", false) }, null, null);
+                Embed embed = new("", $"Last Playtest Rankings ({PlayerWeeklyLeaderboard.Count} Players)", "", "15105570", DateTime.UtcNow.ToString("s"), new(Provider.serverName, Provider.configData.Browser.Icon), new(Provider.serverName, "", Provider.configData.Browser.Icon),
+                    new Field[] { new($"Ranked:", "", false), new("Percentile:", "", false) }, "", "");
 
                 foreach (var rankedReward in ServerOptions.WeeklyRankedRewards)
                 {
