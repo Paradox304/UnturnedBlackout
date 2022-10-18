@@ -11,7 +11,7 @@ public class PlayerData
 {
     public CSteamID SteamID { get; set; }
     public string SteamName { get; set; }
-    public string AvatarLink { get; set; }
+    public List<string> AvatarLinks { get; set; }
     public string CountryCode { get; set; }
     public bool HideFlag { get; set; }
     public int XP { get; set; }
@@ -54,12 +54,12 @@ public class PlayerData
     public Dictionary<int, PlayerCase> CasesSearchByID { get; set; }
 
     public PlayerData(
-        CSteamID steamID, string steamName, string avatarLink, string countryCode, bool hideFlag, int xP, int level, int credits, int scrap, int coins, int kills, int headshotKills, int highestKillstreak, int highestMultiKills, int killsConfirmed, int killsDenied, int flagsCaptured, int flagsSaved,
+        CSteamID steamID, string steamName, List<string> avatarLinks, string countryCode, bool hideFlag, int xP, int level, int credits, int scrap, int coins, int kills, int headshotKills, int highestKillstreak, int highestMultiKills, int killsConfirmed, int killsDenied, int flagsCaptured, int flagsSaved,
         int areasTaken, int deaths, bool music, bool isMuted, DateTimeOffset muteExpiry, bool hasBattlepass, float xPBooster, float bPBooster, float gunXPBooster, bool hasPrime, DateTimeOffset primeExpiry, DateTimeOffset primeLastDailyReward, int volume, List<int> hotkeys)
     {
         SteamID = steamID;
         SteamName = steamName;
-        AvatarLink = avatarLink;
+        AvatarLinks = avatarLinks;
         CountryCode = countryCode;
         HideFlag = hideFlag;
         XP = xP;

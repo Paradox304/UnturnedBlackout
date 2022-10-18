@@ -377,8 +377,19 @@ public static class Utility
     {
         ELoadoutPage.PRIMARY_SKIN or ELoadoutPage.SECONDARY_SKIN => "Skin",
         ELoadoutPage.PERK1 or ELoadoutPage.PERK2 or ELoadoutPage.PERK3 => "Perk",
-        ELoadoutPage.ATTACHMENT_PRIMARY_BARREL or ELoadoutPage.ATTACHMENT_PRIMARY_CHARM or ELoadoutPage.ATTACHMENT_PRIMARY_GRIP or ELoadoutPage.ATTACHMENT_PRIMARY_MAGAZINE or ELoadoutPage.ATTACHMENT_PRIMARY_SIGHTS => page.ToString().Replace("ATTACHMENT_PRIMARY_", ""),
-        ELoadoutPage.ATTACHMENT_SECONDARY_SIGHTS or ELoadoutPage.ATTACHMENT_SECONDARY_BARREL or ELoadoutPage.ATTACHMENT_SECONDARY_CHARM or ELoadoutPage.ATTACHMENT_SECONDARY_MAGAZINE => page.ToString().Replace("ATTACHMENT_SECONDARY_", ""),
+        ELoadoutPage.ATTACHMENT_PRIMARY_GRIP => "Grip",
+        ELoadoutPage.ATTACHMENT_PRIMARY_CHARM or ELoadoutPage.ATTACHMENT_SECONDARY_CHARM => "Charm",
+        ELoadoutPage.ATTACHMENT_PRIMARY_BARREL or ELoadoutPage.ATTACHMENT_SECONDARY_BARREL => "Barrel",
+        ELoadoutPage.ATTACHMENT_PRIMARY_SIGHTS or ELoadoutPage.ATTACHMENT_SECONDARY_SIGHTS => "Sights",
+        ELoadoutPage.ATTACHMENT_PRIMARY_MAGAZINE or ELoadoutPage.ATTACHMENT_SECONDARY_MAGAZINE => "Magazine",
+        ELoadoutPage.CARD => "Card",
+        ELoadoutPage.GLOVE => "Gloves",
+        ELoadoutPage.KNIFE => "Melee",
+        ELoadoutPage.LETHAL => "Lethal",
+        ELoadoutPage.TACTICAL => "Tactical",
+        ELoadoutPage.PRIMARY => "Primary",
+        ELoadoutPage.SECONDARY => "Secondary",
+        ELoadoutPage.KILLSTREAK => "Killstreak",
         var _ => page.ToString()
     };
 
@@ -456,13 +467,13 @@ public static class Utility
 
     public static int ServerNameSort(Server a, Server b)
     {
-        var indexA = _serverDenominations.IndexOf(a.FriendlyIP.Substring(0, 2));
-        var indexB = _serverDenominations.IndexOf(b.FriendlyIP.Substring(0, 2));
+        var indexA = ServerDenominations.IndexOf(a.FriendlyIP.Substring(0, 2));
+        var indexB = ServerDenominations.IndexOf(b.FriendlyIP.Substring(0, 2));
 
         return indexA.CompareTo(indexB);
     }
 
-    private static List<string> _serverDenominations = new() { "eu", "na", "as" };
+    private static readonly List<string> ServerDenominations = new() { "eu", "na", "as" };
     
     public static string GetRarityColor(ERarity rarity) => rarity switch
     {
@@ -479,6 +490,20 @@ public static class Utility
         var _ => throw new ArgumentOutOfRangeException(nameof(rarity), rarity, "Rarity is not as expected")
     };
 
+    public static string ToFriendlyName(this ERarity rarity) => rarity switch
+    {
+        ERarity.COMMON => "Common",
+        ERarity.UNCOMMON => "Uncommon",
+        ERarity.RARE => "Rare",
+        ERarity.EPIC => "Epic",
+        ERarity.LEGENDARY => "Legendary",
+        ERarity.MYTHICAL => "Mythical",
+        ERarity.YELLOW => "Special",
+        ERarity.ORANGE => "Special",
+        ERarity.CYAN => "Special",
+        ERarity.GREEN => "Special",
+        var _ => throw new ArgumentOutOfRangeException(nameof(rarity), rarity, "Rarity is not as expected")
+    };
     public static string GetCurrencySymbol(ECurrency currency) => currency switch
     {
         ECurrency.COINS => "",

@@ -17,6 +17,10 @@ using UnturnedBlackout.Helpers;
 using UnturnedBlackout.Managers;
 using UnturnedBlackout.Models.Global;
 using UnturnedBlackout.Models.UI;
+using UnturnedBlackout.Models.Webhook;
+using Enum = System.Enum;
+using Field = UnturnedBlackout.Models.Webhook.Field;
+using Logger = Rocket.Core.Logging.Logger;
 
 namespace UnturnedBlackout.Instances;
 
@@ -38,6 +42,7 @@ public class UIHandler
 
     private const int MINIMUM_LOADOUT_PAGE_ATTACHMENT_PRIMARY = 4;
     private const int MAXIMUM_LOADOUT_PAGE_ATTACHMENT_PRIMARY = 8;
+    public const string CASE_UNBOXING_WEBHOOK_URL = "https://discord.com/api/webhooks/1031896101038608454/h1Fk3GGrt2DUrv3NWD3VrvBJkJbGSd-ZWQ0ZrAPoxVygxWdjgYkemYwNYZmRm-AIO1An";
 
     private DatabaseManager DB => Plugin.Instance.DB;
     public CSteamID SteamID { get; set; }
@@ -774,7 +779,7 @@ public class UIHandler
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"Volume {PlayerData.Volume} Enabler", true);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Options Audio Music Toggler", PlayerData.Music);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Options Audio Flag Toggler", PlayerData.HideFlag);
-        EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Player Icon", PlayerData.AvatarLink);
+        EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Player Icon", PlayerData.AvatarLinks[2]);
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Player Name", (PlayerData.HasPrime ? UIManager.PRIME_SYMBOL : "") + PlayerData.SteamName);
 
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Version TEXT", Plugin.Instance.Translate("Version").ToRich());
@@ -5104,29 +5109,29 @@ public class UIHandler
         }
     }
 
-    public List<LeaderboardData> GetLeaderboardData() => LeaderboardPage switch
+    private List<LeaderboardData> GetLeaderboardData() => LeaderboardPage switch
     {
         ELeaderboardPage.DAILY => DB.PlayerDailyLeaderboard,
         ELeaderboardPage.WEEKLY => DB.PlayerWeeklyLeaderboard,
         ELeaderboardPage.SEASONAL => DB.PlayerSeasonalLeaderboard,
         ELeaderboardPage.ALL => LeaderboardTab == ELeaderboardTab.KILL ? DB.PlayerAllTimeKill : DB.PlayerAllTimeLevel,
-        _ => throw new ArgumentOutOfRangeException("LeaderboardPage is not as expected")
+        var _ => throw new ArgumentOutOfRangeException("LeaderboardPage is not as expected")
     };
 
-    public Dictionary<CSteamID, LeaderboardData> GetLeaderboardDataLookup() => LeaderboardPage switch
+    private Dictionary<CSteamID, LeaderboardData> GetLeaderboardDataLookup() => LeaderboardPage switch
     {
         ELeaderboardPage.DAILY => DB.PlayerDailyLeaderboardLookup,
         ELeaderboardPage.WEEKLY => DB.PlayerWeeklyLeaderboardLookup,
         ELeaderboardPage.SEASONAL => DB.PlayerSeasonalLeaderboardLookup,
         ELeaderboardPage.ALL => DB.PlayerAllTimeLeaderboardLookup,
-        _ => throw new ArgumentOutOfRangeException("LeaderboardPage is not as expected")
+        var _ => throw new ArgumentOutOfRangeException("LeaderboardPage is not as expected")
     };
 
-    public string GetLeaderboardRefreshTime() => LeaderboardPage switch
+    private string GetLeaderboardRefreshTime() => LeaderboardPage switch
     {
         ELeaderboardPage.DAILY => (DB.ServerOptions.DailyLeaderboardWipe.UtcDateTime - DateTime.UtcNow).ToString(@"hh\:mm\:ss"),
         ELeaderboardPage.WEEKLY => (DB.ServerOptions.WeeklyLeaderboardWipe.UtcDateTime - DateTime.UtcNow).ToString(@"dd\:hh\:mm\:ss"),
-        _ => "00:00:00"
+        var _ => "00:00:00"
     };
 
     public void ShowQuests()
@@ -5568,14 +5573,14 @@ public class UIHandler
         }
 
         var reward = isTop ? tier.FreeReward : tier.PremiumReward;
-        if (reward != null && TryGetBattlepassRewardInfo(reward, out _, out var rewardImage, out _))
-        {
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass IMAGE", reward.RewardType != ERewardType.CARD);
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass Card IMAGE", reward.RewardType == ERewardType.CARD);
-            EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass IMAGE", rewardImage);
-            EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass Card IMAGE", rewardImage);
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass Claim BUTTON", true);
-        }
+        if (reward == null || !TryGetBattlepassRewardInfo(reward, out _, out var rewardImage, out _))
+            return;
+
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass IMAGE", reward.RewardType != ERewardType.CARD);
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass Card IMAGE", reward.RewardType == ERewardType.CARD);
+        EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass IMAGE", rewardImage);
+        EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass Card IMAGE", rewardImage);
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass Claim BUTTON", true);
     }
 
     public bool TryGetBattlepassRewardInfo(Reward reward, out string rewardName, out string rewardImage, out ERarity rewardRarity)
@@ -5807,6 +5812,37 @@ public class UIHandler
             yield break;
         }
 
+        var embed = new Embed(null, $"Case Unboxed ({@case.Case.CaseName})", "", "5763719", DateTime.UtcNow.ToString("s"), new($"[{rewardRarity.ToFriendlyName()}] {rewardName}", rewardImage), new(PlayerData.SteamName, $"http://steamcommunity.com/profiles/{PlayerData.SteamID}", PlayerData.AvatarLinks[0]), Array.Empty<Field>(), null, null);
+
+        Task.Run(() =>
+        {
+            try
+            {
+                DiscordManager.SendEmbed(embed, "Unboxing", CASE_UNBOXING_WEBHOOK_URL);
+            }
+            catch (Exception ex)
+            {
+                Logger.Log("Error sending embed");
+                Logger.Log(ex);
+            }
+        });
+        
+        switch (rewardRarity)
+        {
+            case ERarity.COMMON or ERarity.UNCOMMON or ERarity.RARE:
+                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Crate Result Common Uncommon Rare", true);
+                break;
+            case ERarity.EPIC:
+                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Crate Result Epic", true);
+                break;
+            case ERarity.LEGENDARY:
+                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Crate Result Legendary", true);
+                break;
+            case ERarity.MYTHICAL or ERarity.YELLOW or ERarity.CYAN or ERarity.GREEN:
+                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Crate Result Mythical Special", true);
+                break;
+        }
+        
         var poolSize = 0;
         foreach (var weight in @case.Case.Weights)
             poolSize += weight.Item2;
@@ -5867,6 +5903,7 @@ public class UIHandler
         else
             Plugin.Instance.Reward.GiveRewards(SteamID, new() { reward });
 
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Description TITLE", $"Unboxing {@case.Case.CaseName}");
         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Result IMAGE", rewardImage);
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Result TEXT", $"<color={Utility.GetRarityColor(rewardRarity)}>{rewardName}</color>");
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Description TEXT", rewardDesc);
@@ -6004,7 +6041,7 @@ public class UIHandler
             {
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content BUTTON {i}", true);
                 EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content IMAGE {i}", Config.Icons.FileData.GloveUnboxingIconLink);
-                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Name TEXT {i}", "Glove");
+                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Name TEXT {i}", "Gloves");
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Extra TEXT {i}", " ");
                 SendRarity("SERVER Unbox Content", ERarity.YELLOW, i);
                 continue;
@@ -6014,7 +6051,7 @@ public class UIHandler
             {
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content BUTTON {i}", true);
                 EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content IMAGE {i}", Config.Icons.FileData.KnifeUnboxingIconLink);
-                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Name TEXT {i}", "Knife");
+                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Name TEXT {i}", "Melee");
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Extra TEXT {i}", " ");
                 SendRarity("SERVER Unbox Content", ERarity.YELLOW, i);
                 continue;
@@ -6031,7 +6068,7 @@ public class UIHandler
             EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content IMAGE {i}", skin.IconLink);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Name TEXT {i}", $"{skin.Gun.GunName} | {skin.SkinName}");
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Extra TEXT {i}", " ");
-
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Description TITLE", "Unbox Case");
             SendRarity("SERVER Unbox Content", skin.SkinRarity, i);
         }
     }
@@ -6151,7 +6188,7 @@ public class UIHandler
         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Level IMAGE", DB.Levels.TryGetValue(summary.Player.Data.Level, out var level) ? level.IconLinkLarge : "");
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Level TEXT", summary.Player.Data.Level.ToString());
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Player TEXT", Player.CharacterName);
-        EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Player IMAGE", summary.Player.Data.AvatarLink);
+        EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Player IMAGE", summary.Player.Data.AvatarLinks[2]);
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Kills TEXT", summary.Kills.ToString());
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Deaths TEXT", summary.Deaths.ToString());
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary KD TEXT", string.Format("{0:n}", summary.KD));

@@ -165,7 +165,8 @@ public class GameManager
             var countryCode = "EU";
             try
             {
-                avatarURL = player.SteamProfile.AvatarFull.ToString();
+                var profile = player.SteamProfile;
+                avatarURL = $"{profile.AvatarIcon},{profile.AvatarMedium},{profile.AvatarFull}";
             }
             catch (Exception ex)
             {
@@ -174,7 +175,7 @@ public class GameManager
             }
 
             if (string.IsNullOrEmpty(avatarURL))
-                avatarURL = "https://cdn.discordapp.com/attachments/458038940847439903/1026880604287012995/unknown.png";
+                avatarURL = "https://cdn.discordapp.com/attachments/458038940847439903/1026880604287012995/unknown.png,https://cdn.discordapp.com/attachments/458038940847439903/1026880604287012995/unknown.png,https://cdn.discordapp.com/attachments/458038940847439903/1026880604287012995/unknown.png";
 
             try
             {

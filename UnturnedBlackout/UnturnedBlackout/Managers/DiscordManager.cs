@@ -13,7 +13,7 @@ public static class DiscordManager
         SendHook(webhookMessage, webhookurl);
     }
 
-    public static void SendHook(Message embed, string webhookUrl)
+    private static void SendHook(Message embed, string webhookUrl)
     {
         var bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(embed));
         using WebClient webClient = new();
