@@ -152,11 +152,14 @@ public class GameManager
     {
         var db = Plugin.Instance.DB;
         Plugin.Instance.UI.SendLoadingUI(player, false, EGameType.NONE, null, "Syncing Data... (30 seconds)");
-        for (var i = 30; i >= 0; i--)
+        if (!player.IsAdmin)
         {
-            yield return new WaitForSeconds(1f);
+            for (var i = 30; i >= 0; i--)
+            {
+                yield return new WaitForSeconds(1f);
             
-            Plugin.Instance.UI.UpdateLoadingText(player, $"Syncing Data... ({i} seconds)");
+                Plugin.Instance.UI.UpdateLoadingText(player, $"Syncing Data... ({i} seconds)");
+            }
         }
 
         _ = Task.Run(async () =>
