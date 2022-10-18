@@ -1,15 +1,16 @@
 ﻿using System;
+// ReSharper disable InconsistentNaming
 
 namespace UnturnedBlackout.Models.Webhook;
 
 [Serializable]
 public class Message
 {
-    public string Username { get; set; }
+    public string username { get; set; }
 
-    public string AvatarURL { get; set; }
+    public string avatar_url { get; set; }
 
-    public Embed[] Embeds { get; set; }
+    public Embed[] embeds { get; set; }
 
     public Message()
     {
@@ -17,8 +18,8 @@ public class Message
 
     public Message(string username, string avatarURL, Embed[] embeds)
     {
-        Username = username;
-        AvatarURL = avatarURL;
-        Embeds = embeds;
+        this.username = username;
+        avatar_url = avatarURL;
+        this.embeds = embeds;
     }
 }

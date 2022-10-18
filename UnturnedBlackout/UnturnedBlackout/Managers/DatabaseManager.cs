@@ -3299,9 +3299,9 @@ public class DatabaseManager
 
                     var leaderboardData = PlayerDailyLeaderboard[rankedReward.Key];
                     bulkRewards.Add(new(leaderboardData.SteamID, rankedReward.Value));
-                    embed.Fields[0].Value += $"{Utility.GetDiscordEmoji(rankedReward.Key + 1)} [{leaderboardData.SteamName}](https://steamcommunity.com/profiles/{leaderboardData.SteamID}/) | {leaderboardData.Kills + leaderboardData.HeadshotKills} Kills \n";
+                    embed.fields[0].value += $"{Utility.GetDiscordEmoji(rankedReward.Key + 1)} [{leaderboardData.SteamName}](https://steamcommunity.com/profiles/{leaderboardData.SteamID}/) | {leaderboardData.Kills + leaderboardData.HeadshotKills} Kills \n";
                     if (rankedReward.Key == 2)
-                        embed.Fields[0].Value += $"\n";
+                        embed.fields[0].value += $"\n";
                 }
 
                 // Give all percentile rewards
@@ -3319,7 +3319,7 @@ public class DatabaseManager
                         bulkRewards.Add(new(leaderboardData.SteamID, percentileReward.Rewards));
                     }
 
-                    embed.Fields[1].Value += $"**Top {percentileReward.UpperPercentile}%:** {upperIndex - lowerIndex} players \n";
+                    embed.fields[1].value += $"**Top {percentileReward.UpperPercentile}%:** {upperIndex - lowerIndex} players \n";
                 }
 
                 try
@@ -3371,9 +3371,9 @@ public class DatabaseManager
 
                     var leaderboardData = PlayerWeeklyLeaderboard[rankedReward.Key];
                     bulkRewards.Add(new(leaderboardData.SteamID, rankedReward.Value));
-                    embed.Fields[0].Value += $"{Utility.GetDiscordEmoji(rankedReward.Key + 1)} [{leaderboardData.SteamName}](https://steamcommunity.com/profiles/{leaderboardData.SteamID}/) | {leaderboardData.Kills + leaderboardData.HeadshotKills} Kills \n";
+                    embed.fields[0].value += $"{Utility.GetDiscordEmoji(rankedReward.Key + 1)} [{leaderboardData.SteamName}](https://steamcommunity.com/profiles/{leaderboardData.SteamID}/) | {leaderboardData.Kills + leaderboardData.HeadshotKills} Kills \n";
                     if (rankedReward.Key == 2)
-                        embed.Fields[0].Value += $"\n";
+                        embed.fields[0].value += $"\n";
                 }
 
                 // Give all percentile rewards
@@ -3391,7 +3391,7 @@ public class DatabaseManager
                         bulkRewards.Add(new(leaderboardData.SteamID, percentileReward.Rewards));
                     }
 
-                    embed.Fields[1].Value += $"**Top {percentileReward.UpperPercentile}%:** {upperIndex - lowerIndex} players \n";
+                    embed.fields[1].value += $"**Top {percentileReward.UpperPercentile}%:** {upperIndex - lowerIndex} players \n";
                 }
 
                 try
@@ -3441,9 +3441,9 @@ public class DatabaseManager
 
                     var leaderboardData = PlayerSeasonalLeaderboard[rankedReward.Key];
                     bulkRewards.Add(new(leaderboardData.SteamID, rankedReward.Value));
-                    embed.Fields[0].Value += $"{Utility.GetDiscordEmoji(rankedReward.Key + 1)} [{leaderboardData.SteamName}](https://steamcommunity.com/profiles/{leaderboardData.SteamID}/) | {leaderboardData.Kills + leaderboardData.HeadshotKills} Kills \n";
+                    embed.fields[0].value += $"{Utility.GetDiscordEmoji(rankedReward.Key + 1)} [{leaderboardData.SteamName}](https://steamcommunity.com/profiles/{leaderboardData.SteamID}/) | {leaderboardData.Kills + leaderboardData.HeadshotKills} Kills \n";
                     if (rankedReward.Key == 2)
-                        embed.Fields[0].Value += $"\n";
+                        embed.fields[0].value += $"\n";
                 }
 
                 // Give all percentile rewards
@@ -3461,7 +3461,7 @@ public class DatabaseManager
                         bulkRewards.Add(new(leaderboardData.SteamID, percentileReward.Rewards));
                     }
 
-                    embed.Fields[1].Value += $"**Top {percentileReward.UpperPercentile}%:** {upperIndex - lowerIndex} players \n";
+                    embed.fields[1].value += $"**Top {percentileReward.UpperPercentile}%:** {upperIndex - lowerIndex} players \n";
                 }
 
                 try
