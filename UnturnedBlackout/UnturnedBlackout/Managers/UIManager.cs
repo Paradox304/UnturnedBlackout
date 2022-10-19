@@ -1514,9 +1514,11 @@ public class UIManager
                 return;
             case EUIPage.GUN_SKIN:
                 handler.BuildGunSkinPages();
+                handler.BuildUnboxingInventoryPages();
                 return;
             case EUIPage.KNIFE:
                 handler.BuildKnifePages();
+                handler.BuildUnboxingInventoryPages();
                 return;
             case EUIPage.TACTICAL:
                 handler.BuildTacticalPages();
@@ -1529,6 +1531,7 @@ public class UIManager
                 return;
             case EUIPage.GLOVE:
                 handler.BuildGlovePages();
+                handler.BuildUnboxingInventoryPages();
                 return;
             case EUIPage.KILLSTREAK:
                 handler.BuildKillstreakPages();
@@ -1537,7 +1540,7 @@ public class UIManager
                 handler.BuildAchievementPages();
                 return;
             case EUIPage.CASE:
-                handler.BuildUnboxingInventoryPages();
+                handler.BuildUnboxingCasesPages();
                 return;
             default:
                 throw new ArgumentOutOfRangeException("page", "EUIPage is not as expected");
@@ -1652,7 +1655,7 @@ public class UIManager
                 player.sendBrowserRequest("Our Store:", "https://store.unturnedblackout.com/");
                 return;
             case "SERVER Unbox BUTTON":
-                handler.ShowUnboxingPage(EUnboxingPage.INVENTORY);
+                handler.ShowUnboxingPage(EUnboxingPage.CASES);
                 return;
             case "SERVER Battlepass BUTTON":
                 _ = Plugin.Instance.StartCoroutine(handler.SetupBattlepass());
@@ -1869,14 +1872,14 @@ public class UIManager
             case "SERVER Battlepass Buy Pass BUTTON":
                 player.sendBrowserRequest("Buy premium battlepass here:", "https://store.unturnedblackout.com/category/battlepass");
                 return;
-            case "SERVER Unbox Inventory BUTTON":
-                handler.ShowUnboxingPage(EUnboxingPage.INVENTORY);
+            case "SERVER Unbox Cases BUTTON":
+                handler.ShowUnboxingPage(EUnboxingPage.CASES);
                 return;
-            case "SERVER Unbox Inventory Previous BUTTON":
-                handler.BackwardUnboxingInventoryPage();
+            case "SERVER Unbox Cases Previous BUTTON":
+                handler.BackwardUnboxingCasePage();
                 return;
-            case "SERVER Unbox Inventory Next BUTTON":
-                handler.ForwardUnboxingInventoryPage();
+            case "SERVER Unbox Cases Next BUTTON":
+                handler.ForwardUnboxingCasePage();
                 return;
             case "SERVER Unbox BuyCrate BUTTON":
                 handler.ShowUnboxingPage(EUnboxingPage.BUY);
@@ -1902,7 +1905,7 @@ public class UIManager
             case "SERVER Unbox Content Back BUTTON":
                 if (handler.UnboxingPage == EUnboxingPage.OPEN)
                 {
-                    handler.ShowUnboxingPage(EUnboxingPage.INVENTORY);
+                    handler.ShowUnboxingPage(EUnboxingPage.CASES);
                     if (handler.CrateUnboxer != null)
                         Plugin.Instance.StopCoroutine(handler.CrateUnboxer);
                 }
@@ -1913,6 +1916,15 @@ public class UIManager
                     handler.CrateUnboxer = Plugin.Instance.StartCoroutine(handler.UnboxCase());
 
                 return;
+            case "SERVER Unbox Inventory BUTTON":
+                handler.ShowUnboxingInventoryPage();
+                break;
+            case "SERVER Inventory Forward BUTTON":
+                handler.ForwardUnboxingInventoryPage();
+                break;
+            case "SERVER Inventory Forward BUTTON":
+                handler.BackwardUnboxingInventoryPage();
+                break;
             case "SERVER Summary Close BUTTON":
                 if (handler.MatchEndSummaryShower != null)
                     Plugin.Instance.StopCoroutine(handler.MatchEndSummaryShower);
@@ -1980,6 +1992,9 @@ public class UIManager
                 return;
             case "SERVER Leaderboards Search INPUTFIELD":
                 handler.SearchLeaderboardPlayer(text);
+                return;
+            case "SERVER Inventory Search INPUTFIELD":
+                handler.SearchUnboxingInventoryPage(text);
                 return;
             case "Tactical Hotkey INPUT":
                 handler.SetHotkey(EHotkey.TACTICAL, text);

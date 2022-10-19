@@ -15,8 +15,9 @@ public class Card
     public int Coins { get; set; }
     public int LevelRequirement { get; set; }
     public string AuthorCredits { get; set; }
+    public int UnboxedAmount { get; set; }
 
-    public Card(int cardID, string cardName, string cardDesc, ERarity cardRarity, string iconLink, string cardLink, int scrapAmount, int buyPrice, int coins, int levelRequirement, string authorCredits)
+    public Card(int cardID, string cardName, string cardDesc, ERarity cardRarity, string iconLink, string cardLink, int scrapAmount, int buyPrice, int coins, int levelRequirement, string authorCredits, int unboxedAmount)
     {
         CardID = cardID;
         CardName = cardName;
@@ -29,6 +30,7 @@ public class Card
         Coins = coins;
         LevelRequirement = levelRequirement;
         AuthorCredits = authorCredits;
+        UnboxedAmount = unboxedAmount;
     }
 
     public int GetCoins(int currentLevel)

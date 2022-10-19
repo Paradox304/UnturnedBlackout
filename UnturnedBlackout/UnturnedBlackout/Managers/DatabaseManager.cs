@@ -272,7 +272,7 @@ public class DatabaseManager
                 conn).ExecuteScalarAsync();
 
             _ = await new MySqlCommand(
-                $"CREATE TABLE IF NOT EXISTS `{GUNS_CHARMS}` ( `CharmID` SMALLINT UNSIGNED NOT NULL , `CharmName` VARCHAR(255) NOT NULL , `CharmDesc` TEXT NOT NULL , `CharmRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `IconLink` TEXT NOT NULL , `BuyPrice` INT NOT NULL , `Coins` INT NOT NULL , `ScrapAmount` INT  NOT NULL , `LevelRequirement` INT NOT NULL , `AuthorCredits` TEXT NOT NULL , PRIMARY KEY (`CharmID`));",
+                $"CREATE TABLE IF NOT EXISTS `{GUNS_CHARMS}` ( `CharmID` SMALLINT UNSIGNED NOT NULL , `CharmName` VARCHAR(255) NOT NULL , `CharmDesc` TEXT NOT NULL , `CharmRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `IconLink` TEXT NOT NULL , `BuyPrice` INT NOT NULL , `Coins` INT NOT NULL , `ScrapAmount` INT  NOT NULL , `LevelRequirement` INT NOT NULL , `AuthorCredits` TEXT NOT NULL , `UnboxedAmount` INT NOT NULL , PRIMARY KEY (`CharmID`));",
                 conn).ExecuteScalarAsync();
 
             _ = await new MySqlCommand(
@@ -292,7 +292,7 @@ public class DatabaseManager
                 conn).ExecuteScalarAsync();
 
             _ = await new MySqlCommand(
-                $"CREATE TABLE IF NOT EXISTS `{CARDS}` ( `CardID` INT NOT NULL , `CardName` VARCHAR(255) NOT NULL , `CardDesc` TEXT NOT NULL , `CardRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `IconLink` TEXT NOT NULL , `CardLink` TEXT NOT NULL , `ScrapAmount` INT NOT NULL , `BuyPrice` INT NOT NULL , `Coins` INT NOT NULL , `LevelRequirement` INT NOT NULL , `AuthorCredits` TEXT NOT NULL , PRIMARY KEY (`CardID`));",
+                $"CREATE TABLE IF NOT EXISTS `{CARDS}` ( `CardID` INT NOT NULL , `CardName` VARCHAR(255) NOT NULL , `CardDesc` TEXT NOT NULL , `CardRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `IconLink` TEXT NOT NULL , `CardLink` TEXT NOT NULL , `ScrapAmount` INT NOT NULL , `BuyPrice` INT NOT NULL , `Coins` INT NOT NULL , `LevelRequirement` INT NOT NULL , `AuthorCredits` TEXT NOT NULL , `UnboxedAmount` INT NOT NULL , PRIMARY KEY (`CardID`));",
                 conn).ExecuteScalarAsync();
 
             _ = await new MySqlCommand(
@@ -724,13 +724,16 @@ public class DatabaseManager
 
                     var authorCredits = rdr[9].ToString();
 
+                    if (!int.TryParse(rdr[10].ToString(), out var unboxedAmount))
+                        continue;
+                    
                     if (gunCharms.ContainsKey(charmID))
                     {
                         Logging.Debug($"Found a duplicate charm with id {charmID} registered");
                         continue;
                     }
 
-                    gunCharms.Add(charmID, new(charmID, charmName, charmDesc, rarity, iconLink, buyPrice, coins, scrapAmount, levelRequirement, authorCredits));
+                    gunCharms.Add(charmID, new(charmID, charmName, charmDesc, rarity, iconLink, buyPrice, coins, scrapAmount, levelRequirement, authorCredits, unboxedAmount));
                 }
 
                 Logging.Debug($"Successfully read {gunCharms.Count} gun charms");
@@ -1119,7 +1122,10 @@ public class DatabaseManager
 
                     var authorCredits = rdr[10].ToString();
 
-                    Card card = new(cardID, cardName, cardDesc, rarity, iconLink, cardLink, scrapAmount, buyPrice, coins, levelRequirement, authorCredits);
+                    if (!int.TryParse(rdr[11].ToString(), out var unboxedAmount))
+                        continue;
+                    
+                    Card card = new(cardID, cardName, cardDesc, rarity, iconLink, cardLink, scrapAmount, buyPrice, coins, levelRequirement, authorCredits, unboxedAmount);
                     if (!cards.ContainsKey(cardID))
                         cards.Add(cardID, card);
                     else
@@ -3707,6 +3713,62 @@ public class DatabaseManager
                 rdr.Close();
             }
 
+            Logging.Debug("Reloading unboxed amount for cards");
+            rdr = new MySqlCommand($"SELECT `CardID`,`UnboxedAmount` FROM `{CARDS}`;", conn).ExecuteReader();
+            try
+            {
+                while (rdr.Read())
+                {
+                    if (!int.TryParse(rdr[0].ToString(), out var cardID))
+                        continue;
+
+                    if (!int.TryParse(rdr[1].ToString(), out var unboxedAmount))
+                        continue;
+
+                    if (!Cards.TryGetValue(cardID, out var card))
+                        continue;
+
+                    card.UnboxedAmount = unboxedAmount;
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"Error reading unboxed amounts for cards");
+                Logger.Log(ex);
+            }
+            finally
+            {
+                rdr.Close();
+            }
+            
+            Logging.Debug("Reloading unboxed amount for gun charms");
+            rdr = new MySqlCommand($"SELECT `GunCharmID`,`UnboxedAmount` FROM `{GUNS_CHARMS}`;", conn).ExecuteReader();
+            try
+            {
+                while (rdr.Read())
+                {
+                    if (!ushort.TryParse(rdr[0].ToString(), out var gunCharmID))
+                        continue;
+
+                    if (!int.TryParse(rdr[1].ToString(), out var unboxedAmount))
+                        continue;
+
+                    if (!GunCharms.TryGetValue(gunCharmID, out var gunCharm))
+                        continue;
+
+                    gunCharm.UnboxedAmount = unboxedAmount;
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"Error reading unboxed amounts for gun charms");
+                Logger.Log(ex);
+            }
+            finally
+            {
+                rdr.Close();
+            }
+            
             Logging.Debug($"Querying servers to get their info");
             foreach (var server in Servers)
             {
@@ -4330,6 +4392,7 @@ public class DatabaseManager
 
         var skinsString = loadout.GunSkinsSearchByID.Keys.ToList().GetStringFromIntList();
         AddQuery($"UPDATE `{PLAYERS_GUNS_SKINS}` SET `SkinIDs` = '{skinsString}' WHERE `SteamID` = {steamID};");
+        IncreasePlayerGunSkinUnboxedAmount(id, 1);
         Plugin.Instance.UI.OnUIUpdated(steamID, EUIPage.GUN_SKIN);
     }
 
@@ -4360,6 +4423,7 @@ public class DatabaseManager
         }
 
         loadout.GunCharms.Add(gunCharmID, new(charm, true, false));
+        IncreasePlayerGunSkinUnboxedAmount(gunCharmID, 1);
         Plugin.Instance.UI.OnUIUpdated(steamID, EUIPage.GUN_CHARM);
     }
 
@@ -4392,6 +4456,9 @@ public class DatabaseManager
             return false;
 
         gunCharm.IsBought = isBought;
+        if (isBought)
+            IncreasePlayerGunSkinUnboxedAmount(gunCharmID, 1);
+        
         return true;
     }
 
@@ -4411,6 +4478,15 @@ public class DatabaseManager
         return true;
     }
 
+    public void IncreasePlayerGunCharmUnboxedAmount(ushort id, int amount)
+    {
+        if (!GunCharms.TryGetValue(id, out var charm))
+            throw new ArgumentNullException(nameof(id), $"Charm with id {id} is not found");
+
+        AddQuery($"UPDATE `{GUNS_CHARMS}` SET `UnboxedAmount` = `UnboxedAmount` + {amount} WHERE `ID` = {id};");
+        charm.UnboxedAmount += amount;
+    }
+    
     // Player Knives
 
     public void AddPlayerKnifeBought(CSteamID steamID, ushort knifeID)
@@ -4429,6 +4505,7 @@ public class DatabaseManager
         }
 
         loadout.Knives.Add(knifeID, new(knife, 0, true, false));
+        IncreasePlayerKnifeUnboxedAmount(knifeID, 1);
         Plugin.Instance.UI.OnUIUpdated(steamID, EUIPage.KNIFE);
     }
 
@@ -4460,6 +4537,9 @@ public class DatabaseManager
             return false;
 
         playerKnife.IsBought = isBought;
+        if (isBought)
+            IncreasePlayerKnifeUnboxedAmount(knifeID, 1);
+        
         return true;
     }
 
@@ -4695,6 +4775,7 @@ public class DatabaseManager
         }
 
         loadout.Cards.Add(cardID, new(card, true, false));
+        IncreasePlayerCardUnboxedAmount(cardID, 1);
         Plugin.Instance.UI.OnUIUpdated(steamID, EUIPage.CARD);
     }
 
@@ -4723,6 +4804,9 @@ public class DatabaseManager
             return false;
 
         playerCard.IsBought = isBought;
+        if (isBought)
+            IncreasePlayerCardUnboxedAmount(cardID, 1);
+        
         return true;
     }
 
@@ -4740,6 +4824,15 @@ public class DatabaseManager
 
         playerCard.IsUnlocked = isUnlocked;
         return true;
+    }
+
+    public void IncreasePlayerCardUnboxedAmount(int id, int amount)
+    {
+        if (!Cards.TryGetValue(id, out var card))
+            throw new ArgumentNullException(nameof(id), $"Card with id {id} doesn't exist in the database, while increasing unboxed amount");
+
+        AddQuery($"UPDATE `{CARDS}` SET `UnboxedAmount` = `UnboxedAmount` + {amount} WHERE `ID` = {id};");
+        card.UnboxedAmount += amount;
     }
 
     // Player Gloves
@@ -4760,6 +4853,7 @@ public class DatabaseManager
         }
 
         loadout.Gloves.Add(gloveID, new(glove, true, false));
+        IncreasePlayerGloveUnboxedAmount(gloveID, 1);
         Plugin.Instance.UI.OnUIUpdated(steamID, EUIPage.GLOVE);
     }
 
@@ -4776,6 +4870,9 @@ public class DatabaseManager
             return false;
 
         playerGlove.IsBought = isBought;
+        if (isBought)
+            IncreasePlayerGloveUnboxedAmount(gloveID, 1);
+        
         return true;
     }
 

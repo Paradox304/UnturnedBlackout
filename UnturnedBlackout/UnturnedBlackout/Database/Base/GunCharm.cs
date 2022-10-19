@@ -14,8 +14,9 @@ public class GunCharm
     public int ScrapAmount { get; set; }
     public int LevelRequirement { get; set; }
     public string AuthorCredits { get; set; }
+    public int UnboxedAmount { get; set; }
 
-    public GunCharm(ushort charmID, string charmName, string charmDesc, ERarity charmRarity, string iconLink, int buyPrice, int coins, int scrapAmount, int levelRequirement, string authorCredits)
+    public GunCharm(ushort charmID, string charmName, string charmDesc, ERarity charmRarity, string iconLink, int buyPrice, int coins, int scrapAmount, int levelRequirement, string authorCredits, int unboxedAmount)
     {
         CharmID = charmID;
         CharmName = charmName;
@@ -27,6 +28,7 @@ public class GunCharm
         ScrapAmount = scrapAmount;
         LevelRequirement = levelRequirement;
         AuthorCredits = authorCredits;
+        UnboxedAmount = unboxedAmount;
     }
 
     public int GetCoins(int currentLevel)

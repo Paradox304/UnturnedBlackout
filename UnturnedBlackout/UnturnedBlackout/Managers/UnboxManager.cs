@@ -67,9 +67,6 @@ public class UnboxManager
                 else
                 {
                     knife = CalculateKnife(knivesAvailable);
-
-                    // Send unboxed amount +1
-                    DB.IncreasePlayerKnifeUnboxedAmount(knife.KnifeID, 1);
                 }
 
                 rewardName = knife.KnifeName;
@@ -112,9 +109,6 @@ public class UnboxManager
                 else
                 {
                     glove = CalculateGlove(glovesAvailable);
-
-                    // Send updated unbox amount +1
-                    DB.IncreasePlayerGloveUnboxedAmount(glove.GloveID, 1);
                 }
 
                 rewardName = glove.GloveName;
@@ -147,11 +141,6 @@ public class UnboxManager
                 {
                     isDuplicate = true;
                     duplicateScrapAmount = skin.ScrapAmount;
-                }
-                else
-                {
-                    // Send unboxed amount by +1
-                    DB.IncreasePlayerGunSkinUnboxedAmount(skin.ID, 1);
                 }
 
                 rewardName = skin.Gun.GunName + " | " + skin.SkinName;

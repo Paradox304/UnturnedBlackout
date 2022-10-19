@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using UnturnedBlackout.Database.Base;
 using UnturnedBlackout.Database.Data;
 
 namespace UnturnedBlackout.Models.UI;
@@ -6,11 +7,11 @@ namespace UnturnedBlackout.Models.UI;
 public class PageUnboxInventory
 {
     public int PageID { get; set; }
-    public Dictionary<int, PlayerCase> Cases { get; set; }
+    public Dictionary<int, object> Skins { get; set; }
 
-    public PageUnboxInventory(int pageID, Dictionary<int, PlayerCase> cases)
+    public PageUnboxInventory(int pageID, Dictionary<int, object> skins)
     {
         PageID = pageID;
-        Cases = cases;
+        Skins = skins;
     }
 }

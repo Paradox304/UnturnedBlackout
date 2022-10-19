@@ -2,7 +2,8 @@
 
 public enum EUnboxingPage
 {
-    INVENTORY,
+    CASES,
     BUY,
+    INVENTORY,
     OPEN
 }
