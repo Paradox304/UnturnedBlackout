@@ -80,7 +80,7 @@ public static class Utility
         1 => "1st",
         2 => "2nd",
         3 => "3rd",
-        _ => index + "th"
+        var _ => index + "th"
     };
 
     public static string GetDiscordEmoji(int index) => index switch
@@ -88,7 +88,7 @@ public static class Utility
         1 => ":first_place:",
         2 => ":second_place:",
         3 => ":third_place:",
-        _ => ":military_medal:"
+        var _ => ":military_medal:"
     };
 
     public static uint GetFreeFrequency()
@@ -370,7 +370,7 @@ public static class Utility
         >= 73 and <= 90 => "#2cff35",
         >= 91 and <= 108 => "#fd2d2d",
         >= 109 and <= 126 => "#b04dff",
-        _ => "white"
+        var _ => "white"
     };
 
     public static string ToFriendlyName(this ELoadoutPage page) => page switch
@@ -410,7 +410,7 @@ public static class Utility
         EHotkey.KILLSTREAK_1 => "Killstreak 1",
         EHotkey.KILLSTREAK_2 => "Killstreak 2",
         EHotkey.KILLSTREAK_3 => "Killstreak 3",
-        _ => throw new ArgumentOutOfRangeException(nameof(hotkey), hotkey, "Hotkey is not as expected")
+        var _ => throw new ArgumentOutOfRangeException(nameof(hotkey), hotkey, "Hotkey is not as expected")
     };
 
     public static string ToFriendlyName(this ECurrency currency) => currency switch
@@ -426,7 +426,7 @@ public static class Utility
         ECurrency.SCRAP => "Scrap",
         ECurrency.CREDITS => "Credits",
         ECurrency.COINS => "Coins",
-        _ => throw new ArgumentOutOfRangeException(nameof(currency), currency, null)
+        var _ => throw new ArgumentOutOfRangeException(nameof(currency), currency, null)
     };
 
     public static string ToUIName(this EAttachment attachment) => attachment switch
@@ -435,14 +435,14 @@ public static class Utility
         EAttachment.BARREL => "Barrel",
         EAttachment.MAGAZINE => "Magazine",
         EAttachment.SIGHTS => "Sights",
-        _ => throw new ArgumentOutOfRangeException(nameof(attachment), attachment, "Attachment is not as expected")
+        var _ => throw new ArgumentOutOfRangeException(nameof(attachment), attachment, "Attachment is not as expected")
     };
 
     public static string ToUIName(this ETeam team) => team switch
     {
         ETeam.RED => "Red",
         ETeam.BLUE => "Blue",
-        _ => throw new ArgumentOutOfRangeException(nameof(team), team, null)
+        var _ => throw new ArgumentOutOfRangeException(nameof(team), team, null)
     };
 
     public static string ToFriendlyName(this EChatMode chatMode) => chatMode switch

@@ -1257,12 +1257,6 @@ public class UIHandler
 
     public void EquipLoadout()
     {
-        if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out var loadout))
-        {
-            Logging.Debug($"Error finding loadout with id {LoadoutID} for {Player.CharacterName}");
-            return;
-        }
-
         foreach (var activeLoadout in PlayerLoadout.Loadouts.Values.Where(k => k.IsActive))
             DB.UpdatePlayerLoadoutActive(Player.CSteamID, activeLoadout.LoadoutID, false);
 
@@ -1450,12 +1444,6 @@ public class UIHandler
 
     public void EquipMidgameLoadout()
     {
-        if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out var loadout))
-        {
-            Logging.Debug($"Error finding loadout with id {LoadoutID} for {Player.CharacterName}");
-            return;
-        }
-
         foreach (var activeLoadout in PlayerLoadout.Loadouts.Values.Where(k => k.IsActive))
             DB.UpdatePlayerLoadoutActive(Player.CSteamID, activeLoadout.LoadoutID, false);
 
@@ -5088,7 +5076,7 @@ public class UIHandler
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Leaderboards Rank TEXT 10", $"#{data.IndexOf(playerData) + 1}");
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Leaderboards Kills TEXT 10", (playerData.Kills + playerData.HeadshotKills).ToString());
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Leaderboards Deaths TEXT 10", playerData.Deaths.ToString());
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Leaderboards KDR TEXT 10", ratio.ToString());
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Leaderboards KDR TEXT 10", ratio);
         }
         else
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards BUTTON 10", false);
@@ -5127,7 +5115,7 @@ public class UIHandler
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Name TEXT {index}", (playerData.HasPrime ? UIManager.PRIME_SYMBOL : "") + playerData.SteamName);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Kills TEXT {index}", (playerData.Kills + playerData.HeadshotKills).ToString());
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Deaths TEXT {index}", playerData.Deaths.ToString());
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards KDR TEXT {index}", ratio.ToString());
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards KDR TEXT {index}", ratio);
             index++;
         }
     }
@@ -5183,7 +5171,7 @@ public class UIHandler
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Name TEXT {i}", playerData.SteamName);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Kills TEXT {i}", (playerData.Kills + playerData.HeadshotKills).ToString());
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Deaths TEXT {i}", playerData.Deaths.ToString());
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards KDR TEXT {i}", ratio.ToString());
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards KDR TEXT {i}", ratio);
         }
     }
 
@@ -5193,7 +5181,7 @@ public class UIHandler
         ELeaderboardPage.WEEKLY => DB.PlayerWeeklyLeaderboard,
         ELeaderboardPage.SEASONAL => DB.PlayerSeasonalLeaderboard,
         ELeaderboardPage.ALL => LeaderboardTab == ELeaderboardTab.KILL ? DB.PlayerAllTimeKill : DB.PlayerAllTimeLevel,
-        var _ => throw new ArgumentOutOfRangeException("LeaderboardPage is not as expected")
+        var _ => throw new ArgumentOutOfRangeException(nameof(LeaderboardPage), "Value is not as expected")
     };
 
     private Dictionary<CSteamID, LeaderboardData> GetLeaderboardDataLookup() => LeaderboardPage switch
@@ -5202,7 +5190,7 @@ public class UIHandler
         ELeaderboardPage.WEEKLY => DB.PlayerWeeklyLeaderboardLookup,
         ELeaderboardPage.SEASONAL => DB.PlayerSeasonalLeaderboardLookup,
         ELeaderboardPage.ALL => DB.PlayerAllTimeLeaderboardLookup,
-        var _ => throw new ArgumentOutOfRangeException("LeaderboardPage is not as expected")
+        var _ => throw new ArgumentOutOfRangeException(nameof(LeaderboardPage), "Value is not as expected")
     };
 
     private string GetLeaderboardRefreshTime() => LeaderboardPage switch
@@ -5416,7 +5404,7 @@ public class UIHandler
             if (achievement.TryGetNextTier(out var nextTier))
             {
                 targetAmount = nextTier.TargetAmount;
-                if (nextTier.Rewards.Count >= 1 && TryGetAchievementRewardInfo(nextTier.Rewards[0], out var rewardName, out _, out _))
+                if (nextTier.Rewards.Count >= 1 && TryGetAchievementRewardInfo(nextTier.Rewards[0], out var rewardName, out var _, out var _))
                     EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements Item TEXT", rewardName);
                 else
                     EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements Item TEXT", "None");
@@ -5435,7 +5423,7 @@ public class UIHandler
         {
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Achievements Reward Claimed {i}", achievement.CurrentTier >= i);
 
-            if (!achievement.Achievement.TiersLookup.TryGetValue(i, out var rewardTier) || rewardTier.Rewards.Count == 0 || !TryGetAchievementRewardInfo(rewardTier.Rewards[0], out _, out var rewardImage, out _))
+            if (!achievement.Achievement.TiersLookup.TryGetValue(i, out var rewardTier) || rewardTier.Rewards.Count == 0 || !TryGetAchievementRewardInfo(rewardTier.Rewards[0], out var _, out var rewardImage, out var _))
             {
                 EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Achievements Reward IMAGE {i}", "");
                 continue;
@@ -5651,7 +5639,7 @@ public class UIHandler
         }
 
         var reward = isTop ? tier.FreeReward : tier.PremiumReward;
-        if (reward == null || !TryGetBattlepassRewardInfo(reward, out _, out var rewardImage, out _))
+        if (reward == null || !TryGetBattlepassRewardInfo(reward, out var _, out var rewardImage, out var _))
             return;
 
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass IMAGE", reward.RewardType != ERewardType.CARD);
@@ -6246,7 +6234,7 @@ public class UIHandler
         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Player IMAGE", summary.Player.Data.AvatarLinks[2]);
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Kills TEXT", summary.Kills.ToString());
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Deaths TEXT", summary.Deaths.ToString());
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary KD TEXT", string.Format("{0:n}", summary.KD));
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary KD TEXT", $"{summary.KD:n}");
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Assists TEXT", summary.Assists.ToString());
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Killstreak TEXT", summary.HighestKillstreak.ToString());
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Multikill TEXT", summary.HighestMK.ToString());
@@ -6256,7 +6244,7 @@ public class UIHandler
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Match XP TEXT", $"<color=#fcee6a>+{summary.MatchXP}</color>");
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Match Bonus", $"MATCH <color=#fcee6a>XP</color> BONUS");
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Match Bonus TEXT", $"<color=#fcee6a>+{summary.MatchXPBonus}</color>");
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Achievements XP", $"ACHIEVEMENTS XP BONUS <color=#ffb566>({string.Format("{0:0.##}", summary.Player.Data.AchievementXPBooster * 100)}%)</color>");
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Achievements XP", $"ACHIEVEMENTS XP BONUS <color=#ffb566>({summary.Player.Data.AchievementXPBooster * 100:0.##}%)</color>");
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Achievements XP TEXT", $"<color=#ffb566>+{summary.AchievementXPBonus}</color>");
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Other XP", $"OTHER <color=#fcee6a>XP</color> BONUSES");
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Other XP TEXT", $"<color=#fcee6a>+{summary.OtherXPBonus}</color>");
