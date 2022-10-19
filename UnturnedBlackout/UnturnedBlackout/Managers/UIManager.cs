@@ -1919,10 +1919,10 @@ public class UIManager
             case "SERVER Unbox Inventory BUTTON":
                 handler.ShowUnboxingInventoryPage();
                 break;
-            case "SERVER Inventory Forward BUTTON":
+            case "SERVER Inventory Next BUTTON":
                 handler.ForwardUnboxingInventoryPage();
                 break;
-            case "SERVER Inventory Forward BUTTON":
+            case "SERVER Inventory Previous BUTTON":
                 handler.BackwardUnboxingInventoryPage();
                 break;
             case "SERVER Summary Close BUTTON":
