@@ -5881,19 +5881,16 @@ public class UIHandler
             IsUnboxing = false;
             yield break;
         }
-
-        if (!isDuplicate)
+        
+        var embed = new Embed(null, null, null, Utility.GetDiscordColorCode(rewardRarity), DateTime.UtcNow.ToString("s"), new(Provider.serverName, Provider.configData.Browser.Icon), new(PlayerData.SteamName, $"https://steamcommunity.com/profiles/{PlayerData.SteamID}", PlayerData.AvatarLinks[0]), new Field[] { new("Info:", $"Case: {@case.Case.CaseName}\nSkin: [{rewardRarity.ToFriendlyName()}] {rewardName}", true) }, new(rewardImage), null);
+        switch (cRarity)
         {
-            var embed = new Embed(null, null, null, Utility.GetDiscordColorCode(rewardRarity), DateTime.UtcNow.ToString("s"), new(Provider.serverName, Provider.configData.Browser.Icon), new(PlayerData.SteamName, $"https://steamcommunity.com/profiles/{PlayerData.SteamID}", PlayerData.AvatarLinks[0]), new Field[] { new("Info:", $"Case: {@case.Case.CaseName}\nSkin: [{rewardRarity.ToFriendlyName()}] {rewardName}", true) }, new(rewardImage), null);
-            switch (cRarity)
-            {
-                case ECaseRarity.GLOVE or ECaseRarity.LIMITED_GLOVE or ECaseRarity.KNIFE or ECaseRarity.LIMITED_KNIFE:
-                    Plugin.Instance.Discord.SendEmbed(embed, "Black Market", CASE_UNBOXING_LIMITED_WEBHOOK_URL);
-                    break;
-                default:
-                    Plugin.Instance.Discord.SendEmbed(embed, "Black Market", CASE_UNBOXING_WEBHOOK_URL);
-                    break;
-            }
+            case ECaseRarity.GLOVE or ECaseRarity.LIMITED_GLOVE or ECaseRarity.KNIFE or ECaseRarity.LIMITED_KNIFE:
+                Plugin.Instance.Discord.SendEmbed(embed, "Black Market", CASE_UNBOXING_LIMITED_WEBHOOK_URL);
+                break;
+            default:
+                Plugin.Instance.Discord.SendEmbed(embed, "Black Market", CASE_UNBOXING_WEBHOOK_URL);
+                break;
         }
         
         switch (rewardRarity)
@@ -6184,14 +6181,14 @@ public class UIHandler
 
     public void ShowUnboxingInventoryPage()
     {
-        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Inventory Next BUTTON", UnboxStorePages.Count > 1);
-        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Inventory Previous BUTTON", UnboxStorePages.Count > 1);
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Inventory Next BUTTON", UnboxInventoryPages.Count > 1);
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Inventory Previous BUTTON", UnboxInventoryPages.Count > 1);
 
         if (!UnboxInventoryPages.TryGetValue(1, out var firstPage))
         {
             Logging.Debug($"Unable to find the first unboxing inventory page for {Player.CharacterName}");
             for (var i = 0; i <= MAX_SKINS_PER_INVENTORY_PAGE; i++)
-                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Inventory Skin BUTTON  {i}", false);
+                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Inventory Skin BUTTON {i}", false);
             return;
         }
 
@@ -6201,6 +6198,7 @@ public class UIHandler
     public void ShowUnboxingInventoryPage(PageUnboxInventory page)
     {
         UnboxingPageID = page.PageID;
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Inventory Page TEXT", $"Page {page.PageID}");
         for (var i = 0; i <= MAX_SKINS_PER_INVENTORY_PAGE; i++)
         {
             if (!page.Skins.TryGetValue(i, out var skin) || !TryGetUnboxInventorySkinInfo(skin, out var name, out var iconLink, out var rarity))
@@ -6248,10 +6246,10 @@ public class UIHandler
 
         var updatedInput = input.ToLower();
         var skins = new Dictionary<int, object>();
-        var index = 1;
+        var index = 0;
         foreach (var skin in PlayerLoadout.Knives.Values.Where(k => k.Knife.KnifeName.ToLower().Contains(updatedInput)))
         {
-            skins.Add(index, skin);
+            skins.Add(index, skin.Knife);
             if (index == MAX_SKINS_PER_INVENTORY_PAGE)
                 break;
 
@@ -6262,7 +6260,7 @@ public class UIHandler
         {
             foreach (var skin in PlayerLoadout.Gloves.Values.Where(k => k.Glove.GloveName.ToLower().Contains(updatedInput)))
             {
-                skins.Add(index, skin);
+                skins.Add(index, skin.Glove);
                 if (index == MAX_SKINS_PER_INVENTORY_PAGE)
                     break;
 
@@ -6285,8 +6283,8 @@ public class UIHandler
         if (skins.Count == 0)
             return;
         
-        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Inventory Forward BUTTON", false);
-        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Inventory Forward BUTTON", false);
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Inventory Next BUTTON", false);
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Inventory Previous BUTTON", false);
         
         ShowUnboxingInventoryPage(new(1, skins));
     }
@@ -6311,7 +6309,7 @@ public class UIHandler
                 return true;
             case GunSkin gunSkin:
                 rarity = gunSkin.SkinRarity;
-                name = $"{gunSkin.SkinName} | {gunSkin.Gun.GunName}";
+                name = $"{gunSkin.Gun.GunName} | {gunSkin.SkinName}";
                 iconLink = gunSkin.IconLink;
                 return true;
             default:

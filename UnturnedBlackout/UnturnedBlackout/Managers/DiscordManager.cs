@@ -17,7 +17,7 @@ public class DiscordManager
     public DiscordManager()
     {
         PendingWebhooks = new();
-        WebhookSender = new(60 * 1000);
+        WebhookSender = new(10 * 1000);
         WebhookSender.Elapsed += SendWebhooks;
         WebhookSender.Start();
     }
