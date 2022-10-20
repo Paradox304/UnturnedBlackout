@@ -457,7 +457,7 @@ public class GamePlayer
     }
 
     // Movement
-    public void GiveMovement(bool isADS, bool isCarryingFlag, bool doSteps)
+    /*public void GiveMovement(bool isADS, bool isCarryingFlag, bool doSteps)
     {
         if (ActiveLoadout == null)
             return;
@@ -495,7 +495,7 @@ public class GamePlayer
         yield return new WaitForSeconds(Player.Ping - 0.01f);
 
         Player.Player.movement.pluginSpeedMultiplier = newMovement;
-    }
+    }*/
 
     // Killstreak
     public void SetupKillstreaks()
@@ -642,8 +642,8 @@ public class GamePlayer
 
         Plugin.Instance.UI.UpdateKillstreakReady(this, killstreak);
 
-        MovementChanger.Stop();
-        MovementChanger = Plugin.Instance.StartCoroutine(ChangeMovement(info.MovementMultiplier));
+        /*MovementChanger.Stop();
+        MovementChanger = Plugin.Instance.StartCoroutine(ChangeMovement(info.MovementMultiplier));*/
 
         if (info.KillstreakStaySeconds == 0)
             return;

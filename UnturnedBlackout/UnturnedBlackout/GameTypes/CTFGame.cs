@@ -107,7 +107,7 @@ public class CTFGame : Game
         GamePhase = EGamePhase.STARTED;
         foreach (var player in Players)
         {
-            player.GamePlayer.GiveMovement(player.GamePlayer.Player.Player.equipment.useable is UseableGun gun && gun.isAiming, false, false);
+            player.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1);
             player.StartTime = DateTime.UtcNow;
             UI.ClearCountdownUI(player.GamePlayer);
         }
@@ -842,7 +842,6 @@ public class CTFGame : Game
                 cPlayer.Score += Config.Points.FileData.FlagCapturedPoints;
                 cPlayer.XP += Config.Medals.FileData.FlagCapturedXP;
                 cPlayer.FlagsCaptured++;
-                player.GiveMovement(player.Player.Player.equipment.useable is UseableGun gun && gun.isAiming, false, false);
 
                 UI.ShowXPUI(cPlayer.GamePlayer, Config.Medals.FileData.FlagCapturedXP, Plugin.Instance.Translate("Flag_Captured").ToRich());
                 UI.SendFlagCapturedSound(cPlayer.GamePlayer);
@@ -893,7 +892,6 @@ public class CTFGame : Game
                 }
             });
 
-            player.GiveMovement(player.Player.Player.equipment.useable is UseableGun gun && gun.isAiming, true, false);
             cPlayer.IsCarryingFlag = true;
             UI.UpdateCTFHUD(Players, otherTeam);
         }
@@ -1078,6 +1076,7 @@ public class CTFGame : Game
         cPlayer.GamePlayer.OnStanceChanged(obj.stance);
     }
 
+    /*
     public override void PlayerEquipmentChanged(GamePlayer player)
     {
         var cPlayer = GetCTFPlayer(player.Player);
@@ -1101,7 +1100,8 @@ public class CTFGame : Game
 
         player.GiveMovement(isAiming, cPlayer.IsCarryingFlag, false);
     }
-
+    */
+    
     public CTFPlayer GetCTFPlayer(CSteamID steamID) => PlayersLookup.TryGetValue(steamID, out var cPlayer) ? cPlayer : null;
 
     public CTFPlayer GetCTFPlayer(UnturnedPlayer player) => PlayersLookup.TryGetValue(player.CSteamID, out var cPlayer) ? cPlayer : null;

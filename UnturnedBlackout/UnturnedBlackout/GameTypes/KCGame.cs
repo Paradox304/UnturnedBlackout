@@ -95,7 +95,7 @@ public class KCGame : Game
 
         foreach (var player in Players)
         {
-            player.GamePlayer.GiveMovement(player.GamePlayer.Player.Player.equipment.useable is UseableGun gun && gun.isAiming, false, false);
+            player.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1);
             player.StartTime = DateTime.UtcNow;
             UI.SendKCHUD(player, BlueTeam, RedTeam);
             UI.ClearCountdownUI(player.GamePlayer);
@@ -959,6 +959,7 @@ public class KCGame : Game
         kPlayer.GamePlayer.OnStanceChanged(obj.stance);
     }
 
+    /*
     public override void PlayerEquipmentChanged(GamePlayer player)
     {
         if (IsPlayerIngame(player.SteamID) && GamePhase != EGamePhase.STARTING)
@@ -970,7 +971,8 @@ public class KCGame : Game
         if (IsPlayerIngame(player.SteamID) && GamePhase != EGamePhase.STARTING)
             player.GiveMovement(isAiming, false, false);
     }
-
+    */
+    
     public IEnumerator SpawnSwitch()
     {
         yield return new WaitForSeconds(Config.Base.FileData.SpawnSwitchSeconds);

@@ -78,7 +78,7 @@ public class FFAGame : Game
         UI.OnGameUpdated();
         foreach (var player in Players)
         {
-            player.GamePlayer.GiveMovement(player.GamePlayer.Player.Player.equipment.useable is UseableGun gun && gun.isAiming, false, false);
+            player.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1);
 
             UI.SendFFAHUD(player.GamePlayer);
             UI.ClearCountdownUI(player.GamePlayer);
@@ -828,7 +828,7 @@ public class FFAGame : Game
         fPlayer.GamePlayer.OnStanceChanged(obj.stance);
     }
 
-    public override void PlayerEquipmentChanged(GamePlayer player)
+    /*public override void PlayerEquipmentChanged(GamePlayer player)
     {
         if (IsPlayerIngame(player.SteamID) && GamePhase != EGamePhase.STARTING)
             player.GiveMovement(player.Player.Player.equipment.useable is UseableGun gun && gun.isAiming, false, true);
@@ -839,7 +839,8 @@ public class FFAGame : Game
         if (IsPlayerIngame(player.SteamID) && GamePhase != EGamePhase.STARTING)
             player.GiveMovement(isAiming, false, false);
     }
-
+    */
+    
     public IEnumerator SpawnUsedUp(FFASpawnPoint spawnPoint)
     {
         _ = SpawnPoints.Remove(spawnPoint);

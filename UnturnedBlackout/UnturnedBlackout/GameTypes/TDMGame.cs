@@ -94,7 +94,7 @@ public class TDMGame : Game
 
         foreach (var player in Players)
         {
-            player.GamePlayer.GiveMovement(player.GamePlayer.Player.Player.equipment.useable is UseableGun gun && gun.isAiming, false, false);
+            player.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1);
             player.StartTime = DateTime.UtcNow;
             UI.SendTDMHUD(player, BlueTeam, RedTeam);
             UI.ClearCountdownUI(player.GamePlayer);
@@ -883,7 +883,7 @@ public class TDMGame : Game
         tPlayer.GamePlayer.OnStanceChanged(obj.stance);
     }
 
-    public override void PlayerEquipmentChanged(GamePlayer player)
+    /*public override void PlayerEquipmentChanged(GamePlayer player)
     {
         if (IsPlayerIngame(player.SteamID) && GamePhase != EGamePhase.STARTING)
             player.GiveMovement(player.Player.Player.equipment.useable is UseableGun gun && gun.isAiming, false, true);
@@ -893,7 +893,7 @@ public class TDMGame : Game
     {
         if (IsPlayerIngame(player.SteamID) && GamePhase != EGamePhase.STARTING)
             player.GiveMovement(isAiming, false, false);
-    }
+    }*/
 
     public IEnumerator SpawnSwitch()
     {

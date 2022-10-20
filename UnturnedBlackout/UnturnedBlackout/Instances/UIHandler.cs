@@ -767,9 +767,9 @@ public class UIHandler
         var index = 0;
         var page = 1;
         Dictionary<int, object> skins = new();
-        foreach (var skin in PlayerLoadout.Knives.Values.Where(k => k.IsBought).OrderByDescending(k => (byte)k.Knife.KnifeRarity))
+        foreach (var skin in PlayerLoadout.Knives.Values.Where(k => k.IsBought).OrderByDescending(k => (byte)k.Knife.KnifeRarity).ThenBy(k => k.Knife.KnifeName))
         {
-            skins.Add(index, skin);
+            skins.Add(index, skin.Knife);
             if (index == MAX_SKINS_PER_INVENTORY_PAGE)
             {
                 UnboxInventoryPages.Add(page, new(page, skins));
@@ -782,9 +782,9 @@ public class UIHandler
             index++;
         }
 
-        foreach (var skin in PlayerLoadout.Gloves.Values.Where(k => k.IsBought).OrderByDescending(k => (byte)k.Glove.GloveRarity))
+        foreach (var skin in PlayerLoadout.Gloves.Values.Where(k => k.IsBought).OrderByDescending(k => (byte)k.Glove.GloveRarity).ThenBy(k => k.Glove.GloveName))
         {
-            skins.Add(index, skin); 
+            skins.Add(index, skin.Glove); 
             
             if (index == MAX_SKINS_PER_INVENTORY_PAGE)
             {
@@ -798,7 +798,7 @@ public class UIHandler
             index++;
         }
         
-        foreach (var skin in PlayerLoadout.GunSkinsSearchByID.Values.OrderByDescending(k => (byte)k.SkinRarity))
+        foreach (var skin in PlayerLoadout.GunSkinsSearchByID.Values.OrderByDescending(k => (byte)k.SkinRarity).ThenBy(k => k.Gun.GunName))
         {
             skins.Add(index, skin); 
             
@@ -5755,15 +5755,15 @@ public class UIHandler
                 UnboxInventoryCase(selectedCase);
                 break;
             case EUnboxingPage.INVENTORY:
-                // TODO: Send Inventory page
+                ShowUnboxingInventoryPage();
                 break;
         }
     }
 
     public void ShowUnboxingCasePage()
     {
-        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Inventory Next BUTTON", UnboxCasesPages.Count > 1);
-        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Inventory Previous BUTTON", UnboxCasesPages.Count > 1);
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Cases Next BUTTON", UnboxCasesPages.Count > 1);
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Cases Previous BUTTON", UnboxCasesPages.Count > 1);
 
         if (!UnboxCasesPages.TryGetValue(1, out var firstPage))
         {
@@ -6202,24 +6202,128 @@ public class UIHandler
 
     public void ShowUnboxingInventoryPage(PageUnboxInventory page)
     {
-        
+        UnboxingPageID = page.PageID;
+        for (var i = 1; i <= MAX_SKINS_PER_INVENTORY_PAGE; i++)
+        {
+            if (!page.Skins.TryGetValue(i, out var skin) || !TryGetUnboxInventorySkinInfo(skin, out var name, out var iconLink, out var rarity))
+            {
+                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Inventory Skin BUTTON {i}", false);
+                continue;
+            }
+            
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Inventory Skin BUTTON {i}", true);
+            SendRarity("SERVER Inventory Skin", rarity, i);
+            EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Inventory Skin IMAGE {i}", iconLink);
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Inventory Skin TEXT {i}", name);
+        }
     }
     
     public void ForwardUnboxingInventoryPage()
     {
+        if (!UnboxInventoryPages.TryGetValue(UnboxingPageID + 1, out var page) && !UnboxInventoryPages.TryGetValue(1, out page))
+        {
+            Logging.Debug($"Unable to find the next or first unboxing inventory page for {Player.CharacterName}");
+            return;
+        }
         
+        ShowUnboxingInventoryPage(page);
     }
 
     public void BackwardUnboxingInventoryPage()
     {
+        if (!UnboxInventoryPages.TryGetValue(UnboxingPageID - 1, out var page) && !UnboxInventoryPages.TryGetValue(UnboxInventoryPages.Count, out page))
+        {
+            Logging.Debug($"Unable to find the previous or last unboxing inventory page for {Player.CharacterName}");
+            return;
+        }
         
+        ShowUnboxingInventoryPage(page);
     }
 
     public void SearchUnboxingInventoryPage(string input)
     {
+        if (string.IsNullOrEmpty(input))
+        {
+            ShowUnboxingInventoryPage();
+            return;
+        }
+
+        var updatedInput = input.ToLower();
+        var skins = new Dictionary<int, object>();
+        var index = 1;
+        foreach (var skin in PlayerLoadout.Knives.Values.Where(k => k.Knife.KnifeName.ToLower().Contains(updatedInput)))
+        {
+            skins.Add(index, skin);
+            if (index == MAX_SKINS_PER_INVENTORY_PAGE)
+                break;
+
+            index++;
+        }
+
+        if (index < 20)
+        {
+            foreach (var skin in PlayerLoadout.Gloves.Values.Where(k => k.Glove.GloveName.ToLower().Contains(updatedInput)))
+            {
+                skins.Add(index, skin);
+                if (index == MAX_SKINS_PER_INVENTORY_PAGE)
+                    break;
+
+                index++;
+            }
+        }
+
+        if (index < 20)
+        {
+            foreach (var skin in PlayerLoadout.GunSkinsSearchByID.Values.Where(k => k.SkinName.ToLower().Contains(updatedInput) || k.Gun.GunName.ToLower().Contains(updatedInput)))
+            {
+                skins.Add(index, skin);
+                if (index == MAX_SKINS_PER_INVENTORY_PAGE)
+                    break;
+
+                index++;
+            }
+        }
+
+        if (skins.Count == 0)
+            return;
         
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Inventory Forward BUTTON", false);
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Inventory Forward BUTTON", false);
+        
+        ShowUnboxingInventoryPage(new(1, skins));
     }
 
+    public bool TryGetUnboxInventorySkinInfo(object skin, out string name, out string iconLink, out ERarity rarity)
+    {
+        name = "";
+        iconLink = "";
+        rarity = ERarity.NONE;
+        
+        switch (skin)
+        {
+            case Knife knife:
+                rarity = knife.KnifeRarity;
+                name = knife.KnifeName;
+                iconLink = knife.IconLink;
+                return true;
+            case Glove glove:
+                rarity = glove.GloveRarity;
+                name = glove.GloveName;
+                iconLink = glove.IconLink;
+                return true;
+            case GunSkin gunSkin:
+                rarity = gunSkin.SkinRarity;
+                name = $"{gunSkin.SkinName} | {gunSkin.Gun.GunName}";
+                iconLink = gunSkin.IconLink;
+                return true;
+            default:
+                Logging.Debug($"Unable to find unbox inventory skin info for this type");
+                break;
+        }
+
+        return false;
+    }
+    
     public IEnumerator ShowMatchEndSummary(MatchEndSummary summary)
     {
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary", true);

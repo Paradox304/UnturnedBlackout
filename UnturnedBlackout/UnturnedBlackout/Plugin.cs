@@ -123,10 +123,8 @@ public class Plugin : RocketPlugin<Config>
             return;
 
         var gPlayer = Game.GetGamePlayer(player);
-        if (gPlayer == null)
-            return;
 
-        var game = gPlayer.CurrentGame;
+        var game = gPlayer?.CurrentGame;
         if (game == null)
             return;
 

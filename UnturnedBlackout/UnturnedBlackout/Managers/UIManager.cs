@@ -820,8 +820,6 @@ public class UIManager
                 EffectManager.sendUIEffectText(HUD_KEY, connection, true, "AmmoNum", " ");
                 EffectManager.sendUIEffectText(HUD_KEY, connection, true, "ReserveNum", " ");
             }
-
-            game.PlayerEquipmentChanged(player);
         });
     }
 

@@ -362,8 +362,6 @@ public abstract class Game
     public abstract void OnChatMessageSent(GamePlayer player, EChatMode chatMode, string text, ref bool isVisible);
     public abstract void OnVoiceChatUpdated(GamePlayer player);
     public abstract void OnTakingItem(GamePlayer player, ItemData itemData, ref bool shouldAllow);
-    public abstract void PlayerEquipmentChanged(GamePlayer player);
-    public abstract void PlayerAimingChanged(GamePlayer player, bool isAiming);
     public abstract int GetPlayerCount();
     public abstract bool IsPlayerCarryingFlag(GamePlayer player);
     public abstract List<GamePlayer> GetPlayers();
