@@ -768,7 +768,7 @@ public class UIHandler
         var index = 0;
         var page = 1;
         Dictionary<int, object> skins = new();
-        foreach (var skin in PlayerLoadout.Knives.Values.Where(k => k.IsBought).OrderByDescending(k => (byte)k.Knife.KnifeRarity).ThenBy(k => k.Knife.KnifeName))
+        foreach (var skin in PlayerLoadout.Knives.Values.Where(k => k.IsBought && k.Knife.LevelRequirement != 0).OrderByDescending(k => (byte)k.Knife.KnifeRarity).ThenBy(k => k.Knife.KnifeName))
         {
             skins.Add(index, skin.Knife);
             if (index == MAX_SKINS_PER_INVENTORY_PAGE)
