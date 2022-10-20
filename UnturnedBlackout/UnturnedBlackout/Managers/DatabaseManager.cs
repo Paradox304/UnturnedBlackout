@@ -44,8 +44,8 @@ public class DatabaseManager
 
     public bool ForcedShutdown { get; set; }
     public int ConnectionThreshold { get; set; }
-    public Timer CacheRefresher { get; set; }
-    public Timer BatchQueryCleaner { get; set; }
+    private Timer CacheRefresher { get; set; }
+    private Timer BatchQueryCleaner { get; set; }
 
     // Pending Queries
     public List<string> PendingQueries { get; set; }
@@ -3358,7 +3358,7 @@ public class DatabaseManager
                 
                 try
                 {
-                    DiscordManager.SendEmbed(embed, "Leaderboard", LEADERBOARD_WEBHOOK_URL);
+                    Plugin.Instance.Discord.SendEmbed(embed, "Leaderboard", LEADERBOARD_WEBHOOK_URL);
                 }
                 catch (Exception ex)
                 {
@@ -3455,7 +3455,7 @@ public class DatabaseManager
                 
                 try
                 {
-                    DiscordManager.SendEmbed(embed, "Leaderboard", LEADERBOARD_WEBHOOK_URL);
+                    Plugin.Instance.Discord.SendEmbed(embed, "Leaderboard", LEADERBOARD_WEBHOOK_URL);
                 }
                 catch (Exception ex)
                 {
@@ -3550,7 +3550,7 @@ public class DatabaseManager
                 
                 try
                 {
-                    DiscordManager.SendEmbed(embed, "Leaderboard", LEADERBOARD_WEBHOOK_URL);
+                    Plugin.Instance.Discord.SendEmbed(embed, "Leaderboard", LEADERBOARD_WEBHOOK_URL);
                 }
                 catch (Exception ex)
                 {
@@ -3696,7 +3696,7 @@ public class DatabaseManager
                             new(profile.SteamID, $"https://steamcommunity.com/profiles/{profile.SteamID64}/", profile.AvatarIcon.ToString()), new Field[] { new("**Unmuter:**", $"**Mute Expired**", true), new("**Time:**", DateTime.UtcNow.ToString(CultureInfo.InvariantCulture), true) }, null, null);
 
                         if (!string.IsNullOrEmpty(Plugin.Instance.Configuration.Instance.WebhookURL))
-                            DiscordManager.SendEmbed(embed, "Player Unmuted", Plugin.Instance.Configuration.Instance.WebhookURL);
+                            Plugin.Instance.Discord.SendEmbed(embed, "Player Unmuted", Plugin.Instance.Configuration.Instance.WebhookURL);
 
                         TaskDispatcher.QueueOnMainThread(() => Utility.Say(UnturnedPlayer.FromCSteamID(data.SteamID), Plugin.Instance.Translate("Unmuted").ToRich()));
                     }

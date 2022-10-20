@@ -484,12 +484,25 @@ public static class Utility
         ERarity.LEGENDARY => "#C832FA",
         ERarity.MYTHICAL => "#FA3219",
         ERarity.YELLOW => "#FFFF00",
-        ERarity.ORANGE => "orange",
         ERarity.CYAN => "#31FFF9",
         ERarity.GREEN => "#00FF00",
         var _ => throw new ArgumentOutOfRangeException(nameof(rarity), rarity, "Rarity is not as expected")
     };
 
+    public static string GetDiscordColorCode(ERarity rarity) => rarity switch
+    {
+        ERarity.COMMON => "16777215",
+        ERarity.UNCOMMON => "2066207",
+        ERarity.RARE => "4941000",
+        ERarity.EPIC => "9849850",
+        ERarity.LEGENDARY => "13120250",
+        ERarity.MYTHICAL => "16396825",
+        ERarity.YELLOW => "16776960",
+        ERarity.CYAN => "3276793",
+        ERarity.GREEN => "65280",
+        var _ => throw new ArgumentOutOfRangeException(nameof(rarity), rarity, "Rarity is not as expected")
+    };
+    
     public static string ToFriendlyName(this ERarity rarity) => rarity switch
     {
         ERarity.COMMON => "Common",
@@ -499,11 +512,11 @@ public static class Utility
         ERarity.LEGENDARY => "Legendary",
         ERarity.MYTHICAL => "Mythical",
         ERarity.YELLOW => "Special",
-        ERarity.ORANGE => "Special",
         ERarity.CYAN => "Special",
         ERarity.GREEN => "Special",
         var _ => throw new ArgumentOutOfRangeException(nameof(rarity), rarity, "Rarity is not as expected")
     };
+    
     public static string GetCurrencySymbol(ECurrency currency) => currency switch
     {
         ECurrency.COINS => "",

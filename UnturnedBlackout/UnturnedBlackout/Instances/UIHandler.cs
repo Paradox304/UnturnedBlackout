@@ -34,7 +34,7 @@ public class UIHandler
     public const int MAX_ITEMS_PER_GRID = 15;
     public const int MAX_CASES_PER_CASE_PAGE = 11;
     public const int MAX_CASES_PER_STORE_PAGE = 5;
-    public const int MAX_SKINS_PER_INVENTORY_PAGE = 21;
+    public const int MAX_SKINS_PER_INVENTORY_PAGE = 20;
     public const int MAX_ACHIEVEMENTS_PER_PAGE = 48;
     public const int MAX_PREVIEW_CONTENT_PER_CASE = 19;
     public const int MAX_ROLLING_CONTENT_PER_CASE = 23;
@@ -43,8 +43,9 @@ public class UIHandler
 
     private const int MINIMUM_LOADOUT_PAGE_ATTACHMENT_PRIMARY = 4;
     private const int MAXIMUM_LOADOUT_PAGE_ATTACHMENT_PRIMARY = 8;
-    public const string CASE_UNBOXING_WEBHOOK_URL = "https://discord.com/api/webhooks/1031896101038608454/h1Fk3GGrt2DUrv3NWD3VrvBJkJbGSd-ZWQ0ZrAPoxVygxWdjgYkemYwNYZmRm-AIO1An";
-
+    private const string CASE_UNBOXING_WEBHOOK_URL = "https://discord.com/api/webhooks/1031896101038608454/h1Fk3GGrt2DUrv3NWD3VrvBJkJbGSd-ZWQ0ZrAPoxVygxWdjgYkemYwNYZmRm-AIO1An";
+    private const string CASE_UNBOXING_LIMITED_WEBHOOK_URL = "https://discord.com/api/webhooks/1032689974740525067/fGGfo6QkYTQRIkF2KJfFsEKUCh1AyJ6eCGjKanowEPBEnvtjeLtybJOdfnixhfJPPawE";
+    
     private DatabaseManager DB => Plugin.Instance.DB;
     public CSteamID SteamID { get; set; }
     public UnturnedPlayer Player { get; set; }
@@ -3819,7 +3820,7 @@ public class UIHandler
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Credits", !string.IsNullOrEmpty(gunCharm.GunCharm.AuthorCredits));
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Credits TEXT", gunCharm.GunCharm.AuthorCredits);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Owned", true);
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Owned Text", $"Charm owned by {gunCharm.GunCharm.UnboxedAmount} players");
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Owned TEXT", $"Charm owned by {gunCharm.GunCharm.UnboxedAmount} players");
         
         SendRarityName("SERVER Item Rarity TEXT", gunCharm.GunCharm.CharmRarity);
     }
@@ -3844,7 +3845,7 @@ public class UIHandler
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Description TEXT", true);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Credits", false);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Owned", true);
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Owned Text", $"Skin owned by {skin.UnboxedAmount} players");
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Owned TEXT", $"Skin owned by {skin.UnboxedAmount} players");
         SendRarityName("SERVER Item Rarity TEXT", skin.SkinRarity);
     }
 
@@ -3872,7 +3873,7 @@ public class UIHandler
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Description TEXT", true);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Credits", false);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Owned", true);
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Owned Text", $"Knife owned by {knife.Knife.UnboxedAmount} players");
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Owned TEXT", $"Knife owned by {knife.Knife.UnboxedAmount} players");
         
         SendRarityName("SERVER Item Rarity TEXT", knife.Knife.KnifeRarity);
     }
@@ -3967,7 +3968,7 @@ public class UIHandler
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Credits", !string.IsNullOrEmpty(card.Card.AuthorCredits));
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Credits TEXT", card.Card.AuthorCredits);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Owned", true);
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Owned Text", $"Charm owned by {card.Card.UnboxedAmount} players");
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Owned TEXT", $"Charm owned by {card.Card.UnboxedAmount} players");
         SendRarityName("SERVER Item Rarity TEXT", card.Card.CardRarity);
     }
 
@@ -3995,7 +3996,7 @@ public class UIHandler
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Description TEXT", true);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Credits", false);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Owned", true);
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Owned Text", $"Glove owned by {glove.Glove.UnboxedAmount} players");
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Owned TEXT", $"Glove owned by {glove.Glove.UnboxedAmount} players");
         SendRarityName("SERVER Item Rarity TEXT", glove.Glove.GloveRarity);
     }
 
@@ -5274,7 +5275,7 @@ public class UIHandler
 
         for (var i = 0; i <= 48; i++)
         {
-            yield return new WaitForSeconds(0.01f);
+            yield return new WaitForSeconds(0.1f);
 
             if (!page.Achievements.TryGetValue(i, out var achievement))
                 break;
@@ -5874,27 +5875,26 @@ public class UIHandler
         }
 
         DB.IncreaseCaseUnboxedAmount(@case.Case.CaseID, 1);
-        if (!Plugin.Instance.Unbox.TryCalculateReward(@case.Case, Player, out var reward, out var rewardImage, out var rewardName, out var rewardDesc, out var rewardRarity, out var isDuplicate, out var duplicateScrapAmount))
+        if (!Plugin.Instance.Unbox.TryCalculateReward(@case.Case, Player, out var reward, out var rewardImage, out var rewardName, out var rewardDesc, out var rewardRarity, out var isDuplicate, out var duplicateScrapAmount, out var cRarity))
         {
             Logging.Debug($"Unable to calculate reward for unboxing case {SelectedCaseID} for {Player.CharacterName}");
             IsUnboxing = false;
             yield break;
         }
 
-        var embed = new Embed(null, null, null, "5763719", DateTime.UtcNow.ToString("s"), new(Provider.serverName, Provider.configData.Browser.Icon), new(PlayerData.SteamName, $"https://steamcommunity.com/profiles/{PlayerData.SteamID}", PlayerData.AvatarLinks[0]), new Field[] { new("Info:", $"Case: {@case.Case.CaseName}\nSkin: [{rewardRarity.ToFriendlyName()}] {rewardName}", true) } ,new(rewardImage), null);
-
-        Task.Run(() =>
+        if (!isDuplicate)
         {
-            try
+            var embed = new Embed(null, null, null, Utility.GetDiscordColorCode(rewardRarity), DateTime.UtcNow.ToString("s"), new(Provider.serverName, Provider.configData.Browser.Icon), new(PlayerData.SteamName, $"https://steamcommunity.com/profiles/{PlayerData.SteamID}", PlayerData.AvatarLinks[0]), new Field[] { new("Info:", $"Case: {@case.Case.CaseName}\nSkin: [{rewardRarity.ToFriendlyName()}] {rewardName}", true) }, new(rewardImage), null);
+            switch (cRarity)
             {
-                DiscordManager.SendEmbed(embed, "Unboxing", CASE_UNBOXING_WEBHOOK_URL);
+                case ECaseRarity.GLOVE or ECaseRarity.LIMITED_GLOVE or ECaseRarity.KNIFE or ECaseRarity.LIMITED_KNIFE:
+                    Plugin.Instance.Discord.SendEmbed(embed, "Black Market", CASE_UNBOXING_LIMITED_WEBHOOK_URL);
+                    break;
+                default:
+                    Plugin.Instance.Discord.SendEmbed(embed, "Black Market", CASE_UNBOXING_WEBHOOK_URL);
+                    break;
             }
-            catch (Exception ex)
-            {
-                Logger.Log("Error sending embed");
-                Logger.Log(ex);
-            }
-        });
+        }
         
         switch (rewardRarity)
         {
@@ -5912,9 +5912,7 @@ public class UIHandler
                 break;
         }
         
-        var poolSize = 0;
-        foreach (var weight in @case.Case.Weights)
-            poolSize += weight.Item2;
+        var poolSize = @case.Case.Weights.Sum(k => k.Item2);
 
         for (var i = 0; i <= MAX_ROLLING_CONTENT_PER_CASE; i++)
         {
@@ -6186,8 +6184,8 @@ public class UIHandler
 
     public void ShowUnboxingInventoryPage()
     {
-        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Inventory Forward BUTTON", UnboxStorePages.Count > 1);
-        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Inventory Forward BUTTON", UnboxStorePages.Count > 1);
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Inventory Next BUTTON", UnboxStorePages.Count > 1);
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Inventory Previous BUTTON", UnboxStorePages.Count > 1);
 
         if (!UnboxInventoryPages.TryGetValue(1, out var firstPage))
         {
@@ -6203,7 +6201,7 @@ public class UIHandler
     public void ShowUnboxingInventoryPage(PageUnboxInventory page)
     {
         UnboxingPageID = page.PageID;
-        for (var i = 1; i <= MAX_SKINS_PER_INVENTORY_PAGE; i++)
+        for (var i = 0; i <= MAX_SKINS_PER_INVENTORY_PAGE; i++)
         {
             if (!page.Skins.TryGetValue(i, out var skin) || !TryGetUnboxInventorySkinInfo(skin, out var name, out var iconLink, out var rarity))
             {

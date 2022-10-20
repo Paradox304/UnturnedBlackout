@@ -186,6 +186,8 @@ public class Plugin : RocketPlugin<Config>
         Logging.Debug("Initialized UI");
         Reward = new();
         Logging.Debug("Initialized Reward");
+        Discord = new();
+        Logging.Debug("Initialized Discord");
         DB = new();
         Logging.Debug("Initialized Database");
         BP = new();
@@ -325,7 +327,7 @@ public class Plugin : RocketPlugin<Config>
     public RewardManager Reward { get; set; }
     public UnboxManager Unbox { get; set; }
     public LoggingManager Logger { get; set; }
-
+    public DiscordManager Discord { get; set; }
     // ReSharper disable once InconsistentNaming
     public BPManager BP { get; set; }
     private static Harmony Harmony { get; set; }

@@ -13,7 +13,7 @@ public class UnboxManager
 {
     public DatabaseManager DB => Plugin.Instance.DB;
 
-    public bool TryCalculateReward(Case @case, UnturnedPlayer player, out Reward reward, out string rewardImage, out string rewardName, out string rewardDesc, out ERarity rewardRarity, out bool isDuplicate, out int duplicateScrapAmount)
+    public bool TryCalculateReward(Case @case, UnturnedPlayer player, out Reward reward, out string rewardImage, out string rewardName, out string rewardDesc, out ERarity rewardRarity, out bool isDuplicate, out int duplicateScrapAmount, out ECaseRarity caseRarity)
     {
         reward = null;
         rewardImage = "";
@@ -22,9 +22,9 @@ public class UnboxManager
         rewardRarity = ERarity.NONE;
         isDuplicate = false;
         duplicateScrapAmount = 0;
-
+        
         Logging.Debug($"Calculating reward for case with id {@case.CaseID} for {player.CharacterName}");
-        var caseRarity = CalculateRewardRarity(@case.Weights);
+        caseRarity = CalculateRewardRarity(@case.Weights);
         Logging.Debug($"Rarity found: {caseRarity}");
 
         if (!DB.PlayerLoadouts.TryGetValue(player.CSteamID, out var loadout))
