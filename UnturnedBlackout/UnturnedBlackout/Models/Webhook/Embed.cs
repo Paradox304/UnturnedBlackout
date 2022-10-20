@@ -16,10 +16,10 @@ public class Embed
     public Footer footer { get; set; }
     public Author author { get; set; }
     public Field[] fields { get; set; }
-    public string thumbnail { get; set; }
+    public Thumbnail thumbnail { get; set; }
     public string image { get; set; }
 
-    public Embed(string title, string description, string url, string color, string timestamp, Footer footer, Author author, Field[] fields, string thumbnail, string image)
+    public Embed(string title, string description, string url, string color, string timestamp, Footer footer, Author author, Field[] fields, Thumbnail thumbnail, string image)
     {
         this.title = title;
         this.description = description;

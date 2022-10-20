@@ -5881,7 +5881,7 @@ public class UIHandler
             yield break;
         }
 
-        var embed = new Embed(null, null, null, "5763719", DateTime.UtcNow.ToString("s"), new(Provider.serverName, Provider.configData.Browser.Icon), new(PlayerData.SteamName, $"https://steamcommunity.com/profiles/{PlayerData.SteamID}", PlayerData.AvatarLinks[0]), new Field[] { new("Info:", $"Case: {@case.Case.CaseName}\nSkin: [{rewardRarity.ToFriendlyName()}] {rewardName}", true) } ,null, null);
+        var embed = new Embed(null, null, null, "5763719", DateTime.UtcNow.ToString("s"), new(Provider.serverName, Provider.configData.Browser.Icon), new(PlayerData.SteamName, $"https://steamcommunity.com/profiles/{PlayerData.SteamID}", PlayerData.AvatarLinks[0]), new Field[] { new("Info:", $"Case: {@case.Case.CaseName}\nSkin: [{rewardRarity.ToFriendlyName()}] {rewardName}", true) } ,new(rewardImage), null);
 
         Task.Run(() =>
         {

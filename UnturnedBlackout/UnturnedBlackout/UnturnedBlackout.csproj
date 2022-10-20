@@ -283,6 +283,7 @@
         <Compile Include="Managers\UIManager.cs" />
         <Compile Include="Managers\UnboxManager.cs" />
         <Compile Include="Models\Animation\AnimationItemUnlock.cs" />
+        <Compile Include="Models\Bot\BotLeaderboardReward.cs" />
         <Compile Include="Models\Configuration\BaseValuesConfig.cs" />
         <Compile Include="Models\Configuration\DefaultSkillsConfig.cs" />
         <Compile Include="Models\Configuration\GamemodeConfig.cs" />
@@ -342,6 +343,7 @@
         <Compile Include="Models\Webhook\Field.cs" />
         <Compile Include="Models\Webhook\Footer.cs" />
         <Compile Include="Models\Webhook\Message.cs" />
+        <Compile Include="Models\Webhook\Thumbnail.cs" />
         <Compile Include="Patches\BarricadePatches.cs" />
         <Compile Include="Patches\ClothingPatches.cs" />
         <Compile Include="Models\FFA\FFAPlayer.cs" />

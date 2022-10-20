@@ -12,6 +12,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Net;
+using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Timers;
@@ -21,6 +24,7 @@ using UnturnedBlackout.Database.Data;
 using UnturnedBlackout.Enums;
 using UnturnedBlackout.Helpers;
 using UnturnedBlackout.Models.Animation;
+using UnturnedBlackout.Models.Bot;
 using UnturnedBlackout.Models.Data;
 using UnturnedBlackout.Models.Webhook;
 using Achievement = UnturnedBlackout.Database.Base.Achievement;
@@ -3294,9 +3298,11 @@ public class DatabaseManager
             Logging.Debug("Checking if daily leaderboard needs to be wiped");
             if (ServerOptions.DailyLeaderboardWipe < DateTimeOffset.UtcNow)
             {
+                var botRewards = new List<BotReward>();
+                
                 // Give all ranked rewards
                 Embed embed = new(null, $"Last Playtest Rankings ({PlayerDailyLeaderboard.Count} Players)", "", "15105570", DateTime.UtcNow.ToString("s"), new(Provider.serverName, Provider.configData.Browser.Icon), new(Provider.serverName, "", Provider.configData.Browser.Icon),
-                    new Field[] { new($"Ranked:", "", false), new("Percentile:", "", false) }, "", "");
+                    new Field[] { new($"Ranked:", "", false), new("Percentile:", "", false) }, null, null);
 
                 foreach (var rankedReward in ServerOptions.DailyRankedRewards)
                 {
@@ -3308,6 +3314,8 @@ public class DatabaseManager
                     embed.fields[0].value += $"{Utility.GetDiscordEmoji(rankedReward.Key + 1)} [{leaderboardData.SteamName}](https://steamcommunity.com/profiles/{leaderboardData.SteamID}/) | {leaderboardData.Kills + leaderboardData.HeadshotKills} Kills \n";
                     if (rankedReward.Key == 2)
                         embed.fields[0].value += $"\n";
+                    
+                    botRewards.Add(new(leaderboardData.SteamID.ToString(), rankedReward.Key + 1, 0));
                 }
 
                 // Give all percentile rewards
@@ -3323,11 +3331,31 @@ public class DatabaseManager
 
                         var leaderboardData = PlayerDailyLeaderboard[i];
                         bulkRewards.Add(new(leaderboardData.SteamID, percentileReward.Rewards));
+                        var botReward = botRewards.FirstOrDefault(k => k.steam_id == leaderboardData.SteamID.ToString());
+                        if (botReward != null)
+                            botReward.percentile = percentileReward.UpperPercentile;
+                        else
+                            botRewards.Add(new(leaderboardData.SteamID.ToString(), PlayerDailyLeaderboard.IndexOf(leaderboardData) + 1, percentileReward.UpperPercentile));
                     }
 
                     embed.fields[1].value += $"**Top {percentileReward.UpperPercentile}%:** {upperIndex - lowerIndex} players \n";
                 }
 
+                try
+                {
+                    var leaderboardReward = new BotLeaderboardReward("daily", PlayerDailyLeaderboard.Count, botRewards.ToArray());
+                    var bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(leaderboardReward));
+                    using WebClient webClient = new();
+                    var headers = webClient.Headers;
+                    headers.Set(HttpRequestHeader.ContentType, "application/json");
+                    _ = webClient.UploadData($"http://213.32.6.3:27116/leaderboard", bytes);
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log("Error sending bot leaderboard reward info");
+                    Logger.Log(ex);
+                }
+                
                 try
                 {
                     DiscordManager.SendEmbed(embed, "Leaderboard", LEADERBOARD_WEBHOOK_URL);
@@ -3366,9 +3394,11 @@ public class DatabaseManager
             Logging.Debug("Checking if weekly leaderboard needs to be wiped");
             if (ServerOptions.WeeklyLeaderboardWipe < DateTimeOffset.UtcNow)
             {
+                var botRewards = new List<BotReward>();
+                
                 // Give all ranked rewards
                 Embed embed = new("", $"Last Playtest Rankings ({PlayerWeeklyLeaderboard.Count} Players)", "", "15105570", DateTime.UtcNow.ToString("s"), new(Provider.serverName, Provider.configData.Browser.Icon), new(Provider.serverName, "", Provider.configData.Browser.Icon),
-                    new Field[] { new($"Ranked:", "", false), new("Percentile:", "", false) }, "", "");
+                    new Field[] { new($"Ranked:", "", false), new("Percentile:", "", false) }, null, null);
 
                 foreach (var rankedReward in ServerOptions.WeeklyRankedRewards)
                 {
@@ -3380,6 +3410,8 @@ public class DatabaseManager
                     embed.fields[0].value += $"{Utility.GetDiscordEmoji(rankedReward.Key + 1)} [{leaderboardData.SteamName}](https://steamcommunity.com/profiles/{leaderboardData.SteamID}/) | {leaderboardData.Kills + leaderboardData.HeadshotKills} Kills \n";
                     if (rankedReward.Key == 2)
                         embed.fields[0].value += $"\n";
+                    
+                    botRewards.Add(new(leaderboardData.SteamID.ToString(), rankedReward.Key + 1, 0));
                 }
 
                 // Give all percentile rewards
@@ -3395,11 +3427,32 @@ public class DatabaseManager
 
                         var leaderboardData = PlayerWeeklyLeaderboard[i];
                         bulkRewards.Add(new(leaderboardData.SteamID, percentileReward.Rewards));
+                    
+                        var botReward = botRewards.FirstOrDefault(k => k.steam_id == leaderboardData.SteamID.ToString());
+                        if (botReward != null)
+                            botReward.percentile = percentileReward.UpperPercentile;
+                        else
+                            botRewards.Add(new(leaderboardData.SteamID.ToString(), PlayerWeeklyLeaderboard.IndexOf(leaderboardData) + 1, percentileReward.UpperPercentile));
                     }
 
                     embed.fields[1].value += $"**Top {percentileReward.UpperPercentile}%:** {upperIndex - lowerIndex} players \n";
                 }
 
+                try
+                {
+                    var leaderboardReward = new BotLeaderboardReward("weekly", PlayerWeeklyLeaderboard.Count, botRewards.ToArray());
+                    var bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(leaderboardReward));
+                    using WebClient webClient = new();
+                    var headers = webClient.Headers;
+                    headers.Set(HttpRequestHeader.ContentType, "application/json");
+                    _ = webClient.UploadData($"http://213.32.6.3:27116/leaderboard", bytes);
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log("Error sending bot leaderboard reward info");
+                    Logger.Log(ex);
+                }
+                
                 try
                 {
                     DiscordManager.SendEmbed(embed, "Leaderboard", LEADERBOARD_WEBHOOK_URL);
@@ -3436,6 +3489,8 @@ public class DatabaseManager
             {
                 IsPendingSeasonalWipe = false;
 
+                var botRewards = new List<BotReward>();
+                
                 // Give all ranked rewards
                 Embed embed = new(null, $"Last Playtest Rankings ({PlayerSeasonalLeaderboard.Count} Players)", null, "15105570", DateTime.UtcNow.ToString("s"), new(Provider.serverName, Provider.configData.Browser.Icon), new(Provider.serverName, "", Provider.configData.Browser.Icon),
                     new Field[] { new($"Ranked:", "", false), new("Percentile:", "", false) }, null, null);
@@ -3450,6 +3505,8 @@ public class DatabaseManager
                     embed.fields[0].value += $"{Utility.GetDiscordEmoji(rankedReward.Key + 1)} [{leaderboardData.SteamName}](https://steamcommunity.com/profiles/{leaderboardData.SteamID}/) | {leaderboardData.Kills + leaderboardData.HeadshotKills} Kills \n";
                     if (rankedReward.Key == 2)
                         embed.fields[0].value += $"\n";
+                    
+                    botRewards.Add(new(leaderboardData.SteamID.ToString(), rankedReward.Key + 1, 0));
                 }
 
                 // Give all percentile rewards
@@ -3465,11 +3522,32 @@ public class DatabaseManager
 
                         var leaderboardData = PlayerSeasonalLeaderboard[i];
                         bulkRewards.Add(new(leaderboardData.SteamID, percentileReward.Rewards));
+                        
+                        var botReward = botRewards.FirstOrDefault(k => k.steam_id == leaderboardData.SteamID.ToString());
+                        if (botReward != null)
+                            botReward.percentile = percentileReward.UpperPercentile;
+                        else
+                            botRewards.Add(new(leaderboardData.SteamID.ToString(), PlayerSeasonalLeaderboard.IndexOf(leaderboardData) + 1, percentileReward.UpperPercentile));
                     }
 
                     embed.fields[1].value += $"**Top {percentileReward.UpperPercentile}%:** {upperIndex - lowerIndex} players \n";
                 }
 
+                try
+                {
+                    var leaderboardReward = new BotLeaderboardReward("seasonal", PlayerSeasonalLeaderboard.Count, botRewards.ToArray());
+                    var bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(leaderboardReward));
+                    using WebClient webClient = new();
+                    var headers = webClient.Headers;
+                    headers.Set(HttpRequestHeader.ContentType, "application/json");
+                    _ = webClient.UploadData($"http://213.32.6.3:27116/leaderboard", bytes);
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log("Error sending bot leaderboard reward info");
+                    Logger.Log(ex);
+                }
+                
                 try
                 {
                     DiscordManager.SendEmbed(embed, "Leaderboard", LEADERBOARD_WEBHOOK_URL);
@@ -3742,7 +3820,7 @@ public class DatabaseManager
             }
             
             Logging.Debug("Reloading unboxed amount for gun charms");
-            rdr = new MySqlCommand($"SELECT `GunCharmID`,`UnboxedAmount` FROM `{GUNS_CHARMS}`;", conn).ExecuteReader();
+            rdr = new MySqlCommand($"SELECT `CharmID`,`UnboxedAmount` FROM `{GUNS_CHARMS}`;", conn).ExecuteReader();
             try
             {
                 while (rdr.Read())
@@ -4483,7 +4561,7 @@ public class DatabaseManager
         if (!GunCharms.TryGetValue(id, out var charm))
             throw new ArgumentNullException(nameof(id), $"Charm with id {id} is not found");
 
-        AddQuery($"UPDATE `{GUNS_CHARMS}` SET `UnboxedAmount` = `UnboxedAmount` + {amount} WHERE `ID` = {id};");
+        AddQuery($"UPDATE `{GUNS_CHARMS}` SET `UnboxedAmount` = `UnboxedAmount` + {amount} WHERE `CharmID` = {id};");
         charm.UnboxedAmount += amount;
     }
     
@@ -4831,7 +4909,7 @@ public class DatabaseManager
         if (!Cards.TryGetValue(id, out var card))
             throw new ArgumentNullException(nameof(id), $"Card with id {id} doesn't exist in the database, while increasing unboxed amount");
 
-        AddQuery($"UPDATE `{CARDS}` SET `UnboxedAmount` = `UnboxedAmount` + {amount} WHERE `ID` = {id};");
+        AddQuery($"UPDATE `{CARDS}` SET `UnboxedAmount` = `UnboxedAmount` + {amount} WHERE `CardID` = {id};");
         card.UnboxedAmount += amount;
     }
 

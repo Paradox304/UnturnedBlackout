@@ -52,7 +52,7 @@ public class LoggingManager
 
     public void Warn(string message)
     {
-        Embed embed = new("", "Warning", "", "10038562", DateTime.UtcNow.ToString("s"), new(Provider.serverName, Provider.configData.Browser.Icon), new(Provider.serverName, "", Provider.configData.Browser.Icon), new Field[] { new("Message:", message, true) }, "", "");
+        Embed embed = new("", "Warning", "", "10038562", DateTime.UtcNow.ToString("s"), new(Provider.serverName, Provider.configData.Browser.Icon), new(Provider.serverName, "", Provider.configData.Browser.Icon), new Field[] { new("Message:", message, true) }, null, null);
 
         DiscordManager.SendEmbed(embed, "Warning", WARNINGS_URL);
     }
