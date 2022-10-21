@@ -6133,6 +6133,7 @@ public class UIHandler
                 EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content IMAGE {i}", Config.Icons.FileData.GloveUnboxingIconLink);
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Name TEXT {i}", "Gloves");
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Extra TEXT {i}", " ");
+                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content BOUGHT {i}", false);
                 SendRarity("SERVER Unbox Content", ERarity.YELLOW, i);
                 continue;
             }
@@ -6143,6 +6144,7 @@ public class UIHandler
                 EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content IMAGE {i}", Config.Icons.FileData.KnifeUnboxingIconLink);
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Name TEXT {i}", "Melee");
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Extra TEXT {i}", " ");
+                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content BOUGHT {i}", false);
                 SendRarity("SERVER Unbox Content", ERarity.YELLOW, i);
                 continue;
             }
@@ -6159,6 +6161,7 @@ public class UIHandler
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Name TEXT {i}", $"{skin.Gun.GunName} | {skin.SkinName}");
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Extra TEXT {i}", " ");
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Description TITLE", "Unbox Case");
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content BOUGHT {i}", PlayerLoadout.GunSkinsSearchByID.ContainsKey(skin.ID));
             SendRarity("SERVER Unbox Content", skin.SkinRarity, i);
         }
     }
