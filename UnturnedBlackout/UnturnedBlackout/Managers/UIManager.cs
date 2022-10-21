@@ -1469,10 +1469,13 @@ public class UIManager
         EffectManager.sendUIEffectVisibility(SOUNDS_KEY, player.TransportConnection, true, "FlagSaved0", true);
     }
 
-    public void SendFlagCapturedSound(GamePlayer player)
+    public void SendFlagCapturedSound(List<GamePlayer> players)
     {
-        EffectManager.sendUIEffectVisibility(SOUNDS_KEY, player.TransportConnection, true, "FlagSaved0", false);
-        EffectManager.sendUIEffectVisibility(SOUNDS_KEY, player.TransportConnection, true, "FlagSaved0", true);
+        foreach (var player in players)
+        {
+            EffectManager.sendUIEffectVisibility(SOUNDS_KEY, player.TransportConnection, true, "FlagSaved0", false);
+            EffectManager.sendUIEffectVisibility(SOUNDS_KEY, player.TransportConnection, true, "FlagSaved0", true);
+        }
     }
 
     public void ClearCTFHUD(GamePlayer player) => EffectManager.askEffectClearByID(CTF_ID, player.TransportConnection);
@@ -2008,6 +2011,9 @@ public class UIManager
                 return;
             case "Killstreak 3 Hotkey INPUT":
                 handler.SetHotkey(EHotkey.KILLSTREAK_3, text);
+                return;
+            case "SERVER Unbox Buy Amount INPUT":
+                handler.SetUnboxingStoreBuyAmount(text);
                 return;
         }
     }

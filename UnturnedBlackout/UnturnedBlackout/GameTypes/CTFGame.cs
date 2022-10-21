@@ -844,7 +844,7 @@ public class CTFGame : Game
                 cPlayer.FlagsCaptured++;
 
                 UI.ShowXPUI(cPlayer.GamePlayer, Config.Medals.FileData.FlagCapturedXP, Plugin.Instance.Translate("Flag_Captured").ToRich());
-                UI.SendFlagCapturedSound(cPlayer.GamePlayer);
+                UI.SendFlagCapturedSound(cPlayer.Team.Players.Keys.Select(k => Plugin.Instance.Game.GetGamePlayer(k)).ToList());
 
                 TaskDispatcher.QueueOnMainThread(() =>
                 {

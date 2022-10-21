@@ -93,6 +93,7 @@ public class UIHandler
     public int UnboxingPageID { get; set; }
     public int SelectedCaseID { get; set; }
     public ECurrency SelectedCaseBuyMethod { get; set; }
+    public int SelectedCaseBuyAmount { get; set; }
     public bool IsUnboxing { get; set; }
 
     // Battlepass
@@ -3968,7 +3969,7 @@ public class UIHandler
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Credits", !string.IsNullOrEmpty(card.Card.AuthorCredits));
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Credits TEXT", card.Card.AuthorCredits);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Owned", true);
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Owned TEXT", $"Charm owned by {card.Card.UnboxedAmount} players");
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Owned TEXT", $"Card owned by {card.Card.UnboxedAmount} players");
         SendRarityName("SERVER Item Rarity TEXT", card.Card.CardRarity);
     }
 
@@ -5275,7 +5276,7 @@ public class UIHandler
 
         for (var i = 0; i <= 48; i++)
         {
-            yield return new WaitForSeconds(0.1f);
+            yield return new WaitForSeconds(0.01f);
 
             if (!page.Achievements.TryGetValue(i, out var achievement))
                 break;
@@ -5978,8 +5979,12 @@ public class UIHandler
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"Crate Rolling ANIM {UnityEngine.Random.Range(1, 6)}", true);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Crate EXAMPLE Open ANIM", true);
 
-        yield return new WaitForSeconds(7.5f);
-
+        //yield return new WaitForSeconds(7.5f);
+        yield return new WaitForSeconds(1.36f);
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Rolling Starter", true);
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Wave Starter", true);
+        yield return new WaitForSeconds(6.01f);
+        
         IsUnboxing = false;
         TaskDispatcher.QueueOnMainThread(() =>
         {
@@ -6073,7 +6078,8 @@ public class UIHandler
         }
 
         SelectedCaseID = @case.CaseID;
-
+        SelectedCaseBuyAmount = 1;
+        
         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Unbox Buy IMAGE", @case.IconLink);
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Unbox Buy TEXT", @case.CaseName);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Unbox Buy Credits BUTTON", false);
@@ -6086,6 +6092,26 @@ public class UIHandler
         SendRarityName("SERVER Unbox Buy RarityType TEXT", @case.CaseRarity);
     }
 
+    public void SetUnboxingStoreBuyAmount(string input)
+    {
+        if (!int.TryParse(input, out var amount))
+        {
+            Logging.Debug($"{Player.CharacterName} inputted a non-integer in case buy amount");
+            return;
+        }
+
+        if (amount <= 0 || !DB.Cases.TryGetValue(SelectedCaseID, out var @case))
+        {
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Unbox Buy Amount INPUT", "1");
+            return;
+        }
+
+        SelectedCaseBuyAmount = amount;
+        
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Preview Coins TEXT", $"{Utility.GetCurrencySymbol(ECurrency.COINS)} <color={(PlayerData.Coins >= @case.CoinPrice * amount ? "#9CFF84" : "#FF6E6E")}>{@case.CoinPrice * amount}</color>");
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Preview Scrap TEXT", $"{Utility.GetCurrencySymbol(ECurrency.SCRAP)} <color={(PlayerData.Scrap >= @case.ScrapPrice * amount ? "#9CFF84" : "#FF6E6E")}>{@case.ScrapPrice * amount}</color>");
+    }
+    
     public void PreviewUnboxingStoreCase()
     {
         if (!DB.Cases.TryGetValue(SelectedCaseID, out var @case))
@@ -6145,7 +6171,7 @@ public class UIHandler
             return;
         }
 
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Unbox Buy Modal Description TEXT", @case.CaseName);
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Unbox Buy Modal Description TEXT", $"{SelectedCaseBuyAmount}x {@case.CaseName}");
         SelectedCaseBuyMethod = currency;
     }
 
@@ -6157,7 +6183,7 @@ public class UIHandler
             return;
         }
 
-        var buyPrice = @case.GetBuyPrice(SelectedCaseBuyMethod);
+        var buyPrice = @case.GetBuyPrice(SelectedCaseBuyMethod) * SelectedCaseBuyAmount;
         if (buyPrice > PlayerData.GetCurrency(SelectedCaseBuyMethod))
         {
             SendNotEnoughCurrencyModal(SelectedCaseBuyMethod);
@@ -6176,7 +6202,7 @@ public class UIHandler
                 return;
         }
 
-        DB.IncreasePlayerCase(SteamID, @case.CaseID, 1);
+        DB.IncreasePlayerCase(SteamID, @case.CaseID, SelectedCaseBuyAmount);
     }
 
     public void ShowUnboxingInventoryPage()
