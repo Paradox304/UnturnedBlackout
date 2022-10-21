@@ -249,8 +249,6 @@ public abstract class Game
 
     public void OnStanceChanged(PlayerStance obj) => PlayerStanceChanged(obj);
 
-    public void OnChangeFiremode(GamePlayer player) => PlayerChangeFiremode(player);
-
     private void OnPlayerPickupItem(UnturnedPlayer player, InventoryGroup inventoryGroup, byte inventoryIndex, ItemJar P) => PlayerPickupItem(player, inventoryGroup, inventoryIndex, P);
 
     public void OnKill(GamePlayer killer, GamePlayer victim, ushort weaponID, string killerColor, string victimColor, bool isHeadshot)
@@ -351,7 +349,7 @@ public abstract class Game
 
     public abstract void PlayerPickupItem(UnturnedPlayer player, InventoryGroup inventoryGroup, byte inventoryIndex, ItemJar P);
 
-    public abstract void PlayerChangeFiremode(GamePlayer player);
+    public abstract void PlayerSendScoreboard(GamePlayer gPlayer, bool state);
     public abstract void PlayerStanceChanged(PlayerStance obj);
     public abstract void PlayerThrowableSpawned(GamePlayer player, UseableThrowable throwable);
     public abstract void PlayerBarricadeSpawned(GamePlayer player, BarricadeDrop drop);

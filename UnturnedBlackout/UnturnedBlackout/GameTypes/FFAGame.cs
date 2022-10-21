@@ -791,31 +791,27 @@ public class FFAGame : Game
         UI.ShowXPUI(player, Config.Medals.FileData.TurretDestroyXP, Plugin.Instance.Translate("Turret_Destroy"));
         DB.IncreasePlayerXP(player.SteamID, Config.Medals.FileData.TurretDestroyXP);
     }
-
-    public override void PlayerChangeFiremode(GamePlayer player)
+    
+    public override void PlayerSendScoreboard(GamePlayer gPlayer, bool state)
     {
-        var fPlayer = GetFFAPlayer(player.Player);
-        if (fPlayer == null)
+        var player = GetFFAPlayer(gPlayer.Player);
+        if (player == null)
             return;
-
-        if (GamePhase == EGamePhase.ENDING)
-            return;
-
-        if (player.ScoreboardCooldown > DateTime.UtcNow)
-            return;
-
-        player.ScoreboardCooldown = DateTime.UtcNow.AddSeconds(0.5);
-
-        if (fPlayer.GamePlayer.HasScoreboard)
+        
+        if (state && !gPlayer.HasScoreboard)
         {
-            fPlayer.GamePlayer.HasScoreboard = false;
-            UI.HideFFALeaderboard(fPlayer.GamePlayer);
+            if (gPlayer.ScoreboardCooldown > DateTime.UtcNow)
+                return;
+            
+            gPlayer.HasScoreboard = true;
+            UI.SetupFFALeaderboard(player, Players, Location, true, IsHardcore);
+            UI.ShowFFALeaderboard(gPlayer);
         }
-        else
+        else if (!state && gPlayer.HasScoreboard)
         {
-            fPlayer.GamePlayer.HasScoreboard = true;
-            UI.SetupFFALeaderboard(fPlayer, Players, Location, true, IsHardcore);
-            UI.ShowFFALeaderboard(fPlayer.GamePlayer);
+            gPlayer.HasScoreboard = false;
+            UI.HideFFALeaderboard(gPlayer);
+            gPlayer.ScoreboardCooldown = DateTime.UtcNow.AddSeconds(1);
         }
     }
 

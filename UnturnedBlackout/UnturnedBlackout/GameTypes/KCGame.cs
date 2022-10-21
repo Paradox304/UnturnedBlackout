@@ -922,31 +922,27 @@ public class KCGame : Game
         DB.IncreasePlayerXP(player.SteamID, Config.Medals.FileData.TurretDestroyXP);
     }
 
-    public override void PlayerChangeFiremode(GamePlayer player)
+    public override void PlayerSendScoreboard(GamePlayer gPlayer, bool state)
     {
-        var kPlayer = GetKCPlayer(player.Player);
-        if (kPlayer == null)
+        var player = GetKCPlayer(gPlayer.Player);
+        if (player == null)
             return;
 
-        if (GamePhase == EGamePhase.ENDING)
-            return;
-
-        if (player.ScoreboardCooldown > DateTime.UtcNow)
-            return;
-
-        player.ScoreboardCooldown = DateTime.UtcNow.AddSeconds(0.5);
-
-        if (kPlayer.GamePlayer.HasScoreboard)
+        if (state && !gPlayer.HasScoreboard)
         {
-            kPlayer.GamePlayer.HasScoreboard = false;
-            UI.HideKCLeaderboard(kPlayer.GamePlayer);
-        }
-        else
-        {
-            kPlayer.GamePlayer.HasScoreboard = true;
+            if (gPlayer.ScoreboardCooldown > DateTime.UtcNow)
+                return;
+            
+            gPlayer.HasScoreboard = true;
             var wonTeam = BlueTeam.Score > RedTeam.Score ? BlueTeam : RedTeam.Score > BlueTeam.Score ? RedTeam : new(this, -1, true, 0, new());
-            UI.SetupKCLeaderboard(kPlayer, Players, Location, wonTeam, BlueTeam, RedTeam, true, IsHardcore);
-            UI.ShowKCLeaderboard(kPlayer.GamePlayer);
+            UI.SetupKCLeaderboard(player, Players, Location, wonTeam, BlueTeam, RedTeam, true, IsHardcore);
+            UI.ShowKCLeaderboard(gPlayer);
+        }
+        else if (!state && gPlayer.HasScoreboard)
+        {
+            gPlayer.HasScoreboard = false;
+            UI.HideKCLeaderboard(gPlayer);
+            gPlayer.ScoreboardCooldown = DateTime.UtcNow.AddSeconds(1);
         }
     }
 

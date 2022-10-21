@@ -9,6 +9,7 @@ using System.Collections;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
+using UnturnedBlackout.Enums;
 using UnturnedBlackout.Helpers;
 using UnturnedBlackout.Managers;
 using Logger = Rocket.Core.Logging.Logger;
@@ -119,25 +120,27 @@ public class Plugin : RocketPlugin<Config>
 
     private void OnHotkeyPressed(Player player, uint simulation, byte key, bool state)
     {
-        if (state == false)
-            return;
-
         var gPlayer = Game.GetGamePlayer(player);
 
         var game = gPlayer?.CurrentGame;
-        if (game == null)
+        if (game == null || game.GamePhase == EGamePhase.ENDING)
             return;
-
+        
         switch (key)
         {
             case 0:
-                game.OnChangeFiremode(gPlayer);
+                game.PlayerSendScoreboard(gPlayer, state);
                 break;
-            case 1:
-                if (game.GamePhase != Enums.EGamePhase.ENDING && !gPlayer.HasMidgameLoadout)
+            case 1 when state:
+                if (!gPlayer.HasMidgameLoadout)
                 {
                     gPlayer.HasMidgameLoadout = true;
                     UI.ShowMidgameLoadoutUI(gPlayer);
+                }
+                else
+                {
+                    gPlayer.HasMidgameLoadout = false;
+                    UI.ClearMidgameLoadoutUI(gPlayer);
                 }
 
                 break;
