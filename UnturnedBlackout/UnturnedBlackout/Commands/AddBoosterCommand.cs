@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnturnedBlackout.Enums;
+using UnturnedBlackout.Extensions;
 
 namespace UnturnedBlackout.Commands;
 

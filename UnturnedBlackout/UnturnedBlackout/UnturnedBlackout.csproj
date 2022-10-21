@@ -267,7 +267,7 @@
         <Compile Include="GameTypes\Game.cs" />
         <Compile Include="GameTypes\KCGame.cs" />
         <Compile Include="GameTypes\TDMGame.cs" />
-        <Compile Include="Helpers\Logging.cs" />
+        <Compile Include="Extensions\Logging.cs" />
         <Compile Include="Instances\UIHandler.cs" />
         <Compile Include="Managers\AchievementManager.cs" />
         <Compile Include="Managers\BPManager.cs" />
@@ -357,7 +357,7 @@
         <Compile Include="Properties\AssemblyInfo.cs" />
         <Compile Include="Models\FFA\FFASpawnPoint.cs" />
         <Compile Include="Models\TDM\TDMSpawnPoint.cs" />
-        <Compile Include="Helpers\Utility.cs" />
+        <Compile Include="Extensions\Utility.cs" />
     </ItemGroup>
     <ItemGroup>
         <None Include="app.config" />

@@ -4,7 +4,7 @@ using System.Net;
 using System.Text;
 using System.Text.Json;
 using System.Timers;
-using UnturnedBlackout.Helpers;
+using UnturnedBlackout.Extensions;
 using UnturnedBlackout.Models.Webhook;
 
 namespace UnturnedBlackout.Managers;

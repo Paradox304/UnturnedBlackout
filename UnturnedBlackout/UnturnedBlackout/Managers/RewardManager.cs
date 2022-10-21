@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnturnedBlackout.Database.Base;
 using UnturnedBlackout.Enums;
-using UnturnedBlackout.Helpers;
+using UnturnedBlackout.Extensions;
 
 namespace UnturnedBlackout.Managers;
 

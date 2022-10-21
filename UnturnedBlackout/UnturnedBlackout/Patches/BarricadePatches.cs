@@ -1,6 +1,6 @@
 ﻿using HarmonyLib;
 using SDG.Unturned;
-using UnturnedBlackout.Helpers;
+using UnturnedBlackout.Extensions;
 
 namespace UnturnedBlackout.Patches;
 

@@ -22,7 +22,7 @@ using UnityEngine;
 using UnturnedBlackout.Database.Base;
 using UnturnedBlackout.Database.Data;
 using UnturnedBlackout.Enums;
-using UnturnedBlackout.Helpers;
+using UnturnedBlackout.Extensions;
 using UnturnedBlackout.Models.Animation;
 using UnturnedBlackout.Models.Bot;
 using UnturnedBlackout.Models.Data;
@@ -251,8 +251,11 @@ public class DatabaseManager
     {
         CacheRefresher.Stop();
         BatchQueryCleaner.Stop();
-        if (!ForcedShutdown)
-            CleanQueries(null, null);
+        if (ForcedShutdown)
+            return;
+
+        CleanQueries(null, null);
+        Logger.Log("Cleared all queries", ConsoleColor.Green);
     }
 
     public async Task LoadDatabaseAsync()

@@ -11,8 +11,8 @@ using System.Reflection;
 using UnityEngine;
 using UnturnedBlackout.Database.Data;
 using UnturnedBlackout.Enums;
+using UnturnedBlackout.Extensions;
 using UnturnedBlackout.GameTypes;
-using UnturnedBlackout.Helpers;
 using UnturnedBlackout.Managers;
 using UnturnedBlackout.Models.Animation;
 
@@ -38,7 +38,8 @@ public class GamePlayer
     public DateTime ScoreboardCooldown { get; set; }
 
     public bool HasMidgameLoadout { get; set; }
-
+    public DateTime LastMidgameLoadoutSent { get; set; }
+    
     public bool HasSpawnProtection { get; set; }
 
     public Stack<CSteamID> LastDamager { get; set; }
@@ -118,7 +119,7 @@ public class GamePlayer
         LastDamager = new(100);
         PendingAnimations = new();
         ScoreboardCooldown = DateTime.UtcNow;
-
+        LastMidgameLoadoutSent = DateTime.UtcNow;
         AvailableKillstreaks = new();
         KillstreakTriggers = new();
         OrderedKillstreaks = new();

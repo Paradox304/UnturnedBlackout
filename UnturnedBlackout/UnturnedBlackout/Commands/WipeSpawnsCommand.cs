@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using UnturnedBlackout.Enums;
+using UnturnedBlackout.Extensions;
 
 namespace UnturnedBlackout.Commands;
 

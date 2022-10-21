@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace UnturnedBlackout.Helpers;
+namespace UnturnedBlackout.Extensions;
 
 public static class Logging
 {

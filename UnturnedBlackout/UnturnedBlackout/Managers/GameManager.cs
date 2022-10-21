@@ -11,8 +11,8 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnturnedBlackout.Enums;
+using UnturnedBlackout.Extensions;
 using UnturnedBlackout.GameTypes;
-using UnturnedBlackout.Helpers;
 using UnturnedBlackout.Models.Global;
 using Logger = Rocket.Core.Logging.Logger;
 

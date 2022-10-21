@@ -1,18 +1,17 @@
-﻿using Rocket.API;
-using Rocket.Unturned.Player;
-using SDG.Unturned;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Rocket.API;
+using Rocket.Unturned.Player;
+using SDG.Unturned;
 using UnityEngine;
 using UnturnedBlackout.Database.Base;
 using UnturnedBlackout.Database.Data;
 using UnturnedBlackout.Enums;
-using UnturnedBlackout.Helpers;
 using Logger = Rocket.Core.Logging.Logger;
 
-namespace UnturnedBlackout;
+namespace UnturnedBlackout.Extensions;
 
 public static class Utility
 {

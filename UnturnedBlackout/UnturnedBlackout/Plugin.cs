@@ -10,7 +10,7 @@ using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using UnturnedBlackout.Enums;
-using UnturnedBlackout.Helpers;
+using UnturnedBlackout.Extensions;
 using UnturnedBlackout.Managers;
 using Logger = Rocket.Core.Logging.Logger;
 
@@ -132,15 +132,20 @@ public class Plugin : RocketPlugin<Config>
                 game.PlayerSendScoreboard(gPlayer, state);
                 break;
             case 1 when state:
+                if (DateTime.UtcNow - gPlayer.LastMidgameLoadoutSent < TimeSpan.FromSeconds(1))
+                    return;
+                
                 if (!gPlayer.HasMidgameLoadout)
                 {
                     gPlayer.HasMidgameLoadout = true;
                     UI.ShowMidgameLoadoutUI(gPlayer);
+                    gPlayer.LastMidgameLoadoutSent = DateTime.UtcNow;
                 }
                 else
                 {
                     gPlayer.HasMidgameLoadout = false;
                     UI.ClearMidgameLoadoutUI(gPlayer);
+                    gPlayer.LastMidgameLoadoutSent = DateTime.UtcNow;
                 }
 
                 break;

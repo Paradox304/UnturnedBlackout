@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnturnedBlackout.Database.Data;
 using UnturnedBlackout.Enums;
-using UnturnedBlackout.Helpers;
+using UnturnedBlackout.Extensions;
 using UnturnedBlackout.Models.Global;
 
 namespace UnturnedBlackout.Managers;
