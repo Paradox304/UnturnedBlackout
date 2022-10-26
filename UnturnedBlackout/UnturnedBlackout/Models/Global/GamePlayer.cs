@@ -426,8 +426,8 @@ public class GamePlayer
     {
         if (VoiceChatChecker != null)
             Plugin.Instance.StopCoroutine(VoiceChatChecker);
-        else if (CurrentGame != null)
-            CurrentGame.OnStartedTalking(this);
+        else
+            CurrentGame?.OnStartedTalking(this);
 
         VoiceChatChecker = Plugin.Instance.StartCoroutine(CheckVoiceChat());
     }

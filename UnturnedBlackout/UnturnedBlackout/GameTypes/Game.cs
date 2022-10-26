@@ -88,9 +88,8 @@ public abstract class Game
         BarricadeManager.onDamageBarricadeRequested -= OnBarricadeDamage;
         UseableConsumeable.onConsumePerformed -= OnConsumed;
         UseableGun.OnAimingChanged_Global -= OnAimingChanged;
-
-        if (KillFeedChecker != null)
-            Plugin.Instance.StopCoroutine(KillFeedChecker);
+        
+        KillFeedChecker.Stop();
     }
 
     private void OnAimingChanged(UseableGun obj)
@@ -144,7 +143,7 @@ public abstract class Game
         if (GameTurretDamager.TryGetValue(drop, out var damager) && damager != null)
         {
             Logging.Debug($"Turret damager coroutine not null, remove");
-            Plugin.Instance.StopCoroutine(damager);
+            damager.Stop();
         }
 
         _ = GameTurretDamager.Remove(drop);

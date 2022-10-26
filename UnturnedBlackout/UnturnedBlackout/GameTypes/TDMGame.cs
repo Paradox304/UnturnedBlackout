@@ -121,9 +121,7 @@ public class TDMGame : Game
 
     public IEnumerator GameEnd(TDMTeam wonTeam)
     {
-        if (GameEnder != null)
-            Plugin.Instance.StopCoroutine(GameEnder);
-
+        GameEnder.Stop();
         GamePhase = EGamePhase.ENDING;
         UI.OnGameUpdated();
 

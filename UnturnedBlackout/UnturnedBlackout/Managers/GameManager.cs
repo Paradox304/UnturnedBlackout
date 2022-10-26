@@ -227,15 +227,12 @@ public class GameManager
     private void OnPlayerDeath(PlayerLife sender, EDeathCause cause, ELimb limb, CSteamID instigator)
     {
         var ply = UnturnedPlayer.FromPlayer(sender.player);
-        if (ply == null)
+        if (ply == null || !Players.TryGetValue(ply.CSteamID, out var gPlayer))
             return;
 
-        if (Players.TryGetValue(ply.CSteamID, out var gPlayer))
-        {
-            var game = gPlayer.CurrentGame;
-            if (game == null)
-                SendPlayerToLobby(ply);
-        }
+        var game = gPlayer.CurrentGame;
+        if (game == null)
+            SendPlayerToLobby(ply);
     }
 
     private void OnMessageSent(SteamPlayer player, EChatMode mode, ref Color chatted, ref bool isRich, string text, ref bool isVisible)

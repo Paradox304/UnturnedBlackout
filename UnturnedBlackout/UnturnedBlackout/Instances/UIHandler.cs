@@ -152,17 +152,10 @@ public class UIHandler
 
     public void Destroy()
     {
-        if (TimerRefresher != null)
-            Plugin.Instance.StopCoroutine(TimerRefresher);
-
-        if (AchievementPageShower != null)
-            Plugin.Instance.StopCoroutine(AchievementPageShower);
-
-        if (MatchEndSummaryShower != null)
-            Plugin.Instance.StopCoroutine(MatchEndSummaryShower);
-
-        if (CrateUnboxer != null)
-            Plugin.Instance.StopCoroutine(CrateUnboxer);
+        TimerRefresher.Stop();
+        AchievementPageShower.Stop();
+        MatchEndSummaryShower.Stop();
+        CrateUnboxer.Stop();
     }
 
     public void BuildPages()
@@ -825,6 +818,9 @@ public class UIHandler
         EffectManager.sendUIEffect(MAIN_MENU_ID, MAIN_MENU_KEY, TransportConnection, true);
         Player.Player.enablePluginWidgetFlag(EPluginWidgetFlags.Modal);
         SetupMainMenu();
+
+        AchievementPageShower.Stop();
+        CrateUnboxer.Stop();
         if (summary != null)
             MatchEndSummaryShower = Plugin.Instance.StartCoroutine(ShowMatchEndSummary(summary));
     }
@@ -5242,10 +5238,8 @@ public class UIHandler
     public void SelectedAchievementMainPage(int mainPage)
     {
         AchievementMainPage = mainPage;
-
-        if (AchievementPageShower != null)
-            Plugin.Instance.StopCoroutine(AchievementPageShower);
-
+        AchievementPageShower.Stop();
+        
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements Previous BUTTON", false);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements Next BUTTON", false);
 
@@ -5332,9 +5326,7 @@ public class UIHandler
             return;
         }
 
-        if (AchievementPageShower != null)
-            Plugin.Instance.StopCoroutine(AchievementPageShower);
-
+        AchievementPageShower.Stop();
         AchievementPageShower = Plugin.Instance.StartCoroutine(ShowAchievementSubPage(nextPage));
     }
 
@@ -5354,9 +5346,7 @@ public class UIHandler
             return;
         }
 
-        if (AchievementPageShower != null)
-            Plugin.Instance.StopCoroutine(AchievementPageShower);
-
+        AchievementPageShower.Stop();
         AchievementPageShower = Plugin.Instance.StartCoroutine(ShowAchievementSubPage(nextPage));
     }
 
@@ -5368,9 +5358,7 @@ public class UIHandler
             return;
         }
 
-        if (AchievementPageShower != null)
-            Plugin.Instance.StopCoroutine(AchievementPageShower);
-
+        AchievementPageShower.Stop();
         AchievementPageShower = Plugin.Instance.StartCoroutine(ShowAchievementSubPage(page));
     }
 
@@ -5984,6 +5972,7 @@ public class UIHandler
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Wave Starter", true);
         yield return new WaitForSeconds(6.01f);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Result Starter", true);
+        yield return new WaitForSeconds(Player.Ping + 0.2f);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Result {rewardRarity}", true);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Unbox Button Toggler", @case.Amount > 0);
         IsUnboxing = false;

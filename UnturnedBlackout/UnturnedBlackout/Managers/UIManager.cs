@@ -179,8 +179,7 @@ public class UIManager
 
         if (TipSender.TryGetValue(player.CSteamID, out var tipSender))
         {
-            if (tipSender != null)
-                Plugin.Instance.StopCoroutine(tipSender);
+            tipSender.Stop();
         }
     }
 
@@ -280,9 +279,7 @@ public class UIManager
             return;
         }
 
-        if (player.AnimationChecker != null)
-            Plugin.Instance.StopCoroutine(player.AnimationChecker);
-
+        player.AnimationChecker.Stop();
         player.AnimationChecker = Plugin.Instance.StartCoroutine(player.CheckAnimation());
 
         switch (animationInfo.AnimationType)
@@ -486,9 +483,7 @@ public class UIManager
 
         if (TipSender.TryGetValue(player.CSteamID, out var tipSender))
         {
-            if (tipSender != null)
-                Plugin.Instance.StopCoroutine(tipSender);
-
+            tipSender.Stop();
             _ = TipSender.Remove(player.CSteamID);
         }
 
@@ -513,9 +508,7 @@ public class UIManager
     {
         if (TipSender.TryGetValue(player.CSteamID, out var tipSender))
         {
-            if (tipSender != null)
-                Plugin.Instance.StopCoroutine(tipSender);
-
+            tipSender.Stop();
             _ = TipSender.Remove(player.CSteamID);
         }
 
@@ -1907,8 +1900,7 @@ public class UIManager
                 if (handler.UnboxingPage == EUnboxingPage.OPEN)
                 {
                     handler.ShowUnboxingPage(EUnboxingPage.CASES);
-                    if (handler.CrateUnboxer != null)
-                        Plugin.Instance.StopCoroutine(handler.CrateUnboxer);
+                    handler.CrateUnboxer.Stop();
                 }
 
                 return;
@@ -1927,13 +1919,11 @@ public class UIManager
                 handler.BackwardUnboxingInventoryPage();
                 break;
             case "SERVER Summary Close BUTTON":
-                if (handler.MatchEndSummaryShower != null)
-                    Plugin.Instance.StopCoroutine(handler.MatchEndSummaryShower);
+                handler.MatchEndSummaryShower.Stop();
 
                 return;
             case "SERVER Summary Skip BUTTON":
-                if (handler.MatchEndSummaryShower != null)
-                    Plugin.Instance.StopCoroutine(handler.MatchEndSummaryShower);
+                handler.MatchEndSummaryShower.Stop();
 
                 return;
             case "Music Toggle BUTTON":

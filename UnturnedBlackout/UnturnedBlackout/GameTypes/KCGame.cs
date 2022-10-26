@@ -122,9 +122,7 @@ public class KCGame : Game
 
     public IEnumerator GameEnd(KCTeam wonTeam)
     {
-        if (GameEnder != null)
-            Plugin.Instance.StopCoroutine(GameEnder);
-
+        GameEnder.Stop();
         GamePhase = EGamePhase.ENDING;
 
         UI.OnGameUpdated();

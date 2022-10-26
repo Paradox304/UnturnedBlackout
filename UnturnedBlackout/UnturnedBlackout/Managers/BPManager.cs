@@ -89,8 +89,7 @@ public class BPManager
         {
             var oldTier = bp.CurrentTier;
             bp.CurrentTier += 1;
-            player.Data.Coins -= Config.Base.FileData.BattlepassTierSkipCost;
-
+            
             DB.DecreasePlayerCoins(player.SteamID, Config.Base.FileData.BattlepassTierSkipCost);
             DB.UpdatePlayerBPTier(player.SteamID, bp.CurrentTier);
 

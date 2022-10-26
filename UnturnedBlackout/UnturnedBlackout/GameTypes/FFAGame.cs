@@ -105,9 +105,7 @@ public class FFAGame : Game
 
     public IEnumerator GameEnd()
     {
-        if (GameEnder != null)
-            Plugin.Instance.StopCoroutine(GameEnder);
-
+        GameEnder.Stop();
         GamePhase = EGamePhase.ENDING;
         UI.OnGameUpdated();
         Dictionary<GamePlayer, MatchEndSummary> summaries = new();

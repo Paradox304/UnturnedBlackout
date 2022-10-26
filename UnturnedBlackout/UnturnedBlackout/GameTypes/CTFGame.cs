@@ -141,9 +141,7 @@ public class CTFGame : Game
 
     public IEnumerator GameEnd(CTFTeam wonTeam)
     {
-        if (GameEnder != null)
-            Plugin.Instance.StopCoroutine(GameEnder);
-
+        GameEnder.Stop();
         GamePhase = EGamePhase.ENDING;
         UI.OnGameUpdated();
 
