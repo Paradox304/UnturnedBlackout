@@ -45,6 +45,8 @@ public class UIHandler
     private const int MAXIMUM_LOADOUT_PAGE_ATTACHMENT_PRIMARY = 8;
     private const string CASE_UNBOXING_WEBHOOK_URL = "https://discord.com/api/webhooks/1031896101038608454/h1Fk3GGrt2DUrv3NWD3VrvBJkJbGSd-ZWQ0ZrAPoxVygxWdjgYkemYwNYZmRm-AIO1An";
     private const string CASE_UNBOXING_LIMITED_WEBHOOK_URL = "https://discord.com/api/webhooks/1032689974740525067/fGGfo6QkYTQRIkF2KJfFsEKUCh1AyJ6eCGjKanowEPBEnvtjeLtybJOdfnixhfJPPawE";
+
+    private const char STAR = '★';
     
     private DatabaseManager DB => Plugin.Instance.DB;
     public CSteamID SteamID { get; set; }
@@ -500,7 +502,7 @@ public class UIHandler
         var index = 0;
         var page = 1;
         Dictionary<int, LoadoutKnife> knives = new();
-        foreach (var knife in PlayerLoadout.Knives.Values.OrderByDescending(k => (byte)k.Knife.KnifeRarity))
+        foreach (var knife in PlayerLoadout.Knives.Values.OrderByDescending(k => k.Knife.KnifeName.Count(c => c == STAR)))
         {
             knives.Add(index, knife);
             if (index == MAX_ITEMS_PER_GRID)
@@ -631,7 +633,7 @@ public class UIHandler
         var index = 0;
         var page = 1;
         Dictionary<int, LoadoutGlove> gloves = new();
-        foreach (var glove in PlayerLoadout.Gloves.Values.OrderByDescending(k => (byte)k.Glove.GloveRarity))
+        foreach (var glove in PlayerLoadout.Gloves.Values.OrderByDescending(k => k.Glove.GloveName.Count(c => c == STAR)))
         {
             gloves.Add(index, glove);
             if (index == MAX_ITEMS_PER_GRID)
@@ -762,7 +764,7 @@ public class UIHandler
         var index = 0;
         var page = 1;
         Dictionary<int, object> skins = new();
-        foreach (var skin in PlayerLoadout.Knives.Values.Where(k => k.IsBought && k.Knife.LevelRequirement != 0).OrderByDescending(k => (byte)k.Knife.KnifeRarity).ThenBy(k => k.Knife.KnifeName))
+        foreach (var skin in PlayerLoadout.Knives.Values.Where(k => k.IsBought && k.Knife.LevelRequirement != 0).OrderByDescending(k => k.Knife.KnifeName.Count(c => c == STAR)).ThenBy(k => k.Knife.KnifeName))
         {
             skins.Add(index, skin.Knife);
             if (index == MAX_SKINS_PER_INVENTORY_PAGE)
@@ -777,7 +779,7 @@ public class UIHandler
             index++;
         }
 
-        foreach (var skin in PlayerLoadout.Gloves.Values.Where(k => k.IsBought).OrderByDescending(k => (byte)k.Glove.GloveRarity).ThenBy(k => k.Glove.GloveName))
+        foreach (var skin in PlayerLoadout.Gloves.Values.Where(k => k.IsBought).OrderByDescending(k => k.Glove.GloveName.Count(c => c == STAR)).ThenBy(k => k.Glove.GloveName))
         {
             skins.Add(index, skin.Glove); 
             
