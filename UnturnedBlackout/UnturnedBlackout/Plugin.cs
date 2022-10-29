@@ -6,6 +6,7 @@ using Rocket.Unturned.Permissions;
 using SDG.Unturned;
 using Steamworks;
 using System.Collections;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
@@ -29,7 +30,7 @@ public class Plugin : RocketPlugin<Config>
             Harmony.PatchAll(Assembly);
         }
 
-        Level.onLevelLoaded += OnLevelLoaded;
+        Level.onPostLevelLoaded += OnLevelLoaded;
         PlayerVoice.onRelayVoice += OnVoice;
 
         ObjectManager.onDamageObjectRequested += OnDamageObject;
@@ -52,7 +53,7 @@ public class Plugin : RocketPlugin<Config>
         UI.Destroy();
         DB.Destroy();
 
-        Level.onLevelLoaded -= OnLevelLoaded;
+        Level.onPostLevelLoaded -= OnLevelLoaded;
         PlayerVoice.onRelayVoice -= OnVoice;
 
         ObjectManager.onDamageObjectRequested -= OnDamageObject;
@@ -230,6 +231,9 @@ public class Plugin : RocketPlugin<Config>
         var masks = Assets.find(EAssetType.ITEM).OfType<ItemMaskAsset>();
         foreach (var mask in masks)
             isEarpiece?.SetValue(mask, true);
+        
+        SteamGameServer.SetKeyValue("Cfg_Count", 0.ToString(CultureInfo.InvariantCulture));
+        SteamGameServer.SetKeyValue("rocketplugins", "");
     }
 
     public override TranslationList DefaultTranslations => new()
