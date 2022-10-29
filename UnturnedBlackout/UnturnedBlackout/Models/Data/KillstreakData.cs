@@ -24,6 +24,8 @@ public class KillstreakData
     public int KillstreakStaySeconds { get; set; }
     public float MovementMultiplier { get; set; }
 
+    public string KillstreakHUDIconURL { get; set; }
+    
     public KillstreakData()
     {
     }

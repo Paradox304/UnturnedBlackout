@@ -5873,7 +5873,7 @@ public class UIHandler
             yield break;
         }
         
-        var embed = new Embed(null, null, null, Utility.GetDiscordColorCode(rewardRarity), DateTime.UtcNow.ToString("s"), new(Provider.serverName, Provider.configData.Browser.Icon), new(PlayerData.SteamName, $"https://steamcommunity.com/profiles/{PlayerData.SteamID}", PlayerData.AvatarLinks[0]), new Field[] { new("Info:", $"Case: {@case.Case.CaseName}\nSkin: [{rewardRarity.ToFriendlyName()}] {rewardName}", true) }, new(rewardImage), null);
+        var embed = new Embed(null, null, null, Utility.GetDiscordColorCode(rewardRarity), DateTime.UtcNow.ToString("s"), new(Provider.serverName, Provider.configData.Browser.Icon), new(PlayerData.SteamName, $"https://steamcommunity.com/profiles/{PlayerData.SteamID}", PlayerData.AvatarLinks[0]), new Field[] { new($"[{rewardRarity.ToFriendlyName()}] {rewardName}", @case.Case.CaseName, true) }, new(rewardImage), null);
         switch (cRarity)
         {
             case ECaseRarity.GLOVE or ECaseRarity.LIMITED_GLOVE or ECaseRarity.KNIFE or ECaseRarity.LIMITED_KNIFE:
