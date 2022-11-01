@@ -20,6 +20,8 @@ public class WinningValuesConfig
     public float PrimeGunXPBooster { get; set; }
     public float PrimeBPXPBooster { get; set; }
 
+    public float PremiumBattlepassBooster { get; set; }
+    
     public WinningValuesConfig()
     {
         PointsDivisible = 25;
@@ -36,5 +38,7 @@ public class WinningValuesConfig
         PrimeXPBooster = 0.25f;
         PrimeGunXPBooster = 0.25f;
         PrimeBPXPBooster = 0;
+
+        PremiumBattlepassBooster = 0.2f;
     }
 }

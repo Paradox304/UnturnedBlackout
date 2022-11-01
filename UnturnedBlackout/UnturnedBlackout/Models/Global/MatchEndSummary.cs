@@ -70,7 +70,7 @@ public class MatchEndSummary
         OtherXPBonus = (int)(MatchXPBonus * (player.Data.HasPrime ? data.PrimeXPBooster : 0f));
 
         BattlepassXP = (int)(Kills > 0 ? data.BPXPPerMinutePlayed * minutesPlayed * (1f + (HasWon ? data.BPXPVictoryBonus : data.BPXPDefeatBonus)) : 0);
-        BattlepassBonusXP = (int)Math.Floor(BattlepassXP * (player.Data.BPBooster + global.BPBooster + (player.Data.HasPrime ? data.PrimeBPXPBooster : 0f)));
+        BattlepassBonusXP = (int)Math.Floor(BattlepassXP * (player.Data.BPBooster + global.BPBooster + (player.Data.HasPrime ? data.PrimeBPXPBooster : 0f) + (player.Data.HasBattlepass ? data.PremiumBattlepassBooster : 0f)));
 
         KD = Deaths == 0 ? 0f : Kills / (float)Deaths;
 

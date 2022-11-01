@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Rocket.Core.Utils;
 using UnturnedBlackout.Database.Data;
@@ -13,6 +14,7 @@ public class QuestManager
     {
         var steamID = player.Player.CSteamID;
         var db = Plugin.Instance.DB;
+        var config = Plugin.Instance.Config;
         var data = player.Data;
 
         TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.Achievement.CheckAchievement(player, questType, questConditions));
@@ -47,7 +49,8 @@ public class QuestManager
             if (quest.Amount >= quest.Quest.TargetAmount)
             {
                 Plugin.Instance.UI.SendAnimation(player, new(EAnimationType.QUEST_COMPLETION, quest.Quest));
-                db.IncreasePlayerBPXP(steamID, quest.Quest.XP);
+                var xpGiven = (int)Math.Floor(quest.Quest.XP * (1f + player.Data.BPBooster + db.ServerOptions.BPBooster + (player.Data.HasPrime ? config.WinningValues.FileData.PrimeBPXPBooster : 0f) + (player.Data.HasBattlepass ? config.WinningValues.FileData.PremiumBattlepassBooster : 0f)));
+                db.IncreasePlayerBPXP(steamID, xpGiven);
             }
             else if (quest.Amount * 100 / quest.Quest.TargetAmount % 10 == 0)
                 pendingQuestsProgression.Add(quest);
