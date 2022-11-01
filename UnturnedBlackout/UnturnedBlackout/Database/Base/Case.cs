@@ -35,7 +35,7 @@ public class Case
 
     public int GetBuyPrice(ECurrency currency) => currency switch
     {
-        ECurrency.COINS => CoinPrice,
+        ECurrency.COIN => CoinPrice,
         ECurrency.SCRAP => ScrapPrice,
         var _ => throw new ArgumentOutOfRangeException("currency", "Currency is not as expected")
     };

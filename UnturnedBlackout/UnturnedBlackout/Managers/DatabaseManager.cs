@@ -1873,7 +1873,13 @@ public class DatabaseManager
                 rdr.Close();
             }
 
-            Logging.Debug($"Getting all time data for {player.CharacterName} from the all time table");
+            if (!PlayerData.TryGetValue(player.CSteamID, out var playerData))
+            {
+                Logging.Debug($"Player {player.CharacterName} does not exist in the main table after getting the data, don't know what happened here");
+                return;
+            }
+            
+            /*Logging.Debug($"Getting all time data for {player.CharacterName} from the all time table");
             if (PlayerData.TryGetValue(player.CSteamID, out var playerData))
             {
                 LeaderboardData leaderboardData = new(player.CSteamID, playerData.SteamName, playerData.CountryCode, playerData.HideFlag, playerData.Level, playerData.HasPrime, playerData.Kills, playerData.HeadshotKills, playerData.Deaths);
@@ -1992,7 +1998,7 @@ public class DatabaseManager
             finally
             {
                 rdr.Close();
-            }
+            }*/
 
             Logging.Debug($"Getting quests for {player.CharacterName}");
             TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(LOADING_SPACES * 0.7f)), "PREPARING QUESTS..."));
@@ -3049,196 +3055,8 @@ public class DatabaseManager
             {
                 rdr.Close();
             }
-
-            rdr = new MySqlCommand(
-                $"SELECT `{PLAYERS_LEADERBOARD_DAILY}`.`SteamID`, `{PLAYERS}`.`SteamName`, `{PLAYERS}`.`CountryCode`, `{PLAYERS}`.`HideFlag`, `{PLAYERS}`.`Level`, `{PLAYERS}`.`HasPrime` , `{PLAYERS_LEADERBOARD_DAILY}`.`Kills`, `{PLAYERS_LEADERBOARD_DAILY}`.`HeadshotKills`, `{PLAYERS_LEADERBOARD_DAILY}`.`Deaths` FROM `{PLAYERS_LEADERBOARD_DAILY}` INNER JOIN `{PLAYERS}` ON `{PLAYERS_LEADERBOARD_DAILY}`.`SteamID` = `{PLAYERS}`.`SteamID` ORDER BY (`{PLAYERS_LEADERBOARD_DAILY}`.`Kills` + `{PLAYERS_LEADERBOARD_DAILY}`.`HeadshotKills`) DESC;",
-                conn).ExecuteReader();
-
-            Logging.Debug("Getting daily leaderboard data");
-            try
-            {
-                List<LeaderboardData> playerDailyLeaderboard = new();
-                Dictionary<CSteamID, LeaderboardData> playerDailyLeaderboardLookup = new();
-
-                while (rdr.Read())
-                {
-                    if (!ulong.TryParse(rdr[0].ToString(), out var steamid))
-                        continue;
-
-                    var steamName = rdr[1].ToString();
-                    var countryCode = rdr[2].ToString();
-
-                    if (!bool.TryParse(rdr[3].ToString(), out var hideFlag))
-                        continue;
-
-                    if (!int.TryParse(rdr[4].ToString(), out var level))
-                        continue;
-
-                    if (!bool.TryParse(rdr[5].ToString(), out var hasPrime))
-                        continue;
-
-                    CSteamID steamID = new(steamid);
-                    if (!int.TryParse(rdr[6].ToString(), out var kills))
-                        continue;
-
-                    if (!int.TryParse(rdr[7].ToString(), out var headshotKills))
-                        continue;
-
-                    if (!int.TryParse(rdr[8].ToString(), out var deaths))
-                        continue;
-
-                    LeaderboardData leaderboardData = new(steamID, steamName, countryCode, hideFlag, level, hasPrime, kills, headshotKills, deaths);
-
-                    playerDailyLeaderboard.Add(leaderboardData);
-                    playerDailyLeaderboardLookup.Add(steamID, leaderboardData);
-                }
-
-                PlayerDailyLeaderboard = playerDailyLeaderboard;
-                PlayerDailyLeaderboardLookup = playerDailyLeaderboardLookup;
-            }
-            catch (Exception ex)
-            {
-                Logger.Log("Error reading data from daily leaderboard table");
-                Logger.Log(ex);
-            }
-            finally
-            {
-                rdr.Close();
-            }
-
-            rdr = new MySqlCommand(
-                $"SELECT `{PLAYERS_LEADERBOARD_WEEKLY}`.`SteamID`, `{PLAYERS}`.`SteamName`, `{PLAYERS}`.`CountryCode`, `{PLAYERS}`.`HideFlag`, `{PLAYERS}`.`Level`, `{PLAYERS}`.`HasPrime` , `{PLAYERS_LEADERBOARD_WEEKLY}`.`Kills`, `{PLAYERS_LEADERBOARD_WEEKLY}`.`HeadshotKills`, `{PLAYERS_LEADERBOARD_WEEKLY}`.`Deaths` FROM `{PLAYERS_LEADERBOARD_WEEKLY}` INNER JOIN `{PLAYERS}` ON `{PLAYERS_LEADERBOARD_WEEKLY}`.`SteamID` = `{PLAYERS}`.`SteamID` ORDER BY (`{PLAYERS_LEADERBOARD_WEEKLY}`.`Kills` + `{PLAYERS_LEADERBOARD_WEEKLY}`.`HeadshotKills`) DESC;",
-                conn).ExecuteReader();
-
-            Logging.Debug("Getting weekly leaderboard data");
-            try
-            {
-                List<LeaderboardData> playerWeeklyLeaderboard = new();
-                Dictionary<CSteamID, LeaderboardData> playerWeeklyLeaderboardLookup = new();
-
-                while (rdr.Read())
-                {
-                    if (!ulong.TryParse(rdr[0].ToString(), out var steamid))
-                        continue;
-
-                    var steamName = rdr[1].ToString();
-                    var countryCode = rdr[2].ToString();
-
-                    if (!bool.TryParse(rdr[3].ToString(), out var hideFlag))
-                        continue;
-
-                    if (!int.TryParse(rdr[4].ToString(), out var level))
-                        continue;
-
-                    if (!bool.TryParse(rdr[5].ToString(), out var hasPrime))
-                        continue;
-
-                    CSteamID steamID = new(steamid);
-                    if (!int.TryParse(rdr[6].ToString(), out var kills))
-                        continue;
-
-                    if (!int.TryParse(rdr[7].ToString(), out var headshotKills))
-                        continue;
-
-                    if (!int.TryParse(rdr[8].ToString(), out var deaths))
-                        continue;
-
-                    LeaderboardData leaderboardData = new(steamID, steamName, countryCode, hideFlag, level, hasPrime, kills, headshotKills, deaths);
-
-                    playerWeeklyLeaderboard.Add(leaderboardData);
-                    playerWeeklyLeaderboardLookup.Add(steamID, leaderboardData);
-                }
-
-                PlayerWeeklyLeaderboard = playerWeeklyLeaderboard;
-                PlayerWeeklyLeaderboardLookup = playerWeeklyLeaderboardLookup;
-            }
-            catch (Exception ex)
-            {
-                Logger.Log("Error reading data from weekly leaderboard table");
-                Logger.Log(ex);
-            }
-            finally
-            {
-                rdr.Close();
-            }
-
-            Logging.Debug("Adding any players that are not added in daily or weekly leaderboards");
-            foreach (var data in PlayerData.Values)
-            {
-                if (!PlayerDailyLeaderboardLookup.ContainsKey(data.SteamID))
-                {
-                    LeaderboardData dailyLeaderboardData = new(data.SteamID, data.SteamName, data.CountryCode, data.HideFlag, data.Level, data.HasPrime, 0, 0, 0);
-                    PlayerDailyLeaderboard.Add(dailyLeaderboardData);
-                    PlayerDailyLeaderboardLookup.Add(data.SteamID, dailyLeaderboardData);
-                    _ = new MySqlCommand($"INSERT INTO `{PLAYERS_LEADERBOARD_DAILY}` ( `SteamID` ) VALUES ( {data.SteamID} );", conn).ExecuteScalar();
-                }
-
-                if (!PlayerWeeklyLeaderboardLookup.ContainsKey(data.SteamID))
-                {
-                    LeaderboardData weeklyLeaderboardData = new(data.SteamID, data.SteamName, data.CountryCode, data.HideFlag, data.Level, data.HasPrime, 0, 0, 0);
-                    PlayerWeeklyLeaderboard.Add(weeklyLeaderboardData);
-                    PlayerWeeklyLeaderboardLookup.Add(data.SteamID, weeklyLeaderboardData);
-                    _ = new MySqlCommand($"INSERT INTO `{PLAYERS_LEADERBOARD_WEEKLY}` ( `SteamID` ) VALUES ( {data.SteamID} );", conn).ExecuteScalar();
-                }
-            }
-
-            rdr = new MySqlCommand(
-                $"SELECT `{PLAYERS_LEADERBOARD_SEASONAL}`.`SteamID`, `{PLAYERS}`.`SteamName`, `{PLAYERS}`.`CountryCode`, `{PLAYERS}`.`HideFlag`, `{PLAYERS}`.`Level`, `{PLAYERS}`.`HasPrime` , `{PLAYERS_LEADERBOARD_SEASONAL}`.`Kills`, `{PLAYERS_LEADERBOARD_SEASONAL}`.`HeadshotKills`, `{PLAYERS_LEADERBOARD_SEASONAL}`.`Deaths` FROM `{PLAYERS_LEADERBOARD_SEASONAL}` INNER JOIN `{PLAYERS}` ON `{PLAYERS_LEADERBOARD_SEASONAL}`.`SteamID` = `{PLAYERS}`.`SteamID` ORDER BY (`{PLAYERS_LEADERBOARD_SEASONAL}`.`Kills` + `{PLAYERS_LEADERBOARD_SEASONAL}`.`HeadshotKills`) DESC;",
-                conn).ExecuteReader();
-
-            Logging.Debug("Getting seasonal leaderboard data");
-            try
-            {
-                List<LeaderboardData> playerSeasonalLeaderboard = new();
-                Dictionary<CSteamID, LeaderboardData> playerSeasonalLeaderboardLookup = new();
-
-                while (rdr.Read())
-                {
-                    if (!ulong.TryParse(rdr[0].ToString(), out var steamid))
-                        continue;
-
-                    var steamName = rdr[1].ToString();
-                    var countryCode = rdr[2].ToString();
-
-                    if (!bool.TryParse(rdr[3].ToString(), out var hideFlag))
-                        continue;
-
-                    if (!int.TryParse(rdr[4].ToString(), out var level))
-                        continue;
-
-                    if (!bool.TryParse(rdr[5].ToString(), out var hasPrime))
-                        continue;
-
-                    CSteamID steamID = new(steamid);
-                    if (!int.TryParse(rdr[6].ToString(), out var kills))
-                        continue;
-
-                    if (!int.TryParse(rdr[7].ToString(), out var headshotKills))
-                        continue;
-
-                    if (!int.TryParse(rdr[8].ToString(), out var deaths))
-                        continue;
-
-                    LeaderboardData leaderboardData = new(steamID, steamName, countryCode, hideFlag, level, hasPrime, kills, headshotKills, deaths);
-
-                    playerSeasonalLeaderboard.Add(leaderboardData);
-                    playerSeasonalLeaderboardLookup.Add(steamID, leaderboardData);
-                }
-
-                PlayerSeasonalLeaderboard = playerSeasonalLeaderboard;
-                PlayerSeasonalLeaderboardLookup = playerSeasonalLeaderboardLookup;
-            }
-            catch (Exception ex)
-            {
-                Logger.Log("Error reading data from weekly leaderboard table");
-                Logger.Log(ex);
-            }
-            finally
-            {
-                rdr.Close();
-            }
-
-            rdr = new MySqlCommand($"SELECT `SteamID`, `SteamName`, `CountryCode`, `HideFlag`, `Level`, `HasPrime`, `Kills`, `HeadshotKills`, `Deaths` FROM `{PLAYERS}` ORDER BY (`Kills` + `HeadshotKills`) DESC;", conn).ExecuteReader();
+            
+            rdr = new MySqlCommand($"SELECT `{PLAYERS}`.`SteamID`, `{PLAYERS}`.`SteamName`, `{PLAYERS}`.`CountryCode`, `{PLAYERS}`.`HideFlag`, `{PLAYERS}`.`Level`, `{PLAYERS}`.`HasPrime`, `{PLAYERS}`.`Kills`, `{PLAYERS}`.`HeadshotKills`, `{PLAYERS}`.`Deaths`, ((SELECT CHAR_LENGTH(`{PLAYERS_GUNS_SKINS}`.`SkinIDs`) - CHAR_LENGTH(REPLACE(`{PLAYERS_GUNS_SKINS}`.`SkinIDs`, ',', ''))) + (SELECT COUNT(*) FROM `{PLAYERS_KNIVES}` WHERE `{PLAYERS_KNIVES}`.`SteamID` = `{PLAYERS}`.`SteamID` AND `{PLAYERS_KNIVES}`.`IsBought` = 1 AND `{PLAYERS_KNIVES}`.`KnifeID` != 12767) + (SELECT COUNT(*) FROM `{PLAYERS_GLOVES}`  WHERE `{PLAYERS_GLOVES}`.`SteamID` = `{PLAYERS}`.`SteamID` AND `{PLAYERS_GLOVES}`.`IsBought` = 1)) AS `TotalSkins` FROM `{PLAYERS}` INNER JOIN `{PLAYERS_GUNS_SKINS}` ON `{PLAYERS}`.`SteamID` = `{PLAYERS_GUNS_SKINS}`.`SteamID` ORDER BY (`Kills` + `HeadshotKills`) DESC;", conn).ExecuteReader();
             Logging.Debug("Getting all time leaderboard data");
             try
             {
@@ -3271,8 +3089,11 @@ public class DatabaseManager
 
                     if (!int.TryParse(rdr[8].ToString(), out var deaths))
                         continue;
-
-                    LeaderboardData leaderboardData = new(steamID, steamName, countryCode, hideFlag, level, hasPrime, kills, headshotKills, deaths);
+                    
+                    if (!int.TryParse(rdr[9].ToString(), out var totalSkins))
+                        return;
+                    
+                    LeaderboardData leaderboardData = new(steamID, steamName, countryCode, hideFlag, level, hasPrime, kills, headshotKills, deaths, totalSkins);
                     playerAllTimeLeaderboardLookup.Add(steamID, leaderboardData);
                     playerAllTimeKill.Add(leaderboardData);
                     playerAllTimeLevel.Add(leaderboardData);
@@ -3286,6 +3107,179 @@ public class DatabaseManager
             catch (Exception ex)
             {
                 Logger.Log("Error reading data from players table");
+                Logger.Log(ex);
+            }
+            finally
+            {
+                rdr.Close();
+            }
+            
+            rdr = new MySqlCommand(
+                $"SELECT `SteamID`, `Kills`, `HeadshotKills`, `Deaths` FROM `{PLAYERS_LEADERBOARD_DAILY}` ORDER BY (`Kills` + `HeadshotKills`) DESC;",
+                conn).ExecuteReader();
+
+            Logging.Debug("Getting daily leaderboard data");
+            try
+            {
+                List<LeaderboardData> playerDailyLeaderboard = new();
+                Dictionary<CSteamID, LeaderboardData> playerDailyLeaderboardLookup = new();
+
+                while (rdr.Read())
+                {
+                    if (!ulong.TryParse(rdr[0].ToString(), out var steamid))
+                        continue;
+                    
+                    CSteamID steamID = new(steamid);
+                    if (!int.TryParse(rdr[1].ToString(), out var kills))
+                        continue;
+
+                    if (!int.TryParse(rdr[2].ToString(), out var headshotKills))
+                        continue;
+
+                    if (!int.TryParse(rdr[3].ToString(), out var deaths))
+                        continue;
+
+                    if (!PlayerAllTimeLeaderboardLookup.TryGetValue(steamID, out var allTimeData))
+                    {
+                        Logging.Debug($"Player with steam id {steamID} has no all time data but has daily leaderboard data??");
+                        continue;
+                    }
+                    
+                    LeaderboardData leaderboardData = new(steamID, kills, headshotKills, deaths, allTimeData);
+
+                    playerDailyLeaderboard.Add(leaderboardData);
+                    playerDailyLeaderboardLookup.Add(steamID, leaderboardData);
+                }
+
+                PlayerDailyLeaderboard = playerDailyLeaderboard;
+                PlayerDailyLeaderboardLookup = playerDailyLeaderboardLookup;
+            }
+            catch (Exception ex)
+            {
+                Logger.Log("Error reading data from daily leaderboard table");
+                Logger.Log(ex);
+            }
+            finally
+            {
+                rdr.Close();
+            }
+
+            rdr = new MySqlCommand(
+                $"SELECT `SteamID`, `Kills`, `HeadshotKills`, `Deaths` FROM `{PLAYERS_LEADERBOARD_DAILY}` ORDER BY (`Kills` + `HeadshotKills`) DESC;",
+                conn).ExecuteReader();
+
+            Logging.Debug("Getting weekly leaderboard data");
+            try
+            {
+                List<LeaderboardData> playerWeeklyLeaderboard = new();
+                Dictionary<CSteamID, LeaderboardData> playerWeeklyLeaderboardLookup = new();
+
+                while (rdr.Read())
+                {
+                    if (!ulong.TryParse(rdr[0].ToString(), out var steamid))
+                        continue;
+                    
+                    CSteamID steamID = new(steamid);
+                    if (!int.TryParse(rdr[1].ToString(), out var kills))
+                        continue;
+
+                    if (!int.TryParse(rdr[2].ToString(), out var headshotKills))
+                        continue;
+
+                    if (!int.TryParse(rdr[3].ToString(), out var deaths))
+                        continue;
+
+                    if (!PlayerAllTimeLeaderboardLookup.TryGetValue(steamID, out var allTimeData))
+                    {
+                        Logging.Debug($"Player with steam id {steamID} has no all time data but has weekly leaderboard data??");
+                        continue;
+                    }
+                    
+                    LeaderboardData leaderboardData = new(steamID, kills, headshotKills, deaths, allTimeData);
+
+                    playerWeeklyLeaderboard.Add(leaderboardData);
+                    playerWeeklyLeaderboardLookup.Add(steamID, leaderboardData);
+                }
+
+                PlayerWeeklyLeaderboard = playerWeeklyLeaderboard;
+                PlayerWeeklyLeaderboardLookup = playerWeeklyLeaderboardLookup;
+            }
+            catch (Exception ex)
+            {
+                Logger.Log("Error reading data from weekly leaderboard table");
+                Logger.Log(ex);
+            }
+            finally
+            {
+                rdr.Close();
+            }
+
+            Logging.Debug("Adding any players that are not added in daily or weekly leaderboards");
+            foreach (var data in PlayerData.Values)
+            {
+                if (!PlayerAllTimeLeaderboardLookup.TryGetValue(data.SteamID, out var allTimeData))
+                    continue;
+                
+                if (!PlayerDailyLeaderboardLookup.ContainsKey(data.SteamID))
+                {
+                    LeaderboardData dailyLeaderboardData = new(data.SteamID, 0, 0, 0, allTimeData);
+                    PlayerDailyLeaderboard.Add(dailyLeaderboardData);
+                    PlayerDailyLeaderboardLookup.Add(data.SteamID, dailyLeaderboardData);
+                    _ = new MySqlCommand($"INSERT INTO `{PLAYERS_LEADERBOARD_DAILY}` ( `SteamID` ) VALUES ( {data.SteamID} );", conn).ExecuteScalar();
+                }
+
+                if (!PlayerWeeklyLeaderboardLookup.ContainsKey(data.SteamID))
+                {
+                    LeaderboardData weeklyLeaderboardData = new(data.SteamID, 0, 0, 0, allTimeData);
+                    PlayerWeeklyLeaderboard.Add(weeklyLeaderboardData);
+                    PlayerWeeklyLeaderboardLookup.Add(data.SteamID, weeklyLeaderboardData);
+                    _ = new MySqlCommand($"INSERT INTO `{PLAYERS_LEADERBOARD_WEEKLY}` ( `SteamID` ) VALUES ( {data.SteamID} );", conn).ExecuteScalar();
+                }
+            }
+
+            rdr = new MySqlCommand(
+                $"SELECT `SteamID`, `Kills`, `HeadshotKills`, `Deaths` FROM `{PLAYERS_LEADERBOARD_DAILY}` ORDER BY (`Kills` + `HeadshotKills`) DESC;",
+                conn).ExecuteReader();
+
+            Logging.Debug("Getting seasonal leaderboard data");
+            try
+            {
+                List<LeaderboardData> playerSeasonalLeaderboard = new();
+                Dictionary<CSteamID, LeaderboardData> playerSeasonalLeaderboardLookup = new();
+
+                while (rdr.Read())
+                {
+                    if (!ulong.TryParse(rdr[0].ToString(), out var steamid))
+                        continue;
+                    
+                    CSteamID steamID = new(steamid);
+                    if (!int.TryParse(rdr[1].ToString(), out var kills))
+                        continue;
+
+                    if (!int.TryParse(rdr[2].ToString(), out var headshotKills))
+                        continue;
+
+                    if (!int.TryParse(rdr[3].ToString(), out var deaths))
+                        continue;
+
+                    if (!PlayerAllTimeLeaderboardLookup.TryGetValue(steamID, out var allTimeData))
+                    {
+                        Logging.Debug($"Player with steam id {steamID} has no all time data but has seasonal leaderboard data??");
+                        continue;
+                    }
+                    
+                    LeaderboardData leaderboardData = new(steamID, kills, headshotKills, deaths, allTimeData);
+
+                    playerSeasonalLeaderboard.Add(leaderboardData);
+                    playerSeasonalLeaderboardLookup.Add(steamID, leaderboardData);
+                }
+
+                PlayerSeasonalLeaderboard = playerSeasonalLeaderboard;
+                PlayerSeasonalLeaderboardLookup = playerSeasonalLeaderboardLookup;
+            }
+            catch (Exception ex)
+            {
+                Logger.Log("Error reading data from weekly leaderboard table");
                 Logger.Log(ex);
             }
             finally
@@ -3377,7 +3371,10 @@ public class DatabaseManager
 
                 foreach (var data in PlayerData.Values)
                 {
-                    LeaderboardData leaderboardData = new(data.SteamID, data.SteamName, data.CountryCode, data.HideFlag, data.Level, data.HasPrime, 0, 0, 0);
+                    if (!PlayerAllTimeLeaderboardLookup.TryGetValue(data.SteamID, out var allTimeData))
+                        continue;
+                    
+                    LeaderboardData leaderboardData = new(data.SteamID,0, 0, 0, allTimeData);
                     PlayerDailyLeaderboard.Add(leaderboardData);
                     PlayerDailyLeaderboardLookup.Add(data.SteamID, leaderboardData);
                     _ = new MySqlCommand($"INSERT INTO `{PLAYERS_LEADERBOARD_DAILY}` ( `SteamID` ) VALUES ( {data.SteamID} );", conn).ExecuteScalar();
@@ -3474,7 +3471,10 @@ public class DatabaseManager
 
                 foreach (var data in PlayerData.Values)
                 {
-                    LeaderboardData leaderboardData = new(data.SteamID, data.SteamName, data.CountryCode, data.HideFlag, data.Level, data.HasPrime, 0, 0, 0);
+                    if (!PlayerAllTimeLeaderboardLookup.TryGetValue(data.SteamID, out var allTimeData))
+                        continue;
+                    
+                    LeaderboardData leaderboardData = new(data.SteamID, 0, 0, 0, allTimeData);
                     PlayerWeeklyLeaderboard.Add(leaderboardData);
                     PlayerWeeklyLeaderboardLookup.Add(data.SteamID, leaderboardData);
                     _ = new MySqlCommand($"INSERT INTO `{PLAYERS_LEADERBOARD_WEEKLY}` ( `SteamID` ) VALUES ( {data.SteamID} );", conn).ExecuteScalar();
@@ -3664,20 +3664,25 @@ public class DatabaseManager
 
                 if (data.HasPrime)
                 {
+                    Logging.Debug($"{data.SteamName} has prime, checking if it needs rewards");
                     var maxRewardDate = DateTime.UtcNow;
                     if (DateTime.UtcNow > data.PrimeExpiry.UtcDateTime)
                     {
                         maxRewardDate = data.PrimeExpiry.UtcDateTime;
+                        Logging.Debug($"Prime has expired for the player, setting the max reward date to expiry date which is {data.PrimeExpiry.UtcDateTime}");
                         data.HasPrime = false;
                         TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.Reward.RemoveRewards(data.SteamID, ServerOptions.PrimeRewards));
                         _ = new MySqlCommand($"UPDATE `{PLAYERS}` SET `HasPrime` = false WHERE `SteamID` = {data.SteamID};", conn).ExecuteScalar();
                         _ = R.Permissions.RemovePlayerFromGroup("Prime", new RocketPlayer(data.SteamID.ToString()));
+                        Logging.Debug("Removed prime for the player");
                     }
 
                     var daysWorthReward = (int)(maxRewardDate - data.PrimeLastDailyReward.UtcDateTime).TotalDays;
+                    Logging.Debug($"Max reward date: {maxRewardDate}, last daily reward {data.PrimeLastDailyReward.UtcDateTime}, days worth reward: {daysWorthReward}");
                     if (daysWorthReward == 0)
                         continue;
-
+                    
+                    Logging.Debug("Need to give some reward to player, getting the list of daily rewards");
                     var dailyRewards = ServerOptions.PrimeDailyRewards.ToList();
                     if (daysWorthReward > 1)
                         Plugin.Instance.Reward.MultiplyRewards(dailyRewards, daysWorthReward);
@@ -3956,7 +3961,7 @@ public class DatabaseManager
             return;
 
         data.Credits += credits;
-        Plugin.Instance.UI.OnCurrencyUpdated(steamID, ECurrency.CREDITS);
+        Plugin.Instance.UI.OnCurrencyUpdated(steamID, ECurrency.CREDIT);
     }
 
     public void DecreasePlayerCredits(CSteamID steamID, int credits)
@@ -3966,7 +3971,7 @@ public class DatabaseManager
             return;
 
         data.Credits -= credits;
-        Plugin.Instance.UI.OnCurrencyUpdated(steamID, ECurrency.CREDITS);
+        Plugin.Instance.UI.OnCurrencyUpdated(steamID, ECurrency.CREDIT);
     }
 
     public void IncreasePlayerScrap(CSteamID steamID, int scrap)
@@ -3996,7 +4001,7 @@ public class DatabaseManager
             return;
 
         data.Coins += coins;
-        Plugin.Instance.UI.OnCurrencyUpdated(steamID, ECurrency.COINS);
+        Plugin.Instance.UI.OnCurrencyUpdated(steamID, ECurrency.COIN);
     }
 
     public void DecreasePlayerCoins(CSteamID steamID, int coins)
@@ -4006,7 +4011,7 @@ public class DatabaseManager
             return;
 
         data.Coins -= coins;
-        Plugin.Instance.UI.OnCurrencyUpdated(steamID, ECurrency.COINS);
+        Plugin.Instance.UI.OnCurrencyUpdated(steamID, ECurrency.COIN);
     }
 
     public void IncreasePlayerKills(CSteamID steamID, int kills)

@@ -415,16 +415,16 @@ public static class Utility
     public static string ToFriendlyName(this ECurrency currency) => currency switch
     {
         ECurrency.SCRAP => "Scrap",
-        ECurrency.CREDITS => "Blackout Points",
-        ECurrency.COINS => "Blacktags",
+        ECurrency.CREDIT => "Blackout Points",
+        ECurrency.COIN => "Blacktags",
         var _ => throw new ArgumentOutOfRangeException(nameof(currency), currency, "Currency is not as expected")
     };
 
     public static string ToUIName(this ECurrency currency) => currency switch
     {
         ECurrency.SCRAP => "Scrap",
-        ECurrency.CREDITS => "Credits",
-        ECurrency.COINS => "Coins",
+        ECurrency.CREDIT => "Credits",
+        ECurrency.COIN => "Coins",
         var _ => throw new ArgumentOutOfRangeException(nameof(currency), currency, null)
     };
 
@@ -518,9 +518,9 @@ public static class Utility
     
     public static string GetCurrencySymbol(ECurrency currency) => currency switch
     {
-        ECurrency.COINS => "",
+        ECurrency.COIN => "",
         ECurrency.SCRAP => "",
-        ECurrency.CREDITS => "",
+        ECurrency.CREDIT => "",
         var _ => throw new ArgumentOutOfRangeException(nameof(currency), currency, "Currency is not as expected")
     };
 

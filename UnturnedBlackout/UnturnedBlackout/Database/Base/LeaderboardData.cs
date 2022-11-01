@@ -13,8 +13,9 @@ public class LeaderboardData
     public int Kills { get; set; }
     public int HeadshotKills { get; set; }
     public int Deaths { get; set; }
-
-    public LeaderboardData(CSteamID steamID, string steamName, string countryCode, bool hideFlag, int level, bool hasPrime, int kills, int headshotKills, int deaths)
+    public int Skins { get; set; }
+    
+    public LeaderboardData(CSteamID steamID, string steamName, string countryCode, bool hideFlag, int level, bool hasPrime, int kills, int headshotKills, int deaths, int skins)
     {
         SteamID = steamID;
         SteamName = steamName;
@@ -25,6 +26,21 @@ public class LeaderboardData
         Kills = kills;
         HeadshotKills = headshotKills;
         Deaths = deaths;
+        Skins = skins;
+    }
+
+    public LeaderboardData(CSteamID steamID, int kills, int headshotKills, int deaths, LeaderboardData allTimeData)
+    {
+        SteamID = steamID;
+        Kills = kills;
+        HeadshotKills = headshotKills;
+        Deaths = deaths;
+        SteamName = allTimeData.SteamName;
+        CountryCode = allTimeData.CountryCode;
+        HideFlag = allTimeData.HideFlag;
+        Level = allTimeData.Level;
+        HasPrime = allTimeData.HasPrime;
+        Skins = allTimeData.Skins;
     }
 
     public decimal GetKDR()

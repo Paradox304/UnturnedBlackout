@@ -11,16 +11,9 @@ namespace UnturnedBlackout.Managers;
 
 public class BPManager
 {
-    public HashSet<CSteamID> PendingWork { get; set; }
-
     public DatabaseManager DB => Plugin.Instance.DB;
 
     public ConfigManager Config => Plugin.Instance.Config;
-
-    public BPManager()
-    {
-        PendingWork = new();
-    }
 
     public void ClaimReward(GamePlayer player, bool isTop, int tierID)
     {
@@ -37,14 +30,6 @@ public class BPManager
             return;
         }
 
-        if (PendingWork.Contains(player.SteamID))
-        {
-            Logging.Debug($"{player.Player.CharacterName} is spam clicking probably");
-            return;
-        }
-
-        _ = PendingWork.Add(player.SteamID);
-
         Reward reward;
         if (isTop)
         {
@@ -60,8 +45,6 @@ public class BPManager
         Plugin.Instance.Reward.GiveRewards(player.SteamID, new() { reward });
         Plugin.Instance.UI.OnBattlepassTierUpdated(player.SteamID, tierID);
 
-        _ = PendingWork.Remove(player.SteamID);
-
         if (isTop)
             DB.UpdatePlayerBPClaimedFreeRewards(player.SteamID);
         else
@@ -76,14 +59,6 @@ public class BPManager
             Logging.Debug($"{player.Player.CharacterName} has already reached the end of battlepass");
             return;
         }
-
-        if (PendingWork.Contains(player.SteamID))
-        {
-            Logging.Debug($"{player.Player.CharacterName} is spam clicking probably");
-            return;
-        }
-
-        _ = PendingWork.Add(player.SteamID);
 
         if (player.Data.Coins >= Config.Base.FileData.BattlepassTierSkipCost)
         {
@@ -101,8 +76,6 @@ public class BPManager
             });
         }
         else
-            Plugin.Instance.UI.SendNotEnoughCurrencyModal(player.SteamID, ECurrency.COINS);
-
-        _ = PendingWork.Remove(player.SteamID);
+            Plugin.Instance.UI.SendNotEnoughCurrencyModal(player.SteamID, ECurrency.COIN);
     }
 }

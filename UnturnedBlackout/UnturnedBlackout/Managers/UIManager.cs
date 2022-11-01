@@ -1650,7 +1650,7 @@ public class UIManager
                 player.sendBrowserRequest("Our Store:", "https://store.unturnedblackout.com/");
                 return;
             case "SERVER Unbox BUTTON":
-                handler.ShowUnboxingPage(EUnboxingPage.CASES);
+                handler.ShowUnboxingPage(EUnboxingPage.BUY);
                 return;
             case "SERVER Battlepass BUTTON":
                 _ = Plugin.Instance.StartCoroutine(handler.SetupBattlepass());
@@ -1889,7 +1889,7 @@ public class UIManager
                 handler.PreviewUnboxingStoreCase();
                 return;
             case "SERVER Unbox Buy Coins BUTTON":
-                handler.BuyUnboxingStoreCase(ECurrency.COINS);
+                handler.BuyUnboxingStoreCase(ECurrency.COIN);
                 return;
             case "SERVER Unbox Buy Scrap BUTTON":
                 handler.BuyUnboxingStoreCase(ECurrency.SCRAP);

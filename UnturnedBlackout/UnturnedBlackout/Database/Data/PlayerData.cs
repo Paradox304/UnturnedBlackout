@@ -163,9 +163,9 @@ public class PlayerData
 
     public int GetCurrency(ECurrency currency) => currency switch
     {
-        ECurrency.COINS => Coins,
+        ECurrency.COIN => Coins,
         ECurrency.SCRAP => Scrap,
-        ECurrency.CREDITS => Credits,
+        ECurrency.CREDIT => Credits,
         var _ => throw new ArgumentOutOfRangeException("currency", "Currency is not as expected")
     };
 

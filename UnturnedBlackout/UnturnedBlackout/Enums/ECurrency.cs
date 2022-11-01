@@ -2,7 +2,7 @@
 
 public enum ECurrency
 {
-    CREDITS,
-    COINS,
+    CREDIT,
+    COIN,
     SCRAP
 }

@@ -187,12 +187,12 @@ public class RewardManager
             if (reward.RewardType != ERewardType.COIN && reward.RewardType != ERewardType.CREDIT)
                 continue;
 
-            if (reward.RewardValue is not int rewardValue)
+            if (!int.TryParse(reward.RewardValue.ToString(), out var rewardValue))
                 continue;
 
-            Logging.Debug($"Reward value is {rewardValue}, reward type: {reward.RewardType}");
+            Logging.Debug($"Reward value is {reward.RewardValue}, reward type: {reward.RewardType}");
             reward.RewardValue = rewardValue * multiply;
-            Logging.Debug($"Updated reward value is {rewardValue}");
+            Logging.Debug($"Updated reward value is {reward.RewardValue}");
         }
     }
 }
