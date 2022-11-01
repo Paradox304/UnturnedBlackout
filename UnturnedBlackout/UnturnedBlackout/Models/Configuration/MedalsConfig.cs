@@ -1,5 +1,8 @@
-﻿namespace UnturnedBlackout.Models.Configuration;
+﻿using System;
 
+namespace UnturnedBlackout.Models.Configuration;
+
+[Serializable]
 public class MedalsConfig
 {
     public int TurretDestroyXP { get; set; }

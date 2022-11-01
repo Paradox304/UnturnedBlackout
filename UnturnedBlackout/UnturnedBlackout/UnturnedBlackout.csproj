@@ -297,6 +297,7 @@
         <Compile Include="Models\Configuration\PointsConfig.cs" />
         <Compile Include="Models\Configuration\RoundEndCasesConfig.cs" />
         <Compile Include="Models\Configuration\TeamsConfig.cs" />
+        <Compile Include="Models\Configuration\WebhooksConfig.cs" />
         <Compile Include="Models\Configuration\WinningValuesConfig.cs" />
         <Compile Include="Models\Data\KillstreakData.cs" />
         <Compile Include="Models\Data\LoadoutData.cs" />

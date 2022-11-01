@@ -22,134 +22,167 @@ public class UnboxManager
         rewardRarity = ERarity.NONE;
         isDuplicate = false;
         duplicateScrapAmount = 0;
+        caseRarity = ECaseRarity.RARE;
         
-        Logging.Debug($"Calculating reward for case with id {@case.CaseID} for {player.CharacterName}");
-        caseRarity = CalculateRewardRarity(@case.Weights);
-        Logging.Debug($"Rarity found: {caseRarity}");
-
-        if (!DB.PlayerLoadouts.TryGetValue(player.CSteamID, out var loadout))
+        while (true)
         {
-            Logging.Debug($"Error getting loadout for player with steam id {player.CSteamID}");
-            return false;
-        }
+            Logging.Debug($"Calculating reward for case with id {@case.CaseID} for {player.CharacterName}");
+            caseRarity = CalculateRewardRarity(@case.Weights);
+            Logging.Debug($"Rarity found: {caseRarity}");
 
-        switch (caseRarity)
-        {
-            case ECaseRarity.KNIFE or ECaseRarity.LIMITED_KNIFE:
+            if (!DB.PlayerLoadouts.TryGetValue(player.CSteamID, out var loadout))
             {
-                var isLimited = caseRarity == ECaseRarity.LIMITED_KNIFE;
-                Logging.Debug($"{player.CharacterName} reward rarity is KNIFE, IsLimited {isLimited}");
-                List<Knife> knivesAvailable = new();
-                if (isLimited)
+                Logging.Debug($"Error getting loadout for player with steam id {player.CSteamID}");
+                return false;
+            }
+
+            switch (caseRarity)
+            {
+                case ECaseRarity.KNIFE or ECaseRarity.LIMITED_KNIFE:
                 {
-                    Logging.Debug($"{player.CharacterName} has gotten a limited knife rarity, checking if there are any limited knives available");
-                    knivesAvailable = DB.Knives.Values.Where(k => k.KnifeWeight > 0 && k.MaxAmount > 0 && k.MaxAmount > k.UnboxedAmount && (!loadout.Knives.TryGetValue(k.KnifeID, out var knife) || !knife.IsBought)).ToList();
+                    var isLimited = caseRarity == ECaseRarity.LIMITED_KNIFE;
+                    Logging.Debug($"{player.CharacterName} reward rarity is KNIFE, IsLimited {isLimited}");
+                    List<Knife> knivesAvailable;
+                    if (isLimited)
+                    {
+                        Logging.Debug($"{player.CharacterName} has gotten a limited knife rarity, checking if there are any limited knives available");
+                        knivesAvailable = DB.Knives.Values.Where(k => k.KnifeWeight > 0 && k.MaxAmount > 0 && k.MaxAmount > k.UnboxedAmount && (!loadout.Knives.TryGetValue(k.KnifeID, out var knife) || !knife.IsBought)).ToList();
+                        if (knivesAvailable.Count == 0)
+                        {
+                            Logging.Debug("There are no limited knives available, getting knives that are not owned by the player");
+                            knivesAvailable = DB.Knives.Values.Where(k => k.KnifeWeight > 0 && k.MaxAmount == 0 && (!loadout.Knives.TryGetValue(k.KnifeID, out var knife) || !knife.IsBought)).ToList();
+                        }
+                    }
+                    else
+                        knivesAvailable = DB.Knives.Values.Where(k => k.KnifeWeight > 0 && k.MaxAmount == 0 && (!loadout.Knives.TryGetValue(k.KnifeID, out var knife) || !knife.IsBought)).ToList();
+
+                    Logging.Debug($"Found {knivesAvailable.Count} knives available to be unboxed by the player");
+                    Knife knife = null;
                     if (knivesAvailable.Count == 0)
                     {
-                        Logging.Debug("There are no limited knives available, getting knives that are not owned by the player");
-                        knivesAvailable = DB.Knives.Values.Where(k => k.KnifeWeight > 0 && k.MaxAmount == 0 && (!loadout.Knives.TryGetValue(k.KnifeID, out var knife) || !knife.IsBought)).ToList();
+                        Logging.Debug($"There are no knives available to calculate with, sending a random one to player");
+                        var newKnives = DB.Knives.Values.Where(k => k.KnifeWeight > 0 && k.MaxAmount == 0).ToList();
+                        knife = newKnives[UnityEngine.Random.Range(0, newKnives.Count)];
+
+                        isDuplicate = true;
+                        duplicateScrapAmount = knife.ScrapAmount;
                     }
+                    else
+                        knife = CalculateKnife(knivesAvailable);
+
+                    rewardName = knife.KnifeName;
+                    rewardImage = knife.IconLink;
+                    rewardDesc = knife.KnifeDesc;
+                    rewardRarity = knife.KnifeRarity;
+                    reward = new(ERewardType.KNIFE, knife.KnifeID);
+
+                    return true;
                 }
-                else
-                    knivesAvailable = DB.Knives.Values.Where(k => k.KnifeWeight > 0 && k.MaxAmount == 0 && (!loadout.Knives.TryGetValue(k.KnifeID, out var knife) || !knife.IsBought)).ToList();
-
-                Logging.Debug($"Found {knivesAvailable.Count} knives available to be unboxed by the player");
-                Knife knife = null;
-                if (knivesAvailable.Count == 0)
+                case ECaseRarity.GLOVE or ECaseRarity.LIMITED_GLOVE:
                 {
-                    Logging.Debug($"There are no knives available to calculate with, sending a random one to player");
-                    var newKnives = DB.Knives.Values.Where(k => k.KnifeWeight > 0 && k.MaxAmount == 0).ToList();
-                    knife = newKnives[UnityEngine.Random.Range(0, newKnives.Count)];
+                    var isLimited = caseRarity == ECaseRarity.LIMITED_GLOVE;
+                    Logging.Debug($"{player.CharacterName} reward rarity is GLOVE, IsLimited {isLimited}");
+                    List<Glove> glovesAvailable;
+                    if (isLimited)
+                    {
+                        Logging.Debug($"{player.CharacterName} has gotten a limited glove rarity, checking if there are any limited gloves available");
+                        glovesAvailable = DB.Gloves.Values.Where(k => k.GloveWeight > 0 && k.MaxAmount > 0 && k.MaxAmount > k.UnboxedAmount && (!loadout.Gloves.TryGetValue(k.GloveID, out var glove) || !glove.IsBought)).ToList();
+                        if (glovesAvailable.Count == 0)
+                        {
+                            Logging.Debug("There are no limited gloves available, getting gloves that are not owned by the player");
+                            glovesAvailable = DB.Gloves.Values.Where(k => k.GloveWeight > 0 && k.MaxAmount == 0 && (!loadout.Gloves.TryGetValue(k.GloveID, out var glove) || !glove.IsBought)).ToList();
+                        }
+                    }
+                    else
+                        glovesAvailable = DB.Gloves.Values.Where(k => k.GloveWeight > 0 && k.MaxAmount == 0 && (!loadout.Gloves.TryGetValue(k.GloveID, out var glove) || !glove.IsBought)).ToList();
 
-                    isDuplicate = true;
-                    duplicateScrapAmount = knife.ScrapAmount;
-                }
-                else
-                {
-                    knife = CalculateKnife(knivesAvailable);
-                }
-
-                rewardName = knife.KnifeName;
-                rewardImage = knife.IconLink;
-                rewardDesc = knife.KnifeDesc;
-                rewardRarity = knife.KnifeRarity;
-                reward = new(ERewardType.KNIFE, knife.KnifeID);
-
-                return true;
-            }
-            case ECaseRarity.GLOVE or ECaseRarity.LIMITED_GLOVE:
-            {
-                var isLimited = caseRarity == ECaseRarity.LIMITED_GLOVE;
-                Logging.Debug($"{player.CharacterName} reward rarity is GLOVE, IsLimited {isLimited}");
-                List<Glove> glovesAvailable = new();
-                if (isLimited)
-                {
-                    Logging.Debug($"{player.CharacterName} has gotten a limited glove rarity, checking if there are any limited gloves available");
-                    glovesAvailable = DB.Gloves.Values.Where(k => k.GloveWeight > 0 && k.MaxAmount > 0 && k.MaxAmount > k.UnboxedAmount && (!loadout.Gloves.TryGetValue(k.GloveID, out var glove) || !glove.IsBought)).ToList();
+                    Logging.Debug($"Found {glovesAvailable.Count} gloves available to be unboxed by the player");
+                    Glove glove;
                     if (glovesAvailable.Count == 0)
                     {
-                        Logging.Debug("There are no limited gloves available, getting gloves that are not owned by the player");
-                        glovesAvailable = DB.Gloves.Values.Where(k => k.GloveWeight > 0 && k.MaxAmount == 0 && (!loadout.Gloves.TryGetValue(k.GloveID, out var glove) || !glove.IsBought)).ToList();
+                        Logging.Debug($"There are no gloves available to calculate with, sending a random one to player");
+                        var newGloves = DB.Gloves.Values.Where(k => k.GloveWeight > 0 && k.MaxAmount == 0).ToList();
+                        glove = newGloves[UnityEngine.Random.Range(0, newGloves.Count)];
+
+                        isDuplicate = true;
+                        duplicateScrapAmount = glove.ScrapAmount;
                     }
-                }
-                else
-                    glovesAvailable = DB.Gloves.Values.Where(k => k.GloveWeight > 0 && k.MaxAmount == 0 && (!loadout.Gloves.TryGetValue(k.GloveID, out var glove) || !glove.IsBought)).ToList();
+                    else
+                        glove = CalculateGlove(glovesAvailable);
 
-                Logging.Debug($"Found {glovesAvailable.Count} gloves available to be unboxed by the player");
-                Glove glove = null;
-                if (glovesAvailable.Count == 0)
+                    rewardName = glove.GloveName;
+                    rewardImage = glove.IconLink;
+                    rewardDesc = glove.GloveDesc;
+                    rewardRarity = glove.GloveRarity;
+                    reward = new(ERewardType.GLOVE, glove.GloveID);
+
+                    return true;
+                }
+                case ECaseRarity.LIMITED_SKIN:
                 {
-                    Logging.Debug($"There are no gloves available to calculate with, sending a random one to player");
-                    var newGloves = DB.Gloves.Values.Where(k => k.GloveWeight > 0 && k.MaxAmount == 0).ToList();
-                    glove = newGloves[UnityEngine.Random.Range(0, newGloves.Count)];
+                    Logging.Debug($"{player.CharacterName} reward rarity is LIMITED SKIN");
 
-                    isDuplicate = true;
-                    duplicateScrapAmount = glove.ScrapAmount;
+                    var skinsAvailable = @case.AvailableSkins.Where(k => k.MaxAmount > 0 && k.MaxAmount > k.UnboxedAmount).ToList();
+                    if (skinsAvailable.Count == 0)
+                    {
+                        Logging.Debug("No limited skin found, re-rolling");
+                        continue;
+                    }
+
+                    Logging.Debug($"Found {skinsAvailable.Count} limited skins available, checking for non duplicates");
+                    var nonDuplicateSkins = skinsAvailable.Where(k => !loadout.GunSkinsSearchByID.ContainsKey(k.ID)).ToList();
+                    Logging.Debug($"Found {nonDuplicateSkins.Count} non duplicate skins available");
+                    GunSkin skin;
+                    if (nonDuplicateSkins.Count == 0)
+                    {
+                        Logging.Debug("No non duplicate skin available, giving a random skin");
+                        skin = skinsAvailable[UnityEngine.Random.Range(0, skinsAvailable.Count)];
+                        isDuplicate = true;
+                        duplicateScrapAmount = skin.ScrapAmount;
+                    }
+                    else
+                        skin = nonDuplicateSkins[UnityEngine.Random.Range(0, nonDuplicateSkins.Count)];
+
+                    rewardName = skin.Gun.GunName + " | " + skin.SkinName;
+                    rewardImage = skin.IconLink;
+                    rewardDesc = skin.SkinDesc;
+                    rewardRarity = skin.SkinRarity;
+                    reward = new(ERewardType.GUN_SKIN, skin.ID);
+
+                    return true;
                 }
-                else
+                default:
                 {
-                    glove = CalculateGlove(glovesAvailable);
+                    Logging.Debug($"{player.CharacterName} reward rarity is GUN SKIN with rarity {caseRarity}");
+                    if (!Enum.TryParse(caseRarity.ToString(), true, out ERarity skinRarity))
+                    {
+                        Logging.Debug($"Error parsing {caseRarity} to a specified skin rarity");
+                        return false;
+                    }
+
+                    var skinsAvailable = @case.AvailableSkinsSearchByRarity[skinRarity].Where(k => k.MaxAmount == 0).ToList();
+                    Logging.Debug($"Found {skinsAvailable.Count} skins available to got by {player.CharacterName} for rarity {skinRarity}");
+                    if (skinsAvailable.Count == 0)
+                    {
+                        Logging.Debug($"Found no skins available for the {player.CharacterName} to get for rarity {skinRarity}");
+                        return false;
+                    }
+
+                    var skin = skinsAvailable[UnityEngine.Random.Range(0, skinsAvailable.Count)];
+                    if (loadout.GunSkinsSearchByID.ContainsKey(skin.ID))
+                    {
+                        isDuplicate = true;
+                        duplicateScrapAmount = skin.ScrapAmount;
+                    }
+
+                    rewardName = skin.Gun.GunName + " | " + skin.SkinName;
+                    rewardImage = skin.IconLink;
+                    rewardDesc = skin.SkinDesc;
+                    rewardRarity = skin.SkinRarity;
+                    reward = new(ERewardType.GUN_SKIN, skin.ID);
+
+                    return true;
                 }
-
-                rewardName = glove.GloveName;
-                rewardImage = glove.IconLink;
-                rewardDesc = glove.GloveDesc;
-                rewardRarity = glove.GloveRarity;
-                reward = new(ERewardType.GLOVE, glove.GloveID);
-
-                return true;
-            }
-            default:
-            {
-                Logging.Debug($"{player.CharacterName} reward rarity is GUN SKIN with rarity {caseRarity}");
-                if (!Enum.TryParse(caseRarity.ToString(), true, out ERarity skinRarity))
-                {
-                    Logging.Debug($"Error parsing {caseRarity} to a specified skin rarity");
-                    return false;
-                }
-
-                var skinsAvailable = @case.AvailableSkinsSearchByRarity[skinRarity].Where(k => k.MaxAmount == 0 || k.MaxAmount > k.UnboxedAmount).ToList();
-                Logging.Debug($"Found {skinsAvailable.Count} skins available to got by {player.CharacterName} for rarity {skinRarity}");
-                if (skinsAvailable.Count == 0)
-                {
-                    Logging.Debug($"Found no skins available for the {player.CharacterName} to get for rarity {skinRarity}");
-                    return false;
-                }
-
-                var skin = skinsAvailable[UnityEngine.Random.Range(0, skinsAvailable.Count)];
-                if (loadout.GunSkinsSearchByID.ContainsKey(skin.ID))
-                {
-                    isDuplicate = true;
-                    duplicateScrapAmount = skin.ScrapAmount;
-                }
-
-                rewardName = skin.Gun.GunName + " | " + skin.SkinName;
-                rewardImage = skin.IconLink;
-                rewardDesc = skin.SkinDesc;
-                rewardRarity = skin.SkinRarity;
-                reward = new(ERewardType.GUN_SKIN, skin.ID);
-
-                return true;
             }
         }
     }

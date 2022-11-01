@@ -11,5 +11,6 @@ public enum ECaseRarity
     KNIFE,
     GLOVE,
     LIMITED_KNIFE,
-    LIMITED_GLOVE
+    LIMITED_GLOVE,
+    LIMITED_SKIN
 }

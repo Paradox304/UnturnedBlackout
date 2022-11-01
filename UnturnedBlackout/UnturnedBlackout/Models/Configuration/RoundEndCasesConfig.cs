@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnturnedBlackout.Models.Global;
 
 namespace UnturnedBlackout.Models.Configuration;
 
+[Serializable]
 public class RoundEndCasesConfig
 {
     public int Chance { get; set; }

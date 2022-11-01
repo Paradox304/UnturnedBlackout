@@ -1,5 +1,8 @@
-﻿namespace UnturnedBlackout.Models.Configuration;
+﻿using System;
 
+namespace UnturnedBlackout.Models.Configuration;
+
+[Serializable]
 public class IconsConfig
 {
     public string BlacktagsSmallIconLink { get; set; }
@@ -12,7 +15,8 @@ public class IconsConfig
 
     public string KnifeUnboxingIconLink { get; set; }
     public string GloveUnboxingIconLink { get; set; }
-
+    public string LimitedSkinUnboxingIconLink { get; set; }
+    
     public string XPIconLink { get; set; }
 
     public string XPBoostIconLink { get; set; }

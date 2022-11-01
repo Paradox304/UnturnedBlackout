@@ -5217,6 +5217,8 @@ public class UIHandler
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Quest Reward TEXT {i}", $"+{quest.Quest.XP}★");
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Quest Bar Fill {i}", quest.Amount == 0 ? UIManager.HAIRSPACE_SYMBOL_STRING : new(UIManager.HAIRSPACE_SYMBOL_CHAR, Math.Min(256, quest.Amount * 256 / quest.Quest.TargetAmount)));
         }
+        
+        ShowQuestCompletion();
     }
 
     public void ShowQuestCompletion()
@@ -5879,7 +5881,7 @@ public class UIHandler
         var embed = new Embed(null, null, null, Utility.GetDiscordColorCode(rewardRarity), DateTime.UtcNow.ToString("s"), new(Provider.serverName, Provider.configData.Browser.Icon), new(PlayerData.SteamName, $"https://steamcommunity.com/profiles/{PlayerData.SteamID}", PlayerData.AvatarLinks[0]), new Field[] { new($"[{rewardRarity.ToFriendlyName()}] {rewardName}", @case.Case.CaseName, true) }, new(rewardImage), null);
         switch (cRarity)
         {
-            case ECaseRarity.GLOVE or ECaseRarity.LIMITED_GLOVE or ECaseRarity.KNIFE or ECaseRarity.LIMITED_KNIFE:
+            case ECaseRarity.GLOVE or ECaseRarity.LIMITED_GLOVE or ECaseRarity.KNIFE or ECaseRarity.LIMITED_KNIFE or ECaseRarity.LIMITED_SKIN:
                 Plugin.Instance.Discord.SendEmbed(embed, "Black Market", CASE_UNBOXING_LIMITED_WEBHOOK_URL);
                 break;
             default:
@@ -5910,7 +5912,13 @@ public class UIHandler
             if (i == 20)
             {
                 EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Rolling IMAGE {i}",
-                    reward.RewardType == ERewardType.KNIFE ? Config.Icons.FileData.KnifeUnboxingIconLink : reward.RewardType == ERewardType.GLOVE ? Config.Icons.FileData.GloveUnboxingIconLink : rewardImage);
+                    cRarity switch
+                    {
+                        ECaseRarity.KNIFE or ECaseRarity.LIMITED_KNIFE => Config.Icons.FileData.KnifeUnboxingIconLink,
+                        ECaseRarity.GLOVE or ECaseRarity.LIMITED_GLOVE => Config.Icons.FileData.GloveUnboxingIconLink,
+                        ECaseRarity.LIMITED_SKIN => Config.Icons.FileData.LimitedSkinUnboxingIconLink,
+                        var _ => rewardImage
+                    });
 
                 SendRarity("SERVER Unbox Content Rolling", reward.RewardType is ERewardType.KNIFE or ERewardType.GLOVE ? ERarity.YELLOW : rewardRarity, i);
                 continue;
@@ -5927,6 +5935,10 @@ public class UIHandler
                 case ECaseRarity.GLOVE or ECaseRarity.LIMITED_GLOVE:
                     EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Rolling IMAGE {i}", Config.Icons.FileData.GloveUnboxingIconLink);
                     SendRarity("SERVER Unbox Content Rolling", ERarity.YELLOW, i);
+                    continue;
+                case ECaseRarity.LIMITED_SKIN:
+                    EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Rolling IMAGE {i}", Config.Icons.FileData.LimitedSkinUnboxingIconLink);
+                    SendRarity("SERVER Unbox Content Rolling", ERarity.CYAN, i);
                     continue;
                 default:
                     if (!Enum.TryParse(caseRarity.ToString(), true, out ERarity skinRarity))

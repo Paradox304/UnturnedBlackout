@@ -1,7 +1,9 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace UnturnedBlackout.Models.Configuration;
 
+[Serializable]
 public class BaseValuesConfig
 {
     public int MaxPlayerNameCharacters { get; set; }
