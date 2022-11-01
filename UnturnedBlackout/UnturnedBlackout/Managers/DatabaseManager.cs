@@ -1730,7 +1730,8 @@ public class DatabaseManager
             foreach (var achievement in Achievements)
                 _ = await new MySqlCommand($"INSERT IGNORE INTO `{PLAYERS_ACHIEVEMENTS}` (`SteamID`, `AchievementID`) VALUES ({player.CSteamID}, {achievement.AchievementID});", conn).ExecuteScalarAsync();
 
-            var loadoutAmount = Utility.GetLoadoutAmount(player);
+            var obj = await new MySqlCommand($"SELECT `HasPrime` FROM `{PLAYERS}` WHERE `SteamID` = {player.CSteamID} AND `PrimeExpiry` > {DateTimeOffset.UtcNow.ToUnixTimeSeconds()};", conn).ExecuteScalarAsync();
+            var loadoutAmount = obj != null && bool.TryParse(obj.ToString(), out var hasPrime) && hasPrime ? Plugin.Instance.Config.Base.FileData.PrimeLoadoutAmount : Plugin.Instance.Config.Base.FileData.DefaultLoadoutAmount;
             TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(LOADING_SPACES * 0.51f)), "LOADING LOADOUTS..."));
             Logging.Debug($"{steamName} should have {loadoutAmount} loadouts, adding them");
             var data = Plugin.Instance.Data.ConvertLoadoutToJson(DefaultLoadout);
@@ -2853,7 +2854,7 @@ public class DatabaseManager
             Logging.Debug($"Checking if player has more loadouts for {player.CharacterName}");
             try
             {
-                var loadoutAmount = Utility.GetLoadoutAmount(player);
+                var loadoutAmount = playerData.HasPrime && playerData.PrimeExpiry > DateTimeOffset.UtcNow ? Plugin.Instance.Config.Base.FileData.PrimeLoadoutAmount : Plugin.Instance.Config.Base.FileData.DefaultLoadoutAmount;
                 Logging.Debug($"{player.CharacterName} should have {loadoutAmount} loadouts, he has {loadouts.Count} registered");
                 if (loadoutAmount < loadouts.Count)
                 {
@@ -3672,7 +3673,6 @@ public class DatabaseManager
                         data.HasPrime = false;
                         TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.Reward.RemoveRewards(data.SteamID, ServerOptions.PrimeRewards));
                         _ = new MySqlCommand($"UPDATE `{PLAYERS}` SET `HasPrime` = false WHERE `SteamID` = {data.SteamID};", conn).ExecuteScalar();
-                        _ = R.Permissions.RemovePlayerFromGroup("Prime", new RocketPlayer(data.SteamID.ToString()));
                         Logging.Debug("Removed prime for the player");
                     }
 

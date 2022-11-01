@@ -35,6 +35,9 @@ public class BaseValuesConfig
 
     public byte HandSlotWidth { get; set; }
     public byte HandSlotHeight { get; set; }
+    
+    public int DefaultLoadoutAmount { get; set; }
+    public int PrimeLoadoutAmount { get; set; }
 
     public BaseValuesConfig()
     {
@@ -75,5 +78,8 @@ public class BaseValuesConfig
 
         HandSlotWidth = 10;
         HandSlotHeight = 10;
+
+        DefaultLoadoutAmount = 5;
+        PrimeLoadoutAmount = 10;
     }
 }
