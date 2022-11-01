@@ -69,7 +69,7 @@ internal class UnmuteCommand : IRocketCommand
                 new Field[] { new("**Unmuter:**", $"{(caller is UnturnedPlayer player ? $"[**{player.SteamName}**](https://steamcommunity.com/profiles/{player.CSteamID}/)" : "**Console**")}", true), new("**Time:**", DateTime.UtcNow.ToString(CultureInfo.InvariantCulture), true) }, null, null);
 
             if (!string.IsNullOrEmpty(Plugin.Instance.Configuration.Instance.WebhookURL))
-                Plugin.Instance.Discord.SendEmbed(embed, "Player Unmuted", Plugin.Instance.Configuration.Instance.WebhookURL);
+                Plugin.Instance.Discord.SendEmbed(embed, "Player Unmuted", Plugin.Instance.Config.Webhooks.FileData.UnmuteWebhookLink);
         });
     }
 }

@@ -15,8 +15,6 @@ public class LoggingManager
     public string LogDir { get; set; }
     public string DumpDir { get; set; }
 
-    private const string WARNINGS_URL = "https://discord.com/api/webhooks/1028305456524963960/hR907RCkg2gYkA-76x4n-qsK-SZY-GrzmJOppIkEmqzFwUrXnlvzTeyRQQdxp8gWh4Gv";
-
     public LoggingManager()
     {
         LogDir = Plugin.Instance.Directory + "/Logs/" + $"Log-{DateTime.Now:yyyy-MM-dd-hh:mm:ss}.txt";
@@ -54,7 +52,7 @@ public class LoggingManager
     {
         Embed embed = new("", "Warning", "", "10038562", DateTime.UtcNow.ToString("s"), new(Provider.serverName, Provider.configData.Browser.Icon), new(Provider.serverName, "", Provider.configData.Browser.Icon), new Field[] { new("Message:", message, true) }, null, null);
 
-        Plugin.Instance.Discord.ForceSendEmbed(embed, "Warning", WARNINGS_URL);
+        Plugin.Instance.Discord.ForceSendEmbed(embed, "Warning", Plugin.Instance.Config.Webhooks.FileData.PluginWarningsWebhookLink);
     }
 
     private void Write(object sender, ElapsedEventArgs e)

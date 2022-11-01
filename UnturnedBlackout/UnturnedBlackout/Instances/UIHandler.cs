@@ -43,8 +43,6 @@ public class UIHandler
 
     private const int MINIMUM_LOADOUT_PAGE_ATTACHMENT_PRIMARY = 4;
     private const int MAXIMUM_LOADOUT_PAGE_ATTACHMENT_PRIMARY = 8;
-    private const string CASE_UNBOXING_WEBHOOK_URL = "https://discord.com/api/webhooks/1031896101038608454/h1Fk3GGrt2DUrv3NWD3VrvBJkJbGSd-ZWQ0ZrAPoxVygxWdjgYkemYwNYZmRm-AIO1An";
-    private const string CASE_UNBOXING_LIMITED_WEBHOOK_URL = "https://discord.com/api/webhooks/1032689974740525067/fGGfo6QkYTQRIkF2KJfFsEKUCh1AyJ6eCGjKanowEPBEnvtjeLtybJOdfnixhfJPPawE";
 
     private const char STAR = '★';
     
@@ -5882,10 +5880,10 @@ public class UIHandler
         switch (cRarity)
         {
             case ECaseRarity.GLOVE or ECaseRarity.LIMITED_GLOVE or ECaseRarity.KNIFE or ECaseRarity.LIMITED_KNIFE or ECaseRarity.LIMITED_SKIN:
-                Plugin.Instance.Discord.SendEmbed(embed, "Black Market", CASE_UNBOXING_LIMITED_WEBHOOK_URL);
+                Plugin.Instance.Discord.SendEmbed(embed, "Black Market", Config.Webhooks.FileData.SpecialUnboxedWebhookLink);
                 break;
             default:
-                Plugin.Instance.Discord.SendEmbed(embed, "Black Market", CASE_UNBOXING_WEBHOOK_URL);
+                Plugin.Instance.Discord.SendEmbed(embed, "Black Market", Config.Webhooks.FileData.UnboxedWebhookLink);
                 break;
         }
         

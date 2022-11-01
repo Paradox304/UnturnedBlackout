@@ -204,8 +204,7 @@ public class DatabaseManager
 
     // CASES
     public const string CASES = "UB_Cases";
-
-    private const string LEADERBOARD_WEBHOOK_URL = "https://discord.com/api/webhooks/983367340525760542/RfPxBseRKp3kffBEaHovRBRsLpIR4A-pvAXbQWzknDMohxCiawGlsZw6U_ehXukPreb_";
+   
     public const int LOADING_SPACES = 96;
 
     public DatabaseManager()
@@ -3355,7 +3354,7 @@ public class DatabaseManager
                 
                 try
                 {
-                    Plugin.Instance.Discord.SendEmbed(embed, "Leaderboard", LEADERBOARD_WEBHOOK_URL);
+                    Plugin.Instance.Discord.SendEmbed(embed, "Leaderboard", Plugin.Instance.Config.Webhooks.FileData.LeaderboardWebhookLink);
                 }
                 catch (Exception ex)
                 {
@@ -3455,7 +3454,7 @@ public class DatabaseManager
                 
                 try
                 {
-                    Plugin.Instance.Discord.SendEmbed(embed, "Leaderboard", LEADERBOARD_WEBHOOK_URL);
+                    Plugin.Instance.Discord.SendEmbed(embed, "Leaderboard", Plugin.Instance.Config.Webhooks.FileData.LeaderboardWebhookLink);
                 }
                 catch (Exception ex)
                 {
@@ -3553,7 +3552,7 @@ public class DatabaseManager
                 
                 try
                 {
-                    Plugin.Instance.Discord.SendEmbed(embed, "Leaderboard", LEADERBOARD_WEBHOOK_URL);
+                    Plugin.Instance.Discord.SendEmbed(embed, "Leaderboard", Plugin.Instance.Config.Webhooks.FileData.LeaderboardWebhookLink);
                 }
                 catch (Exception ex)
                 {
@@ -3702,10 +3701,8 @@ public class DatabaseManager
 
                         Embed embed = new(null, $"**{profile.SteamID}** was unmuted", null, "15105570", DateTime.UtcNow.ToString("s"), new(Provider.serverName, Provider.configData.Browser.Icon),
                             new(profile.SteamID, $"https://steamcommunity.com/profiles/{profile.SteamID64}/", profile.AvatarIcon.ToString()), new Field[] { new("**Unmuter:**", $"**Mute Expired**", true), new("**Time:**", DateTime.UtcNow.ToString(CultureInfo.InvariantCulture), true) }, null, null);
-
-                        if (!string.IsNullOrEmpty(Plugin.Instance.Configuration.Instance.WebhookURL))
-                            Plugin.Instance.Discord.SendEmbed(embed, "Player Unmuted", Plugin.Instance.Configuration.Instance.WebhookURL);
-
+                        
+                        Plugin.Instance.Discord.SendEmbed(embed, "Player Unmuted", Plugin.Instance.Config.Webhooks.FileData.UnmuteWebhookLink);
                         TaskDispatcher.QueueOnMainThread(() => Utility.Say(UnturnedPlayer.FromCSteamID(data.SteamID), Plugin.Instance.Translate("Unmuted").ToRich()));
                     }
                     catch (Exception)
