@@ -284,11 +284,10 @@ public static class Utility
                 continue;
             }
 
-            var upperPercentile = lowerPercentile + percentage;
             var rewardsTxt = percRewards.Remove(0, percRewards.IndexOf('-') + 1);
             var rewards = GetRewardsFromString(rewardsTxt);
-            percentileRewards.Add(new(lowerPercentile, upperPercentile, rewards));
-            lowerPercentile = upperPercentile;
+            percentileRewards.Add(new(lowerPercentile, percentage, rewards));
+            lowerPercentile = percentage;
         }
 
         return percentileRewards;

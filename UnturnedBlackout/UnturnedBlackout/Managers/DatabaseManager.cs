@@ -3329,12 +3329,12 @@ public class DatabaseManager
                         bulkRewards.Add(new(leaderboardData.SteamID, percentileReward.Rewards));
                         var botReward = botRewards.FirstOrDefault(k => k.steam_id == leaderboardData.SteamID.ToString());
                         if (botReward != null)
-                            botReward.percentile = percentileReward.UpperPercentile - percentileReward.LowerPercentile;
+                            botReward.percentile = percentileReward.UpperPercentile;
                         else
-                            botRewards.Add(new(leaderboardData.SteamID.ToString(), PlayerDailyLeaderboard.IndexOf(leaderboardData) + 1, percentileReward.UpperPercentile - percentileReward.LowerPercentile));
+                            botRewards.Add(new(leaderboardData.SteamID.ToString(), PlayerDailyLeaderboard.IndexOf(leaderboardData) + 1, percentileReward.UpperPercentile));
                     }
 
-                    embed.fields[1].value += $"**Top {percentileReward.UpperPercentile - percentileReward.LowerPercentile}%:** {upperIndex - lowerIndex} players \n";
+                    embed.fields[1].value += $"**Top {percentileReward.UpperPercentile}%:** {upperIndex - lowerIndex} players \n";
                 }
 
                 try
@@ -3429,12 +3429,12 @@ public class DatabaseManager
                     
                         var botReward = botRewards.FirstOrDefault(k => k.steam_id == leaderboardData.SteamID.ToString());
                         if (botReward != null)
-                            botReward.percentile = percentileReward.UpperPercentile - percentileReward.LowerPercentile;
+                            botReward.percentile = percentileReward.UpperPercentile;
                         else
-                            botRewards.Add(new(leaderboardData.SteamID.ToString(), PlayerWeeklyLeaderboard.IndexOf(leaderboardData) + 1, percentileReward.UpperPercentile - percentileReward.LowerPercentile));
+                            botRewards.Add(new(leaderboardData.SteamID.ToString(), PlayerWeeklyLeaderboard.IndexOf(leaderboardData) + 1, percentileReward.UpperPercentile));
                     }
 
-                    embed.fields[1].value += $"**Top {percentileReward.UpperPercentile - percentileReward.LowerPercentile}%:** {upperIndex - lowerIndex} players \n";
+                    embed.fields[1].value += $"**Top {percentileReward.UpperPercentile}%:** {upperIndex - lowerIndex} players \n";
                 }
 
                 try
@@ -3527,12 +3527,12 @@ public class DatabaseManager
                         
                         var botReward = botRewards.FirstOrDefault(k => k.steam_id == leaderboardData.SteamID.ToString());
                         if (botReward != null)
-                            botReward.percentile = percentileReward.UpperPercentile - percentileReward.LowerPercentile;
+                            botReward.percentile = percentileReward.UpperPercentile;
                         else
-                            botRewards.Add(new(leaderboardData.SteamID.ToString(), PlayerSeasonalLeaderboard.IndexOf(leaderboardData) + 1, percentileReward.UpperPercentile - percentileReward.LowerPercentile));
+                            botRewards.Add(new(leaderboardData.SteamID.ToString(), PlayerSeasonalLeaderboard.IndexOf(leaderboardData) + 1, percentileReward.UpperPercentile));
                     }
 
-                    embed.fields[1].value += $"**Top {percentileReward.UpperPercentile - percentileReward.LowerPercentile}%:** {upperIndex - lowerIndex} players \n";
+                    embed.fields[1].value += $"**Top {percentileReward.UpperPercentile}%:** {upperIndex - lowerIndex} players \n";
                 }
 
                 try
