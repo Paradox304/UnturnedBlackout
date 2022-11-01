@@ -5181,7 +5181,13 @@ public class UIHandler
         ELeaderboardPage.DAILY => DB.PlayerDailyLeaderboard,
         ELeaderboardPage.WEEKLY => DB.PlayerWeeklyLeaderboard,
         ELeaderboardPage.SEASONAL => DB.PlayerSeasonalLeaderboard,
-        ELeaderboardPage.ALL => LeaderboardTab == ELeaderboardTab.KILL ? DB.PlayerAllTimeKill : DB.PlayerAllTimeLevel,
+        ELeaderboardPage.ALL => LeaderboardTab switch
+        {
+            ELeaderboardTab.KILL => DB.PlayerAllTimeKill,
+            ELeaderboardTab.SKINS => DB.PlayerAllTimeSkins,
+            ELeaderboardTab.LEVEL => DB.PlayerAllTimeLevel,
+            _ => throw new ArgumentOutOfRangeException()
+        },
         var _ => throw new ArgumentOutOfRangeException(nameof(LeaderboardPage), "Value is not as expected")
     };
 

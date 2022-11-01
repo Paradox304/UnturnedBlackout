@@ -1833,6 +1833,9 @@ public class UIManager
             case "SERVER Leaderboards Level BUTTON":
                 handler.SelectLeaderboardTab(ELeaderboardTab.LEVEL);
                 return;
+            case "SERVER Leaderboards Skins BUTTON":
+                handler.SelectLeaderboardTab(ELeaderboardTab.SKINS);
+                return;
             case "SERVER Leaderboards Next BUTTON":
                 handler.ForwardLeaderboardPage();
                 return;

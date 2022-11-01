@@ -3,5 +3,6 @@
 public enum ELeaderboardTab
 {
     KILL,
-    LEVEL
+    LEVEL,
+    SKINS
 }

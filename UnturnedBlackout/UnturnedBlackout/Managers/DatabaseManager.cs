@@ -71,6 +71,7 @@ public class DatabaseManager
     public Dictionary<CSteamID, LeaderboardData> PlayerAllTimeLeaderboardLookup { get; set; }
     public List<LeaderboardData> PlayerAllTimeKill { get; set; }
     public List<LeaderboardData> PlayerAllTimeLevel { get; set; }
+    public List<LeaderboardData> PlayerAllTimeSkins { get; set; }
 
     // Base Data
     public Dictionary<ushort, Gun> Guns { get; set; }
@@ -3063,6 +3064,8 @@ public class DatabaseManager
                 Dictionary<CSteamID, LeaderboardData> playerAllTimeLeaderboardLookup = new();
                 List<LeaderboardData> playerAllTimeKill = new();
                 List<LeaderboardData> playerAllTimeLevel = new();
+                List<LeaderboardData> playerAllTimeSkins = new();
+                
                 while (rdr.Read())
                 {
                     if (!ulong.TryParse(rdr[0].ToString(), out var steamid))
@@ -3097,12 +3100,15 @@ public class DatabaseManager
                     playerAllTimeLeaderboardLookup.Add(steamID, leaderboardData);
                     playerAllTimeKill.Add(leaderboardData);
                     playerAllTimeLevel.Add(leaderboardData);
+                    playerAllTimeSkins.Add(leaderboardData);
                 }
 
                 PlayerAllTimeLeaderboardLookup = playerAllTimeLeaderboardLookup;
                 PlayerAllTimeKill = playerAllTimeKill;
                 PlayerAllTimeLevel = playerAllTimeLevel;
+                PlayerAllTimeSkins = playerAllTimeSkins;
                 PlayerAllTimeLevel.Sort((x, y) => y.Level.CompareTo(x.Level));
+                PlayerAllTimeSkins.Sort((x, y) => y.Skins.CompareTo(x.Skins));
             }
             catch (Exception ex)
             {

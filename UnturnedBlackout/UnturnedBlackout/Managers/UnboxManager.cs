@@ -132,16 +132,13 @@ public class UnboxManager
                     Logging.Debug($"Found {skinsAvailable.Count} limited skins available, checking for non duplicates");
                     var nonDuplicateSkins = skinsAvailable.Where(k => !loadout.GunSkinsSearchByID.ContainsKey(k.ID)).ToList();
                     Logging.Debug($"Found {nonDuplicateSkins.Count} non duplicate skins available");
-                    GunSkin skin;
                     if (nonDuplicateSkins.Count == 0)
                     {
-                        Logging.Debug("No non duplicate skin available, giving a random skin");
-                        skin = skinsAvailable[UnityEngine.Random.Range(0, skinsAvailable.Count)];
-                        isDuplicate = true;
-                        duplicateScrapAmount = skin.ScrapAmount;
+                        Logging.Debug("No non duplicate skins found, re-rolling");
+                        continue;
                     }
-                    else
-                        skin = nonDuplicateSkins[UnityEngine.Random.Range(0, nonDuplicateSkins.Count)];
+
+                    var skin = nonDuplicateSkins[UnityEngine.Random.Range(0, nonDuplicateSkins.Count)];
 
                     rewardName = skin.Gun.GunName + " | " + skin.SkinName;
                     rewardImage = skin.IconLink;
