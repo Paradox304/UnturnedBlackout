@@ -1201,13 +1201,13 @@ public class UIHandler
             var attachmentType = (EAttachment)i;
             _ = loadout.PrimaryAttachments.TryGetValue(attachmentType, out var attachment);
             EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout Primary {attachmentType.ToUIName()} IMAGE", attachment?.Attachment?.IconLink ?? Utility.GetDefaultAttachmentImage(attachmentType.ToString()));
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout Primary {attachmentType.ToUIName()} {attachment?.Attachment?.AttachmentRarity.ToString() ?? "DEFAULT"}", true);
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout Primary {attachmentType.ToUIName()} {attachment?.Attachment?.AttachmentRarity.ToString() ?? "COMMON"}", true);
         }
 
         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Loadout Primary Charm IMAGE", loadout.PrimaryGunCharm?.GunCharm?.IconLink ?? Utility.GetDefaultAttachmentImage("charm"));
-        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout Primary Charm {loadout.PrimaryGunCharm?.GunCharm?.CharmRarity.ToString() ?? "DEFAULT"}", true);
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout Primary Charm {loadout.PrimaryGunCharm?.GunCharm?.CharmRarity.ToString() ?? "COMMON"}", true);
         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Loadout Primary Skin IMAGE", loadout.PrimarySkin?.PatternLink ?? Utility.GetDefaultAttachmentImage("skin"));
-        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout Primary Skin {loadout.PrimarySkin?.SkinRarity.ToString() ?? "DEFAULT"}", true);
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout Primary Skin {loadout.PrimarySkin?.SkinRarity.ToString() ?? "COMMON"}", true);
         
         // Secondary
         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Loadout Secondary IMAGE", loadout.SecondarySkin?.IconLink ?? loadout.Secondary?.Gun?.IconLink ?? "");
@@ -1219,13 +1219,13 @@ public class UIHandler
             var attachmentType = (EAttachment)i;
             _ = loadout.SecondaryAttachments.TryGetValue(attachmentType, out var attachment);
             EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout Secondary {attachmentType.ToUIName()} IMAGE", attachment?.Attachment?.IconLink ?? Utility.GetDefaultAttachmentImage(attachmentType.ToString()));
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout Secondary {attachmentType.ToUIName()} {attachment?.Attachment?.AttachmentRarity.ToString() ?? "DEFAULT"}", true);
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout Secondary {attachmentType.ToUIName()} {attachment?.Attachment?.AttachmentRarity.ToString() ?? "COMMON"}", true);
         }
 
         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Loadout Secondary Charm IMAGE", loadout.SecondaryGunCharm?.GunCharm?.IconLink ?? Utility.GetDefaultAttachmentImage("charm"));
-        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout Secondary Charm {loadout.SecondaryGunCharm?.GunCharm?.CharmRarity.ToString() ?? "DEFAULT"}", true);
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout Secondary Charm {loadout.SecondaryGunCharm?.GunCharm?.CharmRarity.ToString() ?? "COMMON"}", true);
         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Loadout Secondary Skin IMAGE", loadout.SecondarySkin?.PatternLink ?? Utility.GetDefaultAttachmentImage("skin"));
-        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout Secondary Skin {loadout.SecondarySkin?.SkinRarity.ToString() ?? "DEFAULT"}", true);
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout Secondary Skin {loadout.SecondarySkin?.SkinRarity.ToString() ?? "COMMON"}", true);
         
         // Knife
         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Loadout Knife IMAGE", loadout.Knife?.Knife?.IconLink ?? "");
@@ -1248,14 +1248,16 @@ public class UIHandler
             var gotPerk = loadout.Perks.TryGetValue(i, out var perk);
             EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout Perk IMAGE {i}", gotPerk ? perk.Perk.IconLink : "");
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout Perk TEXT {i}", gotPerk ? perk.Perk.PerkName : "");
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout Perk {i} {(gotPerk? perk.Perk.PerkRarity.ToString() : "DEFAULT")}", true);
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout Perk {i} {(gotPerk ? perk.Perk.PerkRarity.ToString() : "DEFAULT")}", true);
         }
 
         // Killstreak
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Loadout Killstreak DEFAULT", true);
         for (var i = 0; i <= 2; i++)
         {
             EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout Killstreak IMAGE {i}", loadout.Killstreaks.Count < i + 1 ? "" : loadout.Killstreaks[i].Killstreak.IconLink);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout Killstreak TEXT {i}", loadout.Killstreaks.Count < i + 1 ? "" : loadout.Killstreaks[i].Killstreak.KillstreakRequired.ToString());
+
         }
 
         // Card
@@ -5891,7 +5893,7 @@ public class UIHandler
         }
 
         DB.IncreaseCaseUnboxedAmount(@case.Case.CaseID, 1);
-        if (!Plugin.Instance.Unbox.TryCalculateReward(@case.Case, Player, out var reward, out var rewardImage, out var rewardName, out var rewardDesc, out var rewardRarity, out var isDuplicate, out var duplicateScrapAmount, out var cRarity))
+        if (!Plugin.Instance.Unbox.TryCalculateReward(@case.Case, Player, out var reward, out var rewardImage, out var rewardName, out var rewardDesc, out var rewardRarity, out var isDuplicate, out var duplicateScrapAmount, out var cRarity, out var updatedWeights))
         {
             Logging.Debug($"Unable to calculate reward for unboxing case {SelectedCaseID} for {Player.CharacterName}");
             IsUnboxing = false;
@@ -5901,7 +5903,7 @@ public class UIHandler
         var embed = new Embed(null, null, null, Utility.GetDiscordColorCode(rewardRarity), DateTime.UtcNow.ToString("s"), new(Provider.serverName, Provider.configData.Browser.Icon), new(PlayerData.SteamName, $"https://steamcommunity.com/profiles/{PlayerData.SteamID}", PlayerData.AvatarLinks[0]), new Field[] { new($"[{rewardRarity.ToFriendlyName()}] {rewardName}", @case.Case.CaseName, true) }, new(rewardImage), null);
         switch (cRarity)
         {
-            case ECaseRarity.GLOVE or ECaseRarity.LIMITED_GLOVE or ECaseRarity.KNIFE or ECaseRarity.LIMITED_KNIFE or ECaseRarity.LIMITED_SKIN:
+            case ECaseRarity.GLOVE or ECaseRarity.LIMITED_GLOVE or ECaseRarity.KNIFE or ECaseRarity.LIMITED_KNIFE or ECaseRarity.LIMITED_SKIN or ECaseRarity.SPECIAL_SKIN:
                 Plugin.Instance.Discord.SendEmbed(embed, "Black Market", Config.Webhooks.FileData.SpecialUnboxedWebhookLink);
                 break;
             default:
@@ -5925,7 +5927,7 @@ public class UIHandler
                 break;
         }
         
-        var poolSize = @case.Case.Weights.Sum(k => k.Item2);
+        var poolSize = updatedWeights.Sum(k => k.Item2);
 
         for (var i = 0; i <= MAX_ROLLING_CONTENT_PER_CASE; i++)
         {
@@ -5937,6 +5939,7 @@ public class UIHandler
                         ECaseRarity.KNIFE or ECaseRarity.LIMITED_KNIFE => Config.Icons.FileData.KnifeUnboxingIconLink,
                         ECaseRarity.GLOVE or ECaseRarity.LIMITED_GLOVE => Config.Icons.FileData.GloveUnboxingIconLink,
                         ECaseRarity.LIMITED_SKIN => Config.Icons.FileData.LimitedSkinUnboxingIconLink,
+                        ECaseRarity.SPECIAL_SKIN => Config.Icons.FileData.SpecialSkinUnboxingIconLink,
                         var _ => rewardImage
                     });
 
@@ -5944,8 +5947,7 @@ public class UIHandler
                 continue;
             }
 
-            var caseRarity = CalculateCaseRarity(@case.Case.Weights, poolSize);
-
+            var caseRarity = CalculateCaseRarity(updatedWeights, poolSize);
             switch (caseRarity)
             {
                 case ECaseRarity.KNIFE or ECaseRarity.LIMITED_KNIFE:
@@ -5954,6 +5956,10 @@ public class UIHandler
                     continue;
                 case ECaseRarity.GLOVE or ECaseRarity.LIMITED_GLOVE:
                     EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Rolling IMAGE {i}", Config.Icons.FileData.GloveUnboxingIconLink);
+                    SendRarity("SERVER Unbox Content Rolling", ERarity.YELLOW, i);
+                    continue;
+                case ECaseRarity.SPECIAL_SKIN:
+                    EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Rolling IMAGE {i}", Config.Icons.FileData.SpecialSkinUnboxingIconLink);
                     SendRarity("SERVER Unbox Content Rolling", ERarity.YELLOW, i);
                     continue;
                 case ECaseRarity.LIMITED_SKIN:
@@ -5974,7 +5980,6 @@ public class UIHandler
                     }
 
                     var randomSkin = raritySkins[UnityEngine.Random.Range(0, raritySkins.Count)];
-
                     EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Rolling IMAGE {i}", randomSkin.IconLink);
                     SendRarity("SERVER Unbox Content Rolling", randomSkin.SkinRarity, i);
                     continue;
@@ -5996,7 +6001,6 @@ public class UIHandler
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Description TITLE", $"Unboxing {@case.Case.CaseName}");
         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Result IMAGE", rewardImage);
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Result TEXT", $"<color={Utility.GetRarityColor(rewardRarity)}>{rewardName}</color>");
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Description TEXT", rewardDesc);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Duplicate", isDuplicate);
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Duplicate TEXT", $"+{duplicateScrapAmount}");
         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Duplicate IMAGE", Config.Icons.FileData.ScrapSmallIconLink);
@@ -6147,46 +6151,61 @@ public class UIHandler
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Unbox Button Toggler", false);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Crate EXAMPLE Drop ANIM", true);
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Description TEXT", @case.CaseName);
-
-        var skins = @case.AvailableSkins.Where(k => k.MaxAmount == 0).OrderBy(k => k.SkinRarity).ThenBy(k => k.ID).ToList();
+        
+        var skins = @case.ShowLimiteds ? @case.AvailableSkins.Where(k => k.MaxAmount > 0).OrderBy(k => k.ID).ToList() : @case.AvailableSkins.Where(k => k.MaxAmount == 0).OrderBy(k => k.SkinRarity).ThenBy(k => k.ID).ToList();
         for (var i = 0; i <= MAX_PREVIEW_CONTENT_PER_CASE; i++)
         {
-            if (i == 18 && @case.Weights.Exists(k => k.Item1 == ECaseRarity.GLOVE || k.Item1 == ECaseRarity.LIMITED_GLOVE))
+            switch (i)
             {
-                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content BUTTON {i}", true);
-                EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content IMAGE {i}", Config.Icons.FileData.GloveUnboxingIconLink);
-                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Name TEXT {i}", "Special Gloves");
-                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Extra TEXT {i}", " ");
-                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content BOUGHT {i}", false);
-                SendRarity("SERVER Unbox Content", ERarity.YELLOW, i);
-                continue;
-            }
+                case 17 when @case.Weights.Exists(k => k.Item1 is ECaseRarity.GLOVE or ECaseRarity.LIMITED_GLOVE):
+                {
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content BUTTON {i}", true);
+                    EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content IMAGE {i}", Config.Icons.FileData.GloveUnboxingIconLink);
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Name TEXT {i}", "Special Gloves");
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Extra TEXT {i}", " ");
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content BOUGHT {i}", false);
+                    SendRarity("SERVER Unbox Content", ERarity.YELLOW, i);
+                    continue;
+                }
+                case 18 when @case.Weights.Exists(k => k.Item1 is ECaseRarity.KNIFE or ECaseRarity.LIMITED_KNIFE):
+                {
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content BUTTON {i}", true);
+                    EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content IMAGE {i}", Config.Icons.FileData.KnifeUnboxingIconLink);
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Name TEXT {i}", "Special Melee");
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Extra TEXT {i}", " ");
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content BOUGHT {i}", false);
+                    SendRarity("SERVER Unbox Content", ERarity.YELLOW, i);
+                    continue;
+                }
+                case 19 when @case.Weights.Exists(k => k.Item1 is ECaseRarity.SPECIAL_SKIN):
+                {
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content BUTTON {i}", true);
+                    EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content IMAGE {i}", Config.Icons.FileData.SpecialSkinUnboxingIconLink);
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Name TEXT {i}", "Special Skin");
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Extra TEXT {i}", " ");
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content BOUGHT {i}", false);
+                    SendRarity("SERVER Unbox Content", ERarity.YELLOW, i);
+                    continue;
+                }
+                default:
+                {
+                    if (skins.Count < i + 1)
+                    {
+                        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content BUTTON {i}", false);
+                        continue;
+                    }
 
-            if (i == 19 && @case.Weights.Exists(k => k.Item1 == ECaseRarity.KNIFE || k.Item1 == ECaseRarity.LIMITED_KNIFE))
-            {
-                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content BUTTON {i}", true);
-                EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content IMAGE {i}", Config.Icons.FileData.KnifeUnboxingIconLink);
-                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Name TEXT {i}", "Special Melee");
-                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Extra TEXT {i}", " ");
-                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content BOUGHT {i}", false);
-                SendRarity("SERVER Unbox Content", ERarity.YELLOW, i);
-                continue;
+                    var skin = skins[i];
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content BUTTON {i}", true);
+                    EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content IMAGE {i}", skin.IconLink);
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Name TEXT {i}", $"{skin.Gun.GunName} | {skin.SkinName}");
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Extra TEXT {i}", " ");
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Description TITLE", "Unbox Case");
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content BOUGHT {i}", PlayerLoadout.GunSkinsSearchByID.ContainsKey(skin.ID));
+                    SendRarity("SERVER Unbox Content", skin.SkinRarity, i);
+                    continue;
+                }
             }
-
-            if (skins.Count < i + 1)
-            {
-                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content BUTTON {i}", false);
-                continue;
-            }
-
-            var skin = skins[i];
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content BUTTON {i}", true);
-            EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content IMAGE {i}", skin.IconLink);
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Name TEXT {i}", $"{skin.Gun.GunName} | {skin.SkinName}");
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Extra TEXT {i}", " ");
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Description TITLE", "Unbox Case");
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content BOUGHT {i}", PlayerLoadout.GunSkinsSearchByID.ContainsKey(skin.ID));
-            SendRarity("SERVER Unbox Content", skin.SkinRarity, i);
         }
     }
 

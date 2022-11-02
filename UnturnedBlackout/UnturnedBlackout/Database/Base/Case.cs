@@ -17,8 +17,9 @@ public class Case
     public List<GunSkin> AvailableSkins { get; set; }
     public Dictionary<ERarity, List<GunSkin>> AvailableSkinsSearchByRarity { get; set; }
     public int UnboxedAmount { get; set; }
-
-    public Case(int caseID, string caseName, string iconLink, ERarity caseRarity, bool isBuyable, int scrapPrice, int coinPrice, List<(ECaseRarity, int)> weights, List<GunSkin> availableSkins, Dictionary<ERarity, List<GunSkin>> availableSkinsSearchByRarity, int unboxedAmount)
+    public bool ShowLimiteds { get; set; }
+    
+    public Case(int caseID, string caseName, string iconLink, ERarity caseRarity, bool isBuyable, int scrapPrice, int coinPrice, List<(ECaseRarity, int)> weights, List<GunSkin> availableSkins, Dictionary<ERarity, List<GunSkin>> availableSkinsSearchByRarity, int unboxedAmount, bool showLimiteds)
     {
         CaseID = caseID;
         CaseName = caseName;
@@ -31,12 +32,13 @@ public class Case
         AvailableSkins = availableSkins;
         AvailableSkinsSearchByRarity = availableSkinsSearchByRarity;
         UnboxedAmount = unboxedAmount;
+        ShowLimiteds = showLimiteds;
     }
 
     public int GetBuyPrice(ECurrency currency) => currency switch
     {
         ECurrency.COIN => CoinPrice,
         ECurrency.SCRAP => ScrapPrice,
-        var _ => throw new ArgumentOutOfRangeException("currency", "Currency is not as expected")
+        var _ => throw new ArgumentOutOfRangeException(nameof(currency), "Currency is not as expected")
     };
 }

@@ -83,7 +83,7 @@ public class Plugin : RocketPlugin<Config>
             return;
 
         var newName = ply.playerID.characterName.ToUnrich().Trim();
-        var chars = newName.Count();
+        var chars = newName.Length;
 
         if (chars == 0)
         {

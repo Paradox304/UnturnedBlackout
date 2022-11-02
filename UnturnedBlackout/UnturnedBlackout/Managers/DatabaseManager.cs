@@ -326,7 +326,7 @@ public class DatabaseManager
 
             _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{BATTLEPASS}` ( `TierID` INT NOT NULL , `FreeReward` TEXT NOT NULL , `PremiumReward` TEXT NOT NULL , `XP` INT NOT NULL , PRIMARY KEY (`TierID`));", conn).ExecuteScalarAsync();
             _ = await new MySqlCommand(
-                $"CREATE TABLE IF NOT EXISTS `{CASES}` ( `CaseID` INT NOT NULL , `CaseName` TEXT NOT NULL , `IconLink` TEXT NOT NULL , `CaseRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `IsBuyable` BOOLEAN NOT NULL , `ScrapPrice` INT NOT NULL , `CoinPrice` INT NOT NULL , `CommonWeight` INT NOT NULL , `UncommonWeight` INT NOT NULL , `RareWeight` INT NOT NULL , `EpicWeight` INT NOT NULL , `LegendaryWeight` INT NOT NULL , `MythicalWeight` INT NOT NULL , `KnifeWeight` INT NOT NULL , `GloveWeight` INT NOT NULL , `LimitedKnifeWeight` INT NOT NULL , `LimitedGloveWeight` INT NOT NULL , `LimitedSkinWeight` INT NOT NULL , `AvailableSkins` TEXT NOT NULL, `UnboxedAmount` INT NOT NULL, PRIMARY KEY (`CaseID`))",
+                $"CREATE TABLE IF NOT EXISTS `{CASES}` ( `CaseID` INT NOT NULL , `CaseName` TEXT NOT NULL , `IconLink` TEXT NOT NULL , `CaseRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `IsBuyable` BOOLEAN NOT NULL , `ScrapPrice` INT NOT NULL , `CoinPrice` INT NOT NULL , `CommonWeight` INT NOT NULL , `UncommonWeight` INT NOT NULL , `RareWeight` INT NOT NULL , `EpicWeight` INT NOT NULL , `LegendaryWeight` INT NOT NULL , `MythicalWeight` INT NOT NULL , `KnifeWeight` INT NOT NULL , `GloveWeight` INT NOT NULL , `LimitedKnifeWeight` INT NOT NULL , `LimitedGloveWeight` INT NOT NULL , `LimitedSkinWeight` INT NOT NULL , `SpecialSkinWeight` INT NOT NULL , `AvailableSkins` TEXT NOT NULL, `UnboxedAmount` INT NOT NULL, PRIMARY KEY (`CaseID`))",
                 conn).ExecuteScalarAsync();
 
             // PLAYERS DATA
@@ -1423,7 +1423,7 @@ public class DatabaseManager
                     List<(ECaseRarity, int)> caseRarities = new();
 
                     var shouldContinue = true;
-                    for (var i = 7; i <= 17; i++)
+                    for (var i = 7; i <= 18; i++)
                     {
                         var rarity = (ECaseRarity)(i - 7);
                         if (!int.TryParse(rdr[i].ToString(), out var weight))
@@ -1439,7 +1439,7 @@ public class DatabaseManager
                     if (!shouldContinue)
                         continue;
 
-                    var availableSkinIDs = rdr[18].GetIntListFromReaderResult();
+                    var availableSkinIDs = rdr[19].GetIntListFromReaderResult();
                     List<GunSkin> availableSkins = new();
                     Dictionary<ERarity, List<GunSkin>> availableSkinsSearchByRarity = new();
 
@@ -1464,16 +1464,19 @@ public class DatabaseManager
                         availableSkins.Add(skin);
                     }
 
-                    if (!int.TryParse(rdr[19].ToString(), out var unboxedAmount))
+                    if (!int.TryParse(rdr[20].ToString(), out var unboxedAmount))
                         continue;
 
+                    if (!bool.TryParse(rdr[21].ToString(), out var showLimiteds))
+                        continue;
+                    
                     if (cases.ContainsKey(caseID))
                     {
                         Logging.Debug($"Found a case with id {caseID} already registered, ignoring");
                         continue;
                     }
 
-                    cases.Add(caseID, new(caseID, caseName, iconLink, caseRarity, isBuyable, scrapPrice, coinPrice, caseRarities, availableSkins, availableSkinsSearchByRarity, unboxedAmount));
+                    cases.Add(caseID, new(caseID, caseName, iconLink, caseRarity, isBuyable, scrapPrice, coinPrice, caseRarities, availableSkins, availableSkinsSearchByRarity, unboxedAmount, showLimiteds));
                 }
 
                 Logging.Debug($"Successfully read {cases.Count} cases from base data");

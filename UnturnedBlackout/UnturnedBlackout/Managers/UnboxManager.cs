@@ -13,7 +13,7 @@ public class UnboxManager
 {
     public DatabaseManager DB => Plugin.Instance.DB;
 
-    public bool TryCalculateReward(Case @case, UnturnedPlayer player, out Reward reward, out string rewardImage, out string rewardName, out string rewardDesc, out ERarity rewardRarity, out bool isDuplicate, out int duplicateScrapAmount, out ECaseRarity caseRarity)
+    public bool TryCalculateReward(Case @case, UnturnedPlayer player, out Reward reward, out string rewardImage, out string rewardName, out string rewardDesc, out ERarity rewardRarity, out bool isDuplicate, out int duplicateScrapAmount, out ECaseRarity caseRarity, out List<(ECaseRarity, int)> updatedWeights)
     {
         reward = null;
         rewardImage = "";
@@ -22,19 +22,245 @@ public class UnboxManager
         rewardRarity = ERarity.NONE;
         isDuplicate = false;
         duplicateScrapAmount = 0;
-        caseRarity = ECaseRarity.RARE;
+        caseRarity = ECaseRarity.EPIC;
+        updatedWeights = @case.Weights.ToList();
         
-        while (true)
+        if (!DB.PlayerLoadouts.TryGetValue(player.CSteamID, out var loadout))
+        {
+            Logging.Debug($"Error getting loadout for player with steam id {player.CSteamID}");
+            return false;
+        }
+        
+        Logging.Debug($"{player.CharacterName} is opening {@case.CaseName}, sorting through all the special rarities that the case has and remove rarities that don't have any skins to be given");
+        var specialRarities = new Dictionary<ECaseRarity, List<object>>();
+        foreach (var weight in updatedWeights.ToList())
+        {
+            switch (weight.Item1)
+            {
+                case ECaseRarity.KNIFE:
+                {
+                    Logging.Debug("Case has knife rarity, getting all the knives available for the player");
+                    var knivesAvailable = DB.Knives.Values.Where(k => k.KnifeWeight > 0 && k.MaxAmount == 0 && (!loadout.Knives.TryGetValue(k.KnifeID, out var knife) || !knife.IsBought)).ToList();
+                    if (knivesAvailable.Count == 0)
+                    {
+                        Logging.Debug("There aren't any knives available for the player, removing knife rarity from the case");
+                        updatedWeights.Remove(weight);
+                        break;
+                    }
+                    
+                    Logging.Debug("There are knives available for the player, adding them to the special rarities dictionary");
+                    specialRarities.Add(ECaseRarity.KNIFE, knivesAvailable.Cast<object>().ToList());                                                                                            
+                    break;
+                }
+                case ECaseRarity.LIMITED_KNIFE:
+                {
+                    Logging.Debug("Case has limited knife rarity, getting all the limited knives available for the player");
+                    var limitedKnivesAvailable = DB.Knives.Values.Where(k => k.KnifeWeight > 0 && k.MaxAmount > 0 && k.MaxAmount > k.UnboxedAmount && (!loadout.Knives.TryGetValue(k.KnifeID, out var knife) || !knife.IsBought)).ToList();
+                    if (limitedKnivesAvailable.Count == 0)
+                    {
+                        Logging.Debug("There aren't any limited knives available for the player, removing limited knife rarity from the case");
+                        updatedWeights.Remove(weight);
+                        break;
+                    }
+                    
+                    Logging.Debug("There are limited knives available for the player, adding them to the special rarities dictionary");
+                    specialRarities.Add(ECaseRarity.LIMITED_KNIFE, limitedKnivesAvailable.Cast<object>().ToList());
+                    break;
+                }
+                case ECaseRarity.GLOVE:
+                {
+                    Logging.Debug("Case has limited glove rarity, getting all the gloves available for the player");
+                    var glovesAvailable = DB.Gloves.Values.Where(g => g.GloveWeight > 0 && g.MaxAmount == 0 && (!loadout.Gloves.TryGetValue(g.GloveID, out var glove) || !glove.IsBought)).ToList();
+                    if (glovesAvailable.Count == 0)
+                    {
+                        Logging.Debug("There aren't any gloves available for the player, removing glove rarity from the case");
+                        updatedWeights.Remove(weight);
+                        break;
+                    }
+                    
+                    Logging.Debug("There are gloves available for the player, adding them to the special rarities dictionary");
+                    specialRarities.Add(ECaseRarity.GLOVE, glovesAvailable.Cast<object>().ToList());
+                    break;
+                }
+                case ECaseRarity.LIMITED_GLOVE:
+                {
+                    Logging.Debug("Case has limited glove rarity, getting all the limited gloves available for the player");
+                    var limitedGlovesAvailable = DB.Gloves.Values.Where(g => g.GloveWeight > 0 && g.MaxAmount > 0 && g.MaxAmount > g.UnboxedAmount && (!loadout.Gloves.TryGetValue(g.GloveID, out var glove) || !glove.IsBought)).ToList();
+                    if (limitedGlovesAvailable.Count == 0)
+                    {
+                        Logging.Debug("There aren't any limited gloves available for the player, removing limited glove rarity from the case");
+                        updatedWeights.Remove(weight);
+                        break;
+                    }
+                    
+                    Logging.Debug("There are limited gloves available for the player, adding them to the special rarities dictionary");
+                    specialRarities.Add(ECaseRarity.LIMITED_GLOVE, limitedGlovesAvailable.Cast<object>().ToList());
+                    break;
+                }
+                case ECaseRarity.LIMITED_SKIN:
+                {
+                    Logging.Debug("Case has limited skin rarity, getting all the limited skins available for the player");
+                    var limitedSkinsAvailable = DB.GunSkinsSearchByID.Values.Where(k => k.MaxAmount > 0 && k.MaxAmount > k.UnboxedAmount && !loadout.GunSkinsSearchByID.ContainsKey(k.ID)).ToList();
+                    if (limitedSkinsAvailable.Count == 0)
+                    {
+                        Logging.Debug("There aren't any limited skins available for the player, removing limited skin rarity from the case");
+                        updatedWeights.Remove(weight);
+                        break;
+                    }
+                    
+                    Logging.Debug("There are limited skins available for the player, adding them to the special rarities dictionary");
+                    specialRarities.Add(ECaseRarity.LIMITED_SKIN, limitedSkinsAvailable.Cast<object>().ToList());
+                    break;
+                }
+                case ECaseRarity.SPECIAL_SKIN:
+                {
+                    Logging.Debug("Case has special skin rarity, getting all the special skins available for the player");
+                    var specialSkinsAvailable = DB.GunSkinsSearchByID.Values.Where(k => k.SkinRarity == ERarity.YELLOW && !loadout.GunSkinsSearchByID.ContainsKey(k.ID)).ToList();
+                    if (specialSkinsAvailable.Count == 0)
+                    {
+                        Logging.Debug("There aren't any special skins available for the player, removing special skin rarity from the case");
+                        updatedWeights.Remove(weight);
+                        break;
+                    }
+                    
+                    Logging.Debug("There are special skins available for the player, adding them to the special rarities dictionary");
+                    specialRarities.Add(ECaseRarity.SPECIAL_SKIN, specialSkinsAvailable.Cast<object>().ToList());
+                    break;
+                }
+            }
+        }
+        
+        caseRarity = CalculateRewardRarity(updatedWeights);
+        Logging.Debug($"Case rarity calculated: {caseRarity}, case: {@case.CaseName}, player: {player.CharacterName}");
+        switch (caseRarity)
+        {
+            case ECaseRarity.KNIFE or ECaseRarity.LIMITED_KNIFE:
+            {
+                if (!specialRarities.TryGetValue(caseRarity, out var knives))
+                {
+                    Logging.Debug("Could'nt find any special rarities with this case");
+                    return false;
+                }
+
+                var knivesAvailable = knives.Cast<Knife>().ToList();
+                Logging.Debug($"Found {knivesAvailable.Count} knives available for the player");
+                if (knivesAvailable.Count == 0)
+                {
+                    Logging.Debug("No knives available for the player");
+                    return false;
+                }
+                
+                var knife = CalculateKnife(knivesAvailable);
+                if (knife == null)
+                {
+                    Logging.Debug("Could'nt calculate any knife, returning");
+                    return false;
+                }
+                
+                Logging.Debug($"Knife calculated: {knife.KnifeName}, case: {@case.CaseName}, player: {player.CharacterName}");
+                
+                rewardName = knife.KnifeName;
+                rewardImage = knife.IconLink;
+                rewardDesc = knife.KnifeDesc;
+                rewardRarity = knife.KnifeRarity;
+                reward = new(ERewardType.KNIFE, knife.KnifeID);
+                
+                return true;
+            }
+            case ECaseRarity.GLOVE or ECaseRarity.LIMITED_GLOVE:
+            {
+                if (!specialRarities.TryGetValue(caseRarity, out var gloves))
+                {
+                    Logging.Debug("Couldn't find any special rarities with this case");
+                    return false;
+                }
+                
+                var glovesAvailable = gloves.Cast<Glove>().ToList();
+                Logging.Debug($"Found {glovesAvailable.Count} gloves available for the player");
+                if (glovesAvailable.Count == 0)
+                {
+                    Logging.Debug("No gloves available for player");
+                    return false;
+                }
+                
+                var glove = CalculateGlove(glovesAvailable);
+                if (glove == null)
+                {
+                    Logging.Debug("Could'nt calculate any glove, returning");
+                    return false;
+                }
+
+                rewardName = glove.GloveName;
+                rewardImage = glove.IconLink;
+                rewardDesc = glove.GloveDesc;
+                rewardRarity = glove.GloveRarity;
+                reward = new(ERewardType.GLOVE, glove.GloveID);
+
+                return true;
+            }
+            case ECaseRarity.LIMITED_SKIN or ECaseRarity.SPECIAL_SKIN:
+            {
+                if (!specialRarities.TryGetValue(caseRarity, out var skins))
+                {
+                    Logging.Debug("Couldn't find any special rarities with this case");
+                    return false;
+                }
+                
+                var skinsAvailable = skins.Cast<GunSkin>().ToList();
+                if (skinsAvailable.Count == 0)
+                {
+                    Logging.Debug("No skins available for the player");
+                    return false;
+                }
+                
+                Logging.Debug($"Found {skinsAvailable.Count} skins available for the player");
+                var skin = skinsAvailable[UnityEngine.Random.Range(0, skinsAvailable.Count)];
+
+                rewardName = skin.Gun.GunName + " | " + skin.SkinName;
+                rewardImage = skin.IconLink;
+                rewardDesc = skin.SkinDesc;
+                rewardRarity = skin.SkinRarity;
+                reward = new(ERewardType.GUN_SKIN, skin.ID);
+
+                return true;
+            }
+            default:
+            {
+                if (!Enum.TryParse(caseRarity.ToString(), true, out ERarity skinRarity))
+                {
+                    Logging.Debug($"Error parsing {caseRarity} to a specified skin rarity");
+                    return false;
+                }
+
+                var skinsAvailable = @case.AvailableSkinsSearchByRarity[skinRarity].Where(k => k.MaxAmount == 0).ToList();
+                Logging.Debug($"Found {skinsAvailable.Count} skins available to got by {player.CharacterName} for rarity {skinRarity}");
+                if (skinsAvailable.Count == 0)
+                {
+                    Logging.Debug($"Found no skins available for the {player.CharacterName} to get for rarity {skinRarity}");
+                    return false;
+                }
+
+                var skin = skinsAvailable[UnityEngine.Random.Range(0, skinsAvailable.Count)];
+                if (loadout.GunSkinsSearchByID.ContainsKey(skin.ID))
+                {
+                    isDuplicate = true;
+                    duplicateScrapAmount = skin.ScrapAmount;
+                }
+
+                rewardName = skin.Gun.GunName + " | " + skin.SkinName;
+                rewardImage = skin.IconLink;
+                rewardDesc = skin.SkinDesc;
+                rewardRarity = skin.SkinRarity;
+                reward = new(ERewardType.GUN_SKIN, skin.ID);
+
+                return true;
+            }
+        }
+        /*while (true)
         {
             Logging.Debug($"Calculating reward for case with id {@case.CaseID} for {player.CharacterName}");
             caseRarity = CalculateRewardRarity(@case.Weights);
             Logging.Debug($"Rarity found: {caseRarity}");
-
-            if (!DB.PlayerLoadouts.TryGetValue(player.CSteamID, out var loadout))
-            {
-                Logging.Debug($"Error getting loadout for player with steam id {player.CSteamID}");
-                return false;
-            }
 
             switch (caseRarity)
             {
@@ -181,7 +407,7 @@ public class UnboxManager
                     return true;
                 }
             }
-        }
+        }*/
     }
 
     private Glove CalculateGlove(List<Glove> gloves)

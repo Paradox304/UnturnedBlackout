@@ -14,6 +14,7 @@ using UnturnedBlackout.Enums;
 using UnturnedBlackout.Extensions;
 using UnturnedBlackout.Models.Global;
 using UnturnedBlackout.Models.TDM;
+using UnturnedBlackout.Models.Webhook;
 
 namespace UnturnedBlackout.GameTypes;
 
@@ -148,6 +149,8 @@ public class TDMGame : Game
             var @case = GetRandomRoundEndCase();
             if (@case == null)
                 continue;
+
+            Plugin.Instance.Discord.SendEmbed(new(null, null, null, Utility.GetDiscordColorCode(@case.CaseRarity), DateTime.UtcNow.ToString("s"), new(Provider.serverName, Provider.configData.Browser.Icon), new(roundEndCasePlayer.Data.SteamName, $"https://steamcommunity.com/profiles/{roundEndCasePlayer.SteamID}", roundEndCasePlayer.Data.AvatarLinks[0]), new Field[] { new($"[{@case.CaseRarity.ToFriendlyName()}] {@case.CaseName}", "‎", true) }, new(@case.IconLink), null), null, Plugin.Instance.Config.Webhooks.FileData.CaseDroppedWebhookLink);
 
             roundEndCases.Add((roundEndCasePlayer, @case));
             DB.IncreasePlayerCase(roundEndCasePlayer.SteamID, @case.CaseID, 1);

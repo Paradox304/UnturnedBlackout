@@ -16,6 +16,7 @@ public class IconsConfig
     public string KnifeUnboxingIconLink { get; set; }
     public string GloveUnboxingIconLink { get; set; }
     public string LimitedSkinUnboxingIconLink { get; set; }
+    public string SpecialSkinUnboxingIconLink { get; set; }
     
     public string XPIconLink { get; set; }
 

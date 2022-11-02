@@ -457,7 +457,7 @@ public static class Utility
         "barrel" => "https://cdn.discordapp.com/attachments/458038940847439903/957681668276232213/barrel.png",
         "magazine" => "https://cdn.discordapp.com/attachments/458038940847439903/957681667101835305/ammo.png",
         "charm" => "https://cdn.discordapp.com/attachments/458038940847439903/957681668053958656/charm.png",
-        "skin" => "https://cdn.discordapp.com/attachments/1016553641861202001/1025405063092518973/spray.png",
+        "skin" => "https://cdn.discordapp.com/attachments/1016553641861202001/1037457447838818304/SkinsDefault.png",
         var _ => ""
     };
 
@@ -471,7 +471,7 @@ public static class Utility
         return indexA.CompareTo(indexB);
     }
 
-    private static readonly List<string> ServerDenominations = new() { "eu", "na", "as" };
+    private static readonly List<string> ServerDenominations = new() { "eu", "na", "oce", "as" };
     
     public static string GetRarityColor(ERarity rarity) => rarity switch
     {
@@ -510,7 +510,7 @@ public static class Utility
         ERarity.LEGENDARY => "Legendary",
         ERarity.MYTHICAL => "Mythical",
         ERarity.YELLOW => "Special",
-        ERarity.CYAN => "Special",
+        ERarity.CYAN => "Limited",
         ERarity.GREEN => "Special",
         var _ => throw new ArgumentOutOfRangeException(nameof(rarity), rarity, "Rarity is not as expected")
     };
