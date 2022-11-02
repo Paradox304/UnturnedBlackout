@@ -9,8 +9,8 @@ public enum ERarity
     EPIC,
     LEGENDARY,
     MYTHICAL,
-    YELLOW,
     CYAN,
+    YELLOW,
     NONE,
     ORANGE
 }

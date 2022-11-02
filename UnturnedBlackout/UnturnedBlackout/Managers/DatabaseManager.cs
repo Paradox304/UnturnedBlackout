@@ -1464,7 +1464,7 @@ public class DatabaseManager
                         availableSkins.Add(skin);
                     }
 
-                    if (!int.TryParse(rdr[18].ToString(), out var unboxedAmount))
+                    if (!int.TryParse(rdr[19].ToString(), out var unboxedAmount))
                         continue;
 
                     if (cases.ContainsKey(caseID))

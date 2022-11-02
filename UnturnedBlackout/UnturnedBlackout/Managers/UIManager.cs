@@ -1621,7 +1621,7 @@ public class UIManager
             Logging.Debug($"Error finding handler for {player.channel.owner.playerID.characterName}");
             return;
         }
-
+        
         Logging.Debug($"{ply.CharacterName} pressed button {buttonName}");
         switch (buttonName)
         {
@@ -1798,9 +1798,17 @@ public class UIManager
                 handler.ReloadLoadout();
                 return;
             case "SERVER Item Buy BUTTON":
+                if ((DateTime.UtcNow - handler.LastButtonClicked).TotalSeconds < 1)
+                    return;
+
+                handler.LastButtonClicked = DateTime.UtcNow;
                 handler.BuySelectedItem();
                 return;
             case "SERVER Item Unlock BUTTON":
+                if ((DateTime.UtcNow - handler.LastButtonClicked).TotalSeconds < 1)
+                    return;
+
+                handler.LastButtonClicked = DateTime.UtcNow;
                 handler.UnlockSelectedItem();
                 return;
             case "SERVER Item Dequip BUTTON":
