@@ -894,7 +894,7 @@ public class UIManager
     private void OnBulletShot(UseableGun gun, BulletInfo bullet)
     {
         var ids = new ushort[] { 17001 };
-        var ammo = ids.Contains(bullet.magazineAsset.id) ? 1 : gun.player.equipment.state[10];
+        var ammo = ids.Contains(bullet.magazineAsset.id) ? 0 : gun.player.equipment.state[10];
         var player = Plugin.Instance.Game.GetGamePlayer(gun.player);
         EffectManager.sendUIEffectText(HUD_KEY, player.TransportConnection, true, "AmmoNum", ammo.ToString());
 
@@ -1453,7 +1453,7 @@ public class UIManager
 
             EffectManager.sendUIEffect(FLAG_POPUP_UI, FLAG_POPUP_KEY, player.GamePlayer.TransportConnection, true);
             EffectManager.sendUIEffectVisibility(FLAG_POPUP_KEY, player.GamePlayer.TransportConnection, true, $"FLAG {flag} Toggler", true);
-            EffectManager.sendUIEffectText(FLAG_POPUP_KEY, player.GamePlayer.TransportConnection, true, "FlagTxt", Plugin.Instance.Translate($"CTF_{(player.Team.TeamID == team.TeamID ? "Team" : "Enemy")}_{state}_Flag").ToRich());
+            EffectManager.sendUIEffectText(FLAG_POPUP_KEY, player.GamePlayer.TransportConnection, true, "FlagTxt", Plugin.Instance.Translate($"CTF_{(player.Team.TeamID == team.TeamID ? "Team" : "Enemy")}_{state.ToUIName()}_Flag").ToRich());
         }
     }
 

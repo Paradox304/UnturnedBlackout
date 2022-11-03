@@ -256,6 +256,7 @@ public abstract class Game
 
     public void OnKill(GamePlayer killer, GamePlayer victim, ushort weaponID, string killerColor, string victimColor, bool isHeadshot, string overrideKFSymbol)
     {
+        Logging.Debug($"On Kill - killer: {killer.Player.CharacterName}, victim: {victim.Player.CharacterName}, weapon id: {weaponID}, killer color: {killerColor}, victim color: {victimColor}, is headshot: {isHeadshot}, override kf symbol: {overrideKFSymbol}");
         if (!Plugin.Instance.UI.KillFeedIcons.TryGetValue(weaponID, out var icon) && overrideKFSymbol == null)
             return;
 

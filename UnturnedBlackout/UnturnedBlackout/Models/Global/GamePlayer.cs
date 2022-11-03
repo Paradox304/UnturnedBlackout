@@ -128,7 +128,6 @@ public class GamePlayer
     // Spawn Protection Seconds
     public void GiveSpawnProtection(int seconds)
     {
-        Logging.Debug($"Giving {Player.CharacterName} spawn protection for {seconds} seconds at {DateTime.UtcNow}");
         SpawnProtectionRemover.Stop();
         HasSpawnProtection = true;
         SpawnProtectionRemover = Plugin.Instance.StartCoroutine(RemoveSpawnProtection(seconds));
@@ -137,8 +136,7 @@ public class GamePlayer
     public IEnumerator RemoveSpawnProtection(int seconds)
     {
         yield return new WaitForSeconds(seconds);
-
-        Logging.Debug($"Timer to remove spawn protection for {Player.CharacterName} has passed at {DateTime.UtcNow} removing spawn protection");
+        
         HasSpawnProtection = false;
     }
 
@@ -166,9 +164,6 @@ public class GamePlayer
         SecondaryMovementChangeADS = secondaryMovementChangeADS;
 
         KnifeMovementChange = primaryMovementChange + secondaryMovementChange + loadout.GetKnifeMovement();
-
-        Logging.Debug(
-            $"Setting movement for {Player.CharacterName} with PrimaryMovementChange {PrimaryMovementChange}, PrimaryMovementChangeADS {PrimaryMovementChangeADS}, SecondaryMovementChange {SecondaryMovementChange}, SecondaryMovementChangeADS {SecondaryMovementChangeADS}, KnifeMovementChange {KnifeMovementChange}");
 
         LethalChecker.Stop();
         TacticalChecker.Stop();
@@ -236,20 +231,16 @@ public class GamePlayer
 
     public IEnumerator EnableLethal()
     {
-        Logging.Debug($"Enabling lethal for {Player.CharacterName}, time to wait {LethalIntervalSeconds}");
         yield return new WaitForSeconds(LethalIntervalSeconds);
 
-        Logging.Debug($"Waited enough, giving lethal");
         HasLethal = true;
         Plugin.Instance.UI.UpdateGadgetUsed(this, false, false);
     }
 
     public IEnumerator EnableTactical()
     {
-        Logging.Debug($"Enabling tactical for {Player.CharacterName}, time to wait {LethalIntervalSeconds}");
         yield return new WaitForSeconds(LethalIntervalSeconds);
 
-        Logging.Debug($"Waited enough, giving tactical");
         HasTactical = true;
         Plugin.Instance.UI.UpdateGadgetUsed(this, true, false);
     }
@@ -529,7 +520,6 @@ public class GamePlayer
     public void UpdateKillstreak(int currentKillstreak)
     {
         var updatedKillstreak = currentKillstreak + ExtraKillstreak;
-        Logging.Debug($"Updating killstreak for {Player.CharacterName} with killstreak {updatedKillstreak}");
         var availableKillstreak = OrderedKillstreaks.FirstOrDefault(k => k.Killstreak.KillstreakRequired == updatedKillstreak && !AvailableKillstreaks[k]);
         if (availableKillstreak != null)
         {

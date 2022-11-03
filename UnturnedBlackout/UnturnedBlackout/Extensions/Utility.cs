@@ -443,6 +443,16 @@ public static class Utility
         var _ => throw new ArgumentOutOfRangeException(nameof(team), team, null)
     };
 
+    public static string ToUIName(this EFlagState state) => state switch
+    {
+        EFlagState.TAKEN => "Taken",
+        EFlagState.PICKED => "Picked",
+        EFlagState.DROPPED => "Dropped",
+        EFlagState.CAPTURED => "Captured",
+        EFlagState.RECOVERED => "Recovered",
+        var _ => throw new ArgumentOutOfRangeException(nameof(state), state, null)
+    };
+
     public static string ToFriendlyName(this EChatMode chatMode) => chatMode switch
     {
         EChatMode.LOCAL or EChatMode.GROUP => "Team",
@@ -522,7 +532,7 @@ public static class Utility
         ECurrency.CREDIT => "",
         var _ => throw new ArgumentOutOfRangeException(nameof(currency), currency, "Currency is not as expected")
     };
-
+    
     public static string GetFlag(string country) => Plugin.Instance.Config.Icons.FileData.FlagAPILink.Replace("{country}", country.ToLower());
 
     private static readonly List<uint> UsedFrequencies = new();

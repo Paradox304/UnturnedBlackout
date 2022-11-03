@@ -444,7 +444,6 @@ public class KCGame : Game
                 xpGained += info.MedalXP;
                 xpText += info.MedalName;
                 equipmentUsed += info.ItemID;
-                overrideSymbol = MELEE_SYMBOL;
                 questConditions.Add(EQuestCondition.KILLSTREAK, killstreakID);
             }
             else
@@ -455,6 +454,7 @@ public class KCGame : Game
                         xpGained += Config.Medals.FileData.MeleeKillXP;
                         xpText += Plugin.Instance.Translate("Melee_Kill").ToRich();
                         equipmentUsed = kPlayer.GamePlayer.ActiveLoadout.Knife?.Knife?.KnifeID ?? 0;
+                        overrideSymbol = MELEE_SYMBOL;
                         questConditions.Add(EQuestCondition.KNIFE, equipmentUsed);
                         break;
                     case EDeathCause.GUN:
@@ -673,8 +673,25 @@ public class KCGame : Game
 
         parameters.damage += (kPlayer.GamePlayer.ActiveLoadout.PerksSearchByType.TryGetValue(damageIncreasePerkName, out var damageIncreaserPerk) ? (float)damageIncreaserPerk.Perk.SkillLevel / 100 : 0f) * parameters.damage;
 
-        if (parameters.cause == EDeathCause.GRENADE && parameters.damage < player.GamePlayer.Player.Player.life.health)
-            UI.ShowXPUI(kPlayer.GamePlayer, Config.Medals.FileData.LethalHitXP, Plugin.Instance.Translate("Lethal_Hit"));
+        if (parameters.cause == EDeathCause.GRENADE && kPlayer != player)
+        {
+            var times = parameters.times;
+            if (parameters.respectArmor)
+                times *= DamageTool.getPlayerArmor(parameters.limb, parameters.player);
+
+            if (parameters.applyGlobalArmorMultiplier)
+                times *= Provider.modeConfigData.Players.Armor_Multiplier;
+
+            var damage = Mathf.FloorToInt(parameters.damage * times);
+            var finalDamage = (byte)Mathf.Min(255, damage);
+        
+            Logging.Debug($"cause: {parameters.cause}, damage: {parameters.damage}, final damage: {finalDamage}, player health: {player.GamePlayer.Player.Player.life.health}");
+            if (finalDamage < player.GamePlayer.Player.Player.life.health)
+            {
+                Logging.Debug($"Condition fulfilled, send hit xp for {Config.Medals.FileData.LethalHitXP}");
+                UI.ShowXPUI(kPlayer.GamePlayer, Config.Medals.FileData.LethalHitXP, Plugin.Instance.Translate("Lethal_Hit"));
+            }
+        }
 
         if (kPlayer.GamePlayer.HasSpawnProtection)
         {
