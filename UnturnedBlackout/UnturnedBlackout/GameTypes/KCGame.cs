@@ -396,7 +396,7 @@ public class KCGame : Game
 
             if (kPlayer.GamePlayer.SteamID == vPlayer.GamePlayer.SteamID)
             {
-                OnKill(kPlayer.GamePlayer, vPlayer.GamePlayer, cause == EDeathCause.WATER ? (ushort)0 : (ushort)1, kPlayer.Team.Info.KillFeedHexCode, vPlayer.Team.Info.KillFeedHexCode, false);
+                OnKill(kPlayer.GamePlayer, vPlayer.GamePlayer, 0, kPlayer.Team.Info.KillFeedHexCode, vPlayer.Team.Info.KillFeedHexCode, false, cause == EDeathCause.WATER ? SUICIDE_SYMBOL : EXPLOSION_SYMBOL);
 
                 Logging.Debug("Player killed themselves, returning");
                 return;
@@ -437,12 +437,14 @@ public class KCGame : Game
             var usedKillstreak = kPlayer.GamePlayer.HasKillstreakActive && (kPlayer.GamePlayer.ActiveKillstreak?.Killstreak?.KillstreakInfo?.IsItem ?? false) && cause != EDeathCause.SENTRY;
             var killstreakID = kPlayer.GamePlayer.ActiveKillstreak?.Killstreak?.KillstreakID ?? 0;
 
+            string overrideSymbol = null;
             if (usedKillstreak)
             {
                 var info = kPlayer.GamePlayer.ActiveKillstreak.Killstreak.KillstreakInfo;
                 xpGained += info.MedalXP;
                 xpText += info.MedalName;
                 equipmentUsed += info.ItemID;
+                overrideSymbol = MELEE_SYMBOL;
                 questConditions.Add(EQuestCondition.KILLSTREAK, killstreakID);
             }
             else
@@ -586,7 +588,7 @@ public class KCGame : Game
             kPlayer.GamePlayer.OnKilled(vPlayer.GamePlayer);
 
             if (equipmentUsed != 0)
-                OnKill(kPlayer.GamePlayer, vPlayer.GamePlayer, equipmentUsed, kPlayer.Team.Info.KillFeedHexCode, vPlayer.Team.Info.KillFeedHexCode, cause == EDeathCause.GUN && limb == ELimb.SKULL);
+                OnKill(kPlayer.GamePlayer, vPlayer.GamePlayer, equipmentUsed, kPlayer.Team.Info.KillFeedHexCode, vPlayer.Team.Info.KillFeedHexCode, cause == EDeathCause.GUN && limb == ELimb.SKULL, overrideSymbol);
 
             Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.KILL, questConditions);
             Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.MULTI_KILL, questConditions);

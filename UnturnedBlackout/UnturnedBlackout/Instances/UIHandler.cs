@@ -2992,19 +2992,8 @@ public class UIHandler
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}",
                 perk.Perk.LevelRequirement > PlayerData.Level && !perk.IsUnlocked ? Plugin.Instance.Translate("Unlock_Level", perk.Perk.LevelRequirement) :
                     $"{Utility.GetCurrencySymbol(ECurrency.CREDIT)} <color={(PlayerData.Credits >= perk.Perk.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{perk.Perk.BuyPrice}</color>");
-
-            switch (perk.Perk.PerkType)
-            {
-                case 1:
-                    SendRarity("SERVER Item", ERarity.CYAN, i);
-                    break;
-                case 2:
-                    SendRarity("SERVER Item", ERarity.MYTHICAL, i);
-                    break;
-                case 3:
-                    SendRarity("SERVER Item", ERarity.YELLOW, i);
-                    break;
-            }
+            
+            SendRarity("SERVER Item", perk.Perk.PerkRarity, i);
         }
     }
 

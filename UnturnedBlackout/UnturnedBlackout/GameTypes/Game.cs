@@ -21,6 +21,10 @@ namespace UnturnedBlackout.GameTypes;
 
 public abstract class Game
 {
+    public const string SUICIDE_SYMBOL = "";
+    public const string EXPLOSION_SYMBOL = "";
+    public const string MELEE_SYMBOL = "";
+    
     protected QuestManager Quest => Plugin.Instance.Quest;
     protected UIManager UI => Plugin.Instance.UI;
     protected DatabaseManager DB => Plugin.Instance.DB;
@@ -250,12 +254,12 @@ public abstract class Game
 
     private void OnPlayerPickupItem(UnturnedPlayer player, InventoryGroup inventoryGroup, byte inventoryIndex, ItemJar P) => PlayerPickupItem(player, inventoryGroup, inventoryIndex, P);
 
-    public void OnKill(GamePlayer killer, GamePlayer victim, ushort weaponID, string killerColor, string victimColor, bool isHeadshot)
+    public void OnKill(GamePlayer killer, GamePlayer victim, ushort weaponID, string killerColor, string victimColor, bool isHeadshot, string overrideKFSymbol)
     {
-        if (!Plugin.Instance.UI.KillFeedIcons.TryGetValue(weaponID, out var icon) && weaponID != 0 && weaponID != 1)
+        if (!Plugin.Instance.UI.KillFeedIcons.TryGetValue(weaponID, out var icon) && overrideKFSymbol == null)
             return;
 
-        var message = weaponID is 0 or 1 ? $"{(victim.Data.HasPrime ? UIManager.PRIME_SYMBOL : "")}<color={victimColor}>{victim.Player.CharacterName.ToUnrich()}</color> {(weaponID == 0 ? "" : "")}" : $"{(killer.Data.HasPrime ? UIManager.PRIME_SYMBOL : "")}<color={killerColor}>{killer.Player.CharacterName.ToUnrich()}</color> {icon.Symbol}{(isHeadshot ? "" : "")} {(victim.Data.HasPrime ? UIManager.PRIME_SYMBOL : "")}<color={victimColor}>{victim.Player.CharacterName.ToUnrich()}</color>";
+        var message = victim == killer ? $"{(victim.Data.HasPrime ? UIManager.PRIME_SYMBOL : "")}<color={victimColor}>{victim.Player.CharacterName.ToUnrich()}</color> {overrideKFSymbol ?? icon.Symbol}" : $"{(killer.Data.HasPrime ? UIManager.PRIME_SYMBOL : "")}<color={killerColor}>{killer.Player.CharacterName.ToUnrich()}</color> {overrideKFSymbol ?? icon.Symbol}{(isHeadshot ? "" : "")} {(victim.Data.HasPrime ? UIManager.PRIME_SYMBOL : "")}<color={victimColor}>{victim.Player.CharacterName.ToUnrich()}</color>";
         var feed = new Feed(message, DateTime.UtcNow);
 
         if (Killfeed.Count < Config.Base.FileData.MaxKillFeed)

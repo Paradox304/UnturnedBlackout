@@ -352,7 +352,7 @@ public class FFAGame : Game
 
             if (kPlayer.GamePlayer.SteamID == fPlayer.GamePlayer.SteamID)
             {
-                OnKill(kPlayer.GamePlayer, fPlayer.GamePlayer, cause == EDeathCause.WATER ? (ushort)0 : (ushort)1, Config.FFA.FileData.FFATeam.KillFeedHexCode, Config.FFA.FileData.FFATeam.KillFeedHexCode, false);
+                OnKill(kPlayer.GamePlayer, fPlayer.GamePlayer, 0, Config.FFA.FileData.FFATeam.KillFeedHexCode, Config.FFA.FileData.FFATeam.KillFeedHexCode, false, cause == EDeathCause.WATER ? SUICIDE_SYMBOL : EXPLOSION_SYMBOL);
 
                 Logging.Debug("Player killed themselves, returning");
                 return;
@@ -393,12 +393,14 @@ public class FFAGame : Game
             var usedKillstreak = kPlayer.GamePlayer.HasKillstreakActive && (kPlayer.GamePlayer.ActiveKillstreak?.Killstreak?.KillstreakInfo?.IsItem ?? false) && cause != EDeathCause.SENTRY;
             var killstreakID = kPlayer.GamePlayer.ActiveKillstreak?.Killstreak?.KillstreakID ?? 0;
 
+            string overrideSymbol = null;
             if (usedKillstreak)
             {
                 var info = kPlayer.GamePlayer.ActiveKillstreak.Killstreak.KillstreakInfo;
                 xpGained += info.MedalXP;
                 xpText += info.MedalName;
                 equipmentUsed += info.ItemID;
+                overrideSymbol = MELEE_SYMBOL;
                 questConditions.Add(EQuestCondition.KILLSTREAK, killstreakID);
             }
             else
@@ -540,7 +542,7 @@ public class FFAGame : Game
             kPlayer.GamePlayer.OnKilled(fPlayer.GamePlayer);
 
             if (equipmentUsed != 0)
-                OnKill(kPlayer.GamePlayer, fPlayer.GamePlayer, equipmentUsed, Config.FFA.FileData.FFATeam.KillFeedHexCode, Config.FFA.FileData.FFATeam.KillFeedHexCode, cause == EDeathCause.GUN && limb == ELimb.SKULL);
+                OnKill(kPlayer.GamePlayer, fPlayer.GamePlayer, equipmentUsed, Config.FFA.FileData.FFATeam.KillFeedHexCode, Config.FFA.FileData.FFATeam.KillFeedHexCode, cause == EDeathCause.GUN && limb == ELimb.SKULL, overrideSymbol);
 
             foreach (var ply in Players)
                 UI.UpdateFFATopUI(ply, Players);

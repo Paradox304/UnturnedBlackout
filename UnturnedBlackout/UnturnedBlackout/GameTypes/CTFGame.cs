@@ -443,7 +443,7 @@ public class CTFGame : Game
 
             if (kPlayer.GamePlayer.SteamID == cPlayer.GamePlayer.SteamID)
             {
-                OnKill(kPlayer.GamePlayer, cPlayer.GamePlayer, cause == EDeathCause.WATER ? (ushort)0 : (ushort)1, kPlayer.Team.Info.KillFeedHexCode, cPlayer.Team.Info.KillFeedHexCode, false);
+                OnKill(kPlayer.GamePlayer, cPlayer.GamePlayer, 0, kPlayer.Team.Info.KillFeedHexCode, cPlayer.Team.Info.KillFeedHexCode, false, cause == EDeathCause.WATER ? SUICIDE_SYMBOL : EXPLOSION_SYMBOL);
 
                 Logging.Debug("Player killed themselves, returning");
                 return;
@@ -485,6 +485,7 @@ public class CTFGame : Game
             var usedKillstreak = kPlayer.GamePlayer.HasKillstreakActive && (kPlayer.GamePlayer.ActiveKillstreak?.Killstreak?.KillstreakInfo?.IsItem ?? false) && cause != EDeathCause.SENTRY;
             var killstreakID = kPlayer.GamePlayer.ActiveKillstreak?.Killstreak?.KillstreakID ?? 0;
 
+            string overrideSymbol = null;
             if (usedKillstreak)
             {
                 var info = kPlayer.GamePlayer.ActiveKillstreak.Killstreak.KillstreakInfo;
@@ -501,6 +502,7 @@ public class CTFGame : Game
                         xpGained += Config.Medals.FileData.MeleeKillXP;
                         xpText += Plugin.Instance.Translate("Melee_Kill").ToRich();
                         equipmentUsed = kPlayer.GamePlayer.ActiveLoadout.Knife?.Knife?.KnifeID ?? 0;
+                        overrideSymbol = MELEE_SYMBOL;
                         questConditions.Add(EQuestCondition.KNIFE, equipmentUsed);
                         break;
                     case EDeathCause.GUN:
@@ -645,7 +647,7 @@ public class CTFGame : Game
             kPlayer.GamePlayer.OnKilled(cPlayer.GamePlayer);
 
             if (equipmentUsed != 0)
-                OnKill(kPlayer.GamePlayer, cPlayer.GamePlayer, equipmentUsed, kPlayer.Team.Info.KillFeedHexCode, cPlayer.Team.Info.KillFeedHexCode, cause == EDeathCause.GUN && limb == ELimb.SKULL);
+                OnKill(kPlayer.GamePlayer, cPlayer.GamePlayer, equipmentUsed, kPlayer.Team.Info.KillFeedHexCode, cPlayer.Team.Info.KillFeedHexCode, cause == EDeathCause.GUN && limb == ELimb.SKULL, overrideSymbol);
 
             Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.KILL, questConditions);
             Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.MULTI_KILL, questConditions);
