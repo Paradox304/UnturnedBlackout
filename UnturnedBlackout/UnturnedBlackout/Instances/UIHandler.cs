@@ -4036,21 +4036,16 @@ public class UIHandler
 
     public void SendRarityName(string objectName, ERarity rarity)
     {
-        List<string> rarities = new()
+        var rarityName = rarity switch
         {
-            "COMMON",
-            "ACHIEVEMENT",
-            "UNCOMMON",
-            "RARE",
-            "EPIC",
-            "LEGENDARY",
-            "MYTHICAL",
-            "SPECIAL",
-            "LIMITED"
+            ERarity.GREEN => "ACHIEVEMENT",
+            ERarity.YELLOW => "SPECIAL",
+            ERarity.CYAN => "LIMITED",
+            _ => rarity.ToString()
         };
 
         // SERVER Item Rarity TEXT
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, objectName, $"<color={Utility.GetRarityColor(rarity)}>{rarities[(byte)rarity]}</color>");
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, objectName, $"<color={Utility.GetRarityColor(rarity)}>{rarityName}</color>");
     }
 
     public void BuySelectedItem()
