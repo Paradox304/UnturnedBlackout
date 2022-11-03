@@ -1,11 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text;
 using System.Text.Json;
 using System.Timers;
+using UnityEngine;
 using UnturnedBlackout.Extensions;
 using UnturnedBlackout.Models.Webhook;
+using Logger = Rocket.Core.Logging.Logger;
 
 namespace UnturnedBlackout.Managers;
 
@@ -26,8 +29,7 @@ public class DiscordManager
     {
         if (PendingWebhooks.Count == 0)
             return;
-        
-        Logging.Debug($"Sending {PendingWebhooks.Sum(k => k.Value.Item3.Count)} pending webhooks on {PendingWebhooks.Count} links");
+
         var messageCount = 0;
 
         List<KeyValuePair<string, (string, string, List<Embed>)>> pendingWebhooks;
@@ -36,51 +38,68 @@ public class DiscordManager
             pendingWebhooks = PendingWebhooks.ToList();
             PendingWebhooks.Clear();
         }
-        
-        foreach (var pendingWebhook in pendingWebhooks)
+
+        try
         {
-            var shouldBreak = false;
-            while (pendingWebhook.Value.Item3.Count > 0)
+            Logging.Debug($"Sending {pendingWebhooks.Sum(k => k.Value.Item3.Count)} pending webhooks on {pendingWebhooks.Count} links");
+            foreach (var pendingWebhook in pendingWebhooks.ToList())
             {
-                Embed[] embeds;
-                if (pendingWebhook.Value.Item3.Count > 10)
+                var shouldBreak = false;
+                Logging.Debug($"Sending {pendingWebhook.Value.Item3.Count} for {pendingWebhook.Key}");
+                while (pendingWebhook.Value.Item3.Count > 0)
                 {
-                    embeds = pendingWebhook.Value.Item3.Take(10).ToArray();
-                    pendingWebhook.Value.Item3.RemoveRange(0, 10);
-                }
-                else
-                {
-                    embeds = pendingWebhook.Value.Item3.ToArray();
-                    pendingWebhook.Value.Item3.Clear();
-                }
-                
-                SendHook(new(pendingWebhook.Value.Item1, pendingWebhook.Value.Item2, embeds), pendingWebhook.Key);
-                messageCount++;
+                    Logging.Debug($"Embeds {pendingWebhook.Value.Item3.Count}");
+                    Embed[] embeds;
+                    if (pendingWebhook.Value.Item3.Count > 10)
+                    {
+                        Logging.Debug("Embeds more than 10, take only 10");
+                        embeds = pendingWebhook.Value.Item3.Take(10).ToArray();
+                        pendingWebhook.Value.Item3.RemoveRange(0, 10);
+                    }
+                    else
+                    {
+                        Logging.Debug("Embeds less than 10, take all");
+                        embeds = pendingWebhook.Value.Item3.ToArray();
+                        pendingWebhook.Value.Item3.Clear();
+                    }
 
-                if (messageCount != 30)
-                    continue;
+                    Logging.Debug($"Embeds left {pendingWebhook.Value.Item3.Count}");
+                    Logging.Debug($"Sending hook with username: {pendingWebhook.Value.Item1} and avatar: {pendingWebhook.Value.Item2} and embeds: {embeds.Length} to {pendingWebhook.Key}");
+                    SendHook(new(pendingWebhook.Value.Item1, pendingWebhook.Value.Item2, embeds), pendingWebhook.Key);
+                    messageCount++;
 
-                shouldBreak = true;
-                break;
+                    if (messageCount != 30)
+                        continue;
+
+                    shouldBreak = true;
+                    break;
+                }
+
+                if (shouldBreak)
+                    break;
+
+                pendingWebhooks.RemoveAll(k => k.Key == pendingWebhook.Key);
             }
-
-            if (shouldBreak)
-                break;
-            
-            pendingWebhooks.RemoveAll(k => k.Key == pendingWebhook.Key);
         }
-
-        if (pendingWebhooks.Count == 0)
-            return;
-
-        lock (PendingWebhooks)
+        catch (Exception ex)
         {
-            foreach (var pendingWebhook in pendingWebhooks)
+            Logger.LogException(ex, "Error sending embeds");
+        }
+        finally
+        {
+            if (pendingWebhooks.Count > 0)
             {
-                if (PendingWebhooks.ContainsKey(pendingWebhook.Key))
-                    PendingWebhooks[pendingWebhook.Key].Item3.AddRange(pendingWebhook.Value.Item3);
-                else
-                    PendingWebhooks.Add(pendingWebhook.Key, pendingWebhook.Value);
+                Logging.Debug("Pending webhooks are remaining, add them back to the queue to clean");
+                lock (PendingWebhooks)
+                {
+                    foreach (var pendingWebhook in pendingWebhooks)
+                    {
+                        if (PendingWebhooks.ContainsKey(pendingWebhook.Key))
+                            PendingWebhooks[pendingWebhook.Key].Item3.AddRange(pendingWebhook.Value.Item3);
+                        else
+                            PendingWebhooks.Add(pendingWebhook.Key, pendingWebhook.Value);
+                    }
+                }
             }
         }
     }
