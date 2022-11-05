@@ -907,6 +907,7 @@ public class UIHandler
         Player.Player.teleportToLocationUnsafe(new(0, 0, 0), 0);
         Player.GodMode = true;
         Player.VanishMode = true;
+        HideUI();
         Utility.Say(Player, "<color=green>Staff Mode Activated</color>");
     }
     
