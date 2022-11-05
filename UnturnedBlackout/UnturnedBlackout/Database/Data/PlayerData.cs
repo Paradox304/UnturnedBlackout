@@ -32,6 +32,7 @@ public class PlayerData
     public bool Music { get; set; }
     public bool IsMuted { get; set; }
     public DateTimeOffset MuteExpiry { get; set; }
+    public string MuteReason { get; set; }
     public bool HasBattlepass { get; set; }
     public float XPBooster { get; private set; }
     public float BPBooster { get; private set; }
@@ -42,6 +43,7 @@ public class PlayerData
     public DateTimeOffset PrimeLastDailyReward { get; set; }
     public int Volume { get; set; }
     public List<int> Hotkeys { get; set; }
+    public bool IsStaff { get; set; }
 
     public List<PlayerQuest> Quests { get; set; }
     public Dictionary<EQuestType, List<PlayerQuest>> QuestsSearchByType { get; set; }
@@ -55,7 +57,7 @@ public class PlayerData
 
     public PlayerData(
         CSteamID steamID, string steamName, List<string> avatarLinks, string countryCode, bool hideFlag, int xP, int level, int credits, int scrap, int coins, int kills, int headshotKills, int highestKillstreak, int highestMultiKills, int killsConfirmed, int killsDenied, int flagsCaptured, int flagsSaved,
-        int areasTaken, int deaths, bool music, bool isMuted, DateTimeOffset muteExpiry, bool hasBattlepass, float xPBooster, float bPBooster, float gunXPBooster, bool hasPrime, DateTimeOffset primeExpiry, DateTimeOffset primeLastDailyReward, int volume, List<int> hotkeys)
+        int areasTaken, int deaths, bool music, bool isMuted, DateTimeOffset muteExpiry, string muteReason, bool hasBattlepass, float xPBooster, float bPBooster, float gunXPBooster, bool hasPrime, DateTimeOffset primeExpiry, DateTimeOffset primeLastDailyReward, int volume, List<int> hotkeys, bool isStaff)
     {
         SteamID = steamID;
         SteamName = steamName;
@@ -80,6 +82,7 @@ public class PlayerData
         Music = music;
         IsMuted = isMuted;
         MuteExpiry = muteExpiry;
+        MuteReason = muteReason;
         HasBattlepass = hasBattlepass;
         XPBooster = xPBooster;
         BPBooster = bPBooster;
@@ -89,6 +92,7 @@ public class PlayerData
         PrimeLastDailyReward = primeLastDailyReward;
         Volume = volume;
         Hotkeys = hotkeys;
+        IsStaff = isStaff;
         Quests = new();
         QuestsSearchByType = new();
         Achievements = new();

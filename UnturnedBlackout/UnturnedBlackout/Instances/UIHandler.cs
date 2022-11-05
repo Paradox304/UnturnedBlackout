@@ -683,7 +683,6 @@ public class UIHandler
         AchievementPages = new();
         for (var i = 1; i <= 5; i++)
         {
-            Logging.Debug($"Creating achievement pages for main page {i} for {Player.CharacterName}");
             AchievementPages.Add(i, new());
             var index = 0;
             var page = 1;
@@ -848,6 +847,8 @@ public class UIHandler
         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Currency Coins IMAGE", Config.Icons.FileData.BlacktagsSmallIconLink);
         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Currency Scrap IMAGE", Config.Icons.FileData.ScrapSmallIconLink);
 
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Staff BUTTON", PlayerData.IsStaff);
+        
         OnCurrencyUpdated(ECurrency.COIN);
         OnCurrencyUpdated(ECurrency.SCRAP);
         OnCurrencyUpdated(ECurrency.CREDIT);
@@ -5145,15 +5146,12 @@ public class UIHandler
 
     public void SearchLeaderboardPlayer(string input)
     {
-        Logging.Debug($"{Player.CharacterName} searched {input} on leaderboards");
         var data = GetLeaderboardData();
-        Logging.Debug("Got the leaderboard data");
         for (var i = 0; i <= 9; i++)
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards BUTTON {i}", false);
 
         var inputLower = input.ToLower();
         var searchPlayers = data.Where(k => k.SteamName.ToLower().Contains(inputLower)).Take(10).ToList();
-        Logging.Debug($"Found {searchPlayers.Count} players with that name");
 
         var maxCount = Math.Min(10, searchPlayers.Count);
         for (var i = 0; i < maxCount; i++)
@@ -5164,7 +5162,6 @@ public class UIHandler
 
             var ratio = playerData.Deaths == 0 ? $"{kills:n}" : $"{Math.Round(kills / deaths, 2):n}";
 
-            Logging.Debug($"i: {i}, player name: {playerData.SteamName}");
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards BUTTON {i}", true);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Rank TEXT {i}", $"#{data.IndexOf(playerData) + 1}");
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Level TEXT {i}", playerData.Level.ToString());
@@ -5220,7 +5217,8 @@ public class UIHandler
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Quest Description TEXT {i}", quest.Quest.QuestDesc);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Quest Title TEXT {i}", quest.Quest.QuestTitle);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Quest Target TEXT {i}", $"{quest.Amount}/{quest.Quest.TargetAmount}");
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Quest Reward TEXT {i}", $"+{quest.Quest.XP}★");
+            var updatedXP = (int)Math.Floor(quest.Quest.XP * (1f + PlayerData.BPBooster + DB.ServerOptions.BPBooster + (PlayerData.HasPrime ? Config.WinningValues.FileData.PrimeBPXPBooster : 0f) + (PlayerData.HasBattlepass ? Config.WinningValues.FileData.PremiumBattlepassBooster : 0f)));
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Quest Reward TEXT {i}", $"+{updatedXP}★");
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Quest Bar Fill {i}", quest.Amount == 0 ? UIManager.HAIRSPACE_SYMBOL_STRING : new(UIManager.HAIRSPACE_SYMBOL_CHAR, Math.Min(256, quest.Amount * 256 / quest.Quest.TargetAmount)));
         }
         
@@ -5545,7 +5543,6 @@ public class UIHandler
 
     public void ShowBattlepass()
     {
-        Logging.Debug($"Showing bp for {Player.CharacterName}");
         var bp = PlayerData.Battlepass;
 
         if (!DB.BattlepassTiersSearchByID.TryGetValue(bp.CurrentTier, out var currentTier))
@@ -5555,7 +5552,6 @@ public class UIHandler
         }
 
         var isBattlePassCompleted = !DB.BattlepassTiersSearchByID.TryGetValue(bp.CurrentTier + 1, out var nextTier);
-        Logging.Debug($"Is Battlepass Completed: {isBattlePassCompleted}, next tier null: {nextTier == null}, current xp: {bp.XP}, current tier xp: {currentTier.XP}, next tier xp: {nextTier?.XP ?? 0}");
 
         // Setup the XP bar
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass Tier Target TEXT", $"{bp.XP}/{(isBattlePassCompleted ? currentTier.XP : nextTier.XP)}★");
@@ -5632,7 +5628,6 @@ public class UIHandler
 
     public void SelectedBattlepassTier(bool isTop, int tierID)
     {
-        Logging.Debug($"{Player.CharacterName} clicked top button: {isTop}, id: {tierID}");
         SelectedBattlepassTierID = (isTop, tierID);
 
         if (!DB.BattlepassTiersSearchByID.TryGetValue(tierID, out var tier))
@@ -5847,22 +5842,17 @@ public class UIHandler
 
     private ECaseRarity CalculateCaseRarity(List<(ECaseRarity, int)> weights, int poolSize)
     {
-        Logging.Debug($"Calculating reward rarities, found {weights.Count} weights to look from");
         var randInt = UnityEngine.Random.Range(0, poolSize) + 1;
 
-        Logging.Debug($"Total Poolsize: {poolSize}, random int: {randInt}");
         var accumulatedProbability = 0;
         for (var i = 0; i < weights.Count; i++)
         {
             var weight = weights[i];
-            Logging.Debug($"i: {i}, rarity: {weight.Item1}, weight: {weight.Item2}");
             accumulatedProbability += weight.Item2;
-            Logging.Debug($"accumulated probability: {accumulatedProbability}, rand int: {randInt}");
             if (randInt <= accumulatedProbability)
                 return weight.Item1;
         }
 
-        Logging.Debug($"Random rarity not found, sending a random rarity");
         return weights[UnityEngine.Random.Range(0, weights.Count)].Item1;
     }
 
@@ -6621,7 +6611,6 @@ public class UIHandler
 
     public void OnCurrencyUpdated(ECurrency currency)
     {
-        Logging.Debug($"Currency updated {Player.CharacterName}, {currency}");
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Currency {currency.ToUIName()} TEXT", PlayerData.GetCurrency(currency).ToString());
     }
 

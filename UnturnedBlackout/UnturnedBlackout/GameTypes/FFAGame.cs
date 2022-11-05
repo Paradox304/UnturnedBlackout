@@ -692,7 +692,7 @@ public class FFAGame : Game
             if (data.IsMuted)
             {
                 var expiryTime = data.MuteExpiry.UtcDateTime - DateTime.UtcNow;
-                Utility.Say(player.Player, $"<color=red>You are muted for{(expiryTime.Days == 0 ? "" : $" {expiryTime.Days} Days ")}{(expiryTime.Hours == 0 ? "" : $" {expiryTime.Hours} Hours")} {expiryTime.Minutes} Minutes");
+                Utility.Say(player.Player, $"<color=red>You are muted for{(expiryTime.Days == 0 ? "" : $" {expiryTime.Days} Days ")}{(expiryTime.Hours == 0 ? "" : $" {expiryTime.Hours} Hours")} {expiryTime.Minutes} Minutes. Reason: {data.MuteReason}</color>");
                 return;
             }
 

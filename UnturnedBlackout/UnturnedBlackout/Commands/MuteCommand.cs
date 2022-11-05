@@ -78,7 +78,8 @@ internal class MuteCommand : IRocketCommand
 
             Plugin.Instance.DB.ChangePlayerMuted(steamID, true);
             Plugin.Instance.DB.ChangePlayerMuteExpiry(steamID, expiry);
-
+            Plugin.Instance.DB.ChangePlayerMuteReason(steamID, command[2]);
+            
             if (Provider.clients.Exists(k => k.playerID.steamID == steamID))
                 TaskDispatcher.QueueOnMainThread(() => Utility.Say(UnturnedPlayer.FromCSteamID(steamID), Plugin.Instance.Translate("Muted", amount, command[2]).ToRich()));
 

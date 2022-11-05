@@ -331,7 +331,7 @@ public class DatabaseManager
 
             // PLAYERS DATA
             _ = await new MySqlCommand(
-                $"CREATE TABLE IF NOT EXISTS `{PLAYERS}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `SteamName` TEXT NOT NULL , `AvatarLink` TEXT NOT NULL , `CountryCode` TEXT NOT NULL , `HideFlag` BOOLEAN NOT NULL DEFAULT FALSE , `XP` INT NOT NULL DEFAULT '0' , `Level` INT NOT NULL DEFAULT '1' , `Credits` INT NOT NULL DEFAULT '0' , `Scrap` INT NOT NULL DEFAULT '0' , `Coins` INT NOT NULL DEFAULT '0' , `Kills` INT NOT NULL DEFAULT '0' , `HeadshotKills` INT NOT NULL DEFAULT '0' , `HighestKillstreak` INT NOT NULL DEFAULT '0' , `HighestMultiKills` INT NOT NULL DEFAULT '0' , `KillsConfirmed` INT NOT NULL DEFAULT '0' , `KillsDenied` INT NOT NULL DEFAULT '0' , `FlagsCaptured` INT NOT NULL DEFAULT '0' , `FlagsSaved` INT NOT NULL DEFAULT '0' , `AreasTaken` INT NOT NULL DEFAULT '0' , `Deaths` INT NOT NULL DEFAULT '0' , `Music` BOOLEAN NOT NULL DEFAULT TRUE , `IsMuted` BOOLEAN NOT NULL DEFAULT FALSE , `MuteExpiry` BIGINT NOT NULL DEFAULT '1' , `HasBattlepass` BOOLEAN NOT NULL DEFAULT FALSE , `XPBooster` DECIMAL(6,3) NOT NULL DEFAULT '0' , `BPBooster` DECIMAL(6,3) NOT NULL DEFAULT '0' , `GunXPBooster` DECIMAL(6,3) NOT NULL DEFAULT '0' , `HasPrime` BOOLEAN NOT NULL DEFAULT FALSE , `PrimeExpiry` BIGINT NOT NULL DEFAULT '1' , `PrimeLastDailyReward` BIGINT NOT NULL DEFAULT '1' , `Volume` INT NOT NULL DEFAULT '20' , `Hotkeys` TEXT NOT NULL ,  PRIMARY KEY (`SteamID`));",
+                $"CREATE TABLE IF NOT EXISTS `{PLAYERS}` ( `SteamID` BIGINT UNSIGNED NOT NULL , `SteamName` TEXT NOT NULL , `AvatarLink` TEXT NOT NULL , `CountryCode` TEXT NOT NULL , `HideFlag` BOOLEAN NOT NULL DEFAULT FALSE , `XP` INT NOT NULL DEFAULT '0' , `Level` INT NOT NULL DEFAULT '1' , `Credits` INT NOT NULL DEFAULT '0' , `Scrap` INT NOT NULL DEFAULT '0' , `Coins` INT NOT NULL DEFAULT '0' , `Kills` INT NOT NULL DEFAULT '0' , `HeadshotKills` INT NOT NULL DEFAULT '0' , `HighestKillstreak` INT NOT NULL DEFAULT '0' , `HighestMultiKills` INT NOT NULL DEFAULT '0' , `KillsConfirmed` INT NOT NULL DEFAULT '0' , `KillsDenied` INT NOT NULL DEFAULT '0' , `FlagsCaptured` INT NOT NULL DEFAULT '0' , `FlagsSaved` INT NOT NULL DEFAULT '0' , `AreasTaken` INT NOT NULL DEFAULT '0' , `Deaths` INT NOT NULL DEFAULT '0' , `Music` BOOLEAN NOT NULL DEFAULT TRUE , `IsMuted` BOOLEAN NOT NULL DEFAULT FALSE , `MuteExpiry` BIGINT NOT NULL DEFAULT '1' , `MuteReason` TEXT NOT NULL , `HasBattlepass` BOOLEAN NOT NULL DEFAULT FALSE , `XPBooster` DECIMAL(6,3) NOT NULL DEFAULT '0' , `BPBooster` DECIMAL(6,3) NOT NULL DEFAULT '0' , `GunXPBooster` DECIMAL(6,3) NOT NULL DEFAULT '0' , `HasPrime` BOOLEAN NOT NULL DEFAULT FALSE , `PrimeExpiry` BIGINT NOT NULL DEFAULT '1' , `PrimeLastDailyReward` BIGINT NOT NULL DEFAULT '1' , `Volume` INT NOT NULL DEFAULT '20' , `Hotkeys` TEXT NOT NULL , `IsStaff` BOOLEAN NOT NULL DEFAULT FALSE ,  PRIMARY KEY (`SteamID`));",
                 conn).ExecuteScalarAsync();
 
             _ = await new MySqlCommand(
@@ -1632,7 +1632,7 @@ public class DatabaseManager
             await conn.OpenAsync();
             MySqlCommand cmd =
                 new(
-                    $"INSERT INTO `{PLAYERS}` ( `SteamID` , `SteamName` , `AvatarLink` , `CountryCode` , `MuteExpiry`, `Coins` , `Hotkeys` ) VALUES ({player.CSteamID}, @name, '{avatarLink}' , '{countryCode}' , {DateTimeOffset.UtcNow.ToUnixTimeSeconds()} , {(Plugin.Instance.Configuration.Instance.UnlockAllItems ? 10000000 : 0)} , '4,3,5,6,7' ) ON DUPLICATE KEY UPDATE `AvatarLink` = '{avatarLink}', `SteamName` = @name, `CountryCode` = '{countryCode}';",
+                    $"INSERT INTO `{PLAYERS}` ( `SteamID` , `SteamName` , `AvatarLink` , `CountryCode` , `MuteExpiry`, `MuteReason`, `Coins` , `Hotkeys` ) VALUES ({player.CSteamID}, @name, '{avatarLink}' , '{countryCode}' , {DateTimeOffset.UtcNow.ToUnixTimeSeconds()} , ' ', {(Plugin.Instance.Configuration.Instance.UnlockAllItems ? 10000000 : 0)} , '4,3,5,6,7' ) ON DUPLICATE KEY UPDATE `AvatarLink` = '{avatarLink}', `SteamName` = @name, `CountryCode` = '{countryCode}';",
                     conn);
 
             _ = cmd.Parameters.AddWithValue("@name", steamName.ToUnrich());
@@ -1829,42 +1829,46 @@ public class DatabaseManager
 
                     var muteExpiry = DateTimeOffset.FromUnixTimeSeconds(muteUnixSeconds);
 
-                    if (!bool.TryParse(rdr[23].ToString(), out var hasBattlepass))
+                    var muteReason = rdr[23].ToString();
+                    if (!bool.TryParse(rdr[24].ToString(), out var hasBattlepass))
                         continue;
 
-                    if (!float.TryParse(rdr[24].ToString(), out var xpBooster))
+                    if (!float.TryParse(rdr[25].ToString(), out var xpBooster))
                         continue;
 
-                    if (!float.TryParse(rdr[25].ToString(), out var bpBooster))
+                    if (!float.TryParse(rdr[26].ToString(), out var bpBooster))
                         continue;
 
-                    if (!float.TryParse(rdr[26].ToString(), out var gunXPBooster))
+                    if (!float.TryParse(rdr[27].ToString(), out var gunXPBooster))
                         continue;
 
-                    if (!bool.TryParse(rdr[27].ToString(), out var hasPrime))
+                    if (!bool.TryParse(rdr[28].ToString(), out var hasPrime))
                         continue;
 
-                    if (!long.TryParse(rdr[28].ToString(), out var primeExpiryUnixSeconds))
+                    if (!long.TryParse(rdr[29].ToString(), out var primeExpiryUnixSeconds))
                         continue;
 
                     var primeExpiry = DateTimeOffset.FromUnixTimeSeconds(primeExpiryUnixSeconds);
 
-                    if (!long.TryParse(rdr[29].ToString(), out var primeLastDailyRewardUnixSeconds))
+                    if (!long.TryParse(rdr[30].ToString(), out var primeLastDailyRewardUnixSeconds))
                         continue;
 
                     var primeLastDailyReward = DateTimeOffset.FromUnixTimeSeconds(primeLastDailyRewardUnixSeconds);
 
-                    if (!int.TryParse(rdr[30].ToString(), out var volume))
+                    if (!int.TryParse(rdr[31].ToString(), out var volume))
                         continue;
 
-                    var hotkeys = rdr[31].GetIntListFromReaderResult();
+                    var hotkeys = rdr[32].GetIntListFromReaderResult();
 
+                    if (!bool.TryParse(rdr[33].ToString(), out var isStaff))
+                        continue;
+                    
                     if (PlayerData.ContainsKey(player.CSteamID))
                         _ = PlayerData.Remove(player.CSteamID);
 
                     PlayerData.Add(player.CSteamID,
-                        new(player.CSteamID, steamName, avatarLinks, countryCode, hideFlag, xp, level, credits, scrap, coins, kills, headshotKills, highestKillstreak, highestMultiKills, killsConfirmed, killsDenied, flagsCaptured, flagsSaved, areasTaken, deaths, music, isMuted, muteExpiry,
-                            hasBattlepass, xpBooster, bpBooster, gunXPBooster, hasPrime, primeExpiry, primeLastDailyReward, volume, hotkeys));
+                        new(player.CSteamID, steamName, avatarLinks, countryCode, hideFlag, xp, level, credits, scrap, coins, kills, headshotKills, highestKillstreak, highestMultiKills, killsConfirmed, killsDenied, flagsCaptured, flagsSaved, areasTaken, deaths, music, isMuted, muteExpiry, muteReason,
+                            hasBattlepass, xpBooster, bpBooster, gunXPBooster, hasPrime, primeExpiry, primeLastDailyReward, volume, hotkeys, isStaff));
                 }
             }
             catch (Exception ex)
@@ -4226,6 +4230,15 @@ public class DatabaseManager
         data.MuteExpiry = muteExpiry;
     }
 
+    public void ChangePlayerMuteReason(CSteamID steamID, string muteReason)
+    {
+        AddQuery($"UPDATE `{PLAYERS}` SET `MuteReason` = '{muteReason}' WHERE `SteamID` = {steamID};");
+        if (!PlayerData.TryGetValue(steamID, out var data))
+            return;
+        
+        data.MuteReason = muteReason;
+    }
+    
     public void IncreasePlayerBooster(CSteamID steamID, EBoosterType boosterType, float increaseBooster)
     {
         var coloumnName = "None";

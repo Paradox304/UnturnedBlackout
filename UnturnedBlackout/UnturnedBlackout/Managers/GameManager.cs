@@ -217,11 +217,13 @@ public class GameManager
         if (Players.TryGetValue(player.CSteamID, out var gPlayer))
         {
             var game = gPlayer.CurrentGame;
-            if (game != null)
-                game.RemovePlayerFromGame(gPlayer);
+            game?.RemovePlayerFromGame(gPlayer);
 
             _ = Players.Remove(player.CSteamID);
         }
+
+        Plugin.Instance.DB.PlayerData.Remove(player.CSteamID);
+        Plugin.Instance.DB.PlayerLoadouts.Remove(player.CSteamID);
     }
 
     private void OnPlayerDeath(PlayerLife sender, EDeathCause cause, ELimb limb, CSteamID instigator)

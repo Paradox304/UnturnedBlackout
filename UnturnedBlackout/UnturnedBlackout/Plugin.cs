@@ -345,8 +345,8 @@ public class Plugin : RocketPlugin<Config>
     private static Harmony Harmony { get; set; }
     public static Plugin Instance { get; private set; }
 
-    private static int[][] _allowedColors = new int[][]
+    private static int[][] _allowedColors = new[]
     {
-        new int[] { 244, 230, 210 }, new int[] { 217, 202, 180 }, new int[] { 190, 165, 130 }, new int[] { 157, 136, 107 }, new int[] { 148, 118, 75 }, new int[] { 112, 96, 73 }, new int[] { 83, 71, 54 }, new int[] { 75, 61, 49 }, new int[] { 51, 44, 37 }, new int[] { 35, 31, 28 }
+        new[] { 244, 230, 210 }, new[] { 217, 202, 180 }, new[] { 190, 165, 130 }, new[] { 157, 136, 107 }, new[] { 148, 118, 75 }, new[] { 112, 96, 73 }, new[] { 83, 71, 54 }, new[] { 75, 61, 49 }, new[] { 51, 44, 37 }, new[] { 35, 31, 28 }
     };
 }
