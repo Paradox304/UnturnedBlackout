@@ -123,6 +123,7 @@ public class GameManager
         }
 
         Plugin.Instance.UI.HideMenuUI(gPlayer.Player);
+        player.GodMode = false;
         _ = Plugin.Instance.StartCoroutine(game.AddPlayerToGame(gPlayer));
     }
 
@@ -252,6 +253,7 @@ public class GameManager
         player.Player.enablePluginWidgetFlag(EPluginWidgetFlags.Modal);
         player.Player.inventory.ClearInventory();
         player.Player.life.serverModifyHealth(100);
+        player.GodMode = true;
         TaskDispatcher.QueueOnMainThread(() =>
         {
             player.Player.life.ServerRespawn(false);

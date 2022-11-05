@@ -23,7 +23,8 @@ public class GamePlayer
     public ConfigManager Config => Plugin.Instance.Config;
 
     public Game CurrentGame { get; set; }
-
+    public bool StaffMode { get; set; }
+    
     public CSteamID SteamID { get; set; }
     public UnturnedPlayer Player { get; set; }
     public PlayerData Data { get; set; }
@@ -113,6 +114,7 @@ public class GamePlayer
             throw new($"PLAYER DATA FOR PLAYER WITH {SteamID} NOT FOUND, KICKING THE PLAYER");
         }
 
+        StaffMode = false;
         Data = data;
         TransportConnection = transportConnection;
         PreviousStance = EPlayerStance.STAND;

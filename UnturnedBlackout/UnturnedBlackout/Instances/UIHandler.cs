@@ -30,7 +30,7 @@ public class UIHandler
     public const short MAIN_MENU_KEY = 27632;
     public const ushort MIDGAME_LOADOUT_ID = 27643;
     public const short MIDGAME_LOADOUT_KEY = 27643;
-    public const int MAX_ITEMS_PER_PAGE = 19;
+    public const int MAX_ITEMS_PER_PAGE = 29;
     public const int MAX_ITEMS_PER_GRID = 15;
     public const int MAX_CASES_PER_CASE_PAGE = 11;
     public const int MAX_CASES_PER_STORE_PAGE = 5;
@@ -58,6 +58,8 @@ public class UIHandler
     public Coroutine MatchEndSummaryShower { get; set; }
     public Coroutine CrateUnboxer { get; set; }
 
+    public Coroutine ImageScroller { get; set; }
+    
     public ITransportConnection TransportConnection { get; set; }
     public ConfigManager Config => Plugin.Instance.Config;
 
@@ -144,8 +146,6 @@ public class UIHandler
         LastButtonClicked = DateTime.UtcNow;
         PlayerData = data;
         PlayerLoadout = loadout;
-
-        TimerRefresher = Plugin.Instance.StartCoroutine(RefreshTimer());
 
         MainPage = EMainPage.NONE;
         BuildPages();
@@ -822,6 +822,10 @@ public class UIHandler
 
         AchievementPageShower.Stop();
         CrateUnboxer.Stop();
+        MatchEndSummaryShower.Stop();
+        TimerRefresher = Plugin.Instance.StartCoroutine(RefreshTimer());
+        ImageScroller = Plugin.Instance.StartCoroutine(ScrollImages());
+        
         if (summary != null)
             MatchEndSummaryShower = Plugin.Instance.StartCoroutine(ShowMatchEndSummary(summary));
     }
@@ -831,6 +835,12 @@ public class UIHandler
         EffectManager.askEffectClearByID(MAIN_MENU_ID, TransportConnection);
         Player.Player.disablePluginWidgetFlag(EPluginWidgetFlags.Modal);
         MainPage = EMainPage.NONE;
+
+        ImageScroller.Stop();
+        TimerRefresher.Stop();
+        AchievementPageShower.Stop();
+        CrateUnboxer.Stop();
+        MatchEndSummaryShower.Stop();
     }
 
     public void SetupMainMenu()
@@ -884,6 +894,22 @@ public class UIHandler
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Enough Currency Modal TEXT", Plugin.Instance.Translate("Not_Enough_Currency", Utility.ToFriendlyName(currency)).ToRich());
     }
 
+    public void ActivateStaffMode()
+    {
+        var gPlayer = Plugin.Instance.Game.GetGamePlayer(Player);
+        if (gPlayer == null)
+        {
+            Logging.Debug($"Unable to find game player for {Player.CharacterName}");
+            return;
+        }
+
+        gPlayer.StaffMode = true;
+        Player.Player.teleportToLocationUnsafe(new(0, 0, 0), 0);
+        Player.GodMode = true;
+        Player.VanishMode = true;
+        Utility.Say(Player, "<color=green>Staff Mode Activated</color>");
+    }
+    
     public void ShowPlayPage()
     {
         MainPage = EMainPage.PLAY;
@@ -6624,6 +6650,22 @@ public class UIHandler
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Leaderboards Reset TEXT", GetLeaderboardRefreshTime());
 
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Quest Expire TEXT", $"NEW QUESTS IN: {(DateTimeOffset.UtcNow > PlayerData.Quests[0].QuestEnd ? "00:00:00" : (DateTimeOffset.UtcNow - PlayerData.Quests[0].QuestEnd).ToString(@"hh\:mm\:ss"))}");
+        }
+    }
+
+    public IEnumerator ScrollImages()
+    {
+        var currentIndex = 0;
+        var scrollableImages = Config.Icons.FileData.ScrollableImages;
+        
+        while (true)
+        {
+            if (scrollableImages.Count < currentIndex + 1)
+                currentIndex = 0;
+        
+            EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Scrollable IMAGE", scrollableImages[currentIndex]);
+            currentIndex++;
+            yield return new WaitForSeconds(5f);
         }
     }
 }

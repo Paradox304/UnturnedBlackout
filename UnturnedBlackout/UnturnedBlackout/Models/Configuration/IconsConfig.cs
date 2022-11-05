@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace UnturnedBlackout.Models.Configuration;
 
@@ -26,6 +27,8 @@ public class IconsConfig
 
     public string HiddenFlagIconLink { get; set; }
     public string FlagAPILink { get; set; }
+    
+    public List<string> ScrollableImages { get; set; }
 
     public IconsConfig()
     {

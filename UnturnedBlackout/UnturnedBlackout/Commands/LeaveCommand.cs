@@ -20,7 +20,23 @@ internal class LeaveCommand : IRocketCommand
 
     public void Execute(IRocketPlayer caller, string[] command)
     {
-        var player = caller as UnturnedPlayer;
-        Plugin.Instance.Game.RemovePlayerFromGame(player);
+        if (caller is not UnturnedPlayer player)
+            return;
+        
+        var gPlayer = Plugin.Instance.Game.GetGamePlayer(player);
+        if (gPlayer.CurrentGame != null)
+        {
+            Plugin.Instance.Game.RemovePlayerFromGame(player);
+            return;
+        }
+
+        if (!gPlayer.StaffMode)
+            return;
+
+        gPlayer.StaffMode = false;
+        player.GodMode = false;
+        player.VanishMode = false;
+        
+        Plugin.Instance.Game.SendPlayerToLobby(player);
     }
 }
