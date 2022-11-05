@@ -267,6 +267,7 @@ public class TDMGame : Game
         UI.SendVoiceChatUI(player);
 
         player.IsLoading = false;
+        player.Player.GodMode = false;
         switch (GamePhase)
         {
             case EGamePhase.WAITING_FOR_PLAYERS:

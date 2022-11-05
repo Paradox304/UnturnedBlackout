@@ -123,7 +123,6 @@ public class GameManager
         }
 
         Plugin.Instance.UI.HideMenuUI(gPlayer.Player);
-        player.GodMode = false;
         _ = Plugin.Instance.StartCoroutine(game.AddPlayerToGame(gPlayer));
     }
 

@@ -296,6 +296,7 @@ public class CTFGame : Game
         UI.SendVoiceChatUI(player);
 
         player.IsLoading = false;
+        player.Player.GodMode = false;
         switch (GamePhase)
         {
             case EGamePhase.WAITING_FOR_PLAYERS:
@@ -320,8 +321,7 @@ public class CTFGame : Game
                 UI.ShowCountdownUI(player);
                 break;
             case EGamePhase.ENDING:
-                CTFTeam wonTeam;
-                wonTeam = BlueTeam.Score > RedTeam.Score ? BlueTeam : RedTeam.Score > BlueTeam.Score ? RedTeam : new(-1, true, new(), 0, Vector3.zero);
+                var wonTeam = BlueTeam.Score > RedTeam.Score ? BlueTeam : RedTeam.Score > BlueTeam.Score ? RedTeam : new(-1, true, new(), 0, Vector3.zero);
 
                 UI.SetupCTFLeaderboard(cPlayer, Players, Location, wonTeam, BlueTeam, RedTeam, true, IsHardcore);
                 UI.ShowCTFLeaderboard(cPlayer.GamePlayer);

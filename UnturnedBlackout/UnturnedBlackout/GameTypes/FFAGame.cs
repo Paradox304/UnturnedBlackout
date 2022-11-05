@@ -238,6 +238,7 @@ public class FFAGame : Game
         UI.SendPreEndingUI(fPlayer.GamePlayer);
 
         player.IsLoading = false;
+        player.Player.GodMode = false;
         switch (GamePhase)
         {
             case EGamePhase.WAITING_FOR_PLAYERS:
