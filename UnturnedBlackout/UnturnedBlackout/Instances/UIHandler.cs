@@ -101,6 +101,11 @@ public class UIHandler
 
     // Battlepass
     public (bool, int) SelectedBattlepassTierID { get; set; }
+    
+    // Scrollable Image
+    
+    public int CurrentScrollableImage { get; set; }
+    
 
     public Dictionary<int, PageLoadout> LoadoutPages { get; set; }
     public Dictionary<int, PageGun> PistolPages { get; set; }
@@ -866,8 +871,8 @@ public class UIHandler
         ClearChat();
         ShowXP();
         ShowQuestCompletion();
-
         BuildAchievementPages();
+        SetupScrollableImages();
     }
 
     public void ShowXP()
@@ -6393,6 +6398,73 @@ public class UIHandler
         return false;
     }
     
+    public void SetupScrollableImages()
+    {
+        CurrentScrollableImage = -1;
+        ChangeScrollableImage(0);
+        for (var i = Config.Base.FileData.ScrollableImages.Count - 1; i <= 9; i++)
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Scrollable Dot {i}", false);
+    }
+
+    public void StartScrollableImages()
+    {
+        ImageScroller.Stop();
+        ImageScroller = Plugin.Instance.StartCoroutine(ScrollImages());
+    }
+
+    public void StopScrollableImages()
+    {
+        ImageScroller.Stop();
+    }
+    
+    public void SendScrollableImageLink()
+    {
+        var scrollableImage = Config.Base.FileData.ScrollableImages[CurrentScrollableImage];
+        if (string.IsNullOrEmpty(scrollableImage.Link))
+            return;
+        
+        Player.Player.sendBrowserRequest(scrollableImage.LinkMessage, scrollableImage.Link);
+    }
+
+    public void ChangeScrollableImage(int index)
+    {
+        if (CurrentScrollableImage == index)
+            return;
+
+        var scrollableImages = Config.Base.FileData.ScrollableImages;
+        if (scrollableImages.Count < index + 1)
+            return;
+
+        var newImage = scrollableImages[index];
+        ChangeScrollableImage(newImage, index);
+    }
+
+    public void ChangeScrollableImage(ScrollableImage newImage, int index)
+    {
+        var scrollableImages = Config.Base.FileData.ScrollableImages;
+        var currentScrollableImage = scrollableImages[CurrentScrollableImage];
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Scrollable Previous IMAGE", true);
+        EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Scrollable Previous IMAGE", currentScrollableImage.Image);
+        EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Scrollable IMAGE", newImage.Image);
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Scrollable Shift Image Enabler {index}", true);
+        CurrentScrollableImage = index;
+        ImageScroller.Stop();
+        ImageScroller = Plugin.Instance.StartCoroutine(ScrollImages());
+    }
+    
+    public IEnumerator ScrollImages()
+    {
+        var scrollableImages = Config.Base.FileData.ScrollableImages;
+        yield return new WaitForSeconds(Config.Base.FileData.ScrollableImageTimer);
+
+        var newIndex = CurrentScrollableImage + 1;
+        if (scrollableImages.Count < newIndex + 1)
+            newIndex = 0;
+
+        var newImage = scrollableImages[newIndex];
+        ChangeScrollableImage(newImage, newIndex);
+    }
+
     public IEnumerator ShowMatchEndSummary(MatchEndSummary summary)
     {
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary", true);
@@ -6651,22 +6723,6 @@ public class UIHandler
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Leaderboards Reset TEXT", GetLeaderboardRefreshTime());
 
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Quest Expire TEXT", $"NEW QUESTS IN: {(DateTimeOffset.UtcNow > PlayerData.Quests[0].QuestEnd ? "00:00:00" : (DateTimeOffset.UtcNow - PlayerData.Quests[0].QuestEnd).ToString(@"hh\:mm\:ss"))}");
-        }
-    }
-
-    public IEnumerator ScrollImages()
-    {
-        var currentIndex = 0;
-        var scrollableImages = Config.Icons.FileData.ScrollableImages;
-        
-        while (true)
-        {
-            if (scrollableImages.Count < currentIndex + 1)
-                currentIndex = 0;
-        
-            EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Scrollable IMAGE", scrollableImages[currentIndex]);
-            currentIndex++;
-            yield return new WaitForSeconds(5f);
         }
     }
 }

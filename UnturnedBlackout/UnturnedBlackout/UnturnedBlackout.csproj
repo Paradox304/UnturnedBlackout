@@ -316,6 +316,7 @@
         <Compile Include="Models\Global\Kit.cs" />
         <Compile Include="Models\Global\MatchEndSummary.cs" />
         <Compile Include="Models\Global\RoundEndCase.cs" />
+        <Compile Include="Models\Global\ScrollableImage.cs" />
         <Compile Include="Models\Global\TeamKillstreak.cs" />
         <Compile Include="Models\Global\TeamGlove.cs" />
         <Compile Include="Models\KC\KCConfig.cs" />

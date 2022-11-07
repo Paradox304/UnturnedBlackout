@@ -1627,15 +1627,27 @@ public class UIManager
         {
             case "SERVER Play BUTTON":
                 handler.ShowPlayPage();
+                handler.StopScrollableImages();
+                return;
+            case "SERVER Play Back BUTTON":
+                handler.StartScrollableImages();
                 return;
             case "SERVER Loadout BUTTON":
                 handler.ShowLoadouts();
+                handler.StopScrollableImages();
+                return;
+            case "SERVER Loadout Back BUTTON":
+                handler.StartScrollableImages();
                 return;
             case "SERVER Loadout Close BUTTON":
                 handler.ClearMidgameLoadouts();
                 return;
             case "SERVER Leaderboards BUTTON":
                 handler.ShowLeaderboards();
+                handler.StopScrollableImages();
+                return;
+            case "SERVER Leaderboards Back BUTTON":
+                handler.StartScrollableImages();
                 return;
             case "SERVER Quest BUTTON":
                 handler.ShowQuests();
@@ -1643,23 +1655,42 @@ public class UIManager
             case "SERVER Staff BUTTON":
                 handler.ActivateStaffMode();
                 return;
+            case "Scrollable Image BUTTON":
+                handler.SendScrollableImageLink();
+                return;
             case "Discord BUTTON":
                 player.sendBrowserRequest("Our Discord:", "discord.gg/Uetk2UgMVs");
                 return;
             case "SERVER Achievements BUTTON":
                 handler.ShowAchievements();
+                handler.StopScrollableImages();
+                return;
+            case "SERVER Achievements Back BUTTON":
+                handler.StartScrollableImages();
                 return;
             case "SERVER Store BUTTON":
                 player.sendBrowserRequest("Our Store:", "https://store.unturnedblackout.com/");
                 return;
             case "SERVER Unbox BUTTON":
                 handler.ShowUnboxingPage(EUnboxingPage.BUY);
+                handler.StopScrollableImages();
+                return;
+            case "SERVER Unbox Back BUTTON":
+                handler.StartScrollableImages();
                 return;
             case "SERVER Battlepass BUTTON":
                 _ = Plugin.Instance.StartCoroutine(handler.SetupBattlepass());
+                handler.StopScrollableImages();
+                return;
+            case "SERVER Battlepass Back BUTTON":
+                handler.StartScrollableImages();
                 return;
             case "SERVER Options BUTTON":
                 handler.ShowOptions();
+                handler.StopScrollableImages();
+                return;
+            case "SERVER Options Back BUTTON":
+                handler.StartScrollableImages();
                 return;
             case "SERVER Exit BUTTON":
                 Provider.kick(player.channel.owner.playerID.steamID, "You exited");
@@ -1676,8 +1707,6 @@ public class UIManager
             case "SERVER Play Join BUTTON":
                 handler.ClickedJoinButton();
                 return;
-            case "SERVER Play Back BUTTON":
-                return;
             case "SERVER Loadout Next BUTTON":
                 if (!isGame)
                     handler.ForwardLoadoutPage();
@@ -1691,8 +1720,6 @@ public class UIManager
                 else
                     handler.BackwardMidgameLoadoutPage();
 
-                return;
-            case "SERVER Loadout Back BUTTON":
                 return;
             case "SERVER Loadout Equip BUTTON":
                 if (!isGame)
@@ -1853,8 +1880,6 @@ public class UIManager
             case "SERVER Leaderboards Previous BUTTON":
                 handler.BackwardLeaderboardPage();
                 return;
-            case "SERVER Leaderboards Back BUTTON":
-                return;
             case "SERVER Achievements Next BUTTON":
                 handler.ForwardAchievementSubPage();
                 return;
@@ -1947,8 +1972,6 @@ public class UIManager
             case "Flag Toggle BUTTON":
                 handler.FlagButtonPressed();
                 return;
-            default:
-                break;
         }
 
         var numberRegexMatch = new Regex(@"([0-9]+)").Match(buttonName).Value;
@@ -1980,6 +2003,8 @@ public class UIManager
             handler.SelectedUnboxingStoreCase(selected);
         else if (buttonName.StartsWith("Volume BUTTON"))
             handler.VolumeButtonPressed(selected);
+        else if (buttonName.StartsWith("SERVER Scrollable Dot"))
+            handler.ChangeScrollableImage(selected);
     }
 
     private void OnTextCommitted(Player player, string buttonName, string text)

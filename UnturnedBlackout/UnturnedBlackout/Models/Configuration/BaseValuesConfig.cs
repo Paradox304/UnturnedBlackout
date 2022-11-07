@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
+using UnturnedBlackout.Models.Global;
 
 namespace UnturnedBlackout.Models.Configuration;
 
@@ -39,6 +41,9 @@ public class BaseValuesConfig
     public int DefaultLoadoutAmount { get; set; }
     public int PrimeLoadoutAmount { get; set; }
 
+    public List<ScrollableImage> ScrollableImages { get; set; }
+    public int ScrollableImageTimer { get; set; }
+    
     public BaseValuesConfig()
     {
         MaxPlayerNameCharacters = 20;
@@ -81,5 +86,8 @@ public class BaseValuesConfig
 
         DefaultLoadoutAmount = 5;
         PrimeLoadoutAmount = 10;
+
+        ScrollableImages = new();
+        ScrollableImageTimer = 5;
     }
 }
