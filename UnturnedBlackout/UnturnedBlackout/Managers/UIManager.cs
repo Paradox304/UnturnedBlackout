@@ -1937,11 +1937,11 @@ public class UIManager
                 handler.ConfirmUnboxingStoreCase();
                 return;
             case "SERVER Unbox Content Back BUTTON":
-                if (handler.UnboxingPage == EUnboxingPage.OPEN)
-                {
-                    handler.ShowUnboxingPage(EUnboxingPage.CASES);
-                    handler.CrateUnboxer.Stop();
-                }
+                if (handler.UnboxingPage != EUnboxingPage.OPEN)
+                    return;
+
+                handler.ShowUnboxingPage(EUnboxingPage.CASES);
+                handler.CrateUnboxer.Stop();
 
                 return;
             case "SERVER Unbox Content Unbox BUTTON":
