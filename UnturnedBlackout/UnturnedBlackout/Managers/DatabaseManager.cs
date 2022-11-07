@@ -3127,10 +3127,7 @@ public class DatabaseManager
                 rdr.Close();
             }
             
-            rdr = new MySqlCommand(
-                $"SELECT `SteamID`, `Kills`, `HeadshotKills`, `Deaths` FROM `{PLAYERS_LEADERBOARD_DAILY}` ORDER BY (`Kills` + `HeadshotKills`) DESC;",
-                conn).ExecuteReader();
-
+            rdr = new MySqlCommand($"SELECT `SteamID`, `Kills`, `HeadshotKills`, `Deaths` FROM `{PLAYERS_LEADERBOARD_DAILY}` ORDER BY (`Kills` + `HeadshotKills`) DESC;", conn).ExecuteReader();
             Logging.Debug("Getting daily leaderboard data");
             try
             {
@@ -3177,10 +3174,7 @@ public class DatabaseManager
                 rdr.Close();
             }
 
-            rdr = new MySqlCommand(
-                $"SELECT `SteamID`, `Kills`, `HeadshotKills`, `Deaths` FROM `{PLAYERS_LEADERBOARD_DAILY}` ORDER BY (`Kills` + `HeadshotKills`) DESC;",
-                conn).ExecuteReader();
-
+            rdr = new MySqlCommand($"SELECT `SteamID`, `Kills`, `HeadshotKills`, `Deaths` FROM `{PLAYERS_LEADERBOARD_WEEKLY}` ORDER BY (`Kills` + `HeadshotKills`) DESC;", conn).ExecuteReader();
             Logging.Debug("Getting weekly leaderboard data");
             try
             {
@@ -3250,10 +3244,7 @@ public class DatabaseManager
                 }
             }
 
-            rdr = new MySqlCommand(
-                $"SELECT `SteamID`, `Kills`, `HeadshotKills`, `Deaths` FROM `{PLAYERS_LEADERBOARD_DAILY}` ORDER BY (`Kills` + `HeadshotKills`) DESC;",
-                conn).ExecuteReader();
-
+            rdr = new MySqlCommand($"SELECT `SteamID`, `Kills`, `HeadshotKills`, `Deaths` FROM `{PLAYERS_LEADERBOARD_SEASONAL}` ORDER BY (`Kills` + `HeadshotKills`) DESC;", conn).ExecuteReader();
             Logging.Debug("Getting seasonal leaderboard data");
             try
             {

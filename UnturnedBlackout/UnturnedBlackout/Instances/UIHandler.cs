@@ -6400,9 +6400,13 @@ public class UIHandler
     
     public void SetupScrollableImages()
     {
-        CurrentScrollableImage = -1;
-        ChangeScrollableImage(0);
-        for (var i = Config.Base.FileData.ScrollableImages.Count - 1; i <= 9; i++)
+        var images = Config.Base.FileData.ScrollableImages;
+        var scrollableImage = images[0];
+        EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Scrollable IMAGE", scrollableImage.Image);
+        EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Scrollable Previous IMAGE", scrollableImage.Image);
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Scrollable Shift Image Enabler 0", true);
+        CurrentScrollableImage = 0;
+        for (var i = images.Count; i <= 9; i++)
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Scrollable Dot {i}", false);
     }
 

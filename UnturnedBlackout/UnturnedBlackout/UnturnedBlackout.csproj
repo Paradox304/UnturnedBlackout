@@ -183,6 +183,7 @@
         <Compile Include="Commands\CountryCommand.cs" />
         <Compile Include="Commands\ForceEndGameCommand.cs" />
         <Compile Include="Commands\ForceStartGameCommand.cs" />
+        <Compile Include="Commands\MapCommand.cs" />
         <Compile Include="Commands\RandomRewardCommand.cs" />
         <Compile Include="Commands\RemoveRewardCommand.cs" />
         <Compile Include="Commands\GiveRewardCommand.cs" />
