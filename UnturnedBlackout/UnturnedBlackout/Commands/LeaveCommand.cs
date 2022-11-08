@@ -36,7 +36,8 @@ internal class LeaveCommand : IRocketCommand
         gPlayer.StaffMode = false;
         player.GodMode = false;
         player.VanishMode = false;
-        
+        player.Player.look.sendFreecamAllowed(false);
+        player.Player.look.sendSpecStatsAllowed(false);
         Plugin.Instance.Game.SendPlayerToLobby(player);
     }
 }
