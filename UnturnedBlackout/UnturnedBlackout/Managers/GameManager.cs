@@ -31,7 +31,7 @@ public class GameManager
 
     public const int MAX_GAMES = 14;
     public const int MIN_GAMES = 4;
-    public const int GAME_COUNT_THRESHOLD = 75;
+    public const int GAME_COUNT_THRESHOLD = 59;
     
     public GameManager()
     {
@@ -70,10 +70,11 @@ public class GameManager
             var gameCount = Games.Sum(k => k.GetPlayerCount());
             var gameMaxCount = Games.Sum(k => k.Location.GetMaxPlayers(k.GameMode));
 
-            Logging.Debug($"Checking games, total games: {Games.Count}, players: {gameCount}, max count: {gameMaxCount}");
-            if (gameCount * 100 / gameMaxCount < GAME_COUNT_THRESHOLD && Games.Count > MIN_GAMES)
+            Logging.Debug($"Checking games, total games: {Games.Count}, players: {gameCount}, max count: {gameMaxCount}, threshold: {gameCount * 100 / gameMaxCount}");
+            if (gameCount * 100 / gameMaxCount < GAME_COUNT_THRESHOLD && Games.Count >= MIN_GAMES)
             {
-                Logging.Debug("Threshold below 75%, not starting game");
+                Logging.Debug($"Threshold below {GAME_COUNT_THRESHOLD}%, not starting game");
+                Plugin.Instance.UI.OnGameUpdated();
                 return;
             }
         }
@@ -346,8 +347,8 @@ public class GameManager
             var gameCount = Games.Sum(k => k.GetPlayerCount());
             var gameMaxCount = Games.Sum(k => k.Location.GetMaxPlayers(k.GameMode));
 
-            Logging.Debug($"Checking games, total games: {Games.Count}, players: {gameCount}, max count: {gameMaxCount}");
-            if (gameCount * 100 / gameMaxCount <= GAME_COUNT_THRESHOLD)
+            Logging.Debug($"Checking games, total games: {Games.Count}, players: {gameCount}, max count: {gameMaxCount}, threshold: {gameCount * 100 / gameMaxCount}");
+            if (gameCount * 100 / gameMaxCount < GAME_COUNT_THRESHOLD)
                 continue;
             
             Logging.Debug($"Percentage above {GAME_COUNT_THRESHOLD}, creating new game");
