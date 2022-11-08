@@ -280,6 +280,7 @@ public class KCGame : Game
         {
             case EGamePhase.WAITING_FOR_PLAYERS:
                 var minPlayers = Location.GetMinPlayers(GameMode);
+                GameChecker.Stop();
                 if (Players.Count >= minPlayers)
                     GameStarter = Plugin.Instance.StartCoroutine(StartGame());
                 else
@@ -325,13 +326,16 @@ public class KCGame : Game
         UI.ClearKillstreakUI(player);
         OnStoppedTalking(player);
 
-        if (GamePhase == EGamePhase.STARTING)
+        switch (GamePhase)
         {
-            UI.ClearCountdownUI(player);
-            kPlayer.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1);
+            case EGamePhase.STARTING:
+                UI.ClearCountdownUI(player);
+                kPlayer.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1);
+                break;
+            case EGamePhase.WAITING_FOR_PLAYERS:
+                UI.ClearWaitingForPlayersUI(player);
+                break;
         }
-        else if (GamePhase == EGamePhase.WAITING_FOR_PLAYERS)
-            UI.ClearWaitingForPlayersUI(player);
 
         if (GamePhase != EGamePhase.ENDING)
         {
@@ -349,6 +353,21 @@ public class KCGame : Game
         }
 
         UI.OnGameCountUpdated(this);
+        
+        if (GamePhase != EGamePhase.ENDING)
+            return;
+        
+        if (Players.Count == 0)
+        {
+            GameChecker.Stop();
+            GameChecker = Plugin.Instance.StartCoroutine(CheckGame());
+        }
+        else
+        {
+            var minPlayers = Location.GetMinPlayers(GameMode);
+            foreach (var ply in Players)
+                UI.UpdateWaitingForPlayersUI(ply.GamePlayer, Players.Count, minPlayers);
+        }
     }
 
     public override void OnPlayerDead(Player player, CSteamID killer, ELimb limb, EDeathCause cause)

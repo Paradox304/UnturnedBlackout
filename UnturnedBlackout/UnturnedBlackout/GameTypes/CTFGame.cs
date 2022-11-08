@@ -85,6 +85,7 @@ public class CTFGame : Game
 
     public IEnumerator StartGame()
     {
+        GameChecker.Stop();
         GamePhase = EGamePhase.STARTING;
         foreach (var player in Players)
         {
@@ -306,6 +307,7 @@ public class CTFGame : Game
                 else
                 {
                     UI.SendWaitingForPlayersUI(player, Players.Count, minPlayers);
+                    GameChecker.Stop();
                     foreach (var ply in Players)
                     {
                         if (ply == cPlayer)
@@ -346,13 +348,16 @@ public class CTFGame : Game
 
         OnStoppedTalking(player);
 
-        if (GamePhase == EGamePhase.STARTING)
+        switch (GamePhase)
         {
-            UI.ClearCountdownUI(player);
-            cPlayer.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1);
+            case EGamePhase.STARTING:
+                UI.ClearCountdownUI(player);
+                cPlayer.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1);
+                break;
+            case EGamePhase.WAITING_FOR_PLAYERS:
+                UI.ClearWaitingForPlayersUI(player);
+                break;
         }
-        else if (GamePhase == EGamePhase.WAITING_FOR_PLAYERS)
-            UI.ClearWaitingForPlayersUI(player);
 
         if (GamePhase != EGamePhase.ENDING)
         {
@@ -385,6 +390,21 @@ public class CTFGame : Game
         }
 
         UI.OnGameCountUpdated(this);
+        
+        if (GamePhase != EGamePhase.ENDING)
+            return;
+        
+        if (Players.Count == 0)
+        {
+            GameChecker.Stop();
+            GameChecker = Plugin.Instance.StartCoroutine(CheckGame());
+        }
+        else
+        {
+            var minPlayers = Location.GetMinPlayers(GameMode);
+            foreach (var ply in Players)
+                UI.UpdateWaitingForPlayersUI(ply.GamePlayer, Players.Count, minPlayers);
+        }
     }
 
     public override void OnPlayerDead(Player player, CSteamID killer, ELimb limb, EDeathCause cause)

@@ -272,6 +272,7 @@ public class TDMGame : Game
         {
             case EGamePhase.WAITING_FOR_PLAYERS:
                 var minPlayers = Location.GetMinPlayers(GameMode);
+                GameChecker.Stop();
                 if (Players.Count >= minPlayers)
                     GameStarter = Plugin.Instance.StartCoroutine(StartGame());
                 else
@@ -317,21 +318,15 @@ public class TDMGame : Game
         UI.ClearKillstreakUI(player);
         OnStoppedTalking(player);
 
-        if (GamePhase == EGamePhase.STARTING)
+        switch (GamePhase)
         {
-            UI.ClearCountdownUI(player);
-            tPlayer.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1);
-        }
-        else if (GamePhase == EGamePhase.WAITING_FOR_PLAYERS)
-        {
-            UI.ClearWaitingForPlayersUI(player);
-            foreach (var ply in Players)
-            {
-                if (ply == tPlayer)
-                    continue;
-
-                UI.UpdateWaitingForPlayersUI(ply.GamePlayer, Players.Count - 1, Location.GetMinPlayers(GameMode));
-            }
+            case EGamePhase.STARTING:
+                UI.ClearCountdownUI(player);
+                tPlayer.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1);
+                break;
+            case EGamePhase.WAITING_FOR_PLAYERS:
+                UI.ClearWaitingForPlayersUI(player);
+                break;
         }
 
         if (GamePhase != EGamePhase.ENDING)
@@ -347,6 +342,21 @@ public class TDMGame : Game
         _ = PlayersLookup.Remove(tPlayer.GamePlayer.SteamID);
 
         UI.OnGameCountUpdated(this);
+        
+        if (GamePhase != EGamePhase.ENDING)
+            return;
+        
+        if (Players.Count == 0)
+        {
+            GameChecker.Stop();
+            GameChecker = Plugin.Instance.StartCoroutine(CheckGame());
+        }
+        else
+        {
+            var minPlayers = Location.GetMinPlayers(GameMode);
+            foreach (var ply in Players)
+                UI.UpdateWaitingForPlayersUI(ply.GamePlayer, Players.Count, minPlayers);
+        }
     }
 
     public override void OnPlayerDead(Player player, CSteamID killer, ELimb limb, EDeathCause cause)

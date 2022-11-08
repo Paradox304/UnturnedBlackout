@@ -1550,11 +1550,8 @@ public class UIManager
 
     public void OnGameUpdated()
     {
-        foreach (var handler in UIHandlers)
-        {
-            if (handler.MainPage == EMainPage.PLAY && handler.PlayPage == EPlayPage.GAMES)
-                handler.ShowGames();
-        }
+        foreach (var handler in UIHandlers.Where(handler => handler.MainPage == EMainPage.PLAY && handler.PlayPage == EPlayPage.GAMES))
+            handler.ShowGames();
     }
 
     public void OnGameCountUpdated(Game game)
@@ -1877,8 +1874,20 @@ public class UIManager
             case "SERVER Leaderboards Next BUTTON":
                 handler.ForwardLeaderboardPage();
                 return;
+            case "SERVER Leaderboards Next Fast BUTTON":
+                handler.ForwardLeaderboardPageFast();
+                return;
+            case "SERVER Leaderboards Next End BUTTON":
+                handler.ForwardLeaderboardPageEnd();
+                return;
             case "SERVER Leaderboards Previous BUTTON":
                 handler.BackwardLeaderboardPage();
+                return;
+            case "SERVER Leaderboards Previous Fast BUTTON":
+                handler.BackwardLeaderboardPageFast();
+                return;
+            case "SERVER Leaderboards Previous End BUTTON":
+                handler.BackwardLeaderboardPageEnd();
                 return;
             case "SERVER Achievements Next BUTTON":
                 handler.ForwardAchievementSubPage();

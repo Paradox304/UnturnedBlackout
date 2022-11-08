@@ -5159,9 +5159,9 @@ public class UIHandler
     {
         var data = GetLeaderboardData();
 
-        if (data.Count - 1 < LeaderboardPageID * 8)
+        if (Mathf.CeilToInt(data.Count / 10f) == LeaderboardPageID)
         {
-            ShowLeaderboard();
+            ShowLeaderboardPage(1);
             return;
         }
 
@@ -5170,10 +5170,50 @@ public class UIHandler
 
     public void BackwardLeaderboardPage()
     {
+        var data = GetLeaderboardData();
         if (LeaderboardPageID == 1)
+        {
+            ShowLeaderboardPage(Mathf.CeilToInt(data.Count / 10f));
             return;
+        }
 
         ShowLeaderboardPage(LeaderboardPageID - 1);
+    }
+
+    public void ForwardLeaderboardPageFast()
+    {
+        var data = GetLeaderboardData();
+        var maxPage = Mathf.CeilToInt(data.Count / 10f);
+        if (LeaderboardPageID + 10 >= maxPage)
+        {
+            ShowLeaderboardPage(maxPage);
+            return;
+        }
+        
+        ShowLeaderboardPage(LeaderboardPageID + 10);
+    }
+
+    public void BackwardLeaderboardPageFast()
+    {
+        var data = GetLeaderboardData();
+        if (LeaderboardPageID - 10 <= 1)
+        {
+            ShowLeaderboardPage(1);
+            return;
+        }
+        
+        ShowLeaderboardPage(LeaderboardPageID - 10);
+    }
+
+    public void ForwardLeaderboardPageEnd()
+    {
+        var data = GetLeaderboardData();
+        ShowLeaderboardPage(Mathf.CeilToInt(data.Count / 10f));
+    }
+
+    public void BackwardLeaderboardPageEnd()
+    {
+        ShowLeaderboardPage(1);
     }
 
     public void SearchLeaderboardPlayer(string input)

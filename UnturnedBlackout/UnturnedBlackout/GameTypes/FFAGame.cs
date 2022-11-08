@@ -243,6 +243,7 @@ public class FFAGame : Game
         {
             case EGamePhase.WAITING_FOR_PLAYERS:
                 var minPlayers = Location.GetMinPlayers(GameMode);
+                GameChecker.Stop();
                 if (Players.Count >= minPlayers)
                     GameStarter = Plugin.Instance.StartCoroutine(StartGame());
                 else
@@ -312,8 +313,23 @@ public class FFAGame : Game
 
         foreach (var ply in Players)
             UI.UpdateFFATopUI(ply, Players);
-
+        
         UI.OnGameCountUpdated(this);
+        
+        if (GamePhase != EGamePhase.ENDING)
+            return;
+        
+        if (Players.Count == 0)
+        {
+            GameChecker.Stop();
+            GameChecker = Plugin.Instance.StartCoroutine(CheckGame());
+        }
+        else
+        {
+            var minPlayers = Location.GetMinPlayers(GameMode);
+            foreach (var ply in Players)
+                UI.UpdateWaitingForPlayersUI(ply.GamePlayer, Players.Count, minPlayers);
+        }
     }
 
     public override void OnPlayerDead(Player player, CSteamID killer, ELimb limb, EDeathCause cause)

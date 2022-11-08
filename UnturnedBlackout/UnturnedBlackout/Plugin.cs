@@ -252,6 +252,7 @@ public class Plugin : RocketPlugin<Config>
         { "Game_Voting", "[color=red]There is voting going on in that game, can't join[/color]" },
         { "Not_Ingame", "[color=red]You aren't in any game[/color]" },
         { "Ingame", "[color=red]You are already in a game[/color]" },
+        { "Player_Not_Found", "[color=red]Player not found[/color]"},
         { "Headshot_Kill", "Headshot Kill" },
         { "Normal_Kill", "Normal Kill" },
         { "Domination_Kill", "Domination" },

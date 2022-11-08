@@ -45,6 +45,8 @@ public abstract class Game
     public Dictionary<BarricadeDrop, Coroutine> GameTurretDamager { get; set; }
 
     public Coroutine VoteEnder { get; set; }
+    public Coroutine GameChecker { get; set; }
+    
     public Coroutine KillFeedChecker { get; set; }
 
     public Game(EGameType gameMode, ArenaLocation location, bool isHardcore)
@@ -76,6 +78,7 @@ public abstract class Game
         UseableGun.OnAimingChanged_Global += OnAimingChanged;
 
         KillFeedChecker = Plugin.Instance.StartCoroutine(UpdateKillfeed());
+        GameChecker = Plugin.Instance.StartCoroutine(CheckGame());
     }
 
     public void Destroy()
@@ -94,6 +97,7 @@ public abstract class Game
         UseableGun.OnAimingChanged_Global -= OnAimingChanged;
         
         KillFeedChecker.Stop();
+        GameChecker.Stop();
     }
 
     private void OnAimingChanged(UseableGun obj)
@@ -327,6 +331,27 @@ public abstract class Game
         return Plugin.Instance.DB.Cases.TryGetValue(cases[UnityEngine.Random.Range(0, cases.Count)].CaseID, out @case) ? @case : null;
     }
 
+    public IEnumerator CheckGame()
+    {
+        yield return new WaitForSeconds(120f);
+
+        if (GamePhase != EGamePhase.WAITING_FOR_PLAYERS || GetPlayerCount() > 0)
+            yield break;
+        
+        Logging.Debug("No players in game, restarting");
+        GamePhase = EGamePhase.ENDING;
+        Plugin.Instance.UI.OnGameUpdated();
+        yield return new WaitForSeconds(1f);
+
+        if (GetPlayerCount() != 0)
+        {
+            Logging.Debug("Something weird happened when restarting the game, players are still in the game");
+            yield break;
+        }
+
+        ForceEndGame();
+    }
+    
     public void CleanMap()
     {
         foreach (var region in ItemManager.regions)
