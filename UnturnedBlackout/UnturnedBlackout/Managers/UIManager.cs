@@ -474,7 +474,7 @@ public class UIManager
             if (gameModeOption == null)
                 return;
 
-            EffectManager.sendUIEffectImageURL(LOADING_UI_KEY, transportConnection, true, "LOADING Map Image", location.ImageLink);
+            EffectManager.sendUIEffectVisibility(LOADING_UI_KEY, transportConnection, true, $"SERVER Loading Map {location.LocationName} Enabler", true);
             EffectManager.sendUIEffectImageURL(LOADING_UI_KEY, transportConnection, true, $"LOADING Gamemode Icon", gameModeOption.GamemodeIcon);
             EffectManager.sendUIEffectText(LOADING_UI_KEY, transportConnection, true, "LOADING Map TEXT", location.LocationName);
             EffectManager.sendUIEffectText(LOADING_UI_KEY, transportConnection, true, "LOADING Gamemode TEXT", Plugin.Instance.Translate($"{gameMode}_Name_Full").ToRich());
