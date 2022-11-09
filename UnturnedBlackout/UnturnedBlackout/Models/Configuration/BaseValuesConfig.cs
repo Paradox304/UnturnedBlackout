@@ -22,7 +22,6 @@ public class BaseValuesConfig
     public int LastDamageAfterHealSeconds { get; set; }
     public float HealSeconds { get; set; }
     public float HealAmount { get; set; }
-    public int GamesCount { get; set; }
     public float MovementStepsDelay { get; set; }
     public int SpawnUnavailableSeconds { get; set; }
     public int EndingLeaderboardSeconds { get; set; }
@@ -40,6 +39,10 @@ public class BaseValuesConfig
     
     public int DefaultLoadoutAmount { get; set; }
     public int PrimeLoadoutAmount { get; set; }
+
+    public int MinGamesCount { get; set; }
+    public int MaxGamesCount { get; set; }
+    public int GameThreshold { get; set; }
 
     public List<ScrollableImage> ScrollableImages { get; set; }
     public int ScrollableImageTimer { get; set; }
@@ -66,8 +69,6 @@ public class BaseValuesConfig
         HealSeconds = 0.5f;
         HealAmount = 10;
 
-        GamesCount = 9;
-
         MovementStepsDelay = 0;
 
         SpawnUnavailableSeconds = 5;
@@ -87,6 +88,10 @@ public class BaseValuesConfig
         DefaultLoadoutAmount = 5;
         PrimeLoadoutAmount = 10;
 
+        MinGamesCount = 4;
+        MaxGamesCount = 10;
+        GameThreshold = 70;
+        
         ScrollableImages = new();
         ScrollableImageTimer = 5;
     }

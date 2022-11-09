@@ -28,10 +28,6 @@ public class GameManager
     public List<int> AvailableLocations { get; set; }
 
     public Coroutine GameChecker { get; set; }
-
-    public const int MAX_GAMES = 14;
-    public const int MIN_GAMES = 4;
-    public const int GAME_COUNT_THRESHOLD = 70;
     
     public GameManager()
     {
@@ -51,7 +47,7 @@ public class GameManager
     public void StartGames()
     {
         Logging.Debug("Starting games");
-        for (var i = 1; i <= MIN_GAMES; i++)
+        for (var i = 1; i <= Config.Base.FileData.MinGamesCount; i++)
         {
             Logging.Debug($"{AvailableLocations.Count} locations available");
             var locationID = AvailableLocations[UnityEngine.Random.Range(0, AvailableLocations.Count)];
@@ -71,9 +67,9 @@ public class GameManager
             var gameMaxCount = Games.Sum(k => k.Location.GetMaxPlayers(k.GameMode));
 
             Logging.Debug($"Checking games, total games: {Games.Count}, players: {gameCount}, max count: {gameMaxCount}, threshold: {gameCount * 100 / gameMaxCount}");
-            if (gameCount * 100 / gameMaxCount < GAME_COUNT_THRESHOLD && Games.Count >= MIN_GAMES)
+            if (gameCount * 100 / gameMaxCount < Config.Base.FileData.GameThreshold && Games.Count >= Config.Base.FileData.MinGamesCount)
             {
-                Logging.Debug($"Threshold below {GAME_COUNT_THRESHOLD}%, not starting game");
+                Logging.Debug($"Threshold below {Config.Base.FileData.GameThreshold}%, not starting game");
                 Plugin.Instance.UI.OnGameUpdated();
                 return;
             }
@@ -341,17 +337,17 @@ public class GameManager
         {
             yield return new WaitForSeconds(30f);
             
-            if (Games.Count == MAX_GAMES)
+            if (Games.Count == Config.Base.FileData.MaxGamesCount)
                 continue;
             
             var gameCount = Games.Sum(k => k.GetPlayerCount());
             var gameMaxCount = Games.Sum(k => k.Location.GetMaxPlayers(k.GameMode));
 
             Logging.Debug($"Checking games, total games: {Games.Count}, players: {gameCount}, max count: {gameMaxCount}, threshold: {gameCount * 100 / gameMaxCount}");
-            if (gameCount * 100 / gameMaxCount < GAME_COUNT_THRESHOLD)
+            if (gameCount * 100 / gameMaxCount < Config.Base.FileData.GameThreshold)
                 continue;
             
-            Logging.Debug($"Percentage above {GAME_COUNT_THRESHOLD}, creating new game");
+            Logging.Debug($"Percentage above {Config.Base.FileData.GameThreshold}, creating new game");
             lock (AvailableLocations)
             {
                 Logging.Debug($"{AvailableLocations.Count} locations available");
