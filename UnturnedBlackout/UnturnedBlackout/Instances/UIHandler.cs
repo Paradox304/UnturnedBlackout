@@ -872,7 +872,7 @@ public class UIHandler
         ShowXP();
         ShowQuestCompletion();
         BuildAchievementPages();
-        SetupScrollableImages();
+        _ = Plugin.Instance.StartCoroutine(SetupScrollableImages());
     }
 
     public void ShowXP()
@@ -6440,7 +6440,7 @@ public class UIHandler
         return false;
     }
     
-    public void SetupScrollableImages()
+    public IEnumerator SetupScrollableImages()
     {
         var images = Config.Base.FileData.ScrollableImages;
         var scrollableImage = images[0];
@@ -6450,6 +6450,13 @@ public class UIHandler
         CurrentScrollableImage = 0;
         for (var i = images.Count; i <= 9; i++)
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Scrollable Dot {i}", false);
+
+        for (var i = 1; i <= images.Count - 1; i++)
+        {
+            var image = images[i];
+            EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Scrollable Setup IMAGE", image.Image);
+            yield return new WaitForSeconds(0.2f);
+        }
     }
 
     public void StartScrollableImages()
