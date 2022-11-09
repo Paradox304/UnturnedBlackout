@@ -164,7 +164,7 @@ public class FFAGame : Game
                 UI.HideFFALeaderboard(player.GamePlayer);
             }
 
-            UI.SetupPreEndingUI(player.GamePlayer, EGameType.FFA, index == 0, 0, 0, "", "");
+            UI.SetupPreEndingUI(player.GamePlayer, EGameType.FFA, index == 0, 0, 0, "", "", false);
             MatchEndSummary summary = new(player.GamePlayer, player.XP, player.StartingLevel, player.StartingXP, player.Kills, player.Deaths, player.Assists, player.HighestKillstreak, player.HighestMK, player.StartTime, GameMode, index == 0);
             summaries.Add(player.GamePlayer, summary);
 

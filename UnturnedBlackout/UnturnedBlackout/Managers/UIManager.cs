@@ -530,19 +530,21 @@ public class UIManager
 
     public void SendPreEndingUI(GamePlayer player) => EffectManager.sendUIEffect(PRE_ENDING_UI_ID, PRE_ENDING_UI_KEY, player.TransportConnection, true);
 
-    public void SetupPreEndingUI(GamePlayer player, EGameType gameMode, bool hasWon, int blueScore, int redScore, string blueName, string redName)
+    public void SetupPreEndingUI(GamePlayer player, EGameType gameMode, bool hasWon, int blueScore, int redScore, string blueName, string redName, bool isDraw)
     {
         EffectManager.sendUIEffectVisibility(PRE_ENDING_UI_KEY, player.TransportConnection, true, hasWon ? "Victory" : "Defeat", true);
+        if (isDraw)
+            EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.TransportConnection, true, "DefeatTitle", "DRAW!");
         EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.TransportConnection, true, hasWon ? "VictoryTxt" : "DefeatTxt", Plugin.Instance.Translate(hasWon ? $"{gameMode}_Victory_Desc" : $"{gameMode}_Defeat_Desc").ToRich());
 
-        if (gameMode != EGameType.FFA)
-        {
-            EffectManager.sendUIEffectVisibility(PRE_ENDING_UI_KEY, player.TransportConnection, true, "Scores", true);
-            EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.TransportConnection, true, "BlueSideScore", blueScore.ToString());
-            EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.TransportConnection, true, "BlueSideName", blueName);
-            EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.TransportConnection, true, "RedSideScore", redScore.ToString());
-            EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.TransportConnection, true, "RedSideName", redName);
-        }
+        if (gameMode == EGameType.FFA)
+            return;
+
+        EffectManager.sendUIEffectVisibility(PRE_ENDING_UI_KEY, player.TransportConnection, true, "Scores", true);
+        EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.TransportConnection, true, "BlueSideScore", blueScore.ToString());
+        EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.TransportConnection, true, "BlueSideName", blueName);
+        EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.TransportConnection, true, "RedSideScore", redScore.ToString());
+        EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.TransportConnection, true, "RedSideName", redName);
     }
 
     public void ClearPreEndingUI(GamePlayer player) => EffectManager.askEffectClearByID(PRE_ENDING_UI_ID, player.TransportConnection);
