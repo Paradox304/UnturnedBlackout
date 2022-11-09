@@ -631,7 +631,7 @@ public class DatabaseManager
                         }
                     }
                     
-                    var statText = stats.Aggregate("", (current, stat) => current + $"Stat: {stat.Key}, Amount: {stat.Value}, ");
+                    var statText = stats.Aggregate("", (current, stat) => current + $"Stat: {stat.Key} Amount: {stat.Value}, ");
 
                     Logging.Debug($"Gun: {gunName}, {statText}");
 

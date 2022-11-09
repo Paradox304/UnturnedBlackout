@@ -532,10 +532,8 @@ public class UIManager
 
     public void SetupPreEndingUI(GamePlayer player, EGameType gameMode, bool hasWon, int blueScore, int redScore, string blueName, string redName, bool isDraw)
     {
-        EffectManager.sendUIEffectVisibility(PRE_ENDING_UI_KEY, player.TransportConnection, true, hasWon ? "Victory" : "Defeat", true);
-        if (isDraw)
-            EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.TransportConnection, true, "DefeatTitle", "DRAW!");
-        EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.TransportConnection, true, hasWon ? "VictoryTxt" : "DefeatTxt", Plugin.Instance.Translate(hasWon ? $"{gameMode}_Victory_Desc" : $"{gameMode}_Defeat_Desc").ToRich());
+        EffectManager.sendUIEffectVisibility(PRE_ENDING_UI_KEY, player.TransportConnection, true, isDraw ? "Draw" : hasWon ? "Victory" : "Defeat", true);
+        EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.TransportConnection, true, isDraw ? "DrawTxt" : hasWon ? "VictoryTxt" : "DefeatTxt", Plugin.Instance.Translate(isDraw ? $"{gameMode}_Draw_Desc" : hasWon ? $"{gameMode}_Victory_Desc" : $"{gameMode}_Defeat_Desc").ToRich());
 
         if (gameMode == EGameType.FFA)
             return;
@@ -1209,6 +1207,7 @@ public class UIManager
         EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "MatchResult2", Plugin.Instance.Translate(player.Team == wonTeam ? isPlaying ? "Winning_Text" : "Victory_Text" : isPlaying ? "Losing_Text" : "Defeat_Text").ToRich());
         if (wonTeam.TeamID == -1 && !isPlaying)
             EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "MatchResult2", "DRAW!");
+        
         EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "MapName2", location.LocationName.ToUpper());
         EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "TeamNameR1", redTeam.Info.TeamName);
         EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "TeamScoreR1", redTeam.Score.ToString());
@@ -1380,6 +1379,7 @@ public class UIManager
         EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "MatchResult2", Plugin.Instance.Translate(player.Team == wonTeam ? isPlaying ? "Winning_Text" : "Victory_Text" : isPlaying ? "Losing_Text" : "Defeat_Text").ToRich());
         if (wonTeam.TeamID == -1 && !isPlaying)
             EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "MatchResult2", "DRAW!");
+        
         EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "MapName2", location.LocationName.ToUpper());
         EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "TeamNameR1", redTeam.Info.TeamName);
         EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "TeamScoreR1", redTeam.Score.ToString());
