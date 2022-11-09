@@ -247,6 +247,42 @@ public static class Utility
         return new(rewardType, numberRegexMatch);
     }
 
+    public static Dictionary<EStat, int> GetStatsFromString(string text)
+    {
+        var stats = new Dictionary<EStat, int>();
+        var letterRegex = new Regex("[A-Za-z_]+");
+        var numberRegex = new Regex("[0-9-]+");
+
+        if (string.IsNullOrEmpty(text))
+            return stats;
+        
+        foreach (var statText in text.Split(','))
+        {
+            var letterMatch = letterRegex.Match(statText);
+            if (!letterMatch.Success || !Enum.TryParse(letterMatch.Value, true, out EStat stat))
+            {
+                Logging.Debug($"Letter match not success, unable to find letters in {statText}");
+                continue;
+            }
+            
+            var numberMatch = numberRegex.Match(statText);
+            if (!numberMatch.Success || !int.TryParse(numberMatch.Value, out var value))
+            {
+                Logging.Debug($"Number match not success, unable to find numbers in {statText}");
+                continue;
+            }
+
+            if (stats.ContainsKey(stat))
+            {
+                Logging.Debug("Stat already defined in dictionary");
+                continue;
+            }
+            
+            stats.Add(stat, value);
+        }
+
+        return stats;
+    }
     public static Dictionary<int, List<Reward>> GetRankedRewardsFromString(string text)
     {
         Dictionary<int, List<Reward>> rewardsRanked = new();

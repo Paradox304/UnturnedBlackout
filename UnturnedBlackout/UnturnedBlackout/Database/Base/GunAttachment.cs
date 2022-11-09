@@ -18,7 +18,9 @@ public class GunAttachment
     public int BuyPrice { get; set; }
     public int Coins { get; set; }
 
-    public GunAttachment(ushort attachmentID, string attachmentName, string attachmentDesc, List<string> attachmentPros, List<string> attachmentCons, EAttachment attachmentType, ERarity attachmentRarity, float movementChange, float movementChangeADS, string iconLink, int buyPrice, int coins)
+    public Dictionary<EStat, int> Stats { get; set; }
+
+    public GunAttachment(ushort attachmentID, string attachmentName, string attachmentDesc, List<string> attachmentPros, List<string> attachmentCons, EAttachment attachmentType, ERarity attachmentRarity, float movementChange, float movementChangeADS, string iconLink, int buyPrice, int coins, Dictionary<EStat, int> stats)
     {
         AttachmentID = attachmentID;
         AttachmentName = attachmentName;
@@ -32,5 +34,6 @@ public class GunAttachment
         IconLink = iconLink;
         BuyPrice = buyPrice;
         Coins = coins;
+        Stats = stats;
     }
 }

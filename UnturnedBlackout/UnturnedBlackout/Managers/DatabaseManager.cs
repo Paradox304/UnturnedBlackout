@@ -267,11 +267,11 @@ public class DatabaseManager
 
             // BASE DATA
             _ = await new MySqlCommand(
-                $"CREATE TABLE IF NOT EXISTS `{GUNS}` ( `GunID` SMALLINT UNSIGNED NOT NULL , `GunName` VARCHAR(255) NOT NULL , `GunDesc` TEXT NOT NULL , `GunType` ENUM('Pistol','SMG','Shotgun','LMG','AR','SNIPER','CARBINE') NOT NULL , `GunRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `MovementChange` DECIMAL(4,3) NOT NULL , `MovementChangeADS` DECIMAL(4,3) NOT NULL , `IconLink` TEXT NOT NULL , `MagAmount` TINYINT NOT NULL , `Coins` INT NOT NULL , `BuyPrice` INT NOT NULL ,  `ScrapAmount` INT NOT NULL , `LevelRequirement` INT NOT NULL , `IsPrimary` BOOLEAN NOT NULL , `DefaultAttachments` TEXT NOT NULL , `LevelXPNeeded` TEXT NOT NULL , `LevelRewards` TEXT NOT NULL , PRIMARY KEY (`GunID`));",
+                $"CREATE TABLE IF NOT EXISTS `{GUNS}` ( `GunID` SMALLINT UNSIGNED NOT NULL , `GunName` VARCHAR(255) NOT NULL , `GunDesc` TEXT NOT NULL , `GunType` ENUM('Pistol','SMG','Shotgun','LMG','AR','SNIPER','CARBINE') NOT NULL , `GunRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `MovementChange` DECIMAL(4,3) NOT NULL , `MovementChangeADS` DECIMAL(4,3) NOT NULL , `IconLink` TEXT NOT NULL , `MagAmount` TINYINT NOT NULL , `Coins` INT NOT NULL , `BuyPrice` INT NOT NULL ,  `ScrapAmount` INT NOT NULL , `LevelRequirement` INT NOT NULL , `IsPrimary` BOOLEAN NOT NULL , `DefaultAttachments` TEXT NOT NULL , `LevelXPNeeded` TEXT NOT NULL , `LevelRewards` TEXT NOT NULL , `OverrideStats` TEXT NOT NULL , PRIMARY KEY (`GunID`));",
                 conn).ExecuteScalarAsync();
 
             _ = await new MySqlCommand(
-                $"CREATE TABLE IF NOT EXISTS `{ATTACHMENTS}` ( `AttachmentID` SMALLINT UNSIGNED NOT NULL , `AttachmentName` VARCHAR(255) NOT NULL , `AttachmentDesc` TEXT NOT NULL , `AttachmentPros` TEXT NOT NULL , `AttachmentCons` TEXT NOT NULL , `AttachmentType` ENUM('Sights','Grip','Barrel','Magazine') NOT NULL , `AttachmentRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `MovementChange` DECIMAL(4,3) NOT NULL , `MovementChangeADS` DECIMAL (4,3) NOT NULL , `IconLink` TEXT NOT NULL , `BuyPrice` INT NOT NULL , `Coins` INT NOT NULL , PRIMARY KEY (`AttachmentID`));",
+                $"CREATE TABLE IF NOT EXISTS `{ATTACHMENTS}` ( `AttachmentID` SMALLINT UNSIGNED NOT NULL , `AttachmentName` VARCHAR(255) NOT NULL , `AttachmentDesc` TEXT NOT NULL , `AttachmentPros` TEXT NOT NULL , `AttachmentCons` TEXT NOT NULL , `AttachmentType` ENUM('Sights','Grip','Barrel','Magazine') NOT NULL , `AttachmentRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `MovementChange` DECIMAL(4,3) NOT NULL , `MovementChangeADS` DECIMAL (4,3) NOT NULL , `IconLink` TEXT NOT NULL , `BuyPrice` INT NOT NULL , `Coins` INT NOT NULL , `OverrideStats` TEXT NOT NULL , PRIMARY KEY (`AttachmentID`));",
                 conn).ExecuteScalarAsync();
 
             _ = await new MySqlCommand(
@@ -287,7 +287,7 @@ public class DatabaseManager
                 conn).ExecuteScalarAsync();
 
             _ = await new MySqlCommand(
-                $"CREATE TABLE IF NOT EXISTS `{PERKS}` ( `PerkID` INT NOT NULL , `PerkName` VARCHAR(255) NOT NULL , `PerkDesc` TEXT NOT NULL , `PerkType` ENUM('1','2','3') NOT NULL , `PerkRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `IconLink` TEXT NOT NULL , `SkillType` TEXT NOT NULL , `SkillLevel` INT NOT NULL , `Coins` INT NOT NULL , `BuyPrice` INT NOT NULL , `ScrapAmount` INT  NOT NULL , `LevelRequirement` INT NOT NULL , PRIMARY KEY (`PerkID`));",
+                $"CREATE TABLE IF NOT EXISTS `{PERKS}` ( `PerkID` INT NOT NULL , `PerkName` VARCHAR(255) NOT NULL , `PerkDesc` TEXT NOT NULL , `PerkType` ENUM('1','2','3') NOT NULL , `PerkRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `IconLink` TEXT NOT NULL , `SkillType` TEXT NOT NULL , `SkillLevel` INT NOT NULL , `Coins` INT NOT NULL , `BuyPrice` INT NOT NULL , `ScrapAmount` INT  NOT NULL , `LevelRequirement` INT NOT NULL , `OverrideStats` TEXT NOT NULL , PRIMARY KEY (`PerkID`));",
                 conn).ExecuteScalarAsync();
 
             _ = await new MySqlCommand(
@@ -472,7 +472,7 @@ public class DatabaseManager
                         continue;
 
                     if (!gunAttachments.ContainsKey(attachmentID))
-                        gunAttachments.Add(attachmentID, new(attachmentID, attachmentName, attachmentDesc, attachmentPros, attachmentCons, attachmentType, rarity, movementChange, movementChangeADS, iconLink, buyPrice, coins));
+                        gunAttachments.Add(attachmentID, new(attachmentID, attachmentName, attachmentDesc, attachmentPros, attachmentCons, attachmentType, rarity, movementChange, movementChangeADS, iconLink, buyPrice, coins, new()));
                     else
                         Logging.Debug($"Found a duplicate attachment with id {attachmentID}, ignoring this");
                 }
@@ -492,7 +492,7 @@ public class DatabaseManager
 
             Logging.Debug("Reading guns from the base data");
             rdr = (MySqlDataReader)await new MySqlCommand(
-                    $"SELECT `GunID`, `GunName`, `GunDesc`, `GunType`-1, `GunRarity`, `MovementChange`, `MovementChangeADS`, `IconLink`, `MagAmount`, `Coins`, `BuyPrice`, `ScrapAmount`, `LevelRequirement`, `IsPrimary`, `DefaultAttachments`, `LevelXPNeeded`, `LevelRewards` FROM `{GUNS}`;", conn)
+                    $"SELECT `GunID`, `GunName`, `GunDesc`, `GunType`-1, `GunRarity`, `MovementChange`, `MovementChangeADS`, `IconLink`, `MagAmount`, `Coins`, `BuyPrice`, `ScrapAmount`, `LevelRequirement`, `IsPrimary`, `DefaultAttachments`, `LevelXPNeeded`, `LevelRewards`, `OverrideStats` FROM `{GUNS}`;", conn)
                 .ExecuteReaderAsync();
 
             try
@@ -584,7 +584,58 @@ public class DatabaseManager
                     }
 
                     var longshotRange = Mathf.Pow(gunAsset.damageFalloffRange * 100, 2) * 1.2f;
-                    Gun gun = new(gunID, gunName, gunDesc, gunType, rarity, movementChange, movementChangeADS, iconLink, magAmount, coins, buyPrice, scrapAmount, levelRequirement, isPrimary, defaultAttachments, rewardAttachments, rewardAttachmentsInverse, levelXPNeeded, longshotRange);
+                    var overrideStats = Utility.GetStatsFromString(rdr[17].ToString());
+
+                    var stats = new Dictionary<EStat, int>
+                    {
+                            { EStat.RANGE, overrideStats.TryGetValue(EStat.RANGE, out var range) ? range : Mathf.RoundToInt(gunAsset.damageFalloffRange * 100) },
+                            { EStat.MOBILITY, overrideStats.TryGetValue(EStat.MOBILITY, out var mobility) ? mobility : Mathf.RoundToInt(gunAsset.equipableMovementSpeedMultiplier * 50) }
+                    };
+
+                    switch (gunType)
+                    {
+                        case EGun.ASSAULT_RIFLES:
+                        case EGun.SUBMACHINE_GUNS:
+                        case EGun.LIGHT_MACHINE_GUNS:
+                        case EGun.CARBINES:
+                        {
+                            stats.Add(EStat.DAMAGE, overrideStats.TryGetValue(EStat.DAMAGE, out var damage) ? damage : (int)gunAsset.playerDamageMultiplier.damage);
+                            stats.Add(EStat.FIRE_RATE, overrideStats.TryGetValue(EStat.FIRE_RATE, out var fireRate) ? fireRate : Mathf.RoundToInt(100 - gunAsset.firerate * 10));
+                            stats.Add(EStat.RECOIL_CONTROL, overrideStats.TryGetValue(EStat.RECOIL_CONTROL, out var recoilControl) ? recoilControl : Mathf.RoundToInt(100 - (gunAsset.recoilMin_x + gunAsset.recoilMin_y + gunAsset.recoilMax_y) * 10));
+                            stats.Add(EStat.HIPFIRE_ACCURACY, overrideStats.TryGetValue(EStat.HIPFIRE_ACCURACY, out var accuracy) ? accuracy : Mathf.RoundToInt(100 - gunAsset.spreadHip * 4));
+                            break;
+                        }
+                        case EGun.SNIPER_RIFLES:
+                        {
+                            stats.Add(EStat.DAMAGE, overrideStats.TryGetValue(EStat.DAMAGE, out var damage) ? damage : (int)gunAsset.playerDamageMultiplier.damage);
+                            stats.Add(EStat.FIRE_RATE, overrideStats.TryGetValue(EStat.FIRE_RATE, out var fireRate) ? fireRate : Mathf.RoundToInt(100 - gunAsset.firerate));
+                            stats.Add(EStat.RECOIL_CONTROL, overrideStats.TryGetValue(EStat.RECOIL_CONTROL, out var recoilControl) ? recoilControl : Mathf.RoundToInt(100 - (gunAsset.recoilMin_x + gunAsset.recoilMin_y + gunAsset.recoilMax_y) * 3));
+                            stats.Add(EStat.HIPFIRE_ACCURACY, overrideStats.TryGetValue(EStat.HIPFIRE_ACCURACY, out var accuracy) ? accuracy : Mathf.RoundToInt(100 - gunAsset.spreadHip * 4));
+                            break;
+                        }
+                        case EGun.SHOTGUNS:
+                        { 
+                            stats.Add(EStat.DAMAGE, overrideStats.TryGetValue(EStat.DAMAGE, out var damage) ? damage : (int)(gunAsset.playerDamageMultiplier.damage * 8));
+                            stats.Add(EStat.FIRE_RATE, overrideStats.TryGetValue(EStat.FIRE_RATE, out var fireRate) ? fireRate : Mathf.RoundToInt(100 - gunAsset.firerate * 10));
+                            stats.Add(EStat.RECOIL_CONTROL, overrideStats.TryGetValue(EStat.RECOIL_CONTROL, out var recoilControl) ? recoilControl : Mathf.RoundToInt(100 - (gunAsset.recoilMin_x + gunAsset.recoilMin_y + gunAsset.recoilMax_y) * 3));
+                            stats.Add(EStat.HIPFIRE_ACCURACY, overrideStats.TryGetValue(EStat.HIPFIRE_ACCURACY, out var accuracy) ? accuracy : Mathf.RoundToInt(100 - gunAsset.spreadHip * 5));
+                            break;
+                        }
+                        case EGun.PISTOL:
+                        {
+                            stats.Add(EStat.DAMAGE, overrideStats.TryGetValue(EStat.DAMAGE, out var damage) ? damage : (int)gunAsset.playerDamageMultiplier.damage);
+                            stats.Add(EStat.FIRE_RATE, overrideStats.TryGetValue(EStat.FIRE_RATE, out var fireRate) ? fireRate : Mathf.RoundToInt(100 - gunAsset.firerate * 10));
+                            stats.Add(EStat.RECOIL_CONTROL, overrideStats.TryGetValue(EStat.RECOIL_CONTROL, out var recoilControl) ? recoilControl : Mathf.RoundToInt(100 - (gunAsset.recoilMin_x + gunAsset.recoilMin_y + gunAsset.recoilMax_y) * 5));
+                            stats.Add(EStat.HIPFIRE_ACCURACY, overrideStats.TryGetValue(EStat.HIPFIRE_ACCURACY, out var accuracy) ? accuracy : Mathf.RoundToInt(100 - gunAsset.spreadHip * 4));
+                            break;
+                        }
+                    }
+                    
+                    var statText = stats.Aggregate("", (current, stat) => current + $"Stat: {stat.Key}, Amount: {stat.Value}, ");
+
+                    Logging.Debug($"Gun: {gunName}, {statText}");
+
+                    Gun gun = new(gunID, gunName, gunDesc, gunType, rarity, movementChange, movementChangeADS, iconLink, magAmount, coins, buyPrice, scrapAmount, levelRequirement, isPrimary, defaultAttachments, rewardAttachments, rewardAttachmentsInverse, levelXPNeeded, longshotRange, stats);
                     if (!guns.ContainsKey(gunID))
                         guns.Add(gunID, gun);
                     else
@@ -664,8 +715,8 @@ public class DatabaseManager
                         Logging.Debug($"Found a duplicate skin with id {id}, ignoring this");
                         continue;
                     }
-                    else
-                        gunSkinsSearchByID.Add(id, skin);
+
+                    gunSkinsSearchByID.Add(id, skin);
 
                     if (gunSkinsSearchByGunID.TryGetValue(gunID, out var skins))
                     {
@@ -674,8 +725,8 @@ public class DatabaseManager
                             Logging.Debug($"Found a duplicate skin with id {id}, ignoring this");
                             continue;
                         }
-                        else
-                            skins.Add(skin);
+
+                        skins.Add(skin);
                     }
                     else
                         gunSkinsSearchByGunID.Add(gunID, new() { skin });
@@ -995,7 +1046,8 @@ public class DatabaseManager
                     if (!int.TryParse(rdr[11].ToString(), out var levelRequirement))
                         continue;
 
-                    Perk perk = new(perkID, perkName, perkDesc, perkType, rarity, iconLink, skillType, skillLevel, coins, buyPrice, scrapAmount, levelRequirement);
+                    var stats = Utility.GetStatsFromString(rdr[12].ToString());
+                    Perk perk = new(perkID, perkName, perkDesc, perkType, rarity, iconLink, skillType, skillLevel, coins, buyPrice, scrapAmount, levelRequirement, stats);
                     if (!perks.ContainsKey(perkID))
                         perks.Add(perkID, perk);
                     else

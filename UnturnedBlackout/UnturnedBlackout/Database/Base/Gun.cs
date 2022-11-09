@@ -26,10 +26,9 @@ public class Gun
 
     // VANILLA STATS
     public float LongshotRange { get; set; }
+    public Dictionary<EStat, int> Stats { get; set; }
 
-    public Gun(
-        ushort gunID, string gunName, string gunDesc, EGun gunType, ERarity gunRarity, float movementChange, float movementChangeADS, string iconLink, int magAmount, int coins, int buyPrice, int scrapAmount, int levelRequirement, bool isPrimary, List<GunAttachment> defaultAttachments,
-        Dictionary<int, GunAttachment> rewardAttachments, Dictionary<GunAttachment, int> rewardAttachmentsInverse, List<int> levelXPNeeded, float longshotRange)
+    public Gun(ushort gunID, string gunName, string gunDesc, EGun gunType, ERarity gunRarity, float movementChange, float movementChangeADS, string iconLink, int magAmount, int coins, int buyPrice, int scrapAmount, int levelRequirement, bool isPrimary, List<GunAttachment> defaultAttachments, Dictionary<int, GunAttachment> rewardAttachments, Dictionary<GunAttachment, int> rewardAttachmentsInverse, List<int> levelXPNeeded, float longshotRange, Dictionary<EStat, int> stats)
     {
         GunID = gunID;
         GunName = gunName;
@@ -50,6 +49,7 @@ public class Gun
         RewardAttachmentsInverse = rewardAttachmentsInverse;
         LevelXPNeeded = levelXPNeeded;
         LongshotRange = longshotRange;
+        Stats = stats;
     }
 
     public int GetCoins(int currentLevel)

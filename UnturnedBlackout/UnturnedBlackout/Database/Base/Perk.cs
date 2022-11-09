@@ -1,4 +1,5 @@
-﻿using UnturnedBlackout.Enums;
+﻿using System.Collections.Generic;
+using UnturnedBlackout.Enums;
 
 namespace UnturnedBlackout.Database.Base;
 
@@ -16,8 +17,10 @@ public class Perk
     public int BuyPrice { get; set; }
     public int ScrapAmount { get; set; }
     public int LevelRequirement { get; set; }
+    
+    public Dictionary<EStat, int> Stats { get; set; }
 
-    public Perk(int perkID, string perkName, string perkDesc, int perkType, ERarity perkRarity, string iconLink, string skillType, int skillLevel, int coins, int buyPrice, int scrapAmount, int levelRequirement)
+    public Perk(int perkID, string perkName, string perkDesc, int perkType, ERarity perkRarity, string iconLink, string skillType, int skillLevel, int coins, int buyPrice, int scrapAmount, int levelRequirement, Dictionary<EStat, int> stats)
     {
         PerkID = perkID;
         PerkName = perkName;
@@ -31,6 +34,7 @@ public class Perk
         BuyPrice = buyPrice;
         ScrapAmount = scrapAmount;
         LevelRequirement = levelRequirement;
+        Stats = stats;
     }
 
     public int GetCoins(int currentLevel)

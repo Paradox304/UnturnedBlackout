@@ -260,6 +260,7 @@
         <Compile Include="Enums\EQuestType.cs" />
         <Compile Include="Enums\ERarity.cs" />
         <Compile Include="Enums\ERewardType.cs" />
+        <Compile Include="Enums\EStat.cs" />
         <Compile Include="Enums\ETeam.cs" />
         <Compile Include="Enums\EUIPage.cs" />
         <Compile Include="Enums\EUnboxingPage.cs" />
