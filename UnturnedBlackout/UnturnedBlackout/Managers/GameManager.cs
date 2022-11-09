@@ -31,7 +31,7 @@ public class GameManager
 
     public const int MAX_GAMES = 14;
     public const int MIN_GAMES = 4;
-    public const int GAME_COUNT_THRESHOLD = 59;
+    public const int GAME_COUNT_THRESHOLD = 70;
     
     public GameManager()
     {
