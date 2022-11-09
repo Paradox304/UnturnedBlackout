@@ -96,12 +96,14 @@ public class CTFGame : Game
             player.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(0);
             UI.ShowCountdownUI(player.GamePlayer);
             SpawnPlayer(player);
-
-            if (player.GamePlayer.HasMidgameLoadout)
-                continue;
-            
-            UI.ShowMidgameLoadoutUI(player.GamePlayer);
-            player.GamePlayer.HasMidgameLoadout = true;
+            if (player.GamePlayer.IsPendingLoadoutChange)
+            {
+                TaskDispatcher.QueueOnMainThread(() =>
+                {
+                    Plugin.Instance.Loadout.GiveLoadout(player.GamePlayer);
+                    player.GamePlayer.IsPendingLoadoutChange = false;
+                });
+            }
         }
 
         for (var seconds = Config.CTF.FileData.StartSeconds; seconds >= 0; seconds--)
