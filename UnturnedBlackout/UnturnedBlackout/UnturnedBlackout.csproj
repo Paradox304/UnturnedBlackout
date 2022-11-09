@@ -195,6 +195,7 @@
         <Compile Include="Commands\GiveSeasonalRewardCommand.cs" />
         <Compile Include="Commands\LeaveCommand.cs" />
         <Compile Include="Commands\MuteCommand.cs" />
+        <Compile Include="Commands\SetKSCommand.cs" />
         <Compile Include="Commands\SetLobbyCommand.cs" />
         <Compile Include="Commands\TDMSPCommand.cs" />
         <Compile Include="Commands\UnmuteCommand.cs" />

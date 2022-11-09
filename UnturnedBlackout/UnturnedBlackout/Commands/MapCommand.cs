@@ -38,9 +38,9 @@ public class MapCommand : IRocketCommand
     }
 
     public AllowedCaller AllowedCaller => AllowedCaller.Player;
-    public string Name => "map";
+    public string Name => "mapcheck";
     public string Help => "Check which map the player is in";
-    public string Syntax => "/map (PlayerName)";
+    public string Syntax => "/mapcheck (PlayerName)";
     public List<string> Aliases => new();
     public List<string> Permissions => new();
 }

@@ -65,6 +65,12 @@ public class FFAGame : Game
             player.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(0);
             UI.ShowCountdownUI(player.GamePlayer);
             SpawnPlayer(player);
+
+            if (player.GamePlayer.HasMidgameLoadout)
+                continue;
+            
+            UI.ShowMidgameLoadoutUI(player.GamePlayer);
+            player.GamePlayer.HasMidgameLoadout = true;
         }
 
         for (var seconds = Config.FFA.FileData.StartSeconds; seconds >= 0; seconds--)
