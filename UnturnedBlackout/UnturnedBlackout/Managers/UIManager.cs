@@ -1085,9 +1085,7 @@ public class UIManager
         var bluePlayers = players.Where(k => k.Team.TeamID == (byte)ETeam.BLUE).ToList();
         var redPlayers = players.Where(k => k.Team.TeamID == (byte)ETeam.RED).ToList();
 
-        EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "MatchResult0", Plugin.Instance.Translate(player.Team == wonTeam ? isPlaying ? "Winning_Text" : "Victory_Text" : isPlaying ? "Losing_Text" : "Defeat_Text").ToRich());
-        if (wonTeam.TeamID == -1 && !isPlaying)
-            EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "MatchResult0", "DRAW!");
+        EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "MatchResult0", Plugin.Instance.Translate(wonTeam.TeamID == -1 ? isPlaying ? "Drawing_Text" : "Draw_Text" : player.Team == wonTeam ? isPlaying ? "Winning_Text" : "Victory_Text" : isPlaying ? "Losing_Text" : "Defeat_Text").ToRich());
 
         EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "MapName0", location.LocationName.ToUpper());
         EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "TeamNameR0", redTeam.Info.TeamName);
@@ -1204,10 +1202,8 @@ public class UIManager
         var bluePlayers = players.Where(k => k.Team.TeamID == (byte)ETeam.BLUE).ToList();
         var redPlayers = players.Where(k => k.Team.TeamID == (byte)ETeam.RED).ToList();
 
-        EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "MatchResult2", Plugin.Instance.Translate(player.Team == wonTeam ? isPlaying ? "Winning_Text" : "Victory_Text" : isPlaying ? "Losing_Text" : "Defeat_Text").ToRich());
-        if (wonTeam.TeamID == -1 && !isPlaying)
-            EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "MatchResult2", "DRAW!");
-        
+        EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "MatchResult2", Plugin.Instance.Translate(wonTeam.TeamID == -1 ? isPlaying ? "Drawing_Text" : "Draw_Text" : player.Team == wonTeam ? isPlaying ? "Winning_Text" : "Victory_Text" : isPlaying ? "Losing_Text" : "Defeat_Text").ToRich());
+
         EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "MapName2", location.LocationName.ToUpper());
         EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "TeamNameR1", redTeam.Info.TeamName);
         EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "TeamScoreR1", redTeam.Score.ToString());
@@ -1376,7 +1372,7 @@ public class UIManager
         var bluePlayers = players.Where(k => k.Team.TeamID == (byte)ETeam.BLUE).ToList();
         var redPlayers = players.Where(k => k.Team.TeamID == (byte)ETeam.RED).ToList();
 
-        EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "MatchResult2", Plugin.Instance.Translate(player.Team == wonTeam ? isPlaying ? "Winning_Text" : "Victory_Text" : isPlaying ? "Losing_Text" : "Defeat_Text").ToRich());
+        EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "MatchResult2", Plugin.Instance.Translate(wonTeam.TeamID == -1 ? isPlaying ? "Drawing_Text" : "Draw_Text" : player.Team == wonTeam ? isPlaying ? "Winning_Text" : "Victory_Text" : isPlaying ? "Losing_Text" : "Defeat_Text").ToRich());
         if (wonTeam.TeamID == -1 && !isPlaying)
             EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "MatchResult2", "DRAW!");
         
