@@ -10,19 +10,11 @@ namespace UnturnedBlackout.Patches;
 public static class DamagePatch
 {
     [HarmonyPrefix, UsedImplicitly]
-    public static bool Prefix(ref DamagePlayerParameters parameters, ref EPlayerKill kill)
+    public static void Prefix(DamagePlayerParameters parameters, ref EPlayerKill kill)
     {
-        if (parameters.player == null || parameters.player.life.isDead)
-            return true;
-
         Logger.Log($"PRE DAMAGE PLAYER");
         Logger.Log($"Kill: {kill}");
-        Logger.Log($"Victim: {parameters.player.channel.owner.playerID.characterName}, killer: {PlayerTool.getPlayer(parameters.killer)?.channel.owner.playerID.characterName ?? "None"}, damage: {parameters.damage}, times: {parameters.times}, armor: {DamageTool.getPlayerArmor(parameters.limb, parameters.player)}, Apply global armor: {parameters.applyGlobalArmorMultiplier}, Global Armor: {Provider.modeConfigData.Players.Armor_Multiplier}");
-        var shouldAllow = true;
-        foreach (var game in Plugin.Instance.Game.Games)
-            game.OnPlayerDamage(ref parameters, ref shouldAllow);
-
-        return shouldAllow;
+        Logger.Log($"Victim: {parameters.player.channel.owner.playerID.characterName}, Victim's Pos: {parameters.player.transform.position}, killer: {PlayerTool.getPlayer(parameters.killer)?.channel.owner.playerID.characterName ?? "None"}, damage: {parameters.damage}, times: {parameters.times}, armor: {DamageTool.getPlayerArmor(parameters.limb, parameters.player)}, Apply global armor: {parameters.applyGlobalArmorMultiplier}, Global Armor: {Provider.modeConfigData.Players.Armor_Multiplier}");
     }
 
     [HarmonyPostfix, UsedImplicitly]
@@ -30,6 +22,17 @@ public static class DamagePatch
     {
         Logger.Log($"POST DAMAGE PLAYER");
         Logger.Log($"Kill: {kill}");
-        Logger.Log($"Victim: {parameters.player.channel.owner.playerID.characterName}, killer: {PlayerTool.getPlayer(parameters.killer)?.channel.owner.playerID.characterName ?? "None"}, damage: {parameters.damage}, times: {parameters.times}, armor: {DamageTool.getPlayerArmor(parameters.limb, parameters.player)}, Apply global armor: {parameters.applyGlobalArmorMultiplier}, Global Armor: {Provider.modeConfigData.Players.Armor_Multiplier}");
+        Logger.Log($"Victim: {parameters.player.channel.owner.playerID.characterName}, Victim's Pos: {parameters.player.transform.position}, killer: {PlayerTool.getPlayer(parameters.killer)?.channel.owner.playerID.characterName ?? "None"}, damage: {parameters.damage}, times: {parameters.times}, armor: {DamageTool.getPlayerArmor(parameters.limb, parameters.player)}, Apply global armor: {parameters.applyGlobalArmorMultiplier}, Global Armor: {Provider.modeConfigData.Players.Armor_Multiplier}");
+    }
+}
+
+[HarmonyPatch(typeof(Grenade), nameof(Grenade.Explode))]
+public static class GrenadeExplodePatch
+{
+    [HarmonyPrefix, UsedImplicitly]
+    public static void Prefix(Grenade __instance)
+    {
+        Logger.Log($"PRE GRENADE EXPLODE");
+        Logger.Log($"Range: {__instance.range}, Player Damage: {__instance.playerDamage}, Point: {__instance.transform.position}");
     }
 }
