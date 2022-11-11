@@ -592,10 +592,10 @@ public class DatabaseManager
 
                     var stats = new Dictionary<EStat, int>
                     {
-                            { EStat.RANGE, overrideStats.TryGetValue(EStat.RANGE, out var range) ? range : Mathf.RoundToInt(gunAsset.damageFalloffRange * 100) },
-                            { EStat.MOBILITY, overrideStats.TryGetValue(EStat.MOBILITY, out var mobility) ? mobility : Mathf.RoundToInt(gunAsset.equipableMovementSpeedMultiplier * 50) }
+                        { EStat.RANGE, overrideStats.TryGetValue(EStat.RANGE, out var range) ? range : Mathf.RoundToInt(gunAsset.damageFalloffRange * 100) },
+                        { EStat.MOBILITY, overrideStats.TryGetValue(EStat.MOBILITY, out var mobility) ? mobility : Mathf.RoundToInt(gunAsset.equipableMovementSpeedMultiplier * 50) }
                     };
-
+                    
                     switch (gunType)
                     {
                         case EGun.ASSAULT_RIFLES:

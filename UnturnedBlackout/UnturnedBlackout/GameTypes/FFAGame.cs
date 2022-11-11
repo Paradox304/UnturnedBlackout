@@ -653,9 +653,8 @@ public class FFAGame : Game
 
         var damageIncreasePercent = kPlayer.GamePlayer.ActiveLoadout.PerksSearchByType.TryGetValue(damageIncreasePerkName, out var damageIncreaserPerk) ? (float)damageIncreaserPerk.Perk.SkillLevel / 100 : 0f;
         parameters.damage += damageIncreasePercent * parameters.damage;
-
-        /*
-        if (parameters.cause == EDeathCause.GRENADE && kPlayer != player)
+        
+        /*if (parameters.cause == EDeathCause.GRENADE && kPlayer != player)
         {
             var times = parameters.times;
             if (parameters.respectArmor)

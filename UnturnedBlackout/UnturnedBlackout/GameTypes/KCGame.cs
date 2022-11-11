@@ -701,7 +701,7 @@ public class KCGame : Game
 
         parameters.damage += (kPlayer.GamePlayer.ActiveLoadout.PerksSearchByType.TryGetValue(damageIncreasePerkName, out var damageIncreaserPerk) ? (float)damageIncreaserPerk.Perk.SkillLevel / 100 : 0f) * parameters.damage;
 
-        if (parameters.cause == EDeathCause.GRENADE && kPlayer != player)
+        /*if (parameters.cause == EDeathCause.GRENADE && kPlayer != player)
         {
             var times = parameters.times;
             if (parameters.respectArmor)
@@ -719,7 +719,7 @@ public class KCGame : Game
                 Logging.Debug($"Condition fulfilled, send hit xp for {Config.Medals.FileData.LethalHitXP}");
                 UI.ShowXPUI(kPlayer.GamePlayer, Config.Medals.FileData.LethalHitXP, Plugin.Instance.Translate("Lethal_Hit"));
             }
-        }
+        }*/
 
         if (kPlayer.GamePlayer.HasSpawnProtection)
         {

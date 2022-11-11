@@ -67,7 +67,7 @@ public abstract class Game
         PlayerLife.OnSelectingRespawnPoint += OnPlayerRespawning;
         UnturnedPlayerEvents.OnPlayerRevive += OnPlayerRevive;
         UnturnedPlayerEvents.OnPlayerInventoryAdded += OnPlayerPickupItem;
-        DamageTool.damagePlayerRequested += OnPlayerDamaged;
+        //DamageTool.damagePlayerRequested += OnPlayerDamaged;
         ChatManager.onChatted += OnChatted;
         ItemManager.onTakeItemRequested += OnTakeItem;
         UseableThrowable.onThrowableSpawned += OnThrowableSpawned;
@@ -87,7 +87,7 @@ public abstract class Game
         PlayerLife.OnSelectingRespawnPoint -= OnPlayerRespawning;
         UnturnedPlayerEvents.OnPlayerRevive -= OnPlayerRevive;
         UnturnedPlayerEvents.OnPlayerInventoryAdded -= OnPlayerPickupItem;
-        DamageTool.damagePlayerRequested -= OnPlayerDamaged;
+        //DamageTool.damagePlayerRequested -= OnPlayerDamaged;
         ChatManager.onChatted -= OnChatted;
         ItemManager.onTakeItemRequested -= OnTakeItem;
         UseableThrowable.onThrowableSpawned -= OnThrowableSpawned;
