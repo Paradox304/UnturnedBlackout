@@ -654,6 +654,7 @@ public class FFAGame : Game
         var damageIncreasePercent = kPlayer.GamePlayer.ActiveLoadout.PerksSearchByType.TryGetValue(damageIncreasePerkName, out var damageIncreaserPerk) ? (float)damageIncreaserPerk.Perk.SkillLevel / 100 : 0f;
         parameters.damage += damageIncreasePercent * parameters.damage;
 
+        /*
         if (parameters.cause == EDeathCause.GRENADE && kPlayer != player)
         {
             var times = parameters.times;
@@ -672,7 +673,7 @@ public class FFAGame : Game
                 Logging.Debug($"Condition fulfilled, send hit xp for {Config.Medals.FileData.LethalHitXP}");
                 UI.ShowXPUI(kPlayer.GamePlayer, Config.Medals.FileData.LethalHitXP, Plugin.Instance.Translate("Lethal_Hit"));
             }
-        }
+        }*/
 
         if (!kPlayer.GamePlayer.HasSpawnProtection)
             return;
