@@ -546,6 +546,24 @@ public static class Utility
         ERarity.GREEN => "65280",
         var _ => throw new ArgumentOutOfRangeException(nameof(rarity), rarity, "Rarity is not as expected")
     };
+
+    public static string ToUIName(this EStat stat) => stat switch
+    {
+        EStat.RANGE => "Range",
+        EStat.DAMAGE => "Damage",
+        EStat.FIRE_RATE => "Fire Rate",
+        EStat.MOBILITY =>  "Mobility",
+        EStat.RELOAD_SPEED => "Reload",
+        EStat.RECOIL_CONTROL => "Recoil",
+        EStat.HIPFIRE_ACCURACY => "Accuracy",
+        var _ => throw new ArgumentOutOfRangeException(nameof(stat), stat, "EStat not as expected")
+    };
+
+    public static int GetMaxAmount(this EStat stat) => stat switch
+    {
+        EStat.DAMAGE => 120,
+        var _ => 100
+    };
     
     public static string ToFriendlyName(this ERarity rarity) => rarity switch
     {

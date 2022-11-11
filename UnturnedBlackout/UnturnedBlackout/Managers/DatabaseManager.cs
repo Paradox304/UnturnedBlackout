@@ -436,7 +436,7 @@ public class DatabaseManager
 
             Dictionary<int, List<AnimationItemUnlock>> itemsSearchByLevel = new();
 
-            var rdr = (MySqlDataReader)await new MySqlCommand($"SELECT `AttachmentID`, `AttachmentName`, `AttachmentDesc`, `AttachmentPros` , `AttachmentCons` , `AttachmentType`-1, `AttachmentRarity`, `MovementChange`, `MovementChangeADS`, `IconLink`, `BuyPrice`, `Coins` FROM `{ATTACHMENTS}`;",
+            var rdr = (MySqlDataReader)await new MySqlCommand($"SELECT `AttachmentID`, `AttachmentName`, `AttachmentDesc`, `AttachmentPros` , `AttachmentCons` , `AttachmentType`-1, `AttachmentRarity`, `MovementChange`, `MovementChangeADS`, `IconLink`, `BuyPrice`, `Coins`, `OverrideStats` FROM `{ATTACHMENTS}`;",
                 conn).ExecuteReaderAsync();
 
             try
@@ -470,7 +470,11 @@ public class DatabaseManager
 
                     if (!int.TryParse(rdr[11].ToString(), out var coins))
                         continue;
-
+                    
+                    var overrideStats = Utility.GetStatsFromString(rdr[12].ToString());
+                    var stats = new Dictionary<EStat, int>();
+                    
+                    
                     if (!gunAttachments.ContainsKey(attachmentID))
                         gunAttachments.Add(attachmentID, new(attachmentID, attachmentName, attachmentDesc, attachmentPros, attachmentCons, attachmentType, rarity, movementChange, movementChangeADS, iconLink, buyPrice, coins, new()));
                     else

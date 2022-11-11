@@ -161,7 +161,7 @@ public class Plugin : RocketPlugin<Config>
         {
             yield return new WaitForSeconds(60);
 
-            //LightingManager.time = (uint)(LightingManager.cycle * LevelLighting.transition);
+            LightingManager.time = (uint)(LightingManager.cycle * LevelLighting.transition);
             Logging.Debug($"TPS: {Provider.debugTPS}", ConsoleColor.Yellow);
             Logging.Debug($"UPS: {Provider.debugUPS}", ConsoleColor.Yellow);
         }
