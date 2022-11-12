@@ -275,7 +275,6 @@ public class GameManager
         player.Player.enablePluginWidgetFlag(EPluginWidgetFlags.Modal);
         player.Player.inventory.ClearInventory();
         player.Player.life.serverModifyHealth(100);
-        player.GodMode = true;
         TaskDispatcher.QueueOnMainThread(() =>
         {
             player.Player.life.ServerRespawn(false);

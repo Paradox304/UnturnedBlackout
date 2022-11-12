@@ -350,7 +350,7 @@ public class Plugin : RocketPlugin<Config>
     public BPManager BP { get; set; }
     private static Harmony Harmony { get; set; }
     public static Plugin Instance { get; private set; }
-
+    
     private static int[][] _allowedColors = new[]
     {
         new[] { 244, 230, 210 }, new[] { 217, 202, 180 }, new[] { 190, 165, 130 }, new[] { 157, 136, 107 }, new[] { 148, 118, 75 }, new[] { 112, 96, 73 }, new[] { 83, 71, 54 }, new[] { 75, 61, 49 }, new[] { 51, 44, 37 }, new[] { 35, 31, 28 }
