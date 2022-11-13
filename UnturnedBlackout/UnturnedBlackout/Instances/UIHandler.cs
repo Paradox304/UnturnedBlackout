@@ -3913,7 +3913,7 @@ public class UIHandler
         {
             // Attachment is equipped
             gun.GetCurrentStats(loadout, attachment.Attachment.AttachmentType, out var finalStats);
-            for (var i = 0; i <= 6; i++)
+            for (var i = 0; i <= 7; i++)
             {
                 var stat = (EStat)i;
                 var uiName = stat.ToUIName();
