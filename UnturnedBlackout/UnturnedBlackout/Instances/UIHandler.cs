@@ -3786,42 +3786,79 @@ public class UIHandler
         SendRarityName("SERVER Item Rarity TEXT", gun.Gun.GunRarity);
         
         // Stats
-        foreach (var stat in gun.Gun.Stats)
+        if ((LoadoutPage == ELoadoutPage.PRIMARY && loadout.Primary == gun) || (LoadoutPage == ELoadoutPage.SECONDARY && loadout.Secondary == gun))
         {
-            // Is gun equipped?
-            if ((LoadoutPage == ELoadoutPage.PRIMARY && loadout.Primary == gun) || (LoadoutPage == ELoadoutPage.SECONDARY && loadout.Secondary == gun))
+            gun.GetCurrentStats(loadout, out var defaultStats, out var finalStats, out var attachmentsCompare, out var perksCompare);
+            foreach (var stat in defaultStats)
             {
-                
-                continue;
+                var uiName = stat.Key.ToUIName();
+                var maxAmount = stat.Key.GetMaxAmount();
+                var initialStat = stat.Value;
+                var finalStat = finalStats.TryGetValue(stat.Key, out var finalStatValue) ? finalStatValue : initialStat;
+                var attachmentCompare = attachmentsCompare.TryGetValue(stat.Key, out var attachmentStatValue) ? attachmentStatValue : 0;
+                var perkCompare = perksCompare.TryGetValue(stat.Key, out var perkCompareValue) ? perkCompareValue : 0;
+                var bracketText = $"[{initialStat}{(attachmentCompare != 0 ? $" {(attachmentCompare > 0 ? "+" : "-")} <color=orange>{Math.Abs(attachmentCompare)}</color>" : "")}{(perkCompare != 0 ? $" {(perkCompare > 0 ? "+" : "-")} <color=blue>{Math.Abs(perkCompare)}</color>" : "")}]";
+                if (finalStat == initialStat)
+                {
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Colored Fill Enabler 0", true);
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Normal Fill Enabler {Math.Min(100, initialStat * 100 / maxAmount)}", true);
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Number Text", initialStat.ToString());
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Bracket Text", " ");
+                }
+                else if (finalStat > initialStat)
+                {
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Colored Fill Enabler {Math.Min(100, finalStat * 100 / maxAmount)}", true);
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Normal Fill Enabler {Math.Min(100, initialStat * 100 / maxAmount)}", true);
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Slider Green Enabler", true);
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Number Text", finalStat.ToString());
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Bracket Text", bracketText);
+                }
+                else
+                {
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Colored Fill Enabler {Math.Min(100, initialStat * 100 / maxAmount)}", true);
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Normal Fill Enabler {Math.Min(100, finalStat * 100 / maxAmount)}", true);
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Slider Red Enabler", true);
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Number Text", finalStat.ToString());
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Bracket Text", bracketText);
+                }
             }
-
-            var uiName = stat.Key.ToUIName();
-            var maxAmount = stat.Key.GetMaxAmount();
+        }
+        else
+        {
             var currentGun = LoadoutPage == ELoadoutPage.PRIMARY ? loadout.Primary : loadout.Secondary;
-            var currentStat = currentGun.Gun.Stats.TryGetValue(stat.Key, out var currentStatValue) ? currentStatValue : 0;
-            var newStat = stat.Value;
-            var compareStat = newStat - currentStat;
-            Logging.Debug($"Stat: {stat.Key}, Current Stat: {currentStat}, New Stat: {newStat}, Compare Stat: {compareStat}, UI Name: {uiName}, Max Amount: {maxAmount}");
-            if (compareStat == 0)
+            var equippedStats = currentGun.GetDefaultStats();
+            var newStats = gun.GetDefaultStats();
+            foreach (var stat in newStats)
             {
-                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Colored Fill Enabler 0", true);
-                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Normal Fill Enabler {currentStat * 100 / maxAmount}", true);
-                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Number Text", currentStat.ToString());
-                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Bracket Text", " ");
-            } else if (compareStat > 0)
-            {
-                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Colored Fill Enabler {(currentStat + compareStat) * 100 / maxAmount}", true);
-                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Normal Fill Enabler {currentStat * 100 / maxAmount}", true);
-                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Slider Green Enabler", true);
-                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Number Text", newStat.ToString());
-                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Bracket Text", $"[{currentStat} + <color=#31AB40>{compareStat}</color>]");
-            } else
-            {                
-                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Colored Fill Enabler {currentStat * 100 / maxAmount}", true);
-                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Normal Fill Enabler {(currentStat + compareStat) * 100 / maxAmount}", true);
-                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Slider Red Enabler", true);
-                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Number Text", newStat.ToString());
-                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Bracket Text", $"[{currentStat} - <color=#CE3036>{Math.Abs(compareStat)}</color>]");
+                var uiName = stat.Key.ToUIName();
+                var maxAmount = stat.Key.GetMaxAmount();
+                var currentStat = equippedStats.TryGetValue(stat.Key, out var currentStatValue) ? currentStatValue : 0;
+                var newStat = stat.Value;
+                var compareStat = newStat - currentStat;
+                Logging.Debug($"Stat: {stat.Key}, Current Stat: {currentStat}, New Stat: {newStat}, Compare Stat: {compareStat}, UI Name: {uiName}, Max Amount: {maxAmount}");
+                if (compareStat == 0)
+                {
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Colored Fill Enabler 0", true);
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Normal Fill Enabler {Math.Min(100, currentStat * 100 / maxAmount)}", true);
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Number Text", currentStat.ToString());
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Bracket Text", " ");
+                }
+                else if (compareStat > 0)
+                {
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Colored Fill Enabler {Math.Min(100, newStat * 100 / maxAmount)}", true);
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Normal Fill Enabler {Math.Min(100, currentStat * 100 / maxAmount)}", true);
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Slider Green Enabler", true);
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Number Text", newStat.ToString());
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Bracket Text", $"[{currentStat} + <color=#31AB40>{compareStat}</color>]");
+                }
+                else
+                {
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Colored Fill Enabler {Math.Min(100, currentStat * 100 / maxAmount)}", true);
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Normal Fill Enabler {Math.Min(100, newStat * 100 / maxAmount)}", true);
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Slider Red Enabler", true);
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Number Text", newStat.ToString());
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Bracket Text", $"[{currentStat} - <color=#CE3036>{Math.Abs(compareStat)}</color>]");
+                }
             }
         }
     }

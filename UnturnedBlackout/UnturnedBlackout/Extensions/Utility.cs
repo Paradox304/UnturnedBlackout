@@ -604,15 +604,12 @@ public static class Utility
         EStat.RELOAD_SPEED => "Reload",
         EStat.RECOIL_CONTROL => "Recoil",
         EStat.HIPFIRE_ACCURACY => "Accuracy",
+        EStat.AMMO => "Ammo",
         var _ => throw new ArgumentOutOfRangeException(nameof(stat), stat, "EStat not as expected")
     };
 
-    public static int GetMaxAmount(this EStat stat) => stat switch
-    {
-        EStat.DAMAGE => 120,
-        var _ => 100
-    };
-    
+    public static int GetMaxAmount(this EStat stat) => 100;
+
     public static string ToFriendlyName(this ERarity rarity) => rarity switch
     {
         ERarity.COMMON => "Common",
