@@ -283,6 +283,48 @@ public static class Utility
 
         return stats;
     }
+    
+    public static Dictionary<EStat, float> GetStatMultipliersFromString(string text)
+    {
+        var stats = new Dictionary<EStat, float>();
+        var letterRegex = new Regex("[A-Za-z_]+");
+        var numberRegex = new Regex("[0-9-.]+");
+
+        if (string.IsNullOrEmpty(text))
+            return stats;
+        
+        foreach (var statText in text.Split(','))
+        {
+            var letterMatch = letterRegex.Match(statText);
+            if (!letterMatch.Success || !Enum.TryParse(letterMatch.Value, true, out EStat stat))
+            {
+                Logging.Debug($"Letter match not success, unable to find letters in {statText}");
+                continue;
+            }
+            
+            if (stats.ContainsKey(stat))
+            {
+                Logging.Debug("Stat already defined in dictionary");
+                continue;
+            }
+            
+            var numberMatch = numberRegex.Match(statText);
+            var numberText = numberMatch.Value;
+            if (numberText[0] == '.')
+                numberText = numberText.Remove(0, 1);
+
+            if (!numberMatch.Success || !float.TryParse(numberText, out var value))
+            {
+                Logging.Debug($"Float match not success, unable to find numbers in {numberText}");
+                continue;
+            }
+            
+            stats.Add(stat, value);
+        }
+
+        return stats;
+    }
+    
     public static Dictionary<int, List<Reward>> GetRankedRewardsFromString(string text)
     {
         Dictionary<int, List<Reward>> rewardsRanked = new();
@@ -386,6 +428,12 @@ public static class Utility
         return amount;
     }
 
+    public static string GetPath(this Transform current) {
+        if (current.parent == null)
+            return "/" + current.name;
+        return current.parent.GetPath() + "/" + current.name;
+    }
+    
     public static int GetStartingPos(EAttachment attachment) => attachment switch
     {
         EAttachment.SIGHTS => 0,

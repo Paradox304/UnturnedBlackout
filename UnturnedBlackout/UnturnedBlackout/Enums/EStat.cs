@@ -8,5 +8,6 @@ public enum EStat
     MOBILITY,
     RELOAD_SPEED,
     HIPFIRE_ACCURACY,
-    RECOIL_CONTROL
+    RECOIL_CONTROL,
+    AMMO
 }

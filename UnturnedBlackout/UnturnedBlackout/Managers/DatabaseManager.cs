@@ -471,12 +471,38 @@ public class DatabaseManager
                     if (!int.TryParse(rdr[11].ToString(), out var coins))
                         continue;
                     
-                    var overrideStats = Utility.GetStatsFromString(rdr[12].ToString());
-                    var stats = new Dictionary<EStat, int>();
+                    if (Assets.find(EAssetType.ITEM, attachmentID) is not ItemCaliberAsset caliberAsset)
+                    {
+                        Logging.Debug($"Attachment with id {attachmentID} and name {attachmentName} is not a caliber asset");
+                        continue;
+                    }
                     
+                    Logging.Debug($"Attachment Name: {attachmentName}, ID: {attachmentID}, recoil x: {caliberAsset.recoil_x}, recoil y: {caliberAsset.recoil_y}, damage: {caliberAsset.damage}, spread: {caliberAsset.spread}, movement: {caliberAsset.equipableMovementSpeedMultiplier}");
+                    var overrideStats = Utility.GetStatMultipliersFromString(rdr[12].ToString());
+                    var stats = new Dictionary<EStat, float>();
+                    if (overrideStats.ContainsKey(EStat.RECOIL_CONTROL) || (caliberAsset.recoil_x != 1f && caliberAsset.recoil_y != 1f))
+                        stats.Add(EStat.RECOIL_CONTROL, overrideStats.TryGetValue(EStat.RECOIL_CONTROL, out var recoilControl) ? recoilControl : 1f - (caliberAsset.recoil_x + caliberAsset.recoil_y) / 2);
+                    
+                    if (overrideStats.ContainsKey(EStat.DAMAGE) || caliberAsset.damage != 1f)
+                        stats.Add(EStat.DAMAGE, overrideStats.TryGetValue(EStat.DAMAGE, out var damage) ? damage : caliberAsset.damage - 1f);
+
+                    if (overrideStats.ContainsKey(EStat.HIPFIRE_ACCURACY) || caliberAsset.spread != 1f)
+                        stats.Add(EStat.HIPFIRE_ACCURACY, overrideStats.TryGetValue(EStat.HIPFIRE_ACCURACY, out var accuracy) ? accuracy : 1f - caliberAsset.spread);
+                    
+                    if (overrideStats.ContainsKey(EStat.MOBILITY) || caliberAsset.equipableMovementSpeedMultiplier != 1f)
+                        stats.Add(EStat.MOBILITY, overrideStats.TryGetValue(EStat.MOBILITY, out var mobility) ? mobility : caliberAsset.equipableMovementSpeedMultiplier - 1f);
+
+                    if (attachmentType == EAttachment.MAGAZINE && caliberAsset is ItemMagazineAsset magAsset)
+                    {
+                        stats.Add(EStat.RELOAD_SPEED, overrideStats.TryGetValue(EStat.RELOAD_SPEED, out var speed) ? speed : 1f - magAsset.speed);
+                        stats.Add(EStat.AMMO, overrideStats.TryGetValue(EStat.AMMO, out var ammo) ? ammo : magAsset.amount);
+                    }
+                    
+                    foreach (var stat in stats)
+                        Logging.Debug($"Stat: {stat.Key}, Multiplier: {stat.Value}");
                     
                     if (!gunAttachments.ContainsKey(attachmentID))
-                        gunAttachments.Add(attachmentID, new(attachmentID, attachmentName, attachmentDesc, attachmentPros, attachmentCons, attachmentType, rarity, movementChange, movementChangeADS, iconLink, buyPrice, coins, new()));
+                        gunAttachments.Add(attachmentID, new(attachmentID, attachmentName, attachmentDesc, attachmentPros, attachmentCons, attachmentType, rarity, movementChange, movementChangeADS, iconLink, buyPrice, coins, stats));
                     else
                         Logging.Debug($"Found a duplicate attachment with id {attachmentID}, ignoring this");
                 }
@@ -589,11 +615,16 @@ public class DatabaseManager
 
                     var longshotRange = Mathf.Pow(gunAsset.damageFalloffRange * 100, 2) * 1.2f;
                     var overrideStats = Utility.GetStatsFromString(rdr[17].ToString());
-
+                    
+                    Logging.Debug($"Gun: {gunName}");
+                    Logging.Debug($"Damage Fallof: {gunAsset.damageFalloffRange}, mobility: {gunAsset.equipableMovementSpeedMultiplier}, spread hip: {gunAsset.spreadHip}, fire rate: {gunAsset.firerate}, recoil max x: {gunAsset.recoilMax_x}, recoil max y: {gunAsset.recoilMax_y}");
                     var stats = new Dictionary<EStat, int>
                     {
                         { EStat.RANGE, overrideStats.TryGetValue(EStat.RANGE, out var range) ? range : Mathf.RoundToInt(gunAsset.damageFalloffRange * 100) },
-                        { EStat.MOBILITY, overrideStats.TryGetValue(EStat.MOBILITY, out var mobility) ? mobility : Mathf.RoundToInt(gunAsset.equipableMovementSpeedMultiplier * 50) }
+                        { EStat.MOBILITY, overrideStats.TryGetValue(EStat.MOBILITY, out var mobility) ? mobility : Mathf.RoundToInt(gunAsset.equipableMovementSpeedMultiplier * 50) },
+                        { EStat.HIPFIRE_ACCURACY, overrideStats.TryGetValue(EStat.HIPFIRE_ACCURACY, out var accuracy) ? accuracy : Mathf.RoundToInt(100 - gunAsset.spreadHip * 200) },
+                        { EStat.FIRE_RATE, overrideStats.TryGetValue(EStat.FIRE_RATE, out var fireRate) ? fireRate : 200 / (gunAsset.firerate == 0 ? 200 : gunAsset.firerate) },
+                        { EStat.RELOAD_SPEED, overrideStats[EStat.RELOAD_SPEED] }
                     };
                     
                     switch (gunType)
@@ -602,42 +633,58 @@ public class DatabaseManager
                         case EGun.SUBMACHINE_GUNS:
                         case EGun.LIGHT_MACHINE_GUNS:
                         case EGun.CARBINES:
+                        case EGun.PISTOL:
                         {
                             stats.Add(EStat.DAMAGE, overrideStats.TryGetValue(EStat.DAMAGE, out var damage) ? damage : (int)gunAsset.playerDamageMultiplier.damage);
-                            stats.Add(EStat.FIRE_RATE, overrideStats.TryGetValue(EStat.FIRE_RATE, out var fireRate) ? fireRate : Mathf.RoundToInt(100 - gunAsset.firerate * 10));
-                            stats.Add(EStat.RECOIL_CONTROL, overrideStats.TryGetValue(EStat.RECOIL_CONTROL, out var recoilControl) ? recoilControl : Mathf.RoundToInt(100 - (gunAsset.recoilMin_x + gunAsset.recoilMin_y + gunAsset.recoilMax_y) * 10));
-                            stats.Add(EStat.HIPFIRE_ACCURACY, overrideStats.TryGetValue(EStat.HIPFIRE_ACCURACY, out var accuracy) ? accuracy : Mathf.RoundToInt(100 - gunAsset.spreadHip * 4));
+                            if (gunAsset.hasAuto || gunAsset.hasSemi)
+                                stats.Add(EStat.RECOIL_CONTROL, overrideStats.TryGetValue(EStat.RECOIL_CONTROL, out var recoilControl) ? recoilControl : Mathf.RoundToInt(100 / (gunAsset.recoilMax_x + gunAsset.recoilMax_y)) * gunAsset.firerate / 3);
+                            else if (gunAsset.hasBurst)
+                                stats.Add(EStat.RECOIL_CONTROL, overrideStats.TryGetValue(EStat.RECOIL_CONTROL, out var recoilControl) ? recoilControl : Mathf.RoundToInt(100 / (gunAsset.recoilMax_x + gunAsset.recoilMax_y)) * gunAsset.firerate / 2);
+
                             break;
                         }
                         case EGun.SNIPER_RIFLES:
                         {
                             stats.Add(EStat.DAMAGE, overrideStats.TryGetValue(EStat.DAMAGE, out var damage) ? damage : (int)gunAsset.playerDamageMultiplier.damage);
-                            stats.Add(EStat.FIRE_RATE, overrideStats.TryGetValue(EStat.FIRE_RATE, out var fireRate) ? fireRate : Mathf.RoundToInt(100 - gunAsset.firerate));
-                            stats.Add(EStat.RECOIL_CONTROL, overrideStats.TryGetValue(EStat.RECOIL_CONTROL, out var recoilControl) ? recoilControl : Mathf.RoundToInt(100 - (gunAsset.recoilMin_x + gunAsset.recoilMin_y + gunAsset.recoilMax_y) * 3));
-                            stats.Add(EStat.HIPFIRE_ACCURACY, overrideStats.TryGetValue(EStat.HIPFIRE_ACCURACY, out var accuracy) ? accuracy : Mathf.RoundToInt(100 - gunAsset.spreadHip * 4));
+                            switch (gunAsset.action)
+                            {
+                                case EAction.Trigger:
+                                {
+                                    stats.Add(EStat.RECOIL_CONTROL, overrideStats.TryGetValue(EStat.RECOIL_CONTROL, out var recoilControl) ? recoilControl : Mathf.RoundToInt(100 / (gunAsset.recoilMax_x + gunAsset.recoilMax_y) * 4));
+                                    break;
+                                }
+                                case EAction.Bolt:
+                                {
+                                    stats.Add(EStat.RECOIL_CONTROL, overrideStats.TryGetValue(EStat.RECOIL_CONTROL, out var recoilControl) ? recoilControl : Mathf.RoundToInt(100 / (gunAsset.recoilMax_x + gunAsset.recoilMax_y) * 3));
+                                    break;
+                                }
+                            }
                             break;
                         }
                         case EGun.SHOTGUNS:
                         { 
                             stats.Add(EStat.DAMAGE, overrideStats.TryGetValue(EStat.DAMAGE, out var damage) ? damage : (int)(gunAsset.playerDamageMultiplier.damage * 8));
-                            stats.Add(EStat.FIRE_RATE, overrideStats.TryGetValue(EStat.FIRE_RATE, out var fireRate) ? fireRate : Mathf.RoundToInt(100 - gunAsset.firerate * 10));
-                            stats.Add(EStat.RECOIL_CONTROL, overrideStats.TryGetValue(EStat.RECOIL_CONTROL, out var recoilControl) ? recoilControl : Mathf.RoundToInt(100 - (gunAsset.recoilMin_x + gunAsset.recoilMin_y + gunAsset.recoilMax_y) * 3));
-                            stats.Add(EStat.HIPFIRE_ACCURACY, overrideStats.TryGetValue(EStat.HIPFIRE_ACCURACY, out var accuracy) ? accuracy : Mathf.RoundToInt(100 - gunAsset.spreadHip * 5));
-                            break;
-                        }
-                        case EGun.PISTOL:
-                        {
-                            stats.Add(EStat.DAMAGE, overrideStats.TryGetValue(EStat.DAMAGE, out var damage) ? damage : (int)gunAsset.playerDamageMultiplier.damage);
-                            stats.Add(EStat.FIRE_RATE, overrideStats.TryGetValue(EStat.FIRE_RATE, out var fireRate) ? fireRate : Mathf.RoundToInt(100 - gunAsset.firerate * 10));
-                            stats.Add(EStat.RECOIL_CONTROL, overrideStats.TryGetValue(EStat.RECOIL_CONTROL, out var recoilControl) ? recoilControl : Mathf.RoundToInt(100 - (gunAsset.recoilMin_x + gunAsset.recoilMin_y + gunAsset.recoilMax_y) * 5));
-                            stats.Add(EStat.HIPFIRE_ACCURACY, overrideStats.TryGetValue(EStat.HIPFIRE_ACCURACY, out var accuracy) ? accuracy : Mathf.RoundToInt(100 - gunAsset.spreadHip * 4));
+                            switch (gunAsset.action)
+                            {
+                                case EAction.Trigger:
+                                {
+                                    stats.Add(EStat.RECOIL_CONTROL, overrideStats.TryGetValue(EStat.RECOIL_CONTROL, out var recoilControl) ? recoilControl : Mathf.RoundToInt(100 / (gunAsset.recoilMax_x + gunAsset.recoilMax_y) * 6));
+                                    break;
+                                }
+                                case EAction.Pump:
+                                {
+                                    stats.Add(EStat.RECOIL_CONTROL, overrideStats.TryGetValue(EStat.RECOIL_CONTROL, out var recoilControl) ? recoilControl : Mathf.RoundToInt(100 / (gunAsset.recoilMax_x + gunAsset.recoilMax_y) * 5));
+                                    break;
+                                }
+                            }
                             break;
                         }
                     }
                     
-                    var statText = stats.Aggregate("", (current, stat) => current + $"Stat: {stat.Key} Amount: {stat.Value}, ");
-
-                    Logging.Debug($"Gun: {gunName}, {statText}");
+                    foreach (var stat in stats)
+                    {
+                        Logging.Debug($"Stat: {stat.Key}, Amount: {stat.Value}");
+                    }
 
                     Gun gun = new(gunID, gunName, gunDesc, gunType, rarity, movementChange, movementChangeADS, iconLink, magAmount, coins, buyPrice, scrapAmount, levelRequirement, isPrimary, defaultAttachments, rewardAttachments, rewardAttachmentsInverse, levelXPNeeded, longshotRange, stats);
                     if (!guns.ContainsKey(gunID))
@@ -1050,7 +1097,7 @@ public class DatabaseManager
                     if (!int.TryParse(rdr[11].ToString(), out var levelRequirement))
                         continue;
 
-                    var stats = Utility.GetStatsFromString(rdr[12].ToString());
+                    var stats = Utility.GetStatMultipliersFromString(rdr[12].ToString());
                     Perk perk = new(perkID, perkName, perkDesc, perkType, rarity, iconLink, skillType, skillLevel, coins, buyPrice, scrapAmount, levelRequirement, stats);
                     if (!perks.ContainsKey(perkID))
                         perks.Add(perkID, perk);
