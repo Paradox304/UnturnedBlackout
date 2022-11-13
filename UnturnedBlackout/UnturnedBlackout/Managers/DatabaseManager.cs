@@ -480,32 +480,25 @@ public class DatabaseManager
                     Logging.Debug($"Attachment Name: {attachmentName}, ID: {attachmentID}, recoil x: {caliberAsset.recoil_x}, recoil y: {caliberAsset.recoil_y}, damage: {caliberAsset.damage}, spread: {caliberAsset.spread}, movement: {caliberAsset.equipableMovementSpeedMultiplier}");
                     var overrideStats = Utility.GetStatMultipliersFromString(rdr[12].ToString());
                     var stats = new Dictionary<EStat, float>();
-                    if (overrideStats.ContainsKey(EStat.RECOIL_CONTROL) || (caliberAsset.recoil_x != 1f && caliberAsset.recoil_y != 1f))
+                    if (overrideStats.ContainsKey(EStat.RECOIL_CONTROL) || caliberAsset.recoil_x != 1f || caliberAsset.recoil_y != 1f)
                         stats.Add(EStat.RECOIL_CONTROL, overrideStats.TryGetValue(EStat.RECOIL_CONTROL, out var recoilControl) ? recoilControl : 1f - (caliberAsset.recoil_x + caliberAsset.recoil_y) / 2);
-                    else
-                        stats.Add(EStat.RECOIL_CONTROL, 1f);
-                    
+
                     if (overrideStats.ContainsKey(EStat.DAMAGE) || caliberAsset.damage != 1f)
                         stats.Add(EStat.DAMAGE, overrideStats.TryGetValue(EStat.DAMAGE, out var damage) ? damage : caliberAsset.damage - 1f);
-                    else
-                        stats.Add(EStat.DAMAGE, 1f);
 
                     if (overrideStats.ContainsKey(EStat.HIPFIRE_ACCURACY) || caliberAsset.spread != 1f)
                         stats.Add(EStat.HIPFIRE_ACCURACY, overrideStats.TryGetValue(EStat.HIPFIRE_ACCURACY, out var accuracy) ? accuracy : 1f - caliberAsset.spread);
-                    else
-                        stats.Add(EStat.HIPFIRE_ACCURACY, 1f);
-                    
+
                     if (overrideStats.ContainsKey(EStat.MOBILITY) || caliberAsset.equipableMovementSpeedMultiplier != 1f)
                         stats.Add(EStat.MOBILITY, overrideStats.TryGetValue(EStat.MOBILITY, out var mobility) ? mobility : caliberAsset.equipableMovementSpeedMultiplier - 1f);
-                    else
-                        stats.Add(EStat.MOBILITY, 1f);
 
                     if (attachmentType == EAttachment.MAGAZINE && caliberAsset is ItemMagazineAsset magAsset)
                     {
+                        Logging.Debug($"speed: {magAsset.speed}, ammo: {magAsset.amount}");
                         if (overrideStats.ContainsKey(EStat.RELOAD_SPEED) || magAsset.speed != 1f)
-                            stats.Add(EStat.RELOAD_SPEED, overrideStats.TryGetValue(EStat.RELOAD_SPEED, out var speed) ? speed : 1f - magAsset.speed);
+                            stats.Add(EStat.RELOAD_SPEED, overrideStats.TryGetValue(EStat.RELOAD_SPEED, out var speed) ? speed : magAsset.speed - 1f);
                         else
-                            stats.Add(EStat.RELOAD_SPEED, 1f);
+                            stats.Add(EStat.RELOAD_SPEED, 0f);
 
                         stats.Add(EStat.AMMO, overrideStats.TryGetValue(EStat.AMMO, out var ammo) ? ammo : magAsset.amount);
                     }

@@ -36,7 +36,6 @@ public class LoadoutGun
 
         neededXP = Gun.LevelXPNeeded[Level - 1];
         return true;
-
     }
 
     public Dictionary<EStat, int> GetDefaultStats()
@@ -63,7 +62,7 @@ public class LoadoutGun
                     }
 
                     var reloadValue = Gun.Stats[stat];
-                    defaultStats.Add(stat, Mathf.RoundToInt(reloadValue + reloadValue * reloadMultiplier));
+                    defaultStats.Add(stat, reloadValue + Mathf.RoundToInt(reloadValue * reloadMultiplier));
                     break;
                 }
                 case EStat.AMMO:
@@ -103,8 +102,7 @@ public class LoadoutGun
     
     public void GetCurrentStats(Loadout loadout, out Dictionary<EStat, int> defaultStats, out Dictionary<EStat, int> finalStats, out Dictionary<EStat, int> attachmentsCompare, out Dictionary<EStat, int> perksCompare)
     {
-        Logging.Debug($"Getting current stats for gun with name {Gun.GunName}");
-        // Get default stats with the current mag in account
+        Logging.Debug($"Getting default stats for gun with name {Gun.GunName}");
         defaultStats = new();
         for (var i = 0; i <= 7; i++)
         {
@@ -113,19 +111,19 @@ public class LoadoutGun
             {
                 case EStat.AMMO:
                 {
-                    var defaultMagazine = Attachments.Values.FirstOrDefault(k => k.Attachment.AttachmentType == EAttachment.MAGAZINE)?.Attachment;
+                    var defaultMagazine = Gun.DefaultAttachments.FirstOrDefault(k => k.AttachmentType == EAttachment.MAGAZINE);
                     if (defaultMagazine == null)
                     {
-                        Logging.Debug($"No equipped magazine found to get current stats from for gun {Gun.GunName}");
+                        Logging.Debug($"No default magazine found to get default stats from for gun {Gun.GunName}");
                         break;
                     }
 
                     if (!defaultMagazine.StatMultipliers.TryGetValue(stat, out var amount))
                     {
-                        Logging.Debug($"No ammo found to get current stats from for gun {Gun.GunName}");
+                        Logging.Debug($"No ammo found to get default stats from for gun {Gun.GunName}");
                         break;
                     }
-                    
+
                     defaultStats.Add(stat, (int)amount);
                     break;
                 }
@@ -136,7 +134,7 @@ public class LoadoutGun
                         Logging.Debug($"No default {stat} found to get default stats from for gun {Gun.GunName}");
                         break;
                     }
-                    
+
                     defaultStats.Add(stat, statValue);
                     break;
                 }
@@ -147,10 +145,10 @@ public class LoadoutGun
         foreach (var stat in defaultStats)
             Logging.Debug($"Stat: {stat.Key}, Amount: {stat.Value}");
 
-        var attachments = loadout.Primary == this ? loadout.PrimaryAttachments : loadout.SecondaryAttachments;
         attachmentsCompare = new();
         perksCompare = new();
         finalStats = new();
+        var attachments = (loadout.Primary == this ? loadout.PrimaryAttachments : loadout.SecondaryAttachments).Select(k => k.Value.Attachment).ToList();
         Logging.Debug($"Getting all the attachment mulipliers, perk multipliers and computing the compare and final stat value");
         for (var i = 0; i <= 6; i++)
         {
@@ -158,9 +156,9 @@ public class LoadoutGun
             var startingStat = defaultStats[stat];
             Logging.Debug($"Stat: {stat}, Starting Value: {startingStat}");
             // First get all the attachment multipliers for this stat and sum them up (so the + and - equalise themselves)
-            var attachmentMultiplier = attachments.Values.Sum(k => k.Attachment.StatMultipliers.TryGetValue(stat, out var multiplier) ? multiplier != 1f ? multiplier : 0f : 0f);
+            var attachmentMultiplier = attachments.Sum(k => k.StatMultipliers.TryGetValue(stat, out var multiplier) ? multiplier : 0f);
             Logging.Debug($"Combined Attachment Multiplier: {attachmentMultiplier}");
-            var afterAttachmentStat = attachmentMultiplier != 0f && attachmentMultiplier != 1f ? Mathf.RoundToInt(startingStat + startingStat * attachmentMultiplier) : startingStat;
+            var afterAttachmentStat = startingStat + Mathf.RoundToInt(startingStat * attachmentMultiplier);
             Logging.Debug($"After attachment stat: {afterAttachmentStat}");
             if (startingStat != afterAttachmentStat)
             {
@@ -172,7 +170,7 @@ public class LoadoutGun
             // Get all the perk multipliers for this stat and sum them up (so the + and - equalise themselves)
             var perkMultiplier = loadout.Perks.Values.Sum(k => k.Perk.StatMultipliers.TryGetValue(stat, out var multiplier) ? multiplier : 0f);
             Logging.Debug($"Combined perk multiplier: {perkMultiplier}");
-            var afterPerkStat = perkMultiplier != 0f && perkMultiplier != 1f ? Mathf.RoundToInt(afterAttachmentStat + afterAttachmentStat * perkMultiplier) : afterAttachmentStat;
+            var afterPerkStat = afterAttachmentStat + Mathf.RoundToInt(afterAttachmentStat * perkMultiplier);
             Logging.Debug($"After perk stat: {afterPerkStat}");
             if (afterAttachmentStat != afterPerkStat)
             {
@@ -184,5 +182,110 @@ public class LoadoutGun
             Logging.Debug($"Final stat: {afterPerkStat}");
             finalStats.Add(stat, afterPerkStat);
         }
+
+        var startingAmmoStat = defaultStats[EStat.AMMO];
+        Logging.Debug($"Stat: {EStat.AMMO}, Starting Value: {startingAmmoStat}");
+        var magazine = attachments.FirstOrDefault(k => k.AttachmentType == EAttachment.MAGAZINE);
+        if (magazine == null)
+        {
+            Logging.Debug("Gun has no magazine, can't get final ammo value");
+            return;
+        }
+
+        var finalAmmoStat = magazine.StatMultipliers.TryGetValue(EStat.AMMO, out var ammoValue) ? Mathf.RoundToInt(ammoValue) : startingAmmoStat;
+        Logging.Debug($"Final Ammo Stat: {finalAmmoStat}");
+        if (startingAmmoStat != finalAmmoStat)
+        {
+            var ammoCompare = finalAmmoStat - startingAmmoStat;
+            Logging.Debug($"Ammo compare: {ammoCompare}");
+            attachmentsCompare.Add(EStat.AMMO, ammoCompare);
+        }
+        
+        finalStats.Add(EStat.AMMO, finalAmmoStat);
+    }
+
+    public void GetCurrentStats(Loadout loadout, EAttachment attachmentTypeIgnore, out Dictionary<EStat, int> stats)
+    {
+        Logging.Debug($"Getting default stats for gun with name {Gun.GunName}");
+        var defaultStats = new Dictionary<EStat, int>();
+        stats = new();
+        
+        for (var i = 0; i <= 7; i++)
+        {
+            var stat = (EStat)i;
+            switch (stat)
+            {
+                case EStat.AMMO:
+                {
+                    var defaultMagazine = Gun.DefaultAttachments.FirstOrDefault(k => k.AttachmentType == EAttachment.MAGAZINE);
+                    if (defaultMagazine == null)
+                    {
+                        Logging.Debug($"No default magazine found to get default stats from for gun {Gun.GunName}");
+                        break;
+                    }
+
+                    if (!defaultMagazine.StatMultipliers.TryGetValue(stat, out var amount))
+                    {
+                        Logging.Debug($"No ammo found to get default stats from for gun {Gun.GunName}");
+                        break;
+                    }
+
+                    defaultStats.Add(stat, (int)amount);
+                    break;
+                }
+                default:
+                {
+                    if (!Gun.Stats.TryGetValue(stat, out var statValue))
+                    {
+                        Logging.Debug($"No default {stat} found to get default stats from for gun {Gun.GunName}");
+                        break;
+                    }
+
+                    defaultStats.Add(stat, statValue);
+                    break;
+                }
+            }
+        }
+        
+        Logging.Debug($"Default Stats:");
+        foreach (var stat in defaultStats)
+            Logging.Debug($"Stat: {stat.Key}, Amount: {stat.Value}");
+        
+        var attachments = (loadout.Primary == this ? loadout.PrimaryAttachments : loadout.SecondaryAttachments).Select(k => k.Value.Attachment).Where(k => k.AttachmentType != attachmentTypeIgnore).ToList();
+        Logging.Debug($"Getting all the attachment mulipliers ignoring {attachmentTypeIgnore}, perk multipliers and computing the final stat value");
+        for (var i = 0; i <= 6; i++)
+        {
+            var stat = (EStat)i;
+            var startingStat = defaultStats[stat];
+            Logging.Debug($"Stat: {stat}, Starting Value: {startingStat}");
+            
+            // First get all the attachment multipliers for this stat and sum them up (so the + and - equalise themselves)
+            var attachmentMultiplier = attachments.Sum(k => k.StatMultipliers.TryGetValue(stat, out var multiplier) ? multiplier : 0f);
+            Logging.Debug($"Combined Attachment Multiplier: {attachmentMultiplier}");
+            var afterAttachmentStat = startingStat + Mathf.RoundToInt(startingStat * attachmentMultiplier);
+            Logging.Debug($"After attachment stat: {afterAttachmentStat}");
+            
+            // Get all the perk multipliers for this stat and sum them up (so the + and - equalise themselves)
+            var perkMultiplier = loadout.Perks.Values.Sum(k => k.Perk.StatMultipliers.TryGetValue(stat, out var multiplier) ? multiplier : 0f);
+            Logging.Debug($"Combined perk multiplier: {perkMultiplier}");
+            var afterPerkStat = afterAttachmentStat + Mathf.RoundToInt(afterAttachmentStat * perkMultiplier);
+            Logging.Debug($"Final stat: {afterPerkStat}");
+            stats.Add(stat, afterPerkStat);
+        }
+
+        if (attachmentTypeIgnore != EAttachment.MAGAZINE)
+        {
+            var magazine = attachments.FirstOrDefault(k => k.AttachmentType == EAttachment.MAGAZINE);
+            if (magazine == null)
+            {
+                stats.Add(EStat.AMMO, defaultStats[EStat.AMMO]);
+                return;
+            }
+
+            var ammoCount = magazine.StatMultipliers.TryGetValue(EStat.AMMO, out var ammoCountValue) ? Mathf.RoundToInt(ammoCountValue) : defaultStats[EStat.AMMO];
+            stats.Add(EStat.AMMO, ammoCount);
+        }
+        else
+            stats.Add(EStat.AMMO, defaultStats[EStat.AMMO]);
     }
 }
