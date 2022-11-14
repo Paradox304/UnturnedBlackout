@@ -627,9 +627,9 @@ public class DatabaseManager
                     {
                         { EStat.RANGE, overrideStats.TryGetValue(EStat.RANGE, out var range) ? range : Mathf.RoundToInt(gunAsset.damageFalloffRange * 100) },
                         { EStat.MOBILITY, overrideStats.TryGetValue(EStat.MOBILITY, out var mobility) ? mobility : Mathf.RoundToInt(gunAsset.equipableMovementSpeedMultiplier * 50) },
-                        { EStat.HIPFIRE_ACCURACY, overrideStats.TryGetValue(EStat.HIPFIRE_ACCURACY, out var accuracy) ? accuracy : Mathf.RoundToInt(100 - gunAsset.spreadHip * 200) },
+                        { EStat.HIPFIRE_ACCURACY, overrideStats.TryGetValue(EStat.HIPFIRE_ACCURACY, out var accuracy) ? accuracy : Mathf.RoundToInt(75f - gunAsset.spreadHip * 100f) },
                         { EStat.FIRE_RATE, overrideStats.TryGetValue(EStat.FIRE_RATE, out var fireRate) ? fireRate : 200 / (gunAsset.firerate == 0 ? 200 : gunAsset.firerate) },
-                        { EStat.RELOAD_SPEED, 100 - overrideStats[EStat.RELOAD_SPEED] }
+                        { EStat.RELOAD_SPEED, (100 - overrideStats[EStat.RELOAD_SPEED]) / 2 }
                     };
                     
                     switch (gunType)

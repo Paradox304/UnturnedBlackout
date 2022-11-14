@@ -3842,28 +3842,28 @@ public class UIHandler
                 var newStat = stat.Value;
                 var compareStat = newStat - currentStat;
                 Logging.Debug($"Stat: {stat.Key}, Current Stat: {currentStat}, New Stat: {newStat}, Compare Stat: {compareStat}, UI Name: {uiName}, Max Amount: {maxAmount}");
-                if (compareStat == 0)
+                switch (compareStat)
                 {
-                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Colored Fill Enabler 0", true);
-                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Normal Fill Enabler {Math.Min(100, currentStat * 100 / maxAmount)}", true);
-                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Number Text", currentStat.ToString());
-                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Bracket Text", " ");
-                }
-                else if (compareStat > 0)
-                {
-                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Colored Fill Enabler {Math.Min(100, newStat * 100 / maxAmount)}", true);
-                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Normal Fill Enabler {Math.Min(100, currentStat * 100 / maxAmount)}", true);
-                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Slider Green Enabler", true);
-                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Number Text", newStat.ToString());
-                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Bracket Text", $"[{currentStat} + <color=#31AB40>{compareStat}</color>]");
-                }
-                else
-                {
-                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Colored Fill Enabler {Math.Min(100, currentStat * 100 / maxAmount)}", true);
-                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Normal Fill Enabler {Math.Min(100, newStat * 100 / maxAmount)}", true);
-                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Slider Red Enabler", true);
-                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Number Text", newStat.ToString());
-                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Bracket Text", $"[{currentStat} - <color=#CE3036>{Math.Abs(compareStat)}</color>]");
+                    case 0:
+                        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Colored Fill Enabler 0", true);
+                        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Normal Fill Enabler {Math.Min(100, currentStat * 100 / maxAmount)}", true);
+                        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Number Text", currentStat.ToString());
+                        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Bracket Text", " ");
+                        break;
+                    case > 0:
+                        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Colored Fill Enabler {Math.Min(100, newStat * 100 / maxAmount)}", true);
+                        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Normal Fill Enabler {Math.Min(100, currentStat * 100 / maxAmount)}", true);
+                        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Slider Green Enabler", true);
+                        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Number Text", newStat.ToString());
+                        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Bracket Text", $"[{currentStat} + <color=#31AB40>{compareStat}</color>]");
+                        break;
+                    default:
+                        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Colored Fill Enabler {Math.Min(100, currentStat * 100 / maxAmount)}", true);
+                        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Normal Fill Enabler {Math.Min(100, newStat * 100 / maxAmount)}", true);
+                        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Slider Red Enabler", true);
+                        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Number Text", newStat.ToString());
+                        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Bracket Text", $"[{currentStat} - <color=#CE3036>{Math.Abs(compareStat)}</color>]");
+                        break;
                 }
             }
             stopWatch.Stop();
@@ -3932,18 +3932,32 @@ public class UIHandler
                 var currentStat = finalStat.Value;
                 int newStat;
                 int compareStat;
-                if (stat == EStat.AMMO)
+                switch (stat)
                 {
-                    newStat = attachment.Attachment.StatMultipliers.TryGetValue(EStat.AMMO, out var newAmmoStatValue) ? Mathf.RoundToInt(newAmmoStatValue) : currentStat;
-                    compareStat = newStat - currentStat;
-                    Logging.Debug($"Stat: {stat}, Current Stat: {currentStat}, New Stat: {newStat}, Compare Stat: {compareStat}, UI Name: {uiName}, Max Amount: {maxAmount}");
-                }
-                else
-                {
-                    var multiplier = attachment.Attachment.StatMultipliers.TryGetValue(stat, out var multiplierValue) ? multiplierValue : 0f;
-                    newStat = currentStat + Mathf.RoundToInt(multiplier * currentStat);
-                    compareStat = newStat - currentStat;
-                    Logging.Debug($"Stat: {stat}, Current Stat: {currentStat}, multiplier: {multiplier}, New Stat: {newStat}, Compare Stat: {compareStat}, UI Name: {uiName}, Max Amount: {maxAmount}");
+                    case EStat.AMMO:
+                    {
+                        newStat = attachment.Attachment.StatMultipliers.TryGetValue(EStat.AMMO, out var newAmmoStatValue) ? Mathf.RoundToInt(newAmmoStatValue) : currentStat;
+                        compareStat = newStat - currentStat;
+                        Logging.Debug($"Stat: {stat}, Current Stat: {currentStat}, New Stat: {newStat}, Compare Stat: {compareStat}, UI Name: {uiName}, Max Amount: {maxAmount}");
+                        break;
+                    }
+                    case EStat.RELOAD_SPEED:
+                    {
+                        var multiplier = attachment.Attachment.StatMultipliers.TryGetValue(stat, out var multiplierValue) ? multiplierValue : 0f;
+                        var tempStat = gun.Gun.Stats[EStat.RELOAD_SPEED];
+                        newStat = multiplier != 0f ? tempStat + Mathf.RoundToInt(multiplier * tempStat) : currentStat;
+                        compareStat = newStat - currentStat;
+                        Logging.Debug($"Stat: {stat}, Current Stat: {currentStat}, Temp Stat: {tempStat} multiplier: {multiplier}, new stat: {newStat}, compare stat {compareStat}, UI Name: {uiName}, Max Amount: {maxAmount}");
+                        break;
+                    }
+                    default:
+                    {
+                        var multiplier = attachment.Attachment.StatMultipliers.TryGetValue(stat, out var multiplierValue) ? multiplierValue : 0f;
+                        newStat = currentStat + Mathf.RoundToInt(multiplier * currentStat);
+                        compareStat = newStat - currentStat;
+                        Logging.Debug($"Stat: {stat}, Current Stat: {currentStat}, multiplier: {multiplier}, New Stat: {newStat}, Compare Stat: {compareStat}, UI Name: {uiName}, Max Amount: {maxAmount}");
+                        break;
+                    }
                 }
 
                 switch (compareStat)
@@ -3991,19 +4005,33 @@ public class UIHandler
                 var currentStat = finalStat.Value;
                 int newStat;
                 int compareStat;
-                if (stat == EStat.AMMO)
+                switch (stat)
                 {
-                    newStat = attachment.Attachment.StatMultipliers.TryGetValue(EStat.AMMO, out var newAmmoStatValue) ? Mathf.RoundToInt(newAmmoStatValue) : currentStat;
-                    compareStat = newStat - currentStat;
-                    Logging.Debug($"Stat: {stat}, Current Stat: {currentStat}, New Stat: {newStat}, Compare Stat: {compareStat}, UI Name: {uiName}, Max Amount: {maxAmount}");
-                }
-                else
-                {
-                    var multiplier = attachment.Attachment.StatMultipliers.TryGetValue(stat, out var multiplierValue) ? multiplierValue : 0f;
-                    var tempStat = statsWithoutCurrentAttachment.TryGetValue(stat, out var tempStatValue) ? tempStatValue : currentStat;
-                    newStat = tempStat + Mathf.RoundToInt(multiplier * tempStat);
-                    compareStat = newStat - currentStat;
-                    Logging.Debug($"Stat: {stat}, Current Stat: {currentStat}, Temp Stat: {tempStat}, multiplier: {multiplier}, New Stat: {newStat}, Compare Stat: {compareStat}, UI Name: {uiName}, Max Amount: {maxAmount}");
+                    case EStat.AMMO:
+                    {
+                        newStat = attachment.Attachment.StatMultipliers.TryGetValue(EStat.AMMO, out var newAmmoStatValue) ? Mathf.RoundToInt(newAmmoStatValue) : currentStat;
+                        compareStat = newStat - currentStat;
+                        Logging.Debug($"Stat: {stat}, Current Stat: {currentStat}, New Stat: {newStat}, Compare Stat: {compareStat}, UI Name: {uiName}, Max Amount: {maxAmount}");
+                        break;
+                    }
+                    case EStat.RELOAD_SPEED:
+                    {
+                        var multiplier = attachment.Attachment.StatMultipliers.TryGetValue(stat, out var multiplierValue) ? multiplierValue : 0f;
+                        var tempStat = gun.Gun.Stats[EStat.RELOAD_SPEED];
+                        newStat = tempStat + Mathf.RoundToInt(multiplier * tempStat);
+                        compareStat = newStat - currentStat;
+                        Logging.Debug($"Stat: {stat}, Current Stat: {currentStat}, Temp Stat: {tempStat}, multiplier: {multiplier}, New Stat: {newStat}, Compare Stat: {compareStat}, UI Name: {uiName}, Max Amount: {maxAmount}");
+                        break;
+                    }
+                    default:
+                    {
+                        var multiplier = attachment.Attachment.StatMultipliers.TryGetValue(stat, out var multiplierValue) ? multiplierValue : 0f;
+                        var tempStat = statsWithoutCurrentAttachment.TryGetValue(stat, out var tempStatValue) ? tempStatValue : currentStat;
+                        newStat = tempStat + Mathf.RoundToInt(multiplier * tempStat);
+                        compareStat = newStat - currentStat;
+                        Logging.Debug($"Stat: {stat}, Current Stat: {currentStat}, Temp Stat: {tempStat}, multiplier: {multiplier}, New Stat: {newStat}, Compare Stat: {compareStat}, UI Name: {uiName}, Max Amount: {maxAmount}");
+                        break;
+                    }
                 }
 
                 switch (compareStat)
