@@ -272,9 +272,10 @@ public class GameManager
 
     public void SendPlayerToLobby(UnturnedPlayer player, MatchEndSummary summary = null)
     {
-        player.Player.enablePluginWidgetFlag(EPluginWidgetFlags.Modal);
         player.Player.inventory.ClearInventory();
         player.Player.life.serverModifyHealth(100);
+        if (!player.GodMode)
+            player.GodMode = true;
         TaskDispatcher.QueueOnMainThread(() =>
         {
             player.Player.life.ServerRespawn(false);

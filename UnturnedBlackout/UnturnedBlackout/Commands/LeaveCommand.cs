@@ -34,10 +34,10 @@ internal class LeaveCommand : IRocketCommand
             return;
 
         gPlayer.StaffMode = false;
-        player.GodMode = false;
         player.VanishMode = false;
         player.Player.look.sendFreecamAllowed(false);
         player.Player.look.sendSpecStatsAllowed(false);
+        player.Player.movement.sendPluginSpeedMultiplier(1f);
         Plugin.Instance.Game.SendPlayerToLobby(player);
     }
 }

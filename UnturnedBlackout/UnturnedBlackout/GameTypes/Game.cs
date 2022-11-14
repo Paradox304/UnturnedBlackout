@@ -184,14 +184,14 @@ public abstract class Game
     {
         var trapOwner = Plugin.Instance.Game.GetGamePlayer(new CSteamID(drop.GetServersideData().owner));
         Logging.Debug($"Trap triggered by {player.Player.CharacterName}, owner is {trapOwner?.Player?.CharacterName ?? "None"}");
-        if (trapOwner != null)
-        {
-            Logging.Debug("Trap owner is not null, adding trap owner to the player's last damager");
-            if (player.LastDamager.Count > 0 && player.LastDamager.Peek() == trapOwner.SteamID)
-                return;
+        if (trapOwner == null)
+            return;
 
-            player.LastDamager.Push(trapOwner.SteamID);
-        }
+        Logging.Debug("Trap owner is not null, adding trap owner to the player's last damager");
+        if (player.LastDamager.Count > 0 && player.LastDamager.Peek() == trapOwner.SteamID)
+            return;
+
+        player.LastDamager.Push(trapOwner.SteamID);
     }
 
     private void OnPlayerRespawning(PlayerLife sender, bool wantsToSpawnAtHome, ref Vector3 position, ref float yaw)

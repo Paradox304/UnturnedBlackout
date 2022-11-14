@@ -210,8 +210,13 @@ public class TDMGame : Game
         if (roundEndCases.Count > 0)
             _ = Plugin.Instance.StartCoroutine(UI.SetupRoundEndDrops(Players.Select(k => k.GamePlayer).ToList(), roundEndCases, 0));
 
-        yield return new WaitForSeconds(Config.Base.FileData.EndingLeaderboardSeconds);
+        yield return new WaitForSeconds(Config.Base.FileData.EndingLeaderboardSeconds - 3);
 
+        foreach (var player in Players)
+            player.GamePlayer.Player.Player.enablePluginWidgetFlag(EPluginWidgetFlags.Modal);
+
+        yield return new WaitForSeconds(3);
+        
         foreach (var player in Players.ToList())
         {
             RemovePlayerFromGame(player.GamePlayer);
@@ -266,6 +271,8 @@ public class TDMGame : Game
             UI.UpdateLoadingBar(player.Player, new('　', Math.Min(96, seconds * 96 / 5)));
         }
 
+        if (player.Player.GodMode)
+            player.Player.GodMode = false;
         var currentPos = player.Player.Position;
         player.Player.Player.teleportToLocationUnsafe(new(currentPos.x, currentPos.y + 100, currentPos.z), 0);
         GiveLoadout(tPlayer);
