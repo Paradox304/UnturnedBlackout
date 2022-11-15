@@ -3158,8 +3158,12 @@ public class DatabaseManager
                     var primeRewards = Utility.GetRewardsFromString(rdr[15].ToString());
                     var primeDailyRewards = Utility.GetRewardsFromString(rdr[16].ToString());
 
+                    if (!long.TryParse(rdr[17].ToString(), out var battlepassExpiryUnix))
+                        continue;
+
+                    var battlepassExpiry = DateTimeOffset.FromUnixTimeSeconds(battlepassExpiryUnix);
                     ServerOptions = new(dailyLeaderboardWipe, weeklyLeaderboardWipe, dailyRanked, dailyPercentile, weeklyRanked, weeklyPercentile, seasonalRanked, seasonalPercentile, xpBooster, bpBooster, gunXPBooster, xpBoosterWipe, bpBoosterWipe, gunXPBoosterWipe, gameTips, primeRewards,
-                        primeDailyRewards);
+                        primeDailyRewards, battlepassExpiry);
                 }
             }
             catch (Exception ex)

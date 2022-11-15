@@ -22,11 +22,9 @@ public class Options
     public List<string> GameTips { get; set; }
     public List<Reward> PrimeRewards { get; set; }
     public List<Reward> PrimeDailyRewards { get; set; }
+    public DateTimeOffset BattlepassExpiry { get; set; }
 
-    public Options(
-        DateTimeOffset dailyLeaderboardWipe, DateTimeOffset weeklyLeaderboardWipe, Dictionary<int, List<Reward>> dailyRankedRewards, List<PercentileReward> dailyPercentileRewards, Dictionary<int, List<Reward>> weeklyRankedRewards, List<PercentileReward> weeklyPercentileRewards,
-        Dictionary<int, List<Reward>> seasonalRankedRewards, List<PercentileReward> seasonalPercentileRewards, float xPBooster, float bPBooster, float gunXPBooster, DateTimeOffset xPBoosterWipe, DateTimeOffset bPBoosterWipe, DateTimeOffset gunXPBoosterWipe, List<string> gameTips,
-        List<Reward> primeRewards, List<Reward> primeDailyRewards)
+    public Options(DateTimeOffset dailyLeaderboardWipe, DateTimeOffset weeklyLeaderboardWipe, Dictionary<int, List<Reward>> dailyRankedRewards, List<PercentileReward> dailyPercentileRewards, Dictionary<int, List<Reward>> weeklyRankedRewards, List<PercentileReward> weeklyPercentileRewards, Dictionary<int, List<Reward>> seasonalRankedRewards, List<PercentileReward> seasonalPercentileRewards, float xpBooster, float bpBooster, float gunXPBooster, DateTimeOffset xpBoosterWipe, DateTimeOffset bpBoosterWipe, DateTimeOffset gunXPBoosterWipe, List<string> gameTips, List<Reward> primeRewards, List<Reward> primeDailyRewards, DateTimeOffset battlepassExpiry)
     {
         DailyLeaderboardWipe = dailyLeaderboardWipe;
         WeeklyLeaderboardWipe = weeklyLeaderboardWipe;
@@ -36,14 +34,15 @@ public class Options
         WeeklyPercentileRewards = weeklyPercentileRewards;
         SeasonalRankedRewards = seasonalRankedRewards;
         SeasonalPercentileRewards = seasonalPercentileRewards;
-        XPBooster = xPBooster;
-        BPBooster = bPBooster;
+        XPBooster = xpBooster;
+        BPBooster = bpBooster;
         GunXPBooster = gunXPBooster;
-        XPBoosterWipe = xPBoosterWipe;
-        BPBoosterWipe = bPBoosterWipe;
+        XPBoosterWipe = xpBoosterWipe;
+        BPBoosterWipe = bpBoosterWipe;
         GunXPBoosterWipe = gunXPBoosterWipe;
         GameTips = gameTips;
         PrimeRewards = primeRewards;
         PrimeDailyRewards = primeDailyRewards;
+        BattlepassExpiry = battlepassExpiry;
     }
 }

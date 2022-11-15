@@ -1455,13 +1455,10 @@ public class UIManager
 
     public void SendCTFFlagStates(CTFTeam team, ETeam flag, List<CTFPlayer> players, EFlagState state)
     {
-        foreach (var player in players)
+        foreach (var player in players.Where(player => !player.GamePlayer.IsLoading))
         {
-            if (player.GamePlayer.IsLoading)
-                continue;
-
             EffectManager.sendUIEffect(FLAG_POPUP_UI, FLAG_POPUP_KEY, player.GamePlayer.TransportConnection, true);
-            EffectManager.sendUIEffectVisibility(FLAG_POPUP_KEY, player.GamePlayer.TransportConnection, true, $"FLAG {flag} Toggler", true);
+            EffectManager.sendUIEffectVisibility(FLAG_POPUP_KEY, player.GamePlayer.TransportConnection, true, $"FLAG {flag.ToUIName()} Toggler", true);
             EffectManager.sendUIEffectText(FLAG_POPUP_KEY, player.GamePlayer.TransportConnection, true, "FlagTxt", Plugin.Instance.Translate($"CTF_{(player.Team.TeamID == team.TeamID ? "Team" : "Enemy")}_{state.ToUIName()}_Flag").ToRich());
         }
     }

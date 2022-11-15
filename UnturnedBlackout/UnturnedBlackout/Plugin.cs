@@ -6,6 +6,7 @@ using Rocket.Unturned.Permissions;
 using SDG.Unturned;
 using Steamworks;
 using System.Collections;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -234,6 +235,80 @@ public class Plugin : RocketPlugin<Config>
         
         SteamGameServer.SetKeyValue("Cfg_Count", 0.ToString(CultureInfo.InvariantCulture));
         SteamGameServer.SetKeyValue("rocketplugins", "");
+        
+        Logging.Debug("Copying over the stats from guns to their skin variants");
+        var type = typeof(ItemGunAsset);
+        var fields = new Dictionary<string, FieldInfo>
+        {
+            { "aimingMovementSpeedMultiplier", type.GetField("aimingMovementSpeedMultiplier", BindingFlags.Public | BindingFlags.Instance) },
+            { "equipableMovementSpeedMultiplier", type.GetField("equipableMovementSpeedMultiplier", BindingFlags.Public | BindingFlags.Instance) },
+            { "range", type.GetField("range", BindingFlags.Public | BindingFlags.Instance) },
+            { "firerate", type.GetField("firerate", BindingFlags.Public | BindingFlags.Instance) },
+            { "damageFalloffRange", type.GetField("damageFalloffRange", BindingFlags.Public | BindingFlags.Instance) },
+            { "damageFalloffMultiplier", type.GetField("damageFalloffMultiplier", BindingFlags.Public | BindingFlags.Instance) },
+            { "playerDamageMultiplier", type.GetField("playerDamageMultiplier", BindingFlags.Public | BindingFlags.Instance) },
+            { "zombieDamageMultiplier", type.GetField("zombieDamageMultiplier", BindingFlags.Public | BindingFlags.Instance) },
+            { "animalDamageMultiplier", type.GetField("animalDamageMultiplier", BindingFlags.Public | BindingFlags.Instance) },
+            { "spreadAim", type.GetField("spreadAim", BindingFlags.Public | BindingFlags.Instance) },
+            { "spreadHip", type.GetField("spreadHip", BindingFlags.Public | BindingFlags.Instance) },
+            { "recoilMin_x", type.GetField("recoilMin_x", BindingFlags.Public | BindingFlags.Instance) },
+            { "recoilMin_y", type.GetField("recoilMin_y", BindingFlags.Public | BindingFlags.Instance) },
+            { "recoilMax_x", type.GetField("recoilMax_x", BindingFlags.Public | BindingFlags.Instance) },
+            { "recoilMax_y", type.GetField("recoilMax_y", BindingFlags.Public | BindingFlags.Instance) },
+            { "barricadeDamage", type.GetField("barricadeDamage", BindingFlags.Public | BindingFlags.Instance) },
+            { "vehicleDamage", type.GetField("vehicleDamage", BindingFlags.Public | BindingFlags.Instance) }
+        };
+        
+        foreach (var field in fields)
+            Logging.Debug($"Field: {field.Key}, Field null: {field.Value == null}");
+
+        var properties = new Dictionary<string, PropertyInfo>
+        {
+            {"gunshotRolloffDistance", type.GetProperty("gunshotRolloffDistance", BindingFlags.Public | BindingFlags.Instance) }
+        };
+
+        foreach (var property in properties)
+            Logging.Debug($"Property: {property.Key}, Property Null: {property.Value == null}");
+        
+        foreach (var gun in DB.Guns.Values)
+        {
+            var values = new Dictionary<string, object>();
+            var gunAsset = Assets.find(EAssetType.ITEM, gun.GunID) as ItemGunAsset;
+            Logging.Debug($"Gun: {gun.GunName}");
+            foreach (var field in fields)
+            {
+                var fieldValue = field.Value.GetValue(gunAsset);
+                values.Add(field.Key, fieldValue);
+                Logging.Debug($"{field.Key} : {fieldValue}");
+            }
+
+            foreach (var property in properties)
+            {
+                var propertyValue = property.Value.GetValue(gunAsset);
+                values.Add(property.Key, property.Value.GetValue(gunAsset));
+                Logging.Debug($"{property.Key} : {propertyValue}");
+            }
+
+            if (!DB.GunSkinsSearchByGunID.TryGetValue(gun.GunID, out var skins))
+                continue;
+
+            foreach (var skin in skins)
+            {
+                var skinAsset = Assets.find(EAssetType.ITEM, skin.SkinID) as ItemGunAsset;
+                Logging.Debug($"Skin: {skin.SkinName}");
+                foreach (var field in fields)
+                {
+                    Logging.Debug($"Setting {field.Key} to {values[field.Key]}");
+                    field.Value.SetValue(skinAsset, values[field.Key]);
+                }
+
+                foreach (var property in properties)
+                {
+                    Logging.Debug($"Setting {property.Key} to {values[property.Key]}");
+                    property.Value.SetValue(skinAsset, values[property.Key]);
+                }
+            }
+        }
     }
 
     public override TranslationList DefaultTranslations => new()

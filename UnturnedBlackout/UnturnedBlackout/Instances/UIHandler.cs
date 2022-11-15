@@ -58,7 +58,8 @@ public class UIHandler
     public Coroutine AchievementPageShower { get; set; }
     public Coroutine MatchEndSummaryShower { get; set; }
     public Coroutine CrateUnboxer { get; set; }
-
+    public Coroutine StatsShower { get; set; }
+    
     public Coroutine ImageScroller { get; set; }
     
     public ITransportConnection TransportConnection { get; set; }
@@ -82,6 +83,8 @@ public class UIHandler
     public int LoadoutTabPageID { get; set; }
     public object SelectedItemID { get; set; }
 
+    public bool ShowingStats { get; set; }
+    
     // Leaderboard
     public ELeaderboardPage LeaderboardPage { get; set; }
     public ELeaderboardTab LeaderboardTab { get; set; }
@@ -106,7 +109,6 @@ public class UIHandler
     // Scrollable Image
     
     public int CurrentScrollableImage { get; set; }
-    
 
     public Dictionary<int, PageLoadout> LoadoutPages { get; set; }
     public Dictionary<int, PageGun> PistolPages { get; set; }
@@ -164,6 +166,7 @@ public class UIHandler
         AchievementPageShower.Stop();
         MatchEndSummaryShower.Stop();
         CrateUnboxer.Stop();
+        StatsShower.Stop();
     }
 
     public void BuildPages()
@@ -826,6 +829,7 @@ public class UIHandler
         Player.Player.enablePluginWidgetFlag(EPluginWidgetFlags.Modal);
         SetupMainMenu();
 
+        ShowingStats = false;
         AchievementPageShower.Stop();
         CrateUnboxer.Stop();
         MatchEndSummaryShower.Stop();
@@ -841,12 +845,14 @@ public class UIHandler
         EffectManager.askEffectClearByID(MAIN_MENU_ID, TransportConnection);
         Player.Player.disablePluginWidgetFlag(EPluginWidgetFlags.Modal);
         MainPage = EMainPage.NONE;
-
+        ShowingStats = false;
+        
         ImageScroller.Stop();
         TimerRefresher.Stop();
         AchievementPageShower.Stop();
         CrateUnboxer.Stop();
         MatchEndSummaryShower.Stop();
+        StatsShower.Stop();
     }
 
     public void SetupMainMenu()
@@ -3787,90 +3793,106 @@ public class UIHandler
         SendRarityName("SERVER Item Rarity TEXT", gun.Gun.GunRarity);
         
         // Stats
-        var stopWatch = new Stopwatch();
-        stopWatch.Start();
-        if ((LoadoutPage == ELoadoutPage.PRIMARY && loadout.Primary == gun) || (LoadoutPage == ELoadoutPage.SECONDARY && loadout.Secondary == gun))
+        if (ShowingStats)
         {
-            gun.GetCurrentStats(loadout, out var defaultStats, out var finalStats, out var attachmentsCompare, out var perksCompare);
-            foreach (var stat in defaultStats)
-            {
-                var uiName = stat.Key.ToUIName();
-                var maxAmount = stat.Key.GetMaxAmount();
-                var initialStat = stat.Value;
-                var finalStat = finalStats.TryGetValue(stat.Key, out var finalStatValue) ? finalStatValue : initialStat;
-                var attachmentCompare = attachmentsCompare.TryGetValue(stat.Key, out var attachmentStatValue) ? attachmentStatValue : 0;
-                var perkCompare = perksCompare.TryGetValue(stat.Key, out var perkCompareValue) ? perkCompareValue : 0;
-                var bracketText = $"[{initialStat}{(attachmentCompare != 0 ? $" {(attachmentCompare > 0 ? "+" : "-")} <color=#e8b843>{Math.Abs(attachmentCompare)}</color>" : "")}{(perkCompare != 0 ? $" {(perkCompare > 0 ? "+" : "-")} <color=#579fdb>{Math.Abs(perkCompare)}</color>" : "")}]";
-                if (finalStat == initialStat)
-                {
-                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Colored Fill Enabler 0", true);
-                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Normal Fill Enabler {Math.Min(100, initialStat * 100 / maxAmount)}", true);
-                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Number Text", initialStat.ToString());
-                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Bracket Text", " ");
-                }
-                else if (finalStat > initialStat)
-                {
-                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Colored Fill Enabler {Math.Min(100, finalStat * 100 / maxAmount)}", true);
-                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Normal Fill Enabler {Math.Min(100, initialStat * 100 / maxAmount)}", true);
-                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Slider Green Enabler", true);
-                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Number Text", finalStat.ToString());
-                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Bracket Text", bracketText);
-                }
-                else
-                {
-                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Colored Fill Enabler {Math.Min(100, initialStat * 100 / maxAmount)}", true);
-                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Normal Fill Enabler {Math.Min(100, finalStat * 100 / maxAmount)}", true);
-                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Slider Red Enabler", true);
-                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Number Text", finalStat.ToString());
-                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Bracket Text", bracketText);
-                }
-            }
-
-            stopWatch.Stop();
-            Logging.Debug($"SELECTING GUN STATS DISPLAY TOOK {stopWatch.ElapsedTicks} ticks, {stopWatch.ElapsedMilliseconds} ms");
+            Logging.Debug($"Stats shower already doing it's work, returning");
+            return;
         }
+
+        StatsShower.Stop();
+        ShowingStats = true;
+        if ((LoadoutPage == ELoadoutPage.PRIMARY && loadout.Primary == gun) || (LoadoutPage == ELoadoutPage.SECONDARY && loadout.Secondary == gun))
+            StatsShower = Plugin.Instance.StartCoroutine(ShowEquippedGunStats(loadout, gun));
         else
         {
             var currentGun = LoadoutPage == ELoadoutPage.PRIMARY ? loadout.Primary : loadout.Secondary;
-            var equippedStats = currentGun.GetDefaultStats();
-            var newStats = gun.GetDefaultStats();
-            foreach (var stat in newStats)
-            {
-                var uiName = stat.Key.ToUIName();
-                var maxAmount = stat.Key.GetMaxAmount();
-                var currentStat = equippedStats.TryGetValue(stat.Key, out var currentStatValue) ? currentStatValue : 0;
-                var newStat = stat.Value;
-                var compareStat = newStat - currentStat;
-                Logging.Debug($"Stat: {stat.Key}, Current Stat: {currentStat}, New Stat: {newStat}, Compare Stat: {compareStat}, UI Name: {uiName}, Max Amount: {maxAmount}");
-                switch (compareStat)
-                {
-                    case 0:
-                        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Colored Fill Enabler 0", true);
-                        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Normal Fill Enabler {Math.Min(100, currentStat * 100 / maxAmount)}", true);
-                        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Number Text", currentStat.ToString());
-                        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Bracket Text", " ");
-                        break;
-                    case > 0:
-                        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Colored Fill Enabler {Math.Min(100, newStat * 100 / maxAmount)}", true);
-                        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Normal Fill Enabler {Math.Min(100, currentStat * 100 / maxAmount)}", true);
-                        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Slider Green Enabler", true);
-                        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Number Text", newStat.ToString());
-                        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Bracket Text", $"[{currentStat} + <color=#31AB40>{compareStat}</color>]");
-                        break;
-                    default:
-                        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Colored Fill Enabler {Math.Min(100, currentStat * 100 / maxAmount)}", true);
-                        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Normal Fill Enabler {Math.Min(100, newStat * 100 / maxAmount)}", true);
-                        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Slider Red Enabler", true);
-                        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Number Text", newStat.ToString());
-                        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Bracket Text", $"[{currentStat} - <color=#CE3036>{Math.Abs(compareStat)}</color>]");
-                        break;
-                }
-            }
-            stopWatch.Stop();
-            Logging.Debug($"COMPARING GUN STATS DISPLAY TOOK {stopWatch.ElapsedTicks} ticks, {stopWatch.ElapsedMilliseconds} ms");
+            StatsShower = Plugin.Instance.StartCoroutine(ShowComparisonGunStats(currentGun, gun));
         }
     }
 
+    public IEnumerator ShowEquippedGunStats(Loadout loadout, LoadoutGun gun)
+    {
+        yield return new WaitForSeconds(0.1f);
+
+        gun.GetCurrentStats(loadout, out var defaultStats, out var finalStats, out var attachmentsCompare, out var perksCompare);
+        foreach (var stat in defaultStats)
+        {
+            var uiName = stat.Key.ToUIName();
+            var maxAmount = stat.Key.GetMaxAmount();
+            var initialStat = stat.Value;
+            var finalStat = finalStats.TryGetValue(stat.Key, out var finalStatValue) ? finalStatValue : initialStat;
+            var attachmentCompare = attachmentsCompare.TryGetValue(stat.Key, out var attachmentStatValue) ? attachmentStatValue : 0;
+            var perkCompare = perksCompare.TryGetValue(stat.Key, out var perkCompareValue) ? perkCompareValue : 0;
+            var bracketText = $"[{initialStat}{(attachmentCompare != 0 ? $" {(attachmentCompare > 0 ? "+" : "-")} <color=#e8b843>{Math.Abs(attachmentCompare)}</color>" : "")}{(perkCompare != 0 ? $" {(perkCompare > 0 ? "+" : "-")} <color=#579fdb>{Math.Abs(perkCompare)}</color>" : "")}]";
+            if (finalStat == initialStat)
+            {
+                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Colored Fill Enabler 0", true);
+                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Normal Fill Enabler {Math.Min(100, initialStat * 100 / maxAmount)}", true);
+                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Number Text", initialStat.ToString());
+                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Bracket Text", " ");
+            }
+            else if (finalStat > initialStat)
+            {
+                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Colored Fill Enabler {Math.Min(100, finalStat * 100 / maxAmount)}", true);
+                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Normal Fill Enabler {Math.Min(100, initialStat * 100 / maxAmount)}", true);
+                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Slider Green Enabler", true);
+                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Number Text", finalStat.ToString());
+                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Bracket Text", bracketText);
+            }
+            else
+            {
+                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Colored Fill Enabler {Math.Min(100, initialStat * 100 / maxAmount)}", true);
+                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Normal Fill Enabler {Math.Min(100, finalStat * 100 / maxAmount)}", true);
+                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Slider Red Enabler", true);
+                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Number Text", finalStat.ToString());
+                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Bracket Text", bracketText);
+            }
+        }
+
+        ShowingStats = false;
+    }
+
+    public IEnumerator ShowComparisonGunStats(LoadoutGun currentGun, LoadoutGun newGun)
+    {
+        yield return new WaitForSeconds(0.1f);
+        var equippedStats = currentGun.GetDefaultStats();
+        var newStats = newGun.GetDefaultStats();
+        foreach (var stat in newStats)
+        {
+            var uiName = stat.Key.ToUIName();
+            var maxAmount = stat.Key.GetMaxAmount();
+            var currentStat = equippedStats.TryGetValue(stat.Key, out var currentStatValue) ? currentStatValue : 0;
+            var newStat = stat.Value;
+            var compareStat = newStat - currentStat;
+            Logging.Debug($"Stat: {stat.Key}, Current Stat: {currentStat}, New Stat: {newStat}, Compare Stat: {compareStat}, UI Name: {uiName}, Max Amount: {maxAmount}");
+            switch (compareStat)
+            {
+                case 0:
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Colored Fill Enabler 0", true);
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Normal Fill Enabler {Math.Min(100, currentStat * 100 / maxAmount)}", true);
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Number Text", currentStat.ToString());
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Bracket Text", " ");
+                    break;
+                case > 0:
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Colored Fill Enabler {Math.Min(100, newStat * 100 / maxAmount)}", true);
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Normal Fill Enabler {Math.Min(100, currentStat * 100 / maxAmount)}", true);
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Slider Green Enabler", true);
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Number Text", newStat.ToString());
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Bracket Text", $"[{currentStat} + <color=#31AB40>{compareStat}</color>]");
+                    break;
+                default:
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Colored Fill Enabler {Math.Min(100, currentStat * 100 / maxAmount)}", true);
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Normal Fill Enabler {Math.Min(100, newStat * 100 / maxAmount)}", true);
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Slider Red Enabler", true);
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Number Text", newStat.ToString());
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Bracket Text", $"[{currentStat} - <color=#CE3036>{Math.Abs(compareStat)}</color>]");
+                    break;
+            }
+        }
+
+        ShowingStats = false;
+    }
+    
     public void ShowAttachment(LoadoutAttachment attachment, LoadoutGun gun)
     {
         SelectedItemID = attachment.Attachment.AttachmentID;
@@ -3917,153 +3939,163 @@ public class UIHandler
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Owned", false);
 
         Logging.Debug($"Attachment: {attachment.Attachment.AttachmentName}, ID: {attachment.Attachment.AttachmentID}");
-        var stopWatch = new Stopwatch();
-        stopWatch.Start();
+        if (ShowingStats)
+        {
+            Logging.Debug("Stats shower already doing it's work, returning");
+            return;
+        }
+
+        StatsShower.Stop();
+        ShowingStats = true;
         if (attachment.IsBought && ((isAttachmentPrimary && loadout.PrimaryAttachments.ContainsValue(attachment)) || (!isAttachmentPrimary && loadout.SecondaryAttachments.ContainsValue(attachment))))
-        {
-            // Attachment is equipped
-            Logging.Debug("Attachment is equipped, get the stats while ignore the attachment type");
-            gun.GetCurrentStats(loadout, attachment.Attachment.AttachmentType, out var finalStats);
-            foreach (var finalStat in finalStats)
-            {
-                var stat = finalStat.Key;
-                var uiName = stat.ToUIName();
-                var maxAmount = stat.GetMaxAmount();
-                var currentStat = finalStat.Value;
-                int newStat;
-                int compareStat;
-                switch (stat)
-                {
-                    case EStat.AMMO:
-                    {
-                        newStat = attachment.Attachment.StatMultipliers.TryGetValue(EStat.AMMO, out var newAmmoStatValue) ? Mathf.RoundToInt(newAmmoStatValue) : currentStat;
-                        compareStat = newStat - currentStat;
-                        Logging.Debug($"Stat: {stat}, Current Stat: {currentStat}, New Stat: {newStat}, Compare Stat: {compareStat}, UI Name: {uiName}, Max Amount: {maxAmount}");
-                        break;
-                    }
-                    case EStat.RELOAD_SPEED:
-                    {
-                        var multiplier = attachment.Attachment.StatMultipliers.TryGetValue(stat, out var multiplierValue) ? multiplierValue : 0f;
-                        var tempStat = gun.Gun.Stats[EStat.RELOAD_SPEED];
-                        newStat = multiplier != 0f ? tempStat + Mathf.RoundToInt(multiplier * tempStat) : currentStat;
-                        compareStat = newStat - currentStat;
-                        Logging.Debug($"Stat: {stat}, Current Stat: {currentStat}, Temp Stat: {tempStat} multiplier: {multiplier}, new stat: {newStat}, compare stat {compareStat}, UI Name: {uiName}, Max Amount: {maxAmount}");
-                        break;
-                    }
-                    default:
-                    {
-                        var multiplier = attachment.Attachment.StatMultipliers.TryGetValue(stat, out var multiplierValue) ? multiplierValue : 0f;
-                        newStat = currentStat + Mathf.RoundToInt(multiplier * currentStat);
-                        compareStat = newStat - currentStat;
-                        Logging.Debug($"Stat: {stat}, Current Stat: {currentStat}, multiplier: {multiplier}, New Stat: {newStat}, Compare Stat: {compareStat}, UI Name: {uiName}, Max Amount: {maxAmount}");
-                        break;
-                    }
-                }
-
-                switch (compareStat)
-                {
-                    case 0:
-                        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Colored Fill Enabler 0", true);
-                        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Normal Fill Enabler {Math.Min(100, currentStat * 100 / maxAmount)}", true);
-                        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Number Text", currentStat.ToString());
-                        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Bracket Text", " ");
-                        break;
-                    case > 0:
-                        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Colored Fill Enabler {Math.Min(100, newStat * 100 / maxAmount)}", true);
-                        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Normal Fill Enabler {Math.Min(100, currentStat * 100 / maxAmount)}", true);
-                        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Slider Green Enabler", true);
-                        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Number Text", newStat.ToString());
-                        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Bracket Text", $"[{currentStat} + <color=#31AB40>{compareStat}</color>]");
-                        break;
-                    default:
-                        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Colored Fill Enabler {Math.Min(100, currentStat * 100 / maxAmount)}", true);
-                        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Normal Fill Enabler {Math.Min(100, newStat * 100 / maxAmount)}", true);
-                        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Slider Red Enabler", true);
-                        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Number Text", newStat.ToString());
-                        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Bracket Text", $"[{currentStat} - <color=#CE3036>{Math.Abs(compareStat)}</color>]");
-                        break;
-                }
-            }
-            
-            stopWatch.Stop();
-            Logging.Debug($"SELECTING ATTACHMENT STATS DISPLAY TOOK {stopWatch.ElapsedTicks} ticks, {stopWatch.ElapsedMilliseconds} ms");
-        }
+            StatsShower = Plugin.Instance.StartCoroutine(ShowEquippedAttachmentStats(loadout, gun, attachment));
         else
-        {
-            // Attachment is not equipped
-            Logging.Debug("Attachment is not equipped, getting the stats for the current gun");
-            gun.GetCurrentStats(loadout, out var _, out var statsWithCurrentAttachment, out var _, out var _);
-            Logging.Debug("Getting the stats for the gun while ignoring the current attachment type");
-            gun.GetCurrentStats(loadout, attachment.Attachment.AttachmentType, out var statsWithoutCurrentAttachment);
-            Logging.Debug("Adding the stat multipliers of the current attachment to the stats without current attachment, and computing the comparison");
-            
-            foreach (var finalStat in statsWithCurrentAttachment)
-            {
-                var stat = finalStat.Key;
-                var uiName = stat.ToUIName();
-                var maxAmount = stat.GetMaxAmount();
-                var currentStat = finalStat.Value;
-                int newStat;
-                int compareStat;
-                switch (stat)
-                {
-                    case EStat.AMMO:
-                    {
-                        newStat = attachment.Attachment.StatMultipliers.TryGetValue(EStat.AMMO, out var newAmmoStatValue) ? Mathf.RoundToInt(newAmmoStatValue) : currentStat;
-                        compareStat = newStat - currentStat;
-                        Logging.Debug($"Stat: {stat}, Current Stat: {currentStat}, New Stat: {newStat}, Compare Stat: {compareStat}, UI Name: {uiName}, Max Amount: {maxAmount}");
-                        break;
-                    }
-                    case EStat.RELOAD_SPEED:
-                    {
-                        var multiplier = attachment.Attachment.StatMultipliers.TryGetValue(stat, out var multiplierValue) ? multiplierValue : 0f;
-                        var tempStat = gun.Gun.Stats[EStat.RELOAD_SPEED];
-                        newStat = multiplier != 0f ? tempStat + Mathf.RoundToInt(multiplier * tempStat) : currentStat;
-                        compareStat = newStat - currentStat;
-                        Logging.Debug($"Stat: {stat}, Current Stat: {currentStat}, Temp Stat: {tempStat}, multiplier: {multiplier}, New Stat: {newStat}, Compare Stat: {compareStat}, UI Name: {uiName}, Max Amount: {maxAmount}");
-                        break;
-                    }
-                    default:
-                    {
-                        var multiplier = attachment.Attachment.StatMultipliers.TryGetValue(stat, out var multiplierValue) ? multiplierValue : 0f;
-                        var tempStat = statsWithoutCurrentAttachment.TryGetValue(stat, out var tempStatValue) ? tempStatValue : currentStat;
-                        newStat = tempStat + Mathf.RoundToInt(multiplier * tempStat);
-                        compareStat = newStat - currentStat;
-                        Logging.Debug($"Stat: {stat}, Current Stat: {currentStat}, Temp Stat: {tempStat}, multiplier: {multiplier}, New Stat: {newStat}, Compare Stat: {compareStat}, UI Name: {uiName}, Max Amount: {maxAmount}");
-                        break;
-                    }
-                }
-
-                switch (compareStat)
-                {
-                    case 0:
-                        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Colored Fill Enabler 0", true);
-                        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Normal Fill Enabler {Math.Min(100, currentStat * 100 / maxAmount)}", true);
-                        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Number Text", currentStat.ToString());
-                        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Bracket Text", " ");
-                        break;
-                    case > 0:
-                        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Colored Fill Enabler {Math.Min(100, newStat * 100 / maxAmount)}", true);
-                        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Normal Fill Enabler {Math.Min(100, currentStat * 100 / maxAmount)}", true);
-                        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Slider Green Enabler", true);
-                        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Number Text", newStat.ToString());
-                        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Bracket Text", $"[{currentStat} + <color=#31AB40>{compareStat}</color>]");
-                        break;
-                    default:
-                        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Colored Fill Enabler {Math.Min(100, currentStat * 100 / maxAmount)}", true);
-                        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Normal Fill Enabler {Math.Min(100, newStat * 100 / maxAmount)}", true);
-                        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Slider Red Enabler", true);
-                        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Number Text", newStat.ToString());
-                        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Bracket Text", $"[{currentStat} - <color=#CE3036>{Math.Abs(compareStat)}</color>]");
-                        break;
-                }
-            }
-            
-            stopWatch.Stop();
-            Logging.Debug($"COMPARING ATTACHMENT STATS DISPLAY TOOK {stopWatch.ElapsedTicks} ticks, {stopWatch.ElapsedMilliseconds} ms");
-        }
+            StatsShower = Plugin.Instance.StartCoroutine(ShowComparisonAttachmentStats(loadout, gun, attachment));
     }
 
+    public IEnumerator ShowEquippedAttachmentStats(Loadout loadout, LoadoutGun gun, LoadoutAttachment attachment)
+    {
+        yield return new WaitForSeconds(0.1f);
+        Logging.Debug("Attachment is equipped, get the stats while ignore the attachment type");
+        gun.GetCurrentStats(loadout, attachment.Attachment.AttachmentType, out var finalStats);
+        foreach (var finalStat in finalStats)
+        {
+            var stat = finalStat.Key;
+            var uiName = stat.ToUIName();
+            var maxAmount = stat.GetMaxAmount();
+            var currentStat = finalStat.Value;
+            int newStat;
+            int compareStat;
+            switch (stat)
+            {
+                case EStat.AMMO:
+                {
+                    newStat = attachment.Attachment.StatMultipliers.TryGetValue(EStat.AMMO, out var newAmmoStatValue) ? Mathf.RoundToInt(newAmmoStatValue) : currentStat;
+                    compareStat = newStat - currentStat;
+                    Logging.Debug($"Stat: {stat}, Current Stat: {currentStat}, New Stat: {newStat}, Compare Stat: {compareStat}, UI Name: {uiName}, Max Amount: {maxAmount}");
+                    break;
+                }
+                case EStat.RELOAD_SPEED:
+                {
+                    var multiplier = attachment.Attachment.StatMultipliers.TryGetValue(stat, out var multiplierValue) ? multiplierValue : 0f;
+                    var tempStat = gun.Gun.Stats[EStat.RELOAD_SPEED];
+                    newStat = multiplier != 0f ? tempStat + Mathf.RoundToInt(multiplier * tempStat) : currentStat;
+                    compareStat = newStat - currentStat;
+                    Logging.Debug($"Stat: {stat}, Current Stat: {currentStat}, Temp Stat: {tempStat} multiplier: {multiplier}, new stat: {newStat}, compare stat {compareStat}, UI Name: {uiName}, Max Amount: {maxAmount}");
+                    break;
+                }
+                default:
+                {
+                    var multiplier = attachment.Attachment.StatMultipliers.TryGetValue(stat, out var multiplierValue) ? multiplierValue : 0f;
+                    newStat = currentStat + Mathf.RoundToInt(multiplier * currentStat);
+                    compareStat = newStat - currentStat;
+                    Logging.Debug($"Stat: {stat}, Current Stat: {currentStat}, multiplier: {multiplier}, New Stat: {newStat}, Compare Stat: {compareStat}, UI Name: {uiName}, Max Amount: {maxAmount}");
+                    break;
+                }
+            }
+
+            switch (compareStat)
+            {
+                case 0:
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Colored Fill Enabler 0", true);
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Normal Fill Enabler {Math.Min(100, currentStat * 100 / maxAmount)}", true);
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Number Text", currentStat.ToString());
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Bracket Text", " ");
+                    break;
+                case > 0:
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Colored Fill Enabler {Math.Min(100, newStat * 100 / maxAmount)}", true);
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Normal Fill Enabler {Math.Min(100, currentStat * 100 / maxAmount)}", true);
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Slider Green Enabler", true);
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Number Text", newStat.ToString());
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Bracket Text", $"[{currentStat} + <color=#31AB40>{compareStat}</color>]");
+                    break;
+                default:
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Colored Fill Enabler {Math.Min(100, currentStat * 100 / maxAmount)}", true);
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Normal Fill Enabler {Math.Min(100, newStat * 100 / maxAmount)}", true);
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Slider Red Enabler", true);
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Number Text", newStat.ToString());
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Bracket Text", $"[{currentStat} - <color=#CE3036>{Math.Abs(compareStat)}</color>]");
+                    break;
+            }
+        }
+
+        ShowingStats = false;
+    }
+
+    public IEnumerator ShowComparisonAttachmentStats(Loadout loadout, LoadoutGun gun, LoadoutAttachment attachment)
+    {
+        yield return new WaitForSeconds(0.1f);
+        Logging.Debug("Attachment is not equipped, getting the stats for the current gun");
+        gun.GetCurrentStats(loadout, out var _, out var statsWithCurrentAttachment, out var _, out var _);
+        Logging.Debug("Getting the stats for the gun while ignoring the current attachment type");
+        gun.GetCurrentStats(loadout, attachment.Attachment.AttachmentType, out var statsWithoutCurrentAttachment);
+        Logging.Debug("Adding the stat multipliers of the current attachment to the stats without current attachment, and computing the comparison");
+
+        foreach (var finalStat in statsWithCurrentAttachment)
+        {
+            var stat = finalStat.Key;
+            var uiName = stat.ToUIName();
+            var maxAmount = stat.GetMaxAmount();
+            var currentStat = finalStat.Value;
+            int newStat;
+            int compareStat;
+            switch (stat)
+            {
+                case EStat.AMMO:
+                {
+                    newStat = attachment.Attachment.StatMultipliers.TryGetValue(EStat.AMMO, out var newAmmoStatValue) ? Mathf.RoundToInt(newAmmoStatValue) : currentStat;
+                    compareStat = newStat - currentStat;
+                    Logging.Debug($"Stat: {stat}, Current Stat: {currentStat}, New Stat: {newStat}, Compare Stat: {compareStat}, UI Name: {uiName}, Max Amount: {maxAmount}");
+                    break;
+                }
+                case EStat.RELOAD_SPEED:
+                {
+                    var multiplier = attachment.Attachment.StatMultipliers.TryGetValue(stat, out var multiplierValue) ? multiplierValue : 0f;
+                    var tempStat = gun.Gun.Stats[EStat.RELOAD_SPEED];
+                    newStat = multiplier != 0f ? tempStat + Mathf.RoundToInt(multiplier * tempStat) : currentStat;
+                    compareStat = newStat - currentStat;
+                    Logging.Debug($"Stat: {stat}, Current Stat: {currentStat}, Temp Stat: {tempStat}, multiplier: {multiplier}, New Stat: {newStat}, Compare Stat: {compareStat}, UI Name: {uiName}, Max Amount: {maxAmount}");
+                    break;
+                }
+                default:
+                {
+                    var multiplier = attachment.Attachment.StatMultipliers.TryGetValue(stat, out var multiplierValue) ? multiplierValue : 0f;
+                    var tempStat = statsWithoutCurrentAttachment.TryGetValue(stat, out var tempStatValue) ? tempStatValue : currentStat;
+                    newStat = tempStat + Mathf.RoundToInt(multiplier * tempStat);
+                    compareStat = newStat - currentStat;
+                    Logging.Debug($"Stat: {stat}, Current Stat: {currentStat}, Temp Stat: {tempStat}, multiplier: {multiplier}, New Stat: {newStat}, Compare Stat: {compareStat}, UI Name: {uiName}, Max Amount: {maxAmount}");
+                    break;
+                }
+            }
+
+            switch (compareStat)
+            {
+                case 0:
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Colored Fill Enabler 0", true);
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Normal Fill Enabler {Math.Min(100, currentStat * 100 / maxAmount)}", true);
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Number Text", currentStat.ToString());
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Bracket Text", " ");
+                    break;
+                case > 0:
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Colored Fill Enabler {Math.Min(100, newStat * 100 / maxAmount)}", true);
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Normal Fill Enabler {Math.Min(100, currentStat * 100 / maxAmount)}", true);
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Slider Green Enabler", true);
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Number Text", newStat.ToString());
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Bracket Text", $"[{currentStat} + <color=#31AB40>{compareStat}</color>]");
+                    break;
+                default:
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Colored Fill Enabler {Math.Min(100, currentStat * 100 / maxAmount)}", true);
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Normal Fill Enabler {Math.Min(100, newStat * 100 / maxAmount)}", true);
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Slider Red Enabler", true);
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Number Text", newStat.ToString());
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Bracket Text", $"[{currentStat} - <color=#CE3036>{Math.Abs(compareStat)}</color>]");
+                    break;
+            }
+        }
+
+        ShowingStats = false;
+    }
+    
     public void ShowGunCharm(LoadoutGunCharm gunCharm)
     {
         SelectedItemID = gunCharm.GunCharm.CharmID;
@@ -4164,8 +4196,9 @@ public class UIHandler
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !perk.IsBought && !perk.IsUnlocked && perk.Perk.LevelRequirement > PlayerData.Level);
         var coins = perk.Perk.GetCoins(PlayerData.Level);
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.COIN)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
-        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Equip BUTTON", perk.IsBought && !loadout.Perks.ContainsValue(perk));
-        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Dequip BUTTON", perk.IsBought && loadout.Perks.ContainsValue(perk));
+        var isEquipped = loadout.Perks.TryGetValue(perk.Perk.PerkType, out var equippedPerk) && equippedPerk == perk;
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Equip BUTTON", perk.IsBought && !isEquipped);
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Dequip BUTTON", perk.IsBought && isEquipped);
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Description TEXT", perk.Perk.PerkDesc);
         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item IMAGE", perk.Perk.IconLink);
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item TEXT", perk.Perk.PerkName);
@@ -4185,6 +4218,136 @@ public class UIHandler
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Rarity TEXT", $"<color={Utility.GetRarityColor(ERarity.YELLOW)}>PERK 3</color>");
                 break;
         }
+
+        if (ShowingStats)
+        {
+            Logging.Debug("Stat shower already doing it's work, returning");
+            return;
+        }
+
+        StatsShower.Stop();
+        ShowingStats = true;
+        
+        StatsShower = Plugin.Instance.StartCoroutine(isEquipped ? ShowEquippedPerkStats(loadout, perk) : ShowComparisonPerkStats(loadout, perk));
+    }
+
+    public IEnumerator ShowEquippedPerkStats(Loadout loadout, LoadoutPerk perk)
+    {
+        yield return new WaitForSeconds(0.1f);
+
+        var gun = loadout.Primary;
+        Logging.Debug("Perk is equipped, get the stats while ignore the perk type");
+        gun.GetCurrentStats(loadout, perk.Perk.PerkType, out var finalStats);
+        foreach (var finalStat in finalStats)
+        {
+            var stat = finalStat.Key;
+            var uiName = stat.ToUIName();
+            var maxAmount = stat.GetMaxAmount();
+            var currentStat = finalStat.Value;
+            int newStat;
+            int compareStat;
+            if (stat == EStat.AMMO)
+            {
+                newStat = currentStat;
+                compareStat = newStat - currentStat;
+                Logging.Debug($"Stat: {stat}, Current Stat: {currentStat}, New Stat: {newStat}, Compare Stat: {compareStat}, UI Name: {uiName}, Max Amount: {maxAmount}");
+            }
+            else
+            {
+                var multiplier = perk.Perk.StatMultipliers.TryGetValue(stat, out var multiplierValue) ? multiplierValue : 0f;
+                newStat = currentStat + Mathf.RoundToInt(multiplier * currentStat);
+                compareStat = newStat - currentStat;
+                Logging.Debug($"Stat: {stat}, Current Stat: {currentStat}, multiplier: {multiplier}, New Stat: {newStat}, Compare Stat: {compareStat}, UI Name: {uiName}, Max Amount: {maxAmount}");
+            }
+
+            switch (compareStat)
+            {
+                case 0:
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Colored Fill Enabler 0", true);
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Normal Fill Enabler {Math.Min(100, currentStat * 100 / maxAmount)}", true);
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Number Text", currentStat.ToString());
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Bracket Text", " ");
+                    break;
+                case > 0:
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Colored Fill Enabler {Math.Min(100, newStat * 100 / maxAmount)}", true);
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Normal Fill Enabler {Math.Min(100, currentStat * 100 / maxAmount)}", true);
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Slider Green Enabler", true);
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Number Text", newStat.ToString());
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Bracket Text", $"[{currentStat} + <color=#31AB40>{compareStat}</color>]");
+                    break;
+                default:
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Colored Fill Enabler {Math.Min(100, currentStat * 100 / maxAmount)}", true);
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Normal Fill Enabler {Math.Min(100, newStat * 100 / maxAmount)}", true);
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Slider Red Enabler", true);
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Number Text", newStat.ToString());
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Bracket Text", $"[{currentStat} - <color=#CE3036>{Math.Abs(compareStat)}</color>]");
+                    break;
+            }
+        }
+
+        ShowingStats = false;
+    }
+
+    public IEnumerator ShowComparisonPerkStats(Loadout loadout, LoadoutPerk perk)
+    {
+        yield return new WaitForSeconds(0.1f);
+
+        var gun = loadout.Primary;
+        Logging.Debug("Perk is not equipped, getting the stats for the current gun");
+        gun.GetCurrentStats(loadout, out var _, out var statsWithCurrentAttachment, out var _, out var _);
+        Logging.Debug("Getting the stats for the gun while ignoring the current perk type");
+        gun.GetCurrentStats(loadout, perk.Perk.PerkType, out var statsWithoutCurrentAttachment);
+        Logging.Debug("Adding the stat multipliers of the current perk to the stats without current perk, and computing the comparison");
+
+        foreach (var finalStat in statsWithCurrentAttachment)
+        {
+            var stat = finalStat.Key;
+            var uiName = stat.ToUIName();
+            var maxAmount = stat.GetMaxAmount();
+            var currentStat = finalStat.Value;
+            int newStat;
+            int compareStat;
+            if (stat == EStat.AMMO)
+            {
+                newStat = currentStat;
+                compareStat = newStat - currentStat;
+                Logging.Debug($"Stat: {stat}, Current Stat: {currentStat}, New Stat: {newStat}, Compare Stat: {compareStat}, UI Name: {uiName}, Max Amount: {maxAmount}");
+            }
+            else
+            {
+                var multiplier = perk.Perk.StatMultipliers.TryGetValue(stat, out var multiplierValue) ? multiplierValue : 0f;
+                var tempStat = statsWithoutCurrentAttachment.TryGetValue(stat, out var tempStatValue) ? tempStatValue : currentStat;
+                newStat = tempStat + Mathf.RoundToInt(multiplier * tempStat);
+                compareStat = newStat - currentStat;
+                Logging.Debug($"Stat: {stat}, Current Stat: {currentStat}, Temp Stat: {tempStat}, multiplier: {multiplier}, New Stat: {newStat}, Compare Stat: {compareStat}, UI Name: {uiName}, Max Amount: {maxAmount}");
+            }
+
+            switch (compareStat)
+            {
+                case 0:
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Colored Fill Enabler 0", true);
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Normal Fill Enabler {Math.Min(100, currentStat * 100 / maxAmount)}", true);
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Number Text", currentStat.ToString());
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Bracket Text", " ");
+                    break;
+                case > 0:
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Colored Fill Enabler {Math.Min(100, newStat * 100 / maxAmount)}", true);
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Normal Fill Enabler {Math.Min(100, currentStat * 100 / maxAmount)}", true);
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Slider Green Enabler", true);
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Number Text", newStat.ToString());
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Bracket Text", $"[{currentStat} + <color=#31AB40>{compareStat}</color>]");
+                    break;
+                default:
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Colored Fill Enabler {Math.Min(100, currentStat * 100 / maxAmount)}", true);
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Normal Fill Enabler {Math.Min(100, newStat * 100 / maxAmount)}", true);
+                    EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Slider Red Enabler", true);
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Number Text", newStat.ToString());
+                    EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{uiName} Bracket Text", $"[{currentStat} - <color=#CE3036>{Math.Abs(compareStat)}</color>]");
+                    break;
+            }
+        }
+
+        ShowingStats = false;
     }
 
     public void ShowGadget(LoadoutGadget gadget)
@@ -5871,8 +6034,9 @@ public class UIHandler
         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass IMAGE", "");
 
         // Setup the preview section
-        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass Expire Timer", false);
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass Expire TEXT", "365 Days");
+        var bpExpiry = DB.ServerOptions.BattlepassExpiry;
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass Expire Timer", bpExpiry > DateTimeOffset.UtcNow);
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass Expire TEXT", $"{(int)(bpExpiry - DateTimeOffset.UtcNow).TotalDays} Days");
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass Buy Pass BUTTON", !PlayerData.HasBattlepass);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass Tier Skip", !isBattlePassCompleted);
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass Tier Skip TEXT",
