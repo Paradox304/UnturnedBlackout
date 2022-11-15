@@ -4018,7 +4018,7 @@ public class UIHandler
                     {
                         var multiplier = attachment.Attachment.StatMultipliers.TryGetValue(stat, out var multiplierValue) ? multiplierValue : 0f;
                         var tempStat = gun.Gun.Stats[EStat.RELOAD_SPEED];
-                        newStat = tempStat + Mathf.RoundToInt(multiplier * tempStat);
+                        newStat = multiplier != 0f ? tempStat + Mathf.RoundToInt(multiplier * tempStat) : currentStat;
                         compareStat = newStat - currentStat;
                         Logging.Debug($"Stat: {stat}, Current Stat: {currentStat}, Temp Stat: {tempStat}, multiplier: {multiplier}, New Stat: {newStat}, Compare Stat: {compareStat}, UI Name: {uiName}, Max Amount: {maxAmount}");
                         break;

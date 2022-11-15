@@ -483,8 +483,8 @@ public class DatabaseManager
                     if (overrideStats.ContainsKey(EStat.RECOIL_CONTROL) || caliberAsset.recoil_x != 1f || caliberAsset.recoil_y != 1f)
                         stats.Add(EStat.RECOIL_CONTROL, overrideStats.TryGetValue(EStat.RECOIL_CONTROL, out var recoilControl) ? recoilControl : 1f - (caliberAsset.recoil_x + caliberAsset.recoil_y) / 2);
 
-                    if (overrideStats.ContainsKey(EStat.DAMAGE) || caliberAsset.damage != 1f)
-                        stats.Add(EStat.DAMAGE, overrideStats.TryGetValue(EStat.DAMAGE, out var damage) ? damage : caliberAsset.damage - 1f);
+                    if (overrideStats.ContainsKey(EStat.DAMAGE) || caliberAsset.ballisticDamageMultiplier != 1f)
+                        stats.Add(EStat.DAMAGE, overrideStats.TryGetValue(EStat.DAMAGE, out var damage) ? damage : caliberAsset.ballisticDamageMultiplier - 1f);
 
                     if (overrideStats.ContainsKey(EStat.HIPFIRE_ACCURACY) || caliberAsset.spread != 1f)
                         stats.Add(EStat.HIPFIRE_ACCURACY, overrideStats.TryGetValue(EStat.HIPFIRE_ACCURACY, out var accuracy) ? accuracy : 1f - caliberAsset.spread);
