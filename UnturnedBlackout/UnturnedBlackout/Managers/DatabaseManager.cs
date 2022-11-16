@@ -4989,15 +4989,19 @@ public class DatabaseManager
 
     public void RemovePlayerCard(CSteamID steamID, int cardID)
     {
-        if (!Cards.TryGetValue(cardID, out var card))
+        if (!Cards.ContainsKey(cardID))
             throw new ArgumentNullException("id", $"Card with id {cardID} doesn't exist in the database, while removing from {steamID}");
 
         AddQuery($"DELETE FROM `{PLAYERS_CARDS}` WHERE `SteamID` = {steamID} AND `CardID` = {cardID};");
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
             return;
 
+        if (!loadout.Cards.ContainsKey(cardID))
+            return;
+        
         DecreasePlayerCardUnboxedAmount(cardID, 1);
         loadout.Cards.Remove(cardID);
+        Plugin.Instance.UI.OnUIUpdated(steamID, EUIPage.CARD);
     }
 
     public bool UpdatePlayerCardBought(CSteamID steamID, int cardID, bool isBought)
