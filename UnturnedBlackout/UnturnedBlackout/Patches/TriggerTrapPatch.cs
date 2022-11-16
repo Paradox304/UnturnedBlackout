@@ -38,7 +38,7 @@ public static class TriggerTrapPatch
             return true;
 
         Logging.Debug($"Player: {gPlayer.SteamID.m_SteamID}, owner: {data.owner}, player group: {gPlayer.Player.Player.quests.groupID.m_SteamID}, trap group: {data.group}");
-        if (data.group != 0UL && data.group == gPlayer.Player.Player.quests.groupID.m_SteamID)
+        if (data.owner != gPlayer.Player.CSteamID.m_SteamID && data.group != 0UL && data.group == gPlayer.Player.Player.quests.groupID.m_SteamID)
         {
             Logging.Debug("Player stepping on his own trap or teammmate's");
             return false;

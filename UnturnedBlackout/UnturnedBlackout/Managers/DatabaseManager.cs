@@ -1740,7 +1740,7 @@ public class DatabaseManager
             await conn.OpenAsync();
             MySqlCommand cmd =
                 new(
-                    $"INSERT INTO `{PLAYERS}` ( `SteamID` , `SteamName` , `AvatarLink` , `CountryCode` , `MuteExpiry`, `MuteReason`, `Coins` , `Hotkeys` ) VALUES ({player.CSteamID}, @name, '{avatarLink}' , '{countryCode}' , {DateTimeOffset.UtcNow.ToUnixTimeSeconds()} , ' ', {(Plugin.Instance.Configuration.Instance.UnlockAllItems ? 10000000 : 0)} , '4,3,5,6,7' ) ON DUPLICATE KEY UPDATE `AvatarLink` = '{avatarLink}', `SteamName` = @name, `CountryCode` = '{countryCode}';",
+                    $"INSERT INTO `{PLAYERS}` ( `SteamID` , `SteamName` , `AvatarLink` , `CountryCode` , `MuteExpiry`, `MuteReason`, `Coins` , `Credits`, `Hotkeys` ) VALUES ({player.CSteamID}, @name, '{avatarLink}' , '{countryCode}' , {DateTimeOffset.UtcNow.ToUnixTimeSeconds()} , ' ', {(Config.UnlockAllItems ? 10000000 : 0)} , {(Config.UnlockAllItems ? 10000000 : 0)}, '4,3,5,6,7' ) ON DUPLICATE KEY UPDATE `AvatarLink` = '{avatarLink}', `SteamName` = @name, `CountryCode` = '{countryCode}';",
                     conn);
 
             _ = cmd.Parameters.AddWithValue("@name", steamName.ToUnrich());
@@ -4079,6 +4079,9 @@ public class DatabaseManager
 
     public void DecreasePlayerCredits(CSteamID steamID, int credits)
     {
+        if (Config.UnlockAllItems)
+            return;
+        
         AddQuery($"UPDATE `{PLAYERS}` SET `Credits` = `Credits` - {credits} WHERE `SteamID` = {steamID};");
         if (!PlayerData.TryGetValue(steamID, out var data))
             return;
@@ -4099,6 +4102,9 @@ public class DatabaseManager
 
     public void DecreasePlayerScrap(CSteamID steamID, int scrap)
     {
+        if (Config.UnlockAllItems)
+            return;
+        
         AddQuery($"UPDATE `{PLAYERS}` SET `Scrap` = `Scrap` - {scrap} WHERE `SteamID` = {steamID};");
         if (!PlayerData.TryGetValue(steamID, out var data))
             return;
@@ -4119,6 +4125,9 @@ public class DatabaseManager
 
     public void DecreasePlayerCoins(CSteamID steamID, int coins)
     {
+        if (Config.UnlockAllItems)
+            return;
+        
         AddQuery($"UPDATE `{PLAYERS}` SET `Coins` = `Coins` - {coins} WHERE `SteamID` = {steamID};");
         if (!PlayerData.TryGetValue(steamID, out var data))
             return;
