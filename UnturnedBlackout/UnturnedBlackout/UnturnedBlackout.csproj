@@ -225,6 +225,7 @@
         <Compile Include="Commands\SetKSCommand.cs" />
         <Compile Include="Commands\SetLobbyCommand.cs" />
         <Compile Include="Commands\TDMSPCommand.cs" />
+        <Compile Include="Commands\TPSCommand.cs" />
         <Compile Include="Commands\UnmuteCommand.cs" />
         <Compile Include="Commands\WipeSpawnsCommand.cs" />
         <Compile Include="Config.cs" />
