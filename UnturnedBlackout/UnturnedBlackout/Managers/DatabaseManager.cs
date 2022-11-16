@@ -4996,6 +4996,7 @@ public class DatabaseManager
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
             return;
 
+        DecreasePlayerCardUnboxedAmount(cardID, 1);
         loadout.Cards.Remove(cardID);
     }
 
@@ -5043,6 +5044,15 @@ public class DatabaseManager
         card.UnboxedAmount += amount;
     }
 
+    public void DecreasePlayerCardUnboxedAmount(int id, int amount)
+    {
+        if (!Cards.TryGetValue(id, out var card))
+            throw new ArgumentNullException(nameof(id), $"Card with id {id} doesn't exist in the database, while decreasing unboxed amount");
+
+        AddQuery($"UPDATE `{CARDS}` SET `UnboxedAmount` = `UnboxedAmount` - {amount} WHERE `CardID` = {id};");
+        card.UnboxedAmount -= amount;
+    }
+    
     // Player Gloves
 
     public void AddPlayerGloveBought(CSteamID steamID, int gloveID)
