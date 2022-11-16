@@ -3432,6 +3432,7 @@ public class DatabaseManager
                 }
 
                 // Give all percentile rewards
+                var finalUpperIndex = 0;
                 foreach (var percentileReward in ServerOptions.DailyPercentileRewards)
                 {
                     var lowerIndex = percentileReward.LowerPercentile == 0 ? 0 : percentileReward.LowerPercentile * PlayerDailyLeaderboard.Count / 100;
@@ -3448,10 +3449,17 @@ public class DatabaseManager
                         if (botReward != null)
                             botReward.percentile = percentileReward.UpperPercentile;
                         else
-                            botRewards.Add(new(leaderboardData.SteamID.ToString(), PlayerDailyLeaderboard.IndexOf(leaderboardData) + 1, percentileReward.UpperPercentile));
+                            botRewards.Add(new(leaderboardData.SteamID.ToString(), i + 1, percentileReward.UpperPercentile));
                     }
 
                     embed.fields[1].value += $"**Top {percentileReward.UpperPercentile}%:** {upperIndex - lowerIndex} players \n";
+                    finalUpperIndex = upperIndex;
+                }
+
+                for (var i = finalUpperIndex; i < PlayerDailyLeaderboard.Count; i++)
+                {
+                    var leaderboardData = PlayerDailyLeaderboard[i];
+                    botRewards.Add(new(leaderboardData.SteamID.ToString(), i + 1, 0));
                 }
 
                 try
@@ -3531,6 +3539,7 @@ public class DatabaseManager
                 }
 
                 // Give all percentile rewards
+                var finalUpperIndex = 0;
                 foreach (var percentileReward in ServerOptions.WeeklyPercentileRewards)
                 {
                     var lowerIndex = percentileReward.LowerPercentile == 0 ? 0 : percentileReward.LowerPercentile * PlayerWeeklyLeaderboard.Count / 100;
@@ -3552,8 +3561,15 @@ public class DatabaseManager
                     }
 
                     embed.fields[1].value += $"**Top {percentileReward.UpperPercentile}%:** {upperIndex - lowerIndex} players \n";
+                    finalUpperIndex = upperIndex;
                 }
 
+                for (var i = finalUpperIndex; i < PlayerWeeklyLeaderboard.Count; i++)
+                {
+                    var leaderboardData = PlayerWeeklyLeaderboard[i];
+                    botRewards.Add(new(leaderboardData.SteamID.ToString(), i + 1, 0));
+                }
+                
                 try
                 {
                     var leaderboardReward = new BotLeaderboardReward("weekly", PlayerWeeklyLeaderboard.Count, botRewards.ToArray());
@@ -4391,6 +4407,15 @@ public class DatabaseManager
             data.PrimeLastDailyReward = DateTimeOffset.UtcNow;
             Plugin.Instance.Reward.GiveRewards(steamID, ServerOptions.PrimeRewards);
             AddQuery($"UPDATE `{PLAYERS}` SET `HasPrime` = {data.HasPrime}, `PrimeExpiry` = {data.PrimeExpiry.ToUnixTimeSeconds()} , `PrimeLastDailyReward` = {data.PrimeLastDailyReward.ToUnixTimeSeconds()} WHERE `SteamID` = {steamID};");
+            Task.Run(() =>
+            {
+                var botPrime = new BotPrime(steamID.ToString());
+                var bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(botPrime));
+                using WebClient webClient = new();
+                var headers = webClient.Headers;
+                headers.Set(HttpRequestHeader.ContentType, "application/json");
+                _ = webClient.UploadData($"http://213.32.6.3:27116/prime", bytes);
+            });
         }
 
         if (PlayerDailyLeaderboardLookup.TryGetValue(steamID, out var dailyLeaderboard))
@@ -4640,7 +4665,7 @@ public class DatabaseManager
         }
 
         loadout.GunCharms.Add(gunCharmID, new(charm, true, false));
-        IncreasePlayerGunSkinUnboxedAmount(gunCharmID, 1);
+        IncreasePlayerGunCharmUnboxedAmount(gunCharmID, 1);
         Plugin.Instance.UI.OnUIUpdated(steamID, EUIPage.GUN_CHARM);
     }
 
@@ -4656,7 +4681,11 @@ public class DatabaseManager
         if (!loadout.GunCharms.ContainsKey(gunCharmID))
             return;
 
+        if (!loadout.GunCharms.ContainsKey(gunCharmID))
+            return;
+        
         loadout.GunCharms.Remove(gunCharmID);
+        DecreasePlayerGunCharmUnboxedAmount(gunCharmID, 1);
         Plugin.Instance.UI.OnUIUpdated(steamID, EUIPage.GUN_CHARM);
     }
 
@@ -4674,7 +4703,7 @@ public class DatabaseManager
 
         gunCharm.IsBought = isBought;
         if (isBought)
-            IncreasePlayerGunSkinUnboxedAmount(gunCharmID, 1);
+            IncreasePlayerGunCharmUnboxedAmount(gunCharmID, 1);
         
         return true;
     }
@@ -4702,6 +4731,15 @@ public class DatabaseManager
 
         AddQuery($"UPDATE `{GUNS_CHARMS}` SET `UnboxedAmount` = `UnboxedAmount` + {amount} WHERE `CharmID` = {id};");
         charm.UnboxedAmount += amount;
+    }
+    
+    public void DecreasePlayerGunCharmUnboxedAmount(ushort id, int amount)
+    {
+        if (!GunCharms.TryGetValue(id, out var charm))
+            throw new ArgumentNullException(nameof(id), $"Charm with id {id} is not found");
+
+        AddQuery($"UPDATE `{GUNS_CHARMS}` SET `UnboxedAmount` = `UnboxedAmount` - {amount} WHERE `CharmID` = {id};");
+        charm.UnboxedAmount -= amount;
     }
     
     // Player Knives

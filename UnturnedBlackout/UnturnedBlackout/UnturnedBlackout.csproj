@@ -316,6 +316,7 @@
         <Compile Include="Managers\UnboxManager.cs" />
         <Compile Include="Models\Animation\AnimationItemUnlock.cs" />
         <Compile Include="Models\Bot\BotLeaderboardReward.cs" />
+        <Compile Include="Models\Bot\BotPrime.cs" />
         <Compile Include="Models\Configuration\BaseValuesConfig.cs" />
         <Compile Include="Models\Configuration\DefaultSkillsConfig.cs" />
         <Compile Include="Models\Configuration\GamemodeConfig.cs" />

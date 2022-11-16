@@ -19,7 +19,7 @@ public static class ClosestPointPatch
         __result = gameObject.transform.position;
         return false;
     }
-}*/
+}
 
 [HarmonyPatch]
 public static class ClosestPointPatch2
@@ -91,3 +91,4 @@ public static class ClosestPointPatch2
         Logger.Log($"Result: {res}, bool: {flag}");
     }
 }
+*/
