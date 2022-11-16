@@ -10,6 +10,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using Rocket.API;
+using Rocket.Core;
 using UnityEngine;
 using UnturnedBlackout.Enums;
 using UnturnedBlackout.Extensions;
@@ -162,7 +164,7 @@ public class Plugin : RocketPlugin<Config>
         {
             yield return new WaitForSeconds(60);
 
-            LightingManager.time = (uint)(LightingManager.cycle * LevelLighting.transition);
+            R.Commands.Execute(new ConsolePlayer(), "/day 13000");
             Logging.Debug($"TPS: {Provider.debugTPS}", ConsoleColor.Yellow);
             Logging.Debug($"UPS: {Provider.debugUPS}", ConsoleColor.Yellow);
         }
@@ -236,6 +238,7 @@ public class Plugin : RocketPlugin<Config>
         SteamGameServer.SetKeyValue("Cfg_Count", 0.ToString(CultureInfo.InvariantCulture));
         SteamGameServer.SetKeyValue("rocketplugins", "");
         
+        /*
         Logging.Debug("Copying over the stats from guns to their skin variants");
         var type = typeof(ItemGunAsset);
         var fields = new Dictionary<string, FieldInfo>
@@ -309,6 +312,7 @@ public class Plugin : RocketPlugin<Config>
                 }
             }
         }
+        */
     }
 
     public override TranslationList DefaultTranslations => new()
