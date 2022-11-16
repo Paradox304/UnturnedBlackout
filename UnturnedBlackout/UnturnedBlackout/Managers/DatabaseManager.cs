@@ -3794,7 +3794,7 @@ public class DatabaseManager
 
                     var daysWorthReward = (int)(maxRewardDate - data.PrimeLastDailyReward.UtcDateTime).TotalDays;
                     Logging.Debug($"Max reward date: {maxRewardDate}, last daily reward {data.PrimeLastDailyReward.UtcDateTime}, days worth reward: {daysWorthReward}");
-                    if (daysWorthReward == 0)
+                    if (daysWorthReward <= 0)
                         continue;
                     
                     Logging.Debug("Need to give some reward to player, getting the list of daily rewards");
