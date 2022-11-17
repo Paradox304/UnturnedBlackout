@@ -3456,6 +3456,9 @@ public class DatabaseManager
                     finalUpperIndex = upperIndex;
                 }
 
+                var maxRankedReward = ServerOptions.DailyRankedRewards.Keys.Max();
+                finalUpperIndex = maxRankedReward > finalUpperIndex ? maxRankedReward : finalUpperIndex;
+                
                 for (var i = finalUpperIndex; i < PlayerDailyLeaderboard.Count; i++)
                 {
                     var leaderboardData = PlayerDailyLeaderboard[i];
@@ -3563,7 +3566,10 @@ public class DatabaseManager
                     embed.fields[1].value += $"**Top {percentileReward.UpperPercentile}%:** {upperIndex - lowerIndex} players \n";
                     finalUpperIndex = upperIndex;
                 }
-
+                
+                var maxRankedReward = ServerOptions.WeeklyRankedRewards.Keys.Max();
+                finalUpperIndex = maxRankedReward > finalUpperIndex ? maxRankedReward : finalUpperIndex;
+                
                 for (var i = finalUpperIndex; i < PlayerWeeklyLeaderboard.Count; i++)
                 {
                     var leaderboardData = PlayerWeeklyLeaderboard[i];

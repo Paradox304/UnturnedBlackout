@@ -256,7 +256,7 @@ public class LoadoutGun
                     // First get all the attachment multipliers for this stat and sum them up (so the + and - equalise themselves)
                     var attachmentMultiplier = attachments.Sum(k => k.StatMultipliers.TryGetValue(stat, out var multiplier) ? multiplier : 0f);
                     Logging.Debug($"Combined Attachment Multiplier: {attachmentMultiplier}");
-                    var afterAttachmentStat = attachmentMultiplier != 0f ? startingStat + Mathf.RoundToInt(startingStat * attachmentMultiplier) : startingStat;
+                    var afterAttachmentStat = attachmentMultiplier != 0f ? tempStat + Mathf.RoundToInt(tempStat * attachmentMultiplier) : startingStat;
                     Logging.Debug($"After attachment stat: {afterAttachmentStat}");
             
                     // Get all the perk multipliers for this stat and sum them up (so the + and - equalise themselves)
@@ -330,7 +330,7 @@ public class LoadoutGun
                     // First get all the attachment multipliers for this stat and sum them up (so the + and - equalise themselves)
                     var attachmentMultiplier = attachments.Sum(k => k.StatMultipliers.TryGetValue(stat, out var multiplier) ? multiplier : 0f);
                     Logging.Debug($"Combined Attachment Multiplier: {attachmentMultiplier}");
-                    var afterAttachmentStat = attachmentMultiplier != 0f ? startingStat + Mathf.RoundToInt(startingStat * attachmentMultiplier) : startingStat;
+                    var afterAttachmentStat = attachmentMultiplier != 0f ? tempStat + Mathf.RoundToInt(tempStat * attachmentMultiplier) : startingStat;
                     Logging.Debug($"After attachment stat: {afterAttachmentStat}");
             
                     // Get all the perk multipliers for this stat and sum them up (so the + and - equalise themselves)
