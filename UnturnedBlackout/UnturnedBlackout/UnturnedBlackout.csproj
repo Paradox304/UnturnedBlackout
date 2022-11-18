@@ -17,6 +17,7 @@
         <NuGetPackageImportStamp>
         </NuGetPackageImportStamp>
         <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+		<ProduceReferenceAssembly>true</ProduceReferenceAssembly>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
         <DebugSymbols>true</DebugSymbols>

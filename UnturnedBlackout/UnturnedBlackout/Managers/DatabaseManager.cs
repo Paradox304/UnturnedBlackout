@@ -3070,6 +3070,8 @@ public class DatabaseManager
             catch (Exception ex)
             {
                 Logger.Log($"Error executing query: \n{cmdText}");
+                Plugin.Instance.Logger.Dump(pendingQueries);
+                Plugin.Instance.Logger.Warn($"FAILED TO PROCESS A BATCH OF {pendingQueries.Count} dumped it in a file");
                 Logger.Log(ex);
             }
 
