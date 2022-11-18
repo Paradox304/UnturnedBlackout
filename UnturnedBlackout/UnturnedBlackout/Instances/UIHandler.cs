@@ -1333,15 +1333,13 @@ public class UIHandler
             return;
         }
 
-        if (!string.IsNullOrEmpty(LoadoutNameText))
-        {
-            if (LoadoutNameText.Length > 40)
-                return;
+        if (string.IsNullOrEmpty(LoadoutNameText) || LoadoutNameText.Length > 40)
+            return;
 
-            loadout.LoadoutName = LoadoutNameText;
-            DB.UpdatePlayerLoadout(Player.CSteamID, LoadoutID);
-            ReloadLoadoutPage();
-        }
+        var updatedLoadoutName = LoadoutNameText.Replace("SELECT", "").Replace("UPDATE", "").Replace("INSERT", "").Replace("DELETE", "").Replace("TRUNCATE", "").Replace(";", "");
+        loadout.LoadoutName = updatedLoadoutName;
+        DB.UpdatePlayerLoadout(Player.CSteamID, LoadoutID);
+        ReloadLoadoutPage();
     }
 
     public void ExitRenameLoadout() => LoadoutNameText = "";
