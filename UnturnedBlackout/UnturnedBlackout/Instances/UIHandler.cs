@@ -1337,6 +1337,9 @@ public class UIHandler
             return;
 
         var updatedLoadoutName = LoadoutNameText.Replace("SELECT", "").Replace("UPDATE", "").Replace("INSERT", "").Replace("DELETE", "").Replace("TRUNCATE", "").Replace(";", "");
+        if (string.IsNullOrEmpty(updatedLoadoutName))
+            return;
+        
         loadout.LoadoutName = updatedLoadoutName;
         DB.UpdatePlayerLoadout(Player.CSteamID, LoadoutID);
         ReloadLoadoutPage();
