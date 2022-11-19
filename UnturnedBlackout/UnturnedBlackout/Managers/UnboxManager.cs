@@ -104,9 +104,6 @@ public class UnboxManager
                         updatedWeights.Remove(weight);
                         break;
                     }
-
-                    foreach (var specialSkin in specialSkinsAvailable)
-                        Logging.Debug($"Special Skin: {specialSkin.SkinName}, ID: {specialSkin.ID} Gun: {specialSkin.Gun.GunName}");
                     
                     specialRarities.Add(ECaseRarity.SPECIAL_SKIN, specialSkinsAvailable.Cast<object>().ToList());
                     break;

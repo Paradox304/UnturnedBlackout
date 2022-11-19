@@ -8,6 +8,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnturnedBlackout.Enums;
@@ -203,23 +204,8 @@ public class GameManager
             if (string.IsNullOrEmpty(avatarURL))
                 avatarURL = "https://cdn.discordapp.com/attachments/458038940847439903/1026880604287012995/unknown.png,https://cdn.discordapp.com/attachments/458038940847439903/1026880604287012995/unknown.png,https://cdn.discordapp.com/attachments/458038940847439903/1026880604287012995/unknown.png";
 
-            try
-            {
-                using HttpClient wc = new();
-                countryCode = await wc.GetStringAsync($"http://ipinfo.io/{player.IP}/country");
-                countryCode = countryCode.Replace("\n", "").Replace("\r", "");
-            }
-            catch (Exception ex)
-            {
-                Logger.Log($"Error getting the country code for the player with ip {player.IP}");
-                Logger.Log(ex);
-            }
-            finally
-            {
-                Logging.Debug($"{player.CharacterName}, country code: {countryCode}");
-                await db.AddPlayerAsync(player, player.CharacterName, avatarURL, countryCode);
-                await db.GetPlayerDataAsync(player);
-            }
+            await db.AddPlayerAsync(player, player.CharacterName, avatarURL);
+            await db.GetPlayerDataAsync(player);
 
             TaskDispatcher.QueueOnMainThread(() =>
             {

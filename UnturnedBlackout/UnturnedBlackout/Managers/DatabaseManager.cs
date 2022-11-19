@@ -13,6 +13,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -1730,7 +1731,7 @@ public class DatabaseManager
         }
     }
 
-    public async Task AddPlayerAsync(UnturnedPlayer player, string steamName, string avatarLink, string countryCode)
+    public async Task AddPlayerAsync(UnturnedPlayer player, string steamName, string avatarLink)
     {
         using MySqlConnection conn = new(ConnectionString);
         try
@@ -1738,11 +1739,38 @@ public class DatabaseManager
             Logging.Debug($"Adding {steamName} to the DB");
             TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(LOADING_SPACES * 0.1f)), "LOADING PLAYER DATA..."));
             await conn.OpenAsync();
+            var needsCountryCode = await new MySqlCommand($"SELECT `CountryCode` FROM `UB_Players` WHERE `SteamID` = {player.CSteamID};", conn).ExecuteScalarAsync();
+            var countryCode = "NNN";
+            if (needsCountryCode == null || string.IsNullOrEmpty(needsCountryCode.ToString()) || needsCountryCode.ToString() == "NNN")
+            {
+                Logging.Debug($"{steamName} needs country code, getting it");
+                try
+                {
+                    if (player.IP != "0.0.0.0")
+                    {
+                        var letterRegex = new Regex("[A-Za-z]+");
+                        using HttpClient wc = new();
+                        var response = await wc.GetStringAsync($"http://ip2country.hackers.lv/api/ip2country?return=array&ip={player.IP}");
+                        var match = letterRegex.Match(response);
+                        Logging.Debug($"Got response: {response}, match success:{match.Success}, match: {match.Value}");
+                        if (match.Success)
+                            countryCode = match.Value;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log("Error getting country code");
+                    Logger.Log(ex);
+                }
+            }
+            else
+                Logging.Debug($"{steamName} doesn't need country code");
+
             MySqlCommand cmd =
                 new(
-                    $"INSERT INTO `{PLAYERS}` ( `SteamID` , `SteamName` , `AvatarLink` , `CountryCode` , `MuteExpiry`, `MuteReason`, `Coins` , `Credits`, `Hotkeys` ) VALUES ({player.CSteamID}, @name, '{avatarLink}' , '{countryCode}' , {DateTimeOffset.UtcNow.ToUnixTimeSeconds()} , ' ', {(Config.UnlockAllItems ? 10000000 : 0)} , {(Config.UnlockAllItems ? 10000000 : 0)}, '4,3,5,6,7' ) ON DUPLICATE KEY UPDATE `AvatarLink` = '{avatarLink}', `SteamName` = @name, `CountryCode` = '{countryCode}';",
+                    $"INSERT INTO `{PLAYERS}` ( `SteamID` , `SteamName` , `AvatarLink` , `CountryCode` , `MuteExpiry`, `MuteReason`, `Coins` , `Credits`, `Hotkeys` ) VALUES ({player.CSteamID}, @name, '{avatarLink}' , '{countryCode}' , {DateTimeOffset.UtcNow.ToUnixTimeSeconds()} , ' ', {(Config.UnlockAllItems ? 10000000 : 0)} , {(Config.UnlockAllItems ? 10000000 : 0)}, '4,3,5,6,7' ) ON DUPLICATE KEY UPDATE `AvatarLink` = '{avatarLink}', `SteamName` = @name" + (countryCode != "NNN" ? $", `CountryCode` = '{countryCode}';" : ";"),
                     conn);
-
+            
             _ = cmd.Parameters.AddWithValue("@name", steamName.ToUnrich());
             _ = await cmd.ExecuteScalarAsync();
 
