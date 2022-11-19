@@ -188,7 +188,7 @@ public class GameManager
         _ = Task.Run(async () =>
         {
             var avatarURL = "";
-            var countryCode = "EU";
+            var countryCode = "NNN";
             try
             {
                 var profile = player.SteamProfile;

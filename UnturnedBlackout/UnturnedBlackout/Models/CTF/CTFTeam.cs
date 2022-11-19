@@ -10,7 +10,7 @@ namespace UnturnedBlackout.Models.CTF;
 
 public class CTFTeam
 {
-    public Config Config { get; set; }
+    private static Config Config => Plugin.Instance.Configuration.Instance;
     public TeamInfo Info { get; set; }
 
     public int TeamID { get; set; }
@@ -29,21 +29,20 @@ public class CTFTeam
 
     public CTFTeam(int teamID, bool isDummy, TeamInfo info, ushort flagID, Vector3 flagSP)
     {
-        Config = Plugin.Instance.Configuration.Instance;
         TeamID = teamID;
-        if (!isDummy)
-        {
-            Info = info;
-            Players = new();
-            Score = 0;
-            SpawnPoint = teamID;
-            SpawnThreshold = 0;
-            Frequency = Utility.GetFreeFrequency();
-            FlagSP = flagSP;
-            FlagID = flagID;
-            HasFlag = true;
-            IngameGroup = GroupManager.addGroup(GroupManager.generateUniqueGroupID(), Info.TeamName);
-        }
+        if (isDummy)
+            return;
+
+        Info = info;
+        Players = new();
+        Score = 0;
+        SpawnPoint = teamID;
+        SpawnThreshold = 0;
+        Frequency = Utility.GetFreeFrequency();
+        FlagSP = flagSP;
+        FlagID = flagID;
+        HasFlag = true;
+        IngameGroup = GroupManager.addGroup(GroupManager.generateUniqueGroupID(), Info.TeamName);
     }
 
     public void AddPlayer(CSteamID steamID)
@@ -66,6 +65,8 @@ public class CTFTeam
     public void Destroy()
     {
         GroupManager.deleteGroup(IngameGroup.groupID);
+        IngameGroup = null;
+        Info = null;
         Players.Clear();
     }
 }

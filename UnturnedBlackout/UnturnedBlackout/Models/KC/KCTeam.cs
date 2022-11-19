@@ -13,7 +13,7 @@ namespace UnturnedBlackout.Models.KC;
 
 public class KCTeam
 {
-    public ConfigManager Config => Plugin.Instance.Config;
+    private static ConfigManager Config => Plugin.Instance.Config;
 
     public KCGame Game { get; set; }
     public TeamInfo Info { get; set; }
@@ -107,8 +107,9 @@ public class KCTeam
     public void Destroy()
     {
         CheckSpawnSwitcher.Stop();
-        Game = null;
         GroupManager.deleteGroup(IngameGroup.groupID);
+        Game = null;
+        IngameGroup = null;
         Players.Clear();
     }
 }

@@ -5471,7 +5471,7 @@ public class UIHandler
 
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Leaderboards Level TEXT 10", PlayerData.Level.ToString());
         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Leaderboards Level IMAGE 10", DB.Levels.TryGetValue(PlayerData.Level, out var level) ? level.IconLinkMedium : "");
-        EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Leaderboards Flag IMAGE 10", PlayerData.HideFlag ? Config.Icons.FileData.HiddenFlagIconLink : Utility.GetFlag(PlayerData.CountryCode));
+        EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Leaderboards Flag IMAGE 10", PlayerData.HideFlag || PlayerData.CountryCode == "NNN" ? Config.Icons.FileData.HiddenFlagIconLink : Utility.GetFlag(PlayerData.CountryCode));
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Leaderboards Name TEXT 10", (PlayerData.HasPrime ? UIManager.PRIME_SYMBOL : "") + PlayerData.SteamName);
 
         SelectLeaderboardPage(ELeaderboardPage.DAILY);
@@ -5547,7 +5547,7 @@ public class UIHandler
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Rank TEXT {index}", $"#{i + 1}");
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Level TEXT {index}", playerData.Level.ToString());
             EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Level IMAGE {index}", DB.Levels.TryGetValue(playerData.Level, out var level) ? level.IconLinkMedium : "");
-            EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Flag IMAGE {index}", playerData.HideFlag ? Config.Icons.FileData.HiddenFlagIconLink : Utility.GetFlag(playerData.CountryCode));
+            EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Flag IMAGE {index}", playerData.HideFlag || playerData.CountryCode == "NNN" ? Config.Icons.FileData.HiddenFlagIconLink : Utility.GetFlag(playerData.CountryCode));
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Name TEXT {index}", (playerData.HasPrime ? UIManager.PRIME_SYMBOL : "") + playerData.SteamName);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Kills TEXT {index}", (playerData.Kills + playerData.HeadshotKills).ToString());
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Deaths TEXT {index}", playerData.Deaths.ToString());
@@ -5640,7 +5640,7 @@ public class UIHandler
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Rank TEXT {i}", $"#{data.IndexOf(playerData) + 1}");
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Level TEXT {i}", playerData.Level.ToString());
             EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Level IMAGE {i}", DB.Levels.TryGetValue(playerData.Level, out var level) ? level.IconLinkMedium : "");
-            EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Flag IMAGE {i}", playerData.HideFlag ? Config.Icons.FileData.HiddenFlagIconLink : Utility.GetFlag(playerData.CountryCode));
+            EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Flag IMAGE {i}", playerData.HideFlag || playerData.CountryCode == "NNN" ? Config.Icons.FileData.HiddenFlagIconLink : Utility.GetFlag(playerData.CountryCode));
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Name TEXT {i}", playerData.SteamName);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Kills TEXT {i}", (playerData.Kills + playerData.HeadshotKills).ToString());
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Leaderboards Deaths TEXT {i}", playerData.Deaths.ToString());

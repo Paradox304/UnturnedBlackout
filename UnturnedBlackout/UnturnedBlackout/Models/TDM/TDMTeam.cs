@@ -13,7 +13,7 @@ namespace UnturnedBlackout.Models.TDM;
 
 public class TDMTeam
 {
-    public ConfigManager Config => Plugin.Instance.Config;
+    private static ConfigManager Config => Plugin.Instance.Config;
 
     public TDMGame Game { get; set; }
     public TeamInfo Info { get; set; }
@@ -33,17 +33,17 @@ public class TDMTeam
     public TDMTeam(TDMGame game, int teamID, bool isDummy, TeamInfo info)
     {
         TeamID = teamID;
-        if (!isDummy)
-        {
-            Info = info;
-            Game = game;
-            Players = new();
-            Score = 0;
-            SpawnPoint = teamID;
-            SpawnThreshold = 0;
-            Frequency = Utility.GetFreeFrequency();
-            IngameGroup = GroupManager.addGroup(GroupManager.generateUniqueGroupID(), Info.TeamName);
-        }
+        if (isDummy)
+            return;
+
+        Info = info;
+        Game = game;
+        Players = new();
+        Score = 0;
+        SpawnPoint = teamID;
+        SpawnThreshold = 0;
+        Frequency = Utility.GetFreeFrequency();
+        IngameGroup = GroupManager.addGroup(GroupManager.generateUniqueGroupID(), Info.TeamName);
     }
 
     public void AddPlayer(CSteamID steamID)
@@ -105,8 +105,9 @@ public class TDMTeam
     public void Destroy()
     {
         CheckSpawnSwitcher.Stop();
-        Game = null;
         GroupManager.deleteGroup(IngameGroup.groupID);
+        Game = null;
+        IngameGroup = null;
         Players.Clear();
     }
 }
