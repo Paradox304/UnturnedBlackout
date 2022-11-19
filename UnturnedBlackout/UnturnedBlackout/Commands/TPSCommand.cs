@@ -16,7 +16,7 @@ internal class TPSCommand : IRocketCommand
         Utility.Say(caller, $"UPS: {Provider.debugUPS}");
     }
 
-    public AllowedCaller AllowedCaller => AllowedCaller.Player;
+    public AllowedCaller AllowedCaller => AllowedCaller.Both;
     public string Name => "tps";
     public string Help => "Check the tps of the server";
     public string Syntax => "/tps";
