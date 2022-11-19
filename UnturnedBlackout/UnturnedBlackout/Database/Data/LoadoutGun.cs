@@ -214,16 +214,10 @@ public class LoadoutGun
 
     public void GetCurrentStats(Loadout loadout, EAttachment attachmentTypeIgnore, out Dictionary<EStat, int> stats)
     {
-        Logging.Debug($"Getting default stats for gun with name {Gun.GunName}");
         var defaultStats = GetDefaultStats();
         stats = new();
         
-        Logging.Debug($"Default Stats:");
-        foreach (var stat in defaultStats)
-            Logging.Debug($"Stat: {stat.Key}, Amount: {stat.Value}");
-        
         var attachments = (loadout.Primary == this ? loadout.PrimaryAttachments : loadout.SecondaryAttachments).Select(k => k.Value.Attachment).Where(k => !Gun.DefaultAttachments.Contains(k) && k.AttachmentType != attachmentTypeIgnore).ToList();
-        Logging.Debug($"Getting all the attachment mulipliers ignoring {attachmentTypeIgnore}, perk multipliers and computing the final stat value");
         for (var i = 0; i <= 7; i++)
         {
             var stat = (EStat)i;
@@ -251,38 +245,28 @@ public class LoadoutGun
                 {
                     var startingStat = defaultStats[stat];
                     var tempStat = Gun.Stats[EStat.RELOAD_SPEED];
-                    Logging.Debug($"Stat: {stat}, Starting Value: {startingStat}, Temp Value: {tempStat}");
             
                     // First get all the attachment multipliers for this stat and sum them up (so the + and - equalise themselves)
                     var attachmentMultiplier = attachments.Sum(k => k.StatMultipliers.TryGetValue(stat, out var multiplier) ? multiplier : 0f);
-                    Logging.Debug($"Combined Attachment Multiplier: {attachmentMultiplier}");
                     var afterAttachmentStat = attachmentMultiplier != 0f ? tempStat + Mathf.RoundToInt(tempStat * attachmentMultiplier) : startingStat;
-                    Logging.Debug($"After attachment stat: {afterAttachmentStat}");
             
                     // Get all the perk multipliers for this stat and sum them up (so the + and - equalise themselves)
                     var perkMultiplier = loadout.Perks.Values.Sum(k => k.Perk.StatMultipliers.TryGetValue(stat, out var multiplier) ? multiplier : 0f);
-                    Logging.Debug($"Combined perk multiplier: {perkMultiplier}");
                     var afterPerkStat = afterAttachmentStat + Mathf.RoundToInt(afterAttachmentStat * perkMultiplier);
-                    Logging.Debug($"Final stat: {afterPerkStat}");
                     stats.Add(stat, afterPerkStat);
                     break;
                 }
                 default:
                 {
                     var startingStat = defaultStats[stat];
-                    Logging.Debug($"Stat: {stat}, Starting Value: {startingStat}");
-            
+                    
                     // First get all the attachment multipliers for this stat and sum them up (so the + and - equalise themselves)
                     var attachmentMultiplier = attachments.Sum(k => k.StatMultipliers.TryGetValue(stat, out var multiplier) ? multiplier : 0f);
-                    Logging.Debug($"Combined Attachment Multiplier: {attachmentMultiplier}");
                     var afterAttachmentStat = startingStat + Mathf.RoundToInt(startingStat * attachmentMultiplier);
-                    Logging.Debug($"After attachment stat: {afterAttachmentStat}");
             
                     // Get all the perk multipliers for this stat and sum them up (so the + and - equalise themselves)
                     var perkMultiplier = loadout.Perks.Values.Sum(k => k.Perk.StatMultipliers.TryGetValue(stat, out var multiplier) ? multiplier : 0f);
-                    Logging.Debug($"Combined perk multiplier: {perkMultiplier}");
                     var afterPerkStat = afterAttachmentStat + Mathf.RoundToInt(afterAttachmentStat * perkMultiplier);
-                    Logging.Debug($"Final stat: {afterPerkStat}");
                     stats.Add(stat, afterPerkStat);
                     break;
                 }
@@ -292,17 +276,11 @@ public class LoadoutGun
     
     public void GetCurrentStats(Loadout loadout, int perkTypeIgnore, out Dictionary<EStat, int> stats)
     {
-        Logging.Debug($"Getting default stats for gun with name {Gun.GunName}");
         var defaultStats = GetDefaultStats();
         stats = new();
         
-        Logging.Debug($"Default Stats:");
-        foreach (var stat in defaultStats)
-            Logging.Debug($"Stat: {stat.Key}, Amount: {stat.Value}");
-        
         var attachments = (loadout.Primary == this ? loadout.PrimaryAttachments : loadout.SecondaryAttachments).Select(k => k.Value.Attachment).Where(k => !Gun.DefaultAttachments.Contains(k)).ToList();
         var perks = loadout.Perks.Select(k => k.Value).Where(k => k.Perk.PerkType != perkTypeIgnore).ToList();
-        Logging.Debug($"Getting all the attachment mulipliers, perk multipliers ignoring type {perkTypeIgnore} and computing the final stat value");
         for (var i = 0; i <= 7; i++)
         {
             var stat = (EStat)i;
@@ -325,38 +303,28 @@ public class LoadoutGun
                 {
                     var startingStat = defaultStats[stat];
                     var tempStat = Gun.Stats[EStat.RELOAD_SPEED];
-                    Logging.Debug($"Stat: {stat}, Starting Value: {startingStat}, Temp Value: {tempStat}");
             
                     // First get all the attachment multipliers for this stat and sum them up (so the + and - equalise themselves)
                     var attachmentMultiplier = attachments.Sum(k => k.StatMultipliers.TryGetValue(stat, out var multiplier) ? multiplier : 0f);
-                    Logging.Debug($"Combined Attachment Multiplier: {attachmentMultiplier}");
                     var afterAttachmentStat = attachmentMultiplier != 0f ? tempStat + Mathf.RoundToInt(tempStat * attachmentMultiplier) : startingStat;
-                    Logging.Debug($"After attachment stat: {afterAttachmentStat}");
             
                     // Get all the perk multipliers for this stat and sum them up (so the + and - equalise themselves)
                     var perkMultiplier = perks.Sum(k => k.Perk.StatMultipliers.TryGetValue(stat, out var multiplier) ? multiplier : 0f);
-                    Logging.Debug($"Combined perk multiplier: {perkMultiplier}");
                     var afterPerkStat = afterAttachmentStat + Mathf.RoundToInt(afterAttachmentStat * perkMultiplier);
-                    Logging.Debug($"Final stat: {afterPerkStat}");
                     stats.Add(stat, afterPerkStat);
                     break;
                 }
                 default:
                 {
                     var startingStat = defaultStats[stat];
-                    Logging.Debug($"Stat: {stat}, Starting Value: {startingStat}");
-            
+                    
                     // First get all the attachment multipliers for this stat and sum them up (so the + and - equalise themselves)
                     var attachmentMultiplier = attachments.Sum(k => k.StatMultipliers.TryGetValue(stat, out var multiplier) ? multiplier : 0f);
-                    Logging.Debug($"Combined Attachment Multiplier: {attachmentMultiplier}");
                     var afterAttachmentStat = startingStat + Mathf.RoundToInt(startingStat * attachmentMultiplier);
-                    Logging.Debug($"After attachment stat: {afterAttachmentStat}");
             
                     // Get all the perk multipliers for this stat and sum them up (so the + and - equalise themselves)
                     var perkMultiplier = perks.Sum(k => k.Perk.StatMultipliers.TryGetValue(stat, out var multiplier) ? multiplier : 0f);
-                    Logging.Debug($"Combined perk multiplier: {perkMultiplier}");
                     var afterPerkStat = afterAttachmentStat + Mathf.RoundToInt(afterAttachmentStat * perkMultiplier);
-                    Logging.Debug($"Final stat: {afterPerkStat}");
                     stats.Add(stat, afterPerkStat);
                     break;
                 }

@@ -189,6 +189,7 @@ public class GamePlayer
             HasTactical = true;
             var tactician = loadout.PerksSearchByType.TryGetValue("tactician", out var tacticianPerk) ? tacticianPerk.Perk.SkillLevel : 0f;
             TacticalIntervalSeconds = loadout.Tactical.Gadget.GiveSeconds * (1 - tactician / 100);
+            Logging.Debug($"");
         }
 
         if (loadout.Lethal != null)

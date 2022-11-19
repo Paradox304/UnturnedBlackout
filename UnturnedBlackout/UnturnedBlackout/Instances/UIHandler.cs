@@ -3865,7 +3865,6 @@ public class UIHandler
             var currentStat = equippedStats.TryGetValue(stat.Key, out var currentStatValue) ? currentStatValue : 0;
             var newStat = stat.Value;
             var compareStat = newStat - currentStat;
-            Logging.Debug($"Stat: {stat.Key}, Current Stat: {currentStat}, New Stat: {newStat}, Compare Stat: {compareStat}, UI Name: {uiName}, Max Amount: {maxAmount}");
             switch (compareStat)
             {
                 case 0:
@@ -3957,7 +3956,6 @@ public class UIHandler
     public IEnumerator ShowEquippedAttachmentStats(Loadout loadout, LoadoutGun gun, LoadoutAttachment attachment)
     {
         yield return new WaitForSeconds(0.1f);
-        Logging.Debug("Attachment is equipped, get the stats while ignore the attachment type");
         gun.GetCurrentStats(loadout, attachment.Attachment.AttachmentType, out var finalStats);
         foreach (var finalStat in finalStats)
         {
@@ -3973,7 +3971,6 @@ public class UIHandler
                 {
                     newStat = attachment.Attachment.StatMultipliers.TryGetValue(EStat.AMMO, out var newAmmoStatValue) ? Mathf.RoundToInt(newAmmoStatValue) : currentStat;
                     compareStat = newStat - currentStat;
-                    Logging.Debug($"Stat: {stat}, Current Stat: {currentStat}, New Stat: {newStat}, Compare Stat: {compareStat}, UI Name: {uiName}, Max Amount: {maxAmount}");
                     break;
                 }
                 case EStat.RELOAD_SPEED:
@@ -3982,7 +3979,6 @@ public class UIHandler
                     var tempStat = gun.Gun.Stats[EStat.RELOAD_SPEED];
                     newStat = multiplier != 0f ? tempStat + Mathf.RoundToInt(multiplier * tempStat) : currentStat;
                     compareStat = newStat - currentStat;
-                    Logging.Debug($"Stat: {stat}, Current Stat: {currentStat}, Temp Stat: {tempStat} multiplier: {multiplier}, new stat: {newStat}, compare stat {compareStat}, UI Name: {uiName}, Max Amount: {maxAmount}");
                     break;
                 }
                 default:
@@ -3990,7 +3986,6 @@ public class UIHandler
                     var multiplier = attachment.Attachment.StatMultipliers.TryGetValue(stat, out var multiplierValue) ? multiplierValue : 0f;
                     newStat = currentStat + Mathf.RoundToInt(multiplier * currentStat);
                     compareStat = newStat - currentStat;
-                    Logging.Debug($"Stat: {stat}, Current Stat: {currentStat}, multiplier: {multiplier}, New Stat: {newStat}, Compare Stat: {compareStat}, UI Name: {uiName}, Max Amount: {maxAmount}");
                     break;
                 }
             }
@@ -4026,11 +4021,8 @@ public class UIHandler
     public IEnumerator ShowComparisonAttachmentStats(Loadout loadout, LoadoutGun gun, LoadoutAttachment attachment)
     {
         yield return new WaitForSeconds(0.1f);
-        Logging.Debug("Attachment is not equipped, getting the stats for the current gun");
         gun.GetCurrentStats(loadout, out var _, out var statsWithCurrentAttachment, out var _, out var _);
-        Logging.Debug("Getting the stats for the gun while ignoring the current attachment type");
         gun.GetCurrentStats(loadout, attachment.Attachment.AttachmentType, out var statsWithoutCurrentAttachment);
-        Logging.Debug("Adding the stat multipliers of the current attachment to the stats without current attachment, and computing the comparison");
 
         foreach (var finalStat in statsWithCurrentAttachment)
         {
@@ -4046,7 +4038,6 @@ public class UIHandler
                 {
                     newStat = attachment.Attachment.StatMultipliers.TryGetValue(EStat.AMMO, out var newAmmoStatValue) ? Mathf.RoundToInt(newAmmoStatValue) : currentStat;
                     compareStat = newStat - currentStat;
-                    Logging.Debug($"Stat: {stat}, Current Stat: {currentStat}, New Stat: {newStat}, Compare Stat: {compareStat}, UI Name: {uiName}, Max Amount: {maxAmount}");
                     break;
                 }
                 case EStat.RELOAD_SPEED:
@@ -4055,7 +4046,6 @@ public class UIHandler
                     var tempStat = gun.Gun.Stats[EStat.RELOAD_SPEED];
                     newStat = multiplier != 0f ? tempStat + Mathf.RoundToInt(multiplier * tempStat) : currentStat;
                     compareStat = newStat - currentStat;
-                    Logging.Debug($"Stat: {stat}, Current Stat: {currentStat}, Temp Stat: {tempStat}, multiplier: {multiplier}, New Stat: {newStat}, Compare Stat: {compareStat}, UI Name: {uiName}, Max Amount: {maxAmount}");
                     break;
                 }
                 default:
@@ -4064,7 +4054,6 @@ public class UIHandler
                     var tempStat = statsWithoutCurrentAttachment.TryGetValue(stat, out var tempStatValue) ? tempStatValue : currentStat;
                     newStat = tempStat + Mathf.RoundToInt(multiplier * tempStat);
                     compareStat = newStat - currentStat;
-                    Logging.Debug($"Stat: {stat}, Current Stat: {currentStat}, Temp Stat: {tempStat}, multiplier: {multiplier}, New Stat: {newStat}, Compare Stat: {compareStat}, UI Name: {uiName}, Max Amount: {maxAmount}");
                     break;
                 }
             }
@@ -4237,7 +4226,6 @@ public class UIHandler
         yield return new WaitForSeconds(0.1f);
 
         var gun = loadout.Primary;
-        Logging.Debug("Perk is equipped, get the stats while ignore the perk type");
         gun.GetCurrentStats(loadout, perk.Perk.PerkType, out var finalStats);
         foreach (var finalStat in finalStats)
         {
@@ -4251,14 +4239,12 @@ public class UIHandler
             {
                 newStat = currentStat;
                 compareStat = newStat - currentStat;
-                Logging.Debug($"Stat: {stat}, Current Stat: {currentStat}, New Stat: {newStat}, Compare Stat: {compareStat}, UI Name: {uiName}, Max Amount: {maxAmount}");
             }
             else
             {
                 var multiplier = perk.Perk.StatMultipliers.TryGetValue(stat, out var multiplierValue) ? multiplierValue : 0f;
                 newStat = currentStat + Mathf.RoundToInt(multiplier * currentStat);
                 compareStat = newStat - currentStat;
-                Logging.Debug($"Stat: {stat}, Current Stat: {currentStat}, multiplier: {multiplier}, New Stat: {newStat}, Compare Stat: {compareStat}, UI Name: {uiName}, Max Amount: {maxAmount}");
             }
 
             switch (compareStat)
@@ -4294,11 +4280,8 @@ public class UIHandler
         yield return new WaitForSeconds(0.1f);
 
         var gun = loadout.Primary;
-        Logging.Debug("Perk is not equipped, getting the stats for the current gun");
         gun.GetCurrentStats(loadout, out var _, out var statsWithCurrentAttachment, out var _, out var _);
-        Logging.Debug("Getting the stats for the gun while ignoring the current perk type");
         gun.GetCurrentStats(loadout, perk.Perk.PerkType, out var statsWithoutCurrentAttachment);
-        Logging.Debug("Adding the stat multipliers of the current perk to the stats without current perk, and computing the comparison");
 
         foreach (var finalStat in statsWithCurrentAttachment)
         {
@@ -4312,7 +4295,6 @@ public class UIHandler
             {
                 newStat = currentStat;
                 compareStat = newStat - currentStat;
-                Logging.Debug($"Stat: {stat}, Current Stat: {currentStat}, New Stat: {newStat}, Compare Stat: {compareStat}, UI Name: {uiName}, Max Amount: {maxAmount}");
             }
             else
             {
@@ -4320,7 +4302,6 @@ public class UIHandler
                 var tempStat = statsWithoutCurrentAttachment.TryGetValue(stat, out var tempStatValue) ? tempStatValue : currentStat;
                 newStat = tempStat + Mathf.RoundToInt(multiplier * tempStat);
                 compareStat = newStat - currentStat;
-                Logging.Debug($"Stat: {stat}, Current Stat: {currentStat}, Temp Stat: {tempStat}, multiplier: {multiplier}, New Stat: {newStat}, Compare Stat: {compareStat}, UI Name: {uiName}, Max Amount: {maxAmount}");
             }
 
             switch (compareStat)
