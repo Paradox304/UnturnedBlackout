@@ -41,15 +41,14 @@ public class AchievementManager
             if (!conditionsMet)
                 continue;
 
-            achievement.Amount += 1;
-
-            if (achievement.Achievement.TiersLookup.TryGetValue(achievement.CurrentTier + 1, out var nextTier))
-            {
-                if (achievement.Amount == nextTier.TargetAmount)
-                    TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.SendAnimation(player, new(EAnimationType.ACHIEVEMENT_COMPLETION, nextTier)));
-            }
 
             db.IncreasePlayerAchievementAmount(steamID, achievement.Achievement.AchievementID, 1);
+
+            if (!achievement.Achievement.TiersLookup.TryGetValue(achievement.CurrentTier + 1, out var nextTier))
+                continue;
+
+            if (achievement.Amount == nextTier.TargetAmount)
+                TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.SendAnimation(player, new(EAnimationType.ACHIEVEMENT_COMPLETION, nextTier)));
         }
     }
 
