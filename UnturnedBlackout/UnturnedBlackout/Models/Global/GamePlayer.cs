@@ -189,7 +189,7 @@ public class GamePlayer
             HasTactical = true;
             var tactician = loadout.PerksSearchByType.TryGetValue("tactician", out var tacticianPerk) ? tacticianPerk.Perk.SkillLevel : 0f;
             TacticalIntervalSeconds = loadout.Tactical.Gadget.GiveSeconds * (1 - tactician / 100);
-            Logging.Debug($"");
+            Logging.Debug($"Tactical: {loadout.Tactical.Gadget.GadgetName}, Tactician: {tactician}, Multiplier: {1 - tactician / 100} Interval: {TacticalIntervalSeconds}");
         }
 
         if (loadout.Lethal != null)
@@ -197,6 +197,7 @@ public class GamePlayer
             HasLethal = true;
             var grenadier = loadout.PerksSearchByType.TryGetValue("grenadier", out var grenadierPerk) ? grenadierPerk.Perk.SkillLevel : 0f;
             LethalIntervalSeconds = loadout.Lethal.Gadget.GiveSeconds * (1 - grenadier / 100);
+            Logging.Debug($"Lethal: {loadout.Lethal.Gadget.GadgetName}, Grenadier: {grenadier}, Multiplier: {1 - grenadier / 100} Interval: {LethalIntervalSeconds}");
         }
 
         Plugin.Instance.UI.UpdateGadgetUsed(this, false, !HasLethal);

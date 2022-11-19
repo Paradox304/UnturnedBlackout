@@ -1752,7 +1752,7 @@ public class DatabaseManager
                         using HttpClient wc = new();
                         var response = await wc.GetStringAsync($"http://ip2country.hackers.lv/api/ip2country?return=array&ip={player.IP}");
                         var match = letterRegex.Match(response);
-                        Logging.Debug($"Got response: {response}, match success:{match.Success}, match: {match.Value}");
+                        Logging.Debug($"Got response: {response}, match success: {match.Success}, match: {match.Value}");
                         if (match.Success)
                             countryCode = match.Value;
                     }
