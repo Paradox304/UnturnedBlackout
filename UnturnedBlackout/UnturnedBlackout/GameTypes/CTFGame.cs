@@ -257,8 +257,9 @@ public class CTFGame : Game
 
         foreach (var player in Players.ToList())
         {
+            var gPlayer = player.GamePlayer;
             RemovePlayerFromGame(player.GamePlayer);
-            Plugin.Instance.Game.SendPlayerToLobby(player.GamePlayer.Player, summaries.TryGetValue(player.GamePlayer, out var pendingSummary) ? pendingSummary : null);
+            Plugin.Instance.Game.SendPlayerToLobby(gPlayer.Player, summaries.TryGetValue(gPlayer, out var pendingSummary) ? pendingSummary : null);
         }
 
         Players.Clear();

@@ -102,18 +102,12 @@ public class LoadoutGun
     
     public void GetCurrentStats(Loadout loadout, out Dictionary<EStat, int> defaultStats, out Dictionary<EStat, int> finalStats, out Dictionary<EStat, int> attachmentsCompare, out Dictionary<EStat, int> perksCompare)
     {
-        Logging.Debug($"Getting default stats for gun with name {Gun.GunName}");
         defaultStats = GetDefaultStats();
-
-        Logging.Debug($"Default Stats:");
-        foreach (var stat in defaultStats)
-            Logging.Debug($"Stat: {stat.Key}, Amount: {stat.Value}");
 
         attachmentsCompare = new();
         perksCompare = new();
         finalStats = new();
         var attachments = (loadout.Primary == this ? loadout.PrimaryAttachments : loadout.SecondaryAttachments).Select(k => k.Value.Attachment).Where(k => !Gun.DefaultAttachments.Contains(k)).ToList();
-        Logging.Debug($"Getting all the attachment mulipliers, perk multipliers and computing the compare and final stat value");
         for (var i = 0; i <= 7; i++)
         {
             var stat = (EStat)i;
@@ -122,21 +116,17 @@ public class LoadoutGun
                 case EStat.AMMO:
                 {
                     var startingAmmoStat = defaultStats[EStat.AMMO];
-                    Logging.Debug($"Stat: {EStat.AMMO}, Starting Value: {startingAmmoStat}");
                     var magazine = attachments.FirstOrDefault(k => k.AttachmentType == EAttachment.MAGAZINE);
                     if (magazine == null)
                     {
-                        Logging.Debug("Gun has no magazine, can't get final ammo value");
                         finalStats.Add(EStat.AMMO, startingAmmoStat);
                         return;
                     }
 
                     var finalAmmoStat = magazine.StatMultipliers.TryGetValue(EStat.AMMO, out var ammoValue) ? Mathf.RoundToInt(ammoValue) : startingAmmoStat;
-                    Logging.Debug($"Final Ammo Stat: {finalAmmoStat}");
                     if (startingAmmoStat != finalAmmoStat)
                     {
                         var ammoCompare = finalAmmoStat - startingAmmoStat;
-                        Logging.Debug($"Ammo compare: {ammoCompare}");
                         attachmentsCompare.Add(EStat.AMMO, ammoCompare);
                     }
         
@@ -147,64 +137,48 @@ public class LoadoutGun
                 {
                     var startingStat = defaultStats[stat];
                     var tempStat = Gun.Stats[EStat.RELOAD_SPEED];
-                    Logging.Debug($"Stat: {stat}, Starting Value: {startingStat}, Temp Value: {tempStat}");
                     // First get all the attachment multipliers for this stat and sum them up (so the + and - equalise themselves)
                     var attachmentMultiplier = attachments.Sum(k => k.StatMultipliers.TryGetValue(stat, out var multiplier) ? multiplier : 0f);
-                    Logging.Debug($"Combined Attachment Multiplier: {attachmentMultiplier}");
                     var afterAttachmentStat = attachmentMultiplier != 0f ? tempStat + Mathf.RoundToInt(tempStat * attachmentMultiplier) : startingStat;
-                    Logging.Debug($"After attachment stat: {afterAttachmentStat}");
                     if (startingStat != afterAttachmentStat)
                     {
                         var attachmentCompare = afterAttachmentStat - startingStat;
-                        Logging.Debug($"Attachment compare: {attachmentCompare}");
                         attachmentsCompare.Add(stat, attachmentCompare);
                     }
             
                     // Get all the perk multipliers for this stat and sum them up (so the + and - equalise themselves)
                     var perkMultiplier = loadout.Perks.Values.Sum(k => k.Perk.StatMultipliers.TryGetValue(stat, out var multiplier) ? multiplier : 0f);
-                    Logging.Debug($"Combined perk multiplier: {perkMultiplier}");
                     var afterPerkStat = afterAttachmentStat + Mathf.RoundToInt(afterAttachmentStat * perkMultiplier);
-                    Logging.Debug($"After perk stat: {afterPerkStat}");
                     if (afterAttachmentStat != afterPerkStat)
                     {
                         var perkCompare = afterPerkStat - afterAttachmentStat;
-                        Logging.Debug($"Perk compare: {perkCompare}");
                         perksCompare.Add(stat, perkCompare);
                     }
             
-                    Logging.Debug($"Final stat: {afterPerkStat}");
                     finalStats.Add(stat, afterPerkStat);
                     break;
                 }
                 default:
                 {
                     var startingStat = defaultStats[stat];
-                    Logging.Debug($"Stat: {stat}, Starting Value: {startingStat}");
                     // First get all the attachment multipliers for this stat and sum them up (so the + and - equalise themselves)
                     var attachmentMultiplier = attachments.Sum(k => k.StatMultipliers.TryGetValue(stat, out var multiplier) ? multiplier : 0f);
-                    Logging.Debug($"Combined Attachment Multiplier: {attachmentMultiplier}");
                     var afterAttachmentStat = startingStat + Mathf.RoundToInt(startingStat * attachmentMultiplier);
-                    Logging.Debug($"After attachment stat: {afterAttachmentStat}");
                     if (startingStat != afterAttachmentStat)
                     {
                         var attachmentCompare = afterAttachmentStat - startingStat;
-                        Logging.Debug($"Attachment compare: {attachmentCompare}");
                         attachmentsCompare.Add(stat, attachmentCompare);
                     }
             
                     // Get all the perk multipliers for this stat and sum them up (so the + and - equalise themselves)
                     var perkMultiplier = loadout.Perks.Values.Sum(k => k.Perk.StatMultipliers.TryGetValue(stat, out var multiplier) ? multiplier : 0f);
-                    Logging.Debug($"Combined perk multiplier: {perkMultiplier}");
                     var afterPerkStat = afterAttachmentStat + Mathf.RoundToInt(afterAttachmentStat * perkMultiplier);
-                    Logging.Debug($"After perk stat: {afterPerkStat}");
                     if (afterAttachmentStat != afterPerkStat)
                     {
                         var perkCompare = afterPerkStat - afterAttachmentStat;
-                        Logging.Debug($"Perk compare: {perkCompare}");
                         perksCompare.Add(stat, perkCompare);
                     }
             
-                    Logging.Debug($"Final stat: {afterPerkStat}");
                     finalStats.Add(stat, afterPerkStat);
                     break;
                 }

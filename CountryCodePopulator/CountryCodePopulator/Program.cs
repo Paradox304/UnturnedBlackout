@@ -48,9 +48,12 @@ while (rdr.Read())
 rdr.Close();
 var updateString = "";
 foreach (var code in codes)
-    updateString += $"UPDATE `UB_Players` SET `CountryCode` = {code.Value} WHERE `SteamID` = {code.Key};\n";
+    updateString += $"UPDATE `UB_Players` SET `CountryCode` = '{code.Value}' WHERE `SteamID` = {code.Key};\n";
 
 Console.WriteLine(updateString);
+
+cmd = new(updateString, conn);
+cmd.ExecuteScalar();
 
 /* ACHIEVEMENT SCRIPT
 var achievementID = 10;
