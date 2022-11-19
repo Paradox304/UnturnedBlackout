@@ -241,7 +241,7 @@ public class GameManager
         {
             var game = gPlayer.CurrentGame;
             game?.RemovePlayerFromGame(gPlayer);
-
+            gPlayer.Destroy();
             _ = Players.Remove(player.CSteamID);
         }
 

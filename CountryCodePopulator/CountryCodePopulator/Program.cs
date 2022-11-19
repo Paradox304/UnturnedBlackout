@@ -29,17 +29,10 @@ var conn = new MySqlConnection(euMainBuilder.ConnectionString);
 conn.Open();
 foreach (var id in ids)
 {
-    
+    Console.WriteLine($"Adding supremium card to {id}");
+    var cmd = new MySqlCommand($"INSERT IGNORE INTO `UB_Players` ( `SteamID` , `SteamName` , `AvatarLink` , `CountryCode` , `MuteExpiry`, `MuteReason`, `Hotkeys` ) VALUES ({id}, 'Temp', 'Temp' , 'NA' , {DateTimeOffset.UtcNow.ToUnixTimeSeconds()} , ' ', '4,3,5,6,7' );", conn);
+    cmd.ExecuteScalar();
+    cmd = new($"INSERT INTO `UB_Players_Cards` (`SteamID`,`CardID`,`IsBought`,`IsUnlocked`) VALUES ({id}, 5, 1, 0);", conn);
+    cmd.ExecuteScalar();
 }
 conn.Close();
-
-[Serializable]
-public class BotPrime
-{
-    public string SteamID { get; set; }
-
-    public BotPrime(string steamID)
-    {
-        SteamID = steamID;
-    }
-}

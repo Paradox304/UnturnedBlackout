@@ -230,11 +230,15 @@ public class KCGame : Game
             Plugin.Instance.Game.SendPlayerToLobby(player.GamePlayer.Player, summaries.TryGetValue(player.GamePlayer, out var pendingSummary) ? pendingSummary : null);
         }
 
-        Players = new();
+        Players.Clear();
+        PlayersLookup.Clear();
         BlueTeam.Destroy();
         RedTeam.Destroy();
         SpawnSwitcher.Stop();
 
+        BlueTeam = null;
+        RedTeam = null;
+        
         var locations = Plugin.Instance.Game.AvailableLocations;
         lock (locations)
         {
@@ -358,13 +362,11 @@ public class KCGame : Game
                     .Select(k => BarricadeManager.tryGetRegion(k.model.transform, out var x, out var y, out var plant, out var _) ? (k, x, y, plant) : (k, byte.MaxValue, byte.MaxValue, ushort.MaxValue)).ToList().ForEach(k => BarricadeManager.destroyBarricade(k.k, k.Item2, k.Item3, k.Item4)));
         }
 
-        if (kPlayer != null)
-        {
-            kPlayer.Team.RemovePlayer(kPlayer.GamePlayer.SteamID);
-            kPlayer.GamePlayer.OnGameLeft();
-            _ = Players.Remove(kPlayer);
-            _ = PlayersLookup.Remove(kPlayer.GamePlayer.SteamID);
-        }
+        kPlayer.Team.RemovePlayer(kPlayer.GamePlayer.SteamID);
+        kPlayer.GamePlayer.OnGameLeft();
+        _ = Players.Remove(kPlayer);
+        _ = PlayersLookup.Remove(kPlayer.GamePlayer.SteamID);
+        kPlayer.Destroy();
 
         UI.OnGameCountUpdated(this);
         

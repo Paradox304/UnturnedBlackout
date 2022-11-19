@@ -21,14 +21,14 @@ namespace UnturnedBlackout.GameTypes;
 
 public abstract class Game
 {
-    public const string SUICIDE_SYMBOL = "";
-    public const string EXPLOSION_SYMBOL = "";
-    public const string MELEE_SYMBOL = "";
+    protected const string SUICIDE_SYMBOL = "";
+    protected const string EXPLOSION_SYMBOL = "";
+    protected const string MELEE_SYMBOL = "";
     
-    protected QuestManager Quest => Plugin.Instance.Quest;
-    protected UIManager UI => Plugin.Instance.UI;
-    protected DatabaseManager DB => Plugin.Instance.DB;
-    protected ConfigManager Config => Plugin.Instance.Config;
+    protected static QuestManager Quest => Plugin.Instance.Quest;
+    protected static UIManager UI => Plugin.Instance.UI;
+    protected static DatabaseManager DB => Plugin.Instance.DB;
+    protected static ConfigManager Config => Plugin.Instance.Config;
 
     public EGameType GameMode { get; set; }
     public ArenaLocation Location { get; set; }
@@ -95,6 +95,11 @@ public abstract class Game
         BarricadeManager.onDamageBarricadeRequested -= OnBarricadeDamage;
         UseableConsumeable.onConsumePerformed -= OnConsumed;
         UseableGun.OnAimingChanged_Global -= OnAimingChanged;
+
+        PlayersTalking.Clear();
+        GameTurrets.Clear();
+        GameTurretsInverse.Clear();
+        GameTurretDamager.Clear();
         
         KillFeedChecker.Stop();
         GameChecker.Stop();

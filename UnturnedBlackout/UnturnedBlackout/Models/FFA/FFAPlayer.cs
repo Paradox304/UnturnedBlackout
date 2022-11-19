@@ -44,6 +44,11 @@ public class FFAPlayer
         PlayersKilled = new();
     }
 
+    public void Destroy()
+    {
+        GamePlayer = null;
+    }
+
     public void OnDeath(CSteamID killer)
     {
         Killstreak = 0;

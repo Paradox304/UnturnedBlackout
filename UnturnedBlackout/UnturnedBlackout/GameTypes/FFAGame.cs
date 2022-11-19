@@ -206,7 +206,8 @@ public class FFAGame : Game
             Plugin.Instance.Game.SendPlayerToLobby(player.GamePlayer.Player, summaries.TryGetValue(player.GamePlayer, out var pendingSummary) ? pendingSummary : null);
         }
 
-        Players = new();
+        Players.Clear();
+        PlayersLookup.Clear();
 
         var locations = Plugin.Instance.Game.AvailableLocations;
         lock (locations)
@@ -325,6 +326,7 @@ public class FFAGame : Game
         _ = Players.Remove(fPlayer);
         _ = PlayersLookup.Remove(fPlayer.GamePlayer.SteamID);
 
+        fPlayer.Destroy();
         foreach (var ply in Players)
             UI.UpdateFFATopUI(ply, Players);
         

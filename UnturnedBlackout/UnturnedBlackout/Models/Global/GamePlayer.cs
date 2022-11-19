@@ -20,7 +20,7 @@ namespace UnturnedBlackout.Models.Global;
 
 public class GamePlayer
 {
-    public ConfigManager Config => Plugin.Instance.Config;
+    private static ConfigManager Config => Plugin.Instance.Config;
 
     public Game CurrentGame { get; set; }
     public bool StaffMode { get; set; }
@@ -125,6 +125,15 @@ public class GamePlayer
         AvailableKillstreaks = new();
         KillstreakTriggers = new();
         OrderedKillstreaks = new();
+    }
+
+    public void Destroy()
+    {
+        Player = null;
+        Data = null;
+        CurrentGame = null;
+        ActiveLoadout = null;
+        TransportConnection = null;
     }
 
     // Spawn Protection Seconds
@@ -449,47 +458,6 @@ public class GamePlayer
             PendingAnimations.RemoveAt(0);
         }
     }
-
-    // Movement
-    /*public void GiveMovement(bool isADS, bool isCarryingFlag, bool doSteps)
-    {
-        if (ActiveLoadout == null)
-            return;
-
-        if (Player.Player.equipment.itemID == 0)
-            return;
-
-        var flagCarryingSpeed = isCarryingFlag ? Config.CTF.FileData.FlagCarryingSpeed : 0f;
-        float updatedMovement;
-        if (isCarryingFlag)
-            updatedMovement = Config.CTF.FileData.FlagCarryingSpeed;
-        else if (Player.Player.equipment.itemID == (ActiveLoadout.Primary?.Gun?.GunID ?? 0) || Player.Player.equipment.itemID == (ActiveLoadout.PrimarySkin?.SkinID ?? 0))
-            updatedMovement = PrimaryMovementChange + SecondaryMovementChange + (isADS ? PrimaryMovementChangeADS : 0) + flagCarryingSpeed;
-        else if (Player.Player.equipment.itemID == (ActiveLoadout.Secondary?.Gun?.GunID ?? 0) || Player.Player.equipment.itemID == (ActiveLoadout.SecondarySkin?.SkinID ?? 0))
-            updatedMovement = PrimaryMovementChange + SecondaryMovementChange + (isADS ? SecondaryMovementChangeADS : 0) + flagCarryingSpeed;
-        else if (Player.Player.equipment.itemID == ActiveLoadout.Knife.Knife.KnifeID)
-            updatedMovement = KnifeMovementChange + flagCarryingSpeed;
-        else
-            return;
-
-        // ReSharper disable once CompareOfFloatsByEqualityOperator
-        if (updatedMovement == Player.Player.movement.pluginSpeedMultiplier)
-            return;
-
-        MovementChanger.Stop();
-        MovementChanger = Plugin.Instance.StartCoroutine(ChangeMovement(updatedMovement));
-    }
-
-    public IEnumerator ChangeMovement(float newMovement)
-    {
-        var type = typeof(PlayerMovement);
-        var info = type.GetField("SendPluginSpeedMultiplier", BindingFlags.NonPublic | BindingFlags.Static);
-        var value = info.GetValue(null);
-        ((ClientInstanceMethod<float>)value).Invoke(Player.Player.movement.GetNetId(), ENetReliability.Reliable, Player.Player.channel.GetOwnerTransportConnection(), newMovement);
-        yield return new WaitForSeconds(Player.Ping - 0.01f);
-
-        Player.Player.movement.pluginSpeedMultiplier = newMovement;
-    }*/
 
     // Killstreak
     public void SetupKillstreaks()

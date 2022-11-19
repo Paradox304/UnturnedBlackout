@@ -261,10 +261,14 @@ public class CTFGame : Game
             Plugin.Instance.Game.SendPlayerToLobby(player.GamePlayer.Player, summaries.TryGetValue(player.GamePlayer, out var pendingSummary) ? pendingSummary : null);
         }
 
-        Players = new();
+        Players.Clear();
+        PlayersLookup.Clear();
         BlueTeam.Destroy();
         RedTeam.Destroy();
 
+        BlueTeam = null;
+        RedTeam = null;
+        
         var locations = Plugin.Instance.Game.AvailableLocations;
         lock (locations)
         {
@@ -378,29 +382,28 @@ public class CTFGame : Game
                 BarricadeManager.BarricadeRegions.Cast<BarricadeRegion>().SelectMany(k => k.drops).Where(k => (k.GetServersideData()?.owner ?? 0UL) == player.SteamID.m_SteamID && LevelNavigation.tryGetNavigation(k.model.transform.position, out var nav) && nav == Location.NavMesh)
                     .Select(k => BarricadeManager.tryGetRegion(k.model.transform, out var x, out var y, out var plant, out var _) ? (k, x, y, plant) : (k, byte.MaxValue, byte.MaxValue, ushort.MaxValue)).ToList().ForEach(k => BarricadeManager.destroyBarricade(k.k, k.Item2, k.Item3, k.Item4)));
         }
+        
+        cPlayer.Team.RemovePlayer(cPlayer.GamePlayer.SteamID);
+        cPlayer.GamePlayer.OnGameLeft();
+        _ = Players.Remove(cPlayer);
+        _ = PlayersLookup.Remove(cPlayer.GamePlayer.SteamID);
 
-        if (cPlayer != null)
+        if (cPlayer.IsCarryingFlag)
         {
-            cPlayer.Team.RemovePlayer(cPlayer.GamePlayer.SteamID);
-            cPlayer.GamePlayer.OnGameLeft();
-            _ = Players.Remove(cPlayer);
-            _ = PlayersLookup.Remove(cPlayer.GamePlayer.SteamID);
+            var otherTeam = cPlayer.Team.TeamID == BlueTeam.TeamID ? RedTeam : BlueTeam;
+            if (cPlayer.GamePlayer.Player.Player.clothing.backpack == otherTeam.FlagID)
+                ItemManager.dropItem(new(otherTeam.FlagID, true), cPlayer.GamePlayer.Player.Player.transform.position, true, true, true);
 
-            if (cPlayer.IsCarryingFlag)
+            cPlayer.IsCarryingFlag = false;
+            cPlayer.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1f);
+            TaskDispatcher.QueueOnMainThread(() =>
             {
-                var otherTeam = cPlayer.Team.TeamID == BlueTeam.TeamID ? RedTeam : BlueTeam;
-                if (cPlayer.GamePlayer.Player.Player.clothing.backpack == otherTeam.FlagID)
-                    ItemManager.dropItem(new(otherTeam.FlagID, true), cPlayer.GamePlayer.Player.Player.transform.position, true, true, true);
-
-                cPlayer.IsCarryingFlag = false;
-                cPlayer.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1f);
-                TaskDispatcher.QueueOnMainThread(() =>
-                {
-                    UI.UpdateCTFHUD(Players, otherTeam);
-                    UI.SendCTFFlagStates(cPlayer.Team, (ETeam)otherTeam.TeamID, Players, EFlagState.DROPPED);
-                });
-            }
+                UI.UpdateCTFHUD(Players, otherTeam);
+                UI.SendCTFFlagStates(cPlayer.Team, (ETeam)otherTeam.TeamID, Players, EFlagState.DROPPED);
+            });
         }
+
+        cPlayer.Destroy();
 
         UI.OnGameCountUpdated(this);
         

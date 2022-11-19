@@ -47,6 +47,12 @@ public class TDMPlayer
         PlayersKilled = new();
     }
 
+    public void Destroy()
+    {
+        GamePlayer = null;
+        Team = null;
+    }
+    
     public void OnDeath(CSteamID killer)
     {
         Killstreak = 0;

@@ -223,11 +223,15 @@ public class TDMGame : Game
             Plugin.Instance.Game.SendPlayerToLobby(player.GamePlayer.Player, summaries.TryGetValue(player.GamePlayer, out var pendingSummary) ? pendingSummary : null);
         }
 
-        Players = new();
+        Players.Clear();
+        PlayersLookup.Clear();
         BlueTeam.Destroy();
         RedTeam.Destroy();
         SpawnSwitcher.Stop();
 
+        BlueTeam = null;
+        RedTeam = null;
+        
         var locations = Plugin.Instance.Game.AvailableLocations;
         lock (locations)
         {
@@ -354,7 +358,8 @@ public class TDMGame : Game
         tPlayer.GamePlayer.OnGameLeft();
         _ = Players.Remove(tPlayer);
         _ = PlayersLookup.Remove(tPlayer.GamePlayer.SteamID);
-
+        tPlayer.Destroy();
+        
         UI.OnGameCountUpdated(this);
         
         if (GamePhase != EGamePhase.ENDING)
