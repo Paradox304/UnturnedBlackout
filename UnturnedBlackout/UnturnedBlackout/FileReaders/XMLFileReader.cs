@@ -61,6 +61,9 @@ public class XmlFileReader<T> : IFileReader<T> where T : class, new()
 
     public virtual string LoadURL()
     {
+        if (string.IsNullOrEmpty(URLPath))
+            return string.Empty;
+        
         try
         {
             using HttpClient wc = new();
