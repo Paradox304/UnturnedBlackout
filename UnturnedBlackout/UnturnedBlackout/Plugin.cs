@@ -165,8 +165,8 @@ public class Plugin : RocketPlugin<Config>
             yield return new WaitForSeconds(60);
 
             R.Commands.Execute(new ConsolePlayer(), "/time 13000");
-            Logging.Debug($"TPS: {Provider.debugTPS}", ConsoleColor.Yellow);
-            Logging.Debug($"UPS: {Provider.debugUPS}", ConsoleColor.Yellow);
+            Logger.Log($"TPS: {Provider.debugTPS}");
+            Logger.Log($"UPS: {Provider.debugUPS}");
         }
         // ReSharper disable once IteratorNeverReturns
     }
