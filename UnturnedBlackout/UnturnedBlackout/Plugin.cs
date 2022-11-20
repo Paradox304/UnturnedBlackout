@@ -86,9 +86,10 @@ public class Plugin : RocketPlugin<Config>
         if (ply == null)
             return;
 
-        var newName = ply.playerID.characterName.ToUnrich().Trim();
+        var newName = ply.playerID.characterName.ToUnrich();
         var linkRegex = new Regex(@"(?:(?:https?|ftp):\/\/)?[\w/\-?=%.]+\.[\w/\-&?=%.]+");
         newName = linkRegex.Replace(newName, "");
+        newName = newName.Trim();
         var chars = newName.Length;
 
         if (chars == 0)
