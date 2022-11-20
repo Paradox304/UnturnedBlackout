@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using Rocket.API;
 using Rocket.Core;
 using UnityEngine;
@@ -86,6 +87,8 @@ public class Plugin : RocketPlugin<Config>
             return;
 
         var newName = ply.playerID.characterName.ToUnrich().Trim();
+        var linkRegex = new Regex(@"(?:(?:https?|ftp):\/\/)?[\w/\-?=%.]+\.[\w/\-&?=%.]+");
+        newName = linkRegex.Replace(newName, "");
         var chars = newName.Length;
 
         if (chars == 0)
