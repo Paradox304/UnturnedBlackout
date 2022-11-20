@@ -172,6 +172,7 @@ public class UIHandler
         MatchEndSummaryShower.Stop();
         CrateUnboxer.Stop();
         StatsShower.Stop();
+        ImageScroller.Stop();
     }
 
     public void BuildPages()

@@ -178,9 +178,7 @@ public class UIManager
         }
 
         if (TipSender.TryGetValue(player.CSteamID, out var tipSender))
-        {
             tipSender.Stop();
-        }
     }
 
     public void ShowMenuUI(UnturnedPlayer player, MatchEndSummary summary = null)
