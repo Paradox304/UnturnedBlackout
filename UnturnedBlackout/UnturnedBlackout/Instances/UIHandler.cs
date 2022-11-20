@@ -47,13 +47,16 @@ public class UIHandler
 
     private const char STAR = '★';
 
+    private static DatabaseManager DB => Plugin.Instance.DB;
+    public static ConfigManager Config => Plugin.Instance.Config;
+    
     public DateTime LastButtonClicked { get; set; }
-    private DatabaseManager DB => Plugin.Instance.DB;
     public CSteamID SteamID { get; set; }
     public UnturnedPlayer Player { get; set; }
     public PlayerLoadout PlayerLoadout { get; set; }
     public PlayerData PlayerData { get; set; }
-
+    public ITransportConnection TransportConnection { get; set; }
+    
     public Coroutine TimerRefresher { get; set; }
     public Coroutine AchievementPageShower { get; set; }
     public Coroutine MatchEndSummaryShower { get; set; }
@@ -61,9 +64,6 @@ public class UIHandler
     public Coroutine StatsShower { get; set; }
     
     public Coroutine ImageScroller { get; set; }
-    
-    public ITransportConnection TransportConnection { get; set; }
-    public ConfigManager Config => Plugin.Instance.Config;
 
     public EMainPage MainPage { get; set; }
 
@@ -162,6 +162,11 @@ public class UIHandler
 
     public void Destroy()
     {
+        PlayerData = null;
+        PlayerLoadout = null;
+        Player = null;
+        TransportConnection = null;
+        
         TimerRefresher.Stop();
         AchievementPageShower.Stop();
         MatchEndSummaryShower.Stop();
