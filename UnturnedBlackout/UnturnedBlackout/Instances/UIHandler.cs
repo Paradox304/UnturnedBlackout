@@ -831,7 +831,8 @@ public class UIHandler
     
     public void ShowUI(MatchEndSummary summary = null)
     {
-        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Hide UI Toggler", false);
+        //EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Hide UI Toggler", false);
+        EffectManager.sendUIEffect(MAIN_MENU_ID, MAIN_MENU_KEY, TransportConnection, true);
         Player.Player.enablePluginWidgetFlag(EPluginWidgetFlags.Modal);
         SetupMainMenu();
 
@@ -848,7 +849,8 @@ public class UIHandler
 
     public void HideUI()
     {
-        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Hide UI Toggler", true);
+        //EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Hide UI Toggler", true);
+        EffectManager.askEffectClearByID(MAIN_MENU_ID, TransportConnection);
         Player.Player.disablePluginWidgetFlag(EPluginWidgetFlags.Modal);
         MainPage = EMainPage.NONE;
         ShowingStats = false;

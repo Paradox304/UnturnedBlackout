@@ -498,7 +498,7 @@ public static class Utility
     public static string ToFriendlyName(this ECurrency currency) => currency switch
     {
         ECurrency.SCRAP => "Scrap",
-        ECurrency.CREDIT => "Blackout Points",
+        ECurrency.CREDIT => "Points",
         ECurrency.COIN => "Blacktags",
         var _ => throw new ArgumentOutOfRangeException(nameof(currency), currency, "Currency is not as expected")
     };
