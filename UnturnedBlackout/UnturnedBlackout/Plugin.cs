@@ -87,8 +87,8 @@ public class Plugin : RocketPlugin<Config>
             return;
 
         var newName = ply.playerID.characterName.ToUnrich();
-        var linkRegex = new Regex(@"(?:(?:https?|ftp):\/\/)?[\w/\-?=%.]+\.[\w/\-&?=%.]+");
-        newName = linkRegex.Replace(newName, "");
+        var capturedLinkGroups = newName.Split(' ').Where(k => k.Contains(".pl ") || k.Contains(".net ") || k.Contains(".com ")).ToList();
+        newName = capturedLinkGroups.Aggregate(newName, (current, group) => current.Replace(group, ""));
         newName = newName.Trim();
         var chars = newName.Length;
 
