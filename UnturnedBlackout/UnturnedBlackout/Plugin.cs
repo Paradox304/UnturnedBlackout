@@ -167,14 +167,23 @@ public class Plugin : RocketPlugin<Config>
         while (true)
         {
             yield return new WaitForSeconds(60);
-
             R.Commands.Execute(new ConsolePlayer(), "/time 13000");
-            Logger.Log($"TPS: {Provider.debugTPS}");
-            Logger.Log($"UPS: {Provider.debugUPS}");
         }
         // ReSharper disable once IteratorNeverReturns
     }
 
+    private IEnumerator DebugOutput()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(2);
+            
+            Logging.Debug($"DEBUG", ConsoleColor.Red);
+            Logging.Debug($"TPS: {Provider.debugTPS}", ConsoleColor.Yellow);
+            Logging.Debug($"UPS: {Provider.debugUPS}", ConsoleColor.Yellow);
+        }
+    }
+    
     private void OnDamageStructure(CSteamID instigatorSteamID, Transform structureTransform, ref ushort pendingTotalDamage, ref bool shouldAllow, EDamageOrigin damageOrigin) => shouldAllow = false;
 
     private void OnDamageResource(CSteamID instigatorSteamID, Transform objectTransform, ref ushort pendingTotalDamage, ref bool shouldAllow, EDamageOrigin damageOrigin) => shouldAllow = false;
@@ -222,7 +231,8 @@ public class Plugin : RocketPlugin<Config>
         Logging.Debug("Initialized Game");
 
         _ = StartCoroutine(Day());
-
+        _ = StartCoroutine(DebugOutput());
+        
         var ignoreMags = Config.Killstreaks.FileData.KillstreaksData.Where(k => k.MagID != 0).Select(k => k.MagID).ToList();
         var shouldFillAfterDetach = typeof(ItemMagazineAsset).GetProperty("shouldFillAfterDetach", BindingFlags.Public | BindingFlags.Instance);
         var magazines = Assets.find(EAssetType.ITEM).OfType<ItemMagazineAsset>();
