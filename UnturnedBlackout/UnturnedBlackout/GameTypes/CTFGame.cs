@@ -1039,6 +1039,13 @@ public class CTFGame : Game
         if (drop.asset.id == (player.ActiveLoadout.Lethal?.Gadget?.GadgetID ?? 0))
         {
             player.UsedLethal();
+            TaskDispatcher.QueueOnMainThread(() =>
+            {
+                BarricadeManager.BarricadeRegions.Cast<BarricadeRegion>().SelectMany(k => k.drops).Where(k => k != drop && k.asset.id == drop.asset.id && (drop.GetServersideData()?.owner ?? 0UL) == player.SteamID.m_SteamID)
+                    .Select(k => BarricadeManager.tryGetRegion(k.model.transform, out var x, out var y, out var plant, out var _) ? (k, x, y, plant) : (k, byte.MaxValue, byte.MaxValue, ushort.MaxValue)).ToList()
+                    .ForEach(k => BarricadeManager.destroyBarricade(k.k, k.Item2, k.Item3, k.Item4));
+            });
+            
             return;
         }
 
@@ -1081,7 +1088,7 @@ public class CTFGame : Game
             shouldAllow = false;
             return;
         }
-
+        
         var barricadeData = drop.GetServersideData();
         if (barricadeData == null)
             return;
@@ -1125,32 +1132,6 @@ public class CTFGame : Game
 
         cPlayer.GamePlayer.OnStanceChanged(obj.stance);
     }
-
-    /*
-    public override void PlayerEquipmentChanged(GamePlayer player)
-    {
-        var cPlayer = GetCTFPlayer(player.Player);
-        if (cPlayer == null)
-            return;
-
-        if (GamePhase == EGamePhase.STARTING)
-            return;
-
-        player.GiveMovement(player.Player.Player.equipment.useable is UseableGun gun && gun.isAiming, cPlayer.IsCarryingFlag, true);
-    }
-
-    public override void PlayerAimingChanged(GamePlayer player, bool isAiming)
-    {
-        var cPlayer = GetCTFPlayer(player.Player);
-        if (cPlayer == null)
-            return;
-
-        if (GamePhase == EGamePhase.STARTING)
-            return;
-
-        player.GiveMovement(isAiming, cPlayer.IsCarryingFlag, false);
-    }
-    */
     
     public CTFPlayer GetCTFPlayer(CSteamID steamID) => PlayersLookup.TryGetValue(steamID, out var cPlayer) ? cPlayer : null;
 

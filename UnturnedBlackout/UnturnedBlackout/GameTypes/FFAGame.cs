@@ -782,6 +782,13 @@ public class FFAGame : Game
         if (drop.asset.id == (player.ActiveLoadout.Lethal?.Gadget?.GadgetID ?? 0))
         {
             player.UsedLethal();
+            TaskDispatcher.QueueOnMainThread(() =>
+            {
+                BarricadeManager.BarricadeRegions.Cast<BarricadeRegion>().SelectMany(k => k.drops).Where(k => k != drop && k.asset.id == drop.asset.id && (drop.GetServersideData()?.owner ?? 0UL) == player.SteamID.m_SteamID)
+                    .Select(k => BarricadeManager.tryGetRegion(k.model.transform, out var x, out var y, out var plant, out var _) ? (k, x, y, plant) : (k, byte.MaxValue, byte.MaxValue, ushort.MaxValue)).ToList()
+                    .ForEach(k => BarricadeManager.destroyBarricade(k.k, k.Item2, k.Item3, k.Item4));
+            });
+            
             return;
         }
 

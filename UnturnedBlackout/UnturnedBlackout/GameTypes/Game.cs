@@ -145,7 +145,6 @@ public abstract class Game
 
     public void OnBarricadeDestroyed(BarricadeDrop drop)
     {
-        Logging.Debug($"Barricade destroyed");
         if (!GameTurretsInverse.TryGetValue(drop, out var gPlayer))
             return;
 
