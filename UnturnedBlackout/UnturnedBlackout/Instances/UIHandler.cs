@@ -828,10 +828,10 @@ public class UIHandler
         if (skins.Count != 0)
             UnboxInventoryPages.Add(page, new(page, skins));
     }
-
+    
     public void ShowUI(MatchEndSummary summary = null)
     {
-        EffectManager.sendUIEffect(MAIN_MENU_ID, MAIN_MENU_KEY, TransportConnection, true);
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Hide UI Toggler", false);
         Player.Player.enablePluginWidgetFlag(EPluginWidgetFlags.Modal);
         SetupMainMenu();
 
@@ -848,7 +848,7 @@ public class UIHandler
 
     public void HideUI()
     {
-        EffectManager.askEffectClearByID(MAIN_MENU_ID, TransportConnection);
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Hide UI Toggler", true);
         Player.Player.disablePluginWidgetFlag(EPluginWidgetFlags.Modal);
         MainPage = EMainPage.NONE;
         ShowingStats = false;

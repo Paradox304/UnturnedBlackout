@@ -14,6 +14,7 @@ using UnityEngine;
 using UnturnedBlackout.Enums;
 using UnturnedBlackout.Extensions;
 using UnturnedBlackout.GameTypes;
+using UnturnedBlackout.Instances;
 using UnturnedBlackout.Models.Global;
 using Logger = Rocket.Core.Logging.Logger;
 
@@ -175,6 +176,12 @@ public class GameManager
     public IEnumerator DelayedJoin(UnturnedPlayer player)
     {
         var db = Plugin.Instance.DB;
+        var transportConnection = player.Player.channel.owner.transportConnection;
+        EffectManager.sendUIEffect(UIHandler.MAIN_MENU_ID, UIHandler.MAIN_MENU_KEY, transportConnection, true);
+        Logging.Debug($"Syncing data for {player.CharacterName}, starting sending of images every second");
+        var achievementImages = db.Achievements.SelectMany(k => k.Tiers).Select(k => k.TierPrevLarge).ToList();
+        var achievementImage = 0;
+        Logging.Debug($"Found {achievementImages.Count} images of achievement tiers");
         Plugin.Instance.UI.SendLoadingUI(player, false, EGameType.NONE, null, "Syncing Data... (30 seconds)");
         if (!player.IsAdmin)
         {
@@ -183,6 +190,16 @@ public class GameManager
                 yield return new WaitForSeconds(1f);
             
                 Plugin.Instance.UI.UpdateLoadingText(player, $"Syncing Data... ({i} seconds)");
+                
+                var maxAchievementImage = Math.Min(achievementImage + 15, achievementImages.Count);
+                Logging.Debug($"Current image: {achievementImage}, max achievement image: {maxAchievementImage}");
+                for (var j = achievementImage; j < maxAchievementImage; j++)
+                {
+                    Logging.Debug($"Sending image {achievementImages[j]}, j: {j}");
+                    EffectManager.sendUIEffectImageURL(UIHandler.MAIN_MENU_KEY, transportConnection, true, "Scene Loading IMAGE Box", achievementImages[j]);
+                }
+
+                achievementImage = maxAchievementImage;
             }
         }
 
