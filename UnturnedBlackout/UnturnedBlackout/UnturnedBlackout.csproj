@@ -361,6 +361,7 @@
         <Compile Include="Models\Global\VoteChoice.cs" />
         <Compile Include="Models\UI\PageAchievement.cs" />
         <Compile Include="Models\UI\PageAttachment.cs" />
+        <Compile Include="Models\UI\PageBattlepass.cs" />
         <Compile Include="Models\UI\PageCard.cs" />
         <Compile Include="Models\UI\PageGadget.cs" />
         <Compile Include="Models\UI\PageGlove.cs" />

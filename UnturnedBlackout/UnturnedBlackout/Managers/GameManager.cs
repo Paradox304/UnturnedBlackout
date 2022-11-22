@@ -230,6 +230,8 @@ public class GameManager
             await db.AddPlayerAsync(player, player.CharacterName, avatarURL);
             await db.GetPlayerDataAsync(player);
 
+            Plugin.Instance.UI.RegisterUIHandler(player);
+            
             TaskDispatcher.QueueOnMainThread(() =>
             {
                 Plugin.Instance.UI.ClearLoadingUI(player);
@@ -238,7 +240,7 @@ public class GameManager
                     _ = Players.Remove(player.CSteamID);
 
                 Players.Add(player.CSteamID, new(player, player.Player.channel.GetOwnerTransportConnection()));
-                Plugin.Instance.UI.RegisterUIHandler(player);
+                Plugin.Instance.UI.ShowMenuUI(player);
             });
         });
     }

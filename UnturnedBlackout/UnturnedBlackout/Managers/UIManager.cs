@@ -1588,29 +1588,6 @@ public class UIManager
         handler.ReloadSelectedAchievement();
     }
 
-    public void OnBattlepassTierUpdated(CSteamID steamID, int tierID)
-    {
-        if (!UIHandlersLookup.TryGetValue(steamID, out var handler))
-            return;
-
-        if (handler.MainPage == EMainPage.BATTLEPASS)
-            handler.ShowBattlepassTier(tierID);
-    }
-
-    public void OnBattlepassUpdated(CSteamID steamID, bool force = false)
-    {
-        if (!UIHandlersLookup.TryGetValue(steamID, out var handler))
-            return;
-
-        if (handler.MainPage != EMainPage.BATTLEPASS)
-            return;
-
-        if (force)
-            handler.ShowBattlepass();
-        else
-            _ = Plugin.Instance.StartCoroutine(handler.SetupBattlepass());
-    }
-
     private void OnButtonClicked(Player player, string buttonName)
     {
         var ply = UnturnedPlayer.FromPlayer(player);
@@ -1680,7 +1657,7 @@ public class UIManager
                 handler.StartScrollableImages();
                 return;
             case "SERVER Battlepass BUTTON":
-                _ = Plugin.Instance.StartCoroutine(handler.SetupBattlepass());
+                handler.ShowBattlepass();
                 handler.StopScrollableImages();
                 return;
             case "SERVER Battlepass Back BUTTON":
@@ -1907,14 +1884,16 @@ public class UIManager
             case "SERVER Battlepass Tier Skip BUTTON":
                 return;
             case "SERVER Battlepass Confirm BUTTON":
-                if (handler.MainPage == EMainPage.BATTLEPASS)
-                    Plugin.Instance.BP.SkipTier(gPly);
-
+                handler.SkipBattlepassTier();
                 return;
             case "SERVER Battlepass Claim BUTTON":
-                if (handler.MainPage == EMainPage.BATTLEPASS)
-                    Plugin.Instance.BP.ClaimReward(gPly, handler.SelectedBattlepassTierID.Item1, handler.SelectedBattlepassTierID.Item2);
-
+                handler.ClaimBattlepassTier();
+                return;
+            case "SERVER Battlepass Next BUTTON":
+                handler.ForwardBattlepassPage();
+                return;
+            case "SERVER Battlepass Prev BUTTON":
+                handler.BackwardBattlepassPage();
                 return;
             case "SERVER Battlepass Buy Pass BUTTON":
                 player.sendBrowserRequest("Buy premium battlepass here:", "https://store.unturnedblackout.com/category/battlepass");

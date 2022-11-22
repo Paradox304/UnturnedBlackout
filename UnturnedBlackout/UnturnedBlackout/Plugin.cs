@@ -182,6 +182,7 @@ public class Plugin : RocketPlugin<Config>
             Logging.Debug($"TPS: {Provider.debugTPS}", ConsoleColor.Yellow);
             Logging.Debug($"UPS: {Provider.debugUPS}", ConsoleColor.Yellow);
         }
+        // ReSharper disable once IteratorNeverReturns
     }
     
     private void OnDamageStructure(CSteamID instigatorSteamID, Transform structureTransform, ref ushort pendingTotalDamage, ref bool shouldAllow, EDamageOrigin damageOrigin) => shouldAllow = false;

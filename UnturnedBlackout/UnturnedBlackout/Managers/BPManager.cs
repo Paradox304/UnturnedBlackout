@@ -15,19 +15,19 @@ public class BPManager
 
     public ConfigManager Config => Plugin.Instance.Config;
 
-    public void ClaimReward(GamePlayer player, bool isTop, int tierID)
+    public bool ClaimReward(GamePlayer player, bool isTop, int tierID)
     {
         if (!DB.BattlepassTiersSearchByID.TryGetValue(tierID, out var tier))
         {
             Logging.Debug($"Error finding battlepass tier with id {tierID} for {player.Player.CharacterName}");
-            return;
+            return false;
         }
 
         var bp = player.Data.Battlepass;
         if ((isTop && bp.ClaimedFreeRewards.Contains(tierID)) || (!isTop && bp.ClaimedPremiumRewards.Contains(tierID)))
         {
             Logging.Debug($"{player.Player.CharacterName} has already claimed the reward for IsTop {isTop} and selected {tierID}, why is the plugin asking again?");
-            return;
+            return false;
         }
 
         Reward reward;
@@ -43,12 +43,13 @@ public class BPManager
         }
 
         Plugin.Instance.Reward.GiveRewards(player.SteamID, new() { reward });
-        Plugin.Instance.UI.OnBattlepassTierUpdated(player.SteamID, tierID);
 
         if (isTop)
             DB.UpdatePlayerBPClaimedFreeRewards(player.SteamID);
         else
             DB.UpdatePlayerBPClaimedPremiumRewards(player.SteamID);
+
+        return true;
     }
 
     public void SkipTier(GamePlayer player)
@@ -67,13 +68,6 @@ public class BPManager
             
             DB.DecreasePlayerCoins(player.SteamID, Config.Base.FileData.BattlepassTierSkipCost);
             DB.UpdatePlayerBPTier(player.SteamID, bp.CurrentTier);
-
-            TaskDispatcher.QueueOnMainThread(() =>
-            {
-                Plugin.Instance.UI.OnBattlepassUpdated(player.SteamID);
-                Plugin.Instance.UI.OnBattlepassTierUpdated(player.SteamID, oldTier);
-                Plugin.Instance.UI.OnBattlepassTierUpdated(player.SteamID, bp.CurrentTier);
-            });
         }
         else
             Plugin.Instance.UI.SendNotEnoughCurrencyModal(player.SteamID, ECurrency.COIN);

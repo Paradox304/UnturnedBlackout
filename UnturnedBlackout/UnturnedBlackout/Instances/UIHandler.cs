@@ -36,7 +36,8 @@ public class UIHandler
     public const int MAX_CASES_PER_CASE_PAGE = 11;
     public const int MAX_CASES_PER_STORE_PAGE = 5;
     public const int MAX_SKINS_PER_INVENTORY_PAGE = 20;
-    public const int MAX_ACHIEVEMENTS_PER_PAGE = 48;
+    public const int MAX_ACHIEVEMENTS_PER_PAGE = 24;
+    public const int MAX_BATTLEPASS_TIERS_PER_PAGE = 10;
     public const int MAX_PREVIEW_CONTENT_PER_CASE = 19;
     public const int MAX_ROLLING_CONTENT_PER_CASE = 23;
     private const int MAX_SPACES_MATCH_END_SUMMARY = 113;
@@ -95,6 +96,11 @@ public class UIHandler
     public int AchievementSubPage { get; set; }
     public int SelectedAchievementID { get; set; }
 
+    // Battlepass
+    public int BattlepassPageID { get; set; }
+    public int SelectedBattlepassIndex { get; set; }
+    public (bool, int) SelectedBattlepassTierID { get; set; }
+    
     // Unboxing
     public EUnboxingPage UnboxingPage { get; set; }
     public int UnboxingPageID { get; set; }
@@ -102,9 +108,6 @@ public class UIHandler
     public ECurrency SelectedCaseBuyMethod { get; set; }
     public int SelectedCaseBuyAmount { get; set; }
     public bool IsUnboxing { get; set; }
-
-    // Battlepass
-    public (bool, int) SelectedBattlepassTierID { get; set; }
     
     // Scrollable Image
     
@@ -129,10 +132,12 @@ public class UIHandler
     public Dictionary<int, PageGlove> GlovePages { get; set; }
     public Dictionary<int, PageKillstreak> KillstreakPages { get; set; }
     public Dictionary<int, Dictionary<int, PageAchievement>> AchievementPages { get; set; }
+    public Dictionary<int, PageBattlepass> BattlepassPages { get; set; }
+    public Dictionary<int, PageBattlepass> BattlepassPagesInverse { get; set; } // Get the page the tier of the battlepass is on
     public Dictionary<int, PageUnboxCase> UnboxCasesPages { get; set; }
     public Dictionary<int, PageUnboxStore> UnboxStorePages { get; set; }
     public Dictionary<int, PageUnboxInventory> UnboxInventoryPages { get; set; }
-
+    
     public UIHandler(UnturnedPlayer player)
     {
         Logging.Debug($"Creating UIHandler for {player.CSteamID}");
@@ -157,7 +162,6 @@ public class UIHandler
 
         MainPage = EMainPage.NONE;
         BuildPages();
-        ShowUI();
     }
 
     public void Destroy()
@@ -195,10 +199,10 @@ public class UIHandler
         BuildCardPages();
         BuildGlovePages();
         BuildKillstreakPages();
-        BuildAchievementPages();
         BuildUnboxingCasesPages();
         BuildUnboxingStorePages();
         BuildUnboxingInventoryPages();
+        BuildBattlepassPages();
     }
 
     public void BuildLoadoutPages()
@@ -722,6 +726,41 @@ public class UIHandler
         }
     }
 
+    public void BuildBattlepassPages()
+    {
+        BattlepassPages = new();
+        BattlepassPagesInverse = new();
+        
+        var index = 0;
+        var page = 1;
+        
+        Dictionary<int, BattlepassTier> tiers = new();
+        Dictionary<int, int> tiersInverse = new();
+        
+        foreach (var tier in DB.BattlepassTiers)
+        {
+            tiers.Add(index, tier);
+            tiersInverse.Add(tier.TierID, index);
+            if (index == MAX_BATTLEPASS_TIERS_PER_PAGE)
+            {
+                index = 0;
+                var bpPage = new PageBattlepass(page, tiers, tiersInverse);
+                BattlepassPages.Add(page, bpPage);
+                foreach (var tierID in tiersInverse.Keys)
+                    BattlepassPagesInverse.Add(tierID, bpPage);
+
+                tiers = new();
+                tiersInverse = new();
+                page++;
+                continue;
+            }
+
+            index++;
+        }
+        
+        Logging.Debug($"Created {BattlepassPages.Count} battlepass pages and {BattlepassPagesInverse.Count} battlepass inverse pages");
+    }
+
     public void BuildUnboxingCasesPages()
     {
         UnboxCasesPages = new();
@@ -886,7 +925,7 @@ public class UIHandler
         ClearChat();
         ShowXP();
         ShowQuestCompletion();
-        BuildAchievementPages();
+        _ = Task.Run(BuildAchievementPages);
         _ = Plugin.Instance.StartCoroutine(SetupScrollableImages());
     }
 
@@ -933,6 +972,7 @@ public class UIHandler
         Utility.Say(Player, "<color=green>Staff Mode Activated</color>");
     }
     
+    // Play Page
     public void ShowPlayPage()
     {
         MainPage = EMainPage.PLAY;
@@ -1070,6 +1110,7 @@ public class UIHandler
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Play IP TEXT", $"{server.FriendlyIP}:{server.Port}");
     }
 
+    // Options Page
     public void ShowOptions()
     {
         for (var i = 0; i <= 4; i++)
@@ -1131,6 +1172,7 @@ public class UIHandler
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"{hotkey.ToFriendlyName()} Hotkey INPUT", PlayerData.Hotkeys[(int)hotkey].ToString());
     }
 
+    // Loadouts Page
     public void ShowLoadouts()
     {
         MainPage = EMainPage.LOADOUT;
@@ -1355,6 +1397,7 @@ public class UIHandler
 
     public void ExitRenameLoadout() => LoadoutNameText = "";
 
+    // Midgame Loadouts Page
     public void ShowMidgameLoadouts()
     {
         MainPage = EMainPage.LOADOUT;
@@ -1531,6 +1574,7 @@ public class UIHandler
         Player.Player.disablePluginWidgetFlag(EPluginWidgetFlags.Modal);
     }
 
+    // Loadout Sub Page
     public void ShowLoadoutSubPage(ELoadoutPage page)
     {
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Type TEXT", page.ToFriendlyName());
@@ -5454,6 +5498,7 @@ public class UIHandler
     public bool IsAttachmentPagePrimary() => (int)LoadoutPage >= MINIMUM_LOADOUT_PAGE_ATTACHMENT_PRIMARY && (int)LoadoutPage <= MAXIMUM_LOADOUT_PAGE_ATTACHMENT_PRIMARY;
     public void BackToLoadout() => EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Item Page Disabler", true);
 
+    // Leaderboards
     public void ShowLeaderboards()
     {
         MainPage = EMainPage.LEADERBOARD;
@@ -5669,6 +5714,7 @@ public class UIHandler
         var _ => "00:00:00"
     };
 
+    // Quests
     public void ShowQuests()
     {
         var quests = PlayerData.Quests.OrderBy(k => (int)k.Quest.QuestTier).ToList();
@@ -5697,6 +5743,7 @@ public class UIHandler
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Quest Complete Count TEXT", $"{completedQuests}/{totalQuests}");
     }
 
+    // Achievements
     public void ShowAchievements()
     {
         MainPage = EMainPage.ACHIEVEMENTS;
@@ -5989,22 +6036,8 @@ public class UIHandler
         }
     }
 
-    public IEnumerator SetupBattlepass()
-    {
-        MainPage = EMainPage.BATTLEPASS;
-        ShowBattlepass();
-        // Setup all 50 objects
-        for (var i = 1; i <= 50; i++)
-        {
-            yield return new WaitForSeconds(0.1f);
-            
-            ShowBattlepassTier(i);
-        }
-
-        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass Claim BUTTON", false);
-    }
-
-    public void ShowBattlepass()
+    // Battlepass
+    public void SetupBattlepassPreview()
     {
         var bp = PlayerData.Battlepass;
 
@@ -6035,35 +6068,83 @@ public class UIHandler
         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass Tier Skip IMAGE", "");
     }
 
-    public void ShowBattlepassTier(int tierID)
+    public void ShowBattlepass()
     {
         var bp = PlayerData.Battlepass;
-        if (!DB.BattlepassTiersSearchByID.TryGetValue(tierID, out var tier))
+        SetupBattlepassPreview();
+        
+        Logging.Debug($"{Player.CharacterName} is clicking on battlepass, getting the page their current tier is on");
+        if (!BattlepassPagesInverse.TryGetValue(bp.CurrentTier, out var page) && !BattlepassPages.TryGetValue(1, out page))
+        {
+            Logging.Debug($"Error finding current tier battlepass page or first page for {Player.CharacterName}");
             return;
+        }
+
+        ShowBattlepassPage(page);
+    }
+
+    public void ForwardBattlepassPage()
+    {
+        if (!BattlepassPages.TryGetValue(BattlepassPageID + 1, out var nextPage) && !BattlepassPages.TryGetValue(1, out nextPage))
+        {
+            Logging.Debug($"Error finding battlepass next or first page for {Player.CharacterName}");
+            return;
+        }
+        
+        ShowBattlepassPage(nextPage);
+    }
+
+    public void BackwardBattlepassPage()
+    {
+        if (!BattlepassPages.TryGetValue(BattlepassPageID - 1, out var prevPage) && !BattlepassPages.TryGetValue(BattlepassPages.Keys.Max(), out prevPage))
+        {
+            Logging.Debug($"Error finding battlepass previous or max page for {Player.CharacterName}");
+            return;
+        }
+        
+        ShowBattlepassPage(prevPage);
+    }
+
+    public void ShowBattlepassPage(PageBattlepass page)
+    {
+        BattlepassPageID = page.PageID;
+        for (var i = 0; i <= MAX_BATTLEPASS_TIERS_PER_PAGE; i++)
+        {
+            var tier = page.Tiers[i];
+            ShowBattlepassTier(tier, i);
+        }
+    }
+
+    public void ShowBattlepassTier(BattlepassTier tier, int index)
+    {
+        var bp = PlayerData.Battlepass;
+
+        var tierID = tier.TierID;
 
         var isTierUnlocked = bp.CurrentTier >= tierID;
-        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass Tier Completed Toggler {tierID}", isTierUnlocked);
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass Tier Completed Toggler {index}", isTierUnlocked);
         var spaces = bp.CurrentTier > tierID ? 70 : bp.CurrentTier == tierID ? Math.Min(70, bp.XP * 70 / (DB.BattlepassTiersSearchByID.TryGetValue(tierID + 1, out var nextTier) ? nextTier.XP : tier.XP)) : 0;
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass Tier Fill {tierID}", spaces == 0 ? UIManager.VERY_SMALL_SQUARE : new(UIManager.HAIRSPACE_SYMBOL_CHAR, spaces));
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass Tier Fill {index}", spaces == 0 ? UIManager.VERY_SMALL_SQUARE : new(UIManager.HAIRSPACE_SYMBOL_CHAR, spaces));
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass Tier TEXT {index}", tierID.ToString());
 
         // Setup top reward (free reward)
         var isRewardClaimed = bp.ClaimedFreeRewards.Contains(tierID);
         if (tier.FreeReward != null && TryGetBattlepassRewardInfo(tier.FreeReward, out var topRewardName, out var topRewardImage, out var topRewardRarity))
         {
-            EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass T IMAGE {tierID}", topRewardImage);
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass T TEXT {tierID}", topRewardName);
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass T Locked {tierID}", !isTierUnlocked || isRewardClaimed);
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass T Claimed {tierID}", isRewardClaimed);
+            EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass T IMAGE {index}", topRewardImage);
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass T TEXT {index}", topRewardName);
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass T Locked {index}", !isTierUnlocked || isRewardClaimed);
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass T Claimed {index}", isRewardClaimed);
             SendRarity("SERVER Battlepass T", topRewardRarity, tierID);
         }
         else
         {
-            EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass T IMAGE {tierID}", "");
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass T TEXT {tierID}", " ");
+            EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass T IMAGE {index}", "");
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass T TEXT {index}", " ");
             if (isTierUnlocked)
             {
-                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass T Locked {tierID}", true);
-                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass T Claimed {tierID}", true);
+                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass T Locked {index}", true);
+                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass T Claimed {index}", true);
             }
         }
 
@@ -6071,44 +6152,67 @@ public class UIHandler
         isRewardClaimed = bp.ClaimedPremiumRewards.Contains(tierID);
         if (tier.PremiumReward != null && TryGetBattlepassRewardInfo(tier.PremiumReward, out var bottomRewardName, out var bottomRewardImage, out var bottomRewardRarity))
         {
-            EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass B IMAGE {tierID}", bottomRewardImage);
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass B TEXT {tierID}", bottomRewardName);
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass B Locked {tierID}", !PlayerData.HasBattlepass || !isTierUnlocked || isRewardClaimed);
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass B Claimed {tierID}", isRewardClaimed);
+            EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass B IMAGE {index}", bottomRewardImage);
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass B TEXT {index}", bottomRewardName);
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass B Locked {index}", !PlayerData.HasBattlepass || !isTierUnlocked || isRewardClaimed);
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass B Claimed {index}", isRewardClaimed);
             SendRarity("SERVER Battlepass B", bottomRewardRarity, tierID);
         }
         else
         {
-            EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass B IMAGE {tierID}", "");
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass B TEXT {tierID}", " ");
+            EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass B IMAGE {index}", "");
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass B TEXT {index}", " ");
 
             if (isTierUnlocked)
             {
-                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass B Locked {tierID}", true);
-                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass B Claimed {tierID}", true);
+                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass B Locked {index}", true);
+                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass B Claimed {index}", true);
             }
         }
     }
 
-    public void SelectedBattlepassTier(bool isTop, int tierID)
+    public void SelectedBattlepassTier(bool isTop, int index)
     {
-        SelectedBattlepassTierID = (isTop, tierID);
-
-        if (!DB.BattlepassTiersSearchByID.TryGetValue(tierID, out var tier))
+        if (!BattlepassPages.TryGetValue(BattlepassPageID, out var page) || !page.Tiers.TryGetValue(index, out var tier))
         {
-            Logging.Debug($"Error finding selected battlepass tier for {Player.CharacterName} with selected {tierID}");
+            Logging.Debug($"Error finding selected battlepass page or tier for {Player.CharacterName}");
             return;
         }
-
+        
+        SelectedBattlepassTierID = (isTop, tier.TierID);
+        SelectedBattlepassIndex = index;
+        
         var reward = isTop ? tier.FreeReward : tier.PremiumReward;
         if (reward == null || !TryGetBattlepassRewardInfo(reward, out var _, out var rewardImage, out var _))
+        {
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass IMAGE", false);
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass Card IMAGE", false);
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass Claim BUTTON", false);
             return;
+        }
 
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass IMAGE", reward.RewardType != ERewardType.CARD);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass Card IMAGE", reward.RewardType == ERewardType.CARD);
         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass IMAGE", rewardImage);
         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass Card IMAGE", rewardImage);
-        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass Claim BUTTON", true);
+        var bp = PlayerData.Battlepass;
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass Claim BUTTON", bp.CurrentTier >= tier.TierID && ((isTop && !bp.ClaimedFreeRewards.Contains(tier.TierID)) || (!isTop && !bp.ClaimedPremiumRewards.Contains(tier.TierID))));
+    }
+
+    public void ClaimBattlepassTier()
+    {
+        if (!DB.BattlepassTiersSearchByID.TryGetValue(SelectedBattlepassTierID.Item2, out var tier))
+        {
+            Logging.Debug($"Error finding current selected tier for {Player.CharacterName}, returning");
+            return;
+        }
+        
+        
+    }
+
+    public void SkipBattlepassTier()
+    {
+
     }
 
     public bool TryGetBattlepassRewardInfo(Reward reward, out string rewardName, out string rewardImage, out ERarity rewardRarity)
@@ -6201,6 +6305,7 @@ public class UIHandler
         }
     }
 
+    // Unboxing
     public void ShowUnboxingPage(EUnboxingPage unboxingPage, int selectedCase = -1)
     {
         UnboxingPage = unboxingPage;
@@ -6830,6 +6935,7 @@ public class UIHandler
         return false;
     }
     
+    // Scrollable Images
     public IEnumerator SetupScrollableImages()
     {
         var images = Config.Base.FileData.ScrollableImages;
@@ -6908,6 +7014,7 @@ public class UIHandler
         ChangeScrollableImage(newImage, newIndex);
     }
 
+    // Match End Summary
     public IEnumerator ShowMatchEndSummary(MatchEndSummary summary)
     {
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary", true);
@@ -7151,6 +7258,7 @@ public class UIHandler
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary Stats Toggle", true);
     }
 
+    // Events
     public void OnCurrencyUpdated(ECurrency currency)
     {
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Currency {currency.ToUIName()} TEXT", PlayerData.GetCurrency(currency).ToString());
