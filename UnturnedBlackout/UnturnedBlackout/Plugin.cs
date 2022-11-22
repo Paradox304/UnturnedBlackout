@@ -176,7 +176,7 @@ public class Plugin : RocketPlugin<Config>
     {
         while (true)
         {
-            yield return new WaitForSeconds(2);
+            yield return new WaitForSeconds(1);
             
             Logging.Debug($"DEBUG", ConsoleColor.Red);
             Logging.Debug($"TPS: {Provider.debugTPS}", ConsoleColor.Yellow);
