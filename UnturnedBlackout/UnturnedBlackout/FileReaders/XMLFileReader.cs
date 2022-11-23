@@ -72,7 +72,7 @@ public class XmlFileReader<T> : IFileReader<T> where T : class, new()
         catch (Exception ex)
         {
             Logger.LogException(ex, $"Failed to load file from URL: {URLPath}");
-            return "";
+            return string.Empty;
         }
     }
 

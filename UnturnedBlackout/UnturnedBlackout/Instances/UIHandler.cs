@@ -19,6 +19,7 @@ using UnturnedBlackout.Managers;
 using UnturnedBlackout.Models.Global;
 using UnturnedBlackout.Models.UI;
 using UnturnedBlackout.Models.Webhook;
+using Debug = UnityEngine.Debug;
 using Enum = System.Enum;
 using Field = UnturnedBlackout.Models.Webhook.Field;
 using Logger = Rocket.Core.Logging.Logger;
@@ -5840,7 +5841,7 @@ public class UIHandler
                         break;
                 }
                 
-                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Achievements Bar FIll {i}", fillTxt);
+                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Achievements Bar Fill {i}", fillTxt);
             }
 
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Achievements Claimable {i}", nextTier != null && achievement.Amount >= nextTier.TargetAmount);
@@ -6154,7 +6155,7 @@ public class UIHandler
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass T TEXT {index}", topRewardName);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass T Locked {index}", !isTierUnlocked || isRewardClaimed);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass T Claimed {index}", isRewardClaimed);
-            SendRarity("SERVER Battlepass T", topRewardRarity, tierID);
+            SendRarity("SERVER Battlepass T", topRewardRarity, index);
         }
         else
         {
@@ -6172,7 +6173,7 @@ public class UIHandler
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass B TEXT {index}", bottomRewardName);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass B Locked {index}", !PlayerData.HasBattlepass || !isTierUnlocked || isRewardClaimed);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass B Claimed {index}", isRewardClaimed);
-            SendRarity("SERVER Battlepass B", bottomRewardRarity, tierID);
+            SendRarity("SERVER Battlepass B", bottomRewardRarity, index);
         }
         else
         {
@@ -6223,32 +6224,66 @@ public class UIHandler
         if (gPlayer == null)
             return;
 
-        if (!Plugin.Instance.BP.ClaimReward(gPlayer, SelectedBattlepassTierID.Item1, SelectedBattlepassTierID.Item2))
+        var isTop = SelectedBattlepassTierID.Item1;
+        if (!Plugin.Instance.BP.ClaimReward(gPlayer, isTop, SelectedBattlepassTierID.Item2))
         {
             Logging.Debug($"Error claiming reward for the tier, returning");
             return;
         }
 
-        if (!BattlepassPages.TryGetValue(BattlepassPageID, out var page) || !page.TiersInverse.TryGetValue(tier.TierID, out var index))
+        if (!BattlepassPages.TryGetValue(BattlepassPageID, out var currentPage))
         {
-            Logging.Debug($"Error finding tier index on the current page of battlepass for {Player.CharacterName}, returning");
+            Logging.Debug($"Error finding the current page of battlepass for {Player.CharacterName}, returning");
             return;
         }
-        
-        ShowBattlepassTier(tier, index);
-        if (index == MAX_BATTLEPASS_TIERS_PER_PAGE)
-            return;
 
-        var selectTierIndex = index + (SelectedBattlepassTierID.Item1 ? 2 : 1);
-        Logging.Debug($"Current Index: {index}, Next tier index: {selectTierIndex}");
-        if (!page.Tiers.ContainsKey(selectTierIndex))
+        var currentIndex = SelectedBattlepassIndex;
+        Logging.Debug($"Updating tier {tier.TierID} at index {currentIndex}");
+        ShowBattlepassTier(tier, currentIndex);
+        // get the next available tier
+        var selectTierIndex = currentIndex;
+        while (true)
         {
-            Logging.Debug($"Next tier index to select not found for {Player.CharacterName} in the page, returning");
-            return;   
+            selectTierIndex++;
+            if (!currentPage.Tiers.TryGetValue(selectTierIndex, out var nextTier))
+            {
+                selectTierIndex = 10;
+                break;
+            }
+            
+            if ((isTop && nextTier.FreeReward == null) || (!isTop && nextTier.PremiumReward == null))
+                continue;
+
+            break;
         }
         
-        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass {(SelectedBattlepassTierID.Item1 ? "T" : "B")} Tier Selected {selectTierIndex}", true);
-        SelectedBattlepassTier(SelectedBattlepassTierID.Item1, selectTierIndex);
+        if (selectTierIndex > MAX_BATTLEPASS_TIERS_PER_PAGE)
+        {
+            Logging.Debug($"Player is on the last tier of the page");
+            if (!BattlepassPages.TryGetValue(currentPage.PageID + 1, out var nextPage))
+            {
+                Logging.Debug($"Error finding next page of battlepass for {Player.CharacterName}");
+                return;
+            }
+
+            if (!nextPage.Tiers.ContainsKey(0))
+            {
+                Logging.Debug($"Next page doesn't have index position 0 to select for {Player.CharacterName}, returning");
+                return;
+            }
+            
+            Logging.Debug($"Sending index: 0, is top: {SelectedBattlepassTierID}, page: {nextPage.PageID}");
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Battlepass Loading 1 Fast Starter", true);
+            ShowBattlepassPage(nextPage);
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass {(isTop ? "T" : "B")} Tier Selected 0", true);
+            SelectedBattlepassTier(isTop, 0);
+
+            return;
+        }
+
+        Logging.Debug($"Current Index: {currentIndex}, Next tier index: {selectTierIndex}");
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass {(isTop ? "T" : "B")} Tier Selected {selectTierIndex}", true);
+        SelectedBattlepassTier(isTop, selectTierIndex);
     }
 
     public void SkipBattlepassTier()
@@ -6264,21 +6299,15 @@ public class UIHandler
             return;
 
         SetupBattlepassPreview();
-        if (!BattlepassPagesInverse.TryGetValue(oldTierID, out var page) || page.PageID != BattlepassPageID)
-        {
-            Logging.Debug($"Either old tier page is not found, or that page is not equals to the page the player is on");
-            return;
-        }
-
-        if (page.TiersInverse.TryGetValue(oldTierID, out var oldTierIndex) && DB.BattlepassTiersSearchByID.TryGetValue(oldTierID, out var oldTier))
+        if (BattlepassPagesInverse.TryGetValue(oldTierID, out var oldPage) && oldPage.PageID == BattlepassPageID && oldPage.TiersInverse.TryGetValue(oldTierID, out var oldTierIndex) && DB.BattlepassTiersSearchByID.TryGetValue(oldTierID, out var oldTier))
             ShowBattlepassTier(oldTier, oldTierIndex);
         else
-            Logging.Debug($"Either the index of old tier is not found, or the old tier is not found");
+            Logging.Debug($"Either the page for the old tier was not found, the player was not on the old tier's page, the index for the old tier was not found, or the old tier was not found :/");
 
-        if (page.TiersInverse.TryGetValue(bp.CurrentTier, out var currentTierIndex) && DB.BattlepassTiersSearchByID.TryGetValue(bp.CurrentTier, out var currentTier))
+        if (BattlepassPagesInverse.TryGetValue(bp.CurrentTier, out var currentPage) && currentPage.PageID == BattlepassPageID && currentPage.TiersInverse.TryGetValue(bp.CurrentTier, out var currentTierIndex) && DB.BattlepassTiersSearchByID.TryGetValue(bp.CurrentTier, out var currentTier))
             ShowBattlepassTier(currentTier, currentTierIndex);
         else
-            Logging.Debug($"Either the index of current tier is not found, or the current tier is not found");
+            Logging.Debug($"Either the page for the current tier was not found, the player was not on the current tier's page, the index for the current tier was not found, or the current tier was not found :/");
     }
 
     public bool TryGetBattlepassRewardInfo(Reward reward, out string rewardName, out string rewardImage, out ERarity rewardRarity)
