@@ -177,14 +177,12 @@ public class GameManager
     {
         var db = Plugin.Instance.DB;
         
-        /*
         var transportConnection = player.Player.channel.owner.transportConnection;
         EffectManager.sendUIEffect(UIHandler.MAIN_MENU_ID, UIHandler.MAIN_MENU_KEY, transportConnection, true);
         Logging.Debug($"Syncing data for {player.CharacterName}, starting sending of images every second");
         var achievementImages = db.Achievements.SelectMany(k => k.Tiers).Select(k => k.TierPrevLarge).ToList();
         var achievementImage = 0;
         Logging.Debug($"Found {achievementImages.Count} images of achievement tiers");
-        */
 
         Plugin.Instance.UI.SendLoadingUI(player, false, EGameType.NONE, null, "Syncing Data... (30 seconds)");
         if (!player.IsAdmin)
@@ -195,7 +193,6 @@ public class GameManager
             
                 Plugin.Instance.UI.UpdateLoadingText(player, $"Syncing Data... ({i} seconds)");
                 
-                /*
                 var maxAchievementImage = Math.Min(achievementImage + 15, achievementImages.Count);
                 Logging.Debug($"Current image: {achievementImage}, max achievement image: {maxAchievementImage}");
                 for (var j = achievementImage; j < maxAchievementImage; j++)
@@ -205,7 +202,6 @@ public class GameManager
                 }
 
                 achievementImage = maxAchievementImage;
-                */
             }
         }
 

@@ -1,6 +1,7 @@
 ﻿using Rocket.Core.Utils;
 using Steamworks;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using UnturnedBlackout.Database.Base;
 using UnturnedBlackout.Enums;
@@ -52,24 +53,31 @@ public class BPManager
         return true;
     }
 
-    public void SkipTier(GamePlayer player)
+    public bool SkipTier(GamePlayer player)
     {
         var bp = player.Data.Battlepass;
         if (!DB.BattlepassTiersSearchByID.ContainsKey(bp.CurrentTier + 1))
         {
             Logging.Debug($"{player.Player.CharacterName} has already reached the end of battlepass");
-            return;
+            return false;
         }
 
+        if (bp.CurrentTier == DB.BattlepassTiersSearchByID.Keys.Max())
+        {
+            Logging.Debug($"{player.Player.CharacterName} is already on the max tier");
+            return false;
+        }
+        
         if (player.Data.Coins >= Config.Base.FileData.BattlepassTierSkipCost)
         {
-            var oldTier = bp.CurrentTier;
             bp.CurrentTier += 1;
             
             DB.DecreasePlayerCoins(player.SteamID, Config.Base.FileData.BattlepassTierSkipCost);
             DB.UpdatePlayerBPTier(player.SteamID, bp.CurrentTier);
+            return true;
         }
-        else
-            Plugin.Instance.UI.SendNotEnoughCurrencyModal(player.SteamID, ECurrency.COIN);
+
+        Plugin.Instance.UI.SendNotEnoughCurrencyModal(player.SteamID, ECurrency.COIN);
+        return false;
     }
 }

@@ -37,7 +37,7 @@ public class UIHandler
     public const int MAX_CASES_PER_STORE_PAGE = 5;
     public const int MAX_SKINS_PER_INVENTORY_PAGE = 20;
     public const int MAX_ACHIEVEMENTS_PER_PAGE = 24;
-    public const int MAX_BATTLEPASS_TIERS_PER_PAGE = 10;
+    public const int MAX_BATTLEPASS_TIERS_PER_PAGE = 9;
     public const int MAX_PREVIEW_CONTENT_PER_CASE = 19;
     public const int MAX_ROLLING_CONTENT_PER_CASE = 23;
     private const int MAX_SPACES_MATCH_END_SUMMARY = 113;
@@ -728,6 +728,7 @@ public class UIHandler
 
     public void BuildBattlepassPages()
     {
+        Logging.Debug($"Creating battlepass pages");
         BattlepassPages = new();
         BattlepassPagesInverse = new();
         
@@ -737,17 +738,26 @@ public class UIHandler
         Dictionary<int, BattlepassTier> tiers = new();
         Dictionary<int, int> tiersInverse = new();
         
+        Logging.Debug($"Found {DB.BattlepassTiers.Count} tiers");
         foreach (var tier in DB.BattlepassTiers)
         {
+            Logging.Debug($"Index: {index}, Page: {page}");
             tiers.Add(index, tier);
+            Logging.Debug($"Key: {index}, Value: {tier.TierID} added to tiers");
             tiersInverse.Add(tier.TierID, index);
+            Logging.Debug($"Key: {tier.TierID}, Value: {index} added to tiers inverse");
             if (index == MAX_BATTLEPASS_TIERS_PER_PAGE)
             {
+                Logging.Debug($"Max index reached");
                 index = 0;
                 var bpPage = new PageBattlepass(page, tiers, tiersInverse);
                 BattlepassPages.Add(page, bpPage);
+                Logging.Debug($"Page created and added to pages");
                 foreach (var tierID in tiersInverse.Keys)
+                {
+                    Logging.Debug($"Added the page to {tierID} as pages inverse");
                     BattlepassPagesInverse.Add(tierID, bpPage);
+                }
 
                 tiers = new();
                 tiersInverse = new();
@@ -870,8 +880,8 @@ public class UIHandler
     
     public void ShowUI(MatchEndSummary summary = null)
     {
-        //EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Hide UI Toggler", false);
-        EffectManager.sendUIEffect(MAIN_MENU_ID, MAIN_MENU_KEY, TransportConnection, true);
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Hide UI Toggler", false);
+        //EffectManager.sendUIEffect(MAIN_MENU_ID, MAIN_MENU_KEY, TransportConnection, true);
         Player.Player.enablePluginWidgetFlag(EPluginWidgetFlags.Modal);
         SetupMainMenu();
 
@@ -888,8 +898,8 @@ public class UIHandler
 
     public void HideUI()
     {
-        //EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Hide UI Toggler", true);
-        EffectManager.askEffectClearByID(MAIN_MENU_ID, TransportConnection);
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Hide UI Toggler", true);
+        //EffectManager.askEffectClearByID(MAIN_MENU_ID, TransportConnection);
         Player.Player.disablePluginWidgetFlag(EPluginWidgetFlags.Modal);
         MainPage = EMainPage.NONE;
         ShowingStats = false;
@@ -6128,6 +6138,9 @@ public class UIHandler
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass Tier TEXT {index}", tierID.ToString());
 
         // Setup top reward (free reward)
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass T Rarity Disabler {index}", true);
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass B Rarity Disabler {index}", true);
+        
         var isRewardClaimed = bp.ClaimedFreeRewards.Contains(tierID);
         if (tier.FreeReward != null && TryGetBattlepassRewardInfo(tier.FreeReward, out var topRewardName, out var topRewardImage, out var topRewardRarity))
         {
@@ -6196,7 +6209,7 @@ public class UIHandler
         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass IMAGE", rewardImage);
         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass Card IMAGE", rewardImage);
         var bp = PlayerData.Battlepass;
-        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass Claim BUTTON", bp.CurrentTier >= tier.TierID && ((isTop && !bp.ClaimedFreeRewards.Contains(tier.TierID)) || (!isTop && !bp.ClaimedPremiumRewards.Contains(tier.TierID))));
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass Claim BUTTON", bp.CurrentTier >= tier.TierID && ((isTop && !bp.ClaimedFreeRewards.Contains(tier.TierID)) || (!isTop && PlayerData.HasBattlepass && !bp.ClaimedPremiumRewards.Contains(tier.TierID))));
     }
 
     public void ClaimBattlepassTier()
@@ -6206,13 +6219,67 @@ public class UIHandler
             Logging.Debug($"Error finding current selected tier for {Player.CharacterName}, returning");
             return;
         }
+
+        var gPlayer = Plugin.Instance.Game.GetGamePlayer(Player);
+        if (gPlayer == null)
+            return;
+
+        if (!Plugin.Instance.BP.ClaimReward(gPlayer, SelectedBattlepassTierID.Item1, SelectedBattlepassTierID.Item2))
+        {
+            Logging.Debug($"Error claiming reward for the tier, returning");
+            return;
+        }
+
+        if (!BattlepassPages.TryGetValue(BattlepassPageID, out var page) || !page.TiersInverse.TryGetValue(tier.TierID, out var index))
+        {
+            Logging.Debug($"Error finding tier index on the current page of battlepass for {Player.CharacterName}, returning");
+            return;
+        }
         
+        ShowBattlepassTier(tier, index);
+        if (index == MAX_BATTLEPASS_TIERS_PER_PAGE)
+            return;
+
+        var selectTierIndex = index + (SelectedBattlepassTierID.Item1 ? 2 : 1);
+        Logging.Debug($"Current Index: {index}, Next tier index: {selectTierIndex}");
+        if (!page.TiersInverse.ContainsKey(selectTierIndex))
+        {
+            Logging.Debug($"Next tier index to select not found for {Player.CharacterName} in the page, returning");
+            return;   
+        }
         
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass {(SelectedBattlepassTierID.Item1 ? "T" : "B")} Tier Selected {selectTierIndex}", true);
+        SelectedBattlepassTier(SelectedBattlepassTierID.Item1, selectTierIndex);
     }
 
     public void SkipBattlepassTier()
     {
+        var gPlayer = Plugin.Instance.Game.GetGamePlayer(Player);
+        if (gPlayer == null)
+            return;
 
+        var bp = PlayerData.Battlepass;
+        var oldTierID = bp.CurrentTier;
+        
+        if (!Plugin.Instance.BP.SkipTier(gPlayer))
+            return;
+
+        SetupBattlepassPreview();
+        if (!BattlepassPagesInverse.TryGetValue(oldTierID, out var page) || page.PageID != BattlepassPageID)
+        {
+            Logging.Debug($"Either old tier page is not found, or that page is not equals to the page the player is on");
+            return;
+        }
+
+        if (page.TiersInverse.TryGetValue(oldTierID, out var oldTierIndex) && DB.BattlepassTiersSearchByID.TryGetValue(oldTierID, out var oldTier))
+            ShowBattlepassTier(oldTier, oldTierIndex);
+        else
+            Logging.Debug($"Either the index of old tier is not found, or the old tier is not found");
+
+        if (page.TiersInverse.TryGetValue(bp.CurrentTier, out var currentTierIndex) && DB.BattlepassTiersSearchByID.TryGetValue(bp.CurrentTier, out var currentTier))
+            ShowBattlepassTier(currentTier, currentTierIndex);
+        else
+            Logging.Debug($"Either the index of current tier is not found, or the current tier is not found");
     }
 
     public bool TryGetBattlepassRewardInfo(Reward reward, out string rewardName, out string rewardImage, out ERarity rewardRarity)
