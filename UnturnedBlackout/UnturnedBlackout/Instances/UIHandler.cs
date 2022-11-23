@@ -47,6 +47,12 @@ public class UIHandler
     private const int MAXIMUM_LOADOUT_PAGE_ATTACHMENT_PRIMARY = 8;
 
     private const char STAR = '★';
+    
+    public const int MAX_BATTLEPASS_XP_SPACES = 81;
+    public const int MAX_BATTLEPASS_PREVIEW_XP_SPACES = 72;
+    public const int MAX_ACHIEVEMENT_PREVIEW_AMOUNT_SPACES = 291;
+    public const int MAX_ACHIEVEMENT_PAGE_AMOUNT_SPACES = 100;
+    public const int MAX_QUEST_TARGET_SPACES = 256;
 
     private static DatabaseManager DB => Plugin.Instance.DB;
     public static ConfigManager Config => Plugin.Instance.Config;
@@ -903,6 +909,7 @@ public class UIHandler
         Player.Player.disablePluginWidgetFlag(EPluginWidgetFlags.Modal);
         MainPage = EMainPage.NONE;
         ShowingStats = false;
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Options Audio Music Toggler", false);
         
         ImageScroller.Stop();
         TimerRefresher.Stop();
@@ -5738,7 +5745,7 @@ public class UIHandler
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Quest Target TEXT {i}", $"{quest.Amount}/{quest.Quest.TargetAmount}");
             var updatedXP = (int)Math.Floor(quest.Quest.XP * (1f + PlayerData.BPBooster + DB.ServerOptions.BPBooster + (PlayerData.HasPrime ? Config.WinningValues.FileData.PrimeBPXPBooster : 0f) + (PlayerData.HasBattlepass ? Config.WinningValues.FileData.PremiumBattlepassBooster : 0f)));
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Quest Reward TEXT {i}", $"+{updatedXP}★");
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Quest Bar Fill {i}", quest.Amount == 0 ? UIManager.HAIRSPACE_SYMBOL_STRING : new(UIManager.HAIRSPACE_SYMBOL_CHAR, Math.Min(256, quest.Amount * 256 / quest.Quest.TargetAmount)));
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Quest Bar Fill {i}", quest.Amount == 0 ? UIManager.HAIRSPACE_SYMBOL_STRING : new(UIManager.HAIRSPACE_SYMBOL_CHAR, Math.Min(MAX_QUEST_TARGET_SPACES, quest.Amount * MAX_QUEST_TARGET_SPACES / quest.Quest.TargetAmount)));
         }
         
         ShowQuestCompletion();
@@ -5799,7 +5806,7 @@ public class UIHandler
 
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements Page TEXT", $"Page {page.PageID}");
 
-        for (var i = 0; i <= 48; i++)
+        for (var i = 0; i <= MAX_ACHIEVEMENTS_PER_PAGE; i++)
         {
             yield return new WaitForSeconds(0.01f);
 
@@ -5811,30 +5818,29 @@ public class UIHandler
             if (tier != null)
                 EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Achievements IMAGE {i}", tier.TierPrevLarge);
 
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Achievements Basic {i}", achievement.CurrentTier == 0);
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Achievements Bronze {i}", achievement.CurrentTier == 1);
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Achievements Silver {i}", achievement.CurrentTier == 2);
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Achievements Gold {i}", achievement.CurrentTier == 3);
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Achievements Bar {i}", achievement.CurrentTier < 4);
 
             if (achievement.TryGetNextTier(out var nextTier))
             {
-                var fillTxt = achievement.Amount == 0 ? UIManager.VERY_SMALL_SQUARE : new(UIManager.HAIRSPACE_SYMBOL_CHAR, Math.Min(68, achievement.Amount * 68 / nextTier.TargetAmount));
+                var fillTxt = achievement.Amount == 0 ? UIManager.VERY_SMALL_SQUARE : new(UIManager.HAIRSPACE_SYMBOL_CHAR, Math.Min(MAX_ACHIEVEMENT_PAGE_AMOUNT_SPACES, achievement.Amount * MAX_ACHIEVEMENT_PAGE_AMOUNT_SPACES / nextTier.TargetAmount));
 
                 switch (achievement.CurrentTier)
                 {
                     case 0:
-                        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Achievements Basic Fill {i}", fillTxt);
+                        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Achievements Bar Basic {i}", true);
                         break;
                     case 1:
-                        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Achievements Bronze Fill {i}", fillTxt);
+                        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Achievements Bar Bronze {i}", true);
                         break;
                     case 2:
-                        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Achievements Silver Fill {i}", fillTxt);
+                        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Achievements Bar Silver {i}", true);
                         break;
                     case 3:
-                        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Achievements Gold Fill {i}", fillTxt);
+                        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Achievements Bar Gold {i}", true);
                         break;
                 }
+                
+                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Achievements Bar FIll {i}", fillTxt);
             }
 
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Achievements Claimable {i}", nextTier != null && achievement.Amount >= nextTier.TargetAmount);
@@ -5936,7 +5942,7 @@ public class UIHandler
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements Claim BUTTON", nextTier != null && achievement.Amount >= targetAmount);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements Target TEXT", $"{achievement.Amount}/{targetAmount}");
 
-            var fill = achievement.Amount == 0 ? UIManager.HAIRSPACE_SYMBOL_STRING : new(UIManager.HAIRSPACE_SYMBOL_CHAR, Math.Min(291, achievement.Amount * 291 / targetAmount));
+            var fill = achievement.Amount == 0 ? UIManager.HAIRSPACE_SYMBOL_STRING : new(UIManager.HAIRSPACE_SYMBOL_CHAR, Math.Min(MAX_ACHIEVEMENT_PREVIEW_AMOUNT_SPACES, achievement.Amount * MAX_ACHIEVEMENT_PREVIEW_AMOUNT_SPACES / targetAmount));
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements Fill 0", fill);
         }
 
@@ -6062,7 +6068,7 @@ public class UIHandler
         // Setup the XP bar
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass Tier Target TEXT", $"{bp.XP}/{(isBattlePassCompleted ? currentTier.XP : nextTier.XP)}★");
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass Tier TEXT", $"{bp.CurrentTier}");
-        var fill = bp.XP == 0 ? UIManager.VERY_SMALL_SQUARE : new(' ', Math.Min(72, bp.XP * 72 / (isBattlePassCompleted ? currentTier.XP : nextTier.XP)));
+        var fill = bp.XP == 0 ? UIManager.VERY_SMALL_SQUARE : new(' ', Math.Min(MAX_BATTLEPASS_PREVIEW_XP_SPACES, bp.XP * MAX_BATTLEPASS_PREVIEW_XP_SPACES / (isBattlePassCompleted ? currentTier.XP : nextTier.XP)));
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass Tier XP Fill", fill);
         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Battlepass IMAGE", "");
 
@@ -6133,7 +6139,7 @@ public class UIHandler
 
         var isTierUnlocked = bp.CurrentTier >= tierID;
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass Tier Completed Toggler {index}", isTierUnlocked);
-        var spaces = bp.CurrentTier > tierID ? 70 : bp.CurrentTier == tierID ? Math.Min(70, bp.XP * 70 / (DB.BattlepassTiersSearchByID.TryGetValue(tierID + 1, out var nextTier) ? nextTier.XP : tier.XP)) : 0;
+        var spaces = bp.CurrentTier > tierID ? MAX_BATTLEPASS_XP_SPACES : bp.CurrentTier == tierID ? Math.Min(MAX_BATTLEPASS_XP_SPACES, bp.XP * MAX_BATTLEPASS_XP_SPACES / (DB.BattlepassTiersSearchByID.TryGetValue(tierID + 1, out var nextTier) ? nextTier.XP : tier.XP)) : 0;
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass Tier Fill {index}", spaces == 0 ? UIManager.VERY_SMALL_SQUARE : new(UIManager.HAIRSPACE_SYMBOL_CHAR, spaces));
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass Tier TEXT {index}", tierID.ToString());
 
@@ -6154,11 +6160,8 @@ public class UIHandler
         {
             EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass T IMAGE {index}", "");
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass T TEXT {index}", " ");
-            if (isTierUnlocked)
-            {
-                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass T Locked {index}", true);
-                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass T Claimed {index}", true);
-            }
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass T Locked {index}", true);
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass T Claimed {index}", isTierUnlocked);
         }
 
         // Setup bottom reward (premium reward)
@@ -6175,12 +6178,8 @@ public class UIHandler
         {
             EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass B IMAGE {index}", "");
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass B TEXT {index}", " ");
-
-            if (isTierUnlocked)
-            {
-                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass B Locked {index}", true);
-                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass B Claimed {index}", true);
-            }
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass B Locked {index}", true);
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass B Claimed {index}", isTierUnlocked);
         }
     }
 
@@ -6242,7 +6241,7 @@ public class UIHandler
 
         var selectTierIndex = index + (SelectedBattlepassTierID.Item1 ? 2 : 1);
         Logging.Debug($"Current Index: {index}, Next tier index: {selectTierIndex}");
-        if (!page.TiersInverse.ContainsKey(selectTierIndex))
+        if (!page.Tiers.ContainsKey(selectTierIndex))
         {
             Logging.Debug($"Next tier index to select not found for {Player.CharacterName} in the page, returning");
             return;   
