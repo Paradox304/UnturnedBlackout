@@ -1047,9 +1047,9 @@ public class UIHandler
 
         for (var i = 0; i <= 13; i++)
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Play BUTTON {i}", false);
-
+        
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Play Servers Notification", games.Count >= Config.Base.FileData.MaxGamesCount - 1);
         var maxCount = Math.Min(14, games.Count);
-
         for (var index = 0; index < maxCount; index++)
         {
             var game = games[index];
@@ -1094,7 +1094,8 @@ public class UIHandler
         PlayPage = EPlayPage.SERVERS;
         for (var i = 0; i <= 13; i++)
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Play BUTTON {i}", false);
-
+        
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Play Servers Notification", Plugin.Instance.Game.Games.Count >= Config.Base.FileData.MaxGamesCount - 1);
         var servers = DB.Servers;
         var maxCount = Math.Min(14, servers.Count);
 
@@ -5771,8 +5772,8 @@ public class UIHandler
 
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements Page 1 TEXT", "Weapons");
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements Page 2 TEXT", "Other");
-        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements Page 1 TEXT", true);
-        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements Page 2 TEXT", true);
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements Page 1 BUTTON", true);
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements Page 2 BUTTON", true);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements Page 3 BUTTON", false);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements Page 4 BUTTON", false);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements Page 5 BUTTON", false);
