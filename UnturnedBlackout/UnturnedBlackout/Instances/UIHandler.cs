@@ -809,7 +809,7 @@ public class UIHandler
         var index = 0;
         var page = 1;
         Dictionary<int, Case> cases = new();
-        foreach (var @case in DB.Cases.Values.Where(k => k.IsBuyable).OrderByDescending(k => k.CaseID))
+        foreach (var @case in DB.Cases.Values.Where(k => k.IsBuyable).OrderByDescending(k => (int)k.CaseRarity).ThenByDescending(k => k.CaseID))
         {
             cases.Add(index, @case);
             if (index == MAX_CASES_PER_STORE_PAGE)
@@ -5729,6 +5729,8 @@ public class UIHandler
     {
         ELeaderboardPage.DAILY => DB.ServerOptions.DailyLeaderboardWipe.UtcDateTime > DateTime.UtcNow ? (DB.ServerOptions.DailyLeaderboardWipe.UtcDateTime - DateTime.UtcNow).ToString(@"hh\:mm\:ss") : "Soon...",
         ELeaderboardPage.WEEKLY => DB.ServerOptions.WeeklyLeaderboardWipe.UtcDateTime > DateTime.UtcNow ? (DB.ServerOptions.WeeklyLeaderboardWipe.UtcDateTime - DateTime.UtcNow).ToString(@"dd\:hh\:mm\:ss") : "Soon...",
+        ELeaderboardPage.SEASONAL => DB.ServerOptions.BattlepassExpiry.UtcDateTime > DateTime.UtcNow ? (DB.ServerOptions.BattlepassExpiry.UtcDateTime - DateTime.UtcNow).ToString(@"dd\:hh\:mm\:ss") : "Soon...",
+        ELeaderboardPage.ALL => " ",
         var _ => "00:00:00"
     };
 
@@ -5769,6 +5771,8 @@ public class UIHandler
 
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements Page 1 TEXT", "Weapons");
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements Page 2 TEXT", "Other");
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements Page 1 TEXT", true);
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements Page 2 TEXT", true);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements Page 3 BUTTON", false);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements Page 4 BUTTON", false);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements Page 5 BUTTON", false);
@@ -5797,15 +5801,15 @@ public class UIHandler
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements Previous BUTTON", achievementPages.Count > 1);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements Next BUTTON", achievementPages.Count > 1);
 
-        AchievementPageShower = Plugin.Instance.StartCoroutine(ShowAchievementSubPage(firstPage));
+        AchievementPageShower = Plugin.Instance.StartCoroutine(ShowAchievementSubPage(firstPage, achievementPages.Keys.Max()));
     }
 
-    public IEnumerator ShowAchievementSubPage(PageAchievement page)
+    public IEnumerator ShowAchievementSubPage(PageAchievement page, int maxPage)
     {
         AchievementSubPage = page.PageID;
         Logging.Debug($"Showing achievement page to {Player.CharacterName} with main page {AchievementMainPage} and sub page {AchievementSubPage}");
 
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements Page TEXT", $"Page {page.PageID}");
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements Page TEXT", $"Page {page.PageID}/{maxPage}");
 
         for (var i = 0; i <= MAX_ACHIEVEMENTS_PER_PAGE; i++)
         {
@@ -5865,7 +5869,7 @@ public class UIHandler
         }
 
         AchievementPageShower.Stop();
-        AchievementPageShower = Plugin.Instance.StartCoroutine(ShowAchievementSubPage(nextPage));
+        AchievementPageShower = Plugin.Instance.StartCoroutine(ShowAchievementSubPage(nextPage, achievementPages.Keys.Max()));
     }
 
     public void BackwardAchievementSubPage()
@@ -5885,7 +5889,7 @@ public class UIHandler
         }
 
         AchievementPageShower.Stop();
-        AchievementPageShower = Plugin.Instance.StartCoroutine(ShowAchievementSubPage(nextPage));
+        AchievementPageShower = Plugin.Instance.StartCoroutine(ShowAchievementSubPage(nextPage, achievementPages.Keys.Max()));
     }
 
     public void ReloadAchievementSubPage()
@@ -5897,7 +5901,7 @@ public class UIHandler
         }
 
         AchievementPageShower.Stop();
-        AchievementPageShower = Plugin.Instance.StartCoroutine(ShowAchievementSubPage(page));
+        AchievementPageShower = Plugin.Instance.StartCoroutine(ShowAchievementSubPage(page, achievementPages.Keys.Max()));
     }
 
     public void SelectedAchievement(int selected)
@@ -6258,28 +6262,7 @@ public class UIHandler
         }
         
         if (selectTierIndex > MAX_BATTLEPASS_TIERS_PER_PAGE)
-        {
-            Logging.Debug($"Player is on the last tier of the page");
-            if (!BattlepassPages.TryGetValue(currentPage.PageID + 1, out var nextPage))
-            {
-                Logging.Debug($"Error finding next page of battlepass for {Player.CharacterName}");
-                return;
-            }
-
-            if (!nextPage.Tiers.ContainsKey(0))
-            {
-                Logging.Debug($"Next page doesn't have index position 0 to select for {Player.CharacterName}, returning");
-                return;
-            }
-            
-            Logging.Debug($"Sending index: 0, is top: {SelectedBattlepassTierID}, page: {nextPage.PageID}");
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Battlepass Loading 1 Fast Starter", true);
-            ShowBattlepassPage(nextPage);
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass {(isTop ? "T" : "B")} Tier Selected 0", true);
-            SelectedBattlepassTier(isTop, 0);
-
             return;
-        }
 
         Logging.Debug($"Current Index: {currentIndex}, Next tier index: {selectTierIndex}");
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass {(isTop ? "T" : "B")} Tier Selected {selectTierIndex}", true);
