@@ -106,6 +106,9 @@ public class DiscordManager
 
     public void SendEmbed(Embed embed, string name, string webhookURL, string avatarURL = "")
     {
+        if (string.IsNullOrEmpty(webhookURL))
+            return;
+        
         lock (PendingWebhooks)
         {
             if (PendingWebhooks.ContainsKey(webhookURL))
