@@ -735,7 +735,6 @@ public class UIHandler
 
     public void BuildBattlepassPages()
     {
-        Logging.Debug($"Creating battlepass pages");
         BattlepassPages = new();
         BattlepassPagesInverse = new();
         
@@ -745,24 +744,17 @@ public class UIHandler
         Dictionary<int, BattlepassTier> tiers = new();
         Dictionary<int, int> tiersInverse = new();
         
-        Logging.Debug($"Found {DB.BattlepassTiers.Count} tiers");
         foreach (var tier in DB.BattlepassTiers)
         {
-            Logging.Debug($"Index: {index}, Page: {page}");
             tiers.Add(index, tier);
-            Logging.Debug($"Key: {index}, Value: {tier.TierID} added to tiers");
             tiersInverse.Add(tier.TierID, index);
-            Logging.Debug($"Key: {tier.TierID}, Value: {index} added to tiers inverse");
             if (index == MAX_BATTLEPASS_TIERS_PER_PAGE)
             {
-                Logging.Debug($"Max index reached");
                 index = 0;
                 var bpPage = new PageBattlepass(page, tiers, tiersInverse);
                 BattlepassPages.Add(page, bpPage);
-                Logging.Debug($"Page created and added to pages");
                 foreach (var tierID in tiersInverse.Keys)
                 {
-                    Logging.Debug($"Added the page to {tierID} as pages inverse");
                     BattlepassPagesInverse.Add(tierID, bpPage);
                 }
 
@@ -774,8 +766,6 @@ public class UIHandler
 
             index++;
         }
-        
-        Logging.Debug($"Created {BattlepassPages.Count} battlepass pages and {BattlepassPagesInverse.Count} battlepass inverse pages");
     }
 
     public void BuildUnboxingCasesPages()
@@ -6095,7 +6085,6 @@ public class UIHandler
         var bp = PlayerData.Battlepass;
         SetupBattlepassPreview();
         
-        Logging.Debug($"{Player.CharacterName} is clicking on battlepass, getting the page their current tier is on");
         if (!BattlepassPagesInverse.TryGetValue(bp.CurrentTier, out var page) && !BattlepassPages.TryGetValue(1, out page))
         {
             Logging.Debug($"Error finding current tier battlepass page or first page for {Player.CharacterName}");
@@ -6243,9 +6232,7 @@ public class UIHandler
         }
 
         var currentIndex = SelectedBattlepassIndex;
-        Logging.Debug($"Updating tier {tier.TierID} at index {currentIndex}");
         ShowBattlepassTier(tier, currentIndex);
-        // get the next available tier
         var selectTierIndex = currentIndex;
         while (true)
         {
@@ -6265,7 +6252,6 @@ public class UIHandler
         if (selectTierIndex > MAX_BATTLEPASS_TIERS_PER_PAGE)
             return;
 
-        Logging.Debug($"Current Index: {currentIndex}, Next tier index: {selectTierIndex}");
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Battlepass {(isTop ? "T" : "B")} Tier Selected {selectTierIndex}", true);
         SelectedBattlepassTier(isTop, selectTierIndex);
     }
@@ -6285,13 +6271,9 @@ public class UIHandler
         SetupBattlepassPreview();
         if (BattlepassPagesInverse.TryGetValue(oldTierID, out var oldPage) && oldPage.PageID == BattlepassPageID && oldPage.TiersInverse.TryGetValue(oldTierID, out var oldTierIndex) && DB.BattlepassTiersSearchByID.TryGetValue(oldTierID, out var oldTier))
             ShowBattlepassTier(oldTier, oldTierIndex);
-        else
-            Logging.Debug($"Either the page for the old tier was not found, the player was not on the old tier's page, the index for the old tier was not found, or the old tier was not found :/");
 
         if (BattlepassPagesInverse.TryGetValue(bp.CurrentTier, out var currentPage) && currentPage.PageID == BattlepassPageID && currentPage.TiersInverse.TryGetValue(bp.CurrentTier, out var currentTierIndex) && DB.BattlepassTiersSearchByID.TryGetValue(bp.CurrentTier, out var currentTier))
             ShowBattlepassTier(currentTier, currentTierIndex);
-        else
-            Logging.Debug($"Either the page for the current tier was not found, the player was not on the current tier's page, the index for the current tier was not found, or the current tier was not found :/");
     }
 
     public bool TryGetBattlepassRewardInfo(Reward reward, out string rewardName, out string rewardImage, out ERarity rewardRarity)
