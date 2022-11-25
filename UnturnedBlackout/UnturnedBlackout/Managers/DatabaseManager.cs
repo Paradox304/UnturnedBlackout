@@ -3444,7 +3444,7 @@ public class DatabaseManager
                 var botRewards = new List<BotReward>();
                 
                 // Give all ranked rewards
-                Embed embed = new(null, $"Last Playtest Rankings ({PlayerDailyLeaderboard.Count} Players)", "", "15105570", DateTime.UtcNow.ToString("s"), new(Provider.serverName, Provider.configData.Browser.Icon), new(Provider.serverName, "", Provider.configData.Browser.Icon),
+                Embed embed = new(null, $"Daily Rankings ({PlayerDailyLeaderboard.Count} Players)", "", "15105570", DateTime.UtcNow.ToString("s"), new(Provider.serverName, Provider.configData.Browser.Icon), new(Provider.serverName, "", Provider.configData.Browser.Icon),
                     new Field[] { new($"Ranked:", "", false), new("Percentile:", "", false) }, null, null);
 
                 foreach (var rankedReward in ServerOptions.DailyRankedRewards)
@@ -3454,7 +3454,7 @@ public class DatabaseManager
 
                     var leaderboardData = PlayerDailyLeaderboard[rankedReward.Key];
                     bulkRewards.Add(new(leaderboardData.SteamID, rankedReward.Value));
-                    embed.fields[0].value += $"{Utility.GetDiscordEmoji(rankedReward.Key + 1)} [{leaderboardData.SteamName}](https://steamcommunity.com/profiles/{leaderboardData.SteamID}/) | {leaderboardData.Kills + leaderboardData.HeadshotKills} Kills \n";
+                    embed.fields[0].value += $"{Utility.GetDiscordEmoji(rankedReward.Key + 1)} {leaderboardData.SteamName} | {leaderboardData.Kills + leaderboardData.HeadshotKills} Kills \n";
                     if (rankedReward.Key == 2)
                         embed.fields[0].value += $"\n";
                     
@@ -3554,7 +3554,7 @@ public class DatabaseManager
                 var botRewards = new List<BotReward>();
                 
                 // Give all ranked rewards
-                Embed embed = new("", $"Last Playtest Rankings ({PlayerWeeklyLeaderboard.Count} Players)", "", "15105570", DateTime.UtcNow.ToString("s"), new(Provider.serverName, Provider.configData.Browser.Icon), new(Provider.serverName, "", Provider.configData.Browser.Icon),
+                Embed embed = new("", $"Weekly Rankings ({PlayerWeeklyLeaderboard.Count} Players)", "", "15105570", DateTime.UtcNow.ToString("s"), new(Provider.serverName, Provider.configData.Browser.Icon), new(Provider.serverName, "", Provider.configData.Browser.Icon),
                     new Field[] { new($"Ranked:", "", false), new("Percentile:", "", false) }, null, null);
 
                 foreach (var rankedReward in ServerOptions.WeeklyRankedRewards)
@@ -3564,7 +3564,7 @@ public class DatabaseManager
 
                     var leaderboardData = PlayerWeeklyLeaderboard[rankedReward.Key];
                     bulkRewards.Add(new(leaderboardData.SteamID, rankedReward.Value));
-                    embed.fields[0].value += $"{Utility.GetDiscordEmoji(rankedReward.Key + 1)} [{leaderboardData.SteamName}](https://steamcommunity.com/profiles/{leaderboardData.SteamID}/) | {leaderboardData.Kills + leaderboardData.HeadshotKills} Kills \n";
+                    embed.fields[0].value += $"{Utility.GetDiscordEmoji(rankedReward.Key + 1)} {leaderboardData.SteamName} | {leaderboardData.Kills + leaderboardData.HeadshotKills} Kills \n";
                     if (rankedReward.Key == 2)
                         embed.fields[0].value += $"\n";
                     

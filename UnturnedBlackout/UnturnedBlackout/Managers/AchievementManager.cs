@@ -41,7 +41,6 @@ public class AchievementManager
             if (!conditionsMet)
                 continue;
 
-
             db.IncreasePlayerAchievementAmount(steamID, achievement.Achievement.AchievementID, 1);
 
             if (!achievement.Achievement.TiersLookup.TryGetValue(achievement.CurrentTier + 1, out var nextTier))
