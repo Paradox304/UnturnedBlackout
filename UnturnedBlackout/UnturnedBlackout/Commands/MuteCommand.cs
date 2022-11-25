@@ -93,7 +93,7 @@ internal class MuteCommand : IRocketCommand
                     new("**Time:**", DateTime.UtcNow.ToString(CultureInfo.InvariantCulture), true)
                 }, null, null);
 
-            if (!string.IsNullOrEmpty(Plugin.Instance.Configuration.Instance.WebhookURL))
+            if (!string.IsNullOrEmpty(Plugin.Instance.Config.Webhooks.FileData.MuteWebhookLink))
                 Plugin.Instance.Discord.SendEmbed(embed, "Player Muted", Plugin.Instance.Config.Webhooks.FileData.MuteWebhookLink);
         });
     }
