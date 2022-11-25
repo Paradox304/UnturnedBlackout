@@ -7078,7 +7078,6 @@ public class UIHandler
     public IEnumerator ShowMatchEndSummary(MatchEndSummary summary)
     {
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary", true);
-        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary XP Toggle", true);
 
         // Send the match end info
 
