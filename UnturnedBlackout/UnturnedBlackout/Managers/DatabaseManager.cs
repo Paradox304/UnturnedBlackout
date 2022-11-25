@@ -3439,7 +3439,7 @@ public class DatabaseManager
             List<(CSteamID, List<Reward>)> bulkRewards = new();
 
             Logging.Debug("Checking if daily leaderboard needs to be wiped");
-            if (ServerOptions.DailyLeaderboardWipe < DateTimeOffset.UtcNow)
+            if (Config.AllowedToWipeDailyWeekly && ServerOptions.DailyLeaderboardWipe < DateTimeOffset.UtcNow)
             {
                 var botRewards = new List<BotReward>();
                 
@@ -3549,7 +3549,7 @@ public class DatabaseManager
             }
 
             Logging.Debug("Checking if weekly leaderboard needs to be wiped");
-            if (ServerOptions.WeeklyLeaderboardWipe < DateTimeOffset.UtcNow)
+            if (Config.AllowedToWipeDailyWeekly && ServerOptions.WeeklyLeaderboardWipe < DateTimeOffset.UtcNow)
             {
                 var botRewards = new List<BotReward>();
                 

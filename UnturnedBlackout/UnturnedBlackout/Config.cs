@@ -14,7 +14,8 @@ public class Config : IRocketPluginConfiguration
     public string URL { get; set; }
     public bool UnlockAllItems { get; set; }
     public string IP { get; set; }
-
+    public bool AllowedToWipeDailyWeekly { get; set; }
+    
     public void LoadDefaults()
     {
         DatabaseHost = "136.243.135.46";
@@ -27,5 +28,6 @@ public class Config : IRocketPluginConfiguration
         UnlockAllItems = true;
         IP = "";
         ConnectionTimeout = 3;
+        AllowedToWipeDailyWeekly = true;
     }
 }
