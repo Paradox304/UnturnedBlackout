@@ -342,7 +342,7 @@ public abstract class Game
         if (GamePhase != EGamePhase.WAITING_FOR_PLAYERS || GetPlayerCount() > 0)
             yield break;
         
-        Logging.Debug("No players in game, restarting");
+        Logging.Debug($"No players in game, restarting game with location {Location.LocationName} and gamemode {GameMode}");
         GamePhase = EGamePhase.ENDING;
         Plugin.Instance.UI.OnGameUpdated();
         yield return new WaitForSeconds(1f);

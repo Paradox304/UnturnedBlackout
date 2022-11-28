@@ -68,7 +68,7 @@ public class GameManager
             var gameCount = Games.Sum(k => k.GetPlayerCount());
             var gameMaxCount = Games.Sum(k => k.Location.GetMaxPlayers(k.GameMode));
 
-            Logging.Debug($"Checking games, total games: {Games.Count}, players: {gameCount}, max count: {gameMaxCount}, threshold: {gameCount * 100 / gameMaxCount}");
+            Logging.Debug($"Checking if allowed to start game, total games: {Games.Count}, players: {gameCount}, max count: {gameMaxCount}, threshold: {gameCount * 100 / gameMaxCount}, game threshold: {Config.Base.FileData.GameThreshold}");
             if (gameCount * 100 / gameMaxCount < Config.Base.FileData.GameThreshold && Games.Count >= Config.Base.FileData.MinGamesCount)
             {
                 Logging.Debug($"Threshold below {Config.Base.FileData.GameThreshold}%, not starting game");
@@ -341,38 +341,47 @@ public class GameManager
         while (true)
         {
             yield return new WaitForSeconds(30f);
-            
-            if (Games.Count == Config.Base.FileData.MaxGamesCount)
-                continue;
-            
-            var gameCount = Games.Sum(k => k.GetPlayerCount());
-            var gameMaxCount = Games.Sum(k => k.Location.GetMaxPlayers(k.GameMode));
 
-            Logging.Debug($"Checking games, total games: {Games.Count}, players: {gameCount}, max count: {gameMaxCount}, threshold: {gameCount * 100 / gameMaxCount}");
-            if (gameCount * 100 / gameMaxCount < Config.Base.FileData.GameThreshold)
-                continue;
-            
-            Logging.Debug($"Percentage above {Config.Base.FileData.GameThreshold}, creating new game");
-            lock (AvailableLocations)
+            try
             {
-                Logging.Debug($"{AvailableLocations.Count} locations available");
-                if (AvailableLocations.Count == 0)
-                {
-                    Logging.Debug("No locations available to start game, returning");
+                if (Games.Count == Config.Base.FileData.MaxGamesCount)
                     continue;
-                }
-                
-                var locationID = AvailableLocations[UnityEngine.Random.Range(0, AvailableLocations.Count)];
-                var location = Config.Locations.FileData.ArenaLocations.FirstOrDefault(k => k.LocationID == locationID);
-                if (location == null)
-                {
-                    Logging.Debug("No locations available to start game, returning");
+            
+                var gameCount = Games.Sum(k => k.GetPlayerCount());
+                var gameMaxCount = Games.Sum(k => k.Location.GetMaxPlayers(k.GameMode));
+
+                var threshold = gameCount * 100 / gameMaxCount;
+                Logging.Debug($"Checking games, total games: {Games.Count}, players: {gameCount}, max count: {gameMaxCount}, threshold: {threshold}, game threshold: {Config.Base.FileData.GameThreshold}");
+                if (threshold < Config.Base.FileData.GameThreshold)
                     continue;
-                }
+            
+                Logging.Debug($"Percentage above {Config.Base.FileData.GameThreshold}, creating new game");
+                lock (AvailableLocations)
+                {
+                    Logging.Debug($"{AvailableLocations.Count} locations available");
+                    if (AvailableLocations.Count == 0)
+                    {
+                        Logging.Debug("No locations available to start game, returning");
+                        continue;
+                    }
                 
-                var gameMode = GetRandomGameMode(locationID);
-                Logging.Debug($"Found Location: {location.LocationName}, GameMode: {gameMode.Item1}, IsHardcore: {gameMode.Item2}");
-                StartGame(location, gameMode.Item1, gameMode.Item2, false);
+                    var locationID = AvailableLocations[UnityEngine.Random.Range(0, AvailableLocations.Count)];
+                    var location = Config.Locations.FileData.ArenaLocations.FirstOrDefault(k => k.LocationID == locationID);
+                    if (location == null)
+                    {
+                        Logging.Debug("No locations available to start game, returning");
+                        continue;
+                    }
+                
+                    var gameMode = GetRandomGameMode(locationID);
+                    Logging.Debug($"Found Location: {location.LocationName}, GameMode: {gameMode.Item1}, IsHardcore: {gameMode.Item2}");
+                    StartGame(location, gameMode.Item1, gameMode.Item2, false);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"Error checking games");
+                Logger.Log(ex);
             }
         }
     }

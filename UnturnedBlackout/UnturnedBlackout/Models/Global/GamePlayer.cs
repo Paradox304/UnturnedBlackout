@@ -103,7 +103,7 @@ public class GamePlayer
     public Coroutine TacticalChecker { get; set; }
     public Coroutine LethalChecker { get; set; }
     public Coroutine KillstreakChecker { get; set; }
-
+    
     public GamePlayer(UnturnedPlayer player, ITransportConnection transportConnection)
     {
         SteamID = player.CSteamID;
