@@ -116,14 +116,6 @@ public class Plugin : RocketPlugin<Config>
         ply.vestItem = 0;
 
         ply.skinItems = Array.Empty<int>();
-
-        //var randColor = _allowedColors[UnityEngine.Random.Range(0, _allowedColors.Length)];
-
-        //var field = typeof(SteamPending).GetField("_color", BindingFlags.Instance | BindingFlags.NonPublic);
-        //if (field == null)
-        //return;
-        //Logging.Debug($"Field found for {ply.playerID.characterName}, setting color: {randColor[0]}, {randColor[1]}, {randColor[2]}");
-        //field.SetValue(ply, new Color(randColor[0], randColor[1], randColor[2]));
     }
 
     private void OnHotkeyPressed(Player player, uint simulation, byte key, bool state)
@@ -440,13 +432,7 @@ public class Plugin : RocketPlugin<Config>
     public UnboxManager Unbox { get; set; }
     public LoggingManager Logger { get; set; }
     public DiscordManager Discord { get; set; }
-    // ReSharper disable once InconsistentNaming
     public BPManager BP { get; set; }
     private static Harmony Harmony { get; set; }
     public static Plugin Instance { get; private set; }
-    
-    private static int[][] _allowedColors = new[]
-    {
-        new[] { 244, 230, 210 }, new[] { 217, 202, 180 }, new[] { 190, 165, 130 }, new[] { 157, 136, 107 }, new[] { 148, 118, 75 }, new[] { 112, 96, 73 }, new[] { 83, 71, 54 }, new[] { 75, 61, 49 }, new[] { 51, 44, 37 }, new[] { 35, 31, 28 }
-    };
 }

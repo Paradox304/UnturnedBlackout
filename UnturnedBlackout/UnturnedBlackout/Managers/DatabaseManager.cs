@@ -3364,7 +3364,7 @@ public class DatabaseManager
             }
 
             Logging.Debug("Adding any players that are not added in daily or weekly leaderboards");
-            foreach (var data in PlayerData.Values)
+            foreach (var data in PlayerData.Values.ToList())
             {
                 if (!PlayerAllTimeLeaderboardLookup.TryGetValue(data.SteamID, out var allTimeData))
                     continue;
@@ -3526,7 +3526,7 @@ public class DatabaseManager
                 PlayerDailyLeaderboard.Clear();
                 PlayerDailyLeaderboardLookup.Clear();
 
-                foreach (var data in PlayerData.Values)
+                foreach (var data in PlayerData.Values.ToList())
                 {
                     if (!PlayerAllTimeLeaderboardLookup.TryGetValue(data.SteamID, out var allTimeData))
                         continue;
@@ -3637,7 +3637,7 @@ public class DatabaseManager
                 PlayerWeeklyLeaderboard.Clear();
                 PlayerWeeklyLeaderboardLookup.Clear();
 
-                foreach (var data in PlayerData.Values)
+                foreach (var data in PlayerData.Values.ToList())
                 {
                     if (!PlayerAllTimeLeaderboardLookup.TryGetValue(data.SteamID, out var allTimeData))
                         continue;
@@ -3735,7 +3735,7 @@ public class DatabaseManager
                 TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.Reward.GiveBulkRewards(bulkRewards));
 
             Logging.Debug("Checking if quests need to be wiped");
-            foreach (var data in PlayerData.Values)
+            foreach (var data in PlayerData.Values.ToList())
             {
                 if (data.Quests[0].QuestEnd > DateTimeOffset.UtcNow)
                     continue;
@@ -3790,7 +3790,7 @@ public class DatabaseManager
             }
 
             Logging.Debug("Reloading boosters, checking prime, mute for all players");
-            foreach (var data in PlayerData.Values)
+            foreach (var data in PlayerData.Values.ToList())
             {
                 _ = new MySqlCommand($"DELETE FROM `{PLAYERS_BOOSTERS}` WHERE `SteamID` = {data.SteamID} AND `BoosterExpiration` < {DateTimeOffset.UtcNow.ToUnixTimeSeconds()};", conn).ExecuteScalar();
                 rdr = new MySqlCommand($"SELECT * FROM `{PLAYERS_BOOSTERS}` WHERE `SteamID` = {data.SteamID};", conn).ExecuteReader();

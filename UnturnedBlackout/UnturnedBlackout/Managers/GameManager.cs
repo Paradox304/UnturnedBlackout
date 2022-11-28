@@ -169,7 +169,7 @@ public class GameManager
 
     private void OnPlayerJoined(UnturnedPlayer player)
     {
-        SendPlayerToLobby(player);
+        SendPlayerToLobby(player, showUI: false);
         _ = Plugin.Instance.StartCoroutine(DelayedJoin(player));
     }
 
@@ -273,15 +273,20 @@ public class GameManager
         }
     }
 
-    public void SendPlayerToLobby(UnturnedPlayer player, MatchEndSummary summary = null)
+    public void SendPlayerToLobby(UnturnedPlayer player, MatchEndSummary summary = null, bool showUI = true)
     {
         player.Player.inventory.ClearInventory();
         player.Player.life.serverModifyHealth(100);
         if (!player.GodMode)
             player.GodMode = true;
         player.Player.life.ServerRespawn(false);
-        player.Player.teleportToLocationUnsafe(Config.Base.FileData.LobbySpawn, Config.Base.FileData.LobbyYaw);
-        Plugin.Instance.UI.ShowMenuUI(player, summary);
+        if (Config.Base.FileData.LobbySpawns.Count > 0)
+        {
+            var randomSpawn = Config.Base.FileData.LobbySpawns[UnityEngine.Random.Range(0, Config.Base.FileData.LobbySpawns.Count)];
+            player.Player.teleportToLocationUnsafe(randomSpawn.GetSpawnPoint(), randomSpawn.Yaw);
+        }
+        if (showUI)
+            Plugin.Instance.UI.ShowMenuUI(player, summary);
     }
 
     public (EGameType, bool) GetRandomGameMode(int locationID)

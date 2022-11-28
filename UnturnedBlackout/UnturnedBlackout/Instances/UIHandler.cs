@@ -154,12 +154,14 @@ public class UIHandler
         if (!DB.PlayerLoadouts.TryGetValue(player.CSteamID, out var loadout))
         {
             Logging.Debug($"Error finding player loadout for {player.CharacterName}, failed to initialize UIHandler for player");
+            TaskDispatcher.QueueOnMainThread(() => Provider.kick(SteamID, "Your data was not found, please contact an admin on unturnedblackout.com"));
             return;
         }
 
         if (!DB.PlayerData.TryGetValue(player.CSteamID, out var data))
         {
             Logging.Debug($"Error finding player data for {player.CharacterName}, failed to initialize UIHandler for player");
+            TaskDispatcher.QueueOnMainThread(() => Provider.kick(SteamID, "Your data was not found, please contact an admin on unturnedblackout.com"));
             return;
         }
 
@@ -855,7 +857,7 @@ public class UIHandler
             index++;
         }
         
-        foreach (var skin in PlayerLoadout.GunSkinsSearchByID.Values.OrderByDescending(k => (byte)k.SkinRarity).ThenBy(k => k.Gun.GunName))
+        foreach (var skin in PlayerLoadout.GunSkinsSearchByID.Values.OrderByDescending(k => (byte)k.SkinRarity).ThenBy(k => k.SkinName))
         {
             skins.Add(index, skin); 
             
@@ -6618,6 +6620,7 @@ public class UIHandler
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Result Starter", true);
         yield return new WaitForSeconds(Player.Ping + 0.2f);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Result {rewardRarity}", true);
+        yield return new WaitForSeconds(0.5f);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Unbox Button Toggler", @case.Amount > 0);
         IsUnboxing = false;
     }

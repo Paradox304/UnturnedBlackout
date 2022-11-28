@@ -15,6 +15,7 @@ using UnturnedBlackout.Extensions;
 using UnturnedBlackout.Models.FFA;
 using UnturnedBlackout.Models.Global;
 using UnturnedBlackout.Models.Webhook;
+using Logger = Rocket.Core.Logging.Logger;
 
 namespace UnturnedBlackout.GameTypes;
 
@@ -118,93 +119,128 @@ public class FFAGame : Game
         GamePhase = EGamePhase.ENDING;
         UI.OnGameUpdated();
         Dictionary<GamePlayer, MatchEndSummary> summaries = new();
-
         var endTime = DateTime.UtcNow;
         List<GamePlayer> roundEndCasesPlayers = new();
-        foreach (var player in Players)
-        {
-            var totalMinutesPlayed = (int)(endTime - player.StartTime).TotalMinutes;
-            if (totalMinutesPlayed < Config.RoundEndCases.FileData.MinimumMinutesPlayed || player.Kills == 0)
-                continue;
-
-            var chance = Config.RoundEndCases.FileData.Chance * totalMinutesPlayed;
-            if (UnityEngine.Random.Range(1, 101) > chance)
-                continue;
-
-            roundEndCasesPlayers.Add(player.GamePlayer);
-            if (roundEndCasesPlayers.Count == 8)
-                break;
-        }
-
         List<(GamePlayer, Case)> roundEndCases = new();
-        foreach (var roundEndCasePlayer in roundEndCasesPlayers)
+
+        try
         {
-            var @case = GetRandomRoundEndCase();
-            if (@case == null)
-                continue;
-
-            Plugin.Instance.Discord.SendEmbed(new(null, null, null, Utility.GetDiscordColorCode(@case.CaseRarity), DateTime.UtcNow.ToString("s"), new(Provider.serverName, Provider.configData.Browser.Icon), new(roundEndCasePlayer.Data.SteamName, $"https://steamcommunity.com/profiles/{roundEndCasePlayer.SteamID}", roundEndCasePlayer.Data.AvatarLinks[0]), new Field[] { new($"[{@case.CaseRarity.ToFriendlyName()}] {@case.CaseName}", "‎", true) }, new(@case.IconLink), null), null, Plugin.Instance.Config.Webhooks.FileData.CaseDroppedWebhookLink);
-
-            roundEndCases.Add((roundEndCasePlayer, @case));
-            DB.IncreasePlayerCase(roundEndCasePlayer.SteamID, @case.CaseID, 1);
-        }
-
-        for (var index = 0; index < Players.Count; index++)
-        {
-            var player = Players[index];
-            UI.ClearFFAHUD(player.GamePlayer);
-            UI.ClearMidgameLoadoutUI(player.GamePlayer);
-            if (player.GamePlayer.Player.Player.life.isDead)
-                player.GamePlayer.Player.Player.life.ServerRespawn(false);
-
-            UI.RemoveKillCard(player.GamePlayer);
-            UI.ClearAnimations(player.GamePlayer);
-
-            if (player.GamePlayer.HasScoreboard)
+            foreach (var player in Players)
             {
-                player.GamePlayer.HasScoreboard = false;
-                UI.HideFFALeaderboard(player.GamePlayer);
+                var totalMinutesPlayed = (int)(endTime - player.StartTime).TotalMinutes;
+                if (totalMinutesPlayed < Config.RoundEndCases.FileData.MinimumMinutesPlayed || player.Kills == 0)
+                    continue;
+
+                var chance = Config.RoundEndCases.FileData.Chance * totalMinutesPlayed;
+                if (UnityEngine.Random.Range(1, 101) > chance)
+                    continue;
+
+                roundEndCasesPlayers.Add(player.GamePlayer);
+                if (roundEndCasesPlayers.Count == 8)
+                    break;
             }
 
-            UI.SetupPreEndingUI(player.GamePlayer, EGameType.FFA, index == 0, 0, 0, "", "", false);
-            MatchEndSummary summary = new(player.GamePlayer, player.XP, player.StartingLevel, player.StartingXP, player.Kills, player.Deaths, player.Assists, player.HighestKillstreak, player.HighestMK, player.StartTime, GameMode, index == 0);
-            summaries.Add(player.GamePlayer, summary);
+            foreach (var roundEndCasePlayer in roundEndCasesPlayers)
+            {
+                var @case = GetRandomRoundEndCase();
+                if (@case == null)
+                    continue;
 
-            DB.IncreasePlayerXP(player.GamePlayer.SteamID, summary.PendingXP);
-            DB.IncreasePlayerCredits(player.GamePlayer.SteamID, summary.PendingCredits);
-            DB.IncreasePlayerBPXP(player.GamePlayer.SteamID, summary.BattlepassXP + summary.BattlepassBonusXP);
+                Plugin.Instance.Discord.SendEmbed(
+                    new(null, null, null, Utility.GetDiscordColorCode(@case.CaseRarity), DateTime.UtcNow.ToString("s"), new(Provider.serverName, Provider.configData.Browser.Icon),
+                        new(roundEndCasePlayer.Data.SteamName, $"https://steamcommunity.com/profiles/{roundEndCasePlayer.SteamID}", roundEndCasePlayer.Data.AvatarLinks[0]), new Field[] { new($"[{@case.CaseRarity.ToFriendlyName()}] {@case.CaseName}", "‎", true) }, new(@case.IconLink), null), null,
+                    Plugin.Instance.Config.Webhooks.FileData.CaseDroppedWebhookLink);
 
-            TaskDispatcher.QueueOnMainThread(() => Quest.CheckQuest(player.GamePlayer, EQuestType.FINISH_MATCH, new() { { EQuestCondition.MAP, Location.LocationID }, { EQuestCondition.GAMEMODE, (int)GameMode }, { EQuestCondition.WIN_KILLS, player.Kills } }));
-            if (index == 0)
-                TaskDispatcher.QueueOnMainThread(() => Quest.CheckQuest(player.GamePlayer, EQuestType.WIN, new() { { EQuestCondition.MAP, Location.LocationID }, { EQuestCondition.GAMEMODE, (int)GameMode }, { EQuestCondition.WIN_KILLS, player.Kills } }));
+                roundEndCases.Add((roundEndCasePlayer, @case));
+                DB.IncreasePlayerCase(roundEndCasePlayer.SteamID, @case.CaseID, 1);
+            }
+
+            for (var index = 0; index < Players.Count; index++)
+            {
+                var player = Players[index];
+                UI.ClearFFAHUD(player.GamePlayer);
+                UI.ClearMidgameLoadoutUI(player.GamePlayer);
+                if (player.GamePlayer.Player.Player.life.isDead)
+                    player.GamePlayer.Player.Player.life.ServerRespawn(false);
+
+                UI.RemoveKillCard(player.GamePlayer);
+                UI.ClearAnimations(player.GamePlayer);
+
+                if (player.GamePlayer.HasScoreboard)
+                {
+                    player.GamePlayer.HasScoreboard = false;
+                    UI.HideFFALeaderboard(player.GamePlayer);
+                }
+
+                UI.SetupPreEndingUI(player.GamePlayer, EGameType.FFA, index == 0, 0, 0, "", "", false);
+                MatchEndSummary summary = new(player.GamePlayer, player.XP, player.StartingLevel, player.StartingXP, player.Kills, player.Deaths, player.Assists, player.HighestKillstreak, player.HighestMK, player.StartTime, GameMode, index == 0);
+                summaries.Add(player.GamePlayer, summary);
+
+                DB.IncreasePlayerXP(player.GamePlayer.SteamID, summary.PendingXP);
+                DB.IncreasePlayerCredits(player.GamePlayer.SteamID, summary.PendingCredits);
+                DB.IncreasePlayerBPXP(player.GamePlayer.SteamID, summary.BattlepassXP + summary.BattlepassBonusXP);
+
+                TaskDispatcher.QueueOnMainThread(() => Quest.CheckQuest(player.GamePlayer, EQuestType.FINISH_MATCH, new() { { EQuestCondition.MAP, Location.LocationID }, { EQuestCondition.GAMEMODE, (int)GameMode }, { EQuestCondition.WIN_KILLS, player.Kills } }));
+                if (index == 0)
+                    TaskDispatcher.QueueOnMainThread(() => Quest.CheckQuest(player.GamePlayer, EQuestType.WIN, new() { { EQuestCondition.MAP, Location.LocationID }, { EQuestCondition.GAMEMODE, (int)GameMode }, { EQuestCondition.WIN_KILLS, player.Kills } }));
+            }
+
+            TaskDispatcher.QueueOnMainThread(() =>
+            {
+                UI.SetupFFALeaderboard(Players, Location, false, IsHardcore);
+                CleanMap();
+            });
         }
-
-        TaskDispatcher.QueueOnMainThread(() =>
+        catch (Exception ex)
         {
-            UI.SetupFFALeaderboard(Players, Location, false, IsHardcore);
-            CleanMap();
-        });
+            Logger.Log($"Error ending game on location {Location.LocationName} and gamemode {GameMode}. Part: Setting up round end cases and match end summaries.");
+            Logger.Log(ex);
+        }
 
         yield return new WaitForSeconds(5);
 
-        foreach (var player in Players)
-            UI.ShowFFALeaderboard(player.GamePlayer);
+        try
+        {
+            foreach (var player in Players)
+                UI.ShowFFALeaderboard(player.GamePlayer);
 
-        if (roundEndCases.Count > 0)
-            _ = Plugin.Instance.StartCoroutine(UI.SetupRoundEndDrops(Players.Select(k => k.GamePlayer).ToList(), roundEndCases, 1));
+            if (roundEndCases.Count > 0)
+                _ = Plugin.Instance.StartCoroutine(UI.SetupRoundEndDrops(Players.Select(k => k.GamePlayer).ToList(), roundEndCases, 1));
+        }
+        catch (Exception ex)
+        {
+            Logger.Log($"Error ending game on location {Location.LocationName} and gamemode {GameMode}. Part: Sending leaderboard to players and setting up round end cases");
+            Logger.Log(ex);
+        }
 
         yield return new WaitForSeconds(Config.Base.FileData.EndingLeaderboardSeconds - 3);
 
-        foreach (var player in Players)
-            player.GamePlayer.Player.Player.enablePluginWidgetFlag(EPluginWidgetFlags.Modal);
+        try
+        {
+            foreach (var player in Players)
+                player.GamePlayer.Player.Player.enablePluginWidgetFlag(EPluginWidgetFlags.Modal);
+        }
+        catch (Exception ex)
+        {
+            Logger.Log($"Error ending game on location {Location.LocationName} and gamemode {GameMode}. Part: Sending widget flag to players");
+            Logger.Log(ex);
+        }
 
         yield return new WaitForSeconds(3);
 
-        foreach (var player in Players.ToList())
+        try
         {
-            var gPlayer = player.GamePlayer;
-            RemovePlayerFromGame(player.GamePlayer);
-            Plugin.Instance.Game.SendPlayerToLobby(gPlayer.Player, summaries.TryGetValue(gPlayer, out var pendingSummary) ? pendingSummary : null);
+            foreach (var player in Players.ToList())
+            {
+                var gPlayer = player.GamePlayer;
+                RemovePlayerFromGame(player.GamePlayer);
+                Plugin.Instance.Game.SendPlayerToLobby(gPlayer.Player, summaries.TryGetValue(gPlayer, out var pendingSummary) ? pendingSummary : null);
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.Log($"Error ending game on location {Location.LocationName} and gamemode {GameMode}. Part: Removing players from the game and tping them off the map");
+            Logger.Log(ex);
         }
 
         Players.Clear();

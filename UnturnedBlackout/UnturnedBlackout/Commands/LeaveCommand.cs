@@ -1,6 +1,8 @@
 ﻿using Rocket.API;
 using Rocket.Unturned.Player;
 using System.Collections.Generic;
+using UnturnedBlackout.Enums;
+using UnturnedBlackout.Extensions;
 
 namespace UnturnedBlackout.Commands;
 
@@ -26,6 +28,12 @@ internal class LeaveCommand : IRocketCommand
         var gPlayer = Plugin.Instance.Game.GetGamePlayer(player);
         if (gPlayer.CurrentGame != null)
         {
+            if (gPlayer.CurrentGame.GamePhase == EGamePhase.ENDING)
+            {
+                Utility.Say(player, "<color=red>Game is ending</color>");
+                return;
+            }
+            
             Plugin.Instance.Game.RemovePlayerFromGame(player);
             return;
         }

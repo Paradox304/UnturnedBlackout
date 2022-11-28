@@ -1,6 +1,7 @@
 ﻿using Rocket.API;
 using Rocket.Unturned.Player;
 using System.Collections.Generic;
+using UnturnedBlackout.Models.Global;
 
 namespace UnturnedBlackout.Commands;
 
@@ -20,13 +21,12 @@ internal class SetLobbyCommand : IRocketCommand
 
     public void Execute(IRocketPlayer caller, string[] command)
     {
-        if (caller is UnturnedPlayer player)
-        {
-            var transform = player.Player.transform;
-            Plugin.Instance.Config.Base.FileData.LobbySpawn = transform.position;
-            Plugin.Instance.Config.Base.FileData.LobbyYaw = transform.eulerAngles.y;
-        }
-
+        if (caller is not UnturnedPlayer player)
+            return;
+        
+        var transform = player.Player.transform.position;
+        var spawn = new LobbySpawn(transform.x, transform.y, transform.z, player.Rotation);
+        Plugin.Instance.Config.Base.FileData.LobbySpawns.Add(spawn);
         Plugin.Instance.Config.Base.Save();
     }
 }

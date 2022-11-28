@@ -347,6 +347,7 @@
         <Compile Include="Models\Global\GamemodeOption.cs" />
         <Compile Include="Models\Global\LoadoutAmount.cs" />
         <Compile Include="Models\Global\Kit.cs" />
+        <Compile Include="Models\Global\LobbySpawn.cs" />
         <Compile Include="Models\Global\MatchEndSummary.cs" />
         <Compile Include="Models\Global\RoundEndCase.cs" />
         <Compile Include="Models\Global\ScrollableImage.cs" />
