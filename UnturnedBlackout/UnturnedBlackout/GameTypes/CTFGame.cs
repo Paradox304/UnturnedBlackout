@@ -469,6 +469,12 @@ public class CTFGame : Game
 
         if (cause == EDeathCause.SUICIDE)
         {
+            if (GamePhase == EGamePhase.ENDING)
+            {
+                TaskDispatcher.QueueOnMainThread(() => player.life.ServerRespawn(false));
+                return;
+            }
+            
             RemovePlayerFromGame(cPlayer.GamePlayer);
             return;
         }

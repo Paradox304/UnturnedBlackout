@@ -344,6 +344,7 @@ public class GameManager
 
             try
             {
+                Logging.Debug($"Games: {Games.Count}, Minimum Games: {Config.Base.FileData.MinGamesCount}, Maximum Games: {Config.Base.FileData.MaxGamesCount}");
                 if (Games.Count == Config.Base.FileData.MaxGamesCount)
                     continue;
             

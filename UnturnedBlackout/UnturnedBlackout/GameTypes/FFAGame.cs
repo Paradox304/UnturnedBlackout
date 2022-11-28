@@ -393,6 +393,12 @@ public class FFAGame : Game
 
         if (cause == EDeathCause.SUICIDE)
         {
+            if (GamePhase == EGamePhase.ENDING)
+            {
+                TaskDispatcher.QueueOnMainThread(() => player.life.ServerRespawn(false));
+                return;
+            }
+
             RemovePlayerFromGame(fPlayer.GamePlayer);
             return;
         }
