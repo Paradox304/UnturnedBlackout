@@ -54,6 +54,7 @@ public class PlayerData
     public List<PlayerBooster> ActiveBoosters { get; set; }
     public List<PlayerCase> Cases { get; set; }
     public Dictionary<int, PlayerCase> CasesSearchByID { get; set; }
+    public Dictionary<int, int> AchievementLegends { get; set; }
 
     public PlayerData(
         CSteamID steamID, string steamName, List<string> avatarLinks, string countryCode, bool hideFlag, int xP, int level, int credits, int scrap, int coins, int kills, int headshotKills, int highestKillstreak, int highestMultiKills, int killsConfirmed, int killsDenied, int flagsCaptured, int flagsSaved,
@@ -136,6 +137,16 @@ public class PlayerData
         var xpBooster = completedTiers / totalTiers;
 
         AchievementXPBooster = xpBooster;
+
+        SetAchievementLegend();
+    }
+
+    public void SetAchievementLegend()
+    {
+        AchievementLegends = new();
+        
+        for (var i = 0; i <= 4; i++)
+            AchievementLegends.Add(i, Achievements.Count(k => k.CurrentTier == i));
     }
 
     public void SetPersonalBooster(EBoosterType type, float permanentBooster)

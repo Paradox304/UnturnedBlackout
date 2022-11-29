@@ -81,9 +81,8 @@ public class AchievementManager
         achievement.CurrentTier = nextTier.TierID;
         Plugin.Instance.Reward.GiveRewards(steamID, nextTier.Rewards);
         Plugin.Instance.Reward.RemoveRewards(steamID, nextTier.RemoveRewards);
-        Plugin.Instance.UI.OnAchievementsUpdated(steamID);
-
         data.SetAchievementXPBooster();
+        Plugin.Instance.UI.OnAchievementsUpdated(steamID);
         Plugin.Instance.DB.UpdatePlayerAchievementTier(steamID, achievementID, nextTier.TierID);
     }
 

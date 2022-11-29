@@ -927,7 +927,9 @@ public class UIHandler
         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Currency Scrap IMAGE", Config.Icons.FileData.ScrapSmallIconLink);
 
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Staff BUTTON", PlayerData.IsStaff);
-        
+
+        var primeTimeSpan = PlayerData.PrimeExpiry - DateTimeOffset.UtcNow;
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Prime Expiry", PlayerData.HasPrime ? " " : $"{UIManager.PRIME_SYMBOL} Prime: {(primeTimeSpan.Days > 0 ? $"{(int)Math.Ceiling(primeTimeSpan.TotalDays)}d" : $"{(int)Math.Ceiling(primeTimeSpan.TotalHours)}h")}");
         OnCurrencyUpdated(ECurrency.COIN);
         OnCurrencyUpdated(ECurrency.SCRAP);
         OnCurrencyUpdated(ECurrency.CREDIT);
@@ -5524,6 +5526,7 @@ public class UIHandler
     public void SelectLeaderboardPage(ELeaderboardPage page)
     {
         LeaderboardPage = page;
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Leaderboards Reset TITLE", page != ELeaderboardPage.ALL);
         SelectLeaderboardTab(page == ELeaderboardPage.ALL ? ELeaderboardTab.LEVEL : ELeaderboardTab.KILL);
     }
 
@@ -5955,6 +5958,25 @@ public class UIHandler
 
             EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Achievements Reward IMAGE {i}", rewardImage);
         }
+        
+        // Setup achievement legend
+        for (var i = 0; i <= 4; i++)
+        {
+            var tierType = i switch
+            {
+                0 => "Basic",
+                1 => "Bronze",
+                2 => "Silver",
+                3 => "Gold",
+                4 => "Prismatic",
+                var _ => ""
+            };
+
+            var tierAmount = PlayerData.AchievementLegends.TryGetValue(i, out var amount) ? amount : 0;
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Achievments Legend {tierType} TEXT", tierAmount.ToString());
+        }
+        
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievments Legend XP Boost TEXT", $"{PlayerData.AchievementXPBooster * 100:0.##}%");
     }
 
     public void ReloadSelectedAchievement()
@@ -7086,9 +7108,9 @@ public class UIHandler
 
         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Banner IMAGE", summary.Player.ActiveLoadout?.Card?.Card?.CardLink ?? "");
         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Level IMAGE", DB.Levels.TryGetValue(summary.Player.Data.Level, out var level) ? level.IconLinkLarge : "");
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Level TEXT", summary.Player.Data.Level.ToString());
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Level TEXT", PlayerData.Level.ToString());
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Player TEXT", Player.CharacterName);
-        EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Player IMAGE", summary.Player.Data.AvatarLinks[2]);
+        EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Player IMAGE", PlayerData.AvatarLinks[2]);
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Kills TEXT", summary.Kills.ToString());
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Deaths TEXT", summary.Deaths.ToString());
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary KD TEXT", $"{summary.KD:n}");
@@ -7101,7 +7123,7 @@ public class UIHandler
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Match XP TEXT", $"<color=#fcee6a>+{summary.MatchXP}</color>");
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Match Bonus", $"MATCH <color=#fcee6a>XP</color> BONUS");
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Match Bonus TEXT", $"<color=#fcee6a>+{summary.MatchXPBonus}</color>");
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Achievements XP", $"ACHIEVEMENTS XP BONUS <color=#ffb566>({summary.Player.Data.AchievementXPBooster * 100:0.##}%)</color>");
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Achievements XP", $"ACHIEVEMENTS XP BONUS <color=#ffb566>({PlayerData.AchievementXPBooster * 100:0.##}%)</color>");
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Achievements XP TEXT", $"<color=#ffb566>+{summary.AchievementXPBonus}</color>");
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Other XP", $"OTHER <color=#fcee6a>XP</color> BONUSES");
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Other XP TEXT", $"<color=#fcee6a>+{summary.OtherXPBonus}</color>");
