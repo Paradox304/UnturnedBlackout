@@ -39,6 +39,12 @@ public class BPManager
         }
         else
         {
+            if (!player.Data.HasBattlepass)
+            {
+                Logging.Debug($"{player.Player.CharacterName} is trying to claim a premium reward for battlepass while not having it in the first place");
+                return false;
+            }
+            
             reward = tier.PremiumReward;
             _ = bp.ClaimedPremiumRewards.Add(tierID);
         }
