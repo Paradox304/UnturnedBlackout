@@ -26,9 +26,6 @@ internal class GetNavMeshCommand : IRocketCommand
             return;
 
         if (LevelNavigation.tryGetNavigation(player.Position, out var nav))
-        {
-            UnturnedChat.Say(caller, $"X: {player.Position.x}, Y: {player.Position.y}, Z: {player.Position.z}");
             UnturnedChat.Say(caller, $"Nav Mesh: {nav}");
-        }
     }
 }
