@@ -1001,7 +1001,7 @@ public class UIManager
         EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, ply.GamePlayer.TransportConnection, true, "MapName1", location.LocationName.ToUpper());
         EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, ply.GamePlayer.TransportConnection, true, "GamemodeName1", (isHardcore ? "Hardcore " : "") + Plugin.Instance.Translate("FFA_Name_Full").ToRich());
 
-        for (var i = 0; i <= 19; i++)
+        for (var i = 0; i <= 9; i++)
             EffectManager.sendUIEffectVisibility(PRE_ENDING_UI_KEY, ply.GamePlayer.TransportConnection, true, $"PlayerStats{i}", false);
 
         for (var i = 0; i < players.Count; i++)
@@ -1094,7 +1094,7 @@ public class UIManager
         EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "TeamScoreB0", blueTeam.Score.ToString());
         EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "GamemodeName1", (isHardcore ? "Hardcore " : "") + Plugin.Instance.Translate("TDM_Name_Full").ToRich());
 
-        for (var i = 0; i <= 9; i++)
+        for (var i = 0; i <= 5; i++)
         {
             EffectManager.sendUIEffectVisibility(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, $"PlayerStats{i}B0", false);
             EffectManager.sendUIEffectVisibility(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, $"PlayerStats{i}R0", false);
@@ -1212,7 +1212,7 @@ public class UIManager
         EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "TeamScoreB1", blueTeam.Score.ToString());
         EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "GamemodeName2", (isHardcore ? "Hardcore " : "") + Plugin.Instance.Translate("KC_Name_Full").ToRich());
 
-        for (var i = 0; i <= 9; i++)
+        for (var i = 0; i <= 6; i++)
         {
             EffectManager.sendUIEffectVisibility(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, $"PlayerStats{i}B1", false);
             EffectManager.sendUIEffectVisibility(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, $"PlayerStats{i}R1", false);
