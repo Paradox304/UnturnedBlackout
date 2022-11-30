@@ -36,6 +36,7 @@ internal class AddBattlepassCommand : IRocketCommand
 
         CSteamID steamID = new(steamid);
         Plugin.Instance.DB.AddPlayerBattlepass(steamID);
+        Plugin.Instance.UI.OnBattlepassUpdated(steamID);
         Utility.Say(caller, $"<color=green>Added battlepass to {steamID}</color>");
     }
 }

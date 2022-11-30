@@ -1587,6 +1587,18 @@ public class UIManager
 
         handler.ReloadAchievementSubPage();
         handler.ReloadSelectedAchievement();
+        handler.CheckAchievements = true;
+    }
+
+    public void OnBattlepassUpdated(CSteamID steamID)
+    {
+        if (!UIHandlersLookup.TryGetValue(steamID, out var handler))
+            return;
+
+        if (handler.MainPage != EMainPage.BATTLEPASS)
+            return;
+
+        handler.CheckBattlepass = true;
     }
 
     private void OnButtonClicked(Player player, string buttonName)
@@ -1609,14 +1621,14 @@ public class UIManager
                 handler.StopScrollableImages();
                 return;
             case "SERVER Play Back BUTTON":
-                handler.StartScrollableImages();
+                handler.ReloadMainMenu();
                 return;
             case "SERVER Loadout BUTTON":
                 handler.ShowLoadouts();
                 handler.StopScrollableImages();
                 return;
             case "SERVER Loadout Back BUTTON":
-                handler.StartScrollableImages();
+                handler.ReloadMainMenu();
                 return;
             case "SERVER Loadout Close BUTTON":
                 handler.ClearMidgameLoadouts();
@@ -1626,7 +1638,7 @@ public class UIManager
                 handler.StopScrollableImages();
                 return;
             case "SERVER Leaderboards Back BUTTON":
-                handler.StartScrollableImages();
+                handler.ReloadMainMenu();
                 return;
             case "SERVER Quest BUTTON":
                 handler.ShowQuests();
@@ -1645,7 +1657,7 @@ public class UIManager
                 handler.StopScrollableImages();
                 return;
             case "SERVER Achievements Back BUTTON":
-                handler.StartScrollableImages();
+                handler.ReloadMainMenu();
                 return;
             case "SERVER Store BUTTON":
                 player.sendBrowserRequest("Our Store:", "https://store.unturnedblackout.com/");
@@ -1655,21 +1667,21 @@ public class UIManager
                 handler.StopScrollableImages();
                 return;
             case "SERVER Unbox Back BUTTON":
-                handler.StartScrollableImages();
+                handler.ReloadMainMenu();
                 return;
             case "SERVER Battlepass BUTTON":
                 handler.ShowBattlepass();
                 handler.StopScrollableImages();
                 return;
             case "SERVER Battlepass Back BUTTON":
-                handler.StartScrollableImages();
+                handler.ReloadMainMenu();
                 return;
             case "SERVER Options BUTTON":
                 handler.ShowOptions();
                 handler.StopScrollableImages();
                 return;
             case "SERVER Options Back BUTTON":
-                handler.StartScrollableImages();
+                handler.ReloadMainMenu();
                 return;
             case "SERVER Exit BUTTON":
                 Provider.kick(player.channel.owner.playerID.steamID, "You exited");

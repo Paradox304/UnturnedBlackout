@@ -120,6 +120,11 @@ public class UIHandler
     
     public int CurrentScrollableImage { get; set; }
 
+    // Notifications
+    
+    public bool CheckAchievements { get; set; }
+    public bool CheckBattlepass { get; set; }
+    
     public Dictionary<int, PageLoadout> LoadoutPages { get; set; }
     public Dictionary<int, PageGun> PistolPages { get; set; }
     public Dictionary<int, PageGun> SMGPages { get; set; }
@@ -882,6 +887,8 @@ public class UIHandler
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Hide UI Toggler", false);
         //EffectManager.sendUIEffect(MAIN_MENU_ID, MAIN_MENU_KEY, TransportConnection, true);
         Player.Player.enablePluginWidgetFlag(EPluginWidgetFlags.Modal);
+        CheckBattlepass = true;
+        CheckAchievements = true;
         SetupMainMenu();
 
         ShowingStats = false;
@@ -927,9 +934,7 @@ public class UIHandler
         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Currency Scrap IMAGE", Config.Icons.FileData.ScrapSmallIconLink);
 
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Staff BUTTON", PlayerData.IsStaff);
-
-        var primeTimeSpan = PlayerData.PrimeExpiry - DateTimeOffset.UtcNow;
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Prime Expiry", PlayerData.HasPrime ? " " : $"{UIManager.PRIME_SYMBOL} Prime: {(primeTimeSpan.Days > 0 ? $"{(int)Math.Ceiling(primeTimeSpan.TotalDays)}d" : $"{(int)Math.Ceiling(primeTimeSpan.TotalHours)}h")}");
+        
         OnCurrencyUpdated(ECurrency.COIN);
         OnCurrencyUpdated(ECurrency.SCRAP);
         OnCurrencyUpdated(ECurrency.CREDIT);
@@ -939,6 +944,26 @@ public class UIHandler
         ShowQuestCompletion();
         _ = Task.Run(BuildAchievementPages);
         _ = Plugin.Instance.StartCoroutine(SetupScrollableImages());
+        ReloadMainMenu();
+    }
+
+    public void ReloadMainMenu()
+    {
+        StartScrollableImages();
+        var primeTimeSpan = PlayerData.PrimeExpiry - DateTimeOffset.UtcNow;
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Prime Expiry", PlayerData.HasPrime ? $"{UIManager.PRIME_SYMBOL} Prime: {(primeTimeSpan.Days > 0 ? $"{(int)Math.Ceiling(primeTimeSpan.TotalDays)}d" : $"{(int)Math.Ceiling(primeTimeSpan.TotalHours)}h")}" : " ");
+        if (CheckAchievements)
+        {
+            CheckAchievements = false;
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Main Menu Achievements Notification", PlayerData.Achievements.Exists(k => k.TryGetNextTier(out var nextTier) && k.Amount >= nextTier.TargetAmount));
+        }
+        
+        var bp = PlayerData.Battlepass;
+        if (CheckBattlepass)
+        {
+            CheckBattlepass = false;
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Main Menu Battlepass Notification", DB.BattlepassTiers.Exists(k => bp.CurrentTier >= k.TierID && ((k.FreeReward != null && !bp.ClaimedFreeRewards.Contains(k.TierID)) || (PlayerData.HasBattlepass && k.PremiumReward != null && !bp.ClaimedPremiumRewards.Contains(k.TierID)))));
+        }
     }
 
     public void ShowXP()
@@ -5762,15 +5787,14 @@ public class UIHandler
     public void ShowAchievements()
     {
         MainPage = EMainPage.ACHIEVEMENTS;
-        SelectedAchievementMainPage(1);
-
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements Page 1 TEXT", "Weapons");
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements Page 2 TEXT", "Other");
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements Page 1 BUTTON", true);
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements Page 1 TEXT", "Weapons");
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements Page 2 BUTTON", true);
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements Page 2 TEXT", "Other");
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements Page 3 BUTTON", false);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements Page 4 BUTTON", false);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements Page 5 BUTTON", false);
+        SelectedAchievementMainPage(1);
     }
 
     public void SelectedAchievementMainPage(int mainPage)
@@ -5797,6 +5821,7 @@ public class UIHandler
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Achievements Next BUTTON", achievementPages.Count > 1);
 
         AchievementPageShower = Plugin.Instance.StartCoroutine(ShowAchievementSubPage(firstPage, achievementPages.Keys.Max()));
+        SelectedAchievement(0);
     }
 
     public IEnumerator ShowAchievementSubPage(PageAchievement page, int maxPage)
@@ -5865,6 +5890,7 @@ public class UIHandler
 
         AchievementPageShower.Stop();
         AchievementPageShower = Plugin.Instance.StartCoroutine(ShowAchievementSubPage(nextPage, achievementPages.Keys.Max()));
+        SelectedAchievement(0);
     }
 
     public void BackwardAchievementSubPage()
@@ -5885,6 +5911,7 @@ public class UIHandler
 
         AchievementPageShower.Stop();
         AchievementPageShower = Plugin.Instance.StartCoroutine(ShowAchievementSubPage(nextPage, achievementPages.Keys.Max()));
+        SelectedAchievement(0);
     }
 
     public void ReloadAchievementSubPage()
@@ -6248,6 +6275,7 @@ public class UIHandler
             return;
         }
 
+        CheckBattlepass = true;
         if (!BattlepassPages.TryGetValue(BattlepassPageID, out var currentPage))
         {
             Logging.Debug($"Error finding the current page of battlepass for {Player.CharacterName}, returning");
