@@ -88,6 +88,9 @@ public class GamePlayer
 
     public float HealAmount { get; set; }
 
+    public DateTime LastXPPopup { get; set; }
+    public int LastXP { get; set; }
+    
     public EPlayerStance PreviousStance { get; set; }
 
     public Coroutine MovementChanger { get; set; }
@@ -118,6 +121,8 @@ public class GamePlayer
         Data = data;
         TransportConnection = transportConnection;
         PreviousStance = EPlayerStance.STAND;
+        LastXPPopup = DateTime.UtcNow;
+        LastXP = 0;
         LastDamager = new(100);
         PendingAnimations = new();
         ScoreboardCooldown = DateTime.UtcNow;

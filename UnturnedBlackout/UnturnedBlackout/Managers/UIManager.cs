@@ -218,7 +218,16 @@ public class UIManager
 
     // XP UI
 
-    public void ShowXPUI(GamePlayer player, int xp, string xpGained) => EffectManager.sendUIEffect(27630, 27630, player.TransportConnection, true, $"+{xp} XP", xpGained);
+    public void ShowXPUI(GamePlayer player, int xp, string xpGained)
+    {
+        var showXP = xp;
+        if ((DateTime.UtcNow - player.LastXPPopup).TotalSeconds <= Config.Base.FileData.XPPopupStaySeconds)
+            showXP += player.LastXP;
+
+        player.LastXP = showXP;
+        player.LastXPPopup = DateTime.UtcNow;
+        EffectManager.sendUIEffect(27630, 27630, player.TransportConnection, true, $"+{showXP} XP", xpGained);
+    }
 
     // MULTIKILL SOUND
 

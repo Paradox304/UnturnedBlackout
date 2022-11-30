@@ -43,6 +43,8 @@ public class BaseValuesConfig
     public int MaxGamesCount { get; set; }
     public int GameThreshold { get; set; }
 
+    public double XPPopupStaySeconds { get; set; }
+    
     public List<ScrollableImage> ScrollableImages { get; set; }
     public int ScrollableImageTimer { get; set; }
     
@@ -89,6 +91,8 @@ public class BaseValuesConfig
         MinGamesCount = 4;
         MaxGamesCount = 10;
         GameThreshold = 70;
+
+        XPPopupStaySeconds = 6;
         
         ScrollableImages = new();
         ScrollableImageTimer = 5;
