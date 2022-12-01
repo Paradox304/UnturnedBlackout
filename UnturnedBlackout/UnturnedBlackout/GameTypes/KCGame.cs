@@ -996,7 +996,12 @@ public class KCGame : Game
         if (damager == null)
             return;
 
-        if (!GameTurretsInverse.TryGetValue(drop, out var gPlayer))
+        var barricadeData = drop.GetServersideData();
+        if (barricadeData == null)
+            return;
+
+        var gPlayer = Plugin.Instance.Game.GetGamePlayer(new CSteamID(barricadeData.owner));
+        if (gPlayer == null)
             return;
 
         var owner = GetKCPlayer(gPlayer.Player);
@@ -1008,16 +1013,20 @@ public class KCGame : Game
             shouldAllow = false;
             return;
         }
-
-        var barricadeData = drop.GetServersideData();
-        if (barricadeData == null)
-            return;
-
+        
         if (barricadeData.barricade.health > pendingTotalDamage)
             return;
 
-        UI.ShowXPUI(player, Config.Medals.FileData.TurretDestroyXP, Plugin.Instance.Translate("Turret_Destroy"));
-        DB.IncreasePlayerXP(player.SteamID, Config.Medals.FileData.TurretDestroyXP);
+        if (GameTurretsInverse.ContainsKey(drop))
+        {
+            UI.ShowXPUI(player, Config.Medals.FileData.TurretDestroyXP, Plugin.Instance.Translate("Turret_Destroy"));
+            DB.IncreasePlayerXP(player.SteamID, Config.Medals.FileData.TurretDestroyXP);
+        }
+        else if (drop.asset.id == (gPlayer.ActiveLoadout.Lethal?.Gadget?.GadgetID ?? 0))
+        {
+            UI.ShowXPUI(player, Config.Medals.FileData.ClaymoreDestroyXP, Plugin.Instance.Translate("Claymore_Destroy"));
+            DB.IncreasePlayerXP(player.SteamID, Config.Medals.FileData.ClaymoreDestroyXP);
+        }
     }
 
     public override void PlayerSendScoreboard(GamePlayer gPlayer, bool state)

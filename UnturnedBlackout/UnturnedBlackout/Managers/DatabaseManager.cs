@@ -3439,6 +3439,16 @@ public class DatabaseManager
             Logging.Debug("Checking if daily leaderboard needs to be wiped");
             if (Config.AllowedToWipeDailyWeekly && ServerOptions.DailyLeaderboardWipe < DateTimeOffset.UtcNow)
             {
+                // Change the wipe date
+                var hourTarget = ServerOptions.DailyLeaderboardWipe.Hour;
+                var now = DateTime.UtcNow;
+                DateTimeOffset newWipeDate = new(now.Year, now.Month, now.Day, hourTarget, 0, 0, new(0));
+                if (now.Hour >= hourTarget)
+                    newWipeDate = newWipeDate.AddDays(1);
+
+                _ = new MySqlCommand($"UPDATE `{OPTIONS}` SET `DailyLeaderboardWipe` = {newWipeDate.ToUnixTimeSeconds()};", conn).ExecuteScalar();
+                ServerOptions.DailyLeaderboardWipe = newWipeDate;
+                
                 var botRewards = new List<BotReward>();
                 
                 // Give all ranked rewards
@@ -3534,21 +3544,17 @@ public class DatabaseManager
                     PlayerDailyLeaderboardLookup.Add(data.SteamID, leaderboardData);
                     _ = new MySqlCommand($"INSERT INTO `{PLAYERS_LEADERBOARD_DAILY}` ( `SteamID` ) VALUES ( {data.SteamID} );", conn).ExecuteScalar();
                 }
-
-                // Change the wipe date
-                var hourTarget = ServerOptions.DailyLeaderboardWipe.Hour;
-                var now = DateTime.UtcNow;
-                DateTimeOffset newWipeDate = new(now.Year, now.Month, now.Day, hourTarget, 0, 0, new(0));
-                if (now.Hour >= hourTarget)
-                    newWipeDate = newWipeDate.AddDays(1);
-
-                _ = new MySqlCommand($"UPDATE `{OPTIONS}` SET `DailyLeaderboardWipe` = {newWipeDate.ToUnixTimeSeconds()};", conn).ExecuteScalar();
-                ServerOptions.DailyLeaderboardWipe = newWipeDate;
             }
 
             Logging.Debug("Checking if weekly leaderboard needs to be wiped");
             if (Config.AllowedToWipeDailyWeekly && ServerOptions.WeeklyLeaderboardWipe < DateTimeOffset.UtcNow)
             {
+                // Change the wipe date
+                var newWipeDate = DateTimeOffset.UtcNow.AddDays(7);
+                newWipeDate = new(newWipeDate.Year, newWipeDate.Month, newWipeDate.Day, ServerOptions.WeeklyLeaderboardWipe.Hour, 0, 0, new(0));
+                _ = new MySqlCommand($"UPDATE `{OPTIONS}` SET `WeeklyLeaderboardWipe` = {newWipeDate.ToUnixTimeSeconds()};", conn).ExecuteScalar();
+                ServerOptions.WeeklyLeaderboardWipe = newWipeDate;
+                
                 var botRewards = new List<BotReward>();
                 
                 // Give all ranked rewards
@@ -3645,12 +3651,6 @@ public class DatabaseManager
                     PlayerWeeklyLeaderboardLookup.Add(data.SteamID, leaderboardData);
                     _ = new MySqlCommand($"INSERT INTO `{PLAYERS_LEADERBOARD_WEEKLY}` ( `SteamID` ) VALUES ( {data.SteamID} );", conn).ExecuteScalar();
                 }
-
-                // Change the wipe date
-                var newWipeDate = DateTimeOffset.UtcNow.AddDays(7);
-                newWipeDate = new(newWipeDate.Year, newWipeDate.Month, newWipeDate.Day, ServerOptions.WeeklyLeaderboardWipe.Hour, 0, 0, new(0));
-                _ = new MySqlCommand($"UPDATE `{OPTIONS}` SET `WeeklyLeaderboardWipe` = {newWipeDate.ToUnixTimeSeconds()};", conn).ExecuteScalar();
-                ServerOptions.WeeklyLeaderboardWipe = newWipeDate;
             }
 
             Logging.Debug("Checking if seasonal leaderboard needs to be wiped");

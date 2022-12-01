@@ -6,6 +6,7 @@ namespace UnturnedBlackout.Models.Configuration;
 public class MedalsConfig
 {
     public int TurretDestroyXP { get; set; }
+    public int ClaymoreDestroyXP { get; set; }
     public int NormalKillXP { get; set; }
     public int MeleeKillXP { get; set; }
     public int HeadshotKillXP { get; set; }

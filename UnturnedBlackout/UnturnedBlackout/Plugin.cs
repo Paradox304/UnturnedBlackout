@@ -349,6 +349,7 @@ public class Plugin : RocketPlugin<Config>
         { "Lethal_Kill", "Lethal Kill" },
         { "Lethal_Hit", "Lethal Hit" },
         { "Turret_Destroy", "Turret Destroyed" },
+        { "Claymore_Destroy", "Claymore Destroyed" },
         { "Killstreak_Kill", "Killstreak Kill" },
         { "Kill_Confirmed", "Kill Confirmed" },
         { "Kill_Denied", "Kill Denied" },
