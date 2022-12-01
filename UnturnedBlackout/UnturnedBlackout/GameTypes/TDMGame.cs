@@ -926,7 +926,7 @@ public class TDMGame : Game
         if (owner == null)
             return;
 
-        if (owner.Team == damager.Team)
+        if (owner.Team == damager.Team && owner != damager)
         {
             shouldAllow = false;
             return;
@@ -941,12 +941,20 @@ public class TDMGame : Game
             DB.IncreasePlayerXP(player.SteamID, Config.Medals.FileData.TurretDestroyXP);
         }
         else if (drop.asset.id == (gPlayer.ActiveLoadout.Lethal?.Gadget?.GadgetID ?? 0))
-        {
-            UI.ShowXPUI(player, Config.Medals.FileData.ClaymoreDestroyXP, Plugin.Instance.Translate("Claymore_Destroy"));
-            DB.IncreasePlayerXP(player.SteamID, Config.Medals.FileData.ClaymoreDestroyXP);
-        }
+            _ = Plugin.Instance.StartCoroutine(DelayedClaymoreCheck(player));
     }
 
+    public IEnumerator DelayedClaymoreCheck(GamePlayer player)
+    {
+        yield return new WaitForSeconds(1f);
+
+        if (player.Player.Player.life.isDead)
+            yield break;
+        
+        UI.ShowXPUI(player, Config.Medals.FileData.ClaymoreDestroyXP, Plugin.Instance.Translate("Claymore_Destroy"));
+        DB.IncreasePlayerXP(player.SteamID, Config.Medals.FileData.ClaymoreDestroyXP);
+    }
+    
     public override void PlayerSendScoreboard(GamePlayer gPlayer, bool state)
     {
         var player = GetTDMPlayer(gPlayer.Player);
