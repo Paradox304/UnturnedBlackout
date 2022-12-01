@@ -1,6 +1,4 @@
 ﻿using System.Collections.Generic;
-using UnturnedBlackout.Database.Base;
-using UnturnedBlackout.Database.Data;
 
 namespace UnturnedBlackout.Models.UI;
 

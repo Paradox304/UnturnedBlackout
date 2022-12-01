@@ -5,7 +5,6 @@ using System.Net;
 using System.Text;
 using System.Text.Json;
 using System.Timers;
-using UnityEngine;
 using UnturnedBlackout.Extensions;
 using UnturnedBlackout.Models.Webhook;
 using Logger = Rocket.Core.Logging.Logger;

@@ -1,7 +1,6 @@
 ﻿using Rocket.API;
 using Steamworks;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using UnturnedBlackout.Extensions;
 
 namespace UnturnedBlackout.Commands;

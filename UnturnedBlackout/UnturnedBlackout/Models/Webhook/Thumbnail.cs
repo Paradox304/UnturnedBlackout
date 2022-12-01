@@ -1,5 +1,5 @@
 using System;
-using JetBrains.Annotations;
+
 // ReSharper disable InconsistentNaming
 
 namespace UnturnedBlackout.Models.Webhook;

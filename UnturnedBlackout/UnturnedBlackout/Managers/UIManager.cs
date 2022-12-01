@@ -1490,7 +1490,7 @@ public class UIManager
 
     // EVENTS
 
-    public void OnUIUpdated(CSteamID steamID, EUIPage page)
+    public void OnUIUpdated(CSteamID steamID, EUIPage page, LoadoutGun gun = null)
     {
         if (!UIHandlersLookup.TryGetValue(steamID, out var handler))
             return;
@@ -1499,24 +1499,31 @@ public class UIManager
         {
             case EUIPage.PISTOL:
                 handler.BuildPistolPages();
+                handler.BuildAttachmentPages(gun);
                 return;
             case EUIPage.SMG:
                 handler.BuildSMGPages();
+                handler.BuildAttachmentPages(gun);
                 return;
             case EUIPage.LMG:
                 handler.BuildLMGPages();
+                handler.BuildAttachmentPages(gun);
                 return;
             case EUIPage.SHOTGUN:
                 handler.BuildShotgunPages();
+                handler.BuildAttachmentPages(gun);
                 return;
             case EUIPage.AR:
                 handler.BuildARPages();
+                handler.BuildAttachmentPages(gun);
                 return;
             case EUIPage.SNIPER:
                 handler.BuildSniperPages();
+                handler.BuildAttachmentPages(gun);
                 return;
             case EUIPage.CARBINE:
                 handler.BuildCarbinePages();
+                handler.BuildAttachmentPages(gun);
                 return;
             case EUIPage.GUN_CHARM:
                 handler.BuildGunCharmPages();

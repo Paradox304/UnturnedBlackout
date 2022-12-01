@@ -6,18 +6,15 @@ using Rocket.Unturned.Permissions;
 using SDG.Unturned;
 using Steamworks;
 using System.Collections;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using System.Text.RegularExpressions;
 using Rocket.API;
 using Rocket.Core;
 using UnityEngine;
 using UnturnedBlackout.Enums;
 using UnturnedBlackout.Extensions;
 using UnturnedBlackout.Managers;
-using Logger = Rocket.Core.Logging.Logger;
 
 // ReSharper disable RedundantAssignment
 

@@ -5,7 +5,6 @@ using Rocket.API;
 using Rocket.Unturned.Player;
 using SDG.Unturned;
 using Steamworks;
-using UnturnedBlackout.Database.Base;
 using UnturnedBlackout.Enums;
 using UnturnedBlackout.Extensions;
 

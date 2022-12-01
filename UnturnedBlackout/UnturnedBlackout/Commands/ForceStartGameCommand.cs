@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using Rocket.API;
 using Rocket.Unturned.Player;
 using UnturnedBlackout.Enums;
-using UnturnedBlackout.Managers;
 
 namespace UnturnedBlackout.Commands;
 

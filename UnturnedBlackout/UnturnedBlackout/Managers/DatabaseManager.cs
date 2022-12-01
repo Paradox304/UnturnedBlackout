@@ -1,6 +1,4 @@
 ﻿using MySql.Data.MySqlClient;
-using Rocket.API;
-using Rocket.Core;
 using Rocket.Core.Steam;
 using Rocket.Core.Utils;
 using Rocket.Unturned.Player;
@@ -4534,7 +4532,7 @@ public class DatabaseManager
         }
 
         loadout.Guns.Add(loadoutGun.Gun.GunID, loadoutGun);
-        Plugin.Instance.UI.OnUIUpdated(steamID, (EUIPage)(byte)loadoutGun.Gun.GunType);
+        Plugin.Instance.UI.OnUIUpdated(steamID, (EUIPage)(byte)loadoutGun.Gun.GunType, loadoutGun);
     }
 
     public void IncreasePlayerGunXP(CSteamID steamID, ushort gunID, int increaseXP)

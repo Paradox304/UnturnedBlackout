@@ -6,7 +6,6 @@ using Steamworks;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -19,10 +18,8 @@ using UnturnedBlackout.Managers;
 using UnturnedBlackout.Models.Global;
 using UnturnedBlackout.Models.UI;
 using UnturnedBlackout.Models.Webhook;
-using Debug = UnityEngine.Debug;
 using Enum = System.Enum;
 using Field = UnturnedBlackout.Models.Webhook.Field;
-using Logger = Rocket.Core.Logging.Logger;
 
 namespace UnturnedBlackout.Instances;
 
