@@ -6552,6 +6552,7 @@ public class UIHandler
             yield break;
         }
         
+        Logging.Debug($"Unboxing case with id {SelectedCaseID} for {Player.CharacterName}, Reward {rewardName}, Case Rarity: {cRarity}");
         var embed = new Embed(null, null, null, Utility.GetDiscordColorCode(rewardRarity), DateTime.UtcNow.ToString("s"), new(Provider.serverName, Provider.configData.Browser.Icon), new(PlayerData.SteamName, $"https://steamcommunity.com/profiles/{PlayerData.SteamID}", PlayerData.AvatarLinks[0]), new Field[] { new($"[{rewardRarity.ToFriendlyName()}] {rewardName}", @case.Case.CaseName, true) }, new(rewardImage), null);
         switch (cRarity)
         {
@@ -6562,7 +6563,6 @@ public class UIHandler
                 Plugin.Instance.Discord.SendEmbed(embed, "Black Market", Config.Webhooks.FileData.UnboxedWebhookLink);
                 break;
         }
-        
         switch (rewardRarity)
         {
             case ERarity.COMMON or ERarity.UNCOMMON or ERarity.RARE:
@@ -6578,9 +6578,7 @@ public class UIHandler
                 EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Crate Result Mythical Special", true);
                 break;
         }
-        
         var poolSize = updatedWeights.Sum(k => k.Item2);
-
         for (var i = 0; i <= MAX_ROLLING_CONTENT_PER_CASE; i++)
         {
             if (i == 20)
@@ -6644,7 +6642,6 @@ public class UIHandler
         }
 
         DB.DecreasePlayerCase(SteamID, @case.Case.CaseID, 1);
-
         if (isDuplicate)
             DB.IncreasePlayerScrap(SteamID, duplicateScrapAmount);
         else
@@ -6656,20 +6653,24 @@ public class UIHandler
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Duplicate", isDuplicate);
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Duplicate TEXT", $"+{duplicateScrapAmount}");
         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Duplicate IMAGE", Config.Icons.FileData.ScrapSmallIconLink);
-        
+
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"Crate Rolling ANIM {UnityEngine.Random.Range(1, 6)}", true);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Crate EXAMPLE Open ANIM", true);
 
         yield return new WaitForSeconds(1.36f);
+
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Rolling Starter", true);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Wave Starter", true);
         yield return new WaitForSeconds(6.01f);
+
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Result Starter", true);
         yield return new WaitForSeconds(Player.Ping + 0.2f);
+
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Unbox Content Result {rewardRarity}", true);
-        yield return new WaitForSeconds(0.5f);
-        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Unbox Button Toggler", @case.Amount > 0);
         IsUnboxing = false;
+        yield return new WaitForSeconds(0.5f);
+
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Unbox Content Unbox Button Toggler", @case.Amount > 0);
     }
 
     public void ShowUnboxingStorePage()

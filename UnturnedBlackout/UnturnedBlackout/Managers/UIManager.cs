@@ -1968,6 +1968,8 @@ public class UIManager
             case "SERVER Unbox Content Unbox BUTTON":
                 if (handler.UnboxingPage == EUnboxingPage.OPEN && !handler.IsUnboxing)
                     handler.CrateUnboxer = Plugin.Instance.StartCoroutine(handler.UnboxCase());
+                else
+                    Logging.Debug($"PLAYER TRYING TO UNBOX BUT DENIED AS IsUnboxing: {handler.IsUnboxing}, Page: {handler.UnboxingPage}");
 
                 return;
             case "SERVER Unbox Inventory BUTTON":
