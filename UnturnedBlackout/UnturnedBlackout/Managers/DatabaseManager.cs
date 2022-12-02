@@ -4521,7 +4521,7 @@ public class DatabaseManager
                 continue;
             }
 
-            loadoutAttachments.Add(attachment.Value.AttachmentID, new(attachment.Value, attachment.Key, true, false));
+            loadoutAttachments.Add(attachment.Value.AttachmentID, new(attachment.Value, attachment.Key, false, false));
         }
 
         LoadoutGun loadoutGun = new(gun, 1, 0, 0, true, false, loadoutAttachments);

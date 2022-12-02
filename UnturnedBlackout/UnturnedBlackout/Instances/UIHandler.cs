@@ -5833,7 +5833,10 @@ public class UIHandler
             yield return new WaitForSeconds(0.01f);
 
             if (!page.Achievements.TryGetValue(i, out var achievement))
-                break;
+            {
+                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Achievements BUTTON {i}", false);
+                continue;
+            }
 
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Achievements BUTTON {i}", true);
             var tier = achievement.GetCurrentTier();
