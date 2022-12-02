@@ -391,6 +391,7 @@
         <Compile Include="Patches\DamagePatch.cs" />
         <Compile Include="Patches\GroupPatch.cs" />
         <Compile Include="Patches\InventoryPatches.cs" />
+        <Compile Include="Patches\SuicidePatch.cs" />
         <Compile Include="Patches\TriggerTrapPatch.cs" />
         <Compile Include="Plugin.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />
