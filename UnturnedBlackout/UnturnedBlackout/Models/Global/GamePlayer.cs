@@ -105,6 +105,7 @@ public class GamePlayer
     public Coroutine TacticalChecker { get; set; }
     public Coroutine LethalChecker { get; set; }
     public Coroutine KillstreakChecker { get; set; }
+    public Coroutine EquipmentChecker { get; set; }
     
     public GamePlayer(UnturnedPlayer player, ITransportConnection transportConnection)
     {
@@ -728,11 +729,53 @@ public class GamePlayer
         RemoveActiveKillstreak();
     }
 
+    public IEnumerator CheckEquipment()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(1.5f);
+            
+            Logging.Debug($"Checking equipment for {Player.CharacterName}");
+            if (Player.Player.life.isDead)
+                continue;
+
+            Logging.Debug("Player is not dead");
+            if (CurrentGame == null)
+                break;
+
+            Logging.Debug("Player is in a game");
+            if (!CurrentGame.IsPlayerCarryingFlag(this))
+                continue;
+
+            var equip = Player.Player.equipment;
+            Logging.Debug($"Player is carrying a flag, itemID: {equip.itemID}, primary: {ActiveLoadout.PrimarySkin?.SkinID ?? ActiveLoadout.Primary?.Gun.GunID ?? 0}");
+            if (equip.itemID != (ActiveLoadout.PrimarySkin?.SkinID ?? ActiveLoadout.Primary?.Gun.GunID ?? 0))
+                continue;
+
+            Logging.Debug($"Player is carrying a primary, isBusy: {equip.isBusy}, canEquip: {equip.canEquip}");
+            if (equip.isBusy || !equip.canEquip)
+                continue;
+
+            Logging.Debug("Player can equip, sending secondary");
+            if (Player.Player.inventory.getItem(1, 0) != null)
+            {
+                equip.ServerEquip(1, 0, 0);
+                continue;
+            }
+
+            Logging.Debug("Player doesn't have secondary, sending knife");
+            equip.ServerEquip(KnifePage, KnifeX, KnifeY);
+        }
+    }
+    
     // Events
     public void OnGameJoined(Game game)
     {
         CurrentGame = game;
         IsLoading = true;
+
+        if (game.GameMode == EGameType.CTF)
+            EquipmentChecker = Plugin.Instance.StartCoroutine(CheckEquipment());
     }
 
     public void OnGameLeft()
@@ -751,7 +794,8 @@ public class GamePlayer
         MovementChanger.Stop();
         GadgetGiver.Stop();
         KillstreakItemRemover.Stop();
-
+        EquipmentChecker.Stop();
+        
         HasScoreboard = false;
         HasAnimationGoingOn = false;
         IsPendingLoadoutChange = false;

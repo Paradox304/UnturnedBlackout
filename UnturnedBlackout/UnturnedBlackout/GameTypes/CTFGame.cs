@@ -167,7 +167,7 @@ public class CTFGame : Game
                 if (totalMinutesPlayed < Config.RoundEndCases.FileData.MinimumMinutesPlayed || player.Kills == 0)
                     continue;
 
-                var chance = Config.RoundEndCases.FileData.Chance * totalMinutesPlayed;
+                var chance = Mathf.RoundToInt(Config.RoundEndCases.FileData.Chance * totalMinutesPlayed);
                 if (UnityEngine.Random.Range(1, 101) > chance)
                     continue;
 
@@ -877,10 +877,10 @@ public class CTFGame : Game
         if (cPlayer == null)
             return;
 
-        Logging.Debug($"{player.Player.CharacterName} is trying to pick up item {itemData.item.id}");
+        Logging.Debug($"{player.Player.CharacterName} is trying to pick up item {itemData.item.id}, isBusy: {player.Player.Player.equipment.isBusy}, canEquip: {player.Player.Player.equipment.canEquip}");
         var otherTeam = cPlayer.Team == BlueTeam ? RedTeam : BlueTeam;
 
-        if (player.Player.Player.equipment.isBusy)
+        if (player.Player.Player.equipment.isBusy || !player.Player.Player.equipment.canEquip)
         {
             shouldAllow = false;
             return;
@@ -1129,33 +1129,39 @@ public class CTFGame : Game
         if (owner == null)
             return;
 
+        if (GameTurretsInverse.ContainsKey(drop))
+        {
+            if (owner.Team == damager.Team)
+            {
+                shouldAllow = false;
+                return;
+            }
+            
+            if (barricadeData.barricade.health > pendingTotalDamage)
+                return;
+            
+            UI.ShowXPUI(player, Config.Medals.FileData.TurretDestroyXP, Plugin.Instance.Translate("Turret_Destroy"));
+            DB.IncreasePlayerXP(player.SteamID, Config.Medals.FileData.TurretDestroyXP);
+            
+            return;
+        }
+
+        if (drop.asset.id != (gPlayer.ActiveLoadout.Lethal?.Gadget?.GadgetID ?? 0))
+            return;
+
         if (owner.Team == damager.Team && owner != damager)
         {
             shouldAllow = false;
             return;
         }
-        
+            
         if (barricadeData.barricade.health > pendingTotalDamage)
             return;
 
-        if (GameTurretsInverse.ContainsKey(drop))
-        {
-            UI.ShowXPUI(player, Config.Medals.FileData.TurretDestroyXP, Plugin.Instance.Translate("Turret_Destroy"));
-            DB.IncreasePlayerXP(player.SteamID, Config.Medals.FileData.TurretDestroyXP);
-        }
-        else if (drop.asset.id == (gPlayer.ActiveLoadout.Lethal?.Gadget?.GadgetID ?? 0))
-            _ = Plugin.Instance.StartCoroutine(DelayedClaymoreCheck(player));
-    }
-
-    public IEnumerator DelayedClaymoreCheck(GamePlayer player)
-    {
-        yield return new WaitForSeconds(1f);
-
-        if (player.Player.Player.life.isDead)
-            yield break;
-        
-        UI.ShowXPUI(player, Config.Medals.FileData.ClaymoreDestroyXP, Plugin.Instance.Translate("Claymore_Destroy"));
-        DB.IncreasePlayerXP(player.SteamID, Config.Medals.FileData.ClaymoreDestroyXP);
+        if (owner == damager)
+            return;
+                
+        _ = Plugin.Instance.StartCoroutine(DelayedClaymoreCheck(player));
     }
 
     public override void PlayerSendScoreboard(GamePlayer gPlayer, bool state)

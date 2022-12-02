@@ -839,10 +839,8 @@ public class UIManager
     public void OnUseableChanged(PlayerEquipment obj)
     {
         var player = Plugin.Instance.Game.GetGamePlayer(obj.player);
-        if (player == null)
-            return;
 
-        if (player.CurrentGame == null)
+        if (player?.CurrentGame == null)
             return;
 
         if (player.ActiveLoadout == null)

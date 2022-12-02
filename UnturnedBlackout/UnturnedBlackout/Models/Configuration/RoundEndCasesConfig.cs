@@ -7,7 +7,7 @@ namespace UnturnedBlackout.Models.Configuration;
 [Serializable]
 public class RoundEndCasesConfig
 {
-    public int Chance { get; set; }
+    public float Chance { get; set; }
     public int MinimumMinutesPlayed { get; set; }
 
     public List<RoundEndCase> RoundEndCases { get; set; }

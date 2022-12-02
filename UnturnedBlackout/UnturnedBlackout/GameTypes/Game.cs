@@ -298,6 +298,18 @@ public abstract class Game
         }
     }
 
+
+    public IEnumerator DelayedClaymoreCheck(GamePlayer player)
+    {
+        yield return new WaitForSeconds(0.2f);
+
+        if (player.Player.Player.life.isDead)
+            yield break;
+        
+        UI.ShowXPUI(player, Config.Medals.FileData.ClaymoreDestroyXP, Plugin.Instance.Translate("Claymore_Destroy"));
+        DB.IncreasePlayerXP(player.SteamID, Config.Medals.FileData.ClaymoreDestroyXP);
+    }
+    
     private void OnPlayerDamaged(ref DamagePlayerParameters parameters, ref bool shouldAllow) => OnPlayerDamage(ref parameters, ref shouldAllow);
 
     private void OnPlayerRevive(UnturnedPlayer player, Vector3 position, byte angle) => OnPlayerRevived(player);

@@ -130,7 +130,7 @@ public class FFAGame : Game
                 if (totalMinutesPlayed < Config.RoundEndCases.FileData.MinimumMinutesPlayed || player.Kills == 0)
                     continue;
 
-                var chance = Config.RoundEndCases.FileData.Chance * totalMinutesPlayed;
+                var chance = Mathf.RoundToInt(Config.RoundEndCases.FileData.Chance * totalMinutesPlayed);
                 if (UnityEngine.Random.Range(1, 101) > chance)
                     continue;
 
@@ -875,28 +875,34 @@ public class FFAGame : Game
         var owner = GetFFAPlayer(gPlayer.Player);
         if (owner == null)
             return;
-        
-        if (barricadeData.barricade.health > pendingTotalDamage)
-            return;
 
         if (GameTurretsInverse.ContainsKey(drop))
         {
+            if (owner == damager)
+            {
+                shouldAllow = false;
+                return;
+            }
+            
+            if (barricadeData.barricade.health > pendingTotalDamage)
+                return;
+            
             UI.ShowXPUI(player, Config.Medals.FileData.TurretDestroyXP, Plugin.Instance.Translate("Turret_Destroy"));
             DB.IncreasePlayerXP(player.SteamID, Config.Medals.FileData.TurretDestroyXP);
+            
+            return;
         }
-        else if (drop.asset.id == (gPlayer.ActiveLoadout.Lethal?.Gadget?.GadgetID ?? 0))
-            _ = Plugin.Instance.StartCoroutine(DelayedClaymoreCheck(player));
-    }
 
-    public IEnumerator DelayedClaymoreCheck(GamePlayer player)
-    {
-        yield return new WaitForSeconds(1f);
+        if (drop.asset.id != (gPlayer.ActiveLoadout.Lethal?.Gadget?.GadgetID ?? 0))
+            return;
+            
+        if (barricadeData.barricade.health > pendingTotalDamage)
+            return;
 
-        if (player.Player.Player.life.isDead)
-            yield break;
-        
-        UI.ShowXPUI(player, Config.Medals.FileData.ClaymoreDestroyXP, Plugin.Instance.Translate("Claymore_Destroy"));
-        DB.IncreasePlayerXP(player.SteamID, Config.Medals.FileData.ClaymoreDestroyXP);
+        if (owner == damager)
+            return;
+                
+        _ = Plugin.Instance.StartCoroutine(DelayedClaymoreCheck(player));
     }
     
     public override void PlayerSendScoreboard(GamePlayer gPlayer, bool state)
