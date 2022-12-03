@@ -1,4 +1,5 @@
 ﻿using System;
+using Rocket.Core.Logging;
 
 namespace UnturnedBlackout.Extensions;
 
@@ -14,6 +15,7 @@ public static class Logging
             Console.ResetColor();
         }
 
+        Logger.ExternalLog(message, color);
         Plugin.Instance.Logger.Log(updatedMesage);
     }
 }
