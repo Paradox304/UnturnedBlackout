@@ -3097,7 +3097,7 @@ public class DatabaseManager
             {
                 Logger.Log($"Error executing query: \n{cmdText}");
                 Plugin.Instance.Logger.Dump(pendingQueries);
-                Plugin.Instance.Logger.Warn($"FAILED TO PROCESS A BATCH OF {pendingQueries.Count} dumped it in a file");
+                Plugin.Instance.Logger.Warn($"Failed to process a batch of {pendingQueries.Count} queries, dumped it in a file");
                 Logger.Log(ex);
             }
 
@@ -4021,7 +4021,6 @@ public class DatabaseManager
             Logging.Debug($"Querying servers to get their info");
             foreach (var server in Servers)
             {
-                Logging.Debug($"Querying server with IP: {server.FriendlyIP}, Port: {server.Port}");
                 try
                 {
                     var info = SteamServer.QueryServer(server.IP, server.PortNo, 1000);
@@ -4029,11 +4028,9 @@ public class DatabaseManager
                     server.MaxPlayers = info.MaxPlayers;
                     server.Name = info.Name;
                     server.IsOnline = true;
-                    Logging.Debug($"Found info, players: {info.Players}, max players: {info.MaxPlayers}, name: {info.Name}");
                 }
                 catch
                 {
-                    Logging.Debug($"Failed to get info, server is probably offline");
                     if (server.IsOnline)
                     {
                         server.LastOnline = DateTime.UtcNow;

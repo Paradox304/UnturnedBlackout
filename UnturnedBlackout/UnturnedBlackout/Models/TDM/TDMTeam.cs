@@ -65,21 +65,17 @@ public class TDMTeam
 
     public void OnDeath(CSteamID steamID)
     {
-        Logging.Debug($"Player with {steamID} died, team: {Info.TeamName}");
         if (!Players.TryGetValue(steamID, out var lastDeath))
         {
             Logging.Debug($"Could'nt find player registered to the team, return");
             return;
         }
 
-        Logging.Debug($"Last death: {lastDeath}, Current Time: {DateTime.UtcNow}, Seconds: {(DateTime.UtcNow - lastDeath).TotalSeconds}, Spawn Switch Count: {Config.Base.FileData.SpawnSwitchCountSeconds}");
         if ((DateTime.UtcNow - lastDeath).TotalSeconds < Config.Base.FileData.SpawnSwitchCountSeconds)
         {
-            Logging.Debug($"Player died within spawn switch count seconds, current threshold {SpawnThreshold}, increasing it by one");
             SpawnThreshold++;
             if (SpawnThreshold > Config.Base.FileData.SpawnSwitchThreshold)
             {
-                Logging.Debug($"Threshold reached limit: {Config.Base.FileData.SpawnSwitchThreshold}, switching spawns");
                 CheckSpawnSwitcher.Stop();
                 Game.SwitchSpawn();
                 SpawnThreshold = 0;

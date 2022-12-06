@@ -508,7 +508,6 @@ public class GamePlayer
 
     public void ActivateKillstreak(LoadoutKillstreak killstreak)
     {
-        Logging.Debug($"Activating killstreak with id {killstreak.Killstreak.KillstreakID} for {Player.CharacterName}");
         var info = killstreak.Killstreak.KillstreakInfo;
         var inv = Player.Player.inventory;
         if (CurrentGame == null)
@@ -537,7 +536,6 @@ public class GamePlayer
         }
         else if (info.IsTurret)
         {
-            Logging.Debug($"Killstreak is a turret");
             if (CurrentGame.GameTurrets.ContainsKey(this))
             {
                 Logging.Debug($"Player already has a placed turret in the game, returning");

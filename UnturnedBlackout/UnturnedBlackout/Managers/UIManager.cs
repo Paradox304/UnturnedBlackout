@@ -1570,26 +1570,20 @@ public class UIManager
 
     public void OnGameUpdated()
     {
-        foreach (var handler in UIHandlers.Where(handler => handler.MainPage == EMainPage.PLAY && handler.PlayPage == EPlayPage.GAMES))
+        foreach (var handler in UIHandlers.Where(handler => handler.MainPage == EMainPage.PLAY && handler.PlayPage == EPlayPage.GAMES).ToList())
             handler.ShowGames();
     }
 
     public void OnGameCountUpdated(Game game)
     {
-        foreach (var handler in UIHandlers)
-        {
-            if (handler.MainPage == EMainPage.PLAY && handler.PlayPage == EPlayPage.GAMES)
-                handler.UpdateGamePlayerCount(game);
-        }
+        foreach (var handler in UIHandlers.Where(handler => handler.MainPage == EMainPage.PLAY && handler.PlayPage == EPlayPage.GAMES).ToList())
+            handler.UpdateGamePlayerCount(game);
     }
 
     public void OnServersUpdated()
     {
-        foreach (var handler in UIHandlers)
-        {
-            if (handler.MainPage == EMainPage.PLAY && handler.PlayPage == EPlayPage.SERVERS)
-                handler.ShowServers();
-        }
+        foreach (var handler in UIHandlers.Where(handler => handler.MainPage == EMainPage.PLAY && handler.PlayPage == EPlayPage.SERVERS).ToList())
+            handler.ShowServers();
     }
 
     public void OnAchievementsUpdated(CSteamID steamID)

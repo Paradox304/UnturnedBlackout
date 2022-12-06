@@ -71,13 +71,13 @@ public class KCGame : Game
 
     public IEnumerator StartGame()
     {
+        Logging.Debug($"STARTING GAME ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
         TaskDispatcher.QueueOnMainThread(() => CleanMap());
         GamePhase = EGamePhase.STARTING;
-        foreach (var player in Players)
+        UI.OnGameUpdated();
+        Logging.Debug($"GAME PHASE SET TO STARTING ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
+        foreach (var player in Players.Where(k => !k.GamePlayer.IsLoading).ToList())
         {
-            if (player.GamePlayer.IsLoading)
-                continue;
-
             UI.ClearWaitingForPlayersUI(player.GamePlayer);
             player.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(0);
             UI.ShowCountdownUI(player.GamePlayer);
@@ -92,16 +92,18 @@ public class KCGame : Game
             }
         }
 
+        Logging.Debug($"SENDING COUNTDOWN TO ALL PLAYERS FOR STARTING ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
         for (var seconds = Config.KC.FileData.StartSeconds; seconds >= 0; seconds--)
         {
             yield return new WaitForSeconds(1);
 
-            foreach (var player in Players)
+            foreach (var player in Players.ToList())
                 UI.SendCountdownSeconds(player.GamePlayer, seconds);
         }
 
         GamePhase = EGamePhase.STARTED;
-
+        UI.OnGameUpdated();
+        Logging.Debug($"SENDING KC HUD TO ALL PLAYERS ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
         foreach (var player in Players)
         {
             player.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1);
@@ -116,6 +118,7 @@ public class KCGame : Game
 
     public IEnumerator EndGame()
     {
+        Logging.Debug($"SENDING COUNTDOWN TO ALL PLAYERS FOR ENDING ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
         for (var seconds = Config.KC.FileData.EndSeconds; seconds >= 0; seconds--)
         {
             yield return new WaitForSeconds(1);
@@ -131,18 +134,21 @@ public class KCGame : Game
 
     public IEnumerator GameEnd(KCTeam wonTeam)
     {
+        Logging.Debug($"ENDING GAME ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
         GameEnder.Stop();
         GamePhase = EGamePhase.ENDING;
         UI.OnGameUpdated();
 
+        Logging.Debug($"GAME PHASE SET TO ENDING ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
         var endTime = DateTime.UtcNow;
         List<GamePlayer> roundEndCasesPlayers = new();
         List<(GamePlayer, Case)> roundEndCases = new();
         Dictionary<GamePlayer, MatchEndSummary> summaries = new();
 
+        Logging.Debug($"SETTING UP MATCH END SUMMARIES AND ROUND END CASES ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
         try
         {
-            foreach (var player in Players)
+            foreach (var player in Players.ToList())
             {
                 var totalMinutesPlayed = (int)(endTime - player.StartTime).TotalMinutes;
                 if (totalMinutesPlayed < Config.RoundEndCases.FileData.MinimumMinutesPlayed || player.Kills == 0)
@@ -172,7 +178,7 @@ public class KCGame : Game
                 DB.IncreasePlayerCase(roundEndCasePlayer.SteamID, @case.CaseID, 1);
             }
 
-            foreach (var player in Players)
+            foreach (var player in Players.ToList())
             {
                 UI.ClearKCHUD(player.GamePlayer);
                 UI.ClearMidgameLoadoutUI(player.GamePlayer);
@@ -222,9 +228,10 @@ public class KCGame : Game
 
         yield return new WaitForSeconds(5);
 
+        Logging.Debug($"SENDING LEADERBOARD TO PLAYERS AND SETTING UP ROUND END CASES ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
         try
         {
-            foreach (var player in Players)
+            foreach (var player in Players.ToList())
                 UI.ShowKCLeaderboard(player.GamePlayer);
 
             if (roundEndCases.Count > 0)
@@ -238,6 +245,7 @@ public class KCGame : Game
 
         yield return new WaitForSeconds(Config.Base.FileData.EndingLeaderboardSeconds - 3);
 
+        Logging.Debug($"SENDING WIDGET FLAG TO PLAYERS FOR 3S BEFORE TELEPORTATION ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
         try
         {
             foreach (var player in Players)
@@ -251,6 +259,7 @@ public class KCGame : Game
 
         yield return new WaitForSeconds(3);
 
+        Logging.Debug($"REMOVING PLAYERS FROM THE GAME AND TPING THEM OFF THE MAP ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
         try
         {
             foreach (var player in Players.ToList())
@@ -276,6 +285,7 @@ public class KCGame : Game
         RedTeam = null;
         
         var locations = Plugin.Instance.Game.AvailableLocations;
+        Logging.Debug($"RESTARTING THE GAME ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
         lock (locations)
         {
             var randomLocation = locations.Count > 0 ? locations[UnityEngine.Random.Range(0, locations.Count)] : Location.LocationID;
@@ -285,6 +295,9 @@ public class KCGame : Game
             Plugin.Instance.Game.EndGame(this);
             Plugin.Instance.Game.StartGame(location, gameMode.Item1, gameMode.Item2);
         }
+
+        Logging.Debug($"DESTROYING GAME ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
+        Destroy();
     }
 
     public override IEnumerator AddPlayerToGame(GamePlayer player)
@@ -372,17 +385,9 @@ public class KCGame : Game
         UI.ClearVoiceChatUI(player);
         UI.ClearKillstreakUI(player);
         OnStoppedTalking(player);
-
-        switch (GamePhase)
-        {
-            case EGamePhase.STARTING:
-                UI.ClearCountdownUI(player);
-                kPlayer.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1);
-                break;
-            case EGamePhase.WAITING_FOR_PLAYERS:
-                UI.ClearWaitingForPlayersUI(player);
-                break;
-        }
+        UI.ClearCountdownUI(player);
+        kPlayer.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1);
+        UI.ClearWaitingForPlayersUI(player);
 
         if (GamePhase != EGamePhase.ENDING)
         {
@@ -399,7 +404,7 @@ public class KCGame : Game
 
         UI.OnGameCountUpdated(this);
         
-        if (GamePhase != EGamePhase.ENDING)
+        if (GamePhase != EGamePhase.WAITING_FOR_PLAYERS)
             return;
         
         if (Players.Count == 0)
@@ -423,12 +428,6 @@ public class KCGame : Game
 
         if (cause == EDeathCause.SUICIDE)
         {
-            if (GamePhase == EGamePhase.ENDING || GamePhase == EGamePhase.STARTING)
-            {
-                TaskDispatcher.QueueOnMainThread(() => player.life.ServerRespawn(false));
-                return;
-            }
-
             RemovePlayerFromGame(vPlayer.GamePlayer);
             return;
         }

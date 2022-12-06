@@ -57,8 +57,8 @@ public class CTFPlayer
 
     public void Destroy()
     {
-        GamePlayer = null;
-        Team = null;
+        //GamePlayer = null;
+        //Team = null;
     }
 
     public void OnDeath(CSteamID killer)

@@ -105,7 +105,6 @@ public class GameManager
     public void EndGame(Game game)
     {
         Logging.Debug($"Ending game with location {game.Location.LocationName}");
-        game.Destroy();
         Logging.Debug($"Removing game and adding locations to available locations");
         _ = Games.Remove(game);
         if (AvailableLocations.Contains(game.Location.LocationID))

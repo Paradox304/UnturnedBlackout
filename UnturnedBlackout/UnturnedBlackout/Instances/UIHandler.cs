@@ -177,17 +177,18 @@ public class UIHandler
 
     public void Destroy()
     {
-        PlayerData = null;
-        PlayerLoadout = null;
-        Player = null;
-        TransportConnection = null;
-        
         TimerRefresher.Stop();
         AchievementPageShower.Stop();
         MatchEndSummaryShower.Stop();
         CrateUnboxer.Stop();
         StatsShower.Stop();
         ImageScroller.Stop();
+        
+        PlayerData = null;
+        PlayerLoadout = null;
+        Player = null;
+        TransportConnection = null;
+
     }
 
     public void BuildPages()

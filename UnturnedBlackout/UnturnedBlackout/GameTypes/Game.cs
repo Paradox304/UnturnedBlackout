@@ -147,14 +147,10 @@ public abstract class Game
     {
         if (!GameTurretsInverse.TryGetValue(drop, out var gPlayer))
             return;
-
-        Logging.Debug($"Drop found to be registered as a turret in the game by {gPlayer.Player.CharacterName}");
-
         _ = GameTurrets.Remove(gPlayer);
         _ = GameTurretsInverse.Remove(drop);
         if (GameTurretDamager.TryGetValue(drop, out var damager) && damager != null)
         {
-            Logging.Debug($"Turret damager coroutine not null, remove");
             damager.Stop();
         }
 
@@ -187,11 +183,9 @@ public abstract class Game
     public void OnTrapTriggered(GamePlayer player, BarricadeDrop drop)
     {
         var trapOwner = Plugin.Instance.Game.GetGamePlayer(new CSteamID(drop.GetServersideData().owner));
-        Logging.Debug($"Trap triggered by {player.Player.CharacterName}, owner is {trapOwner?.Player?.CharacterName ?? "None"}");
         if (trapOwner == null)
             return;
 
-        Logging.Debug("Trap owner is not null, adding trap owner to the player's last damager");
         if (player.LastDamager.Count > 0 && player.LastDamager.Peek() == trapOwner.SteamID)
             return;
 
@@ -264,7 +258,6 @@ public abstract class Game
 
     public void OnKill(GamePlayer killer, GamePlayer victim, ushort weaponID, string killerColor, string victimColor, bool isHeadshot, string overrideKFSymbol)
     {
-        Logging.Debug($"On Kill - killer: {killer.Player.CharacterName}, victim: {victim.Player.CharacterName}, weapon id: {weaponID}, killer color: {killerColor}, victim color: {victimColor}, is headshot: {isHeadshot}, override kf symbol: {overrideKFSymbol}");
         if (!Plugin.Instance.UI.KillFeedIcons.TryGetValue(weaponID, out var icon) && overrideKFSymbol == null)
             return;
 
@@ -373,14 +366,9 @@ public abstract class Game
         foreach (var region in ItemManager.regions)
             _ = region.items.RemoveAll(k => LevelNavigation.tryGetNavigation(k.point, out var nav) && nav == Location.NavMesh);
 
-        var stopWatch = new Stopwatch();
-        stopWatch.Start();
         BarricadeManager.BarricadeRegions.Cast<BarricadeRegion>().SelectMany(k => k.drops).Where(k => LevelNavigation.tryGetNavigation(k.model.transform.position, out var nav) && nav == Location.NavMesh)
             .Select(k => BarricadeManager.tryGetRegion(k.model.transform, out var x, out var y, out var plant, out var _) ? (k, x, y, plant) : (k, byte.MaxValue, byte.MaxValue, ushort.MaxValue)).ToList()
             .ForEach(k => BarricadeManager.destroyBarricade(k.k, k.Item2, k.Item3, k.Item4));
-
-        stopWatch.Stop();
-        Logging.Debug($"Clearing all barricades in a game, that one liner took {stopWatch.ElapsedTicks} ticks, {stopWatch.ElapsedMilliseconds}ms");
     }
 
     public abstract void ForceStartGame();

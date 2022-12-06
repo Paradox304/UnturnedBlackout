@@ -46,7 +46,7 @@ public class FFAPlayer
 
     public void Destroy()
     {
-        GamePlayer = null;
+        //GamePlayer = null;
     }
 
     public void OnDeath(CSteamID killer)

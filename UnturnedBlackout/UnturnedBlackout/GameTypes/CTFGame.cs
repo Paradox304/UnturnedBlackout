@@ -84,13 +84,14 @@ public class CTFGame : Game
 
     public IEnumerator StartGame()
     {
+        Logging.Debug($"STARTING GAME ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
         GameChecker.Stop();
         GamePhase = EGamePhase.STARTING;
-        foreach (var player in Players)
+        UI.OnGameUpdated();
+        Logging.Debug($"GAME PHASE SET TO STARTING ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
+        foreach (var player in Players.Where(k => !k.GamePlayer.IsLoading).ToList())
         {
-            if (player.GamePlayer.IsLoading)
-                continue;
-
+            Logging.Debug($"SPAWNING {player.GamePlayer.Player.CharacterName} ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
             UI.ClearWaitingForPlayersUI(player.GamePlayer);
             player.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(0);
             UI.ShowCountdownUI(player.GamePlayer);
@@ -104,25 +105,30 @@ public class CTFGame : Game
                 });
             }
         }
-
+        
+        Logging.Debug($"SENDING COUNTDOWN TO ALL PLAYERS FOR STARTING ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
         for (var seconds = Config.CTF.FileData.StartSeconds; seconds >= 0; seconds--)
         {
             yield return new WaitForSeconds(1);
 
-            foreach (var player in Players)
+            foreach (var player in Players.ToList())
                 UI.SendCountdownSeconds(player.GamePlayer, seconds);
         }
 
         GamePhase = EGamePhase.STARTED;
-        foreach (var player in Players)
+        UI.OnGameUpdated();
+        Logging.Debug($"GAME PHASE SET TO STARTED ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
+        foreach (var player in Players.ToList())
         {
             player.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1);
             player.StartTime = DateTime.UtcNow;
             UI.ClearCountdownUI(player.GamePlayer);
         }
 
+        Logging.Debug($"SENDING CTF HUD ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
         UI.SendCTFHUD(BlueTeam, RedTeam, Players);
 
+        Logging.Debug($"CLEARED MAP AND DROPPED THE FLAGS ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
         TaskDispatcher.QueueOnMainThread(() =>
         {
             CleanMap();
@@ -135,12 +141,13 @@ public class CTFGame : Game
 
     public IEnumerator EndGame()
     {
+        Logging.Debug($"SENDING COUNTDOWN TO ALL PLAYERS FOR ENDING ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
         for (var seconds = Config.CTF.FileData.EndSeconds; seconds >= 0; seconds--)
         {
             yield return new WaitForSeconds(1);
 
             var timeSpan = TimeSpan.FromSeconds(seconds);
-            foreach (var player in Players)
+            foreach (var player in Players.ToList())
                 UI.UpdateCTFTimer(player.GamePlayer, timeSpan.ToString(@"m\:ss"));
         }
 
@@ -150,18 +157,21 @@ public class CTFGame : Game
 
     public IEnumerator GameEnd(CTFTeam wonTeam)
     {
+        Logging.Debug($"ENDING GAME ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
         GameEnder.Stop();
         GamePhase = EGamePhase.ENDING;
         UI.OnGameUpdated();
 
+        Logging.Debug($"GAME PHASE SET TO ENDING ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
         var endTime = DateTime.UtcNow;
         List<GamePlayer> roundEndCasesPlayers = new();
         Dictionary<GamePlayer, MatchEndSummary> summaries = new();
         List<(GamePlayer, Case)> roundEndCases = new();
         
+        Logging.Debug($"SETTING UP MATCH END SUMMARIES AND ROUND END CASES ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
         try
         {
-            foreach (var player in Players)
+            foreach (var player in Players.ToList())
             {
                 var totalMinutesPlayed = (int)(endTime - player.StartTime).TotalMinutes;
                 if (totalMinutesPlayed < Config.RoundEndCases.FileData.MinimumMinutesPlayed || player.Kills == 0)
@@ -191,7 +201,7 @@ public class CTFGame : Game
                 DB.IncreasePlayerCase(roundEndCasePlayer.SteamID, @case.CaseID, 1);
             }
 
-            foreach (var player in Players)
+            foreach (var player in Players.ToList())
             {
                 UI.ClearCTFHUD(player.GamePlayer);
                 UI.ClearMidgameLoadoutUI(player.GamePlayer);
@@ -253,9 +263,10 @@ public class CTFGame : Game
 
         yield return new WaitForSeconds(5);
 
+        Logging.Debug($"SENDING LEADERBOARD TO PLAYERS AND SETTING UP ROUND END CASES ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
         try
         {
-            foreach (var player in Players)
+            foreach (var player in Players.ToList())
                 UI.ShowCTFLeaderboard(player.GamePlayer);
 
             if (roundEndCases.Count > 0)
@@ -269,9 +280,10 @@ public class CTFGame : Game
 
         yield return new WaitForSeconds(Config.Base.FileData.EndingLeaderboardSeconds - 3);
 
+        Logging.Debug($"SENDING WIDGET FLAG TO PLAYERS FOR 3S BEFORE TELEPORTATION ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
         try
         {
-            foreach (var player in Players)
+            foreach (var player in Players.ToList())
                 player.GamePlayer.Player.Player.enablePluginWidgetFlag(EPluginWidgetFlags.Modal);
         }
         catch (Exception ex)
@@ -282,6 +294,7 @@ public class CTFGame : Game
 
         yield return new WaitForSeconds(3);
 
+        Logging.Debug($"REMOVING PLAYERS FROM THE GAME AND TPING THEM OFF THE MAP ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
         try
         {
             foreach (var player in Players.ToList())
@@ -305,6 +318,7 @@ public class CTFGame : Game
         BlueTeam = null;
         RedTeam = null;
         
+        Logging.Debug($"RESTARTING GAME ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
         var locations = Plugin.Instance.Game.AvailableLocations;
         lock (locations)
         {
@@ -315,6 +329,9 @@ public class CTFGame : Game
             Plugin.Instance.Game.EndGame(this);
             Plugin.Instance.Game.StartGame(location, gameMode.Item1, gameMode.Item2);
         }
+
+        Logging.Debug($"DESTROYING GAME ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
+        Destroy();
     }
 
     public override IEnumerator AddPlayerToGame(GamePlayer player)
@@ -398,19 +415,10 @@ public class CTFGame : Game
         UI.ClearPreEndingUI(player);
         UI.ClearVoiceChatUI(player);
         UI.ClearKillstreakUI(player);
-
+        UI.ClearCountdownUI(player);
+        cPlayer.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1);
+        UI.ClearWaitingForPlayersUI(player);
         OnStoppedTalking(player);
-
-        switch (GamePhase)
-        {
-            case EGamePhase.STARTING:
-                UI.ClearCountdownUI(player);
-                cPlayer.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1);
-                break;
-            case EGamePhase.WAITING_FOR_PLAYERS:
-                UI.ClearWaitingForPlayersUI(player);
-                break;
-        }
 
         if (GamePhase != EGamePhase.ENDING)
         {
@@ -443,7 +451,7 @@ public class CTFGame : Game
 
         UI.OnGameCountUpdated(this);
         
-        if (GamePhase != EGamePhase.ENDING)
+        if (GamePhase != EGamePhase.WAITING_FOR_PLAYERS)
             return;
         
         if (Players.Count == 0)
@@ -467,12 +475,6 @@ public class CTFGame : Game
 
         if (cause == EDeathCause.SUICIDE)
         {
-            if (GamePhase == EGamePhase.ENDING || GamePhase == EGamePhase.STARTING)
-            {
-                TaskDispatcher.QueueOnMainThread(() => player.life.ServerRespawn(false));
-                return;
-            }
-            
             RemovePlayerFromGame(cPlayer.GamePlayer);
             return;
         }
