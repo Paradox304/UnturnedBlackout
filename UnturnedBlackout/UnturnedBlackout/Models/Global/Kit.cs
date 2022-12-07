@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace UnturnedBlackout.Models.Global;
 
+[Serializable]
 public class Kit
 {
     public List<ushort> ItemIDs { get; set; }

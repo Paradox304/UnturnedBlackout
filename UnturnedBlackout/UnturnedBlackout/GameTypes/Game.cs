@@ -8,6 +8,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using JetBrains.Annotations;
 using UnityEngine;
 using UnturnedBlackout.Database.Base;
 using UnturnedBlackout.Enums;
@@ -32,7 +33,7 @@ public abstract class Game
 
     public EGameType GameMode { get; set; }
     public ArenaLocation Location { get; set; }
-    public bool IsHardcore { get; set; }
+    [CanBeNull] public GameEvent GameEvent { get; set; }
 
     public EGamePhase GamePhase { get; set; }
 
@@ -49,11 +50,11 @@ public abstract class Game
     
     public Coroutine KillFeedChecker { get; set; }
 
-    public Game(EGameType gameMode, ArenaLocation location, bool isHardcore)
+    public Game(EGameType gameMode, ArenaLocation location, GameEvent gameEvent)
     {
         GameMode = gameMode;
         Location = location;
-        IsHardcore = isHardcore;
+        GameEvent = gameEvent;
         GamePhase = EGamePhase.WAITING_FOR_PLAYERS;
         Killfeed = new();
 

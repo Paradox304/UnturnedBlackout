@@ -34,7 +34,7 @@ public class TDMGame : Game
 
     public uint Frequency { get; set; }
 
-    public TDMGame(ArenaLocation location, bool isHardcore) : base(EGameType.TDM, location, isHardcore)
+    public TDMGame(ArenaLocation location, GameEvent gameEvent) : base(EGameType.TDM, location, gameEvent)
     {
         SpawnPoints = new();
         foreach (var spawnPoint in Plugin.Instance.Data.Data.TDMSpawnPoints.Where(k => k.LocationID == location.LocationID))
@@ -70,11 +70,11 @@ public class TDMGame : Game
 
     public IEnumerator StartGame()
     {
-        Logging.Debug($"STARTING GAME ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
+        Logging.Debug($"STARTING GAME ({Location.LocationName} {GameEvent?.EventName ?? ""}{GameMode})");
         TaskDispatcher.QueueOnMainThread(CleanMap);
         GamePhase = EGamePhase.STARTING;
         UI.OnGameUpdated();
-        Logging.Debug($"SETTING GAME PHASE TO STARTING ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
+        Logging.Debug($"SETTING GAME PHASE TO STARTING ({Location.LocationName} {GameEvent?.EventName ?? ""}{GameMode})");
         foreach (var player in Players.Where(k => !k.GamePlayer.IsLoading).ToList())
         {
             UI.ClearWaitingForPlayersUI(player.GamePlayer);
@@ -91,7 +91,7 @@ public class TDMGame : Game
             }
         }
 
-        Logging.Debug($"SENDING COUNTDOWN TO ALL PLAYERS FOR STARTING ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
+        Logging.Debug($"SENDING COUNTDOWN TO ALL PLAYERS FOR STARTING ({Location.LocationName} {GameEvent?.EventName ?? ""}{GameMode})");
         for (var seconds = Config.TDM.FileData.StartSeconds; seconds >= 0; seconds--)
         {
             yield return new WaitForSeconds(1);
@@ -103,7 +103,7 @@ public class TDMGame : Game
         GamePhase = EGamePhase.STARTED;
         UI.OnGameUpdated();
 
-        Logging.Debug($"GAME PHASE SET TO STARTED ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
+        Logging.Debug($"GAME PHASE SET TO STARTED ({Location.LocationName} {GameEvent?.EventName ?? ""}{GameMode})");
         foreach (var player in Players.ToList())
         {
             player.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1);
@@ -118,7 +118,7 @@ public class TDMGame : Game
 
     public IEnumerator EndGame()
     {
-        Logging.Debug($"SENDING COUNTDOWN TO ALL PLAYERS FOR ENDING ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
+        Logging.Debug($"SENDING COUNTDOWN TO ALL PLAYERS FOR ENDING ({Location.LocationName} {GameEvent?.EventName ?? ""}{GameMode})");
         for (var seconds = Config.TDM.FileData.EndSeconds; seconds >= 0; seconds--)
         {
             yield return new WaitForSeconds(1);
@@ -134,18 +134,18 @@ public class TDMGame : Game
 
     public IEnumerator GameEnd(TDMTeam wonTeam)
     {
-        Logging.Debug($"ENDING GAME ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
+        Logging.Debug($"ENDING GAME ({Location.LocationName} {GameEvent?.EventName ?? ""}{GameMode})");
         GameEnder.Stop();
         GamePhase = EGamePhase.ENDING;
         UI.OnGameUpdated();
 
-        Logging.Debug($"GAME PHASE SET TO ENDING ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
+        Logging.Debug($"GAME PHASE SET TO ENDING ({Location.LocationName} {GameEvent?.EventName ?? ""}{GameMode})");
         var endTime = DateTime.UtcNow;
         List<GamePlayer> roundEndCasesPlayers = new();
         List<(GamePlayer, Case)> roundEndCases = new();
         Dictionary<GamePlayer, MatchEndSummary> summaries = new();
 
-        Logging.Debug($"SETTING UP MATCH END SUMMARIES AND ROUND END CASES ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
+        Logging.Debug($"SETTING UP MATCH END SUMMARIES AND ROUND END CASES ({Location.LocationName} {GameEvent?.EventName ?? ""}{GameMode})");
         try
         {
             foreach (var player in Players.ToList())
@@ -211,7 +211,7 @@ public class TDMGame : Game
 
             TaskDispatcher.QueueOnMainThread(() =>
             {
-                UI.SetupTDMLeaderboard(Players, Location, wonTeam, BlueTeam, RedTeam, false, IsHardcore);
+                UI.SetupTDMLeaderboard(Players, wonTeam, BlueTeam, RedTeam, this);
                 CleanMap();
             });
         }
@@ -223,7 +223,7 @@ public class TDMGame : Game
 
         yield return new WaitForSeconds(5);
 
-        Logging.Debug($"SENDING LEADERBOARD AND SETTING UP ROUND END DROPS FOR PLAYERS ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
+        Logging.Debug($"SENDING LEADERBOARD AND SETTING UP ROUND END DROPS FOR PLAYERS ({Location.LocationName} {GameEvent?.EventName ?? ""}{GameMode})");
         try
         {
             foreach (var player in Players.ToList())
@@ -238,9 +238,9 @@ public class TDMGame : Game
             Logger.Log(ex);
         }
 
-        yield return new WaitForSeconds(Config.Base.FileData.EndingLeaderboardSeconds - 3);
+        yield return new WaitForSeconds(Config.Base.FileData.EndingLeaderboardSeconds - 1.5f);
 
-        Logging.Debug($"SENDING WIDGET FLAG FOR TO PLAYERS FOR 3S BEFORE TELEPORTATION ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
+        Logging.Debug($"SENDING WIDGET FLAG FOR TO PLAYERS FOR 3S BEFORE TELEPORTATION ({Location.LocationName} {GameEvent?.EventName ?? ""}{GameMode})");
         try
         {
             foreach (var player in Players)
@@ -252,9 +252,9 @@ public class TDMGame : Game
             Logger.Log(ex);
         }
 
-        yield return new WaitForSeconds(3);
+        yield return new WaitForSeconds(1.5f);
 
-        Logging.Debug($"REMOVING PLAYERS FROM THE GAME AND TPING THEM OFF THEM OFF THE MAP ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
+        Logging.Debug($"REMOVING PLAYERS FROM THE GAME AND TPING THEM OFF THEM OFF THE MAP ({Location.LocationName} {GameEvent?.EventName ?? ""}{GameMode})");
         try
         {
             foreach (var player in Players.ToList())
@@ -280,18 +280,18 @@ public class TDMGame : Game
         RedTeam = null;
         
         var locations = Plugin.Instance.Game.AvailableLocations;
-        Logging.Debug($"RESTARTING GAME ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
+        Logging.Debug($"RESTARTING GAME ({Location.LocationName} {GameEvent?.EventName ?? ""}{GameMode})");
         lock (locations)
         {
             var randomLocation = locations.Count > 0 ? locations[UnityEngine.Random.Range(0, locations.Count)] : Location.LocationID;
             var location = Config.Locations.FileData.ArenaLocations.FirstOrDefault(k => k.LocationID == randomLocation);
-            var gameMode = Plugin.Instance.Game.GetRandomGameMode(location.LocationID);
+            var gameSetup = Plugin.Instance.Game.GetRandomGameSetup(location);
             GamePhase = EGamePhase.ENDED;
             Plugin.Instance.Game.EndGame(this);
-            Plugin.Instance.Game.StartGame(location, gameMode.Item1, gameMode.Item2);
+            Plugin.Instance.Game.StartGame(location, gameSetup.Item1, gameSetup.Item2);
         }
 
-        Logging.Debug($"DESTROYING GAME ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
+        Logging.Debug($"DESTROYING GAME ({Location.LocationName} {GameEvent?.EventName ?? ""}{GameMode})");
         Destroy();
     }
 
@@ -358,7 +358,7 @@ public class TDMGame : Game
                 TDMTeam wonTeam;
                 wonTeam = BlueTeam.Score > RedTeam.Score ? BlueTeam : RedTeam.Score > BlueTeam.Score ? RedTeam : new(this, -1, true, new());
 
-                UI.SetupTDMLeaderboard(tPlayer, Players, Location, wonTeam, BlueTeam, RedTeam, true, IsHardcore);
+                UI.SetupTDMLeaderboard(tPlayer, Players, wonTeam, BlueTeam, RedTeam, this);
                 UI.ShowTDMLeaderboard(tPlayer.GamePlayer);
                 break;
             default:
@@ -685,7 +685,7 @@ public class TDMGame : Game
         if (player == null)
             return;
 
-        parameters.applyGlobalArmorMultiplier = IsHardcore;
+        parameters.applyGlobalArmorMultiplier = GameEvent?.IsHardcore ?? false;
         if (GamePhase != EGamePhase.STARTED)
         {
             shouldAllow = false;
@@ -974,7 +974,7 @@ public class TDMGame : Game
             
             gPlayer.HasScoreboard = true;
             var wonTeam = BlueTeam.Score > RedTeam.Score ? BlueTeam : RedTeam.Score > BlueTeam.Score ? RedTeam : new(this, -1, true, new());
-            UI.SetupTDMLeaderboard(player, Players, Location, wonTeam, BlueTeam, RedTeam, true, IsHardcore);
+            UI.SetupTDMLeaderboard(player, Players, wonTeam, BlueTeam, RedTeam, this);
             UI.ShowTDMLeaderboard(gPlayer);
         }
         else if (!state && gPlayer.HasScoreboard)

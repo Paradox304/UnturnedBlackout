@@ -997,17 +997,20 @@ public class UIManager
         EffectManager.sendUIEffectText(FFA_KEY, player.GamePlayer.TransportConnection, true, "2ndPlacementScore", secondPlayer != null ? secondPlayer.Kills.ToString() : "0");
     }
 
-    public void SetupFFALeaderboard(List<FFAPlayer> players, ArenaLocation location, bool isPlaying, bool isHardcore)
+    public void SetupFFALeaderboard(List<FFAPlayer> players, Game game)
     {
         foreach (var player in players)
-            SetupFFALeaderboard(player, players, location, isPlaying, isHardcore);
+            SetupFFALeaderboard(player, players, game);
     }
 
-    public void SetupFFALeaderboard(FFAPlayer ply, List<FFAPlayer> players, ArenaLocation location, bool isPlaying, bool isHardcore)
+    public void SetupFFALeaderboard(FFAPlayer ply, List<FFAPlayer> players, Game game)
     {
+        var location = game.Location;
+        var isPlaying = game.GamePhase != EGamePhase.ENDING;
+        
         EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, ply.GamePlayer.TransportConnection, true, "MatchResult1", Plugin.Instance.Translate(players.IndexOf(ply) == 0 ? isPlaying ? "Winning_Text" : "Victory_Text" : isPlaying ? "Losing_Text" : "Defeat_Text").ToRich());
         EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, ply.GamePlayer.TransportConnection, true, "MapName1", location.LocationName.ToUpper());
-        EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, ply.GamePlayer.TransportConnection, true, "GamemodeName1", (isHardcore ? "Hardcore " : "") + Plugin.Instance.Translate("FFA_Name_Full").ToRich());
+        EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, ply.GamePlayer.TransportConnection, true, "GamemodeName1", (game.GameEvent?.EventName ?? "") + Plugin.Instance.Translate("FFA_Name_Full").ToRich());
 
         for (var i = 0; i <= 9; i++)
             EffectManager.sendUIEffectVisibility(PRE_ENDING_UI_KEY, ply.GamePlayer.TransportConnection, true, $"PlayerStats{i}", false);
@@ -1082,14 +1085,17 @@ public class UIManager
         EffectManager.sendUIEffectText(TDM_KEY, player.GamePlayer.TransportConnection, true, $"{team.ToUIName()}BarFill{index}", spaces == 0 ? HAIRSPACE_SYMBOL_STRING : new(HAIRSPACE_SYMBOL_CHAR, spaces));
     }
 
-    public void SetupTDMLeaderboard(List<TDMPlayer> players, ArenaLocation location, TDMTeam wonTeam, TDMTeam blueTeam, TDMTeam redTeam, bool isPlaying, bool isHardcore)
+    public void SetupTDMLeaderboard(List<TDMPlayer> players, TDMTeam wonTeam, TDMTeam blueTeam, TDMTeam redTeam, Game game)
     {
         foreach (var player in players)
-            SetupTDMLeaderboard(player, players, location, wonTeam, blueTeam, redTeam, isPlaying, isHardcore);
+            SetupTDMLeaderboard(player, players, wonTeam, blueTeam, redTeam, game);
     }
 
-    public void SetupTDMLeaderboard(TDMPlayer player, List<TDMPlayer> players, ArenaLocation location, TDMTeam wonTeam, TDMTeam blueTeam, TDMTeam redTeam, bool isPlaying, bool isHardcore)
+    public void SetupTDMLeaderboard(TDMPlayer player, List<TDMPlayer> players, TDMTeam wonTeam, TDMTeam blueTeam, TDMTeam redTeam, Game game)
     {
+        var location = game.Location;
+        var isPlaying = game.GamePhase != EGamePhase.ENDING;
+        
         var bluePlayers = players.Where(k => k.Team.TeamID == (byte)ETeam.BLUE).ToList();
         var redPlayers = players.Where(k => k.Team.TeamID == (byte)ETeam.RED).ToList();
 
@@ -1100,7 +1106,7 @@ public class UIManager
         EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "TeamScoreR0", redTeam.Score.ToString());
         EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "TeamNameB0", blueTeam.Info.TeamName);
         EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "TeamScoreB0", blueTeam.Score.ToString());
-        EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "GamemodeName1", (isHardcore ? "Hardcore " : "") + Plugin.Instance.Translate("TDM_Name_Full").ToRich());
+        EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "GamemodeName1", (game.GameEvent?.EventName ?? "") + Plugin.Instance.Translate("TDM_Name_Full").ToRich());
 
         for (var i = 0; i <= 5; i++)
         {
@@ -1200,14 +1206,17 @@ public class UIManager
         EffectManager.sendUIEffectText(KC_KEY, player.GamePlayer.TransportConnection, true, $"{team.ToUIName()}BarFill{index}", spaces == 0 ? HAIRSPACE_SYMBOL_STRING : new(HAIRSPACE_SYMBOL_CHAR, spaces));
     }
 
-    public void SetupKCLeaderboard(List<KCPlayer> players, ArenaLocation location, KCTeam wonTeam, KCTeam blueTeam, KCTeam redTeam, bool isPlaying, bool isHardcore)
+    public void SetupKCLeaderboard(List<KCPlayer> players, KCTeam wonTeam, KCTeam blueTeam, KCTeam redTeam, Game game)
     {
         foreach (var player in players)
-            SetupKCLeaderboard(player, players, location, wonTeam, blueTeam, redTeam, isPlaying, isHardcore);
+            SetupKCLeaderboard(player, players, wonTeam, blueTeam, redTeam, game);
     }
 
-    public void SetupKCLeaderboard(KCPlayer player, List<KCPlayer> players, ArenaLocation location, KCTeam wonTeam, KCTeam blueTeam, KCTeam redTeam, bool isPlaying, bool isHardcore)
+    public void SetupKCLeaderboard(KCPlayer player, List<KCPlayer> players, KCTeam wonTeam, KCTeam blueTeam, KCTeam redTeam, Game game)
     {
+        var location = game.Location;
+        var isPlaying = game.GamePhase != EGamePhase.ENDING;
+        
         var bluePlayers = players.Where(k => k.Team.TeamID == (byte)ETeam.BLUE).ToList();
         var redPlayers = players.Where(k => k.Team.TeamID == (byte)ETeam.RED).ToList();
 
@@ -1218,7 +1227,7 @@ public class UIManager
         EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "TeamScoreR1", redTeam.Score.ToString());
         EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "TeamNameB1", blueTeam.Info.TeamName);
         EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "TeamScoreB1", blueTeam.Score.ToString());
-        EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "GamemodeName2", (isHardcore ? "Hardcore " : "") + Plugin.Instance.Translate("KC_Name_Full").ToRich());
+        EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "GamemodeName2", (game.GameEvent?.EventName ?? "") + Plugin.Instance.Translate("KC_Name_Full").ToRich());
 
         for (var i = 0; i <= 6; i++)
         {
@@ -1371,14 +1380,17 @@ public class UIManager
         }
     }
 
-    public void SetupCTFLeaderboard(List<CTFPlayer> players, ArenaLocation location, CTFTeam wonTeam, CTFTeam blueTeam, CTFTeam redTeam, bool isPlaying, bool isHardcore)
+    public void SetupCTFLeaderboard(List<CTFPlayer> players, CTFTeam wonTeam, CTFTeam blueTeam, CTFTeam redTeam, Game game)
     {
         foreach (var player in players)
-            SetupCTFLeaderboard(player, players, location, wonTeam, blueTeam, redTeam, isPlaying, isHardcore);
+            SetupCTFLeaderboard(player, players, wonTeam, blueTeam, redTeam, game);
     }
 
-    public void SetupCTFLeaderboard(CTFPlayer player, List<CTFPlayer> players, ArenaLocation location, CTFTeam wonTeam, CTFTeam blueTeam, CTFTeam redTeam, bool isPlaying, bool isHardcore)
+    public void SetupCTFLeaderboard(CTFPlayer player, List<CTFPlayer> players, CTFTeam wonTeam, CTFTeam blueTeam, CTFTeam redTeam, Game game)
     {
+        var location = game.Location;
+        var isPlaying = game.GamePhase != EGamePhase.ENDING;
+        
         var bluePlayers = players.Where(k => k.Team.TeamID == (byte)ETeam.BLUE).ToList();
         var redPlayers = players.Where(k => k.Team.TeamID == (byte)ETeam.RED).ToList();
 
@@ -1391,7 +1403,7 @@ public class UIManager
         EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "TeamScoreR1", redTeam.Score.ToString());
         EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "TeamNameB1", blueTeam.Info.TeamName);
         EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "TeamScoreB1", blueTeam.Score.ToString());
-        EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "GamemodeName2", (isHardcore ? "Hardcore " : "") + Plugin.Instance.Translate("CTF_Name_Full").ToRich());
+        EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "GamemodeName2", (game.GameEvent?.EventName ?? "") + Plugin.Instance.Translate("CTF_Name_Full").ToRich());
 
         for (var i = 0; i <= 9; i++)
         {
@@ -1828,14 +1840,14 @@ public class UIManager
                 handler.ReloadLoadout();
                 return;
             case "SERVER Item Buy BUTTON":
-                if ((DateTime.UtcNow - handler.LastButtonClicked).TotalSeconds < 1)
+                if ((DateTime.UtcNow - handler.LastButtonClicked).TotalSeconds < 0.5)
                     return;
 
                 handler.LastButtonClicked = DateTime.UtcNow;
                 handler.BuySelectedItem();
                 return;
             case "SERVER Item Unlock BUTTON":
-                if ((DateTime.UtcNow - handler.LastButtonClicked).TotalSeconds < 1)
+                if ((DateTime.UtcNow - handler.LastButtonClicked).TotalSeconds < 0.5)
                     return;
 
                 handler.LastButtonClicked = DateTime.UtcNow;

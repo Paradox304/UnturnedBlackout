@@ -320,6 +320,7 @@
         <Compile Include="Models\Bot\BotPrime.cs" />
         <Compile Include="Models\Configuration\BaseValuesConfig.cs" />
         <Compile Include="Models\Configuration\DefaultSkillsConfig.cs" />
+        <Compile Include="Models\Configuration\GameEventConfig.cs" />
         <Compile Include="Models\Configuration\GamemodeConfig.cs" />
         <Compile Include="Models\Configuration\IconsConfig.cs" />
         <Compile Include="Models\Configuration\KillFeedConfig.cs" />
@@ -344,6 +345,7 @@
         <Compile Include="Models\Feed\FeedIcon.cs" />
         <Compile Include="Models\FFA\FFAConfig.cs" />
         <Compile Include="Models\Global\DefaultSkill.cs" />
+        <Compile Include="Models\Global\GameEvent.cs" />
         <Compile Include="Models\Global\GamemodeOption.cs" />
         <Compile Include="Models\Global\LoadoutAmount.cs" />
         <Compile Include="Models\Global\Kit.cs" />
@@ -359,7 +361,6 @@
         <Compile Include="Models\TDM\TDMConfig.cs" />
         <Compile Include="Models\TDM\TDMPlayer.cs" />
         <Compile Include="Models\Global\TeamInfo.cs" />
-        <Compile Include="Models\Global\VoteChoice.cs" />
         <Compile Include="Models\UI\PageAchievement.cs" />
         <Compile Include="Models\UI\PageAttachment.cs" />
         <Compile Include="Models\UI\PageBattlepass.cs" />

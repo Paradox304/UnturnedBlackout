@@ -1,5 +1,8 @@
-﻿namespace UnturnedBlackout.Models.Global;
+﻿using System;
 
+namespace UnturnedBlackout.Models.Global;
+
+[Serializable]
 public class TeamGlove
 {
     public int GloveID { get; set; }

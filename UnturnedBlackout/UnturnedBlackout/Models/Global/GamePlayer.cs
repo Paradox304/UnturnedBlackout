@@ -331,6 +331,7 @@ public class GamePlayer
     // Death screen
     public void OnDeath(CSteamID killer, int respawnSeconds)
     {
+        LastXPPopup = LastXPPopup.Subtract(TimeSpan.FromSeconds(30));
         if (HasKillstreakActive)
             RemoveActiveKillstreak();
 

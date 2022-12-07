@@ -1,7 +1,9 @@
-﻿using UnturnedBlackout.Enums;
+﻿using System;
+using UnturnedBlackout.Enums;
 
 namespace UnturnedBlackout.Models.Global;
 
+[Serializable]
 public class ArenaLocation
 {
     public int LocationID { get; set; }

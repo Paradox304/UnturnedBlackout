@@ -31,7 +31,7 @@ public class FFAGame : Game
 
     public uint Frequency { get; set; }
 
-    public FFAGame(ArenaLocation location, bool isHardcore) : base(EGameType.FFA, location, isHardcore)
+    public FFAGame(ArenaLocation location, GameEvent gameEvent) : base(EGameType.FFA, location, gameEvent)
     {
         SpawnPoints = Plugin.Instance.Data.Data.FFASpawnPoints.Where(k => k.LocationID == location.LocationID).ToList();
         Players = new();
@@ -53,11 +53,11 @@ public class FFAGame : Game
 
     public IEnumerator StartGame()
     {
-        Logging.Debug($"STARTING GAME ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
+        Logging.Debug($"STARTING GAME ({Location.LocationName} {GameEvent?.EventName ?? ""}{GameMode})");
         TaskDispatcher.QueueOnMainThread(CleanMap);
         GamePhase = EGamePhase.STARTING;
         UI.OnGameUpdated();
-        Logging.Debug($"GAME PHASE SET TO STARTING ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
+        Logging.Debug($"GAME PHASE SET TO STARTING ({Location.LocationName} {GameEvent?.EventName ?? ""}{GameMode})");
         foreach (var player in Players.Where(k => !k.GamePlayer.IsLoading).ToList())
         {
             UI.ClearWaitingForPlayersUI(player.GamePlayer);
@@ -74,7 +74,7 @@ public class FFAGame : Game
             }
         }
 
-        Logging.Debug($"SENDING COUNTDOWN TO ALL PLAYERS FOR STARTING ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
+        Logging.Debug($"SENDING COUNTDOWN TO ALL PLAYERS FOR STARTING ({Location.LocationName} {GameEvent?.EventName ?? ""}{GameMode})");
         for (var seconds = Config.FFA.FileData.StartSeconds; seconds >= 0; seconds--)
         {
             yield return new WaitForSeconds(1);
@@ -85,7 +85,7 @@ public class FFAGame : Game
 
         GamePhase = EGamePhase.STARTED;
         UI.OnGameUpdated();
-        Logging.Debug($"GAME PHASE SET TO STARTED ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
+        Logging.Debug($"GAME PHASE SET TO STARTED ({Location.LocationName} {GameEvent?.EventName ?? ""}{GameMode})");
         foreach (var player in Players.ToList())
         {
             player.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1);
@@ -101,7 +101,7 @@ public class FFAGame : Game
 
     public IEnumerator EndGame()
     {
-        Logging.Debug($"SENDING COUNTDOWN TO ALL PLAYERS FOR ENDING ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
+        Logging.Debug($"SENDING COUNTDOWN TO ALL PLAYERS FOR ENDING ({Location.LocationName} {GameEvent?.EventName ?? ""}{GameMode})");
         for (var seconds = Config.FFA.FileData.EndSeconds; seconds >= 0; seconds--)
         {
             yield return new WaitForSeconds(1);
@@ -116,18 +116,18 @@ public class FFAGame : Game
 
     public IEnumerator GameEnd()
     {
-        Logging.Debug($"ENDING GAME ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
+        Logging.Debug($"ENDING GAME ({Location.LocationName} {GameEvent?.EventName ?? ""}{GameMode})");
         GameEnder.Stop();
         GamePhase = EGamePhase.ENDING;
         UI.OnGameUpdated();
-        Logging.Debug($"GAME PHASE SET TO ENDING ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
+        Logging.Debug($"GAME PHASE SET TO ENDING ({Location.LocationName} {GameEvent?.EventName ?? ""}{GameMode})");
         
         Dictionary<GamePlayer, MatchEndSummary> summaries = new();
         var endTime = DateTime.UtcNow;
         List<GamePlayer> roundEndCasesPlayers = new();
         List<(GamePlayer, Case)> roundEndCases = new();
 
-        Logging.Debug($"SETTING UP MATCH END SUMMARIES AND ROUND END CASES ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
+        Logging.Debug($"SETTING UP MATCH END SUMMARIES AND ROUND END CASES ({Location.LocationName} {GameEvent?.EventName ?? ""}{GameMode})");
         try
         {
             foreach (var player in Players.ToList())
@@ -192,7 +192,7 @@ public class FFAGame : Game
 
             TaskDispatcher.QueueOnMainThread(() =>
             {
-                UI.SetupFFALeaderboard(Players, Location, false, IsHardcore);
+                UI.SetupFFALeaderboard(Players, this);
                 CleanMap();
             });
         }
@@ -204,7 +204,7 @@ public class FFAGame : Game
 
         yield return new WaitForSeconds(5);
 
-        Logging.Debug($"SENDING LEADERBOARD TO PLAYERS AND ROUND END CASES ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
+        Logging.Debug($"SENDING LEADERBOARD TO PLAYERS AND ROUND END CASES ({Location.LocationName} {GameEvent?.EventName ?? ""}{GameMode})");
         try
         {
             foreach (var player in Players.ToList())
@@ -219,9 +219,9 @@ public class FFAGame : Game
             Logger.Log(ex);
         }
 
-        yield return new WaitForSeconds(Config.Base.FileData.EndingLeaderboardSeconds - 3);
+        yield return new WaitForSeconds(Config.Base.FileData.EndingLeaderboardSeconds - 1.5f);
 
-        Logging.Debug($"SENDING WIDGET FLAG TO PLAYERS 3S BEFORE TELEPORTATION ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
+        Logging.Debug($"SENDING WIDGET FLAG TO PLAYERS 3S BEFORE TELEPORTATION ({Location.LocationName} {GameEvent?.EventName ?? ""}{GameMode})");
         try
         {
             foreach (var player in Players.ToList())
@@ -233,9 +233,9 @@ public class FFAGame : Game
             Logger.Log(ex);
         }
 
-        yield return new WaitForSeconds(3);
+        yield return new WaitForSeconds(1.5f);
 
-        Logging.Debug($"REMOVING PLAYERS FROM GAME AND TPING THEM OFF THE MAP ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
+        Logging.Debug($"REMOVING PLAYERS FROM GAME AND TPING THEM OFF THE MAP ({Location.LocationName} {GameEvent?.EventName ?? ""}{GameMode})");
         try
         {
             foreach (var player in Players.ToList())
@@ -255,18 +255,18 @@ public class FFAGame : Game
         PlayersLookup.Clear();
 
         var locations = Plugin.Instance.Game.AvailableLocations;
-        Logging.Debug($"RESTARTING GAME ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
+        Logging.Debug($"RESTARTING GAME ({Location.LocationName} {GameEvent?.EventName ?? ""}{GameMode})");
         lock (locations)
         {
             var randomLocation = locations.Count > 0 ? locations[UnityEngine.Random.Range(0, locations.Count)] : Location.LocationID;
             var location = Config.Locations.FileData.ArenaLocations.FirstOrDefault(k => k.LocationID == randomLocation);
-            var gameMode = Plugin.Instance.Game.GetRandomGameMode(location.LocationID);
+            var gameSetup = Plugin.Instance.Game.GetRandomGameSetup(location);
             GamePhase = EGamePhase.ENDED;
             Plugin.Instance.Game.EndGame(this);
-            Plugin.Instance.Game.StartGame(location, gameMode.Item1, gameMode.Item2);
+            Plugin.Instance.Game.StartGame(location, gameSetup.Item1, gameSetup.Item2);
         }
 
-        Logging.Debug($"DESTROYING GAME ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
+        Logging.Debug($"DESTROYING GAME ({Location.LocationName} {GameEvent?.EventName ?? ""}{GameMode})");
         Destroy();
     }
 
@@ -325,7 +325,7 @@ public class FFAGame : Game
                 SpawnPlayer(fPlayer);
                 break;
             case EGamePhase.ENDING:
-                UI.SetupFFALeaderboard(fPlayer, Players, Location, true, IsHardcore);
+                UI.SetupFFALeaderboard(fPlayer, Players, this);
                 UI.ShowFFALeaderboard(fPlayer.GamePlayer);
                 break;
             default:
@@ -658,7 +658,7 @@ public class FFAGame : Game
         if (player == null)
             return;
 
-        parameters.applyGlobalArmorMultiplier = IsHardcore;
+        parameters.applyGlobalArmorMultiplier = GameEvent?.IsHardcore ?? false;
         if (GamePhase != EGamePhase.STARTED)
         {
             shouldAllow = false;
@@ -916,7 +916,7 @@ public class FFAGame : Game
                 return;
             
             gPlayer.HasScoreboard = true;
-            UI.SetupFFALeaderboard(player, Players, Location, true, IsHardcore);
+            UI.SetupFFALeaderboard(player, Players, this);
             UI.ShowFFALeaderboard(gPlayer);
         }
         else if (!state && gPlayer.HasScoreboard)

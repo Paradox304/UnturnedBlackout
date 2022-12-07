@@ -27,7 +27,7 @@ public class ConfigManager
     public XmlFileReader<IconsConfig> Icons { get; set; }
     public XmlFileReader<KillstreakConfig> Killstreaks { get; set; }
     public XmlFileReader<WebhooksConfig> Webhooks { get; set; }
-    
+    public XmlFileReader<GameEventConfig> Events { get; set; }
     public ConfigManager()
     {
         var configInstance = Plugin.Instance.Configuration.Instance;
@@ -50,5 +50,6 @@ public class ConfigManager
         Icons = new(Plugin.Instance.Directory + "/LocalStorage/Configuration.Icons.xml", configInstance.URL + "Configuration.Icons.xml");
         Killstreaks = new(Plugin.Instance.Directory + "/LocalStorage/Configuration.Killstreaks.xml", configInstance.URL + "Configuration.Killstreaks.xml");
         Webhooks = new(Plugin.Instance.Directory + "/LocalStorage/Configuration.Webhooks.xml", configInstance.URL + "Configuration.Webhooks.xml");
+        Webhooks = new(Plugin.Instance.Directory + "/LocalStorage/Configuration.Events.xml", configInstance.URL + "Configuration.Events.xml");
     }
 }

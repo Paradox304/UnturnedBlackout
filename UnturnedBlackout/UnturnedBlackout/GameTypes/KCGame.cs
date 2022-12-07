@@ -35,7 +35,7 @@ public class KCGame : Game
 
     public uint Frequency { get; set; }
 
-    public KCGame(ArenaLocation location, bool isHardcore) : base(EGameType.KC, location, isHardcore)
+    public KCGame(ArenaLocation location, GameEvent gameEvent) : base(EGameType.KC, location, gameEvent)
     {
         SpawnPoints = new();
         foreach (var spawnPoint in Plugin.Instance.Data.Data.TDMSpawnPoints.Where(k => k.LocationID == location.LocationID))
@@ -71,11 +71,11 @@ public class KCGame : Game
 
     public IEnumerator StartGame()
     {
-        Logging.Debug($"STARTING GAME ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
+        Logging.Debug($"STARTING GAME ({Location.LocationName} {GameEvent?.EventName ?? ""}{GameMode})");
         TaskDispatcher.QueueOnMainThread(() => CleanMap());
         GamePhase = EGamePhase.STARTING;
         UI.OnGameUpdated();
-        Logging.Debug($"GAME PHASE SET TO STARTING ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
+        Logging.Debug($"GAME PHASE SET TO STARTING ({Location.LocationName} {GameEvent?.EventName ?? ""}{GameMode})");
         foreach (var player in Players.Where(k => !k.GamePlayer.IsLoading).ToList())
         {
             UI.ClearWaitingForPlayersUI(player.GamePlayer);
@@ -92,7 +92,7 @@ public class KCGame : Game
             }
         }
 
-        Logging.Debug($"SENDING COUNTDOWN TO ALL PLAYERS FOR STARTING ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
+        Logging.Debug($"SENDING COUNTDOWN TO ALL PLAYERS FOR STARTING ({Location.LocationName} {GameEvent?.EventName ?? ""}{GameMode})");
         for (var seconds = Config.KC.FileData.StartSeconds; seconds >= 0; seconds--)
         {
             yield return new WaitForSeconds(1);
@@ -103,7 +103,7 @@ public class KCGame : Game
 
         GamePhase = EGamePhase.STARTED;
         UI.OnGameUpdated();
-        Logging.Debug($"SENDING KC HUD TO ALL PLAYERS ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
+        Logging.Debug($"SENDING KC HUD TO ALL PLAYERS ({Location.LocationName} {GameEvent?.EventName ?? ""}{GameMode})");
         foreach (var player in Players)
         {
             player.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1);
@@ -118,7 +118,7 @@ public class KCGame : Game
 
     public IEnumerator EndGame()
     {
-        Logging.Debug($"SENDING COUNTDOWN TO ALL PLAYERS FOR ENDING ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
+        Logging.Debug($"SENDING COUNTDOWN TO ALL PLAYERS FOR ENDING ({Location.LocationName} {GameEvent?.EventName ?? ""}{GameMode})");
         for (var seconds = Config.KC.FileData.EndSeconds; seconds >= 0; seconds--)
         {
             yield return new WaitForSeconds(1);
@@ -134,18 +134,18 @@ public class KCGame : Game
 
     public IEnumerator GameEnd(KCTeam wonTeam)
     {
-        Logging.Debug($"ENDING GAME ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
+        Logging.Debug($"ENDING GAME ({Location.LocationName} {GameEvent?.EventName ?? ""}{GameMode})");
         GameEnder.Stop();
         GamePhase = EGamePhase.ENDING;
         UI.OnGameUpdated();
 
-        Logging.Debug($"GAME PHASE SET TO ENDING ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
+        Logging.Debug($"GAME PHASE SET TO ENDING ({Location.LocationName} {GameEvent?.EventName ?? ""}{GameMode})");
         var endTime = DateTime.UtcNow;
         List<GamePlayer> roundEndCasesPlayers = new();
         List<(GamePlayer, Case)> roundEndCases = new();
         Dictionary<GamePlayer, MatchEndSummary> summaries = new();
 
-        Logging.Debug($"SETTING UP MATCH END SUMMARIES AND ROUND END CASES ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
+        Logging.Debug($"SETTING UP MATCH END SUMMARIES AND ROUND END CASES ({Location.LocationName} {GameEvent?.EventName ?? ""}{GameMode})");
         try
         {
             foreach (var player in Players.ToList())
@@ -216,7 +216,7 @@ public class KCGame : Game
 
             TaskDispatcher.QueueOnMainThread(() =>
             {
-                UI.SetupKCLeaderboard(Players, Location, wonTeam, BlueTeam, RedTeam, false, IsHardcore);
+                UI.SetupKCLeaderboard(Players, wonTeam, BlueTeam, RedTeam, this);
                 CleanMap();
             });
         }
@@ -228,7 +228,7 @@ public class KCGame : Game
 
         yield return new WaitForSeconds(5);
 
-        Logging.Debug($"SENDING LEADERBOARD TO PLAYERS AND SETTING UP ROUND END CASES ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
+        Logging.Debug($"SENDING LEADERBOARD TO PLAYERS AND SETTING UP ROUND END CASES ({Location.LocationName} {GameEvent?.EventName ?? ""}{GameMode})");
         try
         {
             foreach (var player in Players.ToList())
@@ -243,9 +243,9 @@ public class KCGame : Game
             Logger.Log(ex);
         }
 
-        yield return new WaitForSeconds(Config.Base.FileData.EndingLeaderboardSeconds - 3);
+        yield return new WaitForSeconds(Config.Base.FileData.EndingLeaderboardSeconds - 1.5f);
 
-        Logging.Debug($"SENDING WIDGET FLAG TO PLAYERS FOR 3S BEFORE TELEPORTATION ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
+        Logging.Debug($"SENDING WIDGET FLAG TO PLAYERS FOR 3S BEFORE TELEPORTATION ({Location.LocationName} {GameEvent?.EventName ?? ""}{GameMode})");
         try
         {
             foreach (var player in Players)
@@ -257,9 +257,9 @@ public class KCGame : Game
             Logger.Log(ex);
         }
 
-        yield return new WaitForSeconds(3);
+        yield return new WaitForSeconds(1.5f);
 
-        Logging.Debug($"REMOVING PLAYERS FROM THE GAME AND TPING THEM OFF THE MAP ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
+        Logging.Debug($"REMOVING PLAYERS FROM THE GAME AND TPING THEM OFF THE MAP ({Location.LocationName} {GameEvent?.EventName ?? ""}{GameMode})");
         try
         {
             foreach (var player in Players.ToList())
@@ -285,18 +285,18 @@ public class KCGame : Game
         RedTeam = null;
         
         var locations = Plugin.Instance.Game.AvailableLocations;
-        Logging.Debug($"RESTARTING THE GAME ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
+        Logging.Debug($"RESTARTING THE GAME ({Location.LocationName} {GameEvent?.EventName ?? ""}{GameMode})");
         lock (locations)
         {
             var randomLocation = locations.Count > 0 ? locations[UnityEngine.Random.Range(0, locations.Count)] : Location.LocationID;
             var location = Config.Locations.FileData.ArenaLocations.FirstOrDefault(k => k.LocationID == randomLocation);
-            var gameMode = Plugin.Instance.Game.GetRandomGameMode(location.LocationID);
+            var gameSetup = Plugin.Instance.Game.GetRandomGameSetup(location);
             GamePhase = EGamePhase.ENDED;
             Plugin.Instance.Game.EndGame(this);
-            Plugin.Instance.Game.StartGame(location, gameMode.Item1, gameMode.Item2);
+            Plugin.Instance.Game.StartGame(location, gameSetup.Item1, gameSetup.Item2);
         }
 
-        Logging.Debug($"DESTROYING GAME ({Location.LocationName} {(IsHardcore ? "Hardcore " : "")}{GameMode})");
+        Logging.Debug($"DESTROYING GAME ({Location.LocationName} {GameEvent?.EventName ?? ""}{GameMode})");
         Destroy();
     }
 
@@ -364,7 +364,7 @@ public class KCGame : Game
                 KCTeam wonTeam;
                 wonTeam = BlueTeam.Score > RedTeam.Score ? BlueTeam : RedTeam.Score > BlueTeam.Score ? RedTeam : new(this, -1, true, 0, new());
 
-                UI.SetupKCLeaderboard(kPlayer, Players, Location, wonTeam, BlueTeam, RedTeam, true, IsHardcore);
+                UI.SetupKCLeaderboard(kPlayer, Players, wonTeam, BlueTeam, RedTeam, this);
                 UI.ShowKCLeaderboard(kPlayer.GamePlayer);
                 break;
             default:
@@ -694,7 +694,7 @@ public class KCGame : Game
         if (player == null)
             return;
 
-        parameters.applyGlobalArmorMultiplier = IsHardcore;
+        parameters.applyGlobalArmorMultiplier = GameEvent?.IsHardcore ?? false;
         if (GamePhase != EGamePhase.STARTED)
         {
             shouldAllow = false;
@@ -1055,7 +1055,7 @@ public class KCGame : Game
             
             gPlayer.HasScoreboard = true;
             var wonTeam = BlueTeam.Score > RedTeam.Score ? BlueTeam : RedTeam.Score > BlueTeam.Score ? RedTeam : new(this, -1, true, 0, new());
-            UI.SetupKCLeaderboard(player, Players, Location, wonTeam, BlueTeam, RedTeam, true, IsHardcore);
+            UI.SetupKCLeaderboard(player, Players, wonTeam, BlueTeam, RedTeam, this);
             UI.ShowKCLeaderboard(gPlayer);
         }
         else if (!state && gPlayer.HasScoreboard)

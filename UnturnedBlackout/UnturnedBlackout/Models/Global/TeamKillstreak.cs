@@ -1,7 +1,9 @@
-﻿using JetBrains.Annotations;
+﻿using System;
+using JetBrains.Annotations;
 
 namespace UnturnedBlackout.Models.Global;
 
+[Serializable]
 public class TeamKillstreak
 {
     public int KillstreakID { get; set; }

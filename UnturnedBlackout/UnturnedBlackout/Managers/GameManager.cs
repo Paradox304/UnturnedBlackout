@@ -44,7 +44,7 @@ public class GameManager
         GameChecker = Plugin.Instance.StartCoroutine(CheckGames());
     }
 
-    public void StartGames()
+    private void StartGames()
     {
         Logging.Debug("Starting games");
         for (var i = 1; i <= Config.Base.FileData.MinGamesCount; i++)
@@ -52,13 +52,19 @@ public class GameManager
             Logging.Debug($"{AvailableLocations.Count} locations available");
             var locationID = AvailableLocations[UnityEngine.Random.Range(0, AvailableLocations.Count)];
             var location = Config.Locations.FileData.ArenaLocations.FirstOrDefault(k => k.LocationID == locationID);
-            var gameMode = GetRandomGameMode(locationID);
-            Logging.Debug($"Found Location: {location.LocationName}, GameMode: {gameMode.Item1}, IsHardcore: {gameMode.Item2}");
-            StartGame(location, gameMode.Item1, gameMode.Item2, false);
+            if (location == null)
+            {
+                Logging.Debug($"Error finding a free location, returning");
+                return;
+            }
+
+            var gameSetup = GetRandomGameSetup(location);
+            Logging.Debug($"Found Location: {location.LocationName}, GameMode: {gameSetup.Item1}, Event: {gameSetup.Item2?.EventName ?? "None"}");
+            StartGame(location, gameSetup.Item1, gameSetup.Item2, false);
         }
     }
 
-    public void StartGame(ArenaLocation location, EGameType gameMode, bool isHardcore, bool forceCheck = true)
+    public void StartGame(ArenaLocation location, EGameType gameMode, GameEvent gameEvent, bool forceCheck = true)
     {
         Logging.Debug($"Starting game");
         if (forceCheck)
@@ -79,16 +85,16 @@ public class GameManager
         switch (gameMode)
         {
             case EGameType.FFA:
-                game = new FFAGame(location, isHardcore);
+                game = new FFAGame(location, gameEvent);
                 break;
             case EGameType.TDM:
-                game = new TDMGame(location, isHardcore);
+                game = new TDMGame(location, gameEvent);
                 break;
             case EGameType.KC:
-                game = new KCGame(location, isHardcore);
+                game = new KCGame(location, gameEvent);
                 break;
             case EGameType.CTF:
-                game = new CTFGame(location, isHardcore);
+                game = new CTFGame(location, gameEvent);
                 break;
         }
 
@@ -287,32 +293,44 @@ public class GameManager
             Plugin.Instance.UI.ShowMenuUI(player, summary);
     }
 
-    public (EGameType, bool) GetRandomGameMode(int locationID)
+    public (EGameType, GameEvent) GetRandomGameSetup(ArenaLocation location)
     {
-        Logging.Debug($"Getting list of random gamemodes for location with id {locationID}");
-        var gameModeOptions = Config.Gamemode.FileData.GamemodeOptions.Where(k => !k.IgnoredLocations.Contains(locationID)).ToList();
+        Logging.Debug($"Getting list of random gamemodes for location {location.LocationName}");
+        var gameModeOptions = Config.Gamemode.FileData.GamemodeOptions.Where(k => !k.IgnoredLocations.Contains(location.LocationID)).ToList();
         Logging.Debug($"Found {gameModeOptions.Count} gamemode options to choose from");
         var option = CalculateRandomGameMode(gameModeOptions);
-        Logging.Debug($"Found gamemode with name {option.GameType}");
-        var isHardcore = option.HasHardcore && UnityEngine.Random.Range(0, 100) <= option.HardcoreChance;
-        Logging.Debug($"hardcore: {isHardcore}");
-        return (option.GameType, isHardcore);
+        Logging.Debug($"Getting list of random events for location {location.LocationName}");
+        var events = Config.Events.FileData.GameEvents.Where(k => !k.IgnoredLocations.Contains(location.LocationID) && !k.IgnoredGameModes.Contains(option.GameType)).ToList();
+        Logging.Debug($"Found {events.Count} events to choose from");
+        var @event = UnityEngine.Random.Range(1, 101) <= option.EventChance ? CalculateRandomGameEvent(events) : null;
+        return (option.GameType, @event);
     }
 
-    public GamemodeOption CalculateRandomGameMode(List<GamemodeOption> options)
+    private GameEvent CalculateRandomGameEvent(List<GameEvent> events)
     {
-        var poolSize = 0;
-        foreach (var option in options)
-            poolSize += option.GamemodeWeight;
-
+        var poolSize = events.Sum(k => k.EventWeight);
         var randInt = UnityEngine.Random.Range(0, poolSize) + 1;
-
         var accumulatedProbability = 0;
-        for (var i = 0; i < options.Count; i++)
+        foreach (var @event in events)
         {
-            accumulatedProbability += options[i].GamemodeWeight;
+            accumulatedProbability += @event.EventWeight;
             if (randInt <= accumulatedProbability)
-                return options[i];
+                return @event;
+        }
+
+        return events[UnityEngine.Random.Range(0, events.Count)];
+    }
+    
+    private GamemodeOption CalculateRandomGameMode(List<GamemodeOption> options)
+    {
+        var poolSize = options.Sum(option => option.GamemodeWeight);
+        var randInt = UnityEngine.Random.Range(0, poolSize) + 1;
+        var accumulatedProbability = 0;
+        foreach (var option in options)
+        {
+            accumulatedProbability += option.GamemodeWeight;
+            if (randInt <= accumulatedProbability)
+                return option;
         }
 
         return options[UnityEngine.Random.Range(0, options.Count)];
@@ -372,9 +390,9 @@ public class GameManager
                         continue;
                     }
                 
-                    var gameMode = GetRandomGameMode(locationID);
-                    Logging.Debug($"Found Location: {location.LocationName}, GameMode: {gameMode.Item1}, IsHardcore: {gameMode.Item2}");
-                    StartGame(location, gameMode.Item1, gameMode.Item2, false);
+                    var gameSetup = GetRandomGameSetup(location);
+                    Logging.Debug($"Found Location: {location.LocationName}, GameMode: {gameSetup.Item1}, Event: {gameSetup.Item2?.EventName ?? "None"}");
+                    StartGame(location, gameSetup.Item1, gameSetup.Item2, false);
                 }
             }
             catch (Exception ex)

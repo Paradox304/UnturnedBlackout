@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace UnturnedBlackout.Models.Global;
 
+[Serializable]
 public class TeamInfo
 {
     public int TeamID { get; set; }
