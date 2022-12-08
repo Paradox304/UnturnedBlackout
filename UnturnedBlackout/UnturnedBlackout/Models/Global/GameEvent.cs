@@ -23,6 +23,7 @@ public class GameEvent
     
     public bool AllowPrimary { get; set; }
     public bool AllowSecondary { get; set; }
+    public bool KnifeDoesDamage { get; set; }
     public bool AllowKillstreaks { get; set; }
     public bool AllowTactical { get; set; }
     public bool AllowLethal { get; set; }

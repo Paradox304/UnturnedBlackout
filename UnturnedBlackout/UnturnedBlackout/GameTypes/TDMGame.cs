@@ -719,12 +719,12 @@ public class TDMGame : Game
         }
 
         parameters.damage -= (player.GamePlayer.ActiveLoadout.PerksSearchByType.TryGetValue(damageReducePerkName, out var damageReducerPerk) && (GameEvent?.AllowPerks ?? true) ? (float)damageReducerPerk.Perk.SkillLevel / 100 : 0f) * parameters.damage;
-
-        player.GamePlayer.OnDamaged(parameters.killer);
-
         var kPlayer = GetTDMPlayer(parameters.killer);
         if (kPlayer == null)
+        {
+            player.GamePlayer.OnDamaged(parameters.killer);
             return;
+        }
 
         if (kPlayer.Team == player.Team && kPlayer != player)
         {
@@ -733,8 +733,14 @@ public class TDMGame : Game
             return;
         }
 
+        if (parameters.cause == EDeathCause.MELEE && !(GameEvent?.KnifeDoesDamage ?? true))
+        {
+            shouldAllow = false;
+            return;
+        }
+        
+        player.GamePlayer.OnDamaged(parameters.killer);
         parameters.damage += (kPlayer.GamePlayer.ActiveLoadout.PerksSearchByType.TryGetValue(damageIncreasePerkName, out var damageIncreaserPerk) && (GameEvent?.AllowPerks ?? true) ? (float)damageIncreaserPerk.Perk.SkillLevel / 100 : 0f) * parameters.damage;
-
         if (parameters.cause == EDeathCause.GRENADE && kPlayer != player)
         {
             var times = parameters.times;

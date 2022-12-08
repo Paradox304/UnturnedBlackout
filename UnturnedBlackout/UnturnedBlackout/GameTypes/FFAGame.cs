@@ -671,7 +671,13 @@ public class FFAGame : Game
             shouldAllow = false;
             return;
         }
-
+        
+        if (parameters.cause == EDeathCause.MELEE && !(GameEvent?.KnifeDoesDamage ?? true))
+        {
+            shouldAllow = false;
+            return;
+        }
+        
         var damageReducePerkName = "none";
         var damageIncreasePerkName = "none";
         switch (parameters.cause)

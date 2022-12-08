@@ -728,12 +728,13 @@ public class KCGame : Game
         }
 
         parameters.damage -= (player.GamePlayer.ActiveLoadout.PerksSearchByType.TryGetValue(damageReducePerkName, out var damageReducerPerk) && (GameEvent?.AllowPerks ?? true) ? (float)damageReducerPerk.Perk.SkillLevel / 100 : 0f) * parameters.damage;
-
-        player.GamePlayer.OnDamaged(parameters.killer);
-
+        
         var kPlayer = GetKCPlayer(parameters.killer);
         if (kPlayer == null)
+        {
+            player.GamePlayer.OnDamaged(parameters.killer);
             return;
+        }
 
         if (kPlayer.Team == player.Team && kPlayer != player)
         {
@@ -741,8 +742,14 @@ public class KCGame : Game
             return;
         }
 
+        if (parameters.cause == EDeathCause.MELEE && !(GameEvent?.KnifeDoesDamage ?? true))
+        {
+            shouldAllow = false;
+            return;
+        }
+        
+        player.GamePlayer.OnDamaged(parameters.killer);
         parameters.damage += (kPlayer.GamePlayer.ActiveLoadout.PerksSearchByType.TryGetValue(damageIncreasePerkName, out var damageIncreaserPerk) && (GameEvent?.AllowPerks ?? true) ? (float)damageIncreaserPerk.Perk.SkillLevel / 100 : 0f) * parameters.damage;
-
         if (parameters.cause == EDeathCause.GRENADE && kPlayer != player)
         {
             var times = parameters.times;
@@ -763,11 +770,11 @@ public class KCGame : Game
             }
         }
 
-        if (kPlayer.GamePlayer.HasSpawnProtection)
-        {
-            kPlayer.GamePlayer.SpawnProtectionRemover.Stop();
-            kPlayer.GamePlayer.HasSpawnProtection = false;
-        }
+        if (!kPlayer.GamePlayer.HasSpawnProtection)
+            return;
+
+        kPlayer.GamePlayer.SpawnProtectionRemover.Stop();
+        kPlayer.GamePlayer.HasSpawnProtection = false;
     }
 
     public override void OnPlayerRevived(UnturnedPlayer player)
