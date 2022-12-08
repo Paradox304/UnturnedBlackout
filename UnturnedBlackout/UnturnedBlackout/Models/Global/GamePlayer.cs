@@ -79,12 +79,6 @@ public class GamePlayer
     public Dictionary<ushort, LoadoutKillstreak> KillstreakTriggers { get; set; }
     public int ExtraKillstreak { get; set; }
 
-    public float PrimaryMovementChange { get; set; }
-    public float PrimaryMovementChangeADS { get; set; }
-    public float SecondaryMovementChange { get; set; }
-    public float SecondaryMovementChangeADS { get; set; }
-    public float KnifeMovementChange { get; set; }
-
     public float HealAmount { get; set; }
 
     public DateTime LastXPPopup { get; set; }
@@ -171,32 +165,22 @@ public class GamePlayer
         if (loadout == null)
             return;
 
-        loadout.GetPrimaryMovement(out var primaryMovementChange, out var primaryMovementChangeADS);
-        PrimaryMovementChange = primaryMovementChange;
-        PrimaryMovementChangeADS = primaryMovementChangeADS;
-
-        loadout.GetSecondaryMovement(out var secondaryMovementChange, out var secondaryMovementChangeADS);
-        SecondaryMovementChange = secondaryMovementChange;
-        SecondaryMovementChangeADS = secondaryMovementChangeADS;
-
-        KnifeMovementChange = primaryMovementChange + secondaryMovementChange + loadout.GetKnifeMovement();
-
         LethalChecker.Stop();
         TacticalChecker.Stop();
 
-        var medic = loadout.PerksSearchByType.TryGetValue("medic", out var medicPerk) ? medicPerk.Perk.SkillLevel : 0f;
+        var medic = loadout.PerksSearchByType.TryGetValue("medic", out var medicPerk) && (CurrentGame?.GameEvent?.AllowPerks ?? true) ? medicPerk.Perk.SkillLevel : 0f;
         HealAmount = Config.Base.FileData.HealAmount * (1 + medic / 100);
 
         Plugin.Instance.UI.SendGadgetIcons(this);
 
-        if (loadout.Tactical != null)
+        if (loadout.Tactical != null && (CurrentGame?.GameEvent?.AllowTactical ?? true))
         {
             HasTactical = true;
             var tactician = loadout.PerksSearchByType.TryGetValue("tactician", out var tacticianPerk) ? tacticianPerk.Perk.SkillLevel : 0f;
             TacticalIntervalSeconds = loadout.Tactical.Gadget.GiveSeconds * (1 - tactician / 100);
         }
 
-        if (loadout.Lethal != null)
+        if (loadout.Lethal != null && (CurrentGame?.GameEvent?.AllowLethal ?? true))
         {
             HasLethal = true;
             var grenadier = loadout.PerksSearchByType.TryGetValue("grenadier", out var grenadierPerk) ? grenadierPerk.Perk.SkillLevel : 0f;
@@ -420,9 +404,9 @@ public class GamePlayer
             if (PreviousStance == EPlayerStance.CLIMB && newStance != EPlayerStance.CLIMB)
             {
                 if (HasKillstreakActive && ActiveKillstreak.Killstreak.KillstreakInfo.IsItem)
-                    Player.Player.equipment.ServerEquip(LastEquippedPage, LastEquippedX, LastEquippedY);
-                else
                     Player.Player.equipment.ServerEquip(KillstreakPage, KillstreakX, KillstreakY);
+                else
+                    Player.Player.equipment.ServerEquip(LastEquippedPage, LastEquippedX, LastEquippedY);
             }
 
             PreviousStance = newStance;
@@ -475,13 +459,16 @@ public class GamePlayer
         KillstreakTriggers = new();
         OrderedKillstreaks = new();
 
-        ExtraKillstreak = ActiveLoadout.PerksSearchByType.TryGetValue("expert", out var expertPerk) ? expertPerk.Perk.SkillLevel : 0;
+        ExtraKillstreak = ActiveLoadout.PerksSearchByType.TryGetValue("expert", out var expertPerk) && (CurrentGame?.GameEvent?.AllowPerks ?? true) ? expertPerk.Perk.SkillLevel : 0;
 
-        foreach (var killstreak in ActiveLoadout.Killstreaks.OrderBy(k => k.Killstreak.KillstreakRequired))
+        if (CurrentGame?.GameEvent?.AllowKillstreaks ?? true)
         {
-            OrderedKillstreaks.Add(killstreak);
-            AvailableKillstreaks.Add(killstreak, false);
-            KillstreakTriggers.Add(killstreak.Killstreak.KillstreakInfo.TriggerItemID, killstreak);
+            foreach (var killstreak in ActiveLoadout.Killstreaks.OrderBy(k => k.Killstreak.KillstreakRequired))
+            {
+                OrderedKillstreaks.Add(killstreak);
+                AvailableKillstreaks.Add(killstreak, false);
+                KillstreakTriggers.Add(killstreak.Killstreak.KillstreakInfo.TriggerItemID, killstreak);
+            }
         }
 
         if (OrderedKillstreaks.Count == 0)

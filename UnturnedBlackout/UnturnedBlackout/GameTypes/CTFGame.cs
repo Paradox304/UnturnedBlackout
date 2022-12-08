@@ -350,7 +350,7 @@ public class CTFGame : Game
         PlayersLookup.Add(player.SteamID, cPlayer);
 
         UI.OnGameCountUpdated(this);
-        UI.SendLoadingUI(player.Player, true, GameMode, Location);
+        UI.SendLoadingUI(player.Player, true, this);
         for (var seconds = 1; seconds <= 5; seconds++)
         {
             yield return new WaitForSeconds(1);
@@ -796,7 +796,7 @@ public class CTFGame : Game
                 break;
         }
 
-        parameters.damage -= (player.GamePlayer.ActiveLoadout.PerksSearchByType.TryGetValue(damageReducePerkName, out var damageReducerPerk) ? (float)damageReducerPerk.Perk.SkillLevel / 100 : 0f) * parameters.damage;
+        parameters.damage -= (player.GamePlayer.ActiveLoadout.PerksSearchByType.TryGetValue(damageReducePerkName, out var damageReducerPerk) && (GameEvent?.AllowPerks ?? true) ? (float)damageReducerPerk.Perk.SkillLevel / 100 : 0f) * parameters.damage;
 
         player.GamePlayer.OnDamaged(parameters.killer);
 
@@ -810,7 +810,7 @@ public class CTFGame : Game
             return;
         }
 
-        parameters.damage += (kPlayer.GamePlayer.ActiveLoadout.PerksSearchByType.TryGetValue(damageIncreasePerkName, out var damageIncreaserPerk) ? (float)damageIncreaserPerk.Perk.SkillLevel / 100 : 0f) * parameters.damage;
+        parameters.damage += (kPlayer.GamePlayer.ActiveLoadout.PerksSearchByType.TryGetValue(damageIncreasePerkName, out var damageIncreaserPerk) && (GameEvent?.AllowPerks ?? true) ? (float)damageIncreaserPerk.Perk.SkillLevel / 100 : 0f) * parameters.damage;
 
         if (parameters.cause == EDeathCause.GRENADE && kPlayer != player)
         {

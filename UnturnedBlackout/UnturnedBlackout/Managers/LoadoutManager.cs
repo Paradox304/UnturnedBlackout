@@ -3,6 +3,7 @@ using SDG.Unturned;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnturnedBlackout.Database.Data;
 using UnturnedBlackout.Enums;
 using UnturnedBlackout.Extensions;
 using UnturnedBlackout.Models.Global;
@@ -540,18 +541,52 @@ public class LoadoutManager
         foreach (var id in kit.ItemIDs)
             inv.forceAddItem(new(id, true), true);
 
-        // Giving glove to player
-        if (activeLoadout.Glove != null)
-        {
-            var glove = gloves.FirstOrDefault(k => k.GloveID == activeLoadout.Glove.Glove.GloveID);
-            player.Player.Player.clothing.thirdClothes.shirt = 0;
-            player.Player.Player.clothing.askWearShirt(0, 0, Array.Empty<byte>(), true);
-            inv.forceAddItem(new(glove.ItemID, true), true);
-        }
-
         // Giving primary to player
-        if (activeLoadout.Primary != null)
+        if (activeLoadout.Primary != null && (game.GameEvent?.AllowPrimary ?? true))
         {
+            if (game.GameEvent != null && (!game.GameEvent.AllowedGunTypes.Contains(activeLoadout.Primary.Gun.GunType) || game.GameEvent.BlacklistedGuns.Contains(activeLoadout.Primary.Gun.GunID)))
+            {
+                Logging.Debug($"{player.Player.CharacterName} is joining a game with a gun that is in the ignored gun type, getting the override gun");
+                var overrideGun = game.GameEvent.OverridePrimary;
+                if (!loadout.Guns.TryGetValue(overrideGun.GunID, out var overridePrimary))
+                {
+                    Logging.Debug($"Error finding override gun registered to the player");
+                    return;
+                }
+                
+                Logging.Debug($"Getting the override attachments");
+                var overridePrimaryAttachments = new Dictionary<EAttachment, LoadoutAttachment>();
+                if (overridePrimary.Attachments.TryGetValue(overrideGun.BarrelID, out var overridePrimaryBarrel))
+                {
+                    Logging.Debug($"Found override gun barrel, adding it to the dictionary");
+                    overridePrimaryAttachments.Add(EAttachment.BARREL, overridePrimaryBarrel);
+                }
+                
+                if (overridePrimary.Attachments.TryGetValue(overrideGun.SightsID, out var overridePrimarySights))
+                {
+                    Logging.Debug($"Found override gun sights, adding it to the dictionary");
+                    overridePrimaryAttachments.Add(EAttachment.SIGHTS, overridePrimarySights);
+                }
+                
+                if (overridePrimary.Attachments.TryGetValue(overrideGun.GripID, out var overridePrimaryGrip))
+                {
+                    Logging.Debug($"Found override gun grip, adding it to the dictionary");
+                    overridePrimaryAttachments.Add(EAttachment.GRIP, overridePrimaryGrip);
+                }
+                
+                if (overridePrimary.Attachments.TryGetValue(overrideGun.MagID, out var overridePrimaryMag))
+                {
+                    Logging.Debug($"Found override gun mag, adding it to the dictionary");
+                    overridePrimaryAttachments.Add(EAttachment.MAGAZINE, overridePrimaryMag);
+                }
+
+                var newLoadout = new Loadout(-1, "Temporary Loadout", true, overridePrimary, null, activeLoadout.PrimaryGunCharm, overridePrimaryAttachments, activeLoadout.Secondary, activeLoadout.SecondarySkin, activeLoadout.SecondaryGunCharm, activeLoadout.SecondaryAttachments, activeLoadout.Knife,
+                    activeLoadout.Tactical, activeLoadout.Lethal, activeLoadout.Killstreaks, activeLoadout.Perks, activeLoadout.PerksSearchByType, activeLoadout.Glove, activeLoadout.Card);
+                
+                Logging.Debug($"Created a replica loadout with the same values as before just different gun, assigning it as active loadout");
+                activeLoadout = newLoadout;
+            }
+            
             Item item = new(activeLoadout.PrimarySkin?.SkinID ?? activeLoadout.Primary.Gun.GunID, false);
 
             // Setting up attachments
@@ -588,7 +623,7 @@ public class LoadoutManager
         }
 
         // Giving secondary to player
-        if (activeLoadout.Secondary != null)
+        if (activeLoadout.Secondary != null && (game.GameEvent?.AllowSecondary ?? true))
         {
             Item item = new(activeLoadout.SecondarySkin?.SkinID ?? activeLoadout.Secondary.Gun.GunID, true);
 
@@ -620,41 +655,55 @@ public class LoadoutManager
             }
 
             _ = inv.items[1].tryAddItem(item);
-            if (activeLoadout.Primary == null)
+            if (player.Player.Player.inventory.getItem(0, 0) == null)
                 player.Player.Player.equipment.ServerEquip(1, 0, 0);
         }
 
         // Giving knife to player
-        byte knifePage = 0;
-        byte knifeX = 0;
-        byte knifeY = 0;
+        byte knifePage = 255;
+        byte knifeX = 255;
+        byte knifeY = 255;
 
         if (activeLoadout.Knife != null)
         {
-            inv.forceAddItem(new(activeLoadout.Knife.Knife.KnifeID, true), activeLoadout.Primary == null && activeLoadout.Secondary == null);
+            inv.items[PlayerInventory.SLOTS].tryAddItem(new(activeLoadout.Knife.Knife.KnifeID, true));
             inv.TryGetItemIndex(activeLoadout.Knife.Knife.KnifeID, out knifeX, out knifeY, out knifePage, out var _);
+            if (player.Player.Player.inventory.getItem(0,0) == null && player.Player.Player.inventory.getItem(1,0) == null)
+                player.Player.Player.equipment.ServerEquip(knifePage, knifeX, knifeY);
         }
-
+        
+        // Giving glove to player
+        if (activeLoadout.Glove != null)
+        {
+            var glove = gloves.FirstOrDefault(k => k.GloveID == activeLoadout.Glove.Glove.GloveID);
+            player.Player.Player.clothing.thirdClothes.shirt = 0;
+            player.Player.Player.clothing.askWearShirt(0, 0, Array.Empty<byte>(), true);
+            inv.forceAddItem(new(glove.ItemID, true), true);
+        }
+        
         // Giving perks to player
         var skill = player.Player.Player.skills;
         Dictionary<(int, int), int> skills = new();
 
         foreach (var defaultSkill in Plugin.Instance.Config.DefaultSkills.FileData.DefaultSkills)
         {
-            if (PlayerSkills.TryParseIndices(defaultSkill.SkillName, out var specialtyIndex, out var skillIndex))
-            {
-                var max = skill.skills[specialtyIndex][skillIndex].max;
-                if (skills.ContainsKey((specialtyIndex, skillIndex)))
-                    skills[(specialtyIndex, skillIndex)] = defaultSkill.SkillLevel < max ? defaultSkill.SkillLevel : max;
-                else
-                    skills.Add((specialtyIndex, skillIndex), defaultSkill.SkillLevel < max ? defaultSkill.SkillLevel : max);
-            }
+            if (!PlayerSkills.TryParseIndices(defaultSkill.SkillName, out var specialtyIndex, out var skillIndex))
+                continue;
+
+            var max = skill.skills[specialtyIndex][skillIndex].max;
+            if (skills.ContainsKey((specialtyIndex, skillIndex)))
+                skills[(specialtyIndex, skillIndex)] = defaultSkill.SkillLevel < max ? defaultSkill.SkillLevel : max;
+            else
+                skills.Add((specialtyIndex, skillIndex), defaultSkill.SkillLevel < max ? defaultSkill.SkillLevel : max);
         }
 
-        foreach (var perk in activeLoadout.Perks)
+        if (game.GameEvent?.AllowPerks ?? true)
         {
-            if (PlayerSkills.TryParseIndices(perk.Value.Perk.SkillType, out var specialtyIndex, out var skillIndex))
+            foreach (var perk in activeLoadout.Perks)
             {
+                if (!PlayerSkills.TryParseIndices(perk.Value.Perk.SkillType, out var specialtyIndex, out var skillIndex))
+                    continue;
+
                 var max = skill.skills[specialtyIndex][skillIndex].max;
                 if (skills.ContainsKey((specialtyIndex, skillIndex)))
                 {
@@ -675,7 +724,7 @@ public class LoadoutManager
         }
 
         // Giving tactical and lethal to player
-        if (activeLoadout.Lethal != null)
+        if (activeLoadout.Lethal != null && (game.GameEvent?.AllowLethal ?? true))
         {
             var lethalID = activeLoadout.Lethal.Gadget.GadgetID;
             inv.forceAddItem(new(lethalID, false), false);
@@ -684,7 +733,7 @@ public class LoadoutManager
                 player.Player.Player.equipment.ServerBindItemHotkey(player.Data.GetHotkey(EHotkey.LETHAL), lethalAsset, lethalPage, lethalX, lethalY);
         }
 
-        if (activeLoadout.Tactical != null)
+        if (activeLoadout.Tactical != null && (game.GameEvent?.AllowTactical ?? true))
         {
             var tacticalID = activeLoadout.Tactical.Gadget.GadgetID;
             inv.forceAddItem(new(tacticalID, false), false);
@@ -695,14 +744,17 @@ public class LoadoutManager
 
         // Giving killstreaks to player
         byte killstreakHotkey = 2;
-        foreach (var killstreakID in activeLoadout.Killstreaks.Select(killstreak => killstreak.Killstreak.KillstreakInfo.TriggerItemID))
+        if (game.GameEvent?.AllowKillstreaks ?? true)
         {
-            inv.forceAddItem(new(killstreakID, true), false);
-            inv.TryGetItemIndex(killstreakID, out var killstreakX, out var killstreakY, out var killstreakPage, out var _);
-            if (Assets.find(EAssetType.ITEM, killstreakID) is ItemAsset killstreakAsset)
-                player.Player.Player.equipment.ServerBindItemHotkey(player.Data.GetHotkey((EHotkey)killstreakHotkey), killstreakAsset, killstreakPage, killstreakX, killstreakY);
+            foreach (var killstreakID in activeLoadout.Killstreaks.Select(killstreak => killstreak.Killstreak.KillstreakInfo.TriggerItemID))
+            {
+                inv.forceAddItem(new(killstreakID, true), false);
+                inv.TryGetItemIndex(killstreakID, out var killstreakX, out var killstreakY, out var killstreakPage, out var _);
+                if (Assets.find(EAssetType.ITEM, killstreakID) is ItemAsset killstreakAsset)
+                    player.Player.Player.equipment.ServerBindItemHotkey(player.Data.GetHotkey((EHotkey)killstreakHotkey), killstreakAsset, killstreakPage, killstreakX, killstreakY);
 
-            killstreakHotkey++;
+                killstreakHotkey++;
+            }
         }
 
         player.SetActiveLoadout(activeLoadout, knifePage, knifeX, knifeY);

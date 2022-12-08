@@ -185,7 +185,7 @@ public class GameManager
         var achievementImages = db.Achievements.SelectMany(k => k.Tiers).Select(k => k.TierPrevLarge).ToList();
         var achievementImage = 0;
 
-        Plugin.Instance.UI.SendLoadingUI(player, false, EGameType.NONE, null, "Syncing Data... (30 seconds)");
+        Plugin.Instance.UI.SendLoadingUI(player, false, null, "Syncing Data... (30 seconds)");
         if (!player.IsAdmin)
         {
             for (var i = 30; i >= 0; i--)

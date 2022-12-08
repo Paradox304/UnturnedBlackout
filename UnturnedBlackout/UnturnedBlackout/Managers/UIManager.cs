@@ -465,7 +465,7 @@ public class UIManager
 
     // LOADING UI
 
-    public void SendLoadingUI(UnturnedPlayer player, bool isMatch, EGameType gameMode, ArenaLocation location, string loadingText = "LOADING...")
+    public void SendLoadingUI(UnturnedPlayer player, bool isMatch, Game game, string loadingText = "LOADING...")
     {
         var transportConnection = player.Player.channel.owner.transportConnection;
 
@@ -478,6 +478,9 @@ public class UIManager
 
         if (isMatch)
         {
+            var location = game.Location;
+            var gameMode = game.GameMode;
+            
             var gameModeOption = Config.Gamemode.FileData.GamemodeOptions.FirstOrDefault(k => k.GameType == gameMode);
             if (gameModeOption == null)
                 return;
@@ -485,7 +488,7 @@ public class UIManager
             EffectManager.sendUIEffectVisibility(LOADING_UI_KEY, transportConnection, true, $"SERVER Loading Map {location.LocationName} Enabler", true);
             EffectManager.sendUIEffectImageURL(LOADING_UI_KEY, transportConnection, true, $"LOADING Gamemode Icon", gameModeOption.GamemodeIcon);
             EffectManager.sendUIEffectText(LOADING_UI_KEY, transportConnection, true, "LOADING Map TEXT", location.LocationName);
-            EffectManager.sendUIEffectText(LOADING_UI_KEY, transportConnection, true, "LOADING Gamemode TEXT", Plugin.Instance.Translate($"{gameMode}_Name_Full").ToRich());
+            EffectManager.sendUIEffectText(LOADING_UI_KEY, transportConnection, true, "LOADING Gamemode TEXT", (game.GameEvent == null ? "" : $"<color={game.GameEvent.EventColor}>{game.GameEvent}</color> ") + Plugin.Instance.Translate($"{gameMode}_Name_Full").ToRich());
             EffectManager.sendUIEffectText(LOADING_UI_KEY, transportConnection, true, "LOADING Bar Fill", "　");
         }
 
@@ -800,7 +803,7 @@ public class UIManager
                                           asset.id == (player.ActiveLoadout.Knife?.Knife?.KnifeID ?? 0);
 
             player.ForceEquip = !isPrimarySecondaryMelee;
-            if (!player.ForceEquip)
+            if (isPrimarySecondaryMelee)
             {
                 player.LastEquippedPage = equipment.equippedPage;
                 player.LastEquippedX = equipment.equipped_x;
@@ -829,12 +832,8 @@ public class UIManager
     private void OnDequipRequested(PlayerEquipment equipment, ref bool shouldAllow)
     {
         var player = Plugin.Instance.Game.GetGamePlayer(equipment.player);
-        Logging.Debug($"{player.Player.CharacterName} tryna dequip his gun with id {equipment.itemID}");
         if (player.HasKillstreakActive && player.ActiveKillstreak.Killstreak.KillstreakInfo.IsItem)
-        {
-            Logging.Debug($"{player.Player.CharacterName} has killstreak active and dequipped weapon with id {equipment.itemID}, waiting for a bit then removing the killstreak");
             TaskDispatcher.QueueOnMainThread(() => player.RemoveActiveKillstreak());
-        }
     }
 
     public void OnUseableChanged(PlayerEquipment obj)
@@ -1010,7 +1009,7 @@ public class UIManager
         
         EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, ply.GamePlayer.TransportConnection, true, "MatchResult1", Plugin.Instance.Translate(players.IndexOf(ply) == 0 ? isPlaying ? "Winning_Text" : "Victory_Text" : isPlaying ? "Losing_Text" : "Defeat_Text").ToRich());
         EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, ply.GamePlayer.TransportConnection, true, "MapName1", location.LocationName.ToUpper());
-        EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, ply.GamePlayer.TransportConnection, true, "GamemodeName1", (game.GameEvent?.EventName ?? "") + Plugin.Instance.Translate("FFA_Name_Full").ToRich());
+        EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, ply.GamePlayer.TransportConnection, true, "GamemodeName1", (game.GameEvent == null ? "" : $"{game.GameEvent} ") + Plugin.Instance.Translate("FFA_Name_Full").ToRich());
 
         for (var i = 0; i <= 9; i++)
             EffectManager.sendUIEffectVisibility(PRE_ENDING_UI_KEY, ply.GamePlayer.TransportConnection, true, $"PlayerStats{i}", false);
@@ -1106,7 +1105,7 @@ public class UIManager
         EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "TeamScoreR0", redTeam.Score.ToString());
         EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "TeamNameB0", blueTeam.Info.TeamName);
         EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "TeamScoreB0", blueTeam.Score.ToString());
-        EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "GamemodeName1", (game.GameEvent?.EventName ?? "") + Plugin.Instance.Translate("TDM_Name_Full").ToRich());
+        EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "GamemodeName0", (game.GameEvent == null ? "" : $"{game.GameEvent} ") + Plugin.Instance.Translate("TDM_Name_Full").ToRich());
 
         for (var i = 0; i <= 5; i++)
         {
@@ -1227,7 +1226,7 @@ public class UIManager
         EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "TeamScoreR1", redTeam.Score.ToString());
         EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "TeamNameB1", blueTeam.Info.TeamName);
         EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "TeamScoreB1", blueTeam.Score.ToString());
-        EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "GamemodeName2", (game.GameEvent?.EventName ?? "") + Plugin.Instance.Translate("KC_Name_Full").ToRich());
+        EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "GamemodeName2", (game.GameEvent == null ? "" : $"{game.GameEvent} ") + Plugin.Instance.Translate("KC_Name_Full").ToRich());
 
         for (var i = 0; i <= 6; i++)
         {
@@ -1403,7 +1402,7 @@ public class UIManager
         EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "TeamScoreR1", redTeam.Score.ToString());
         EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "TeamNameB1", blueTeam.Info.TeamName);
         EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "TeamScoreB1", blueTeam.Score.ToString());
-        EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "GamemodeName2", (game.GameEvent?.EventName ?? "") + Plugin.Instance.Translate("CTF_Name_Full").ToRich());
+        EffectManager.sendUIEffectText(PRE_ENDING_UI_KEY, player.GamePlayer.TransportConnection, true, "GamemodeName2", (game.GameEvent == null ? "" : $"{game.GameEvent} ") + Plugin.Instance.Translate("CTF_Name_Full").ToRich());
 
         for (var i = 0; i <= 9; i++)
         {

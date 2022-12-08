@@ -13,7 +13,21 @@ public class GameEvent
     public int EventWeight { get; set; }
     
     public bool IsHardcore { get; set; }
-
+    
+    [XmlArrayItem("AllowedGunType")]
+    public List<EGun> AllowedGunTypes { get; set; }
+    [XmlArrayItem("BlacklistedGun")]
+    public List<ushort> BlacklistedGuns { get; set; }
+    
+    public CustomGun OverridePrimary { get; set; }
+    
+    public bool AllowPrimary { get; set; }
+    public bool AllowSecondary { get; set; }
+    public bool AllowKillstreaks { get; set; }
+    public bool AllowTactical { get; set; }
+    public bool AllowLethal { get; set; }
+    public bool AllowPerks { get; set; }
+    
     [XmlArrayItem("IgnoredLocation")]
     public List<int> IgnoredLocations { get; set; }
     [XmlArrayItem("IgnoredGameMode")]

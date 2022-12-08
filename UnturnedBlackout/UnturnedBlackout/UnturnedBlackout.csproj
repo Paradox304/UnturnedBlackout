@@ -344,6 +344,7 @@
         <Compile Include="Models\Feed\Feed.cs" />
         <Compile Include="Models\Feed\FeedIcon.cs" />
         <Compile Include="Models\FFA\FFAConfig.cs" />
+        <Compile Include="Models\Global\CustomGun.cs" />
         <Compile Include="Models\Global\DefaultSkill.cs" />
         <Compile Include="Models\Global\GameEvent.cs" />
         <Compile Include="Models\Global\GamemodeOption.cs" />

@@ -287,7 +287,7 @@ public class FFAGame : Game
         PlayersLookup.Add(player.SteamID, fPlayer);
         UI.OnGameCountUpdated(this);
 
-        UI.SendLoadingUI(player.Player, true, GameMode, Location);
+        UI.SendLoadingUI(player.Player, true, this);
         for (var seconds = 1; seconds <= 5; seconds++)
         {
             yield return new WaitForSeconds(1);
@@ -691,7 +691,7 @@ public class FFAGame : Game
                 break;
         }
 
-        var damageReducePercent = player.GamePlayer.ActiveLoadout.PerksSearchByType.TryGetValue(damageReducePerkName, out var damageReducerPerk) ? (float)damageReducerPerk.Perk.SkillLevel / 100 : 0f;
+        var damageReducePercent = player.GamePlayer.ActiveLoadout.PerksSearchByType.TryGetValue(damageReducePerkName, out var damageReducerPerk) && (GameEvent?.AllowPerks ?? true) ? (float)damageReducerPerk.Perk.SkillLevel / 100 : 0f;
         parameters.damage -= damageReducePercent * parameters.damage;
 
         player.GamePlayer.OnDamaged(parameters.killer);
@@ -700,7 +700,7 @@ public class FFAGame : Game
         if (kPlayer == null)
             return;
 
-        var damageIncreasePercent = kPlayer.GamePlayer.ActiveLoadout.PerksSearchByType.TryGetValue(damageIncreasePerkName, out var damageIncreaserPerk) ? (float)damageIncreaserPerk.Perk.SkillLevel / 100 : 0f;
+        var damageIncreasePercent = kPlayer.GamePlayer.ActiveLoadout.PerksSearchByType.TryGetValue(damageIncreasePerkName, out var damageIncreaserPerk) && (GameEvent?.AllowPerks ?? true) ? (float)damageIncreaserPerk.Perk.SkillLevel / 100 : 0f;
         parameters.damage += damageIncreasePercent * parameters.damage;
         
         if (parameters.cause == EDeathCause.GRENADE && kPlayer != player)

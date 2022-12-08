@@ -44,7 +44,7 @@ public class Plugin : RocketPlugin<Config>
         UnturnedPermissions.OnJoinRequested += OnJoining;
 
         PlayerInput.onPluginKeyTick += OnHotkeyPressed;
-
+        
         Rocket.Core.Logging.Logger.Log("Unturned Blackout has been loaded");
     }
 
