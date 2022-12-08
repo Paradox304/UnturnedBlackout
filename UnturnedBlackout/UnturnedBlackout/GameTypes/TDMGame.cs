@@ -645,7 +645,7 @@ public class TDMGame : Game
             foreach (var ply in Players)
                 UI.UpdateTDMScore(ply, kPlayer.Team);
 
-            if (kPlayer.Team.Score == Config.TDM.FileData.ScoreLimit)
+            if (kPlayer.Team.Score >= Config.TDM.FileData.ScoreLimit)
                 _ = Plugin.Instance.StartCoroutine(GameEnd(kPlayer.Team));
 
             if (equipmentUsed != 0)

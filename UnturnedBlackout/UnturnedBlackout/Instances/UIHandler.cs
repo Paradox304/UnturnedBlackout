@@ -20,6 +20,7 @@ using UnturnedBlackout.Models.UI;
 using UnturnedBlackout.Models.Webhook;
 using Enum = System.Enum;
 using Field = UnturnedBlackout.Models.Webhook.Field;
+using Logger = Rocket.Core.Logging.Logger;
 
 namespace UnturnedBlackout.Instances;
 
@@ -711,30 +712,38 @@ public class UIHandler
 
     public void BuildAchievementPages()
     {
-        AchievementPages = new();
-        for (var i = 1; i <= 5; i++)
+        try
         {
-            AchievementPages.Add(i, new());
-            var index = 0;
-            var page = 1;
-            Dictionary<int, PlayerAchievement> achievements = new();
-            foreach (var achievement in PlayerData.Achievements.Where(k => k.Achievement.PageID == i).OrderByDescending(k => k.CurrentTier).ThenByDescending(k => k.TryGetNextTier(out var nextTier) ? k.Amount * 100 / nextTier.TargetAmount : 100))
+            AchievementPages = new();
+            for (var i = 1; i <= 5; i++)
             {
-                achievements.Add(index, achievement);
-                if (index == MAX_ACHIEVEMENTS_PER_PAGE)
+                AchievementPages.Add(i, new());
+                var index = 0;
+                var page = 1;
+                Dictionary<int, PlayerAchievement> achievements = new();
+                foreach (var achievement in PlayerData.Achievements.Where(k => k.Achievement.PageID == i).OrderByDescending(k => k.CurrentTier).ThenByDescending(k => k.TryGetNextTier(out var nextTier) ? k.Amount * 100 / nextTier.TargetAmount : 100))
                 {
-                    AchievementPages[i].Add(page, new(page, achievements));
-                    achievements = new();
-                    index = 0;
-                    page++;
-                    continue;
+                    achievements.Add(index, achievement);
+                    if (index == MAX_ACHIEVEMENTS_PER_PAGE)
+                    {
+                        AchievementPages[i].Add(page, new(page, achievements));
+                        achievements = new();
+                        index = 0;
+                        page++;
+                        continue;
+                    }
+
+                    index++;
                 }
 
-                index++;
+                if (achievements.Count != 0)
+                    AchievementPages[i].Add(page, new(page, achievements));
             }
-
-            if (achievements.Count != 0)
-                AchievementPages[i].Add(page, new(page, achievements));
+        }
+        catch (Exception ex)
+        {
+            Logger.Log($"Error building achievement pages for {Player.CharacterName}");
+            Logger.Log(ex);
         }
     }
 

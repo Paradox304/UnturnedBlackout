@@ -896,7 +896,7 @@ public class KCGame : Game
                 foreach (var ply in Players)
                     UI.UpdateKCScore(ply, kPlayer.Team);
 
-                if (kPlayer.Team.Score == Config.KC.FileData.ScoreLimit)
+                if (kPlayer.Team.Score >= Config.KC.FileData.ScoreLimit)
                     _ = Plugin.Instance.StartCoroutine(GameEnd(kPlayer.Team));
             });
         }

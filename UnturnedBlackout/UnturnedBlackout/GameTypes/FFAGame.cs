@@ -621,7 +621,7 @@ public class FFAGame : Game
             foreach (var ply in Players)
                 UI.UpdateFFATopUI(ply, Players);
 
-            if (kPlayer.Kills == Config.FFA.FileData.ScoreLimit)
+            if (kPlayer.Kills >= Config.FFA.FileData.ScoreLimit)
                 _ = Plugin.Instance.StartCoroutine(GameEnd());
 
             Quest.CheckQuest(kPlayer.GamePlayer, EQuestType.KILL, questConditions);
