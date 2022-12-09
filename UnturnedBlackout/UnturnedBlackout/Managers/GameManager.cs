@@ -302,7 +302,9 @@ public class GameManager
         Logging.Debug($"Getting list of random events for location {location.LocationName}");
         var events = Config.Events.FileData.GameEvents.Where(k => !k.IgnoredLocations.Contains(location.LocationID) && !k.IgnoredGameModes.Contains(option.GameType)).ToList();
         Logging.Debug($"Found {events.Count} events to choose from");
-        var @event = UnityEngine.Random.Range(1, 101) <= option.EventChance ? CalculateRandomGameEvent(events) : null;
+        var eventRNG = UnityEngine.Random.Range(1, 101);
+        Logging.Debug($"Event RNG: {eventRNG}, Passed: {eventRNG <= option.EventChance}");
+        var @event = eventRNG <= option.EventChance ? CalculateRandomGameEvent(events) : null;
         return (option.GameType, @event);
     }
 
@@ -325,6 +327,7 @@ public class GameManager
     {
         var poolSize = options.Sum(option => option.GamemodeWeight);
         var randInt = UnityEngine.Random.Range(0, poolSize) + 1;
+        Logging.Debug($"Gamemode RNG: {randInt}");
         var accumulatedProbability = 0;
         foreach (var option in options)
         {

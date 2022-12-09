@@ -327,6 +327,7 @@ public class CTFGame : Game
             var gameSetup = Plugin.Instance.Game.GetRandomGameSetup(location);
             GamePhase = EGamePhase.ENDED;
             Plugin.Instance.Game.EndGame(this);
+            Logging.Debug($"Found Location: {location.LocationName}, GameMode: {gameSetup.Item1}, Event: {gameSetup.Item2?.EventName ?? "None"}");
             Plugin.Instance.Game.StartGame(location, gameSetup.Item1, gameSetup.Item2);
         }
 
