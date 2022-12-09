@@ -6076,6 +6076,14 @@ public class UIHandler
                 rewardImage = gunCharm.IconLink;
                 rewardRarity = gunCharm.CharmRarity;
                 return true;
+            case ERewardType.CASE:
+                if (!DB.Cases.TryGetValue(Convert.ToInt32(reward.RewardValue), out var @case))
+                    return false;
+
+                rewardName = $"<color={Utility.GetRarityColor(@case.CaseRarity)}>{@case.CaseName}</color>";
+                rewardImage = @case.IconLink;
+                rewardRarity = @case.CaseRarity;
+                return true;
             case ERewardType.BP_BOOSTER:
                 rewardName = $"<color=white>{string.Format("{0:0.##}", Convert.ToDecimal(reward.RewardValue) * 100)}% Battlepass Stars Boost</color>";
                 rewardImage = Config.Icons.FileData.BPXPBoostIconLink;
