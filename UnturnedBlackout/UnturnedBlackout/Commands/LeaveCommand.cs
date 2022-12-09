@@ -30,13 +30,13 @@ internal class LeaveCommand : IRocketCommand
         {
             if (gPlayer.CurrentGame.GamePhase == EGamePhase.ENDING)
             {
-                Utility.Say(player, "<color=red>Game is ending</color>");
+                Utility.Say(player, "[color=red]Game is ending[/color]");
                 return;
             }
 
             if (gPlayer.CurrentGame.GamePhase == EGamePhase.STARTING)
             {
-                Utility.Say(player, "<color=red>Game is starting</color>");
+                Utility.Say(player, "[color=red]Game is starting[/color]");
                 return;
             }
             

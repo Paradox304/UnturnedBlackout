@@ -22,23 +22,24 @@ internal class CTFSPCommand : IRocketCommand
 
     public void Execute(IRocketPlayer caller, string[] command)
     {
-        var player = caller as UnturnedPlayer;
-
+        if (caller is not UnturnedPlayer player)
+            return;
+        
         if (command.Length < 2)
         {
-            Utility.Say(caller, Plugin.Instance.Translate("Correct_Usage", Syntax).ToRich());
+            Utility.Say(caller, Plugin.Instance.Translate("Correct_Usage", Syntax));
             return;
         }
 
         if (!int.TryParse(command[0], out var locationID))
         {
-            Utility.Say(caller, Plugin.Instance.Translate("Location_Not_Found").ToRich());
+            Utility.Say(caller, Plugin.Instance.Translate("Location_Not_Found"));
             return;
         }
 
         if (!int.TryParse(command[1], out var groupID))
         {
-            Utility.Say(caller, Plugin.Instance.Translate("Group_Not_Found").ToRich());
+            Utility.Say(caller, Plugin.Instance.Translate("Group_Not_Found"));
             return;
         }
 
@@ -52,17 +53,15 @@ internal class CTFSPCommand : IRocketCommand
         var location = Plugin.Instance.Config.Locations.FileData.ArenaLocations.FirstOrDefault(k => k.LocationID == locationID);
         if (location == null)
         {
-            Utility.Say(caller, Plugin.Instance.Translate("Location_Not_Found").ToRich());
+            Utility.Say(caller, Plugin.Instance.Translate("Location_Not_Found"));
             return;
         }
 
-        Utility.Say(caller, isFlag ? Plugin.Instance.Translate("CTF_Flag_SpawnPoint_Set", location.LocationName, groupID).ToRich() : Plugin.Instance.Translate("CTF_SpawnPoint_Set", location.LocationName, groupID).ToRich());
-        if (player != null)
-        {
-            var transform = player.Player.transform;
-            var position = transform.position;
-            Plugin.Instance.Data.Data.CTFSpawnPoints.Add(new(locationID, groupID, position.x, position.y, position.z, transform.eulerAngles.y, isFlag));
-        }
+        Utility.Say(caller, isFlag ? Plugin.Instance.Translate("CTF_Flag_SpawnPoint_Set", location.LocationName, groupID) : Plugin.Instance.Translate("CTF_SpawnPoint_Set", location.LocationName, groupID));
+
+        var transform = player.Player.transform;
+        var position = transform.position;
+        Plugin.Instance.Data.Data.CTFSpawnPoints.Add(new(locationID, groupID, position.x, position.y, position.z, transform.eulerAngles.y, isFlag));
 
         Plugin.Instance.Data.SaveJson();
     }

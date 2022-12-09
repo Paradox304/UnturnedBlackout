@@ -17,17 +17,15 @@ public static class Utility
 {
     public static string ToRich(this string value) => value.Replace('[', '<').Replace(']', '>').Replace("osqb", "[").Replace("csqb", "]");
 
-    public static string ToUnrich(this string value) => new Regex(@"<[^>]*>", RegexOptions.IgnoreCase).Replace(value, "").Trim();
+    public static string ToUnrich(this string value) => new Regex(@"\[[^\]]*\]", RegexOptions.IgnoreCase).Replace(value, "").Trim();
 
     public static void Say(IRocketPlayer target, string message)
     {
         if (target is UnturnedPlayer player)
-            ChatManager.serverSendMessage(message, Color.green, toPlayer: player.SteamPlayer(), useRichTextFormatting: true);
+            ChatManager.serverSendMessage(message.ToRich(), Color.green, toPlayer: player.SteamPlayer(), useRichTextFormatting: true);
         else
             Logger.Log(message.ToUnrich());
     }
-
-    public static void Announce(string message) => ChatManager.serverSendMessage(message, Color.green, useRichTextFormatting: true);
 
     public static void ClearInventory(this PlayerInventory inv)
     {

@@ -1013,7 +1013,7 @@ public class UIHandler
         Player.Player.look.sendSpecStatsAllowed(true);
         Player.Player.movement.sendPluginSpeedMultiplier(0f);
         HideUI();
-        Utility.Say(Player, "<color=green>Staff Mode Activated</color>");
+        Utility.Say(Player, "[color=green]Staff Mode Activated[/color]");
     }
     
     // Play Page

@@ -123,7 +123,7 @@ public class GameManager
     {
         if (selectedID > Games.Count - 1)
         {
-            Utility.Say(player, Plugin.Instance.Translate("Game_Not_Found_With_ID").ToRich());
+            Utility.Say(player, Plugin.Instance.Translate("Game_Not_Found_With_ID"));
             return;
         }
 
@@ -133,20 +133,20 @@ public class GameManager
 
         if (gPlayer.CurrentGame != null)
         {
-            Utility.Say(player, Plugin.Instance.Translate("Ingame").ToRich());
+            Utility.Say(player, Plugin.Instance.Translate("Ingame"));
             return;
         }
 
         var game = Games[selectedID];
         if (game.GetPlayerCount() >= game.Location.GetMaxPlayers(game.GameMode))
         {
-            Utility.Say(player, Plugin.Instance.Translate("Game_Full").ToRich());
+            Utility.Say(player, Plugin.Instance.Translate("Game_Full"));
             return;
         }
 
         if (game.GamePhase == EGamePhase.ENDING)
         {
-            Utility.Say(player, $"<color=red>Game is ending</color>");
+            Utility.Say(player, $"[color=red]Game is ending[/color]");
             return;
         }
         
@@ -162,7 +162,7 @@ public class GameManager
 
         if (gPlayer.CurrentGame == null)
         {
-            Utility.Say(player, Plugin.Instance.Translate("Not_Ingame").ToRich());
+            Utility.Say(player, Plugin.Instance.Translate("Not_Ingame"));
             return;
         }
 

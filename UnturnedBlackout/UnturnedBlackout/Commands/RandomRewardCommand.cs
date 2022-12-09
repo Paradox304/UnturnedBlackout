@@ -23,7 +23,7 @@ public class RandomRewardCommand : IRocketCommand
 
         if (!ulong.TryParse(command[0], out var steamid))
         {
-            Utility.Say(caller, "<color=red>Steam ID is not in correct format</color>");
+            Utility.Say(caller, "[color=red]Steam ID is not in correct format[/color]");
             return;
         }
 
@@ -31,7 +31,7 @@ public class RandomRewardCommand : IRocketCommand
         var rewards = Utility.GetRewardsFromString(command[1]);
         if (rewards.Count == 0)
         {
-            Utility.Say(caller, "<color=red>You have set no rewards</color>");
+            Utility.Say(caller, "[color=red]You have set no rewards[/color]");
             return;
         }
 
@@ -41,7 +41,7 @@ public class RandomRewardCommand : IRocketCommand
             return;
         
         if (Provider.clients.Exists(k => k.playerID.steamID == steamID))
-            Utility.Say(UnturnedPlayer.FromCSteamID(steamID), $"You claimed your free daily pack and received {randomReward.RewardValue} {currency.ToFriendlyName()}");
+            Utility.Say(UnturnedPlayer.FromCSteamID(steamID), $"[color=green]You claimed your free daily pack and received {randomReward.RewardValue} {currency.ToFriendlyName()}[/color]");
     }
 
     public AllowedCaller AllowedCaller => AllowedCaller.Both;

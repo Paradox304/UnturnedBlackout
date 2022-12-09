@@ -3,6 +3,7 @@ using Rocket.Unturned.Chat;
 using Rocket.Unturned.Player;
 using SDG.Unturned;
 using System.Collections.Generic;
+using UnturnedBlackout.Extensions;
 
 namespace UnturnedBlackout.Commands;
 
@@ -26,6 +27,6 @@ internal class GetNavMeshCommand : IRocketCommand
             return;
 
         if (LevelNavigation.tryGetNavigation(player.Position, out var nav))
-            UnturnedChat.Say(caller, $"Nav Mesh: {nav}");
+            Utility.Say(caller, $"[color=green]Nav Mesh: {nav}[/color]");
     }
 }

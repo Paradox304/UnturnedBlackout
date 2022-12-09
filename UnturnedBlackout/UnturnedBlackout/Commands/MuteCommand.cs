@@ -32,7 +32,7 @@ internal class MuteCommand : IRocketCommand
     {
         if (command.Length < 3)
         {
-            Utility.Say(caller, Plugin.Instance.Translate("Correct_Usage", Syntax).ToRich());
+            Utility.Say(caller, Plugin.Instance.Translate("Correct_Usage", Syntax));
             return;
         }
 
@@ -41,7 +41,7 @@ internal class MuteCommand : IRocketCommand
 
         if (steamID == CSteamID.Nil)
         {
-            Utility.Say(caller, "<color=red>Player not found</color>");
+            Utility.Say(caller, "[color=red]Player not found[/color]");
             return;
         }
 
@@ -49,13 +49,13 @@ internal class MuteCommand : IRocketCommand
         var match = regex.Match(command[1]);
         if (!match.Success || (!command[1].Contains("d") && !command[1].Contains("h")))
         {
-            Utility.Say(caller, "<color=red>Time is not in the correct format</color>");
+            Utility.Say(caller, "[color=red]Time is not in the correct format[/color]");
             return;
         }
         
         if (!int.TryParse(match.Value, out var time))
         {
-            Utility.Say(caller, "<color=red>Time is not in the correct format</color>");
+            Utility.Say(caller, "[color=red]Time is not in the correct format[/color]");
             return;
         }
 
@@ -71,7 +71,7 @@ internal class MuteCommand : IRocketCommand
             }
             catch (Exception)
             {
-                TaskDispatcher.QueueOnMainThread(() => Utility.Say(caller, "<color=red>Player not found</color>"));
+                TaskDispatcher.QueueOnMainThread(() => Utility.Say(caller, "[color=red]Player not found[/color]"));
                 return;
             }
 
@@ -82,7 +82,7 @@ internal class MuteCommand : IRocketCommand
             if (Provider.clients.Exists(k => k.playerID.steamID == steamID))
                 TaskDispatcher.QueueOnMainThread(() => Utility.Say(UnturnedPlayer.FromCSteamID(steamID), Plugin.Instance.Translate("Muted", amount, command[2]).ToRich()));
 
-            TaskDispatcher.QueueOnMainThread(() => Utility.Say(caller, $"<color=green>Player has been muted for {amount} for {command[2]}</color>"));
+            TaskDispatcher.QueueOnMainThread(() => Utility.Say(caller, $"[color=green]Player has been muted for {amount} for {command[2]}[/color]"));
 
             Embed embed = new(null, $"**{profile.SteamID}** was muted for **{time}** {(command[1].Contains("d") ? "day(s)" : "hour(s)")}", null, "15105570", DateTime.UtcNow.ToString("s"), new(Provider.serverName, Provider.configData.Browser.Icon),
                 new(profile.SteamID, $"https://steamcommunity.com/profiles/{profile.SteamID64}/", profile.AvatarIcon.ToString()),

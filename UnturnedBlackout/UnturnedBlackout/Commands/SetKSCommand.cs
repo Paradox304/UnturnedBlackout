@@ -27,11 +27,12 @@ public class SetKSCommand : IRocketCommand
 
         if (gPlayer.CurrentGame == null)
         {
-            Utility.Say(caller, "[color=red]You are not in a game");
+            Utility.Say(caller, "[color=red]You are not in a game[/color]");
             return;
         }
         
         gPlayer.UpdateKillstreak(kills);
+        Utility.Say(caller, $"[color=green]Setted killstreak to {kills}[/color]");
     }
 
     public AllowedCaller AllowedCaller => AllowedCaller.Player;

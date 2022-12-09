@@ -3,6 +3,7 @@ using Rocket.Core.Utils;
 using Rocket.Unturned.Chat;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using UnturnedBlackout.Extensions;
 
 namespace UnturnedBlackout.Commands;
 
@@ -24,21 +25,20 @@ internal class GenAchievementCommand : IRocketCommand
     {
         if (command.Length < 2)
         {
-            UnturnedChat.Say(caller, $"Correct Usage: {Syntax}");
+            Utility.Say(caller, Plugin.Instance.Translate("Correct_Usage", Syntax));
             return;
         }
 
         if (!int.TryParse(command[0], out var achievementID))
         {
-            UnturnedChat.Say(caller, "Achievement tier is not correct");
+            Utility.Say(caller, "[color=green]Achievement tier is not correct[/color]");
             return;
         }
 
         _ = Task.Run(async () =>
         {
             await Plugin.Instance.DB.GenerateAchievementTiersAsync(achievementID, command[1]);
-
-            TaskDispatcher.QueueOnMainThread(() => UnturnedChat.Say(caller, $"Tiers generated for {achievementID} with title {command[1]}"));
+            TaskDispatcher.QueueOnMainThread(() => Utility.Say(caller, $"[color=green]Tiers generated for {achievementID} with title {command[1]}[/color]"));
         });
     }
 }

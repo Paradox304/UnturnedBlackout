@@ -22,21 +22,9 @@ internal class WipeSpawnsCommand : IRocketCommand
 
     public void Execute(IRocketPlayer caller, string[] command)
     {
-        if (command.Length < 2)
+        if (command.Length < 2 || !int.TryParse(command[0], out var mapID) || !Enum.TryParse(command[1], true, out EGameType gameMode))
         {
-            Utility.Say(caller, $"<color=red>Correct Usage: {Syntax}</color>");
-            return;
-        }
-
-        if (!int.TryParse(command[0], out var mapID))
-        {
-            Utility.Say(caller, $"<color=red>Correct Usage: {Syntax}</color>");
-            return;
-        }
-
-        if (!Enum.TryParse(command[1], true, out EGameType gameMode))
-        {
-            Utility.Say(caller, $"<color=red>Correct Usage: {Syntax}</color>");
+            Utility.Say(caller, Plugin.Instance.Translate("Correct_Usage", Syntax));
             return;
         }
 
@@ -55,6 +43,6 @@ internal class WipeSpawnsCommand : IRocketCommand
         }
 
         Plugin.Instance.Data.SaveJson();
-        Utility.Say(caller, $"<color=green>Wiped spawnpoints for map {mapID} for gamemode {gameMode}</color>");
+        Utility.Say(caller, $"[color=green]Wiped spawnpoints for map {mapID} for gamemode {gameMode}[/color]");
     }
 }

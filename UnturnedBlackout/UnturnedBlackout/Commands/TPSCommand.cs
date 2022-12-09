@@ -11,8 +11,8 @@ internal class TPSCommand : IRocketCommand
 {
     public void Execute(IRocketPlayer caller, string[] command)
     {
-        Utility.Say(caller, $"TPS: {Provider.debugTPS}");
-        Utility.Say(caller, $"UPS: {Provider.debugUPS}");
+        Utility.Say(caller, $"[color=green]TPS: {Provider.debugTPS}[/color]");
+        Utility.Say(caller, $"[color=green]UPS: {Provider.debugUPS}[/color]");
     }
 
     public AllowedCaller AllowedCaller => AllowedCaller.Both;

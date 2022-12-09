@@ -31,7 +31,7 @@ internal class UnmuteCommand : IRocketCommand
     {
         if (command.Length == 0)
         {
-            Utility.Say(caller, Plugin.Instance.Translate("Correct_Usage", Syntax).ToRich());
+            Utility.Say(caller, Plugin.Instance.Translate("Correct_Usage", Syntax));
             return;
         }
 
@@ -40,7 +40,7 @@ internal class UnmuteCommand : IRocketCommand
 
         if (steamID == CSteamID.Nil)
         {
-            Utility.Say(caller, "<color=red>Player not found</color>");
+            Utility.Say(caller, "[color=red]Player not found[/color]");
             return;
         }
 
@@ -53,16 +53,16 @@ internal class UnmuteCommand : IRocketCommand
             }
             catch (Exception)
             {
-                TaskDispatcher.QueueOnMainThread(() => Utility.Say(caller, "<color=red>Player not found</color>"));
+                TaskDispatcher.QueueOnMainThread(() => Utility.Say(caller, "[color=red]Player not found[/color]"));
                 return;
             }
 
             Plugin.Instance.DB.ChangePlayerMuted(steamID, false);
 
             if (Provider.clients.Exists(k => k.playerID.steamID == steamID))
-                TaskDispatcher.QueueOnMainThread(() => Utility.Say(UnturnedPlayer.FromCSteamID(steamID), Plugin.Instance.Translate("Unmuted").ToRich()));
+                TaskDispatcher.QueueOnMainThread(() => Utility.Say(UnturnedPlayer.FromCSteamID(steamID), Plugin.Instance.Translate("Unmuted")));
 
-            TaskDispatcher.QueueOnMainThread(() => Utility.Say(caller, $"<color=green>Player has been unmuted</color>"));
+            TaskDispatcher.QueueOnMainThread(() => Utility.Say(caller, $"[color=green]Player has been unmuted[/color]"));
 
             Embed embed = new(null, $"**{profile.SteamID}** was unmuted", null, "15105570", DateTime.UtcNow.ToString("s"), new(Provider.serverName, Provider.configData.Browser.Icon), new(profile.SteamID, $"https://steamcommunity.com/profiles/{profile.SteamID64}/", profile.AvatarIcon.ToString()),
                 new Field[] { new("**Unmuter:**", $"{(caller is UnturnedPlayer player ? $"[**{player.SteamName}**](https://steamcommunity.com/profiles/{player.CSteamID}/)" : "**Console**")}", true), new("**Time:**", DateTime.UtcNow.ToString(CultureInfo.InvariantCulture), true) }, null, null);

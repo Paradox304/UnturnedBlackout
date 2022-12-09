@@ -3869,7 +3869,7 @@ public class DatabaseManager
                             new(profile.SteamID, $"https://steamcommunity.com/profiles/{profile.SteamID64}/", profile.AvatarIcon.ToString()), new Field[] { new("**Unmuter:**", $"**Mute Expired**", true), new("**Time:**", DateTime.UtcNow.ToString(CultureInfo.InvariantCulture), true) }, null, null);
                         
                         Plugin.Instance.Discord.SendEmbed(embed, "Player Unmuted", Plugin.Instance.Config.Webhooks.FileData.UnmuteWebhookLink);
-                        TaskDispatcher.QueueOnMainThread(() => Utility.Say(UnturnedPlayer.FromCSteamID(data.SteamID), Plugin.Instance.Translate("Unmuted").ToRich()));
+                        TaskDispatcher.QueueOnMainThread(() => Utility.Say(UnturnedPlayer.FromCSteamID(data.SteamID), Plugin.Instance.Translate("Unmuted")));
                     }
                     catch (Exception)
                     {

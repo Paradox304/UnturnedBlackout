@@ -23,19 +23,19 @@ internal class AddBattlepassCommand : IRocketCommand
     {
         if (command.Length == 0)
         {
-            Utility.Say(caller, $"<color=red>Correct Usage: {Syntax}</color>");
+            Utility.Say(caller, Plugin.Instance.Translate("Correct_Usage", Syntax));
             return;
         }
 
         if (!ulong.TryParse(command[0], out var steamid))
         {
-            Utility.Say(caller, $"<color=red>SteamID is not in the correct format</color>");
+            Utility.Say(caller, $"[color=red]SteamID is not in the correct format[/color]");
             return;
         }
 
         CSteamID steamID = new(steamid);
         Plugin.Instance.DB.AddPlayerBattlepass(steamID);
         Plugin.Instance.UI.OnBattlepassUpdated(steamID);
-        Utility.Say(caller, $"<color=green>Added battlepass to {steamID}</color>");
+        Utility.Say(caller, $"[color=green]Added battlepass to {steamID}[/color]");
     }
 }

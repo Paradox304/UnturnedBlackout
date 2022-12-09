@@ -34,7 +34,7 @@ public class MapCommand : IRocketCommand
         }
 
         var map = gPlayer.CurrentGame?.Location?.LocationName ?? "None";
-        Utility.Say(caller, $"<color=green>Map: {map}</color>");
+        Utility.Say(caller, $"[color=green]Map: {map}[/color]");
     }
 
     public AllowedCaller AllowedCaller => AllowedCaller.Player;

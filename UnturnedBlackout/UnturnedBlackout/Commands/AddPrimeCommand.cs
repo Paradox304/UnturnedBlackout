@@ -23,13 +23,13 @@ internal class AddPrimeCommand : IRocketCommand
     {
         if (command.Length < 2)
         {
-            Utility.Say(caller, $"<color=red>Correct Usage: {Syntax}</color>");
+            Utility.Say(caller, Plugin.Instance.Translate("Correct_Usage", Syntax));
             return;
         }
 
         if (!ulong.TryParse(command[0], out var steamid))
         {
-            Utility.Say(caller, $"<color=red>SteamID is not in the correct format</color>");
+            Utility.Say(caller, $"[color=red]SteamID is not in the correct format[/color]");
             return;
         }
 
@@ -37,11 +37,11 @@ internal class AddPrimeCommand : IRocketCommand
 
         if (!int.TryParse(command[1], out var days))
         {
-            Utility.Say(caller, $"<color=red>Days is not in the correct format</color>");
+            Utility.Say(caller, $"[color=red]Days is not in the correct format[/color]");
             return;
         }
 
         Plugin.Instance.DB.AddPlayerPrime(steamID, days);
-        Utility.Say(caller, $"<color=green>Added prime with days {days} to {steamID}</color>");
+        Utility.Say(caller, $"[color=green]Added prime with days {days} to {steamID}[/color]");
     }
 }

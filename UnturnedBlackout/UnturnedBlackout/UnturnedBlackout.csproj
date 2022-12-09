@@ -207,6 +207,7 @@
     <ItemGroup>
         <Compile Include="Commands\AddBattlepassCommand.cs" />
         <Compile Include="Commands\AddBoosterCommand.cs" />
+        <Compile Include="Commands\AddCaseCommand.cs" />
         <Compile Include="Commands\AddPrimeCommand.cs" />
         <Compile Include="Commands\CountryCommand.cs" />
         <Compile Include="Commands\ForceEndGameCommand.cs" />

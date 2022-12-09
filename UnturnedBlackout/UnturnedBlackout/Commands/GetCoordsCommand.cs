@@ -21,7 +21,9 @@ internal class GetCoordsCommand : IRocketCommand
 
     public void Execute(IRocketPlayer caller, string[] command)
     {
-        var player = caller as UnturnedPlayer;
+        if (caller is not UnturnedPlayer player)
+            return;
+        
         Utility.Say(caller, $"X: {player.Position.x}, Y: {player.Position.z}, Z: {player.Position.z}");
     }
 }

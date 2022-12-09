@@ -23,13 +23,13 @@ internal class GiveRewardCommand : IRocketCommand
     {
         if (command.Length < 2)
         {
-            Utility.Say(caller, $"<color=red>Correct Usage: {Syntax}</color>");
+            Utility.Say(caller, Plugin.Instance.Translate("Correct_Usage", Syntax));
             return;
         }
 
         if (!ulong.TryParse(command[0], out var steamid))
         {
-            Utility.Say(caller, $"<color=red>SteamID is not in the correct format</color>");
+            Utility.Say(caller, $"[color=red]SteamID is not in the correct format[/color]");
             return;
         }
 
