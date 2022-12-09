@@ -696,7 +696,8 @@ public class UIManager
         player.Player.disablePluginWidgetFlag(EPluginWidgetFlags.ShowStatusIcons);
         player.Player.disablePluginWidgetFlag(EPluginWidgetFlags.ShowUseableGunStatus);
         player.Player.disablePluginWidgetFlag(EPluginWidgetFlags.ShowDeathMenu);
-
+        player.Player.disablePluginWidgetFlag(EPluginWidgetFlags.ShowReputationChangeNotification);
+        
         player.Player.equipment.onEquipRequested += OnEquipRequested;
         player.Player.equipment.onDequipRequested += OnDequipRequested;
 
