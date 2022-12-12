@@ -47,7 +47,24 @@ public class GameManager
     private void StartGames()
     {
         Logging.Debug("Starting games");
-        for (var i = 1; i <= Config.Base.FileData.MinGamesCount; i++)
+        foreach (var @event in Config.Events.FileData.GameEvents.Where(k => k.AlwaysHaveLobby))
+        {
+            Logging.Debug($"{AvailableLocations.Count} locations available");
+            var locationID = AvailableLocations[UnityEngine.Random.Range(0, AvailableLocations.Count)];
+            var location = Config.Locations.FileData.ArenaLocations.FirstOrDefault(k => k.LocationID == locationID);
+            if (location == null)
+            {
+                Logging.Debug($"Error finding a free location, returning");
+                return;
+            }
+
+            var gameSetup = GetRandomGameSetup(location);
+            gameSetup.Item2 = @event;
+            Logging.Debug($"Found Location: {location.LocationName}, GameMode: {gameSetup.Item1}, Event: {gameSetup.Item2?.EventName ?? "None"}");
+            StartGame(location, gameSetup.Item1, gameSetup.Item2, false);
+        }
+        
+        for (var i = Games.Count + 1; i <= Config.Base.FileData.MinGamesCount; i++)
         {
             Logging.Debug($"{AvailableLocations.Count} locations available");
             var locationID = AvailableLocations[UnityEngine.Random.Range(0, AvailableLocations.Count)];
@@ -141,6 +158,18 @@ public class GameManager
         if (game.GetPlayerCount() >= game.Location.GetMaxPlayers(game.GameMode))
         {
             Utility.Say(player, Plugin.Instance.Translate("Game_Full"));
+            return;
+        }
+
+        if (game.GameEvent != null && game.GameEvent.MinLevel != 0 && gPlayer.Data.Level < game.GameEvent.MinLevel)
+        {
+            Utility.Say(player, $"[color=red]Game has a min level of {game.GameEvent.MinLevel}[/color]");
+            return;
+        }
+
+        if (game.GameEvent != null && game.GameEvent.MaxLevel != 0 && gPlayer.Data.Level > game.GameEvent.MaxLevel)
+        {
+            Utility.Say(player, $"[color=red]Game has a max level of {game.GameEvent.MaxLevel}[/color]");
             return;
         }
 
@@ -300,7 +329,7 @@ public class GameManager
         Logging.Debug($"Found {gameModeOptions.Count} gamemode options to choose from");
         var option = CalculateRandomGameMode(gameModeOptions);
         Logging.Debug($"Getting list of random events for location {location.LocationName}");
-        var events = Config.Events.FileData.GameEvents.Where(k => !k.IgnoredLocations.Contains(location.LocationID) && !k.IgnoredGameModes.Contains(option.GameType)).ToList();
+        var events = Config.Events.FileData.GameEvents.Where(k => k.EventWeight != 0 && !k.IgnoredLocations.Contains(location.LocationID) && !k.IgnoredGameModes.Contains(option.GameType)).ToList();
         Logging.Debug($"Found {events.Count} events to choose from");
         var eventRNG = UnityEngine.Random.Range(1, 101);
         Logging.Debug($"Event RNG: {eventRNG}, Passed: {eventRNG <= option.EventChance}");

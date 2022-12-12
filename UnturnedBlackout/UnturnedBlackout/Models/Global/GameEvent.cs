@@ -8,6 +8,7 @@ namespace UnturnedBlackout.Models.Global;
 [Serializable]
 public class GameEvent
 {
+    public int EventID { get; set; }
     public string EventName { get; set; }
     public string EventColor { get; set; }
     public int EventWeight { get; set; }
@@ -28,6 +29,12 @@ public class GameEvent
     public bool AllowTactical { get; set; }
     public bool AllowLethal { get; set; }
     public bool AllowPerks { get; set; }
+    
+    public bool AlwaysHaveLobby { get; set; }
+    public int MinLevel { get; set; }
+    public int MaxLevel { get; set; }
+    public float XPMultiplier { get; set; }
+    public float GunXPMultiplier { get; set; }
     
     [XmlArrayItem("IgnoredLocation")]
     public List<int> IgnoredLocations { get; set; }

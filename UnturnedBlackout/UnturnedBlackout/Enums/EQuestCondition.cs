@@ -15,5 +15,6 @@ public enum EQuestCondition
     WIN_TAGS, // Amount of dogtags collected at the time of match win
     WIN_FLAGS_CAPTURED, // Amount of flags captured at the time of match win
     WIN_FLAGS_SAVED, // Amount of flags saved at the time of match win
+    EVENT_ID, // ID of the event the player is in
     SPECIAL // FOR SPECIAL TYPE OF QUESTS [DO NOT SET THIS ON YOUR OWN, ASK ME BEFOREHAND]
 }

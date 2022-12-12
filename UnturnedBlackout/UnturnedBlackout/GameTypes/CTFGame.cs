@@ -217,7 +217,7 @@ public class CTFGame : Game
                     UI.HideCTFLeaderboard(player.GamePlayer);
                 }
 
-                MatchEndSummary summary = new(player.GamePlayer, player.XP, player.StartingLevel, player.StartingXP, player.Kills, player.Deaths, player.Assists, player.HighestKillstreak, player.HighestMK, player.StartTime, GameMode, player.Team == wonTeam);
+                MatchEndSummary summary = new(player.GamePlayer, GameEvent, player.XP, player.StartingLevel, player.StartingXP, player.Kills, player.Deaths, player.Assists, player.HighestKillstreak, player.HighestMK, player.StartTime, GameMode, player.Team == wonTeam);
                 summaries.Add(player.GamePlayer, summary);
                 DB.IncreasePlayerXP(player.GamePlayer.SteamID, summary.PendingXP);
                 DB.IncreasePlayerCredits(player.GamePlayer.SteamID, summary.PendingCredits);
@@ -227,6 +227,7 @@ public class CTFGame : Game
                     {
                         { EQuestCondition.MAP, Location.LocationID },
                         { EQuestCondition.GAMEMODE, (int)GameMode },
+                        { EQuestCondition.EVENT_ID, GameEvent?.EventID ?? 0 },
                         { EQuestCondition.WIN_FLAGS_CAPTURED, player.FlagsCaptured },
                         { EQuestCondition.WIN_FLAGS_SAVED, player.FlagsSaved },
                         { EQuestCondition.WIN_KILLS, player.Kills }
@@ -239,6 +240,7 @@ public class CTFGame : Game
                         {
                             { EQuestCondition.MAP, Location.LocationID },
                             { EQuestCondition.GAMEMODE, (int)GameMode },
+                            { EQuestCondition.EVENT_ID, GameEvent?.EventID ?? 0 },
                             { EQuestCondition.WIN_FLAGS_CAPTURED, player.FlagsCaptured },
                             { EQuestCondition.WIN_FLAGS_SAVED, player.FlagsSaved },
                             { EQuestCondition.WIN_KILLS, player.Kills }
@@ -325,10 +327,13 @@ public class CTFGame : Game
             var randomLocation = locations.Count > 0 ? locations[UnityEngine.Random.Range(0, locations.Count)] : Location.LocationID;
             var location = Config.Locations.FileData.ArenaLocations.FirstOrDefault(k => k.LocationID == randomLocation);
             var gameSetup = Plugin.Instance.Game.GetRandomGameSetup(location);
+            if (GameEvent?.AlwaysHaveLobby ?? true)
+                gameSetup.Item2 = GameEvent;
+
             GamePhase = EGamePhase.ENDED;
             Plugin.Instance.Game.EndGame(this);
             Logging.Debug($"Found Location: {location.LocationName}, GameMode: {gameSetup.Item1}, Event: {gameSetup.Item2?.EventName ?? "None"}");
-            Plugin.Instance.Game.StartGame(location, gameSetup.Item1, gameSetup.Item2);
+            Plugin.Instance.Game.StartGame(location, gameSetup.Item1, gameSetup.Item2, !(GameEvent?.AlwaysHaveLobby ?? false));
         }
 
         Logging.Debug($"DESTROYING GAME ({Location.LocationName} {GameEvent?.EventName ?? ""}{GameMode})");
@@ -530,7 +535,7 @@ public class CTFGame : Game
                 return;
             }
 
-            Dictionary<EQuestCondition, int> questConditions = new() { { EQuestCondition.MAP, Location.LocationID }, { EQuestCondition.GAMEMODE, (int)GameMode } };
+            Dictionary<EQuestCondition, int> questConditions = new() { { EQuestCondition.MAP, Location.LocationID }, { EQuestCondition.GAMEMODE, (int)GameMode }, { EQuestCondition.EVENT_ID, GameEvent?.EventID ?? 0 } };
 
             Logging.Debug($"Killer found, killer name: {kPlayer.GamePlayer.Player.CharacterName}");
 
@@ -748,7 +753,7 @@ public class CTFGame : Game
                 DB.IncreasePlayerKillstreakKills(kPlayer.GamePlayer.SteamID, killstreakID, 1);
             else if ((kPlayer.GamePlayer.ActiveLoadout.Primary != null && kPlayer.GamePlayer.ActiveLoadout.Primary.Gun.GunID == equipmentUsed) || (kPlayer.GamePlayer.ActiveLoadout.Secondary != null && kPlayer.GamePlayer.ActiveLoadout.Secondary.Gun.GunID == equipmentUsed))
             {
-                DB.IncreasePlayerGunXP(kPlayer.GamePlayer.SteamID, equipmentUsed, xpGained);
+                DB.IncreasePlayerGunXP(kPlayer.GamePlayer.SteamID, equipmentUsed, Mathf.RoundToInt(xpGained * (1f + kPlayer.GamePlayer.Data.GunXPBooster + DB.ServerOptions.GunXPBooster + (GameEvent?.GunXPMultiplier ?? 0f) + (kPlayer.GamePlayer.Data.HasPrime ? Config.WinningValues.FileData.PrimeGunXPBooster : 0f))));
                 DB.IncreasePlayerGunKills(kPlayer.GamePlayer.SteamID, equipmentUsed, 1);
             }
             else if (kPlayer.GamePlayer.ActiveLoadout.Lethal != null && kPlayer.GamePlayer.ActiveLoadout.Lethal.Gadget.GadgetID == equipmentUsed)
@@ -899,7 +904,7 @@ public class CTFGame : Game
             return;
         }
 
-        Dictionary<EQuestCondition, int> questConditions = new() { { EQuestCondition.MAP, Location.LocationID }, { EQuestCondition.GAMEMODE, (int)GameMode } };
+        Dictionary<EQuestCondition, int> questConditions = new() { { EQuestCondition.MAP, Location.LocationID }, { EQuestCondition.GAMEMODE, (int)GameMode }, { EQuestCondition.EVENT_ID, GameEvent?.EventID ?? 0 } };
 
         if (cPlayer.Team.FlagID == itemData.item.id)
         {

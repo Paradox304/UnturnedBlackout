@@ -39,7 +39,7 @@ public class MatchEndSummary
     public EGameType GameType { get; set; }
     public bool HasWon { get; set; }
 
-    public MatchEndSummary(GamePlayer player, int matchXP, int startingLevel, int startingXP, int kills, int deaths, int assists, int highestKillstreak, int highestMK, DateTime startTime, EGameType gameType, bool hasWon)
+    public MatchEndSummary(GamePlayer player, GameEvent @event, int matchXP, int startingLevel, int startingXP, int kills, int deaths, int assists, int highestKillstreak, int highestMK, DateTime startTime, EGameType gameType, bool hasWon)
     {
         // Set values
         Player = player;
@@ -62,7 +62,7 @@ public class MatchEndSummary
         var global = Plugin.Instance.DB.ServerOptions;
 
         PendingCredits = MatchXP == 0 ? 0 : MatchXP / data.PointsDivisible + minutesPlayed * data.PointsPerMinutePlayed;
-        MatchXPBonus = (int)((Kills > 0 ? MatchXP / (HasWon ? data.BonusXPVictoryDivisible : data.BonusXPDefeatDivisible) : 0) * (1f + player.Data.XPBooster + global.XPBooster));
+        MatchXPBonus = (int)((Kills > 0 ? MatchXP / (HasWon ? data.BonusXPVictoryDivisible : data.BonusXPDefeatDivisible) : 0) * (1f + player.Data.XPBooster + global.XPBooster + (@event?.XPMultiplier ?? 0f)));
         if (MatchXPBonus != 0)
             MatchXPBonus += minutesPlayed * data.BonusXPPerMinutePlayed;
 

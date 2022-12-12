@@ -200,7 +200,7 @@ public class GamePlayer
         Plugin.Instance.UI.UpdateGadgetUsed(this, true, true);
         if (CurrentGame != null)
         {
-            Dictionary<EQuestCondition, int> questConditions = new() { { EQuestCondition.MAP, CurrentGame.Location.LocationID }, { EQuestCondition.GAMEMODE, (int)CurrentGame.GameMode }, { EQuestCondition.GADGET, ActiveLoadout.Tactical.Gadget.GadgetID } };
+            Dictionary<EQuestCondition, int> questConditions = new() { { EQuestCondition.MAP, CurrentGame.Location.LocationID }, { EQuestCondition.GAMEMODE, (int)CurrentGame.GameMode }, { EQuestCondition.EVENT_ID, CurrentGame.GameEvent?.EventID ?? 0 }, { EQuestCondition.GADGET, ActiveLoadout.Tactical.Gadget.GadgetID } };
             TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.Quest.CheckQuest(this, EQuestType.GADGETS_USED, questConditions));
         }
 
@@ -217,7 +217,7 @@ public class GamePlayer
         Plugin.Instance.UI.UpdateGadgetUsed(this, false, true);
         if (CurrentGame != null)
         {
-            Dictionary<EQuestCondition, int> questConditions = new() { { EQuestCondition.MAP, CurrentGame.Location.LocationID }, { EQuestCondition.GAMEMODE, (int)CurrentGame.GameMode }, { EQuestCondition.GADGET, ActiveLoadout.Lethal.Gadget.GadgetID } };
+            Dictionary<EQuestCondition, int> questConditions = new() { { EQuestCondition.MAP, CurrentGame.Location.LocationID }, { EQuestCondition.GAMEMODE, (int)CurrentGame.GameMode }, { EQuestCondition.EVENT_ID, CurrentGame.GameEvent?.EventID ?? 0 }, { EQuestCondition.GADGET, ActiveLoadout.Lethal.Gadget.GadgetID } };
             TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.Quest.CheckQuest(this, EQuestType.GADGETS_USED, questConditions));
         }
 

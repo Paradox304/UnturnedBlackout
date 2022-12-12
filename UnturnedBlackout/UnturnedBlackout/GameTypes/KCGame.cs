@@ -194,7 +194,7 @@ public class KCGame : Game
                     UI.HideKCLeaderboard(player.GamePlayer);
                 }
 
-                MatchEndSummary summary = new(player.GamePlayer, player.XP, player.StartingLevel, player.StartingXP, player.Kills, player.Deaths, player.Assists, player.HighestKillstreak, player.HighestMK, player.StartTime, GameMode, player.Team == wonTeam);
+                MatchEndSummary summary = new(player.GamePlayer, GameEvent, player.XP, player.StartingLevel, player.StartingXP, player.Kills, player.Deaths, player.Assists, player.HighestKillstreak, player.HighestMK, player.StartTime, GameMode, player.Team == wonTeam);
                 summaries.Add(player.GamePlayer, summary);
 
                 DB.IncreasePlayerXP(player.GamePlayer.SteamID, summary.PendingXP);
@@ -202,12 +202,12 @@ public class KCGame : Game
                 DB.IncreasePlayerBPXP(player.GamePlayer.SteamID, summary.BattlepassXP + summary.BattlepassBonusXP);
 
                 TaskDispatcher.QueueOnMainThread(() => Quest.CheckQuest(player.GamePlayer, EQuestType.FINISH_MATCH,
-                    new() { { EQuestCondition.MAP, Location.LocationID }, { EQuestCondition.GAMEMODE, (int)GameMode }, { EQuestCondition.WIN_KILLS, player.Kills }, { EQuestCondition.WIN_TAGS, player.KillsDenied + player.KillsConfirmed } }));
+                    new() { { EQuestCondition.MAP, Location.LocationID }, { EQuestCondition.GAMEMODE, (int)GameMode }, { EQuestCondition.EVENT_ID, GameEvent?.EventID ?? 0 }, { EQuestCondition.WIN_KILLS, player.Kills }, { EQuestCondition.WIN_TAGS, player.KillsDenied + player.KillsConfirmed } }));
 
                 if (player.Team == wonTeam)
                 {
                     TaskDispatcher.QueueOnMainThread(() => Quest.CheckQuest(player.GamePlayer, EQuestType.WIN,
-                        new() { { EQuestCondition.MAP, Location.LocationID }, { EQuestCondition.GAMEMODE, (int)GameMode }, { EQuestCondition.WIN_KILLS, player.Kills }, { EQuestCondition.WIN_TAGS, player.KillsDenied + player.KillsConfirmed } }));
+                        new() { { EQuestCondition.MAP, Location.LocationID }, { EQuestCondition.GAMEMODE, (int)GameMode }, { EQuestCondition.EVENT_ID, GameEvent?.EventID ?? 0 }, { EQuestCondition.WIN_KILLS, player.Kills }, { EQuestCondition.WIN_TAGS, player.KillsDenied + player.KillsConfirmed } }));
                 }
 
                 UI.SetupPreEndingUI(player.GamePlayer, EGameType.KC, player.Team.TeamID == wonTeam.TeamID, BlueTeam.Score, RedTeam.Score, BlueTeam.Info.TeamName, RedTeam.Info.TeamName, wonTeam.TeamID == -1);
@@ -291,10 +291,13 @@ public class KCGame : Game
             var randomLocation = locations.Count > 0 ? locations[UnityEngine.Random.Range(0, locations.Count)] : Location.LocationID;
             var location = Config.Locations.FileData.ArenaLocations.FirstOrDefault(k => k.LocationID == randomLocation);
             var gameSetup = Plugin.Instance.Game.GetRandomGameSetup(location);
+            if (GameEvent?.AlwaysHaveLobby ?? true)
+                gameSetup.Item2 = GameEvent;
+
             GamePhase = EGamePhase.ENDED;
             Plugin.Instance.Game.EndGame(this);
             Logging.Debug($"Found Location: {location.LocationName}, GameMode: {gameSetup.Item1}, Event: {gameSetup.Item2?.EventName ?? "None"}");
-            Plugin.Instance.Game.StartGame(location, gameSetup.Item1, gameSetup.Item2);
+            Plugin.Instance.Game.StartGame(location, gameSetup.Item1, gameSetup.Item2, !(GameEvent?.AlwaysHaveLobby ?? false));
         }
 
         Logging.Debug($"DESTROYING GAME ({Location.LocationName} {GameEvent?.EventName ?? ""}{GameMode})");
@@ -473,7 +476,7 @@ public class KCGame : Game
                 return;
             }
 
-            Dictionary<EQuestCondition, int> questConditions = new() { { EQuestCondition.MAP, Location.LocationID }, { EQuestCondition.GAMEMODE, (int)GameMode } };
+            Dictionary<EQuestCondition, int> questConditions = new() { { EQuestCondition.MAP, Location.LocationID }, { EQuestCondition.EVENT_ID, GameEvent?.EventID ?? 0 }, { EQuestCondition.GAMEMODE, (int)GameMode } };
 
             Logging.Debug($"Killer found, killer name: {kPlayer.GamePlayer.Player.CharacterName}");
 
@@ -679,7 +682,7 @@ public class KCGame : Game
                 DB.IncreasePlayerKillstreakKills(kPlayer.GamePlayer.SteamID, killstreakID, 1);
             else if ((kPlayer.GamePlayer.ActiveLoadout.Primary != null && kPlayer.GamePlayer.ActiveLoadout.Primary.Gun.GunID == equipmentUsed) || (kPlayer.GamePlayer.ActiveLoadout.Secondary != null && kPlayer.GamePlayer.ActiveLoadout.Secondary.Gun.GunID == equipmentUsed))
             {
-                DB.IncreasePlayerGunXP(kPlayer.GamePlayer.SteamID, equipmentUsed, xpGained);
+                DB.IncreasePlayerGunXP(kPlayer.GamePlayer.SteamID, equipmentUsed, Mathf.RoundToInt(xpGained * (1f + kPlayer.GamePlayer.Data.GunXPBooster + DB.ServerOptions.GunXPBooster + (GameEvent?.GunXPMultiplier ?? 0f) + (kPlayer.GamePlayer.Data.HasPrime ? Config.WinningValues.FileData.PrimeGunXPBooster : 0f))));
                 DB.IncreasePlayerGunKills(kPlayer.GamePlayer.SteamID, equipmentUsed, 1);
             }
             else if (kPlayer.GamePlayer.ActiveLoadout.Lethal != null && kPlayer.GamePlayer.ActiveLoadout.Lethal.Gadget.GadgetID == equipmentUsed)
@@ -862,7 +865,7 @@ public class KCGame : Game
             return;
 
         var otherTeam = kPlayer.Team.TeamID == (byte)ETeam.BLUE ? RedTeam : BlueTeam;
-        Dictionary<EQuestCondition, int> questConditions = new() { { EQuestCondition.MAP, Location.LocationID }, { EQuestCondition.GAMEMODE, (int)GameMode } };
+        Dictionary<EQuestCondition, int> questConditions = new() { { EQuestCondition.MAP, Location.LocationID }, { EQuestCondition.GAMEMODE, (int)GameMode }, { EQuestCondition.EVENT_ID, GameEvent?.EventID ?? 0 } };
 
         var xpGained = 0;
         var xpText = "";
