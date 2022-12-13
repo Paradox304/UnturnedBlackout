@@ -327,7 +327,7 @@ public class CTFGame : Game
             var randomLocation = locations.Count > 0 ? locations[UnityEngine.Random.Range(0, locations.Count)] : Location.LocationID;
             var location = Config.Locations.FileData.ArenaLocations.FirstOrDefault(k => k.LocationID == randomLocation);
             var gameSetup = Plugin.Instance.Game.GetRandomGameSetup(location);
-            if (GameEvent?.AlwaysHaveLobby ?? true)
+            if (GameEvent?.AlwaysHaveLobby ?? false)
                 gameSetup.Item2 = GameEvent;
 
             GamePhase = EGamePhase.ENDED;

@@ -1106,7 +1106,7 @@ public class UIHandler
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Play Map {game.Location.LocationName} Enabler", true);
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Play Map TEXT", game.Location.LocationName);
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Play Description TEXT", Plugin.Instance.Translate($"{game.GameMode}_Description{(game.GameEvent == null ? "" : $"_{game.GameEvent.EventName}")}_Full"));
-        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Play Join BUTTON", game.GamePhase != EGamePhase.ENDING && game.GamePhase != EGamePhase.ENDED);
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Play Join BUTTON", game.GamePhase != EGamePhase.ENDING && game.GamePhase != EGamePhase.ENDED && (game.GameEvent == null || ((game.GameEvent.MinLevel == 0 || PlayerData.Level >= game.GameEvent.MinLevel) && (game.GameEvent.MaxLevel == 0 || PlayerData.Level <= game.GameEvent.MaxLevel))));
     }
 
     public void UpdateGamePlayerCount(Game game)

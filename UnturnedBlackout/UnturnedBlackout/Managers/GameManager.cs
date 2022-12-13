@@ -163,13 +163,13 @@ public class GameManager
 
         if (game.GameEvent != null && game.GameEvent.MinLevel != 0 && gPlayer.Data.Level < game.GameEvent.MinLevel)
         {
-            Utility.Say(player, $"[color=red]Game has a min level of {game.GameEvent.MinLevel}[/color]");
+            Utility.Say(player, $"[color=red]You need to be above Level {game.GameEvent.MinLevel} to join this lobby.[/color]");
             return;
         }
 
         if (game.GameEvent != null && game.GameEvent.MaxLevel != 0 && gPlayer.Data.Level > game.GameEvent.MaxLevel)
         {
-            Utility.Say(player, $"[color=red]Game has a max level of {game.GameEvent.MaxLevel}[/color]");
+            Utility.Say(player, $"[color=red]You need to be below Level {game.GameEvent.MaxLevel + 1} to join this lobby.[/color]");
             return;
         }
 
