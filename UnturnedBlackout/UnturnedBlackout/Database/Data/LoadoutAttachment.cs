@@ -17,10 +17,5 @@ public class LoadoutAttachment
         IsUnlocked = isUnlocked;
     }
 
-    public int GetCoins(int currentLevel)
-    {
-        var levelsRequired = LevelRequirement - currentLevel;
-        var coinsRequired = Attachment.Coins * levelsRequired;
-        return coinsRequired > 0 ? coinsRequired : 0;
-    }
+    public int GetCoins(int currentLevel) => Attachment.Coins;
 }

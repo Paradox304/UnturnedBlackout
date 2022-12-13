@@ -3870,9 +3870,9 @@ public class UIHandler
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy BUTTON", !gun.IsBought);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy Locked", !gun.IsUnlocked && gun.Gun.LevelRequirement > PlayerData.Level);
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.CREDIT)} <color={(PlayerData.Credits >= gun.Gun.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{gun.Gun.BuyPrice}</color>");
-        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !gun.IsBought && !gun.IsUnlocked && gun.Gun.LevelRequirement > PlayerData.Level);
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !gun.IsBought && !gun.IsUnlocked /* && gun.Gun.LevelRequirement > PlayerData.Level*/);
         var coins = gun.Gun.GetCoins(PlayerData.Level);
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.COIN)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.COIN)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Equip BUTTON", gun.IsBought && ((LoadoutPage == ELoadoutPage.PRIMARY && loadout.Primary != gun) || (LoadoutPage == ELoadoutPage.SECONDARY && loadout.Secondary != gun)));
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Dequip BUTTON", false);
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Description TEXT", gun.Gun.GunDesc);
@@ -4001,9 +4001,9 @@ public class UIHandler
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy BUTTON", !attachment.IsBought);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy Locked", !attachment.IsUnlocked && attachment.LevelRequirement > gun.Level);
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.CREDIT)} <color={(PlayerData.Credits >= attachment.Attachment.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{attachment.Attachment.BuyPrice}</color>");
-        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !attachment.IsBought && !attachment.IsUnlocked && attachment.LevelRequirement > gun.Level);
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !attachment.IsBought && !attachment.IsUnlocked /*&& attachment.LevelRequirement > gun.Level*/);
         var coins = attachment.GetCoins(gun.Level);
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.COIN)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.COIN)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
         var isAttachmentPrimary = IsAttachmentPagePrimary();
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Equip BUTTON",
             attachment.IsBought && ((isAttachmentPrimary && !loadout.PrimaryAttachments.ContainsValue(attachment)) || (!isAttachmentPrimary && !loadout.SecondaryAttachments.ContainsValue(attachment))));
@@ -4194,10 +4194,9 @@ public class UIHandler
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy BUTTON", !gunCharm.IsBought);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy Locked", !gunCharm.IsUnlocked && gunCharm.GunCharm.LevelRequirement > PlayerData.Level);
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.CREDIT)} <color={(PlayerData.Credits >= gunCharm.GunCharm.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{gunCharm.GunCharm.BuyPrice}</color>");
-        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !gunCharm.IsBought && !gunCharm.IsUnlocked && gunCharm.GunCharm.LevelRequirement > PlayerData.Level);
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !gunCharm.IsBought && !gunCharm.IsUnlocked /*&& gunCharm.GunCharm.LevelRequirement > PlayerData.Level*/);
         var coins = gunCharm.GunCharm.GetCoins(PlayerData.Level);
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.COIN)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.COIN)} {gunCharm.GunCharm.GetCoins(PlayerData.Level)}");
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.COIN)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
         var isAttachmentPrimary = IsAttachmentPagePrimary();
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Equip BUTTON", gunCharm.IsBought && ((isAttachmentPrimary && loadout.PrimaryGunCharm != gunCharm) || (!isAttachmentPrimary && loadout.SecondaryGunCharm != gunCharm)));
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Dequip BUTTON", gunCharm.IsBought && ((isAttachmentPrimary && loadout.PrimaryGunCharm == gunCharm) || (!isAttachmentPrimary && loadout.SecondaryGunCharm == gunCharm)));
@@ -4250,9 +4249,9 @@ public class UIHandler
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy BUTTON", !knife.IsBought);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy Locked", !knife.IsUnlocked && knife.Knife.LevelRequirement > PlayerData.Level);
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.CREDIT)} <color={(PlayerData.Credits >= knife.Knife.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{knife.Knife.BuyPrice}</color>");
-        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !knife.IsBought && !knife.IsUnlocked && knife.Knife.LevelRequirement > PlayerData.Level);
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !knife.IsBought && !knife.IsUnlocked /*&& knife.Knife.LevelRequirement > PlayerData.Level*/);
         var coins = knife.Knife.GetCoins(PlayerData.Level);
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.COIN)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.COIN)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Equip BUTTON", knife.IsBought && loadout.Knife != knife);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Dequip BUTTON", false);
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Description TEXT", knife.Knife.KnifeDesc);
@@ -4279,9 +4278,9 @@ public class UIHandler
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy BUTTON", !perk.IsBought);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy Locked", !perk.IsUnlocked && perk.Perk.LevelRequirement > PlayerData.Level);
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.CREDIT)} <color={(PlayerData.Credits >= perk.Perk.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{perk.Perk.BuyPrice}</color>");
-        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !perk.IsBought && !perk.IsUnlocked && perk.Perk.LevelRequirement > PlayerData.Level);
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !perk.IsBought && !perk.IsUnlocked /*&& perk.Perk.LevelRequirement > PlayerData.Level*/);
         var coins = perk.Perk.GetCoins(PlayerData.Level);
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.COIN)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.COIN)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
         var isEquipped = loadout.Perks.TryGetValue(perk.Perk.PerkType, out var equippedPerk) && equippedPerk == perk;
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Equip BUTTON", perk.IsBought && !isEquipped);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Dequip BUTTON", perk.IsBought && isEquipped);
@@ -4440,9 +4439,9 @@ public class UIHandler
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy BUTTON", !gadget.IsBought);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy Locked", !gadget.IsUnlocked && gadget.Gadget.LevelRequirement > PlayerData.Level);
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.CREDIT)} <color={(PlayerData.Credits >= gadget.Gadget.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{gadget.Gadget.BuyPrice}</color>");
-        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !gadget.IsBought && !gadget.IsUnlocked && gadget.Gadget.LevelRequirement > PlayerData.Level);
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !gadget.IsBought && !gadget.IsUnlocked /*&& gadget.Gadget.LevelRequirement > PlayerData.Level*/);
         var coins = gadget.Gadget.GetCoins(PlayerData.Level);
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.COIN)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.COIN)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Equip BUTTON", gadget.IsBought && ((LoadoutPage == ELoadoutPage.TACTICAL && loadout.Tactical != gadget) || (LoadoutPage == ELoadoutPage.LETHAL && loadout.Lethal != gadget)));
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Dequip BUTTON", gadget.IsBought && ((LoadoutPage == ELoadoutPage.TACTICAL && loadout.Tactical == gadget) || (LoadoutPage == ELoadoutPage.LETHAL && loadout.Lethal == gadget)));
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Description TEXT", gadget.Gadget.GadgetDesc);
@@ -4467,9 +4466,9 @@ public class UIHandler
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy BUTTON", !card.IsBought);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy Locked", !card.IsUnlocked && card.Card.LevelRequirement > PlayerData.Level);
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.CREDIT)} <color={(PlayerData.Credits >= card.Card.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{card.Card.BuyPrice}</color>");
-        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !card.IsBought && !card.IsUnlocked && card.Card.LevelRequirement > PlayerData.Level);
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !card.IsBought && !card.IsUnlocked /*&& card.Card.LevelRequirement > PlayerData.Level*/);
         var coins = card.Card.GetCoins(PlayerData.Level);
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.COIN)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.COIN)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Equip BUTTON", card.IsBought && loadout.Card != card);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Dequip BUTTON", card.IsBought && loadout.Card == card);
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Description TEXT", card.Card.CardDesc);
@@ -4496,9 +4495,9 @@ public class UIHandler
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy BUTTON", !glove.IsBought);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy Locked", !glove.IsUnlocked && glove.Glove.LevelRequirement > PlayerData.Level);
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.CREDIT)} <color={(PlayerData.Credits >= glove.Glove.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{glove.Glove.BuyPrice}</color>");
-        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !glove.IsBought && !glove.IsUnlocked && glove.Glove.LevelRequirement > PlayerData.Level);
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !glove.IsBought && !glove.IsUnlocked /*&& glove.Glove.LevelRequirement > PlayerData.Level*/);
         var coins = glove.Glove.GetCoins(PlayerData.Level);
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.COIN)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.COIN)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Equip BUTTON", glove.IsBought && loadout.Glove != glove);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Dequip BUTTON", glove.IsBought && loadout.Glove == glove);
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Description TEXT", glove.Glove.GloveDesc);
@@ -4524,9 +4523,9 @@ public class UIHandler
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy BUTTON", !killstreak.IsBought);
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy Locked", !killstreak.IsUnlocked && killstreak.Killstreak.LevelRequirement > PlayerData.Level);
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.CREDIT)} <color={(PlayerData.Credits >= killstreak.Killstreak.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{killstreak.Killstreak.BuyPrice}</color>");
-        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !killstreak.IsBought && !killstreak.IsUnlocked && killstreak.Killstreak.LevelRequirement > PlayerData.Level);
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !killstreak.IsBought && !killstreak.IsUnlocked /*&& killstreak.Killstreak.LevelRequirement > PlayerData.Level*/);
         var coins = killstreak.Killstreak.GetCoins(PlayerData.Level);
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"UNLOCK {Utility.GetCurrencySymbol(ECurrency.COIN)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.COIN)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Equip BUTTON", killstreak.IsBought && !loadout.Killstreaks.Contains(killstreak));
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Dequip BUTTON", killstreak.IsBought && loadout.Killstreaks.Contains(killstreak));
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Description TEXT", killstreak.Killstreak.KillstreakDesc);
@@ -4766,8 +4765,9 @@ public class UIHandler
                     if (DB.UpdatePlayerKillstreakBought(Player.CSteamID, killstreak.Killstreak.KillstreakID, true))
                     {
                         DB.DecreasePlayerCredits(Player.CSteamID, killstreak.Killstreak.BuyPrice);
+                        ReloadSelectedItem();
+                        ReloadLoadoutTab();
                         EquipSelectedItem();
-                        BackToLoadout();
                     }
                 }
                 else
@@ -4846,13 +4846,13 @@ public class UIHandler
                 }
 
                 var cost = gun.Gun.GetCoins(PlayerData.Level);
-                if (PlayerData.Coins >= cost && !gun.IsBought && !gun.IsUnlocked && gun.Gun.LevelRequirement > PlayerData.Level)
+                if (PlayerData.Coins >= cost && !gun.IsBought && !gun.IsUnlocked /*&& gun.Gun.LevelRequirement > PlayerData.Level*/)
                 {
-                    if (DB.UpdatePlayerGunUnlocked(Player.CSteamID, gun.Gun.GunID, true))
+                    if (DB.UpdatePlayerGunUnlocked(Player.CSteamID, gun.Gun.GunID, true) && DB.UpdatePlayerGunBought(Player.CSteamID, gun.Gun.GunID, true))
                     {
                         DB.DecreasePlayerCoins(Player.CSteamID, cost);
-                        ReloadSelectedItem();
-                        ReloadLoadoutTab();
+                        EquipSelectedItem();
+                        BackToLoadout();
                     }
                 }
                 else
@@ -4879,13 +4879,13 @@ public class UIHandler
                 }
 
                 var cost = attachment.GetCoins(gun.Level);
-                if (PlayerData.Coins >= cost && !attachment.IsBought && !attachment.IsUnlocked && attachment.LevelRequirement > gun.Level)
+                if (PlayerData.Coins >= cost && !attachment.IsBought && !attachment.IsUnlocked /*&& attachment.LevelRequirement > gun.Level*/)
                 {
-                    if (DB.UpdatePlayerGunAttachmentUnlocked(Player.CSteamID, gun.Gun.GunID, attachment.Attachment.AttachmentID, true))
+                    if (DB.UpdatePlayerGunAttachmentUnlocked(Player.CSteamID, gun.Gun.GunID, attachment.Attachment.AttachmentID, true) && DB.UpdatePlayerGunAttachmentBought(Player.CSteamID, gun.Gun.GunID, attachment.Attachment.AttachmentID, true))
                     {
                         DB.DecreasePlayerCoins(Player.CSteamID, cost);
-                        ReloadSelectedItem();
-                        ReloadLoadoutTab();
+                        EquipSelectedItem();
+                        BackToLoadout();
                     }
                 }
                 else
@@ -4911,13 +4911,13 @@ public class UIHandler
                 }
 
                 var cost = attachment.GetCoins(gun.Level);
-                if (PlayerData.Coins >= cost && !attachment.IsBought && !attachment.IsUnlocked && attachment.LevelRequirement > gun.Level)
+                if (PlayerData.Coins >= cost && !attachment.IsBought && !attachment.IsUnlocked /*&& attachment.LevelRequirement > gun.Level*/)
                 {
-                    if (DB.UpdatePlayerGunAttachmentUnlocked(Player.CSteamID, gun.Gun.GunID, attachment.Attachment.AttachmentID, true))
+                    if (DB.UpdatePlayerGunAttachmentUnlocked(Player.CSteamID, gun.Gun.GunID, attachment.Attachment.AttachmentID, true) && DB.UpdatePlayerGunAttachmentBought(Player.CSteamID, gun.Gun.GunID, attachment.Attachment.AttachmentID, true))
                     {
                         DB.DecreasePlayerCoins(Player.CSteamID, cost);
-                        ReloadSelectedItem();
-                        ReloadLoadoutTab();
+                        EquipSelectedItem();
+                        BackToLoadout();
                     }
                 }
                 else
@@ -4936,13 +4936,13 @@ public class UIHandler
                 }
 
                 var cost = gunCharm.GunCharm.GetCoins(PlayerData.Level);
-                if (PlayerData.Coins >= cost && !gunCharm.IsBought && !gunCharm.IsUnlocked && gunCharm.GunCharm.LevelRequirement > PlayerData.Level)
+                if (PlayerData.Coins >= cost && !gunCharm.IsBought && !gunCharm.IsUnlocked /*&& gunCharm.GunCharm.LevelRequirement > PlayerData.Level*/)
                 {
-                    if (DB.UpdatePlayerGunCharmUnlocked(Player.CSteamID, gunCharm.GunCharm.CharmID, true))
+                    if (DB.UpdatePlayerGunCharmUnlocked(Player.CSteamID, gunCharm.GunCharm.CharmID, true) && DB.UpdatePlayerGunCharmBought(Player.CSteamID, gunCharm.GunCharm.CharmID, true))
                     {
                         DB.DecreasePlayerCoins(Player.CSteamID, cost);
-                        ReloadSelectedItem();
-                        ReloadLoadoutTab();
+                        EquipSelectedItem();
+                        BackToLoadout();
                     }
                 }
                 else
@@ -4960,13 +4960,13 @@ public class UIHandler
                 }
 
                 var cost = knife.Knife.GetCoins(PlayerData.Level);
-                if (PlayerData.Coins >= cost && !knife.IsBought && !knife.IsUnlocked && knife.Knife.LevelRequirement > PlayerData.Level)
+                if (PlayerData.Coins >= cost && !knife.IsBought && !knife.IsUnlocked /*&& knife.Knife.LevelRequirement > PlayerData.Level*/)
                 {
-                    if (DB.UpdatePlayerKnifeUnlocked(Player.CSteamID, knife.Knife.KnifeID, true))
+                    if (DB.UpdatePlayerKnifeUnlocked(Player.CSteamID, knife.Knife.KnifeID, true) && DB.UpdatePlayerKnifeBought(Player.CSteamID, knife.Knife.KnifeID, true))
                     {
                         DB.DecreasePlayerCoins(Player.CSteamID, cost);
-                        ReloadSelectedItem();
-                        ReloadLoadoutTab();
+                        EquipSelectedItem();
+                        BackToLoadout();
                     }
                 }
                 else
@@ -4985,13 +4985,13 @@ public class UIHandler
                 }
 
                 var cost = gadget.Gadget.GetCoins(PlayerData.Level);
-                if (PlayerData.Coins >= cost && !gadget.IsBought && !gadget.IsUnlocked && gadget.Gadget.LevelRequirement > PlayerData.Level)
+                if (PlayerData.Coins >= cost && !gadget.IsBought && !gadget.IsUnlocked /*&& gadget.Gadget.LevelRequirement > PlayerData.Level*/)
                 {
-                    if (DB.UpdatePlayerGadgetUnlocked(Player.CSteamID, gadget.Gadget.GadgetID, true))
+                    if (DB.UpdatePlayerGadgetUnlocked(Player.CSteamID, gadget.Gadget.GadgetID, true) && DB.UpdatePlayerGadgetBought(Player.CSteamID, gadget.Gadget.GadgetID, true))
                     {
                         DB.DecreasePlayerCoins(Player.CSteamID, cost);
-                        ReloadSelectedItem();
-                        ReloadLoadoutTab();
+                        EquipSelectedItem();
+                        BackToLoadout();
                     }
                 }
                 else
@@ -5011,13 +5011,13 @@ public class UIHandler
                 }
 
                 var cost = perk.Perk.GetCoins(PlayerData.Level);
-                if (PlayerData.Coins >= cost && !perk.IsBought && !perk.IsUnlocked && perk.Perk.LevelRequirement > PlayerData.Level)
+                if (PlayerData.Coins >= cost && !perk.IsBought && !perk.IsUnlocked /*&& perk.Perk.LevelRequirement > PlayerData.Level*/)
                 {
-                    if (DB.UpdatePlayerPerkUnlocked(Player.CSteamID, perk.Perk.PerkID, true))
+                    if (DB.UpdatePlayerPerkUnlocked(Player.CSteamID, perk.Perk.PerkID, true) && DB.UpdatePlayerPerkBought(Player.CSteamID, perk.Perk.PerkID, true))
                     {
                         DB.DecreasePlayerCoins(Player.CSteamID, cost);
-                        ReloadSelectedItem();
-                        ReloadLoadoutTab();
+                        EquipSelectedItem();
+                        BackToLoadout();
                     }
                 }
                 else
@@ -5035,13 +5035,14 @@ public class UIHandler
                 }
 
                 var cost = killstreak.Killstreak.GetCoins(PlayerData.Level);
-                if (PlayerData.Coins >= cost && !killstreak.IsBought && !killstreak.IsUnlocked && killstreak.Killstreak.LevelRequirement > PlayerData.Level)
+                if (PlayerData.Coins >= cost && !killstreak.IsBought && !killstreak.IsUnlocked /*&& killstreak.Killstreak.LevelRequirement > PlayerData.Level*/)
                 {
-                    if (DB.UpdatePlayerKillstreakUnlocked(Player.CSteamID, killstreak.Killstreak.KillstreakID, true))
+                    if (DB.UpdatePlayerKillstreakUnlocked(Player.CSteamID, killstreak.Killstreak.KillstreakID, true) && DB.UpdatePlayerKillstreakBought(Player.CSteamID, killstreak.Killstreak.KillstreakID, true))
                     {
                         DB.DecreasePlayerCoins(Player.CSteamID, cost);
                         ReloadSelectedItem();
                         ReloadLoadoutTab();
+                        EquipSelectedItem();
                     }
                 }
                 else
@@ -5059,13 +5060,13 @@ public class UIHandler
                 }
 
                 var cost = card.Card.GetCoins(PlayerData.Level);
-                if (PlayerData.Coins >= cost && !card.IsBought && !card.IsUnlocked && card.Card.LevelRequirement > PlayerData.Level)
+                if (PlayerData.Coins >= cost && !card.IsBought && !card.IsUnlocked /*&& card.Card.LevelRequirement > PlayerData.Level*/)
                 {
-                    if (DB.UpdatePlayerCardUnlocked(Player.CSteamID, card.Card.CardID, true))
+                    if (DB.UpdatePlayerCardUnlocked(Player.CSteamID, card.Card.CardID, true) && DB.UpdatePlayerCardBought(Player.CSteamID, card.Card.CardID, true))
                     {
                         DB.DecreasePlayerCoins(Player.CSteamID, cost);
-                        ReloadSelectedItem();
-                        ReloadLoadoutTab();
+                        EquipSelectedItem();
+                        BackToLoadout();
                     }
                 }
                 else
@@ -5083,13 +5084,13 @@ public class UIHandler
                 }
 
                 var cost = glove.Glove.GetCoins(PlayerData.Level);
-                if (PlayerData.Coins >= cost && !glove.IsBought && !glove.IsUnlocked && glove.Glove.LevelRequirement > PlayerData.Level)
+                if (PlayerData.Coins >= cost && !glove.IsBought && !glove.IsUnlocked /*&& glove.Glove.LevelRequirement > PlayerData.Level*/)
                 {
-                    if (DB.UpdatePlayerGloveUnlocked(Player.CSteamID, glove.Glove.GloveID, true))
+                    if (DB.UpdatePlayerGloveUnlocked(Player.CSteamID, glove.Glove.GloveID, true) && DB.UpdatePlayerGloveBought(Player.CSteamID, glove.Glove.GloveID, true))
                     {
                         DB.DecreasePlayerCoins(Player.CSteamID, cost);
-                        ReloadSelectedItem();
-                        ReloadLoadoutTab();
+                        EquipSelectedItem();
+                        BackToLoadout();
                     }
                 }
                 else
@@ -5148,8 +5149,7 @@ public class UIHandler
                 if (gun.IsBought)
                 {
                     loadoutManager.EquipGun(Player, LoadoutID, gun.Gun.GunID, true);
-                    ReloadLoadoutTab();
-                    ReloadSelectedItem();
+                    BackToLoadout();
                 }
 
                 break;
@@ -5175,8 +5175,7 @@ public class UIHandler
                 if (attachment.IsBought)
                 {
                     loadoutManager.EquipAttachment(Player, attachment.Attachment.AttachmentID, LoadoutID, true);
-                    ReloadLoadoutTab();
-                    ReloadSelectedItem();
+                    BackToLoadout();
                 }
 
                 break;
@@ -5193,8 +5192,7 @@ public class UIHandler
                 if (gun.IsBought)
                 {
                     loadoutManager.EquipGun(Player, LoadoutID, gun.Gun.GunID, false);
-                    ReloadLoadoutTab();
-                    ReloadSelectedItem();
+                    BackToLoadout();
                 }
 
                 break;
@@ -5219,8 +5217,7 @@ public class UIHandler
                 if (attachment.IsBought)
                 {
                     loadoutManager.EquipAttachment(Player, attachment.Attachment.AttachmentID, LoadoutID, false);
-                    ReloadLoadoutTab();
-                    ReloadSelectedItem();
+                    BackToLoadout();
                 }
 
                 break;

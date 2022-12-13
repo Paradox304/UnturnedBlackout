@@ -12,6 +12,7 @@ public class GameEvent
     public string EventName { get; set; }
     public string EventColor { get; set; }
     public int EventWeight { get; set; }
+    public int EventLimit { get; set; }
     
     public bool IsHardcore { get; set; }
     

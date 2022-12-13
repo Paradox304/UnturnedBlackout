@@ -328,7 +328,7 @@ public class CTFGame : Game
             var location = Config.Locations.FileData.ArenaLocations.FirstOrDefault(k => k.LocationID == randomLocation);
             var gameSetup = Plugin.Instance.Game.GetRandomGameSetup(location);
             if (GameEvent?.AlwaysHaveLobby ?? false)
-                gameSetup.Item2 = GameEvent;
+                gameSetup.Item2 = Plugin.Instance.Game.Games.Exists(k => k != this && k.GameEvent == GameEvent && k.Location.GetMaxPlayers(k.GameMode) > k.GetPlayerCount()) ? gameSetup.Item2 : GameEvent;
 
             GamePhase = EGamePhase.ENDED;
             Plugin.Instance.Game.EndGame(this);

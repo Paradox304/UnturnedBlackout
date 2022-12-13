@@ -46,25 +46,7 @@ public class GameManager
 
     private void StartGames()
     {
-        Logging.Debug("Starting games");
-        foreach (var @event in Config.Events.FileData.GameEvents.Where(k => k.AlwaysHaveLobby))
-        {
-            Logging.Debug($"{AvailableLocations.Count} locations available");
-            var locationID = AvailableLocations[UnityEngine.Random.Range(0, AvailableLocations.Count)];
-            var location = Config.Locations.FileData.ArenaLocations.FirstOrDefault(k => k.LocationID == locationID);
-            if (location == null)
-            {
-                Logging.Debug($"Error finding a free location, returning");
-                return;
-            }
-
-            var gameSetup = GetRandomGameSetup(location);
-            gameSetup.Item2 = @event;
-            Logging.Debug($"Found Location: {location.LocationName}, GameMode: {gameSetup.Item1}, Event: {gameSetup.Item2?.EventName ?? "None"}");
-            StartGame(location, gameSetup.Item1, gameSetup.Item2, false);
-        }
-        
-        for (var i = Games.Count + 1; i <= Config.Base.FileData.MinGamesCount; i++)
+        for (var i = 1; i <= Config.Base.FileData.MinGamesCount; i++)
         {
             Logging.Debug($"{AvailableLocations.Count} locations available");
             var locationID = AvailableLocations[UnityEngine.Random.Range(0, AvailableLocations.Count)];
@@ -328,12 +310,31 @@ public class GameManager
         var gameModeOptions = Config.Gamemode.FileData.GamemodeOptions.Where(k => !k.IgnoredLocations.Contains(location.LocationID)).ToList();
         Logging.Debug($"Found {gameModeOptions.Count} gamemode options to choose from");
         var option = CalculateRandomGameMode(gameModeOptions);
+        GameEvent @event = null;
+        foreach (var alwaysEvent in Config.Events.FileData.GameEvents.Where(k => k.AlwaysHaveLobby))
+        {
+            Logging.Debug($"Checking if there are enough {alwaysEvent.EventName} event lobbies");
+            if (Games.Exists(k => k.GameEvent == alwaysEvent && k.Location.GetMaxPlayers(k.GameMode) > k.GetPlayerCount()))
+                continue;
+
+            Logging.Debug($"All other event lobbies of {alwaysEvent.EventName} are filled, setting this one to that event");
+            @event = alwaysEvent;
+            break;
+        }
+
+        if (@event != null)
+            return (option.GameType, @event);
+        
         Logging.Debug($"Getting list of random events for location {location.LocationName}");
-        var events = Config.Events.FileData.GameEvents.Where(k => k.EventWeight != 0 && !k.IgnoredLocations.Contains(location.LocationID) && !k.IgnoredGameModes.Contains(option.GameType)).ToList();
+        var events = Config.Events.FileData.GameEvents.Where(k => k.EventWeight != 0 && !k.IgnoredLocations.Contains(location.LocationID) && !k.IgnoredGameModes.Contains(option.GameType) && Games.Count(l => k == l.GameEvent) < k.EventLimit).ToList();
         Logging.Debug($"Found {events.Count} events to choose from");
+        if (events.Count == 0)
+            return (option.GameType, @event);
+
         var eventRNG = UnityEngine.Random.Range(1, 101);
         Logging.Debug($"Event RNG: {eventRNG}, Passed: {eventRNG <= option.EventChance}");
-        var @event = eventRNG <= option.EventChance ? CalculateRandomGameEvent(events) : null;
+        @event = eventRNG <= option.EventChance ? CalculateRandomGameEvent(events) : null;
+
         return (option.GameType, @event);
     }
 
@@ -401,7 +402,19 @@ public class GameManager
 
                 var threshold = gameCount * 100 / gameMaxCount;
                 Logging.Debug($"Checking games, total games: {Games.Count}, players: {gameCount}, max count: {gameMaxCount}, threshold: {threshold}, game threshold: {Config.Base.FileData.GameThreshold}");
-                if (threshold < Config.Base.FileData.GameThreshold)
+                var ignoreThreshold = false;
+                foreach (var alwaysEvent in Config.Events.FileData.GameEvents.Where(k => k.AlwaysHaveLobby))
+                {
+                    Logging.Debug($"Checking if there are enough {alwaysEvent.EventName} event lobbies");
+                    if (Games.Exists(k => k.GameEvent == alwaysEvent && k.Location.GetMaxPlayers(k.GameMode) > k.GetPlayerCount()))
+                        continue;
+
+                    Logging.Debug($"All other event lobbies of {alwaysEvent.EventName} are filled, setting this one to that event");
+                    ignoreThreshold = true;
+                    break;
+                }
+                
+                if (!ignoreThreshold && threshold < Config.Base.FileData.GameThreshold)
                     continue;
             
                 Logging.Debug($"Percentage above {Config.Base.FileData.GameThreshold}, creating new game");

@@ -33,10 +33,5 @@ public class Glove
         UnboxedAmount = unboxedAmount;
     }
 
-    public int GetCoins(int currentLevel)
-    {
-        var levelsNeeded = LevelRequirement - currentLevel;
-        var coinsRequired = Coins * levelsNeeded;
-        return coinsRequired > 0 ? coinsRequired : 0;
-    }
+    public int GetCoins(int currentLevel) => Coins;
 }
