@@ -185,7 +185,7 @@ public class FFAGame : Game
                 DB.IncreasePlayerCredits(player.GamePlayer.SteamID, summary.PendingCredits);
                 DB.IncreasePlayerBPXP(player.GamePlayer.SteamID, summary.BattlepassXP + summary.BattlepassBonusXP);
 
-                TaskDispatcher.QueueOnMainThread(() => Quest.CheckQuest(player.GamePlayer, EQuestType.FINISH_MATCH, new() { { EQuestCondition.MAP, Location.LocationID }, { EQuestCondition.GAMEMODE, (int)GameMode }, { EQuestCondition.EVENT_ID, GameEvent?.EventID ?? 0 }, { EQuestCondition.EVENT_ID, GameEvent?.EventID ?? 0 }, { EQuestCondition.WIN_KILLS, player.Kills } }));
+                TaskDispatcher.QueueOnMainThread(() => Quest.CheckQuest(player.GamePlayer, EQuestType.FINISH_MATCH, new() { { EQuestCondition.MAP, Location.LocationID }, { EQuestCondition.GAMEMODE, (int)GameMode }, { EQuestCondition.EVENT_ID, GameEvent?.EventID ?? 0 }, { EQuestCondition.WIN_KILLS, player.Kills } }));
                 if (index == 0)
                     TaskDispatcher.QueueOnMainThread(() => Quest.CheckQuest(player.GamePlayer, EQuestType.WIN, new() { { EQuestCondition.MAP, Location.LocationID }, { EQuestCondition.GAMEMODE, (int)GameMode }, { EQuestCondition.WIN_KILLS, player.Kills } }));
             }
