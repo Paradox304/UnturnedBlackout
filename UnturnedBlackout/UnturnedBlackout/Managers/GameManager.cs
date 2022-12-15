@@ -104,6 +104,7 @@ public class GameManager
         else
             _ = AvailableLocations.Remove(location.LocationID);
 
+        Games = Games.OrderByDescending(k => k.GameEvent?.AlwaysHaveLobby ?? false).ToList();
         Plugin.Instance.UI.OnGameUpdated();
     }
 

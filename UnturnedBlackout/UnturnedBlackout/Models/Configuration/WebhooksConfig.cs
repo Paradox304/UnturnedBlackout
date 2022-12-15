@@ -12,7 +12,8 @@ public class WebhooksConfig
     public string MuteWebhookLink { get; set; }
     public string UnmuteWebhookLink { get; set; }
     public string PluginWarningsWebhookLink { get; set; }
-
+    public string BlacktagPurchaseWebhookLink { get; set; }
+    
     public WebhooksConfig()
     {
         

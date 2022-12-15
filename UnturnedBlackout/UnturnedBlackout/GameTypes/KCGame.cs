@@ -154,7 +154,7 @@ public class KCGame : Game
                 if (totalMinutesPlayed < Config.RoundEndCases.FileData.MinimumMinutesPlayed || player.Kills == 0)
                     continue;
 
-                var chance = Mathf.RoundToInt(Config.RoundEndCases.FileData.Chance * totalMinutesPlayed);
+                var chance = Mathf.RoundToInt(Config.RoundEndCases.FileData.Chance * totalMinutesPlayed) + (player.GamePlayer.Data.HasPrime ? Config.RoundEndCases.FileData.PrimeBonusChance : 0);
                 if (UnityEngine.Random.Range(1, 101) > chance)
                     continue;
 
@@ -508,7 +508,7 @@ public class KCGame : Game
             ushort equipmentUsed = 0;
             var longshotRange = 0f;
 
-            var usedKillstreak = kPlayer.GamePlayer.HasKillstreakActive && (kPlayer.GamePlayer.ActiveKillstreak?.Killstreak?.KillstreakInfo?.IsItem ?? false) && cause != EDeathCause.SENTRY;
+            var usedKillstreak = kPlayer.GamePlayer.HasKillstreakActive && (kPlayer.GamePlayer.ActiveKillstreak?.Killstreak?.KillstreakInfo?.IsItem ?? false) && cause != EDeathCause.SENTRY && cause != EDeathCause.SHRED;
             var killstreakID = kPlayer.GamePlayer.ActiveKillstreak?.Killstreak?.KillstreakID ?? 0;
 
             string overrideSymbol = null;
@@ -1018,7 +1018,7 @@ public class KCGame : Game
         if (owner == null)
             return;
 
-        if (GameTurretsInverse.ContainsKey(drop))
+        pendingTotalDamage *= GameEvent?.IsHardcore ?? false ? (ushort)3 : (ushort)1;        if (GameTurretsInverse.ContainsKey(drop))
         {
             if (owner.Team == damager.Team)
             {

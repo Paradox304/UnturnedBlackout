@@ -1011,7 +1011,8 @@ public class UIHandler
         Player.VanishMode = true;
         Player.Player.look.sendFreecamAllowed(true);
         Player.Player.look.sendSpecStatsAllowed(true);
-        Player.Player.movement.sendPluginSpeedMultiplier(0f);
+        if (!Player.IsAdmin)
+            Player.Player.movement.sendPluginSpeedMultiplier(0f);
         HideUI();
         Utility.Say(Player, "[color=green]Staff Mode Activated[/color]");
     }
@@ -4850,6 +4851,7 @@ public class UIHandler
                 {
                     if (DB.UpdatePlayerGunUnlocked(Player.CSteamID, gun.Gun.GunID, true) && DB.UpdatePlayerGunBought(Player.CSteamID, gun.Gun.GunID, true))
                     {
+                        SendUnlockEmbed(gun.Gun.GunName, gun.Gun.IconLink, cost);
                         DB.DecreasePlayerCoins(Player.CSteamID, cost);
                         EquipSelectedItem();
                         BackToLoadout();
@@ -4883,6 +4885,7 @@ public class UIHandler
                 {
                     if (DB.UpdatePlayerGunAttachmentUnlocked(Player.CSteamID, gun.Gun.GunID, attachment.Attachment.AttachmentID, true) && DB.UpdatePlayerGunAttachmentBought(Player.CSteamID, gun.Gun.GunID, attachment.Attachment.AttachmentID, true))
                     {
+                        SendUnlockEmbed($"{attachment.Attachment.AttachmentName} | {gun.Gun.GunName}", attachment.Attachment.IconLink, cost);
                         DB.DecreasePlayerCoins(Player.CSteamID, cost);
                         EquipSelectedItem();
                         BackToLoadout();
@@ -4915,6 +4918,7 @@ public class UIHandler
                 {
                     if (DB.UpdatePlayerGunAttachmentUnlocked(Player.CSteamID, gun.Gun.GunID, attachment.Attachment.AttachmentID, true) && DB.UpdatePlayerGunAttachmentBought(Player.CSteamID, gun.Gun.GunID, attachment.Attachment.AttachmentID, true))
                     {
+                        SendUnlockEmbed($"{attachment.Attachment.AttachmentName} | {gun.Gun.GunName}", attachment.Attachment.IconLink, cost);
                         DB.DecreasePlayerCoins(Player.CSteamID, cost);
                         EquipSelectedItem();
                         BackToLoadout();
@@ -4940,6 +4944,7 @@ public class UIHandler
                 {
                     if (DB.UpdatePlayerGunCharmUnlocked(Player.CSteamID, gunCharm.GunCharm.CharmID, true) && DB.UpdatePlayerGunCharmBought(Player.CSteamID, gunCharm.GunCharm.CharmID, true))
                     {
+                        SendUnlockEmbed(gunCharm.GunCharm.CharmName, gunCharm.GunCharm.IconLink, cost);
                         DB.DecreasePlayerCoins(Player.CSteamID, cost);
                         EquipSelectedItem();
                         BackToLoadout();
@@ -4964,6 +4969,7 @@ public class UIHandler
                 {
                     if (DB.UpdatePlayerKnifeUnlocked(Player.CSteamID, knife.Knife.KnifeID, true) && DB.UpdatePlayerKnifeBought(Player.CSteamID, knife.Knife.KnifeID, true))
                     {
+                        SendUnlockEmbed(knife.Knife.KnifeName, knife.Knife.IconLink, cost);
                         DB.DecreasePlayerCoins(Player.CSteamID, cost);
                         EquipSelectedItem();
                         BackToLoadout();
@@ -4989,6 +4995,7 @@ public class UIHandler
                 {
                     if (DB.UpdatePlayerGadgetUnlocked(Player.CSteamID, gadget.Gadget.GadgetID, true) && DB.UpdatePlayerGadgetBought(Player.CSteamID, gadget.Gadget.GadgetID, true))
                     {
+                        SendUnlockEmbed(gadget.Gadget.GadgetName, gadget.Gadget.IconLink, cost);
                         DB.DecreasePlayerCoins(Player.CSteamID, cost);
                         EquipSelectedItem();
                         BackToLoadout();
@@ -5015,6 +5022,7 @@ public class UIHandler
                 {
                     if (DB.UpdatePlayerPerkUnlocked(Player.CSteamID, perk.Perk.PerkID, true) && DB.UpdatePlayerPerkBought(Player.CSteamID, perk.Perk.PerkID, true))
                     {
+                        SendUnlockEmbed(perk.Perk.PerkName, perk.Perk.IconLink, cost);
                         DB.DecreasePlayerCoins(Player.CSteamID, cost);
                         EquipSelectedItem();
                         BackToLoadout();
@@ -5039,6 +5047,7 @@ public class UIHandler
                 {
                     if (DB.UpdatePlayerKillstreakUnlocked(Player.CSteamID, killstreak.Killstreak.KillstreakID, true) && DB.UpdatePlayerKillstreakBought(Player.CSteamID, killstreak.Killstreak.KillstreakID, true))
                     {
+                        SendUnlockEmbed(killstreak.Killstreak.KillstreakName, killstreak.Killstreak.IconLink, cost);
                         DB.DecreasePlayerCoins(Player.CSteamID, cost);
                         ReloadSelectedItem();
                         ReloadLoadoutTab();
@@ -5064,6 +5073,7 @@ public class UIHandler
                 {
                     if (DB.UpdatePlayerCardUnlocked(Player.CSteamID, card.Card.CardID, true) && DB.UpdatePlayerCardBought(Player.CSteamID, card.Card.CardID, true))
                     {
+                        SendUnlockEmbed(card.Card.CardName, card.Card.IconLink, cost);
                         DB.DecreasePlayerCoins(Player.CSteamID, cost);
                         EquipSelectedItem();
                         BackToLoadout();
@@ -5088,6 +5098,7 @@ public class UIHandler
                 {
                     if (DB.UpdatePlayerGloveUnlocked(Player.CSteamID, glove.Glove.GloveID, true) && DB.UpdatePlayerGloveBought(Player.CSteamID, glove.Glove.GloveID, true))
                     {
+                        SendUnlockEmbed(glove.Glove.GloveName, glove.Glove.IconLink, cost);
                         DB.DecreasePlayerCoins(Player.CSteamID, cost);
                         EquipSelectedItem();
                         BackToLoadout();
@@ -5534,6 +5545,13 @@ public class UIHandler
         ReloadLoadout();
     }
 
+    public void SendUnlockEmbed(string name, string iconLink, int cost)
+    {
+        var embed = new Embed(null, null, null, "255", DateTime.UtcNow.ToString("s"), new(Provider.serverName, Provider.configData.Browser.Icon), new(PlayerData.SteamName, $"https://steamcommunity.com/profiles/{PlayerData.SteamID}", PlayerData.AvatarLinks[0]),
+            new Field[] { new(name, $"{cost} :Blacktag:", true) }, new(iconLink), null);
+        Plugin.Instance.Discord.SendEmbed(embed, "", Config.Webhooks.FileData.BlacktagPurchaseWebhookLink);
+    }
+    
     public string GetPerkInt() => LoadoutPage.ToString().Replace("PERK", "");
     public string GetAttachmentPage() => LoadoutPage.ToString().Replace("ATTACHMENT_PRIMARY_", "").Replace("ATTACHMENT_SECONDARY_", "");
     public bool IsAttachmentPagePrimary() => (int)LoadoutPage >= MINIMUM_LOADOUT_PAGE_ATTACHMENT_PRIMARY && (int)LoadoutPage <= MAXIMUM_LOADOUT_PAGE_ATTACHMENT_PRIMARY;
@@ -7193,8 +7211,8 @@ public class UIHandler
         // Animate Match XP
 
         var boldSpaces = currentXP == 0 ? 1 : Math.Max(1, Math.Min(MAX_SPACES_MATCH_END_SUMMARY, currentXP * MAX_SPACES_MATCH_END_SUMMARY / (nextLevelXP == 0 ? 1 : nextLevelXP)));
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", UIManager.HAIRSPACE_SYMBOL_STRING);
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 0", new(' ', boldSpaces));
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", UIManager.VERY_SMALL_SQUARE);
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 0", boldSpaces == 1 ? UIManager.VERY_SMALL_SQUARE : new(' ', boldSpaces));
         yield return new WaitForSeconds(0.7f);
 
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Type TEXT", "Match XP");
@@ -7215,8 +7233,8 @@ public class UIHandler
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", new(' ', MAX_SPACES_MATCH_END_SUMMARY - boldSpaces));
             yield return new WaitForSeconds(0.5f);
 
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 0", UIManager.HAIRSPACE_SYMBOL_STRING);
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", UIManager.HAIRSPACE_SYMBOL_STRING);
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 0", UIManager.VERY_SMALL_SQUARE);
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", UIManager.VERY_SMALL_SQUARE);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary LevelUp Toggle", false);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Level 0 TEXT", $"<color=#AD6816>{currentLevel:D3}</color>");
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Level 1 TEXT", nextLevelXP == 0 ? "MAX" : (currentLevel + 1).ToString("D3"));
@@ -7225,7 +7243,7 @@ public class UIHandler
         }
 
         var highlightedSpaces = Math.Max(1, Math.Min(MAX_SPACES_MATCH_END_SUMMARY - boldSpaces, b * (MAX_SPACES_MATCH_END_SUMMARY - boldSpaces) / (nextLevelXP - currentXP)));
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", new(' ', highlightedSpaces));
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", highlightedSpaces == 1 ? UIManager.VERY_SMALL_SQUARE : new(' ', highlightedSpaces));
         currentXP += b;
         yield return new WaitForSeconds(0.7f);
 
@@ -7239,8 +7257,8 @@ public class UIHandler
         // Animate Match Bonus XP
 
         boldSpaces = currentXP == 0 ? 1 : Math.Max(1, Math.Min(MAX_SPACES_MATCH_END_SUMMARY, currentXP * MAX_SPACES_MATCH_END_SUMMARY / (nextLevelXP == 0 ? 1 : nextLevelXP)));
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", UIManager.HAIRSPACE_SYMBOL_STRING);
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 0", new(' ', boldSpaces));
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", UIManager.VERY_SMALL_SQUARE);
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 0", boldSpaces == 1 ? UIManager.VERY_SMALL_SQUARE : new(' ', boldSpaces));
         yield return new WaitForSeconds(0.7f);
 
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Type TEXT", "Match Bonus XP");
@@ -7261,8 +7279,8 @@ public class UIHandler
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", new(' ', MAX_SPACES_MATCH_END_SUMMARY - boldSpaces));
             yield return new WaitForSeconds(0.5f);
 
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 0", UIManager.HAIRSPACE_SYMBOL_STRING);
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", UIManager.HAIRSPACE_SYMBOL_STRING);
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 0", UIManager.VERY_SMALL_SQUARE);
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", UIManager.VERY_SMALL_SQUARE);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary LevelUp Toggle", false);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Level 0 TEXT", $"<color=#AD6816>{currentLevel:D3}</color>");
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Level 1 TEXT", nextLevelXP == 0 ? "MAX" : (currentLevel + 1).ToString("D3"));
@@ -7271,7 +7289,7 @@ public class UIHandler
         }
 
         highlightedSpaces = Math.Max(1, Math.Min(MAX_SPACES_MATCH_END_SUMMARY - boldSpaces, b * (MAX_SPACES_MATCH_END_SUMMARY - boldSpaces) / (nextLevelXP - currentXP)));
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", new(' ', highlightedSpaces));
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", highlightedSpaces == 1 ? UIManager.VERY_SMALL_SQUARE : new(' ', highlightedSpaces));
         currentXP += b;
         yield return new WaitForSeconds(0.7f);
 
@@ -7285,8 +7303,8 @@ public class UIHandler
         // Animate Achievement Bonus XP
 
         boldSpaces = currentXP == 0 ? 1 : Math.Max(1, Math.Min(MAX_SPACES_MATCH_END_SUMMARY, currentXP * MAX_SPACES_MATCH_END_SUMMARY / (nextLevelXP == 0 ? 1 : nextLevelXP)));
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", UIManager.HAIRSPACE_SYMBOL_STRING);
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 0", new(' ', boldSpaces));
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", UIManager.VERY_SMALL_SQUARE);
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 0", boldSpaces == 1 ? UIManager.VERY_SMALL_SQUARE : new(' ', boldSpaces));
         yield return new WaitForSeconds(0.7f);
 
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Type TEXT", "Achievement Bonus XP");
@@ -7307,8 +7325,8 @@ public class UIHandler
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", new(' ', MAX_SPACES_MATCH_END_SUMMARY - boldSpaces));
             yield return new WaitForSeconds(0.5f);
 
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 0", UIManager.HAIRSPACE_SYMBOL_STRING);
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", UIManager.HAIRSPACE_SYMBOL_STRING);
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 0", UIManager.VERY_SMALL_SQUARE);
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", UIManager.VERY_SMALL_SQUARE);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary LevelUp Toggle", false);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Level 0 TEXT", $"<color=#AD6816>{currentLevel:D3}</color>");
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Level 1 TEXT", nextLevelXP == 0 ? "MAX" : (currentLevel + 1).ToString("D3"));
@@ -7317,7 +7335,7 @@ public class UIHandler
         }
 
         highlightedSpaces = Math.Max(1, Math.Min(MAX_SPACES_MATCH_END_SUMMARY - boldSpaces, b * (MAX_SPACES_MATCH_END_SUMMARY - boldSpaces) / (nextLevelXP - currentXP)));
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", new(' ', highlightedSpaces));
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", highlightedSpaces == 1 ? UIManager.VERY_SMALL_SQUARE : new(' ', highlightedSpaces));
         currentXP += b;
         yield return new WaitForSeconds(0.7f);
 
@@ -7331,8 +7349,8 @@ public class UIHandler
         // Animate Other Bonus XP
 
         boldSpaces = currentXP == 0 ? 1 : Math.Max(1, Math.Min(MAX_SPACES_MATCH_END_SUMMARY, currentXP * MAX_SPACES_MATCH_END_SUMMARY / (nextLevelXP == 0 ? 1 : nextLevelXP)));
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", UIManager.HAIRSPACE_SYMBOL_STRING);
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 0", new(' ', boldSpaces));
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", UIManager.VERY_SMALL_SQUARE);
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 0", boldSpaces == 1 ? UIManager.VERY_SMALL_SQUARE : new(' ', boldSpaces));
         yield return new WaitForSeconds(0.7f);
 
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Type TEXT", "Other Bonus XP");
@@ -7353,8 +7371,8 @@ public class UIHandler
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", new(' ', MAX_SPACES_MATCH_END_SUMMARY - boldSpaces));
             yield return new WaitForSeconds(0.5f);
 
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 0", UIManager.HAIRSPACE_SYMBOL_STRING);
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", UIManager.HAIRSPACE_SYMBOL_STRING);
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 0", UIManager.VERY_SMALL_SQUARE);
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", UIManager.VERY_SMALL_SQUARE);
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "Scene Summary LevelUp Toggle", false);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Level 0 TEXT", $"<color=#AD6816>{currentLevel:D3}</color>");
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary Level 1 TEXT", nextLevelXP == 0 ? "MAX" : (currentLevel + 1).ToString("D3"));
@@ -7363,7 +7381,7 @@ public class UIHandler
         }
 
         highlightedSpaces = Math.Max(1, Math.Min(MAX_SPACES_MATCH_END_SUMMARY - boldSpaces, b * (MAX_SPACES_MATCH_END_SUMMARY - boldSpaces) / (nextLevelXP - currentXP)));
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", new(' ', highlightedSpaces));
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", highlightedSpaces == 1 ? UIManager.VERY_SMALL_SQUARE : new(' ', highlightedSpaces));
         currentXP += b;
         yield return new WaitForSeconds(0.7f);
 
@@ -7377,8 +7395,8 @@ public class UIHandler
         // Finish up Animation
 
         boldSpaces = currentXP == 0 ? 1 : Math.Max(1, Math.Min(MAX_SPACES_MATCH_END_SUMMARY, currentXP * MAX_SPACES_MATCH_END_SUMMARY / (nextLevelXP == 0 ? 1 : nextLevelXP)));
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", UIManager.HAIRSPACE_SYMBOL_STRING);
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 0", new(' ', boldSpaces));
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 1", UIManager.VERY_SMALL_SQUARE);
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Summary XP Bar Fill 0", boldSpaces == 1 ? UIManager.VERY_SMALL_SQUARE : new(' ', boldSpaces));
 
         // --------------------------
 

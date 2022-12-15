@@ -208,7 +208,7 @@ public class GamePlayer
         TacticalChecker = Plugin.Instance.StartCoroutine(EnableTactical());
 
         GadgetGiver.Stop();
-        GadgetGiver = Plugin.Instance.StartCoroutine(GiveGadget(ActiveLoadout.Tactical.Gadget.GadgetID));
+        GadgetGiver = Plugin.Instance.StartCoroutine(GiveGadget(ActiveLoadout.Tactical.Gadget.GadgetID, true));
     }
 
     public void UsedLethal()
@@ -226,7 +226,7 @@ public class GamePlayer
 
         //m_LethalChecker.Start();
         GadgetGiver.Stop();
-        GadgetGiver = Plugin.Instance.StartCoroutine(GiveGadget(ActiveLoadout.Lethal.Gadget.GadgetID));
+        GadgetGiver = Plugin.Instance.StartCoroutine(GiveGadget(ActiveLoadout.Lethal.Gadget.GadgetID, false));
     }
 
     public IEnumerator EnableLethal()
@@ -245,7 +245,7 @@ public class GamePlayer
         Plugin.Instance.UI.UpdateGadgetUsed(this, true, false);
     }
 
-    public IEnumerator GiveGadget(ushort id)
+    public IEnumerator GiveGadget(ushort id, bool isTactical)
     {
         yield return new WaitForSeconds(1);
 
@@ -258,7 +258,11 @@ public class GamePlayer
                 continue;
             }
 
-            Player.Player.inventory.forceAddItem(new(id, false), false);
+            var inv = Player.Player.inventory;
+            inv.forceAddItem(new(id, false), false);
+            inv.TryGetItemIndex(id, out var x, out var y, out var page, out var _);
+            if (Assets.find(EAssetType.ITEM, id) is ItemAsset gadgetAsset)
+                Player.Player.equipment.ServerBindItemHotkey(Data.GetHotkey(isTactical ? EHotkey.TACTICAL : EHotkey.LETHAL), gadgetAsset, page, x, y);
             break;
         }
     }

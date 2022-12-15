@@ -8,6 +8,7 @@ namespace UnturnedBlackout.Models.Configuration;
 public class RoundEndCasesConfig
 {
     public float Chance { get; set; }
+    public int PrimeBonusChance { get; set; }
     public int MinimumMinutesPlayed { get; set; }
 
     public List<RoundEndCase> RoundEndCases { get; set; }
