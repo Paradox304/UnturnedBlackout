@@ -17,7 +17,7 @@ using UnturnedBlackout.Models.Animation;
 
 namespace UnturnedBlackout.Models.Global;
 
-public class GamePlayer
+public class GamePlayer : IDisposable
 {
     private static ConfigManager Config => Plugin.Instance.Config;
 
@@ -86,7 +86,6 @@ public class GamePlayer
     
     public EPlayerStance PreviousStance { get; set; }
 
-    public Coroutine MovementChanger { get; set; }
     public Coroutine Healer { get; set; }
     public Coroutine RespawnTimer { get; set; }
     public Coroutine VoiceChatChecker { get; set; }
@@ -126,15 +125,54 @@ public class GamePlayer
         OrderedKillstreaks = new();
     }
 
-    public void Destroy()
+    /*public void Destroy()
     {
         Player = null;
         Data = null;
         CurrentGame = null;
         ActiveLoadout = null;
         TransportConnection = null;
-    }
+    }*/
 
+    public void Dispose()
+    {
+        Logging.Debug($"Game player for {Data.SteamName} is being disposed");
+        CurrentGame = null;
+        Player = null;
+        Data = null;
+        TransportConnection = null;
+        ActiveLoadout = null;
+        LastDamager = null;
+        PendingAnimations = null;
+        ActiveKillstreak = null;
+        OrderedKillstreaks = null;
+        AvailableKillstreaks = null;
+        KillstreakTriggers = null;
+        
+        TacticalChecker.Stop();
+        TacticalChecker = null;
+        LethalChecker.Stop();
+        LethalChecker = null;
+        SpawnProtectionRemover.Stop();
+        SpawnProtectionRemover = null;
+        Healer.Stop();
+        Healer = null;
+        DamageChecker.Stop();
+        DamageChecker = null;
+        RespawnTimer.Stop();
+        RespawnTimer = null;
+        VoiceChatChecker.Stop();
+        VoiceChatChecker = null;
+        AnimationChecker.Stop();
+        AnimationChecker = null;
+        GadgetGiver.Stop();
+        GadgetGiver = null;
+        KillstreakItemRemover.Stop();
+        KillstreakItemRemover = null;
+        EquipmentChecker.Stop();
+        EquipmentChecker = null;
+    }
+    
     // Spawn Protection Seconds
     public void GiveSpawnProtection(int seconds)
     {
@@ -774,7 +812,6 @@ public class GamePlayer
         RespawnTimer.Stop();
         VoiceChatChecker.Stop();
         AnimationChecker.Stop();
-        MovementChanger.Stop();
         GadgetGiver.Stop();
         KillstreakItemRemover.Stop();
         EquipmentChecker.Stop();

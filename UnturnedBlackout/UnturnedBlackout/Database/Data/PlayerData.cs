@@ -3,10 +3,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnturnedBlackout.Enums;
+using UnturnedBlackout.Extensions;
 
 namespace UnturnedBlackout.Database.Data;
 
-public class PlayerData
+public class PlayerData : IDisposable
 {
     public CSteamID SteamID { get; set; }
     public string SteamName { get; set; }
@@ -104,6 +105,23 @@ public class PlayerData
         CasesSearchByID = new();
     }
 
+    public void Dispose()
+    {
+        Logging.Debug($"PlayerData for {SteamName} is being disposed");
+        AvatarLinks = null;
+        Hotkeys = null;
+        Quests = null;
+        QuestsSearchByType = null;
+        Achievements = null;
+        AchievementsSearchByType = null;
+        AchievementsSearchByID = null;
+        Battlepass = null;
+        ActiveBoosters = null;
+        Cases = null;
+        CasesSearchByID = null;
+        AchievementLegends = null;
+    }
+    
     public bool TryGetNeededXP(out int xp)
     {
         if (Plugin.Instance.DB.Levels.TryGetValue(Level + 1, out var level))

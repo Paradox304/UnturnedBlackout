@@ -1,11 +1,12 @@
 ﻿using Steamworks;
 using System;
 using System.Collections.Generic;
+using UnturnedBlackout.Extensions;
 using UnturnedBlackout.Models.Global;
 
 namespace UnturnedBlackout.Models.CTF;
 
-public class CTFPlayer
+public class CTFPlayer : IDisposable
 {
     public GamePlayer GamePlayer { get; set; }
 
@@ -55,11 +56,19 @@ public class CTFPlayer
         PlayersKilled = new();
     }
 
-    public void Destroy()
+    public void Dispose()
+    {
+        Logging.Debug($"CTFPlayer for {GamePlayer.Data.SteamName} is being disposed");
+        GamePlayer = null;
+        Team = null;
+        PlayersKilled = null;
+    }
+    
+    /*public void Destroy()
     {
         //GamePlayer = null;
         //Team = null;
-    }
+    }*/
 
     public void OnDeath(CSteamID killer)
     {

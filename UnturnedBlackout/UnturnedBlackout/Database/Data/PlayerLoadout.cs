@@ -1,10 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using Steamworks;
 using UnturnedBlackout.Database.Base;
+using UnturnedBlackout.Extensions;
 
 namespace UnturnedBlackout.Database.Data;
 
-public class PlayerLoadout
+public class PlayerLoadout : IDisposable
 {
+    public CSteamID SteamID { get; set; }
     public Dictionary<ushort, LoadoutGun> Guns { get; set; }
     public Dictionary<ushort, LoadoutGunCharm> GunCharms { get; set; }
     public Dictionary<ushort, LoadoutKnife> Knives { get; set; }
@@ -19,9 +23,10 @@ public class PlayerLoadout
     public Dictionary<int, Loadout> Loadouts { get; set; }
 
     public PlayerLoadout(
-        Dictionary<ushort, LoadoutGun> guns, Dictionary<ushort, LoadoutGunCharm> gunCharms, Dictionary<ushort, LoadoutKnife> knives, Dictionary<int, GunSkin> gunSkinsSearchByID, Dictionary<ushort, List<GunSkin>> gunSkinsSearchByGunID, Dictionary<ushort, GunSkin> gunSkinsSearchBySkinID,
+        CSteamID steamID, Dictionary<ushort, LoadoutGun> guns, Dictionary<ushort, LoadoutGunCharm> gunCharms, Dictionary<ushort, LoadoutKnife> knives, Dictionary<int, GunSkin> gunSkinsSearchByID, Dictionary<ushort, List<GunSkin>> gunSkinsSearchByGunID, Dictionary<ushort, GunSkin> gunSkinsSearchBySkinID,
         Dictionary<int, LoadoutPerk> perks, Dictionary<ushort, LoadoutGadget> gadgets, Dictionary<int, LoadoutKillstreak> killstreaks, Dictionary<int, LoadoutCard> cards, Dictionary<int, LoadoutGlove> gloves, Dictionary<int, Loadout> loadouts)
     {
+        SteamID = steamID;
         Guns = guns;
         GunCharms = gunCharms;
         Knives = knives;
@@ -34,5 +39,22 @@ public class PlayerLoadout
         Cards = cards;
         Gloves = gloves;
         Loadouts = loadouts;
+    }
+
+    public void Dispose()
+    {
+        Logging.Debug($"PlayerLoadout for {SteamID} is being disposed");
+        Guns = null;
+        GunCharms = null;
+        Knives = null;
+        GunSkinsSearchByID = null;
+        GunSkinsSearchByGunID = null;
+        GunSkinsSearchBySkinID = null;
+        Perks = null;
+        Gadgets = null;
+        Killstreaks = null;
+        Cards = null;
+        Gloves = null;
+        Loadouts = null;
     }
 }

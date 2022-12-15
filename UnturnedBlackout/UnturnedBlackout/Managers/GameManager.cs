@@ -257,10 +257,8 @@ public class GameManager
         Plugin.Instance.UI.UnregisterUIHandler(player);
         if (Players.TryGetValue(player.CSteamID, out var gPlayer))
         {
-            Logging.Debug($"{player.CharacterName} left, has a game player registered destroying it and removing it");
             var game = gPlayer.CurrentGame;
             game?.RemovePlayerFromGame(gPlayer);
-            gPlayer.Destroy();
             _ = Players.Remove(player.CSteamID);
         }
 

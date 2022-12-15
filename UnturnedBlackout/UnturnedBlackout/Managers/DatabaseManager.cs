@@ -3028,7 +3028,7 @@ public class DatabaseManager
             if (PlayerLoadouts.ContainsKey(player.CSteamID))
                 _ = PlayerLoadouts.Remove(player.CSteamID);
 
-            PlayerLoadouts.Add(player.CSteamID, new(guns, gunCharms, knives, gunSkinsSearchByID, gunSkinsSearchByGunID, gunSkinsSearchBySkinID, perks, gadgets, killstreaks, cards, gloves, loadouts));
+            PlayerLoadouts.Add(player.CSteamID, new(player.CSteamID, guns, gunCharms, knives, gunSkinsSearchByID, gunSkinsSearchByGunID, gunSkinsSearchBySkinID, perks, gadgets, killstreaks, cards, gloves, loadouts));
         }
         catch (Exception ex)
         {

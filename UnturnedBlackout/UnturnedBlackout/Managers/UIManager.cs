@@ -171,9 +171,6 @@ public class UIManager
     {
         if (UIHandlersLookup.TryGetValue(player.CSteamID, out var handler))
         {
-            Logging.Debug($"{player.CharacterName} left, he has a UIHandler, destroying it and removing it");
-            handler.Destroy();
-
             _ = UIHandlers.Remove(handler);
             _ = UIHandlersLookup.Remove(player.CSteamID);
         }

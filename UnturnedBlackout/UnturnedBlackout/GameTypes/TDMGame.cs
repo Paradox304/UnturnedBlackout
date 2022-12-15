@@ -57,6 +57,23 @@ public class TDMGame : Game
     }
 
 
+    public override void Dispose()
+    {
+        Logging.Debug($"TDMGame on location {Location.LocationName} and event {GameEvent?.EventName ?? "None"} is being disposed");
+        SpawnPoints = null;
+        Players = null;
+        PlayersLookup = null;
+        BlueTeam = null;
+        RedTeam = null;
+        GameStarter.Stop();
+        GameStarter = null;
+        GameEnder.Stop();
+        GameEnder = null;
+        SpawnSwitcher.Stop();
+        SpawnSwitcher = null;
+        base.Dispose();
+    }
+    
     public override void ForceStartGame()
     {
         GameStarter = Plugin.Instance.StartCoroutine(StartGame());
@@ -294,9 +311,6 @@ public class TDMGame : Game
             Logging.Debug($"Found Location: {location.LocationName}, GameMode: {gameSetup.Item1}, Event: {gameSetup.Item2?.EventName ?? "None"}");
             Plugin.Instance.Game.StartGame(location, gameSetup.Item1, gameSetup.Item2, !(GameEvent?.AlwaysHaveLobby ?? false));
         }
-
-        Logging.Debug($"DESTROYING GAME ({Location.LocationName} {GameEvent?.EventName ?? ""}{GameMode})");
-        Destroy();
     }
 
     public override IEnumerator AddPlayerToGame(GamePlayer player)
@@ -398,7 +412,6 @@ public class TDMGame : Game
         tPlayer.GamePlayer.OnGameLeft();
         _ = Players.Remove(tPlayer);
         _ = PlayersLookup.Remove(tPlayer.GamePlayer.SteamID);
-        tPlayer.Destroy();
         
         UI.OnGameCountUpdated(this);
         

@@ -20,7 +20,7 @@ using UnturnedBlackout.Models.Global;
 
 namespace UnturnedBlackout.GameTypes;
 
-public abstract class Game
+public abstract class Game : IDisposable
 {
     protected const string SUICIDE_SYMBOL = "";
     protected const string EXPLOSION_SYMBOL = "";
@@ -82,7 +82,7 @@ public abstract class Game
         GameChecker = Plugin.Instance.StartCoroutine(CheckGame());
     }
 
-    public void Destroy()
+    public virtual void Dispose()
     {
         UnturnedPlayerEvents.OnPlayerDeath -= OnPlayerDeath;
         PlayerLife.OnSelectingRespawnPoint -= OnPlayerRespawning;
@@ -105,6 +105,30 @@ public abstract class Game
         KillFeedChecker.Stop();
         GameChecker.Stop();
     }
+    
+    /*public void Destroy()
+    {
+        UnturnedPlayerEvents.OnPlayerDeath -= OnPlayerDeath;
+        PlayerLife.OnSelectingRespawnPoint -= OnPlayerRespawning;
+        UnturnedPlayerEvents.OnPlayerRevive -= OnPlayerRevive;
+        UnturnedPlayerEvents.OnPlayerInventoryAdded -= OnPlayerPickupItem;
+        DamageTool.damagePlayerRequested -= OnPlayerDamaged;
+        ChatManager.onChatted -= OnChatted;
+        ItemManager.onTakeItemRequested -= OnTakeItem;
+        UseableThrowable.onThrowableSpawned -= OnThrowableSpawned;
+        BarricadeManager.onBarricadeSpawned -= OnBarricadeSpawned;
+        BarricadeManager.onDamageBarricadeRequested -= OnBarricadeDamage;
+        UseableConsumeable.onConsumePerformed -= OnConsumed;
+        UseableGun.OnAimingChanged_Global -= OnAimingChanged;
+
+        PlayersTalking.Clear();
+        GameTurrets.Clear();
+        GameTurretsInverse.Clear();
+        GameTurretDamager.Clear();
+        
+        KillFeedChecker.Stop();
+        GameChecker.Stop();
+    }*/
 
     private void OnAimingChanged(UseableGun obj)
     {

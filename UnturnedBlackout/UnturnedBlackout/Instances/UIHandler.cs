@@ -24,7 +24,7 @@ using Logger = Rocket.Core.Logging.Logger;
 
 namespace UnturnedBlackout.Instances;
 
-public class UIHandler
+public class UIHandler : IDisposable
 {
     public const ushort MAIN_MENU_ID = 27632;
     public const short MAIN_MENU_KEY = 27632;
@@ -68,7 +68,6 @@ public class UIHandler
     public Coroutine MatchEndSummaryShower { get; set; }
     public Coroutine CrateUnboxer { get; set; }
     public Coroutine StatsShower { get; set; }
-    
     public Coroutine ImageScroller { get; set; }
 
     public EMainPage MainPage { get; set; }
@@ -175,8 +174,54 @@ public class UIHandler
         MainPage = EMainPage.NONE;
         BuildPages();
     }
-
-    public void Destroy()
+    
+    public void Dispose()
+    {
+        Logging.Debug($"UIHandler for {PlayerData.SteamName} is being disposed");
+        TimerRefresher.Stop();
+        TimerRefresher = null;
+        AchievementPageShower.Stop();
+        AchievementPageShower = null;
+        MatchEndSummaryShower.Stop();
+        MatchEndSummaryShower = null;
+        CrateUnboxer.Stop();
+        CrateUnboxer = null;
+        StatsShower.Stop();
+        StatsShower = null;
+        ImageScroller.Stop();
+        ImageScroller = null;
+        
+        Player = null;
+        PlayerLoadout = null;
+        PlayerData = null;
+        TransportConnection = null;
+        LoadoutPages = null;
+        PistolPages = null;
+        SMGPages = null;
+        LMGPages = null;
+        ShotgunPages = null;
+        ARPages = null;
+        SniperPages = null;
+        CarbinePages = null;
+        AttachmentPages = null;
+        GunCharmPages = null;
+        GunSkinPages = null;
+        KnifePages = null;
+        PerkPages = null;
+        TacticalPages = null;
+        LethalPages = null;
+        CardPages = null;
+        GlovePages = null;
+        KillstreakPages = null;
+        AchievementPages = null;
+        BattlepassPages = null;
+        BattlepassPagesInverse = null;
+        UnboxCasesPages = null;
+        UnboxStorePages = null;
+        UnboxInventoryPages = null;
+    }
+    
+    /*public void Destroy()
     {
         TimerRefresher.Stop();
         AchievementPageShower.Stop();
@@ -189,8 +234,8 @@ public class UIHandler
         PlayerLoadout = null;
         Player = null;
         TransportConnection = null;
-
     }
+    */
 
     public void BuildPages()
     {

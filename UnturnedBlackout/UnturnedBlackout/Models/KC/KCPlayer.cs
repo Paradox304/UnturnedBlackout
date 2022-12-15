@@ -1,11 +1,12 @@
 ﻿using Steamworks;
 using System;
 using System.Collections.Generic;
+using UnturnedBlackout.Extensions;
 using UnturnedBlackout.Models.Global;
 
 namespace UnturnedBlackout.Models.KC;
 
-public class KCPlayer
+public class KCPlayer : IDisposable
 {
     public GamePlayer GamePlayer { get; set; }
 
@@ -52,11 +53,19 @@ public class KCPlayer
         PlayersKilled = new();
     }
 
-    public void Destroy()
+    public void Dispose()
+    {
+        Logging.Debug($"KCPlayer for {GamePlayer.Data.SteamName} is being disposed");
+        Team = null;
+        GamePlayer = null;
+        PlayersKilled = null;
+    }
+    
+    /*public void Destroy()
     {
         //GamePlayer = null;
         //Team = null;
-    }
+    }*/
 
     public void OnDeath(CSteamID killer)
     {

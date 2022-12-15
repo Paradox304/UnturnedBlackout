@@ -1,11 +1,12 @@
 ﻿using Steamworks;
 using System;
 using System.Collections.Generic;
+using UnturnedBlackout.Extensions;
 using UnturnedBlackout.Models.Global;
 
 namespace UnturnedBlackout.Models.FFA;
 
-public class FFAPlayer
+public class FFAPlayer : IDisposable
 {
     public GamePlayer GamePlayer { get; set; }
 
@@ -44,10 +45,17 @@ public class FFAPlayer
         PlayersKilled = new();
     }
 
-    public void Destroy()
+    public void Dispose()
+    {
+        Logging.Debug($"FFAPlayer for {GamePlayer.Data.SteamName} is being disposed");
+        GamePlayer = null;
+        PlayersKilled = null;
+    }
+    
+    /*public void Destroy()
     {
         //GamePlayer = null;
-    }
+    }*/
 
     public void OnDeath(CSteamID killer)
     {

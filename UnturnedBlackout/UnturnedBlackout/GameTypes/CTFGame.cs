@@ -69,8 +69,22 @@ public class CTFGame : Game
         RedTeam = new((byte)ETeam.RED, false, redTeamInfo, Config.CTF.FileData.RedFlagID, redFlag);
         Frequency = Utility.GetFreeFrequency();
     }
-
-
+    
+    public override void Dispose()
+    {
+        Logging.Debug($"CTFGame on location {Location.LocationName} and event {GameEvent?.EventName ?? "None"} is being disposed");
+        SpawnPoints = null;
+        Players = null;
+        PlayersLookup = null;
+        BlueTeam = null;
+        RedTeam = null;
+        GameStarter.Stop();
+        GameStarter = null;
+        GameEnder.Stop();
+        GameEnder = null;
+        base.Dispose();
+    }
+    
     public override void ForceStartGame()
     {
         GameStarter = Plugin.Instance.StartCoroutine(StartGame());
@@ -335,9 +349,6 @@ public class CTFGame : Game
             Logging.Debug($"Found Location: {location.LocationName}, GameMode: {gameSetup.Item1}, Event: {gameSetup.Item2?.EventName ?? "None"}");
             Plugin.Instance.Game.StartGame(location, gameSetup.Item1, gameSetup.Item2, !(GameEvent?.AlwaysHaveLobby ?? false));
         }
-
-        Logging.Debug($"DESTROYING GAME ({Location.LocationName} {GameEvent?.EventName ?? ""}{GameMode})");
-        Destroy();
     }
 
     public override IEnumerator AddPlayerToGame(GamePlayer player)
@@ -452,9 +463,6 @@ public class CTFGame : Game
                 UI.SendCTFFlagStates(cPlayer.Team, (ETeam)otherTeam.TeamID, Players, EFlagState.DROPPED);
             });
         }
-
-        cPlayer.Destroy();
-
         UI.OnGameCountUpdated(this);
         
         if (GamePhase != EGamePhase.WAITING_FOR_PLAYERS)
