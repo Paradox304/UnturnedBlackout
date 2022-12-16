@@ -55,6 +55,11 @@ public class TDMPlayer : IDisposable
         PlayersKilled = null;
     }
     
+    ~TDMPlayer()
+    {
+        Logging.Debug("TDMPlayer is being destroyed/finalised");
+    }
+    
     /*public void Destroy()
     {
         //GamePlayer = null;

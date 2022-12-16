@@ -63,6 +63,11 @@ public class CTFPlayer : IDisposable
         Team = null;
         PlayersKilled = null;
     }
+
+    ~CTFPlayer()
+    {
+        Logging.Debug("CTFPlayer is being destroyed/finalised");
+    }
     
     /*public void Destroy()
     {

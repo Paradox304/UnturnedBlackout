@@ -84,6 +84,11 @@ public class CTFGame : Game
         GameEnder = null;
         base.Dispose();
     }
+
+    ~CTFGame()
+    {
+        Logging.Debug("CTFGame is being destroyed/finalised");
+    }
     
     public override void ForceStartGame()
     {

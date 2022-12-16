@@ -75,6 +75,11 @@ public class KCGame : Game
         base.Dispose();
     }
     
+    ~KCGame()
+    {
+        Logging.Debug("KCGame is being destroyed/finalised");
+    }
+    
     public override void ForceStartGame()
     {
         GameStarter = Plugin.Instance.StartCoroutine(StartGame());

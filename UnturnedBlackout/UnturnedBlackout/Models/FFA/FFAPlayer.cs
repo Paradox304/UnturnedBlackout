@@ -52,6 +52,11 @@ public class FFAPlayer : IDisposable
         PlayersKilled = null;
     }
     
+    ~FFAPlayer()
+    {
+        Logging.Debug("FFAPlayer is being destroyed/finalised");
+    }
+    
     /*public void Destroy()
     {
         //GamePlayer = null;

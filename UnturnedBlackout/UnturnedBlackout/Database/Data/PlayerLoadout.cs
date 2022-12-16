@@ -43,7 +43,7 @@ public class PlayerLoadout : IDisposable
 
     public void Dispose()
     {
-        Logging.Debug($"PlayerLoadout for {SteamID} is being disposed");
+        Logging.Debug($"PlayerLoadout is being disposed/finalised");
         Guns = null;
         GunCharms = null;
         Knives = null;
@@ -56,5 +56,10 @@ public class PlayerLoadout : IDisposable
         Cards = null;
         Gloves = null;
         Loadouts = null;
+    }
+
+    ~PlayerLoadout()
+    {
+        Logging.Debug($"PlayerLoadout for {SteamID} is being destroyed/finalised");
     }
 }

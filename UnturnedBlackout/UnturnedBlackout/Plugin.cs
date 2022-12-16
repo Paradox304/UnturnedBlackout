@@ -112,6 +112,15 @@ public class Plugin : RocketPlugin<Config>
         ply.pantsItem = 0;
         ply.vestItem = 0;
 
+        ply.packageBackpack = 0;
+        ply.packageGlasses = 0;
+        ply.packageHat = 0;
+        ply.packageMask = 0;
+        ply.packagePants = 0;
+        ply.packageShirt = 0;
+        ply.packageVest = 0;
+        
+        ply.packageSkins = Array.Empty<ulong>();
         ply.skinItems = Array.Empty<int>();
     }
 

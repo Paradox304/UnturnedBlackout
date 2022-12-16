@@ -54,6 +54,11 @@ public class FFAGame : Game
         base.Dispose();
     }
     
+    ~FFAGame()
+    {
+        Logging.Debug("FFAGame is being destroyed/finalised");
+    }
+    
     public override void ForceStartGame()
     {
         GameStarter = Plugin.Instance.StartCoroutine(StartGame());

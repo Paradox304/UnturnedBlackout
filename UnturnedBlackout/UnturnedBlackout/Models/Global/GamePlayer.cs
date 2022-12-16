@@ -173,6 +173,11 @@ public class GamePlayer : IDisposable
         EquipmentChecker = null;
     }
     
+    ~GamePlayer()
+    {
+        Logging.Debug("GamePlayer is being destroyed/finalised");
+    }
+    
     // Spawn Protection Seconds
     public void GiveSpawnProtection(int seconds)
     {

@@ -61,6 +61,11 @@ public class KCPlayer : IDisposable
         PlayersKilled = null;
     }
     
+    ~KCPlayer()
+    {
+        Logging.Debug("KCPlayer is being destroyed/finalised");
+    }
+    
     /*public void Destroy()
     {
         //GamePlayer = null;

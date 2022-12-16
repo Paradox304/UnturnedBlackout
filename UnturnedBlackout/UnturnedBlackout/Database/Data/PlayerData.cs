@@ -121,7 +121,12 @@ public class PlayerData : IDisposable
         CasesSearchByID = null;
         AchievementLegends = null;
     }
-    
+
+    ~PlayerData()
+    {
+        Logging.Debug($"PlayerData is being destroyed/finalised");
+    }
+
     public bool TryGetNeededXP(out int xp)
     {
         if (Plugin.Instance.DB.Levels.TryGetValue(Level + 1, out var level))

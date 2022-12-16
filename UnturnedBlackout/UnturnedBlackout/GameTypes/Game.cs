@@ -97,13 +97,23 @@ public abstract class Game : IDisposable
         UseableConsumeable.onConsumePerformed -= OnConsumed;
         UseableGun.OnAimingChanged_Global -= OnAimingChanged;
 
-        PlayersTalking.Clear();
-        GameTurrets.Clear();
-        GameTurretsInverse.Clear();
-        GameTurretDamager.Clear();
+        Location = null;
+        GameEvent = null;
+        Killfeed = null;
+        PlayersTalking = null;
+        GameTurrets = null;
+        GameTurretsInverse = null;
+        GameTurretDamager = null;
         
         KillFeedChecker.Stop();
+        KillFeedChecker = null;
         GameChecker.Stop();
+        GameChecker = null;
+    }
+
+    ~Game()
+    {
+        Logging.Debug("Game is being destroyed/finalised");
     }
     
     /*public void Destroy()

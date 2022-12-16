@@ -74,6 +74,11 @@ public class TDMGame : Game
         base.Dispose();
     }
     
+    ~TDMGame()
+    {
+        Logging.Debug("TDMGame is being destroyed/finalised");
+    }
+    
     public override void ForceStartGame()
     {
         GameStarter = Plugin.Instance.StartCoroutine(StartGame());

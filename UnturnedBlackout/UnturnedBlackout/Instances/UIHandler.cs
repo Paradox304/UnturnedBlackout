@@ -220,6 +220,11 @@ public class UIHandler : IDisposable
         UnboxStorePages = null;
         UnboxInventoryPages = null;
     }
+
+    ~UIHandler()
+    {
+        Logging.Debug("UIHandler is being destroyed/finalised");
+    }
     
     /*public void Destroy()
     {
