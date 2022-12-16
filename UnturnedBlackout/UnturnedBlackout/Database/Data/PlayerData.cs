@@ -124,7 +124,7 @@ public class PlayerData : IDisposable
 
     ~PlayerData()
     {
-        Logging.Debug($"PlayerData is being destroyed/finalised");
+        Logging.Debug($"PlayerData is being destroyed/finalised", ConsoleColor.Magenta);
     }
 
     public bool TryGetNeededXP(out int xp)

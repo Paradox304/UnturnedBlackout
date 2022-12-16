@@ -60,6 +60,6 @@ public class PlayerLoadout : IDisposable
 
     ~PlayerLoadout()
     {
-        Logging.Debug($"PlayerLoadout for {SteamID} is being destroyed/finalised");
+        Logging.Debug($"PlayerLoadout is being destroyed/finalised", ConsoleColor.Magenta);
     }
 }

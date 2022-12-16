@@ -175,7 +175,7 @@ public class GamePlayer : IDisposable
     
     ~GamePlayer()
     {
-        Logging.Debug("GamePlayer is being destroyed/finalised");
+        Logging.Debug("GamePlayer is being destroyed/finalised", ConsoleColor.Magenta);
     }
     
     // Spawn Protection Seconds

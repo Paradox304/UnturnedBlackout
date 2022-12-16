@@ -223,7 +223,7 @@ public class UIHandler : IDisposable
 
     ~UIHandler()
     {
-        Logging.Debug("UIHandler is being destroyed/finalised");
+        Logging.Debug("UIHandler is being destroyed/finalised", ConsoleColor.Magenta);
     }
     
     /*public void Destroy()

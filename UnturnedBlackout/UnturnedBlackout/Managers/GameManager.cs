@@ -260,10 +260,20 @@ public class GameManager
             var game = gPlayer.CurrentGame;
             game?.RemovePlayerFromGame(gPlayer);
             _ = Players.Remove(player.CSteamID);
+            gPlayer.Dispose();
         }
 
-        Plugin.Instance.DB.PlayerData.Remove(player.CSteamID);
+        if (Plugin.Instance.DB.PlayerData.TryGetValue(player.CSteamID, out var playerData))
+        {
+            Plugin.Instance.DB.PlayerData.Remove(player.CSteamID);
+            playerData.Dispose();
+        }
+
+        if (!Plugin.Instance.DB.PlayerLoadouts.TryGetValue(player.CSteamID, out var playerLoadout))
+            return;
+
         Plugin.Instance.DB.PlayerLoadouts.Remove(player.CSteamID);
+        playerLoadout.Dispose();
     }
 
     private void OnPlayerDeath(PlayerLife sender, EDeathCause cause, ELimb limb, CSteamID instigator)

@@ -63,7 +63,7 @@ public class KCPlayer : IDisposable
     
     ~KCPlayer()
     {
-        Logging.Debug("KCPlayer is being destroyed/finalised");
+        Logging.Debug("KCPlayer is being destroyed/finalised", ConsoleColor.Magenta);
     }
     
     /*public void Destroy()

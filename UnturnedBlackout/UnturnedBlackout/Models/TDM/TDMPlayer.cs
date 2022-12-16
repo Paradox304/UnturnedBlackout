@@ -57,7 +57,7 @@ public class TDMPlayer : IDisposable
     
     ~TDMPlayer()
     {
-        Logging.Debug("TDMPlayer is being destroyed/finalised");
+        Logging.Debug("TDMPlayer is being destroyed/finalised", ConsoleColor.Magenta);
     }
     
     /*public void Destroy()

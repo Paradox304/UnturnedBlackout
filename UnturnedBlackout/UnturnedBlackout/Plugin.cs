@@ -175,10 +175,12 @@ public class Plugin : RocketPlugin<Config>
         while (true)
         {
             yield return new WaitForSeconds(1);
+
+            var tps = Provider.debugTPS;
+            var ups = Provider.debugUPS;
             
-            Logging.Debug($"DEBUG", ConsoleColor.Red);
-            Logging.Debug($"TPS: {Provider.debugTPS}", ConsoleColor.Yellow);
-            Logging.Debug($"UPS: {Provider.debugUPS}", ConsoleColor.Yellow);
+            Logging.Debug($"TPS: {tps}", tps < 45 ? ConsoleColor.Red : ConsoleColor.White);
+            Logging.Debug($"UPS: {ups}", ups < 55 ? ConsoleColor.Red : ConsoleColor.White);
         }
         // ReSharper disable once IteratorNeverReturns
     }

@@ -60,7 +60,7 @@ public class KCGame : Game
 
     public override void Dispose()
     {
-        Logging.Debug($"KC on location {Location.LocationName} and event {GameEvent?.EventName ?? "None"} is being disposed");
+        Logging.Debug($"KCGame on location {Location.LocationName} and event {GameEvent?.EventName ?? "None"} is being disposed");
         SpawnPoints = null;
         Players = null;
         PlayersLookup = null;
@@ -77,7 +77,7 @@ public class KCGame : Game
     
     ~KCGame()
     {
-        Logging.Debug("KCGame is being destroyed/finalised");
+        Logging.Debug("KCGame is being destroyed/finalised", ConsoleColor.Magenta);
     }
     
     public override void ForceStartGame()
@@ -321,6 +321,8 @@ public class KCGame : Game
             Logging.Debug($"Found Location: {location.LocationName}, GameMode: {gameSetup.Item1}, Event: {gameSetup.Item2?.EventName ?? "None"}");
             Plugin.Instance.Game.StartGame(location, gameSetup.Item1, gameSetup.Item2, !(GameEvent?.AlwaysHaveLobby ?? false));
         }
+
+        Dispose();
     }
 
     public override IEnumerator AddPlayerToGame(GamePlayer player)

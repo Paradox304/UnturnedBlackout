@@ -173,6 +173,7 @@ public class UIManager
         {
             _ = UIHandlers.Remove(handler);
             _ = UIHandlersLookup.Remove(player.CSteamID);
+            handler.Dispose();
         }
 
         if (TipSender.TryGetValue(player.CSteamID, out var tipSender))

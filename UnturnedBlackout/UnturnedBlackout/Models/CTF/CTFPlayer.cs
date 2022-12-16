@@ -66,7 +66,7 @@ public class CTFPlayer : IDisposable
 
     ~CTFPlayer()
     {
-        Logging.Debug("CTFPlayer is being destroyed/finalised");
+        Logging.Debug("CTFPlayer is being destroyed/finalised", ConsoleColor.Magenta);
     }
     
     /*public void Destroy()

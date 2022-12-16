@@ -110,11 +110,6 @@ public abstract class Game : IDisposable
         GameChecker.Stop();
         GameChecker = null;
     }
-
-    ~Game()
-    {
-        Logging.Debug("Game is being destroyed/finalised");
-    }
     
     /*public void Destroy()
     {

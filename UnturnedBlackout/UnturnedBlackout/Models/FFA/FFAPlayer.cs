@@ -54,7 +54,7 @@ public class FFAPlayer : IDisposable
     
     ~FFAPlayer()
     {
-        Logging.Debug("FFAPlayer is being destroyed/finalised");
+        Logging.Debug("FFAPlayer is being destroyed/finalised", ConsoleColor.Magenta);
     }
     
     /*public void Destroy()

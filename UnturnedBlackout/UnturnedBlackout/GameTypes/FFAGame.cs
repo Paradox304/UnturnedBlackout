@@ -56,7 +56,7 @@ public class FFAGame : Game
     
     ~FFAGame()
     {
-        Logging.Debug("FFAGame is being destroyed/finalised");
+        Logging.Debug("FFAGame is being destroyed/finalised", ConsoleColor.Magenta);
     }
     
     public override void ForceStartGame()
@@ -288,6 +288,8 @@ public class FFAGame : Game
             Logging.Debug($"Found Location: {location.LocationName}, GameMode: {gameSetup.Item1}, Event: {gameSetup.Item2?.EventName ?? "None"}");
             Plugin.Instance.Game.StartGame(location, gameSetup.Item1, gameSetup.Item2, !(GameEvent?.AlwaysHaveLobby ?? false));
         }
+
+        Dispose();
     }
 
     public override IEnumerator AddPlayerToGame(GamePlayer player)
