@@ -60,6 +60,7 @@ public class TDMGame : Game
     public override void Dispose()
     {
         Logging.Debug($"TDMGame on location {Location.LocationName} and event {GameEvent?.EventName ?? "None"} is being disposed");
+        Utility.ClearFrequency(Frequency);
         SpawnPoints = null;
         Players = null;
         PlayersLookup = null;

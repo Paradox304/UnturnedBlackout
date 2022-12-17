@@ -73,6 +73,7 @@ public class CTFGame : Game
     public override void Dispose()
     {
         Logging.Debug($"CTFGame on location {Location.LocationName} and event {GameEvent?.EventName ?? "None"} is being disposed");
+        Utility.ClearFrequency(Frequency);
         SpawnPoints = null;
         Players = null;
         PlayersLookup = null;

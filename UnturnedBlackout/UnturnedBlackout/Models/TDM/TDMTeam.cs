@@ -98,10 +98,16 @@ public class TDMTeam
         SpawnThreshold = 0;
     }
 
+    ~TDMTeam()
+    {
+        Logging.Debug("TDMTeam is being destroyed/finalised", ConsoleColor.Magenta);
+    }
+    
     public void Destroy()
     {
         CheckSpawnSwitcher.Stop();
         GroupManager.deleteGroup(IngameGroup.groupID);
+        Utility.ClearFrequency(Frequency);
         Game = null;
         IngameGroup = null;
         Players.Clear();

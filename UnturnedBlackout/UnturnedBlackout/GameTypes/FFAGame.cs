@@ -43,6 +43,7 @@ public class FFAGame : Game
     public override void Dispose()
     {
         Logging.Debug($"FFAGame on location {Location.LocationName} and event {GameEvent?.EventName ?? "None"} is being disposed");
+        Utility.ClearFrequency(Frequency);
         SpawnPoints = null;
         UnavailableSpawnPoints = null;
         Players = null;

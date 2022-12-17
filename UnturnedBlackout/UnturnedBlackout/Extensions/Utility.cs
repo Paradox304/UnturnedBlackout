@@ -93,12 +93,17 @@ public static class Utility
         while (true)
         {
             var freq = (uint)UnityEngine.Random.Range(300000, 900000);
-            if (!UsedFrequencies.Contains(freq) && freq != 460327)
-            {
-                UsedFrequencies.Add(freq);
-                return freq;
-            }
+            if (UsedFrequencies.Contains(freq) || freq == 460327)
+                continue;
+
+            UsedFrequencies.Add(freq);
+            return freq;
         }
+    }
+
+    public static void ClearFrequency(uint freq)
+    {
+        UsedFrequencies.Remove(freq);
     }
 
     public static List<int> GetIntListFromReaderResult(this object readerResult)
@@ -632,5 +637,5 @@ public static class Utility
     
     public static string GetFlag(string country) => Plugin.Instance.Config.Icons.FileData.FlagAPILink.Replace("{country}", country.ToLower());
 
-    private static readonly List<uint> UsedFrequencies = new();
+    private static readonly HashSet<uint> UsedFrequencies = new();
 }

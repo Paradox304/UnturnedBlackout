@@ -62,9 +62,15 @@ public class CTFTeam
         player.quests.askSetRadioFrequency(CSteamID.Nil, 0);
     }
 
+    ~CTFTeam()
+    {
+        Logging.Debug("CTFTeam is being destroyed/finalised", ConsoleColor.Magenta);
+    }
+    
     public void Destroy()
     {
         GroupManager.deleteGroup(IngameGroup.groupID);
+        Utility.ClearFrequency(Frequency);
         IngameGroup = null;
         Info = null;
         Players.Clear();
