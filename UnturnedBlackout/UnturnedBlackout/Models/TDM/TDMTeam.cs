@@ -11,7 +11,7 @@ using UnturnedBlackout.Models.Global;
 
 namespace UnturnedBlackout.Models.TDM;
 
-public class TDMTeam
+public class TDMTeam : IDisposable
 {
     private static ConfigManager Config => Plugin.Instance.Config;
 
@@ -98,12 +98,23 @@ public class TDMTeam
         SpawnThreshold = 0;
     }
 
+    public void Dispose()
+    {
+        Logging.Debug($"TDMTeam for {Info.TeamName} is being disposed");
+        CheckSpawnSwitcher.Stop();
+        CheckSpawnSwitcher = null;
+        GroupManager.deleteGroup(IngameGroup.groupID);
+        Utility.ClearFrequency(Frequency);
+        Game = null;
+        IngameGroup = null;
+        Players = null;
+    }
     ~TDMTeam()
     {
         Logging.Debug("TDMTeam is being destroyed/finalised", ConsoleColor.Magenta);
     }
     
-    public void Destroy()
+    /*public void Destroy()
     {
         CheckSpawnSwitcher.Stop();
         GroupManager.deleteGroup(IngameGroup.groupID);
@@ -111,5 +122,5 @@ public class TDMTeam
         Game = null;
         IngameGroup = null;
         Players.Clear();
-    }
+    }*/
 }

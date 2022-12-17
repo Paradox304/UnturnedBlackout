@@ -100,12 +100,24 @@ public class KCTeam
         SpawnThreshold = 0;
     }
 
+    public void Dispose()
+    {
+        Logging.Debug($"KCTeam for {Info.TeamName} is being disposed");
+        CheckSpawnSwitcher.Stop();
+        CheckSpawnSwitcher = null;
+        GroupManager.deleteGroup(IngameGroup.groupID);
+        Utility.ClearFrequency(Frequency);
+        Game = null;
+        IngameGroup = null;
+        Players = null;
+    }
+    
     ~KCTeam()
     {
         Logging.Debug("KCTeam is being destroyed/finalised", ConsoleColor.Magenta);
     }
     
-    public void Destroy()
+    /*public void Destroy()
     {
         CheckSpawnSwitcher.Stop();
         GroupManager.deleteGroup(IngameGroup.groupID);
@@ -113,5 +125,5 @@ public class KCTeam
         Game = null;
         IngameGroup = null;
         Players.Clear();
-    }
+    }*/
 }

@@ -77,7 +77,9 @@ public class CTFGame : Game
         SpawnPoints = null;
         Players = null;
         PlayersLookup = null;
+        BlueTeam.Dispose();
         BlueTeam = null;
+        RedTeam.Dispose();
         RedTeam = null;
         GameStarter.Stop();
         GameStarter = null;
@@ -334,11 +336,6 @@ public class CTFGame : Game
 
         Players.Clear();
         PlayersLookup.Clear();
-        BlueTeam.Destroy();
-        RedTeam.Destroy();
-
-        BlueTeam = null;
-        RedTeam = null;
         
         Logging.Debug($"RESTARTING GAME ({Location.LocationName} {GameEvent?.EventName ?? ""}{GameMode})");
         var locations = Plugin.Instance.Game.AvailableLocations;

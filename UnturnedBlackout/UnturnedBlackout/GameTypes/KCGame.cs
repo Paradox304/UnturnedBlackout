@@ -65,7 +65,9 @@ public class KCGame : Game
         SpawnPoints = null;
         Players = null;
         PlayersLookup = null;
+        BlueTeam.Dispose();
         BlueTeam = null;
+        RedTeam.Dispose();
         RedTeam = null;
         GameStarter.Stop();
         GameStarter = null;
@@ -300,12 +302,7 @@ public class KCGame : Game
 
         Players.Clear();
         PlayersLookup.Clear();
-        BlueTeam.Destroy();
-        RedTeam.Destroy();
         SpawnSwitcher.Stop();
-
-        BlueTeam = null;
-        RedTeam = null;
         
         var locations = Plugin.Instance.Game.AvailableLocations;
         Logging.Debug($"RESTARTING THE GAME ({Location.LocationName} {GameEvent?.EventName ?? ""}{GameMode})");

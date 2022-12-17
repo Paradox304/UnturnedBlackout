@@ -8,7 +8,7 @@ using UnturnedBlackout.Models.Global;
 
 namespace UnturnedBlackout.Models.CTF;
 
-public class CTFTeam
+public class CTFTeam : IDisposable
 {
     private static Config Config => Plugin.Instance.Configuration.Instance;
     public TeamInfo Info { get; set; }
@@ -61,18 +61,28 @@ public class CTFTeam
         player.quests.leaveGroup(true);
         player.quests.askSetRadioFrequency(CSteamID.Nil, 0);
     }
-
+    
+    public void Dispose()
+    {
+        Logging.Debug($"CTFTeam for team {Info.TeamName} is being disposed");
+        GroupManager.deleteGroup(IngameGroup.groupID);
+        Utility.ClearFrequency(Frequency);
+        IngameGroup = null;
+        Info = null;
+        Players = null;
+    }
+    
     ~CTFTeam()
     {
         Logging.Debug("CTFTeam is being destroyed/finalised", ConsoleColor.Magenta);
     }
     
-    public void Destroy()
+    /*public void Destroy()
     {
         GroupManager.deleteGroup(IngameGroup.groupID);
         Utility.ClearFrequency(Frequency);
         IngameGroup = null;
         Info = null;
         Players.Clear();
-    }
+    }*/
 }
