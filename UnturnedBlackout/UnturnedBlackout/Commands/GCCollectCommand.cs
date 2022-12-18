@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Rocket.API;
 using UnturnedBlackout.Extensions;
 
@@ -13,7 +14,7 @@ public class GCCollectCommand : IRocketCommand
         Logging.Debug($"Generation 1: {GC.CollectionCount(1)}", ConsoleColor.Cyan);
         Logging.Debug($"Generation 2: {GC.CollectionCount(2)}", ConsoleColor.Cyan);
         Logging.Debug("INTIATED GARBAGE COLLECTION", ConsoleColor.Cyan);
-        GC.Collect();
+        Task.Run(GC.Collect);
     }
 
     public AllowedCaller AllowedCaller => AllowedCaller.Console;

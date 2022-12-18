@@ -177,7 +177,7 @@ public class UIHandler : IDisposable
     
     public void Dispose()
     {
-        Logging.Debug($"UIHandler for {PlayerData.SteamName} is being disposed");
+        Logging.Debug($"UIHandler for {PlayerData.SteamName} is being disposed. Generation: {GC.GetGeneration(this)}", ConsoleColor.Blue);
         TimerRefresher.Stop();
         TimerRefresher = null;
         AchievementPageShower.Stop();

@@ -31,6 +31,8 @@ public class KCPlayer : IDisposable
     public DateTime LastKill { get; set; }
     public Dictionary<CSteamID, int> PlayersKilled { get; set; }
 
+    public bool IsDisposed { get; set; }
+    
     public KCPlayer(GamePlayer gamePlayer, KCTeam team)
     {
         GamePlayer = gamePlayer;
@@ -55,10 +57,11 @@ public class KCPlayer : IDisposable
 
     public void Dispose()
     {
-        Logging.Debug($"KCPlayer for {GamePlayer.Data.SteamName} is being disposed");
+        Logging.Debug($"KCPlayer for {GamePlayer.Data.SteamName} is being disposed. Generation: {GC.GetGeneration(this)}", ConsoleColor.Blue);
         Team = null;
         GamePlayer = null;
         PlayersKilled = null;
+        IsDisposed = true;
     }
     
     ~KCPlayer()

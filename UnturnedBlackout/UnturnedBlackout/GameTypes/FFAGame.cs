@@ -42,7 +42,7 @@ public class FFAGame : Game
 
     public override void Dispose()
     {
-        Logging.Debug($"FFAGame on location {Location.LocationName} and event {GameEvent?.EventName ?? "None"} is being disposed");
+        Logging.Debug($"FFAGame on location {Location.LocationName} and event {GameEvent?.EventName ?? "None"} is being disposed. Generation: {GC.GetGeneration(this)}", ConsoleColor.Blue);
         Utility.ClearFrequency(Frequency);
         SpawnPoints = null;
         UnavailableSpawnPoints = null;
@@ -80,6 +80,9 @@ public class FFAGame : Game
         Logging.Debug($"GAME PHASE SET TO STARTING ({Location.LocationName} {GameEvent?.EventName ?? ""}{GameMode})");
         foreach (var player in Players.Where(k => !k.GamePlayer.IsLoading).ToList())
         {
+            if (player.IsDisposed)
+                continue;
+            
             UI.ClearWaitingForPlayersUI(player.GamePlayer);
             player.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(0);
             UI.ShowCountdownUI(player.GamePlayer);
@@ -100,7 +103,12 @@ public class FFAGame : Game
             yield return new WaitForSeconds(1);
 
             foreach (var player in Players.ToList())
+            {
+                if (player.IsDisposed)
+                    continue;
+                
                 UI.SendCountdownSeconds(player.GamePlayer, seconds);
+            }
         }
 
         GamePhase = EGamePhase.STARTED;
@@ -108,6 +116,9 @@ public class FFAGame : Game
         Logging.Debug($"GAME PHASE SET TO STARTED ({Location.LocationName} {GameEvent?.EventName ?? ""}{GameMode})");
         foreach (var player in Players.ToList())
         {
+            if (player.IsDisposed)
+                continue;
+            
             player.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1);
 
             UI.SendFFAHUD(player.GamePlayer);
@@ -128,7 +139,12 @@ public class FFAGame : Game
 
             var timeSpan = TimeSpan.FromSeconds(seconds);
             foreach (var player in Players.ToList())
+            {
+                if (player.IsDisposed)
+                    continue;
+                
                 UI.UpdateFFATimer(player.GamePlayer, timeSpan.ToString(@"m\:ss"));
+            }
         }
 
         _ = Plugin.Instance.StartCoroutine(GameEnd());
@@ -152,6 +168,9 @@ public class FFAGame : Game
         {
             foreach (var player in Players.ToList())
             {
+                if (player.IsDisposed)
+                    continue;
+                
                 var totalMinutesPlayed = (int)(endTime - player.StartTime).TotalMinutes;
                 if (totalMinutesPlayed < Config.RoundEndCases.FileData.MinimumMinutesPlayed || player.Kills == 0)
                     continue;
@@ -228,7 +247,12 @@ public class FFAGame : Game
         try
         {
             foreach (var player in Players.ToList())
+            {
+                if (player.IsDisposed)
+                    continue;
+                
                 UI.ShowFFALeaderboard(player.GamePlayer);
+            }
 
             if (roundEndCases.Count > 0)
                 _ = Plugin.Instance.StartCoroutine(UI.SetupRoundEndDrops(Players.Select(k => k.GamePlayer).ToList(), roundEndCases, 1));
@@ -245,7 +269,12 @@ public class FFAGame : Game
         try
         {
             foreach (var player in Players.ToList())
+            {
+                if (player.IsDisposed)
+                    continue;
+                
                 player.GamePlayer.Player.Player.enablePluginWidgetFlag(EPluginWidgetFlags.Modal);
+            }
         }
         catch (Exception ex)
         {
@@ -260,6 +289,9 @@ public class FFAGame : Game
         {
             foreach (var player in Players.ToList())
             {
+                if (player.IsDisposed)
+                    continue;
+                
                 var gPlayer = player.GamePlayer;
                 RemovePlayerFromGame(player.GamePlayer);
                 Plugin.Instance.Game.SendPlayerToLobby(gPlayer.Player, summaries.TryGetValue(gPlayer, out var pendingSummary) ? pendingSummary : null);
@@ -393,6 +425,7 @@ public class FFAGame : Game
         foreach (var ply in Players)
             UI.UpdateFFATopUI(ply, Players);
         
+        fPlayer.Dispose();
         if (GamePhase != EGamePhase.WAITING_FOR_PLAYERS)
             return;
         

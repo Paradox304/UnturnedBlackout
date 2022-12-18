@@ -43,7 +43,7 @@ public class PlayerLoadout : IDisposable
 
     public void Dispose()
     {
-        Logging.Debug($"PlayerLoadout is being disposed/finalised");
+        Logging.Debug($"PlayerLoadout is being disposed/finalised. Generation: {GC.GetGeneration(this)}", ConsoleColor.Blue);
         Guns = null;
         GunCharms = null;
         Knives = null;

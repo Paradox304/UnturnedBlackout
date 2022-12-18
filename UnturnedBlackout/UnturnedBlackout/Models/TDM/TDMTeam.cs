@@ -100,7 +100,7 @@ public class TDMTeam : IDisposable
 
     public void Dispose()
     {
-        Logging.Debug($"TDMTeam for {Info.TeamName} is being disposed");
+        Logging.Debug($"TDMTeam for {Info.TeamName} is being disposed. Generation: {GC.GetGeneration(this)}", ConsoleColor.Blue);
         CheckSpawnSwitcher.Stop();
         CheckSpawnSwitcher = null;
         GroupManager.deleteGroup(IngameGroup.groupID);

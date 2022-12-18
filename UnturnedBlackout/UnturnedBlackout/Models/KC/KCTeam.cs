@@ -102,7 +102,7 @@ public class KCTeam
 
     public void Dispose()
     {
-        Logging.Debug($"KCTeam for {Info.TeamName} is being disposed");
+        Logging.Debug($"KCTeam for {Info.TeamName} is being disposed. Generation: {GC.GetGeneration(this)}", ConsoleColor.Blue);
         CheckSpawnSwitcher.Stop();
         CheckSpawnSwitcher = null;
         GroupManager.deleteGroup(IngameGroup.groupID);

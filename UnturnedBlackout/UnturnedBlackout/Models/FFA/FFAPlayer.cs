@@ -26,6 +26,8 @@ public class FFAPlayer : IDisposable
     public DateTime LastKill { get; set; }
     public Dictionary<CSteamID, int> PlayersKilled { get; set; }
 
+    public bool IsDisposed { get; set; }
+    
     public FFAPlayer(GamePlayer gamePlayer)
     {
         GamePlayer = gamePlayer;
@@ -47,9 +49,10 @@ public class FFAPlayer : IDisposable
 
     public void Dispose()
     {
-        Logging.Debug($"FFAPlayer for {GamePlayer.Data.SteamName} is being disposed");
+        Logging.Debug($"FFAPlayer for {GamePlayer.Data.SteamName} is being disposed. Generation: {GC.GetGeneration(this)}", ConsoleColor.Blue);
         GamePlayer = null;
         PlayersKilled = null;
+        IsDisposed = true;
     }
     
     ~FFAPlayer()

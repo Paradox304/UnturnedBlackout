@@ -60,7 +60,7 @@ public class KCGame : Game
 
     public override void Dispose()
     {
-        Logging.Debug($"KCGame on location {Location.LocationName} and event {GameEvent?.EventName ?? "None"} is being disposed");
+        Logging.Debug($"KCGame on location {Location.LocationName} and event {GameEvent?.EventName ?? "None"} is being disposed. Generation: {GC.GetGeneration(this)}", ConsoleColor.Blue);
         Utility.ClearFrequency(Frequency);
         SpawnPoints = null;
         Players = null;
@@ -103,6 +103,9 @@ public class KCGame : Game
         Logging.Debug($"GAME PHASE SET TO STARTING ({Location.LocationName} {GameEvent?.EventName ?? ""}{GameMode})");
         foreach (var player in Players.Where(k => !k.GamePlayer.IsLoading).ToList())
         {
+            if (player.IsDisposed)
+                continue;
+            
             UI.ClearWaitingForPlayersUI(player.GamePlayer);
             player.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(0);
             UI.ShowCountdownUI(player.GamePlayer);
@@ -123,7 +126,12 @@ public class KCGame : Game
             yield return new WaitForSeconds(1);
 
             foreach (var player in Players.ToList())
+            {
+                if (player.IsDisposed)
+                    continue;
+                
                 UI.SendCountdownSeconds(player.GamePlayer, seconds);
+            }
         }
 
         GamePhase = EGamePhase.STARTED;
@@ -131,6 +139,9 @@ public class KCGame : Game
         Logging.Debug($"SENDING KC HUD TO ALL PLAYERS ({Location.LocationName} {GameEvent?.EventName ?? ""}{GameMode})");
         foreach (var player in Players)
         {
+            if (player.IsDisposed)
+                continue;
+            
             player.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1);
             player.StartTime = DateTime.UtcNow;
             UI.SendKCHUD(player, BlueTeam, RedTeam);
@@ -150,7 +161,12 @@ public class KCGame : Game
 
             var timeSpan = TimeSpan.FromSeconds(seconds);
             foreach (var player in Players)
+            {
+                if (player.IsDisposed)
+                    continue;
+                
                 UI.UpdateKCTimer(player.GamePlayer, timeSpan.ToString(@"m\:ss"));
+            }
         }
 
         var wonTeam = BlueTeam.Score > RedTeam.Score ? BlueTeam : RedTeam.Score > BlueTeam.Score ? RedTeam : new(this, -1, true, 0, new());
@@ -175,6 +191,9 @@ public class KCGame : Game
         {
             foreach (var player in Players.ToList())
             {
+                if (player.IsDisposed)
+                    continue;
+                
                 var totalMinutesPlayed = (int)(endTime - player.StartTime).TotalMinutes;
                 if (totalMinutesPlayed < Config.RoundEndCases.FileData.MinimumMinutesPlayed || player.Kills == 0)
                     continue;
@@ -205,6 +224,9 @@ public class KCGame : Game
 
             foreach (var player in Players.ToList())
             {
+                if (player.IsDisposed)
+                    continue;
+                
                 UI.ClearKCHUD(player.GamePlayer);
                 UI.ClearMidgameLoadoutUI(player.GamePlayer);
                 if (player.GamePlayer.Player.Player.life.isDead)
@@ -257,7 +279,12 @@ public class KCGame : Game
         try
         {
             foreach (var player in Players.ToList())
+            {
+                if (player.IsDisposed)
+                    continue;
+                
                 UI.ShowKCLeaderboard(player.GamePlayer);
+            }
 
             if (roundEndCases.Count > 0)
                 _ = Plugin.Instance.StartCoroutine(UI.SetupRoundEndDrops(Players.Select(k => k.GamePlayer).ToList(), roundEndCases, 2));
@@ -273,8 +300,13 @@ public class KCGame : Game
         Logging.Debug($"SENDING WIDGET FLAG TO PLAYERS FOR 3S BEFORE TELEPORTATION ({Location.LocationName} {GameEvent?.EventName ?? ""}{GameMode})");
         try
         {
-            foreach (var player in Players)
+            foreach (var player in Players.ToList())
+            {
+                if (player.IsDisposed)
+                    continue;
+                
                 player.GamePlayer.Player.Player.enablePluginWidgetFlag(EPluginWidgetFlags.Modal);
+            }
         }
         catch (Exception ex)
         {
@@ -289,6 +321,9 @@ public class KCGame : Game
         {
             foreach (var player in Players.ToList())
             {
+                if (player.IsDisposed)
+                    continue;
+                
                 var gPlayer = player.GamePlayer;
                 RemovePlayerFromGame(player.GamePlayer);
                 Plugin.Instance.Game.SendPlayerToLobby(gPlayer.Player, summaries.TryGetValue(gPlayer, out var pendingSummary) ? pendingSummary : null);
@@ -424,7 +459,8 @@ public class KCGame : Game
         _ = Players.Remove(kPlayer);
         _ = PlayersLookup.Remove(kPlayer.GamePlayer.SteamID);
         UI.OnGameCountUpdated(this);
-        
+
+        kPlayer.Dispose();
         if (GamePhase != EGamePhase.WAITING_FOR_PLAYERS)
             return;
         

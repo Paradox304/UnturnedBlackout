@@ -306,11 +306,13 @@ public class DatabaseManager
                 conn).ExecuteScalarAsync();
 
             _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{LEVELS}` ( `Level` INT NOT NULL , `XPNeeded` INT NOT NULL , `IconLinkLarge` TEXT NOT NULL , `IconLinkMedium` TEXT NOT NULL , `IconLinkSmall` TEXT NOT NULL , PRIMARY KEY (`Level`));", conn).ExecuteScalarAsync();
+            
             _ = await new MySqlCommand(
                 $"CREATE TABLE IF NOT EXISTS `{OPTIONS}` ( `DailyLeaderboardWipe` BIGINT NOT NULL , `WeeklyLeaderboardWipe` BIGINT NOT NULL , `DailyLeaderboardRankedRewards` TEXT NOT NULL , `DailyLeaderboardPercentileRewards` TEXT NOT NULL , `WeeklyLeaderboardRankedRewards` TEXT NOT NULL , `WeeklyLeaderboardPercentileRewards` TEXT NOT NULL, `SeasonalLeaderboardRankedRewards` TEXT NOT NULL , `SeasonalLeaderboardPercentileRewards` TEXT NOT NULL , `XPBooster` DECIMAL(6,3) NOT NULL , `BPBooster` DECIMAL(6,3) NOT NULL , `GunXPBooster` DECIMAL(6,3) NOT NULL , `XPBoosterWipe` BIGINT NOT NULL , `BPBoosterWipe` BIGINT NOT NULL , `GunXPBoosterWipe` BIGINT NOT NULL , `GameTips` TEXT NOT NULL , `PrimeRewards` TEXT NOT NULL , `PrimeDailyRewards` TEXT NOT NULL);",
                 conn).ExecuteScalarAsync();
 
-            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{SERVERS}`  ( `IP` TEXT NOT NULL , `Port` TEXT NOT NULL , `ServerName` TEXT NOT NULL , `FriendlyIP` TEXT NOT NULL , `ServerBanner` TEXT NOT NULL , `ServerDesc` TEXT NOT NULL );", conn).ExecuteScalarAsync();
+            _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{SERVERS}`  ( `ServerID` INT NOT NULL AUTO_INCREMENT, `IP` TEXT NOT NULL , `Port` TEXT NOT NULL , `ServerName` TEXT NOT NULL , `FriendlyIP` TEXT NOT NULL , `ServerDesc` TEXT NOT NULL , `MaxPlayers` INT NOT NULL , `Players` INT NOT NULL , `CurrentServerName` TEXT NOT NULL , `SurgeMultiplier` DECIMAL(4,3) NOT NULL , `SurgeExpiry` BIGINT UNSIGNED NOT NULL , `LastUpdated` BIGINT UNSIGNED NOT NULL , PRIMARY KEY(`ServerID`));", conn).ExecuteScalarAsync();
+            
             _ = await new MySqlCommand(
                 $"CREATE TABLE IF NOT EXISTS `{QUESTS}` ( `QuestID` INT NOT NULL AUTO_INCREMENT , `QuestTitle` TEXT NOT NULL , `QuestDesc` TEXT NOT NULL , QuestType ENUM('Kill', 'Death', 'Win', 'FinishMatch', 'MultiKill', 'Killstreak', 'Headshots', 'GadgetsUsed', 'FlagsCaptured', 'FlagsSaved', 'Dogtags', 'Shutdown', 'Domination', 'FlagKiller', 'FlagDenied', 'Revenge', 'FirstKill', 'Longshot', 'Survivor', 'Collector') NOT NULL , `QuestTier` ENUM('Easy1', 'Easy2', 'Easy3', 'Medium1', 'Medium2', 'Hard1') NOT NULL , `QuestConditions` TEXT NOT NULL , `TargetAmount` INT NOT NULL , `XP` INT NOT NULL , PRIMARY KEY (`QuestID`));",
                 conn).ExecuteScalarAsync();
@@ -324,6 +326,7 @@ public class DatabaseManager
                 conn).ExecuteScalarAsync();
 
             _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{BATTLEPASS}` ( `TierID` INT NOT NULL , `FreeReward` TEXT NOT NULL , `PremiumReward` TEXT NOT NULL , `XP` INT NOT NULL , PRIMARY KEY (`TierID`));", conn).ExecuteScalarAsync();
+            
             _ = await new MySqlCommand(
                 $"CREATE TABLE IF NOT EXISTS `{CASES}` ( `CaseID` INT NOT NULL , `CaseName` TEXT NOT NULL , `IconLink` TEXT NOT NULL , `CaseRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `IsBuyable` BOOLEAN NOT NULL , `ScrapPrice` INT NOT NULL , `CoinPrice` INT NOT NULL , `CommonWeight` INT NOT NULL , `UncommonWeight` INT NOT NULL , `RareWeight` INT NOT NULL , `EpicWeight` INT NOT NULL , `LegendaryWeight` INT NOT NULL , `MythicalWeight` INT NOT NULL , `KnifeWeight` INT NOT NULL , `GloveWeight` INT NOT NULL , `LimitedKnifeWeight` INT NOT NULL , `LimitedGloveWeight` INT NOT NULL , `LimitedSkinWeight` INT NOT NULL , `SpecialSkinWeight` INT NOT NULL , `AvailableSkins` TEXT NOT NULL, `UnboxedAmount` INT NOT NULL, PRIMARY KEY (`CaseID`))",
                 conn).ExecuteScalarAsync();

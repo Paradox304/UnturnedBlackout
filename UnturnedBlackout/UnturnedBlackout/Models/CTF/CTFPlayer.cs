@@ -32,6 +32,8 @@ public class CTFPlayer : IDisposable
     public DateTime LastKill { get; set; }
     public Dictionary<CSteamID, int> PlayersKilled { get; set; }
 
+    public bool IsDisposed { get; set; }
+    
     public CTFPlayer(GamePlayer gamePlayer, CTFTeam team)
     {
         GamePlayer = gamePlayer;
@@ -58,10 +60,11 @@ public class CTFPlayer : IDisposable
 
     public void Dispose()
     {
-        Logging.Debug($"CTFPlayer for {GamePlayer.Data.SteamName} is being disposed");
+        Logging.Debug($"CTFPlayer for {GamePlayer.Data.SteamName} is being disposed. Generation: {GC.GetGeneration(this)}", ConsoleColor.Blue);
         GamePlayer = null;
         Team = null;
         PlayersKilled = null;
+        IsDisposed = true;
     }
 
     ~CTFPlayer()

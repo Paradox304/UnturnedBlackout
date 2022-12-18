@@ -136,7 +136,7 @@ public class GamePlayer : IDisposable
 
     public void Dispose()
     {
-        Logging.Debug($"Game player for {Data.SteamName} is being disposed");
+        Logging.Debug($"Game player for {Data.SteamName} is being disposed. Generation: {GC.GetGeneration(this)}", ConsoleColor.Blue);
         CurrentGame = null;
         Player = null;
         Data = null;

@@ -64,7 +64,7 @@ public class CTFTeam : IDisposable
     
     public void Dispose()
     {
-        Logging.Debug($"CTFTeam for team {Info.TeamName} is being disposed");
+        Logging.Debug($"CTFTeam for team {Info.TeamName} is being disposed. Generation: {GC.GetGeneration(this)}", ConsoleColor.Blue);
         GroupManager.deleteGroup(IngameGroup.groupID);
         Utility.ClearFrequency(Frequency);
         IngameGroup = null;

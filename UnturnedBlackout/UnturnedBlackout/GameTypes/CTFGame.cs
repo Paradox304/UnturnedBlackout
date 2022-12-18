@@ -72,7 +72,7 @@ public class CTFGame : Game
     
     public override void Dispose()
     {
-        Logging.Debug($"CTFGame on location {Location.LocationName} and event {GameEvent?.EventName ?? "None"} is being disposed");
+        Logging.Debug($"CTFGame on location {Location.LocationName} and event {GameEvent?.EventName ?? "None"} is being disposed. Generation: {GC.GetGeneration(this)}", ConsoleColor.Blue);
         Utility.ClearFrequency(Frequency);
         SpawnPoints = null;
         Players = null;
@@ -113,6 +113,9 @@ public class CTFGame : Game
         Logging.Debug($"GAME PHASE SET TO STARTING ({Location.LocationName} {GameEvent?.EventName ?? ""}{GameMode})");
         foreach (var player in Players.Where(k => !k.GamePlayer.IsLoading).ToList())
         {
+            if (player.IsDisposed)
+                continue;
+            
             Logging.Debug($"SPAWNING {player.GamePlayer.Player.CharacterName} ({Location.LocationName} {GameEvent?.EventName ?? ""}{GameMode})");
             UI.ClearWaitingForPlayersUI(player.GamePlayer);
             player.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(0);
@@ -134,7 +137,12 @@ public class CTFGame : Game
             yield return new WaitForSeconds(1);
 
             foreach (var player in Players.ToList())
+            {
+                if (player.IsDisposed)
+                    continue;
+                
                 UI.SendCountdownSeconds(player.GamePlayer, seconds);
+            }
         }
 
         GamePhase = EGamePhase.STARTED;
@@ -142,6 +150,9 @@ public class CTFGame : Game
         Logging.Debug($"GAME PHASE SET TO STARTED ({Location.LocationName} {GameEvent?.EventName ?? ""}{GameMode})");
         foreach (var player in Players.ToList())
         {
+            if (player.IsDisposed)
+                continue;
+            
             player.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1);
             player.StartTime = DateTime.UtcNow;
             UI.ClearCountdownUI(player.GamePlayer);
@@ -170,7 +181,12 @@ public class CTFGame : Game
 
             var timeSpan = TimeSpan.FromSeconds(seconds);
             foreach (var player in Players.ToList())
+            {
+                if (player.IsDisposed)
+                    continue;
+                
                 UI.UpdateCTFTimer(player.GamePlayer, timeSpan.ToString(@"m\:ss"));
+            }
         }
 
         var wonTeam = BlueTeam.Score > RedTeam.Score ? BlueTeam : RedTeam.Score > BlueTeam.Score ? RedTeam : new(-1, true, new(), 0, Vector3.zero);
@@ -195,6 +211,9 @@ public class CTFGame : Game
         {
             foreach (var player in Players.ToList())
             {
+                if (player.IsDisposed)
+                    continue;
+                
                 var totalMinutesPlayed = (int)(endTime - player.StartTime).TotalMinutes;
                 if (totalMinutesPlayed < Config.RoundEndCases.FileData.MinimumMinutesPlayed || player.Kills == 0)
                     continue;
@@ -225,6 +244,9 @@ public class CTFGame : Game
 
             foreach (var player in Players.ToList())
             {
+                if (player.IsDisposed)
+                    continue;
+                
                 UI.ClearCTFHUD(player.GamePlayer);
                 UI.ClearMidgameLoadoutUI(player.GamePlayer);
                 if (player.GamePlayer.Player.Player.life.isDead)
@@ -291,7 +313,12 @@ public class CTFGame : Game
         try
         {
             foreach (var player in Players.ToList())
+            {
+                if (player.IsDisposed)
+                    continue;
+                
                 UI.ShowCTFLeaderboard(player.GamePlayer);
+            }
 
             if (roundEndCases.Count > 0)
                 _ = Plugin.Instance.StartCoroutine(UI.SetupRoundEndDrops(Players.Select(k => k.GamePlayer).ToList(), roundEndCases, 2));
@@ -308,7 +335,12 @@ public class CTFGame : Game
         try
         {
             foreach (var player in Players.ToList())
-                player.GamePlayer.Player.Player.enablePluginWidgetFlag(EPluginWidgetFlags.Modal);
+            {
+                if (player.IsDisposed)
+                    continue;
+                
+                UI.ShowCTFLeaderboard(player.GamePlayer);
+            }
         }
         catch (Exception ex)
         {
@@ -323,6 +355,9 @@ public class CTFGame : Game
         {
             foreach (var player in Players.ToList())
             {
+                if (player.IsDisposed)
+                    continue;
+                
                 var gPlayer = player.GamePlayer;
                 RemovePlayerFromGame(player.GamePlayer);
                 Plugin.Instance.Game.SendPlayerToLobby(gPlayer.Player, summaries.TryGetValue(gPlayer, out var pendingSummary) ? pendingSummary : null);
@@ -469,6 +504,7 @@ public class CTFGame : Game
             });
         }
         UI.OnGameCountUpdated(this);
+        cPlayer.Dispose();
         
         if (GamePhase != EGamePhase.WAITING_FOR_PLAYERS)
             return;

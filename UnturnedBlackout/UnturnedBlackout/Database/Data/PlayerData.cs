@@ -107,7 +107,7 @@ public class PlayerData : IDisposable
 
     public void Dispose()
     {
-        Logging.Debug($"PlayerData for {SteamName} is being disposed");
+        Logging.Debug($"PlayerData for {SteamName} is being disposed. Generation: {GC.GetGeneration(this)}", ConsoleColor.Blue);
         AvatarLinks = null;
         Hotkeys = null;
         Quests = null;

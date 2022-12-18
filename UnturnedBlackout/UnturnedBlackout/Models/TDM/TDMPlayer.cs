@@ -28,6 +28,8 @@ public class TDMPlayer : IDisposable
     public DateTime LastKill { get; set; }
     public Dictionary<CSteamID, int> PlayersKilled { get; set; }
 
+    public bool IsDisposed { get; set; }
+    
     public TDMPlayer(GamePlayer gamePlayer, TDMTeam team)
     {
         GamePlayer = gamePlayer;
@@ -50,9 +52,10 @@ public class TDMPlayer : IDisposable
 
     public void Dispose()
     {
-        Logging.Debug($"TDMPlayer for {GamePlayer.Data.SteamName} is being disposed");
+        Logging.Debug($"TDMPlayer for {GamePlayer.Data.SteamName} is being disposed. Generation: {GC.GetGeneration(this)}", ConsoleColor.Blue);
         GamePlayer = null;
         PlayersKilled = null;
+        IsDisposed = true;
     }
     
     ~TDMPlayer()
