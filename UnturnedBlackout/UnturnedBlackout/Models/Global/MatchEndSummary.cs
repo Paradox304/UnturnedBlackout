@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using UnturnedBlackout.Enums;
 using UnturnedBlackout.Managers;
 
@@ -62,7 +63,7 @@ public class MatchEndSummary
         var global = Plugin.Instance.DB.ServerOptions;
 
         PendingCredits = MatchXP == 0 ? 0 : MatchXP / data.PointsDivisible + minutesPlayed * data.PointsPerMinutePlayed;
-        MatchXPBonus = (int)((Kills > 0 ? MatchXP / (HasWon ? data.BonusXPVictoryDivisible : data.BonusXPDefeatDivisible) : 0) * (1f + player.Data.XPBooster + global.XPBooster + (@event?.XPMultiplier ?? 0f)));
+        MatchXPBonus = (int)((Kills > 0 ? MatchXP / (HasWon ? data.BonusXPVictoryDivisible : data.BonusXPDefeatDivisible) : 0) * (1f + player.Data.XPBooster + global.XPBooster + (@event?.XPMultiplier ?? 0f) + (Plugin.Instance.DB.Servers.FirstOrDefault(k => k.IsCurrentServer)?.SurgeMultiplier ?? 0f)));
         if (MatchXPBonus != 0)
             MatchXPBonus += minutesPlayed * data.BonusXPPerMinutePlayed;
 

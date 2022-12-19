@@ -4107,7 +4107,7 @@ public class DatabaseManager
                 currentServer.SurgeMultiplier = 0f;
             }
             
-            if (Servers.Exists(k => k.IsOnline && Config.SurgeServers.Contains(k.ServerID) && k.Players * 100 / k.MaxPlayers >= Config.SurgeThreshold))
+            if (currentServer.SurgeMultiplier == 0f && Servers.Exists(k => k.IsOnline && Config.SurgeServers.Contains(k.ServerID) && k.Players * 100 / k.MaxPlayers >= Config.SurgeThreshold))
             {
                 Logging.Debug($"One surge group server has players more than threshold, adding the multiplier and changing the expiry");
                 currentServer.SurgeExpiry = DateTimeOffset.UtcNow.AddSeconds(Config.SurgeSeconds);
