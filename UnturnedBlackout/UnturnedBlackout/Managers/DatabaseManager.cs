@@ -4013,7 +4013,7 @@ public class DatabaseManager
         try
         {
             conn.Open();
-            new MySqlCommand($"UPDATE `{SERVERS}` SET `Players` = {Provider.clients.Count}, `MaxPlayers` = {Provider.maxPlayers}, `CurrentServerName` = {Provider.serverName}, `LastUpdated` = {DateTimeOffset.UtcNow.ToUnixTimeSeconds()} WHERE `ServerID` = {Config.ServerID};", conn).ExecuteScalar();
+            new MySqlCommand($"UPDATE `{SERVERS}` SET `Players` = {Provider.clients.Count}, `MaxPlayers` = {Provider.maxPlayers}, `CurrentServerName` = '{Provider.serverName}', `LastUpdated` = {DateTimeOffset.UtcNow.ToUnixTimeSeconds()} WHERE `ServerID` = {Config.ServerID};", conn).ExecuteScalar();
             Logging.Debug("Reading servers for base data");
             var rdr = new MySqlCommand($"SELECT * FROM `{SERVERS}`;", conn).ExecuteReader();
             try
