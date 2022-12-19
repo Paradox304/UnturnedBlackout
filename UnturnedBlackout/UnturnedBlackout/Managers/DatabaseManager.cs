@@ -231,7 +231,7 @@ public class DatabaseManager
         BatchQueryCleaner.Elapsed += CleanQueries;
         PendingQueries = new();
 
-        ServerChecker = new(15 * 100);
+        ServerChecker = new(15 * 1000);
         ServerChecker.Elapsed += CheckServers;
         
         PlayerData = new();
