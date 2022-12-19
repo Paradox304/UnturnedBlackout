@@ -6,50 +6,44 @@ namespace UnturnedBlackout.Database.Base;
 
 public class Server
 {
+    public int ServerID { get; set; }
     public string IP { get; set; }
     public string Port { get; set; }
     public string ServerName { get; set; }
+    public string FriendlyIP { get; set; }
+    public string ServerDesc { get; set; }
 
+    public int MaxPlayers { get; set; }
+    public int Players { get; set; }
+    public string CurrentServerName { get; set; }
+    public float SurgeMultiplier { get; set; }
+    public DateTimeOffset SurgeExpiry { get; set; }
+    public DateTimeOffset LastUpdated { get; set; }
+
+
+    public bool IsCurrentServer { get; set; }
+    
     public uint IPNo { get; set; }
     public ushort PortNo { get; set; }
 
-    public string FriendlyIP { get; set; }
-    public string ServerBanner { get; set; }
-    public string ServerDesc { get; set; }
+    public bool IsOnline => (DateTimeOffset.UtcNow - LastUpdated).TotalSeconds < 20;
 
-    public bool IsCurrentServer { get; set; }
-
-    // Details got from the timer
-    public string Name { get; set; }
-    public int Players { get; set; }
-    public int MaxPlayers { get; set; }
-    public bool IsOnline { get; set; }
-    public DateTime LastOnline { get; set; }
-
-    public Server(string iP, string port, string serverName, string friendlyIP, string serverBanner, string serverDesc)
+    public Server(int serverID, string ip, string port, string serverName, string friendlyIP, string serverDesc, int maxPlayers, int players, string currentServerName, float surgeMultiplier, DateTimeOffset surgeExpiry, DateTimeOffset lastUpdated, bool isCurrentServer, uint ipNo, ushort portNo)
     {
-        IP = iP;
+        ServerID = serverID;
+        IP = ip;
         Port = port;
         ServerName = serverName;
         FriendlyIP = friendlyIP;
-        ServerBanner = serverBanner;
         ServerDesc = serverDesc;
-
-        if (!IPAddress.TryParse(IP, out var ipAddress))
-            throw new ArgumentException("IP is not correct");
-
-        var ipBytes = ipAddress.GetAddressBytes();
-        if (BitConverter.IsLittleEndian)
-            Array.Reverse(ipBytes);
-
-        IPNo = BitConverter.ToUInt32(ipBytes, 0);
-
-        if (!ushort.TryParse(Port, out var portNo))
-            throw new ArgumentException("Port is not correct");
-
+        MaxPlayers = maxPlayers;
+        Players = players;
+        CurrentServerName = currentServerName;
+        SurgeMultiplier = surgeMultiplier;
+        SurgeExpiry = surgeExpiry;
+        LastUpdated = lastUpdated;
+        IsCurrentServer = isCurrentServer;
+        IPNo = ipNo;
         PortNo = portNo;
-
-        IsCurrentServer = friendlyIP == Plugin.Instance.Configuration.Instance.IP && PortNo == Provider.port;
-        LastOnline = DateTime.UtcNow;
     }
 }

@@ -1180,13 +1180,14 @@ public class UIHandler : IDisposable
         {
             var server = servers[index];
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Play BUTTON {index}", true);
-            var name = string.IsNullOrEmpty(server.Name) ? server.ServerName : server.Name;
+            var name = string.IsNullOrEmpty(server.CurrentServerName) ? server.ServerName : server.CurrentServerName;
             if (server.IsCurrentServer)
                 name = $"<color=#FFFF00>{name}</color>";
 
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Play Server TEXT {index}", name);
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Play Server Surge Multiplier TEXT {index}", server.SurgeMultiplier != 0f ? $"{server.SurgeMultiplier}x XP BOOST" : " ");
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Play Status TEXT {index}",
-                server.IsOnline ? "<color=#36ff3c>Online</color>" : (DateTime.UtcNow - server.LastOnline).TotalSeconds < 120 ? "<color=#f5fa73>Restarting</color>" : "<color=#ed2626>Offline</color>");
+                server.IsOnline ? "<color=#36ff3c>Online</color>" : (DateTime.UtcNow - server.LastUpdated).TotalSeconds < 120 ? "<color=#f5fa73>Restarting</color>" : "<color=#ed2626>Offline</color>");
 
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Play Players TEXT {index}", server.IsOnline ? $"{server.Players}/{server.MaxPlayers}" : "0/0");
         }
@@ -1196,7 +1197,7 @@ public class UIHandler : IDisposable
 
     public void ShowServer(Server server)
     {
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Play Server TEXT", string.IsNullOrEmpty(server.Name) ? server.ServerName : server.Name);
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Play Server TEXT", string.IsNullOrEmpty(server.CurrentServerName) ? server.ServerName : server.CurrentServerName);
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Play Mode TEXT", " ");
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Play Server {server.FriendlyIP.Split('.')[0].ToUpper()} Enabler", true);
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Play Map TEXT", " ");

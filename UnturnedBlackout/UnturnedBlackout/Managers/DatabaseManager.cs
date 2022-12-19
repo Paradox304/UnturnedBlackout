@@ -45,7 +45,8 @@ public class DatabaseManager
     public int ConnectionThreshold { get; set; }
     private Timer CacheRefresher { get; set; }
     private Timer BatchQueryCleaner { get; set; }
-
+    private Timer ServerChecker { get; set; }
+    
     // Pending Queries
     public List<string> PendingQueries { get; set; }
 
@@ -230,6 +231,9 @@ public class DatabaseManager
         BatchQueryCleaner.Elapsed += CleanQueries;
         PendingQueries = new();
 
+        ServerChecker = new(15 * 100);
+        ServerChecker.Elapsed += CheckServers;
+        
         PlayerData = new();
         PlayerLoadouts = new();
 
@@ -242,8 +246,11 @@ public class DatabaseManager
         }).Wait();
 
         RefreshData(null, null);
+        CheckServers(null, null);
+        
         CacheRefresher.Start();
         BatchQueryCleaner.Start();
+        ServerChecker.Start();
     }
 
     public void Destroy()
@@ -1595,38 +1602,6 @@ public class DatabaseManager
             catch (Exception ex)
             {
                 Logger.Log($"Error reading cases from cases table");
-                Logger.Log(ex);
-            }
-            finally
-            {
-                rdr.Close();
-            }
-
-            Logging.Debug("Reading servers for base data");
-            rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{SERVERS}`;", conn).ExecuteReaderAsync();
-            try
-            {
-                List<Server> servers = new();
-                while (await rdr.ReadAsync())
-                {
-                    var ip = rdr[0].ToString();
-                    var port = rdr[1].ToString();
-                    var serverName = rdr[2].ToString();
-                    var friendlyIP = rdr[3].ToString();
-                    var serverBanner = rdr[4].ToString();
-                    var serverDesc = rdr[5].ToString();
-
-                    Server server = new(ip, port, serverName, friendlyIP, serverBanner, serverDesc);
-
-                    servers.Add(server);
-                }
-
-                Logging.Debug($"Successfully read {servers.Count} servers from the table");
-                Servers = servers;
-            }
-            catch (Exception ex)
-            {
-                Logger.Log("Error reading data from servers table");
                 Logger.Log(ex);
             }
             finally
@@ -4020,28 +3995,90 @@ public class DatabaseManager
             {
                 rdr.Close();
             }
-            
-            Logging.Debug($"Querying servers to get their info");
-            foreach (var server in Servers)
+        }
+        catch (Exception ex)
+        {
+            Logger.Log("Error refreshing leaderboard data");
+            Logger.Log(ex);
+        }
+        finally
+        {
+            conn.Close();
+        }
+    }
+
+    private void CheckServers(object sender, ElapsedEventArgs e)
+    {
+        using MySqlConnection conn = new(ConnectionString);
+        try
+        {
+            conn.Open();
+            new MySqlCommand($"UPDATE `{SERVERS}` SET `Players` = {Provider.clients.Count}, `MaxPlayers` = {Provider.maxPlayers}, `CurrentServerName` = {Provider.serverName}, `LastUpdated` = {DateTimeOffset.UtcNow.ToUnixTimeSeconds()} WHERE `ServerID` = {Config.ServerID};", conn).ExecuteScalar();
+            Logging.Debug("Reading servers for base data");
+            var rdr = new MySqlCommand($"SELECT * FROM `{SERVERS}`;", conn).ExecuteReader();
+            try
             {
-                try
+                List<Server> servers = new();
+                while (rdr.Read())
                 {
-                    var info = SteamServer.QueryServer(server.IP, server.PortNo, 1000);
-                    server.Players = info.Players;
-                    server.MaxPlayers = info.MaxPlayers;
-                    server.Name = info.Name;
-                    server.IsOnline = true;
+                    if (!int.TryParse(rdr[0].ToString(), out var serverID))
+                        continue;
+                    
+                    var ip = rdr[1].ToString();
+                    var port = rdr[2].ToString();
+                    var serverName = rdr[3].ToString();
+                    var friendlyIP = rdr[4].ToString();
+                    var serverDesc = rdr[5].ToString();
+
+                    if (!int.TryParse(rdr[6].ToString(), out var maxPlayers))
+                        continue;
+
+                    if (!int.TryParse(rdr[7].ToString(), out var players))
+                        continue;
+
+                    var currentServerName = rdr[8].ToString();
+                    if (!float.TryParse(rdr[9].ToString(), out var surgeMultiplier))
+                        continue;
+
+                    if (!long.TryParse(rdr[10].ToString(), out var surgeExpiryUnix))
+                        continue;
+
+                    if (!long.TryParse(rdr[11].ToString(), out var lastUpdatedUnix))
+                        continue;
+
+                    var surgeExpiry = DateTimeOffset.FromUnixTimeSeconds(surgeExpiryUnix);
+                    var lastUpdated = DateTimeOffset.FromUnixTimeSeconds(lastUpdatedUnix);
+
+                    if (!IPAddress.TryParse(ip, out var ipAddress))
+                        continue;
+
+                    var ipBytes = ipAddress.GetAddressBytes();
+                    if (BitConverter.IsLittleEndian)
+                        Array.Reverse(ipBytes);
+
+                    var ipNo = BitConverter.ToUInt32(ipBytes, 0);
+
+                    if (!ushort.TryParse(port, out var portNo))
+                        continue;
+                    
+                    var server = new Server(serverID, ip, port, serverName, friendlyIP, serverDesc, maxPlayers, players, currentServerName, surgeMultiplier, surgeExpiry, lastUpdated, Config.ServerID == serverID, ipNo, portNo);
+                    servers.Add(server);
                 }
-                catch
-                {
-                    if (server.IsOnline)
-                    {
-                        server.LastOnline = DateTime.UtcNow;
-                        server.IsOnline = false;
-                    }
-                }
+
+                Logging.Debug($"Successfully read {servers.Count} servers from the table");
+                Servers = servers;
+            }
+            catch (Exception ex)
+            {
+                Logger.Log("Error reading data from servers table");
+                Logger.Log(ex);
+            }
+            finally
+            {
+                rdr.Close();
             }
             
+            Logging.Debug("Sorting servers");
             Servers.Sort((a, b) =>
             {
                 if (a.IsCurrentServer)
@@ -4058,11 +4095,31 @@ public class DatabaseManager
 
                 return Utility.ServerNameSort(a, b);
             });
+
+            var currentServer = Servers.FirstOrDefault(k => k.IsCurrentServer);
+            if (currentServer == null)
+                return;
+
+            if (currentServer.SurgeMultiplier != 0f && DateTimeOffset.UtcNow > currentServer.SurgeExpiry)
+            {
+                Logging.Debug("Surge multiplier is active, expiry is reached. Expiring the multiplier");
+                new MySqlCommand($"UPDATE `{SERVERS}` SET `SurgeMultiplier` = 0 WHERE `ServerID` = {currentServer.ServerID};", conn).ExecuteScalar();
+                currentServer.SurgeMultiplier = 0f;
+            }
+            
+            if (Servers.Exists(k => k.IsOnline && Config.SurgeServers.Contains(k.ServerID) && k.Players * 100 / k.MaxPlayers >= Config.SurgeThreshold))
+            {
+                Logging.Debug($"One surge group server has players more than threshold, adding the multiplier and changing the expiry");
+                currentServer.SurgeExpiry = DateTimeOffset.UtcNow.AddSeconds(Config.SurgeSeconds);
+                currentServer.SurgeMultiplier = Config.SurgeMultiplier;
+                new MySqlCommand($"UPDATE `{SERVERS}` SET `SurgeMultiplier` = {currentServer.SurgeMultiplier}, `SurgeExpiry` = {currentServer.SurgeExpiry.ToUnixTimeSeconds()} WHERE `ServerID` = {currentServer.ServerID};", conn).ExecuteScalar();
+            }
+            
             TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.OnServersUpdated());
         }
         catch (Exception ex)
         {
-            Logger.Log("Error refreshing leaderboard data");
+            Logger.Log("Error while refreshing servers");
             Logger.Log(ex);
         }
         finally
@@ -4070,7 +4127,7 @@ public class DatabaseManager
             conn.Close();
         }
     }
-
+    
     // Player Data
 
     public void IncreasePlayerXP(CSteamID steamID, int xp)
