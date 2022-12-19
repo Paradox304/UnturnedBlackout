@@ -1071,7 +1071,6 @@ public class UIHandler : IDisposable
     public void ShowPlayPage()
     {
         MainPage = EMainPage.PLAY;
-        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Play Servers Notification", (Plugin.Instance.Game.Games.Count >= Config.Base.FileData.MaxGamesCount - 1) || DB.Servers.Exists(k => k.IsOnline && k.SurgeMultiplier != 0f));
         ShowPlayPage(EPlayPage.GAMES);
     }
 
@@ -1126,7 +1125,7 @@ public class UIHandler : IDisposable
         for (var i = 0; i <= 13; i++)
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Play BUTTON {i}", false);
         
-        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Play Servers Notification", games.Count >= Config.Base.FileData.MaxGamesCount - 1);
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Play Servers Notification", Plugin.Instance.Game.Games.Count >= Config.Base.FileData.MaxGamesCount - 1 || DB.Servers.Exists(k => k.IsOnline && k.SurgeMultiplier != 0f));
         var maxCount = Math.Min(14, games.Count);
         for (var index = 0; index < maxCount; index++)
         {
