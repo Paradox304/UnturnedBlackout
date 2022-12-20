@@ -1125,7 +1125,7 @@ public class UIHandler : IDisposable
         for (var i = 0; i <= 13; i++)
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Play BUTTON {i}", false);
         
-        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Play Servers Notification", Plugin.Instance.Game.Games.Count >= Config.Base.FileData.MaxGamesCount - 1 || DB.Servers.Exists(k => k.IsOnline && k.SurgeMultiplier != 0f));
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Play Servers Notification", Plugin.Instance.Game.Games.Count >= Config.Base.FileData.MaxGamesCount - 1 || DB.Servers.Exists(k => !k.IsCurrentServer && k.IsOnline && k.SurgeMultiplier != 0f));
         var maxCount = Math.Min(14, games.Count);
         for (var index = 0; index < maxCount; index++)
         {
@@ -1172,7 +1172,7 @@ public class UIHandler : IDisposable
         for (var i = 0; i <= 13; i++)
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Play BUTTON {i}", false);
         
-        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Play Servers Notification", (Plugin.Instance.Game.Games.Count >= Config.Base.FileData.MaxGamesCount - 1) || DB.Servers.Exists(k => k.IsOnline && k.SurgeMultiplier != 0f));
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Play Servers Notification", (Plugin.Instance.Game.Games.Count >= Config.Base.FileData.MaxGamesCount - 1) || DB.Servers.Exists(k => !k.IsCurrentServer && k.IsOnline && k.SurgeMultiplier != 0f));
         var servers = DB.Servers;
         var maxCount = Math.Min(14, servers.Count);
 
@@ -1185,7 +1185,7 @@ public class UIHandler : IDisposable
                 name = $"<color=#FFFF00>{name}</color>";
 
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Play Server TEXT {index}", name);
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Play Server Surge Multiplier TEXT {index}", server.SurgeMultiplier != 0f ? $"{server.SurgeMultiplier}x XP BOOST" : " ");
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Play Server Surge Multiplier TEXT {index}", server.SurgeMultiplier != 0f ? $"+{(int)(server.SurgeMultiplier * 100)}% XP BOOST" : " ");
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Play Status TEXT {index}",
                 server.IsOnline ? "<color=#36ff3c>Online</color>" : (DateTime.UtcNow - server.LastUpdated).TotalSeconds < 120 ? "<color=#f5fa73>Restarting</color>" : "<color=#ed2626>Offline</color>");
 

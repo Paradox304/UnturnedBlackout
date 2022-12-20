@@ -4013,7 +4013,7 @@ public class DatabaseManager
         try
         {
             conn.Open();
-            new MySqlCommand($"UPDATE `{SERVERS}` SET `Players` = {Provider.clients.Count}, `MaxPlayers` = {Provider.maxPlayers}, `CurrentServerName` = '{Provider.serverName}', `LastUpdated` = {DateTimeOffset.UtcNow.ToUnixTimeSeconds()} WHERE `ServerID` = {Config.ServerID};", conn).ExecuteScalar();
+            new MySqlCommand($"UPDATE `{SERVERS}` SET `Players` = {Provider.clients.Count}, `CurrentServerName` = '{Provider.serverName}', `LastUpdated` = {DateTimeOffset.UtcNow.ToUnixTimeSeconds()} WHERE `ServerID` = {Config.ServerID};", conn).ExecuteScalar();
             Logging.Debug("Reading servers for base data");
             var rdr = new MySqlCommand($"SELECT * FROM `{SERVERS}`;", conn).ExecuteReader();
             try
@@ -4100,6 +4100,7 @@ public class DatabaseManager
             if (currentServer == null)
                 return;
 
+            Provider.maxPlayers = (byte)currentServer.MaxPlayers;
             if (currentServer.SurgeMultiplier != 0f && DateTimeOffset.UtcNow > currentServer.SurgeExpiry)
             {
                 Logging.Debug("Surge multiplier is active, expiry is reached. Expiring the multiplier");
@@ -4107,14 +4108,16 @@ public class DatabaseManager
                 currentServer.SurgeMultiplier = 0f;
             }
             
-            if (currentServer.SurgeMultiplier == 0f && Servers.Exists(k => k.IsOnline && Config.SurgeServers.Contains(k.ServerID) && k.Players * 100 / k.MaxPlayers >= Config.SurgeThreshold))
+            if (Provider.clients.Count * 100 / Provider.maxPlayers < Config.SurgeThreshold && currentServer.SurgeMultiplier == 0f && Servers.Exists(k => k.IsOnline && Config.SurgeServers.Contains(k.ServerID) && k.Players * 100 / k.MaxPlayers >= Config.SurgeThreshold))
             {
                 Logging.Debug($"One surge group server has players more than threshold, adding the multiplier and changing the expiry");
                 currentServer.SurgeExpiry = DateTimeOffset.UtcNow.AddSeconds(Config.SurgeSeconds);
                 currentServer.SurgeMultiplier = Config.SurgeMultiplier;
                 new MySqlCommand($"UPDATE `{SERVERS}` SET `SurgeMultiplier` = {currentServer.SurgeMultiplier}, `SurgeExpiry` = {currentServer.SurgeExpiry.ToUnixTimeSeconds()} WHERE `ServerID` = {currentServer.ServerID};", conn).ExecuteScalar();
             }
-            
+
+            Provider.serverName = currentServer.ServerName + $"{(currentServer.SurgeMultiplier != 0f ? $"| +{(int)(currentServer.SurgeMultiplier * 100)}% XP BOOST" : "")}";
+            currentServer.CurrentServerName = Provider.serverName;
             TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.OnServersUpdated());
         }
         catch (Exception ex)
