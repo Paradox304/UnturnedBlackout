@@ -1180,7 +1180,7 @@ public class UIHandler : IDisposable
         {
             var server = servers[index];
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Play BUTTON {index}", true);
-            var name = string.IsNullOrEmpty(server.CurrentServerName) ? server.ServerName : server.CurrentServerName;
+            var name = server.ServerName;
             if (server.IsCurrentServer)
                 name = $"<color=#FFFF00>{name}</color>";
 
@@ -1197,7 +1197,7 @@ public class UIHandler : IDisposable
 
     public void ShowServer(Server server)
     {
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Play Server TEXT", string.IsNullOrEmpty(server.CurrentServerName) ? server.ServerName : server.CurrentServerName);
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Play Server TEXT", server.ServerName);
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Play Mode TEXT", " ");
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Play Server {server.FriendlyIP.Split('.')[0].ToUpper()} Enabler", true);
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Play Map TEXT", " ");

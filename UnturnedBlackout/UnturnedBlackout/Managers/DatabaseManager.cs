@@ -4116,7 +4116,7 @@ public class DatabaseManager
                 new MySqlCommand($"UPDATE `{SERVERS}` SET `SurgeMultiplier` = {currentServer.SurgeMultiplier}, `SurgeExpiry` = {currentServer.SurgeExpiry.ToUnixTimeSeconds()} WHERE `ServerID` = {currentServer.ServerID};", conn).ExecuteScalar();
             }
 
-            Provider.serverName = currentServer.ServerName + $"{(currentServer.SurgeMultiplier != 0f ? $"| +{(int)(currentServer.SurgeMultiplier * 100)}% XP BOOST" : "")}";
+            Provider.serverName = currentServer.ServerName + $"{(currentServer.SurgeMultiplier != 0f ? $" | +{(int)(currentServer.SurgeMultiplier * 100)}% XP BOOST" : "")}";
             currentServer.CurrentServerName = Provider.serverName;
             TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.OnServersUpdated());
         }
