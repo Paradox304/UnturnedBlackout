@@ -4013,7 +4013,7 @@ public class DatabaseManager
         try
         {
             conn.Open();
-            new MySqlCommand($"UPDATE `{SERVERS}` SET `Players` = {Provider.clients.Count}, `CurrentServerName` = '{Provider.serverName}', `LastUpdated` = {DateTimeOffset.UtcNow.ToUnixTimeSeconds()} WHERE `ServerID` = {Config.ServerID};", conn).ExecuteScalar();
+            new MySqlCommand($"UPDATE `{SERVERS}` SET `Players` = {Provider.clients.Count}, `LastUpdated` = {DateTimeOffset.UtcNow.ToUnixTimeSeconds()} WHERE `ServerID` = {Config.ServerID};", conn).ExecuteScalar();
             Logging.Debug("Reading servers for base data");
             var rdr = new MySqlCommand($"SELECT * FROM `{SERVERS}`;", conn).ExecuteReader();
             try
@@ -4118,6 +4118,7 @@ public class DatabaseManager
 
             Provider.serverName = currentServer.ServerName + $"{(currentServer.SurgeMultiplier != 0f ? $" | +{(int)(currentServer.SurgeMultiplier * 100)}% XP BOOST" : "")}";
             currentServer.CurrentServerName = Provider.serverName;
+            new MySqlCommand($"UPDATE `{SERVERS}` SET `CurrentServerName` = '{Provider.serverName}' WHERE `ServerID` = {Config.ServerID};", conn).ExecuteScalar();
             TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.OnServersUpdated());
         }
         catch (Exception ex)
