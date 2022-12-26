@@ -218,7 +218,7 @@ public class CTFGame : Game
                 if (totalMinutesPlayed < Config.RoundEndCases.FileData.MinimumMinutesPlayed || player.Kills == 0)
                     continue;
 
-                var chance = Mathf.RoundToInt(Config.RoundEndCases.FileData.Chance * totalMinutesPlayed) + (player.GamePlayer.Data.HasPrime ? Config.RoundEndCases.FileData.PrimeBonusChance : 0);
+                var chance = Mathf.RoundToInt(Config.RoundEndCases.FileData.Chance * totalMinutesPlayed) * (player.GamePlayer.Data.HasPrime ? Config.RoundEndCases.FileData.PrimeBonusMultiplier : 1f);
                 if (UnityEngine.Random.Range(1, 101) > chance)
                     continue;
 
