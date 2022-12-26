@@ -5599,7 +5599,7 @@ public class UIHandler : IDisposable
     public void SendUnlockEmbed(string name, string iconLink, int cost)
     {
         var embed = new Embed(null, null, null, "255", DateTime.UtcNow.ToString("s"), new(Provider.serverName, Provider.configData.Browser.Icon), new(PlayerData.SteamName, $"https://steamcommunity.com/profiles/{PlayerData.SteamID}", PlayerData.AvatarLinks[0]),
-            new Field[] { new(name, $"{cost} :Blacktag:", true) }, new(iconLink), null);
+            new Field[] { new(name, $"{cost} Blacktags", true) }, new(iconLink), null);
         Plugin.Instance.Discord.SendEmbed(embed, "", Config.Webhooks.FileData.BlacktagPurchaseWebhookLink);
     }
     
