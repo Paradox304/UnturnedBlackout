@@ -1645,7 +1645,7 @@ public class DatabaseManager
 
                 Logging.Debug($"Found {defaultSecondaryAttachments.Count} default secondary attachments");
                 List<int> defaultPerk = new();
-                for (var i = 1; i <= 3; i++)
+                for (var i = 1; i <= 4; i++)
                 {
                     var randomPerks = defaultPerks.Where(k => k.PerkType == i).ToList();
                     if (randomPerks.Count == 0)

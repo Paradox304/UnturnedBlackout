@@ -1762,6 +1762,9 @@ public class UIManager
             case "SERVER Loadout Perk BUTTON 3":
                 handler.ShowLoadoutSubPage(ELoadoutPage.PERK3);
                 return;
+            case "SERVER Loadout Perk BUTTON 4":
+                handler.ShowLoadoutSubPage(ELoadoutPage.PERK4);
+                return;
             case "SERVER Loadout Primary BUTTON":
                 handler.ShowLoadoutSubPage(ELoadoutPage.PRIMARY);
                 return;

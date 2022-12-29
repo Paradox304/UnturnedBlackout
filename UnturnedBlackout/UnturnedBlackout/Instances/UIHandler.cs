@@ -53,6 +53,8 @@ public class UIHandler : IDisposable
     public const int MAX_ACHIEVEMENT_PAGE_AMOUNT_SPACES = 100;
     public const int MAX_QUEST_TARGET_SPACES = 256;
 
+    public const int MAX_PERK_TYPES = 4;
+
     private static DatabaseManager DB => Plugin.Instance.DB;
     public static ConfigManager Config => Plugin.Instance.Config;
     
@@ -606,7 +608,7 @@ public class UIHandler : IDisposable
     public void BuildPerkPages()
     {
         PerkPages = new();
-        for (var i = 1; i <= 3; i++)
+        for (var i = 1; i <= MAX_PERK_TYPES; i++)
         {
             PerkPages.Add(i, new());
             var index = 0;
@@ -1852,6 +1854,7 @@ public class UIHandler : IDisposable
                     case ELoadoutPage.PERK1:
                     case ELoadoutPage.PERK2:
                     case ELoadoutPage.PERK3:
+                    case ELoadoutPage.PERK4:
                     {
                         if (!int.TryParse(GetPerkInt(), out var perkType))
                         {
@@ -2190,6 +2193,7 @@ public class UIHandler : IDisposable
                     case ELoadoutPage.PERK1:
                     case ELoadoutPage.PERK2:
                     case ELoadoutPage.PERK3:
+                    case ELoadoutPage.PERK4:
                     {
                         if (!int.TryParse(GetPerkInt(), out var perkType))
                         {
@@ -2512,6 +2516,7 @@ public class UIHandler : IDisposable
                     case ELoadoutPage.PERK1:
                     case ELoadoutPage.PERK2:
                     case ELoadoutPage.PERK3:
+                    case ELoadoutPage.PERK4:
                     {
                         if (!int.TryParse(GetPerkInt(), out var perkType))
                         {
@@ -2833,6 +2838,7 @@ public class UIHandler : IDisposable
                     case ELoadoutPage.PERK1:
                     case ELoadoutPage.PERK2:
                     case ELoadoutPage.PERK3:
+                    case ELoadoutPage.PERK4:
                     {
                         if (!int.TryParse(GetPerkInt(), out var perkType))
                         {
@@ -3647,6 +3653,7 @@ public class UIHandler : IDisposable
                     case ELoadoutPage.PERK1:
                     case ELoadoutPage.PERK2:
                     case ELoadoutPage.PERK3:
+                    case ELoadoutPage.PERK4:
                     {
                         if (!int.TryParse(GetPerkInt(), out var perkType))
                         {
@@ -4353,6 +4360,9 @@ public class UIHandler : IDisposable
                 break;
             case 3:
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Rarity TEXT", $"<color={Utility.GetRarityColor(ERarity.YELLOW)}>PERK 3</color>");
+                break;
+            case 4:
+                // TODO: Send perk rarity here
                 break;
         }
 

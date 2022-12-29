@@ -19,6 +19,7 @@ public enum ELoadoutPage
     PERK1,
     PERK2,
     PERK3,
+    PERK4,
     KILLSTREAK,
     GLOVE,
     CARD,
