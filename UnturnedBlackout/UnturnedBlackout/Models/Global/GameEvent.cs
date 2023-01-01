@@ -41,8 +41,4 @@ public class GameEvent
     public List<int> IgnoredLocations { get; set; }
     [XmlArrayItem("IgnoredGameMode")]
     public List<EGameType> IgnoredGameModes { get; set; }
-    
-    public GameEvent()
-    {
-    }
 }

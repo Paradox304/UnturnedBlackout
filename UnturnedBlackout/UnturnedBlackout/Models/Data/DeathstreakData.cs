@@ -1,8 +1,11 @@
-﻿namespace UnturnedBlackout.Models.Data;
+using System;
 
-public class KillstreakData
+namespace UnturnedBlackout.Models.Data;
+
+[Serializable]
+public class DeathstreakData
 {
-    public int KillstreakID { get; set; }
+    public int DeathstreakID { get; set; }
     public ushort TriggerItemID { get; set; }
 
     public bool IsItem { get; set; }
@@ -15,13 +18,8 @@ public class KillstreakData
 
     public bool IsClothing { get; set; }
 
-    public bool IsTurret { get; set; }
-    public ushort TurretID { get; set; }
-    public ushort GunID { get; set; }
-    public int TurretDamagePerSecond { get; set; }
-
     public bool HasInfiniteStamina { get; set; }
-    public int KillstreakStaySeconds { get; set; }
+    public int DeathstreakStaySeconds { get; set; }
 
-    public string KillstreakHUDIconURL { get; set; }
+    public string DeathstreakHUDIconURL { get; set; }
 }

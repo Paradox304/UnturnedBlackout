@@ -237,6 +237,7 @@
         <Compile Include="Database\Base\BattlepassTier.cs" />
         <Compile Include="Database\Base\Card.cs" />
         <Compile Include="Database\Base\Case.cs" />
+        <Compile Include="Database\Base\Deathstreak.cs" />
         <Compile Include="Database\Base\Gadget.cs" />
         <Compile Include="Database\Base\Glove.cs" />
         <Compile Include="Database\Base\Gun.cs" />
@@ -256,6 +257,7 @@
         <Compile Include="Database\Data\Loadout.cs" />
         <Compile Include="Database\Data\LoadoutAttachment.cs" />
         <Compile Include="Database\Data\LoadoutCard.cs" />
+        <Compile Include="Database\Data\LoadoutDeathstreak.cs" />
         <Compile Include="Database\Data\LoadoutGadget.cs" />
         <Compile Include="Database\Data\LoadoutGlove.cs" />
         <Compile Include="Database\Data\LoadoutGun.cs" />
@@ -321,6 +323,7 @@
         <Compile Include="Models\Bot\BotLeaderboardReward.cs" />
         <Compile Include="Models\Bot\BotPrime.cs" />
         <Compile Include="Models\Configuration\BaseValuesConfig.cs" />
+        <Compile Include="Models\Configuration\DeathstreakConfig.cs" />
         <Compile Include="Models\Configuration\DefaultSkillsConfig.cs" />
         <Compile Include="Models\Configuration\GameEventConfig.cs" />
         <Compile Include="Models\Configuration\GamemodeConfig.cs" />
@@ -335,6 +338,7 @@
         <Compile Include="Models\Configuration\TeamsConfig.cs" />
         <Compile Include="Models\Configuration\WebhooksConfig.cs" />
         <Compile Include="Models\Configuration\WinningValuesConfig.cs" />
+        <Compile Include="Models\Data\DeathstreakData.cs" />
         <Compile Include="Models\Data\KillstreakData.cs" />
         <Compile Include="Models\Data\LoadoutData.cs" />
         <Compile Include="Models\Animation\AnimationInfo.cs" />
@@ -368,6 +372,7 @@
         <Compile Include="Models\UI\PageAttachment.cs" />
         <Compile Include="Models\UI\PageBattlepass.cs" />
         <Compile Include="Models\UI\PageCard.cs" />
+        <Compile Include="Models\UI\PageDeathstreak.cs" />
         <Compile Include="Models\UI\PageGadget.cs" />
         <Compile Include="Models\UI\PageGlove.cs" />
         <Compile Include="Models\UI\PageGun.cs" />

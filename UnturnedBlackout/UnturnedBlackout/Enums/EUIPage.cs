@@ -18,6 +18,7 @@ public enum EUIPage
     CARD,
     GLOVE,
     KILLSTREAK,
+    DEATHSTREAK,
     CASE,
     ACHIEVEMENT
 }

@@ -26,8 +26,4 @@ public class IconsConfig
 
     public string HiddenFlagIconLink { get; set; }
     public string FlagAPILink { get; set; }
-
-    public IconsConfig()
-    {
-    }
 }

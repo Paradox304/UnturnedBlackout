@@ -142,6 +142,7 @@ public class UIHandler : IDisposable
     public Dictionary<int, PageCard> CardPages { get; set; }
     public Dictionary<int, PageGlove> GlovePages { get; set; }
     public Dictionary<int, PageKillstreak> KillstreakPages { get; set; }
+    public Dictionary<int, PageDeathstreak> DeathstreakPages { get; set; }
     public Dictionary<int, Dictionary<int, PageAchievement>> AchievementPages { get; set; }
     public Dictionary<int, PageBattlepass> BattlepassPages { get; set; }
     public Dictionary<int, PageBattlepass> BattlepassPagesInverse { get; set; } // Get the page the tier of the battlepass is on
@@ -264,6 +265,7 @@ public class UIHandler : IDisposable
         BuildCardPages();
         BuildGlovePages();
         BuildKillstreakPages();
+        BuildDeathstreakPages();
         BuildUnboxingCasesPages();
         BuildUnboxingStorePages();
         BuildUnboxingInventoryPages();
@@ -760,6 +762,32 @@ public class UIHandler : IDisposable
 
         if (killstreaks.Count != 0)
             KillstreakPages.Add(page, new(page, killstreaks));
+    }
+
+    public void BuildDeathstreakPages()
+    {
+        DeathstreakPages = new();
+        var index = 0;
+        var page = 1;
+        Dictionary<int, LoadoutDeathstreak> deathstreaks = new();
+
+        foreach (var deathstreak in PlayerLoadout.Deathstreaks.Values.OrderBy(k => k.Deathstreak.BuyPrice))
+        {
+            deathstreaks.Add(index, deathstreak);
+            if (index == MAX_ITEMS_PER_PAGE)
+            {
+                DeathstreakPages.Add(page, new(page, deathstreaks));
+                deathstreaks = new();
+                index = 0;
+                page++;
+                continue;
+            }
+
+            index++;
+        }
+
+        if (deathstreaks.Count != 0)
+            DeathstreakPages.Add(page, new(page, deathstreaks));
     }
 
     public void BuildAchievementPages()
@@ -1924,6 +1952,18 @@ public class UIHandler : IDisposable
                         ShowKillstreakPage(firstPage);
                         break;
                     }
+                    
+                    case ELoadoutPage.DEATHSTREAK:
+                    {
+                        if (!DeathstreakPages.TryGetValue(1, out var firstPage))
+                        {
+                            Logging.Debug($"Error finding the first page for deathstreaks for {Player.CharacterName}");
+                            return;
+                        }
+
+                        ShowDeathstreakPage(firstPage);
+                        break;
+                    }
 
                     case ELoadoutPage.GLOVE:
                     {
@@ -2058,316 +2098,102 @@ public class UIHandler : IDisposable
             return;
         }
 
-        switch (LoadoutTab)
+        switch (LoadoutPage)
         {
-            case ELoadoutTab.ALL:
+            case ELoadoutPage.PRIMARY_SKIN:
             {
-                switch (LoadoutPage)
+                if (!GunSkinPages.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out var gunSkinPages))
                 {
-                    case ELoadoutPage.PRIMARY_SKIN:
-                    {
-                        if (!GunSkinPages.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out var gunSkinPages))
-                        {
-                            Logging.Debug($"Error getting gun skin pages for gun with id {loadout.Primary?.Gun?.GunID ?? 0}");
-                            return;
-                        }
-
-                        if (!gunSkinPages.TryGetValue(LoadoutTabPageID + 1, out var nextPage) && !gunSkinPages.TryGetValue(1, out nextPage))
-                        {
-                            Logging.Debug($"Error finding the next page for gun skins for gun with id {loadout.Primary.Gun.GunID} for {Player.CharacterName}");
-                            return;
-                        }
-
-                        ShowGunSkinPage(nextPage);
-                        break;
-                    }
-
-                    case ELoadoutPage.SECONDARY_SKIN:
-                    {
-                        if (!GunSkinPages.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out var gunSkinPages))
-                        {
-                            Logging.Debug($"Error getting gun skin pages for gun with id {loadout.Secondary?.Gun?.GunID ?? 0}");
-                            return;
-                        }
-
-                        if (!gunSkinPages.TryGetValue(LoadoutTabPageID + 1, out var nextPage) && !gunSkinPages.TryGetValue(1, out nextPage))
-                        {
-                            Logging.Debug($"Error finding the next page for gun skins for gun with id {loadout.Secondary.Gun.GunID} for {Player.CharacterName}");
-                            return;
-                        }
-
-                        ShowGunSkinPage(nextPage);
-                        break;
-                    }
-
-                    case ELoadoutPage.ATTACHMENT_PRIMARY_BARREL:
-                    case ELoadoutPage.ATTACHMENT_PRIMARY_GRIP:
-                    case ELoadoutPage.ATTACHMENT_PRIMARY_MAGAZINE:
-                    case ELoadoutPage.ATTACHMENT_PRIMARY_SIGHTS:
-                    {
-                        if (!Enum.TryParse(GetAttachmentPage(), false, out EAttachment attachmentType))
-                        {
-                            Logging.Debug($"Error finding attachment type that {Player.CharacterName} has selected");
-                            return;
-                        }
-
-                        if (!PlayerLoadout.Guns.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out var gun))
-                        {
-                            Logging.Debug($"Error finding primary that has been selected with id {loadout.Primary?.Gun?.GunID ?? 0} for {Player.CharacterName}");
-                            return;
-                        }
-
-                        if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out var attachmentTypePages))
-                        {
-                            Logging.Debug($"Error finding primary attachments for {gun.Gun.GunID} for {Player.CharacterName}");
-                            return;
-                        }
-
-                        if (!attachmentTypePages.TryGetValue(attachmentType, out var attachmentPages))
-                        {
-                            Logging.Debug($"Error finding attachments with type {attachmentType} for {Player.CharacterName}");
-                            return;
-                        }
-
-                        if (!attachmentPages.TryGetValue(LoadoutTabPageID + 1, out var nextPage) && !attachmentPages.TryGetValue(1, out nextPage))
-                        {
-                            Logging.Debug($"Error finding next page of attachment with type {attachmentType} for gun with id {gun.Gun.GunID} for {Player.CharacterName}");
-                            return;
-                        }
-
-                        ShowAttachmentPage(nextPage, gun);
-                        break;
-                    }
-
-                    case ELoadoutPage.ATTACHMENT_PRIMARY_CHARM:
-                    case ELoadoutPage.ATTACHMENT_SECONDARY_CHARM:
-                    {
-                        if (!GunCharmPages.TryGetValue(LoadoutTabPageID + 1, out var nextPage) && !GunCharmPages.TryGetValue(1, out nextPage))
-                        {
-                            Logging.Debug($"Error getting next page for gun charms for {Player.CharacterName}");
-                            return;
-                        }
-
-                        ShowGunCharmPage(nextPage);
-                        break;
-                    }
-
-                    case ELoadoutPage.ATTACHMENT_SECONDARY_BARREL:
-                    case ELoadoutPage.ATTACHMENT_SECONDARY_MAGAZINE:
-                    case ELoadoutPage.ATTACHMENT_SECONDARY_SIGHTS:
-                    {
-                        if (!Enum.TryParse(GetAttachmentPage(), false, out EAttachment attachmentType))
-                        {
-                            Logging.Debug($"Error finding attachment type that {Player.CharacterName} has selected");
-                            return;
-                        }
-
-                        if (!PlayerLoadout.Guns.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out var gun))
-                        {
-                            Logging.Debug($"Error finding secondary that has been selected with id {loadout.Secondary?.Gun?.GunID ?? 0} for {Player.CharacterName}");
-                            return;
-                        }
-
-                        if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out var attachmentTypePages))
-                        {
-                            Logging.Debug($"Error finding secondary attachments for {gun.Gun.GunID} for {Player.CharacterName}");
-                            return;
-                        }
-
-                        if (!attachmentTypePages.TryGetValue(attachmentType, out var attachmentPages))
-                        {
-                            Logging.Debug($"Error finding attachments with type {attachmentType} for {Player.CharacterName}");
-                            return;
-                        }
-
-                        if (!attachmentPages.TryGetValue(LoadoutTabPageID + 1, out var nextPage) && !attachmentPages.TryGetValue(1, out nextPage))
-                        {
-                            Logging.Debug($"Error finding next page of attachment with type {attachmentType} for gun with id {gun.Gun.GunID} for {Player.CharacterName}");
-                            return;
-                        }
-
-                        ShowAttachmentPage(nextPage, gun);
-                        break;
-                    }
-
-                    case ELoadoutPage.PERK1:
-                    case ELoadoutPage.PERK2:
-                    case ELoadoutPage.PERK3:
-                    case ELoadoutPage.PERK4:
-                    {
-                        if (!int.TryParse(GetPerkInt(), out var perkType))
-                        {
-                            Logging.Debug($"Error getting perk type from {LoadoutPage}");
-                            return;
-                        }
-
-                        if (!PerkPages[perkType].TryGetValue(LoadoutTabPageID + 1, out var nextPage) && !PerkPages[perkType].TryGetValue(1, out nextPage))
-                        {
-                            Logging.Debug($"Error getting next page for perks for {Player.CharacterName}");
-                            return;
-                        }
-
-                        ShowPerkPage(nextPage);
-                        break;
-                    }
-
-                    case ELoadoutPage.LETHAL:
-                    {
-                        if (!LethalPages.TryGetValue(LoadoutTabPageID + 1, out var nextPage) && !LethalPages.TryGetValue(1, out nextPage))
-                        {
-                            Logging.Debug($"Error finding the next page for lethals for {Player.CharacterName}");
-                            return;
-                        }
-
-                        ShowGadgetPage(nextPage);
-                        break;
-                    }
-
-                    case ELoadoutPage.TACTICAL:
-                    {
-                        if (!TacticalPages.TryGetValue(LoadoutTabPageID + 1, out var nextPage) && !TacticalPages.TryGetValue(1, out nextPage))
-                        {
-                            Logging.Debug($"Error finding the next page for tacticals for {Player.CharacterName}");
-                            return;
-                        }
-
-                        ShowGadgetPage(nextPage);
-                        break;
-                    }
-
-                    case ELoadoutPage.KNIFE:
-                    {
-                        if (!KnifePages.TryGetValue(LoadoutTabPageID + 1, out var nextPage) && !KnifePages.TryGetValue(1, out nextPage))
-                        {
-                            Logging.Debug($"Error finding the next page for knives for {Player.CharacterName}");
-                            return;
-                        }
-
-                        ShowKnifePage(nextPage);
-                        break;
-                    }
-
-                    case ELoadoutPage.KILLSTREAK:
-                    {
-                        if (!KillstreakPages.TryGetValue(LoadoutTabPageID + 1, out var nextPage) && !KillstreakPages.TryGetValue(1, out nextPage))
-                        {
-                            Logging.Debug($"Error finding the next page for killstreaks for {Player.CharacterName}");
-                            return;
-                        }
-
-                        ShowKillstreakPage(nextPage);
-                        break;
-                    }
-
-                    case ELoadoutPage.GLOVE:
-                    {
-                        if (!GlovePages.TryGetValue(LoadoutTabPageID + 1, out var nextPage) && !GlovePages.TryGetValue(1, out nextPage))
-                        {
-                            Logging.Debug($"Error finding the next page for gloves for {Player.CharacterName}");
-                            return;
-                        }
-
-                        ShowGlovePage(nextPage);
-                        break;
-                    }
-
-                    case ELoadoutPage.CARD:
-                    {
-                        if (!CardPages.TryGetValue(LoadoutTabPageID + 1, out var nextPage) && !CardPages.TryGetValue(1, out nextPage))
-                        {
-                            Logging.Debug($"Error finding the next page for cards for {Player.CharacterName}");
-                            return;
-                        }
-
-                        ShowCardPage(nextPage);
-                        break;
-                    }
-                }
-
-                break;
-            }
-
-            case ELoadoutTab.PISTOLS:
-            {
-                if (!PistolPages.TryGetValue(LoadoutTabPageID + 1, out var nextPage) && !PistolPages.TryGetValue(1, out nextPage))
-                {
-                    Logging.Debug($"Error finding next page for pistols for {Player.CharacterName}");
+                    Logging.Debug($"Error getting gun skin pages for gun with id {loadout.Primary?.Gun?.GunID ?? 0}");
                     return;
                 }
 
-                ShowGunPage(nextPage);
-                break;
-            }
-
-            case ELoadoutTab.SUBMACHINE_GUNS:
-            {
-                if (!SMGPages.TryGetValue(LoadoutTabPageID + 1, out var nextPage) && !SMGPages.TryGetValue(1, out nextPage))
+                if (!gunSkinPages.TryGetValue(LoadoutTabPageID + 1, out var nextPage) && !gunSkinPages.TryGetValue(1, out nextPage))
                 {
-                    Logging.Debug($"Error finding next page for smgs for {Player.CharacterName}");
+                    Logging.Debug($"Error finding the next page for gun skins for gun with id {loadout.Primary.Gun.GunID} for {Player.CharacterName}");
                     return;
                 }
 
-                ShowGunPage(nextPage);
+                ShowGunSkinPage(nextPage);
                 break;
             }
 
-            case ELoadoutTab.SHOTGUNS:
+            case ELoadoutPage.SECONDARY_SKIN:
             {
-                if (!ShotgunPages.TryGetValue(LoadoutTabPageID + 1, out var nextPage) && !ShotgunPages.TryGetValue(1, out nextPage))
+                if (!GunSkinPages.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out var gunSkinPages))
                 {
-                    Logging.Debug($"Error finding next page for shotguns for {Player.CharacterName}");
+                    Logging.Debug($"Error getting gun skin pages for gun with id {loadout.Secondary?.Gun?.GunID ?? 0}");
                     return;
                 }
 
-                ShowGunPage(nextPage);
+                if (!gunSkinPages.TryGetValue(LoadoutTabPageID + 1, out var nextPage) && !gunSkinPages.TryGetValue(1, out nextPage))
+                {
+                    Logging.Debug($"Error finding the next page for gun skins for gun with id {loadout.Secondary.Gun.GunID} for {Player.CharacterName}");
+                    return;
+                }
+
+                ShowGunSkinPage(nextPage);
                 break;
             }
 
-            case ELoadoutTab.LIGHT_MACHINE_GUNS:
+            case ELoadoutPage.ATTACHMENT_PRIMARY_CHARM:
+            case ELoadoutPage.ATTACHMENT_SECONDARY_CHARM:
             {
-                if (!LMGPages.TryGetValue(LoadoutTabPageID + 1, out var nextPage) && !LMGPages.TryGetValue(1, out nextPage))
+                if (!GunCharmPages.TryGetValue(LoadoutTabPageID + 1, out var nextPage) && !GunCharmPages.TryGetValue(1, out nextPage))
                 {
-                    Logging.Debug($"Error finding next page for lmgs for {Player.CharacterName}");
+                    Logging.Debug($"Error getting next page for gun charms for {Player.CharacterName}");
                     return;
                 }
 
-                ShowGunPage(nextPage);
+                ShowGunCharmPage(nextPage);
                 break;
             }
 
-            case ELoadoutTab.ASSAULT_RIFLES:
+            case ELoadoutPage.KNIFE:
             {
-                if (!ARPages.TryGetValue(LoadoutTabPageID + 1, out var nextPage) && !ARPages.TryGetValue(1, out nextPage))
+                if (!KnifePages.TryGetValue(LoadoutTabPageID + 1, out var nextPage) && !KnifePages.TryGetValue(1, out nextPage))
                 {
-                    Logging.Debug($"Error finding next page for ARs for {Player.CharacterName}");
+                    Logging.Debug($"Error finding the next page for knives for {Player.CharacterName}");
                     return;
                 }
 
-                ShowGunPage(nextPage);
+                ShowKnifePage(nextPage);
                 break;
             }
 
-            case ELoadoutTab.SNIPER_RIFLES:
+            case ELoadoutPage.KILLSTREAK:
             {
-                if (!SniperPages.TryGetValue(LoadoutTabPageID + 1, out var nextPage) && !SniperPages.TryGetValue(1, out nextPage))
+                if (!KillstreakPages.TryGetValue(LoadoutTabPageID + 1, out var nextPage) && !KillstreakPages.TryGetValue(1, out nextPage))
                 {
-                    Logging.Debug($"Error finding next page for snipers for {Player.CharacterName}");
+                    Logging.Debug($"Error finding the next page for killstreaks for {Player.CharacterName}");
                     return;
                 }
 
-                ShowGunPage(nextPage);
+                ShowKillstreakPage(nextPage);
                 break;
             }
 
-            case ELoadoutTab.CARBINES:
+            case ELoadoutPage.GLOVE:
             {
-                if (!CarbinePages.TryGetValue(LoadoutTabPageID + 1, out var nextPage) && !CarbinePages.TryGetValue(1, out nextPage))
+                if (!GlovePages.TryGetValue(LoadoutTabPageID + 1, out var nextPage) && !GlovePages.TryGetValue(1, out nextPage))
                 {
-                    Logging.Debug($"Error finding next page for carbines for {Player.CharacterName}");
+                    Logging.Debug($"Error finding the next page for gloves for {Player.CharacterName}");
                     return;
                 }
 
-                ShowGunPage(nextPage);
+                ShowGlovePage(nextPage);
+                break;
+            }
+
+            case ELoadoutPage.CARD:
+            {
+                if (!CardPages.TryGetValue(LoadoutTabPageID + 1, out var nextPage) && !CardPages.TryGetValue(1, out nextPage))
+                {
+                    Logging.Debug($"Error finding the next page for cards for {Player.CharacterName}");
+                    return;
+                }
+
+                ShowCardPage(nextPage);
                 break;
             }
         }
@@ -2381,316 +2207,102 @@ public class UIHandler : IDisposable
             return;
         }
 
-        switch (LoadoutTab)
+        switch (LoadoutPage)
         {
-            case ELoadoutTab.ALL:
+            case ELoadoutPage.PRIMARY_SKIN:
             {
-                switch (LoadoutPage)
+                if (!GunSkinPages.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out var gunSkinPages))
                 {
-                    case ELoadoutPage.PRIMARY_SKIN:
-                    {
-                        if (!GunSkinPages.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out var gunSkinPages))
-                        {
-                            Logging.Debug($"Error getting gun skin pages for gun with id {loadout.Primary?.Gun?.GunID ?? 0}");
-                            return;
-                        }
-
-                        if (!gunSkinPages.TryGetValue(LoadoutTabPageID - 1, out var prevPage) && !gunSkinPages.TryGetValue(gunSkinPages.Keys.Max(), out prevPage))
-                        {
-                            Logging.Debug($"Error finding the prev page for gun skins for gun with id {loadout.Primary.Gun.GunID} for {Player.CharacterName}");
-                            return;
-                        }
-
-                        ShowGunSkinPage(prevPage);
-                        break;
-                    }
-
-                    case ELoadoutPage.SECONDARY_SKIN:
-                    {
-                        if (!GunSkinPages.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out var gunSkinPages))
-                        {
-                            Logging.Debug($"Error getting gun skin pages for gun with id {loadout.Secondary?.Gun?.GunID ?? 0}");
-                            return;
-                        }
-
-                        if (!gunSkinPages.TryGetValue(LoadoutTabPageID - 1, out var prevPage) && !gunSkinPages.TryGetValue(gunSkinPages.Keys.Max(), out prevPage))
-                        {
-                            Logging.Debug($"Error finding the prev page for gun skins for gun with id {loadout.Secondary.Gun.GunID} for {Player.CharacterName}");
-                            return;
-                        }
-
-                        ShowGunSkinPage(prevPage);
-                        break;
-                    }
-
-                    case ELoadoutPage.ATTACHMENT_PRIMARY_BARREL:
-                    case ELoadoutPage.ATTACHMENT_PRIMARY_GRIP:
-                    case ELoadoutPage.ATTACHMENT_PRIMARY_MAGAZINE:
-                    case ELoadoutPage.ATTACHMENT_PRIMARY_SIGHTS:
-                    {
-                        if (!Enum.TryParse(GetAttachmentPage(), false, out EAttachment attachmentType))
-                        {
-                            Logging.Debug($"Error finding attachment type that {Player.CharacterName} has selected");
-                            return;
-                        }
-
-                        if (!PlayerLoadout.Guns.TryGetValue(loadout.Primary?.Gun?.GunID ?? 0, out var gun))
-                        {
-                            Logging.Debug($"Error finding primary that has been selected with id {loadout.Primary?.Gun?.GunID ?? 0} for {Player.CharacterName}");
-                            return;
-                        }
-
-                        if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out var attachmentTypePages))
-                        {
-                            Logging.Debug($"Error finding primary attachments for {gun.Gun.GunID} for {Player.CharacterName}");
-                            return;
-                        }
-
-                        if (!attachmentTypePages.TryGetValue(attachmentType, out var attachmentPages))
-                        {
-                            Logging.Debug($"Error finding attachments with type {attachmentType} for {Player.CharacterName}");
-                            return;
-                        }
-
-                        if (!attachmentPages.TryGetValue(LoadoutTabPageID - 1, out var prevPage) && !attachmentPages.TryGetValue(attachmentPages.Keys.Max(), out prevPage))
-                        {
-                            Logging.Debug($"Error finding previous page of attachment with type {attachmentType} for gun with id {gun.Gun.GunID} for {Player.CharacterName}");
-                            return;
-                        }
-
-                        ShowAttachmentPage(prevPage, gun);
-                        break;
-                    }
-
-                    case ELoadoutPage.ATTACHMENT_PRIMARY_CHARM:
-                    case ELoadoutPage.ATTACHMENT_SECONDARY_CHARM:
-                    {
-                        if (!GunCharmPages.TryGetValue(LoadoutTabPageID - 1, out var prevPage) && !GunCharmPages.TryGetValue(GunCharmPages.Keys.Max(), out prevPage))
-                        {
-                            Logging.Debug($"Error getting prev page for gun charms for {Player.CharacterName}");
-                            return;
-                        }
-
-                        ShowGunCharmPage(prevPage);
-                        break;
-                    }
-
-                    case ELoadoutPage.ATTACHMENT_SECONDARY_BARREL:
-                    case ELoadoutPage.ATTACHMENT_SECONDARY_MAGAZINE:
-                    case ELoadoutPage.ATTACHMENT_SECONDARY_SIGHTS:
-                    {
-                        if (!Enum.TryParse(GetAttachmentPage(), false, out EAttachment attachmentType))
-                        {
-                            Logging.Debug($"Error finding attachment type that {Player.CharacterName} has selected");
-                            return;
-                        }
-
-                        if (!PlayerLoadout.Guns.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out var gun))
-                        {
-                            Logging.Debug($"Error finding Secondary that has been selected with id {loadout.Secondary?.Gun?.GunID ?? 0} for {Player.CharacterName}");
-                            return;
-                        }
-
-                        if (!AttachmentPages.TryGetValue(gun.Gun.GunID, out var attachmentTypePages))
-                        {
-                            Logging.Debug($"Error finding Secondary attachments for {gun.Gun.GunID} for {Player.CharacterName}");
-                            return;
-                        }
-
-                        if (!attachmentTypePages.TryGetValue(attachmentType, out var attachmentPages))
-                        {
-                            Logging.Debug($"Error finding attachments with type {attachmentType} for {Player.CharacterName}");
-                            return;
-                        }
-
-                        if (!attachmentPages.TryGetValue(LoadoutTabPageID - 1, out var prevPage) && !attachmentPages.TryGetValue(attachmentPages.Keys.Max(), out prevPage))
-                        {
-                            Logging.Debug($"Error finding previous page of attachment with type {attachmentType} for gun with id {gun.Gun.GunID} for {Player.CharacterName}");
-                            return;
-                        }
-
-                        ShowAttachmentPage(prevPage, gun);
-                        break;
-                    }
-
-                    case ELoadoutPage.PERK1:
-                    case ELoadoutPage.PERK2:
-                    case ELoadoutPage.PERK3:
-                    case ELoadoutPage.PERK4:
-                    {
-                        if (!int.TryParse(GetPerkInt(), out var perkType))
-                        {
-                            Logging.Debug($"Error getting perk type from {LoadoutPage}");
-                            return;
-                        }
-
-                        if (!PerkPages[perkType].TryGetValue(LoadoutTabPageID - 1, out var prevPage) && !PerkPages[perkType].TryGetValue(PerkPages.Keys.Max(), out prevPage))
-                        {
-                            Logging.Debug($"Error getting prev page for perks for {Player.CharacterName}");
-                            return;
-                        }
-
-                        ShowPerkPage(prevPage);
-                        break;
-                    }
-
-                    case ELoadoutPage.LETHAL:
-                    {
-                        if (!LethalPages.TryGetValue(LoadoutTabPageID - 1, out var prevPage) && !LethalPages.TryGetValue(LethalPages.Keys.Max(), out prevPage))
-                        {
-                            Logging.Debug($"Error finding the prev page for lethals for {Player.CharacterName}");
-                            return;
-                        }
-
-                        ShowGadgetPage(prevPage);
-                        break;
-                    }
-
-                    case ELoadoutPage.TACTICAL:
-                    {
-                        if (!TacticalPages.TryGetValue(LoadoutTabPageID - 1, out var prevPage) && !TacticalPages.TryGetValue(TacticalPages.Keys.Max(), out prevPage))
-                        {
-                            Logging.Debug($"Error finding the prev page for tacticals for {Player.CharacterName}");
-                            return;
-                        }
-
-                        ShowGadgetPage(prevPage);
-                        break;
-                    }
-
-                    case ELoadoutPage.KNIFE:
-                    {
-                        if (!KnifePages.TryGetValue(LoadoutTabPageID - 1, out var prevPage) && !KnifePages.TryGetValue(KnifePages.Keys.Max(), out prevPage))
-                        {
-                            Logging.Debug($"Error finding the prev page for knives for {Player.CharacterName}");
-                            return;
-                        }
-
-                        ShowKnifePage(prevPage);
-                        break;
-                    }
-
-                    case ELoadoutPage.KILLSTREAK:
-                    {
-                        if (!KillstreakPages.TryGetValue(LoadoutTabPageID - 1, out var prevPage) && !KillstreakPages.TryGetValue(KillstreakPages.Keys.Max(), out prevPage))
-                        {
-                            Logging.Debug($"Error finding the prev page for killstreaks for {Player.CharacterName}");
-                            return;
-                        }
-
-                        ShowKillstreakPage(prevPage);
-                        break;
-                    }
-
-                    case ELoadoutPage.GLOVE:
-                    {
-                        if (!GlovePages.TryGetValue(LoadoutTabPageID - 1, out var prevPage) && !GlovePages.TryGetValue(GlovePages.Keys.Max(), out prevPage))
-                        {
-                            Logging.Debug($"Error finding the prev page for gloves for {Player.CharacterName}");
-                            return;
-                        }
-
-                        ShowGlovePage(prevPage);
-                        break;
-                    }
-
-                    case ELoadoutPage.CARD:
-                    {
-                        if (!CardPages.TryGetValue(LoadoutTabPageID - 1, out var prevPage) && !CardPages.TryGetValue(CardPages.Keys.Max(), out prevPage))
-                        {
-                            Logging.Debug($"Error finding the prev page for cards for {Player.CharacterName}");
-                            return;
-                        }
-
-                        ShowCardPage(prevPage);
-                        break;
-                    }
-                }
-
-                break;
-            }
-
-            case ELoadoutTab.PISTOLS:
-            {
-                if (!PistolPages.TryGetValue(LoadoutTabPageID - 1, out var prevPage) && !PistolPages.TryGetValue(PistolPages.Keys.Max(), out prevPage))
-                {
-                    Logging.Debug($"Error finding next page for pistols for {Player.CharacterName}");
+                    Logging.Debug($"Error getting gun skin pages for gun with id {loadout.Primary?.Gun?.GunID ?? 0}");
                     return;
                 }
 
-                ShowGunPage(prevPage);
-                break;
-            }
-
-            case ELoadoutTab.SUBMACHINE_GUNS:
-            {
-                if (!SMGPages.TryGetValue(LoadoutTabPageID - 1, out var prevPage) && !SMGPages.TryGetValue(SMGPages.Keys.Max(), out prevPage))
+                if (!gunSkinPages.TryGetValue(LoadoutTabPageID - 1, out var prevPage) && !gunSkinPages.TryGetValue(gunSkinPages.Keys.Max(), out prevPage))
                 {
-                    Logging.Debug($"Error finding next page for smgs for {Player.CharacterName}");
+                    Logging.Debug($"Error finding the prev page for gun skins for gun with id {loadout.Primary.Gun.GunID} for {Player.CharacterName}");
                     return;
                 }
 
-                ShowGunPage(prevPage);
+                ShowGunSkinPage(prevPage);
                 break;
             }
 
-            case ELoadoutTab.SHOTGUNS:
+            case ELoadoutPage.SECONDARY_SKIN:
             {
-                if (!ShotgunPages.TryGetValue(LoadoutTabPageID - 1, out var prevPage) && !ShotgunPages.TryGetValue(ShotgunPages.Keys.Max(), out prevPage))
+                if (!GunSkinPages.TryGetValue(loadout.Secondary?.Gun?.GunID ?? 0, out var gunSkinPages))
                 {
-                    Logging.Debug($"Error finding next page for shotguns for {Player.CharacterName}");
+                    Logging.Debug($"Error getting gun skin pages for gun with id {loadout.Secondary?.Gun?.GunID ?? 0}");
                     return;
                 }
 
-                ShowGunPage(prevPage);
+                if (!gunSkinPages.TryGetValue(LoadoutTabPageID - 1, out var prevPage) && !gunSkinPages.TryGetValue(gunSkinPages.Keys.Max(), out prevPage))
+                {
+                    Logging.Debug($"Error finding the prev page for gun skins for gun with id {loadout.Secondary.Gun.GunID} for {Player.CharacterName}");
+                    return;
+                }
+
+                ShowGunSkinPage(prevPage);
                 break;
             }
 
-            case ELoadoutTab.LIGHT_MACHINE_GUNS:
+            case ELoadoutPage.ATTACHMENT_PRIMARY_CHARM:
+            case ELoadoutPage.ATTACHMENT_SECONDARY_CHARM:
             {
-                if (!LMGPages.TryGetValue(LoadoutTabPageID - 1, out var prevPage) && !LMGPages.TryGetValue(LMGPages.Keys.Max(), out prevPage))
+                if (!GunCharmPages.TryGetValue(LoadoutTabPageID - 1, out var prevPage) && !GunCharmPages.TryGetValue(GunCharmPages.Keys.Max(), out prevPage))
                 {
-                    Logging.Debug($"Error finding next page for lmgs for {Player.CharacterName}");
+                    Logging.Debug($"Error getting prev page for gun charms for {Player.CharacterName}");
                     return;
                 }
 
-                ShowGunPage(prevPage);
+                ShowGunCharmPage(prevPage);
                 break;
             }
 
-            case ELoadoutTab.ASSAULT_RIFLES:
+            case ELoadoutPage.KNIFE:
             {
-                if (!ARPages.TryGetValue(LoadoutTabPageID - 1, out var prevPage) && !ARPages.TryGetValue(ARPages.Keys.Max(), out prevPage))
+                if (!KnifePages.TryGetValue(LoadoutTabPageID - 1, out var prevPage) && !KnifePages.TryGetValue(KnifePages.Keys.Max(), out prevPage))
                 {
-                    Logging.Debug($"Error finding next page for ARs for {Player.CharacterName}");
+                    Logging.Debug($"Error finding the prev page for knives for {Player.CharacterName}");
                     return;
                 }
 
-                ShowGunPage(prevPage);
+                ShowKnifePage(prevPage);
                 break;
             }
 
-            case ELoadoutTab.SNIPER_RIFLES:
+            case ELoadoutPage.KILLSTREAK:
             {
-                if (!SniperPages.TryGetValue(LoadoutTabPageID - 1, out var prevPage) && !SniperPages.TryGetValue(SniperPages.Keys.Max(), out prevPage))
+                if (!KillstreakPages.TryGetValue(LoadoutTabPageID - 1, out var prevPage) && !KillstreakPages.TryGetValue(KillstreakPages.Keys.Max(), out prevPage))
                 {
-                    Logging.Debug($"Error finding next page for snipers for {Player.CharacterName}");
+                    Logging.Debug($"Error finding the prev page for killstreaks for {Player.CharacterName}");
                     return;
                 }
 
-                ShowGunPage(prevPage);
+                ShowKillstreakPage(prevPage);
                 break;
             }
 
-            case ELoadoutTab.CARBINES:
+            case ELoadoutPage.GLOVE:
             {
-                if (!CarbinePages.TryGetValue(LoadoutTabPageID - 1, out var prevPage) && !CarbinePages.TryGetValue(CarbinePages.Keys.Max(), out prevPage))
+                if (!GlovePages.TryGetValue(LoadoutTabPageID - 1, out var prevPage) && !GlovePages.TryGetValue(GlovePages.Keys.Max(), out prevPage))
                 {
-                    Logging.Debug($"Error finding next page for carbines for {Player.CharacterName}");
+                    Logging.Debug($"Error finding the prev page for gloves for {Player.CharacterName}");
                     return;
                 }
 
-                ShowGunPage(prevPage);
+                ShowGlovePage(prevPage);
+                break;
+            }
+
+            case ELoadoutPage.CARD:
+            {
+                if (!CardPages.TryGetValue(LoadoutTabPageID - 1, out var prevPage) && !CardPages.TryGetValue(CardPages.Keys.Max(), out prevPage))
+                {
+                    Logging.Debug($"Error finding the prev page for cards for {Player.CharacterName}");
+                    return;
+                }
+
+                ShowCardPage(prevPage);
                 break;
             }
         }
@@ -2901,6 +2513,18 @@ public class UIHandler : IDisposable
                         }
 
                         ShowKillstreakPage(page);
+                        break;
+                    }
+
+                    case ELoadoutPage.DEATHSTREAK:
+                    {
+                        if (!DeathstreakPages.TryGetValue(LoadoutTabPageID, out var page))
+                        {
+                            Logging.Debug($"Error finding current page for deathstreaks for {Player.CharacterName}");
+                            return;
+                        }
+
+                        ShowDeathstreakPage(page);
                         break;
                     }
 
@@ -3289,7 +2913,7 @@ public class UIHandler : IDisposable
         }
 
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Page TEXT", $"Page {page.PageID}");
-        for (var i = 0; i <= MAX_ITEMS_PER_GRID; i++)
+        for (var i = 0; i <= MAX_ITEMS_PER_PAGE; i++)
         {
             if (!page.Killstreaks.TryGetValue(i, out var killstreak))
             {
@@ -3297,10 +2921,48 @@ public class UIHandler : IDisposable
                 continue;
             }
 
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Grid BUTTON {i}", true);
-            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Grid Equipped {i}", currentLoadout.Killstreaks.Contains(killstreak));
-            EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Grid IMAGE {i}", killstreak.Killstreak.IconLink);
-            SendRarity("SERVER Item Grid", killstreak.Killstreak.KillstreakRarity, i);
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item BUTTON {i}", true);
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Equipped {i}", currentLoadout.Killstreaks.Contains(killstreak));
+            EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item IMAGE {i}", killstreak.Killstreak.IconLink);
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item TEXT {i}", killstreak.Killstreak.KillstreakName);
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay {i}", !killstreak.IsBought);
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}",
+                killstreak.Killstreak.LevelRequirement > PlayerData.Level && !killstreak.IsUnlocked ? Plugin.Instance.Translate("Unlock_Level", killstreak.Killstreak.LevelRequirement) :
+                    $"{Utility.GetCurrencySymbol(ECurrency.CREDIT)} <color={(PlayerData.Credits >= killstreak.Killstreak.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{killstreak.Killstreak.BuyPrice}</color>");
+            
+            SendRarity("SERVER Item", killstreak.Killstreak.KillstreakRarity, i);
+        }
+    }
+
+    public void ShowDeathstreakPage(PageDeathstreak page)
+    {
+        LoadoutTabPageID = page.PageID;
+
+        if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out var currentLoadout))
+        {
+            Logging.Debug($"Error finding current loadout for {Player.CharacterName} with id {LoadoutID}");
+            return;
+        }
+
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Page TEXT", $"Page {page.PageID}");
+        for (var i = 0; i <= MAX_ITEMS_PER_PAGE; i++)
+        {
+            if (!page.Deathstreaks.TryGetValue(i, out var deathstreak))
+            {
+                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item BUTTON {i}", false);
+                continue;
+            }
+
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item BUTTON {i}", true);
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Equipped {i}", currentLoadout.Deathstreak == deathstreak);
+            EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item IMAGE {i}", deathstreak.Deathstreak.IconLink);
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item TEXT {i}", deathstreak.Deathstreak.DeathstreakName);
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay {i}", !deathstreak.IsBought);
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}",
+                deathstreak.Deathstreak.LevelRequirement > PlayerData.Level && !deathstreak.IsUnlocked ? Plugin.Instance.Translate("Unlock_Level", deathstreak.Deathstreak.LevelRequirement) :
+                    $"{Utility.GetCurrencySymbol(ECurrency.CREDIT)} <color={(PlayerData.Credits >= deathstreak.Deathstreak.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{deathstreak.Deathstreak.BuyPrice}</color>");
+            
+            SendRarity("SERVER Item", deathstreak.Deathstreak.DeathstreakRarity, i);
         }
     }
 
@@ -3451,6 +3113,18 @@ public class UIHandler : IDisposable
                 }
 
                 ShowKillstreak(killstreak);
+                break;
+            }
+            
+            case ELoadoutPage.DEATHSTREAK:
+            {
+                if (!PlayerLoadout.Deathstreaks.TryGetValue((int)SelectedItemID, out var deathstreak))
+                {
+                    Logging.Debug($"Error finding deathstreak with id {SelectedItemID} for {Player.CharacterName}");
+                    return;
+                }
+                
+                ShowDeathstreak(deathstreak);
                 break;
             }
 
@@ -3746,6 +3420,24 @@ public class UIHandler : IDisposable
                         }
 
                         ShowKillstreak(killstreak);
+                        break;
+                    }
+
+                    case ELoadoutPage.DEATHSTREAK:
+                    {
+                        if (!DeathstreakPages.TryGetValue(LoadoutTabPageID, out var page))
+                        {
+                            Logging.Debug($"Error finding deathstreak page with id {LoadoutTabPageID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        if (!page.Deathstreaks.TryGetValue(selected, out var deathstreak))
+                        {
+                            Logging.Debug($"Error finding deathstreak at {selected} at page {LoadoutTabPageID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        ShowDeathstreak(deathstreak);
                         break;
                     }
 
@@ -4600,6 +4292,34 @@ public class UIHandler : IDisposable
         
         SendRarityName("SERVER Item Rarity TEXT", killstreak.Killstreak.KillstreakRarity);
     }
+    
+    public void ShowDeathstreak(LoadoutDeathstreak deathstreak)
+    {
+        SelectedItemID = deathstreak.Deathstreak.DeathstreakID;
+        if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out var loadout))
+        {
+            Logging.Debug($"Error finding loadout with id {LoadoutID} for {Player.CharacterName}");
+            return;
+        }
+
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy BUTTON", !deathstreak.IsBought);
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy Locked", !deathstreak.IsUnlocked && deathstreak.Deathstreak.LevelRequirement > PlayerData.Level);
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.CREDIT)} <color={(PlayerData.Credits >= deathstreak.Deathstreak.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{deathstreak.Deathstreak.BuyPrice}</color>");
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !deathstreak.IsBought && !deathstreak.IsUnlocked /*&& killstreak.Killstreak.LevelRequirement > PlayerData.Level*/);
+        var coins = deathstreak.Deathstreak.GetCoins(PlayerData.Level);
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.COIN)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Equip BUTTON", deathstreak.IsBought && loadout.Deathstreak != deathstreak);
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Dequip BUTTON", deathstreak.IsBought && loadout.Deathstreak == deathstreak);
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Description TEXT", deathstreak.Deathstreak.DeathstreakDesc);
+        EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item IMAGE", deathstreak.Deathstreak.IconLink);
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item TEXT", deathstreak.Deathstreak.DeathstreakName);
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item ProsCons", false);
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Description TEXT", true);
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Credits", false);
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Owned", false);
+        
+        SendRarityName("SERVER Item Rarity TEXT", deathstreak.Deathstreak.DeathstreakRarity);
+    }
 
     public void SendRarity(string objectName, ERarity rarity, int selected) => EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{objectName} {rarity} {selected}", true);
 
@@ -4723,7 +4443,6 @@ public class UIHandler : IDisposable
                     return;
                 }
 
-                // buy gun charm
                 if (PlayerData.Credits >= gunCharm.GunCharm.BuyPrice && !gunCharm.IsBought)
                 {
                     if (DB.UpdatePlayerGunCharmBought(Player.CSteamID, gunCharm.GunCharm.CharmID, true))
@@ -4747,7 +4466,6 @@ public class UIHandler : IDisposable
                     return;
                 }
 
-                // buy knife
                 if (PlayerData.Credits >= knife.Knife.BuyPrice && !knife.IsBought)
                 {
                     if (DB.UpdatePlayerKnifeBought(Player.CSteamID, knife.Knife.KnifeID, true))
@@ -4797,7 +4515,6 @@ public class UIHandler : IDisposable
                     return;
                 }
 
-                // buy perk
                 if (PlayerData.Credits >= perk.Perk.BuyPrice && !perk.IsBought)
                 {
                     if (DB.UpdatePlayerPerkBought(Player.CSteamID, perk.Perk.PerkID, true))
@@ -4821,7 +4538,6 @@ public class UIHandler : IDisposable
                     return;
                 }
 
-                // buy killstreak
                 if (PlayerData.Credits >= killstreak.Killstreak.BuyPrice && !killstreak.IsBought)
                 {
                     if (DB.UpdatePlayerKillstreakBought(Player.CSteamID, killstreak.Killstreak.KillstreakID, true))
@@ -4838,6 +4554,29 @@ public class UIHandler : IDisposable
                 break;
             }
 
+            case ELoadoutPage.DEATHSTREAK:
+            {
+                if (!PlayerLoadout.Deathstreaks.TryGetValue((int)SelectedItemID, out var deathstreak))
+                {
+                    Logging.Debug($"Error finding deathstreak with id {SelectedItemID} for {Player.CharacterName}");
+                    return;
+                }
+
+                if (PlayerData.Credits >= deathstreak.Deathstreak.BuyPrice && !deathstreak.IsBought)
+                {
+                    if (DB.UpdatePlayerDeathstreakBought(Player.CSteamID, deathstreak.Deathstreak.DeathstreakID, true))
+                    {
+                        DB.DecreasePlayerCredits(Player.CSteamID, deathstreak.Deathstreak.BuyPrice);
+                        EquipSelectedItem();
+                        BackToLoadout();
+                    }
+                }
+                else
+                    SendNotEnoughCurrencyModal(ECurrency.CREDIT);
+
+                break;
+            }
+            
             case ELoadoutPage.CARD:
             {
                 if (!PlayerLoadout.Cards.TryGetValue((int)SelectedItemID, out var card))
@@ -4846,7 +4585,6 @@ public class UIHandler : IDisposable
                     return;
                 }
 
-                // buy card
                 if (PlayerData.Credits >= card.Card.BuyPrice && !card.IsBought)
                 {
                     if (DB.UpdatePlayerCardBought(Player.CSteamID, card.Card.CardID, true))
@@ -4870,7 +4608,6 @@ public class UIHandler : IDisposable
                     return;
                 }
 
-                // buy glove
                 if (PlayerData.Credits >= glove.Glove.BuyPrice && !glove.IsBought)
                 {
                     if (DB.UpdatePlayerGloveBought(Player.CSteamID, glove.Glove.GloveID, true))
@@ -5113,6 +4850,31 @@ public class UIHandler : IDisposable
                         ReloadSelectedItem();
                         ReloadLoadoutTab();
                         EquipSelectedItem();
+                    }
+                }
+                else
+                    SendNotEnoughCurrencyModal(ECurrency.COIN);
+
+                break;
+            }
+
+            case ELoadoutPage.DEATHSTREAK:
+            {
+                if (!PlayerLoadout.Deathstreaks.TryGetValue((int)SelectedItemID, out var deathstreak))
+                {
+                    Logging.Debug($"Error finding deathstreak with id {SelectedItemID} for {Player.CharacterName}");
+                    return;
+                }
+
+                var cost = deathstreak.Deathstreak.GetCoins(PlayerData.Level);
+                if (PlayerData.Coins >= cost && !deathstreak.IsBought && !deathstreak.IsUnlocked /*&& killstreak.Killstreak.LevelRequirement > PlayerData.Level*/)
+                {
+                    if (DB.UpdatePlayerDeathstreakUnlocked(Player.CSteamID, deathstreak.Deathstreak.DeathstreakID, true) && DB.UpdatePlayerDeathstreakBought(Player.CSteamID, deathstreak.Deathstreak.DeathstreakID, true))
+                    {
+                        SendUnlockEmbed(deathstreak.Deathstreak.DeathstreakName, deathstreak.Deathstreak.IconLink, cost);
+                        DB.DecreasePlayerCoins(Player.CSteamID, cost);
+                        EquipSelectedItem();
+                        BackToLoadout();
                     }
                 }
                 else
@@ -5401,6 +5163,23 @@ public class UIHandler : IDisposable
                 break;
             }
 
+            case ELoadoutPage.DEATHSTREAK:
+            {
+                if (!PlayerLoadout.Deathstreaks.TryGetValue((int)SelectedItemID, out var deathstreak))
+                {
+                    Logging.Debug($"Error finding deathstreak with id {SelectedItemID} for {Player.CharacterName}");
+                    return;
+                }
+
+                if (deathstreak.IsBought)
+                {
+                    loadoutManager.EquipDeathstreak(Player, LoadoutID, deathstreak.Deathstreak.DeathstreakID);
+                    BackToLoadout();
+                }
+
+                break;
+            }
+            
             case ELoadoutPage.GLOVE:
             {
                 if (!PlayerLoadout.Gloves.TryGetValue((int)SelectedItemID, out var glove))
@@ -5586,6 +5365,20 @@ public class UIHandler : IDisposable
                 break;
             }
 
+            case ELoadoutPage.DEATHSTREAK:
+            {
+                if (!PlayerLoadout.Deathstreaks.TryGetValue((int)SelectedItemID, out var deathstreak))
+                {
+                    Logging.Debug($"Error finding deathstreak with id {SelectedItemID} for {Player.CharacterName}");
+                    return;
+                }
+
+                loadoutManager.DequipDeathstreak(Player, LoadoutID, deathstreak.Deathstreak.DeathstreakID);
+                ReloadLoadoutTab();
+                ReloadSelectedItem();
+                break;
+            }
+            
             case ELoadoutPage.GLOVE:
             {
                 loadoutManager.EquipGlove(Player, LoadoutID, 0);

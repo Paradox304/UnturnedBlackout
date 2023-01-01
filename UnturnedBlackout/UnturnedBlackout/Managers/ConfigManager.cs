@@ -26,6 +26,7 @@ public class ConfigManager
     public XmlFileReader<RoundEndCasesConfig> RoundEndCases { get; set; }
     public XmlFileReader<IconsConfig> Icons { get; set; }
     public XmlFileReader<KillstreakConfig> Killstreaks { get; set; }
+    public XmlFileReader<DeathstreakConfig> Deathstreaks { get; set; }
     public XmlFileReader<WebhooksConfig> Webhooks { get; set; }
     public XmlFileReader<GameEventConfig> Events { get; set; }
     
@@ -50,6 +51,7 @@ public class ConfigManager
         RoundEndCases = new(Plugin.Instance.Directory + "/LocalStorage/Configuration.RoundEndCases.xml", configInstance.URL + "Configuration.RoundEndCases.xml");
         Icons = new(Plugin.Instance.Directory + "/LocalStorage/Configuration.Icons.xml", configInstance.URL + "Configuration.Icons.xml");
         Killstreaks = new(Plugin.Instance.Directory + "/LocalStorage/Configuration.Killstreaks.xml", configInstance.URL + "Configuration.Killstreaks.xml");
+        Deathstreaks = new(Plugin.Instance.Directory + "/LocalStorage/Configuration.Deathstreaks.xml", configInstance.URL + "Configuration.Deathstreaks.xml");
         Webhooks = new(Plugin.Instance.Directory + "/LocalStorage/Configuration.Webhooks.xml", configInstance.URL + "Configuration.Webhooks.xml");
         Events = new(Plugin.Instance.Directory + "/LocalStorage/Configuration.Events.xml", configInstance.URL + "Configuration.Events.xml");
     }

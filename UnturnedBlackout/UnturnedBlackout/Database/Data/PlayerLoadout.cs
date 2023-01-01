@@ -18,13 +18,12 @@ public class PlayerLoadout : IDisposable
     public Dictionary<int, LoadoutPerk> Perks { get; set; }
     public Dictionary<ushort, LoadoutGadget> Gadgets { get; set; }
     public Dictionary<int, LoadoutKillstreak> Killstreaks { get; set; }
+    public Dictionary<int, LoadoutDeathstreak> Deathstreaks { get; set; }
     public Dictionary<int, LoadoutCard> Cards { get; set; }
     public Dictionary<int, LoadoutGlove> Gloves { get; set; }
     public Dictionary<int, Loadout> Loadouts { get; set; }
 
-    public PlayerLoadout(
-        CSteamID steamID, Dictionary<ushort, LoadoutGun> guns, Dictionary<ushort, LoadoutGunCharm> gunCharms, Dictionary<ushort, LoadoutKnife> knives, Dictionary<int, GunSkin> gunSkinsSearchByID, Dictionary<ushort, List<GunSkin>> gunSkinsSearchByGunID, Dictionary<ushort, GunSkin> gunSkinsSearchBySkinID,
-        Dictionary<int, LoadoutPerk> perks, Dictionary<ushort, LoadoutGadget> gadgets, Dictionary<int, LoadoutKillstreak> killstreaks, Dictionary<int, LoadoutCard> cards, Dictionary<int, LoadoutGlove> gloves, Dictionary<int, Loadout> loadouts)
+    public PlayerLoadout(CSteamID steamID, Dictionary<ushort, LoadoutGun> guns, Dictionary<ushort, LoadoutGunCharm> gunCharms, Dictionary<ushort, LoadoutKnife> knives, Dictionary<int, GunSkin> gunSkinsSearchByID, Dictionary<ushort, List<GunSkin>> gunSkinsSearchByGunID, Dictionary<ushort, GunSkin> gunSkinsSearchBySkinID, Dictionary<int, LoadoutPerk> perks, Dictionary<ushort, LoadoutGadget> gadgets, Dictionary<int, LoadoutKillstreak> killstreaks, Dictionary<int, LoadoutDeathstreak> deathstreaks, Dictionary<int, LoadoutCard> cards, Dictionary<int, LoadoutGlove> gloves, Dictionary<int, Loadout> loadouts)
     {
         SteamID = steamID;
         Guns = guns;
@@ -36,6 +35,7 @@ public class PlayerLoadout : IDisposable
         Perks = perks;
         Gadgets = gadgets;
         Killstreaks = killstreaks;
+        Deathstreaks = deathstreaks;
         Cards = cards;
         Gloves = gloves;
         Loadouts = loadouts;
@@ -53,6 +53,7 @@ public class PlayerLoadout : IDisposable
         Perks = null;
         Gadgets = null;
         Killstreaks = null;
+        Deathstreaks = null;
         Cards = null;
         Gloves = null;
         Loadouts = null;

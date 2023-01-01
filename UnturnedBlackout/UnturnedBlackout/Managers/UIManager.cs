@@ -1561,6 +1561,9 @@ public class UIManager
             case EUIPage.KILLSTREAK:
                 handler.BuildKillstreakPages();
                 return;
+            case EUIPage.DEATHSTREAK:
+                handler.BuildDeathstreakPages();
+                return;
             case EUIPage.ACHIEVEMENT:
                 handler.BuildAchievementPages();
                 return;
@@ -1568,7 +1571,7 @@ public class UIManager
                 handler.BuildUnboxingCasesPages();
                 return;
             default:
-                throw new ArgumentOutOfRangeException("page", "EUIPage is not as expected");
+                throw new ArgumentOutOfRangeException(nameof(page), "EUIPage is not as expected");
         }
     }
 

@@ -15,8 +15,4 @@ public class TeamInfo
     public List<Kit> TeamKits { get; set; }
     public List<TeamGlove> TeamGloves { get; set; }
     public List<TeamKillstreak> TeamKillstreaks { get; set; }
-
-    public TeamInfo()
-    {
-    }
 }

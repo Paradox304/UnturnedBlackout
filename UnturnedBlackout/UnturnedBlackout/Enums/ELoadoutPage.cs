@@ -21,6 +21,7 @@ public enum ELoadoutPage
     PERK3,
     PERK4,
     KILLSTREAK,
+    DEATHSTREAK,
     GLOVE,
     CARD,
     TACTICAL,

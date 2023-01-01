@@ -13,8 +13,4 @@ public class FFAConfig
     public int ScoreLimit { get; set; }
     public int SpawnProtectionSeconds { get; set; }
     public int RespawnSeconds { get; set; }
-
-    public FFAConfig()
-    {
-    }
 }

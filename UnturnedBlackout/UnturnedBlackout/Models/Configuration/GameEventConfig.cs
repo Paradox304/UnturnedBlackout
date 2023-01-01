@@ -8,8 +8,4 @@ namespace UnturnedBlackout.Models.Configuration;
 public class GameEventConfig
 {
     public List<GameEvent> GameEvents { get; set; }
-
-    public GameEventConfig()
-    {
-    }
 }

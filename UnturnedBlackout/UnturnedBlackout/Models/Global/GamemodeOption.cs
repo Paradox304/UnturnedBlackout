@@ -16,8 +16,4 @@ public class GamemodeOption
 
     [XmlArrayItem(ElementName = "IgnoredLocation")]
     public List<int> IgnoredLocations { get; set; }
-
-    public GamemodeOption()
-    {
-    }
 }

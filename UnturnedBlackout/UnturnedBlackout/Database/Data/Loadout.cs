@@ -22,14 +22,13 @@ public class Loadout
     public LoadoutGadget Tactical { get; set; }
     public LoadoutGadget Lethal { get; set; }
     public List<LoadoutKillstreak> Killstreaks { get; set; }
+    public LoadoutDeathstreak Deathstreak { get; set; }
     public Dictionary<int, LoadoutPerk> Perks { get; set; }
     public Dictionary<string, LoadoutPerk> PerksSearchByType { get; set; }
     public LoadoutGlove Glove { get; set; }
     public LoadoutCard Card { get; set; }
 
-    public Loadout(
-        int loadoutID, string loadoutName, bool isActive, LoadoutGun primary, GunSkin primarySkin, LoadoutGunCharm primaryGunCharm, Dictionary<EAttachment, LoadoutAttachment> primaryAttachments, LoadoutGun secondary, GunSkin secondarySkin, LoadoutGunCharm secondaryGunCharm,
-        Dictionary<EAttachment, LoadoutAttachment> secondaryAttachments, LoadoutKnife knife, LoadoutGadget tactical, LoadoutGadget lethal, List<LoadoutKillstreak> killstreaks, Dictionary<int, LoadoutPerk> perks, Dictionary<string, LoadoutPerk> perksSearchByType, LoadoutGlove glove, LoadoutCard card)
+    public Loadout(int loadoutID, string loadoutName, bool isActive, LoadoutGun primary, GunSkin primarySkin, LoadoutGunCharm primaryGunCharm, Dictionary<EAttachment, LoadoutAttachment> primaryAttachments, LoadoutGun secondary, GunSkin secondarySkin, LoadoutGunCharm secondaryGunCharm, Dictionary<EAttachment, LoadoutAttachment> secondaryAttachments, LoadoutKnife knife, LoadoutGadget tactical, LoadoutGadget lethal, List<LoadoutKillstreak> killstreaks, LoadoutDeathstreak deathstreak, Dictionary<int, LoadoutPerk> perks, Dictionary<string, LoadoutPerk> perksSearchByType, LoadoutGlove glove, LoadoutCard card)
     {
         LoadoutID = loadoutID;
         LoadoutName = loadoutName;
@@ -46,6 +45,7 @@ public class Loadout
         Tactical = tactical;
         Lethal = lethal;
         Killstreaks = killstreaks;
+        Deathstreak = deathstreak;
         Perks = perks;
         PerksSearchByType = perksSearchByType;
         Glove = glove;

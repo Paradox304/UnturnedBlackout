@@ -444,6 +444,16 @@ public class LoadoutManager
         DB.UpdatePlayerLoadout(player.CSteamID, loadoutID);
     }
 
+    public void EquipDeathstreak(UnturnedPlayer player, int loadoutID, int newDeathstreak)
+    {
+        // TODO: Code 
+    }
+
+    public void DequipDeathstreak(UnturnedPlayer player, int loadoutID, int oldDeathstreak)
+    {
+        // TODO: Code 
+    }
+    
     public void EquipGunSkin(UnturnedPlayer player, int loadoutID, int id, bool isPrimary)
     {
         Logging.Debug($"{player.CharacterName} trying to equip gun skin with id {id}");
@@ -581,7 +591,7 @@ public class LoadoutManager
                 }
 
                 var newLoadout = new Loadout(-1, "Temporary Loadout", true, overridePrimary, null, activeLoadout.PrimaryGunCharm, overridePrimaryAttachments, activeLoadout.Secondary, activeLoadout.SecondarySkin, activeLoadout.SecondaryGunCharm, activeLoadout.SecondaryAttachments, activeLoadout.Knife,
-                    activeLoadout.Tactical, activeLoadout.Lethal, activeLoadout.Killstreaks, activeLoadout.Perks, activeLoadout.PerksSearchByType, activeLoadout.Glove, activeLoadout.Card);
+                    activeLoadout.Tactical, activeLoadout.Lethal, activeLoadout.Killstreaks, activeLoadout.Deathstreak, activeLoadout.Perks, activeLoadout.PerksSearchByType, activeLoadout.Glove, activeLoadout.Card);
                 
                 Logging.Debug($"Created a replica loadout with the same values as before just different gun, assigning it as active loadout");
                 activeLoadout = newLoadout;
