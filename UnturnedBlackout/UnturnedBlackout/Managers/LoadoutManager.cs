@@ -446,12 +446,27 @@ public class LoadoutManager
 
     public void EquipDeathstreak(UnturnedPlayer player, int loadoutID, int newDeathstreak)
     {
-        // TODO: Code 
-    }
+        Logging.Debug($"{player.CharacterName} is trying to switch deathstreak to {newDeathstreak} for loadout with id {loadoutID}");
+        if (!DB.PlayerLoadouts.TryGetValue(player.CSteamID, out var loadout))
+        {
+            Logging.Debug($"Error finding loadout for {player.CharacterName}");
+            return;
+        }
 
-    public void DequipDeathstreak(UnturnedPlayer player, int loadoutID, int oldDeathstreak)
-    {
-        // TODO: Code 
+        if (!loadout.Deathstreaks.TryGetValue(newDeathstreak, out var deathstreak) && newDeathstreak != 0)
+        {
+            Logging.Debug($"Error finding loadout card with id {newDeathstreak} for {player.CharacterName}");
+            return;
+        }
+
+        if (!loadout.Loadouts.TryGetValue(loadoutID, out var playerLoadout))
+        {
+            Logging.Debug($"Error finding loadout with id {loadoutID} for {player.CharacterName}");
+            return;
+        }
+
+        playerLoadout.Deathstreak = deathstreak;
+        DB.UpdatePlayerLoadout(player.CSteamID, loadoutID);
     }
     
     public void EquipGunSkin(UnturnedPlayer player, int loadoutID, int id, bool isPrimary)

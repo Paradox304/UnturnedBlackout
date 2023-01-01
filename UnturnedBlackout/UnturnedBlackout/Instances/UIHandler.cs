@@ -5367,13 +5367,7 @@ public class UIHandler : IDisposable
 
             case ELoadoutPage.DEATHSTREAK:
             {
-                if (!PlayerLoadout.Deathstreaks.TryGetValue((int)SelectedItemID, out var deathstreak))
-                {
-                    Logging.Debug($"Error finding deathstreak with id {SelectedItemID} for {Player.CharacterName}");
-                    return;
-                }
-
-                loadoutManager.DequipDeathstreak(Player, LoadoutID, deathstreak.Deathstreak.DeathstreakID);
+                loadoutManager.EquipDeathstreak(Player, LoadoutID, 0);
                 ReloadLoadoutTab();
                 ReloadSelectedItem();
                 break;
