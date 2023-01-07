@@ -6,6 +6,5 @@ public enum EHotkey
     LETHAL,
     KILLSTREAK_1,
     KILLSTREAK_2,
-    KILLSTREAK_3,
-    DEATHSTREAK
+    KILLSTREAK_3
 }

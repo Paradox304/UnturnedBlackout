@@ -8,6 +8,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.PlayerLoop;
+using UnturnedBlackout.Database.Base;
 using UnturnedBlackout.Database.Data;
 using UnturnedBlackout.Enums;
 using UnturnedBlackout.Extensions;
@@ -73,18 +75,8 @@ public class GamePlayer : IDisposable
     public Dictionary<ushort, LoadoutKillstreak> KillstreakTriggers { get; set; }
     public int ExtraKillstreak { get; set; }
     
-    public byte DeathstreakPage { get; set; }
-    public byte DeathstreakX { get; set; }
-    public byte DeathstreakY { get; set; }
-
-    public ushort DeathstreakPreviousShirtID { get; set; }
-    public ushort DeathstreakPreviousPantsID { get; set; }
-    public ushort DeathstreakPreviousHatID { get; set; }
-    public ushort DeathstreakPreviousVestID { get; set; }
-    
     public bool HasDeathstreakActive { get; set; }
-    public bool HasDeathstreakAvailable { get; set; }
-    
+    public int CurrentLifeKills { get; set; }
     public int CurrentDeathstreak { get; set; }
     public int ExtraDeathstreak { get; set; }
     
@@ -113,6 +105,7 @@ public class GamePlayer : IDisposable
     public Coroutine TacticalChecker { get; set; }
     public Coroutine LethalChecker { get; set; }
     public Coroutine KillstreakChecker { get; set; }
+    public Coroutine DeathstreakChecker { get; set; }
     public Coroutine EquipmentChecker { get; set; }
     
     public GamePlayer(UnturnedPlayer player, ITransportConnection transportConnection)
@@ -184,8 +177,14 @@ public class GamePlayer : IDisposable
         GadgetGiver = null;
         KillstreakItemRemover.Stop();
         KillstreakItemRemover = null;
+        KillstreakClothingRemover.Stop();
+        KillstreakClothingRemover = null;
         EquipmentChecker.Stop();
         EquipmentChecker = null;
+        KillstreakChecker.Stop();
+        KillstreakChecker = null;
+        DeathstreakChecker.Stop();
+        DeathstreakChecker = null;
     }
     
     ~GamePlayer()
@@ -249,6 +248,7 @@ public class GamePlayer : IDisposable
         Plugin.Instance.UI.UpdateGadgetUsed(this, true, !HasTactical);
 
         SetupKillstreaks();
+        SetupDeathstreaks();
     }
 
     // Tactical and Lethal
@@ -370,6 +370,7 @@ public class GamePlayer : IDisposable
     // Kill Card
     public void OnKilled(GamePlayer victim)
     {
+        CurrentLifeKills++;
         var victimData = victim.Data;
         Plugin.Instance.UI.SendKillCard(this, victim, victimData);
     }
@@ -377,6 +378,9 @@ public class GamePlayer : IDisposable
     // Death screen
     public void OnDeath(CSteamID killer, int respawnSeconds)
     {
+        if (HasDeathstreakActive)
+            RemoveActiveDeathstreak();
+        
         LastXPPopup = LastXPPopup.Subtract(TimeSpan.FromSeconds(30));
         if (HasKillstreakActive)
             RemoveActiveKillstreak();
@@ -439,9 +443,25 @@ public class GamePlayer : IDisposable
             Plugin.Instance.Loadout.GiveLoadout(this);
             IsPendingLoadoutChange = false;
             Plugin.Instance.UI.ClearDeathUI(this);
+
+            // Check if deathstreak needs to be started
+            if (CurrentLifeKills == 0)
+                UpdateDeathstreak(++CurrentDeathstreak);
+            else
+                CurrentDeathstreak = 0;
+
+            CurrentLifeKills = 0;
             return;
         }
 
+        // Check if deathstreak needs to be started
+        if (CurrentLifeKills == 0)
+            UpdateDeathstreak(++CurrentDeathstreak);
+        else
+            CurrentDeathstreak = 0;
+
+        CurrentLifeKills = 0;
+        
         // Fill up the guns
         for (byte i = 0; i <= 1; i++)
         {
@@ -781,18 +801,52 @@ public class GamePlayer : IDisposable
     public void SetupDeathstreaks()
     {
         HasDeathstreakActive = false;
-        HasDeathstreakAvailable = false;
-        
         ExtraDeathstreak = ActiveLoadout.PerksSearchByType.TryGetValue("noob", out var noobPerk) && (CurrentGame?.GameEvent?.AllowPerks ?? true) ? noobPerk.Perk.SkillLevel : 0;
+    }
 
-        if (CurrentGame?.GameEvent?.AllowDeathstreaks ?? true)
+    public void UpdateDeathstreak(int currentDeathstreak)
+    {
+        if (!(CurrentGame?.GameEvent?.AllowDeathstreaks ?? true))
+            return;
+
+        CurrentDeathstreak = currentDeathstreak + ExtraDeathstreak;
+        if (ActiveLoadout?.Deathstreak != null && CurrentDeathstreak >= ActiveLoadout.Deathstreak.Deathstreak.DeathstreakRequired)
+            ActivateDeathstreak();
+    }
+
+    public void ActivateDeathstreak()
+    {
+        HasDeathstreakActive = true;
+        var info = ActiveLoadout.Deathstreak.Deathstreak.DeathstreakInfo;
+        var movement = Player.Player.movement;
+        if (info.SpeedMultiplier != 0f)
+            movement.sendPluginSpeedMultiplier(movement.pluginSpeedMultiplier + info.SpeedMultiplier);
+
+        Plugin.Instance.UI.SetupActiveDeathstreakUI(this);
+        DeathstreakChecker = Plugin.Instance.StartCoroutine(CheckDeathstreak(info.DeathstreakStaySeconds));
+    }
+    
+    public void RemoveActiveDeathstreak()
+    {
+        DeathstreakChecker.Stop();
+        HasDeathstreakActive = false;
+        var info = ActiveLoadout.Deathstreak.Deathstreak.DeathstreakInfo;
+        var movement = Player.Player.movement;
+        if (info.SpeedMultiplier != 0f)
+            movement.sendPluginSpeedMultiplier(movement.pluginSpeedMultiplier - info.SpeedMultiplier);
+        
+        Plugin.Instance.UI.RemoveActiveDeathstreakUI(this);
+    }
+
+    public IEnumerator CheckDeathstreak(int seconds)
+    {
+        for (var i = seconds; i > 0; i--)
         {
-            
+            Plugin.Instance.UI.UpdateDeathstreakTimer(this, i);
+            yield return new WaitForSeconds(1f);
         }
-        else
-        {
-            
-        }
+
+        RemoveActiveDeathstreak();
     }
     
     // Checkers
@@ -833,7 +887,7 @@ public class GamePlayer : IDisposable
     {
         CurrentGame = game;
         IsLoading = true;
-
+        
         if (game.GameMode == EGameType.CTF)
             EquipmentChecker = Plugin.Instance.StartCoroutine(CheckEquipment());
     }
@@ -842,7 +896,10 @@ public class GamePlayer : IDisposable
     {
         CurrentGame = null;
         IsLoading = false;
-
+        
+        CurrentLifeKills = 0;
+        CurrentDeathstreak = 0;
+        
         TacticalChecker.Stop();
         LethalChecker.Stop();
         SpawnProtectionRemover.Stop();
@@ -853,8 +910,10 @@ public class GamePlayer : IDisposable
         AnimationChecker.Stop();
         GadgetGiver.Stop();
         KillstreakItemRemover.Stop();
+        KillstreakClothingRemover.Stop();
         EquipmentChecker.Stop();
-        
+        DeathstreakChecker.Stop();
+
         HasScoreboard = false;
         HasAnimationGoingOn = false;
         IsPendingLoadoutChange = false;

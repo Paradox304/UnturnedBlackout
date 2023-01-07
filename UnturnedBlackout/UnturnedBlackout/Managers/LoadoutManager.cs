@@ -781,16 +781,6 @@ public class LoadoutManager
                 killstreakHotkey++;
             }
         }
-
-        // Giving deathstreak to player
-        if (activeLoadout.Deathstreak != null && (game.GameEvent?.AllowDeathstreaks ?? true))
-        {
-            var deathstreakID = activeLoadout.Deathstreak.Deathstreak.DeathstreakInfo.TriggerItemID;
-            inv.forceAddItem(new(deathstreakID, true), false);
-            inv.TryGetItemIndex(deathstreakID, out var deathstreakX, out var deathstreakY, out var deathstreakPage, out var _);
-            if (Assets.find(EAssetType.ITEM, deathstreakID) is ItemAsset deathstreakAsset)
-                player.Player.Player.equipment.ServerBindItemHotkey(player.Data.GetHotkey(EHotkey.DEATHSTREAK), deathstreakAsset, deathstreakPage, deathstreakX, deathstreakY);
-        }
         
         player.SetActiveLoadout(activeLoadout, knifePage, knifeX, knifeY);
     }

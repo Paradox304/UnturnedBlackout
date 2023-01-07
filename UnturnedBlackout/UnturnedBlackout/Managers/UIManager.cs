@@ -104,6 +104,9 @@ public class UIManager
     public const ushort KILLSTREAK_AVAILABLE_ID = 27650;
     public const short KILLSTREAK_AVAILABLE_KEY = 27650;
 
+    public const ushort DEATHSTREAK_ACTIVE_ID = 27651;
+    public const short DEATHSTREAK_ACTIVE_KEY = 27651;
+    
     public const ushort FLAG_POPUP_UI = 27900;
     public const short FLAG_POPUP_KEY = 27900;
 
@@ -686,6 +689,19 @@ public class UIManager
 
     public void ClearKillstreakUI(GamePlayer player) => EffectManager.askEffectClearByID(KILLSTREAK_ID, player.TransportConnection);
 
+    // DEATHSTREAK
+
+    public void SetupActiveDeathstreakUI(GamePlayer player)
+    {
+        var info = player.ActiveLoadout.Deathstreak.Deathstreak.DeathstreakInfo;
+        EffectManager.sendUIEffect(DEATHSTREAK_ACTIVE_ID, DEATHSTREAK_ACTIVE_KEY, player.TransportConnection, true);
+        EffectManager.sendUIEffectImageURL(DEATHSTREAK_ACTIVE_KEY, player.TransportConnection, true, "DeathstreakIcon", info.DeathstreakHUDIconURL);
+        EffectManager.sendUIEffectText(DEATHSTREAK_ACTIVE_KEY, player.TransportConnection, true, "DeathstreakTimerNum", info.DeathstreakStaySeconds.ToString());
+    }
+
+    public void UpdateDeathstreakTimer(GamePlayer player, int seconds) => EffectManager.sendUIEffectText(DEATHSTREAK_ACTIVE_KEY, player.TransportConnection, true, "DeathstreakTimerNum", seconds.ToString());
+    
+    public void RemoveActiveDeathstreakUI(GamePlayer player) => EffectManager.askEffectClearByID(DEATHSTREAK_ACTIVE_ID, player.TransportConnection);
     // HUD RELATED UI
 
     private void OnConnected(UnturnedPlayer player)
@@ -2076,9 +2092,6 @@ public class UIManager
                 return;
             case "Killstreak 3 Hotkey INPUT":
                 handler.SetHotkey(EHotkey.KILLSTREAK_3, text);
-                return;
-            case "Deathstreak Hotkey INPUT":
-                handler.SetHotkey(EHotkey.DEATHSTREAK, text);
                 return;
             case "SERVER Unbox Buy Amount INPUT":
                 handler.SetUnboxingStoreBuyAmount(text);
