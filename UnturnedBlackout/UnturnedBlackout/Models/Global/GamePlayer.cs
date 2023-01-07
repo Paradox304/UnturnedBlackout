@@ -65,19 +65,34 @@ public class GamePlayer : IDisposable
     public ushort KillstreakPreviousPantsID { get; set; }
     public ushort KillstreakPreviousHatID { get; set; }
     public ushort KillstreakPreviousVestID { get; set; }
-
-    public bool HasTactical { get; set; }
-    public bool HasLethal { get; set; }
-
-    public float TacticalIntervalSeconds { get; set; }
-    public float LethalIntervalSeconds { get; set; }
-
+    
     public bool HasKillstreakActive { get; set; }
     public LoadoutKillstreak ActiveKillstreak { get; set; }
     public List<LoadoutKillstreak> OrderedKillstreaks { get; set; }
     public Dictionary<LoadoutKillstreak, bool> AvailableKillstreaks { get; set; }
     public Dictionary<ushort, LoadoutKillstreak> KillstreakTriggers { get; set; }
     public int ExtraKillstreak { get; set; }
+    
+    public byte DeathstreakPage { get; set; }
+    public byte DeathstreakX { get; set; }
+    public byte DeathstreakY { get; set; }
+
+    public ushort DeathstreakPreviousShirtID { get; set; }
+    public ushort DeathstreakPreviousPantsID { get; set; }
+    public ushort DeathstreakPreviousHatID { get; set; }
+    public ushort DeathstreakPreviousVestID { get; set; }
+    
+    public bool HasDeathstreakActive { get; set; }
+    public bool HasDeathstreakAvailable { get; set; }
+    
+    public int CurrentDeathstreak { get; set; }
+    public int ExtraDeathstreak { get; set; }
+    
+    public bool HasTactical { get; set; }
+    public bool HasLethal { get; set; }
+
+    public float TacticalIntervalSeconds { get; set; }
+    public float LethalIntervalSeconds { get; set; }
 
     public float HealAmount { get; set; }
 
@@ -762,6 +777,25 @@ public class GamePlayer : IDisposable
         RemoveActiveKillstreak();
     }
 
+    // Deathstreak
+    public void SetupDeathstreaks()
+    {
+        HasDeathstreakActive = false;
+        HasDeathstreakAvailable = false;
+        
+        ExtraDeathstreak = ActiveLoadout.PerksSearchByType.TryGetValue("noob", out var noobPerk) && (CurrentGame?.GameEvent?.AllowPerks ?? true) ? noobPerk.Perk.SkillLevel : 0;
+
+        if (CurrentGame?.GameEvent?.AllowDeathstreaks ?? true)
+        {
+            
+        }
+        else
+        {
+            
+        }
+    }
+    
+    // Checkers
     public IEnumerator CheckEquipment()
     {
         while (true)

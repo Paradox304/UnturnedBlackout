@@ -6,6 +6,7 @@ using Rocket.Unturned.Permissions;
 using SDG.Unturned;
 using Steamworks;
 using System.Collections;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -189,7 +190,24 @@ public class Plugin : RocketPlugin<Config>
 
     private void OnDamageResource(CSteamID instigatorSteamID, Transform objectTransform, ref ushort pendingTotalDamage, ref bool shouldAllow, EDamageOrigin damageOrigin) => shouldAllow = false;
 
-    private void OnDamageObject(CSteamID instigatorSteamID, Transform objectTransform, byte section, ref ushort pendingTotalDamage, ref bool shouldAllow, EDamageOrigin damageOrigin) => shouldAllow = false;
+    private void OnDamageObject(CSteamID instigatorSteamID, Transform objectTransform, byte section, ref ushort pendingTotalDamage, ref bool shouldAllow, EDamageOrigin damageOrigin)
+    {
+        var ids = new List<ushort> { 2, 30, 71, 286 };
+        if (!ObjectManager.tryGetRegion(objectTransform, out var x, out var y, out var index))
+        {
+            shouldAllow = false;
+            return;
+        }
+        
+        var obj = ObjectManager.getObject(x, y, index);
+        if (obj == null || !ids.Contains(obj.asset.id))
+        {
+            shouldAllow = false;
+            return;
+        }
+
+        pendingTotalDamage = 50;
+    }
 
     private void OnVoice(PlayerVoice speaker, bool wantsToUseWalkieTalkie, ref bool shouldAllow, ref bool shouldBroadcastOverRadio, ref PlayerVoice.RelayVoiceCullingHandler cullingHandler)
     {
