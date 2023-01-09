@@ -86,6 +86,7 @@ public class DatabaseManager
     public Dictionary<ushort, Gadget> Gadgets { get; set; }
     public Dictionary<int, Killstreak> Killstreaks { get; set; }
     public Dictionary<int, Deathstreak> Deathstreaks { get; set; }
+    public Dictionary<int, Ability> Abilities { get; set; }
     public Dictionary<int, Perk> Perks { get; set; }
     public Dictionary<int, Glove> Gloves { get; set; }
     public Dictionary<int, Card> Cards { get; set; }
@@ -113,6 +114,7 @@ public class DatabaseManager
     public List<Gadget> DefaultGadgets { get; set; }
     public List<Killstreak> DefaultKillstreaks { get; set; }
     public List<Deathstreak> DefaultDeathstreaks { get; set; }
+    public List<Ability> DefaultAbilities { get; set; }
     public List<Perk> DefaultPerks { get; set; }
     public List<Glove> DefaultGloves { get; set; }
     public List<Card> DefaultCards { get; set; }
@@ -144,6 +146,9 @@ public class DatabaseManager
 
     // DEATHSTREAKS
     public const string PLAYERS_DEATHSTREAKS = "UB_Players_Deathstreaks";
+    
+    // ABILITIES
+    public const string PLAYERS_ABILITIES = "UB_Players_Abilities";
     
     // CARDS
     public const string PLAYERS_CARDS = "UB_Players_Cards";
@@ -187,6 +192,9 @@ public class DatabaseManager
 
     // DEATHSTREAKS
     public const string DEATHSTREAKS = "UB_Deathstreaks";
+    
+    // ABILITIES
+    public const string ABILITIES = "UB_Abilities";
     
     // CARDS
     public const string CARDS = "UB_Cards";
@@ -313,6 +321,10 @@ public class DatabaseManager
                 conn).ExecuteScalarAsync();
 
             _ = await new MySqlCommand($"CREATE TABLE IF NOT EXISTS `{DEATHSTREAKS}` (`DeathstreakID` INT NOT NULL , `DeathstreakName` VARCHAR(255) NOT NULL , `DeathstreakDesc` TEXT NOT NULL , `DeathstreakRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `IconLink` TEXT NOT NULL , `DeathstreakRequired` INT NOT NULL , `BuyPrice` INT NOT NULL , `Coins` INT NOT NULL , `ScrapAmount` INT NOT NULL , `LevelRequirement` INT NOT NULL , PRIMARY KEY (`DeathstreakID`));", conn).ExecuteScalarAsync();
+
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{ABILITIES}` (`AbilityID` INT NOT NULL , `AbilityName` VARCHAR(255) NOT NULL , `AbilityDesc` TEXT NOT NULL , `AbilityRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `IconLink` TEXT NOT NULL , `BuyPrice` INT NOT NULL , `Coins` INT NOT NULL , `ScrapAmount` INT NOT NULL , `LevelRequirement` INT NOT NULL , PRIMARY KEY (`AbilityID`));",
+                conn).ExecuteScalarAsync();
             
             _ = await new MySqlCommand(
                 $"CREATE TABLE IF NOT EXISTS `{CARDS}` ( `CardID` INT NOT NULL , `CardName` VARCHAR(255) NOT NULL , `CardDesc` TEXT NOT NULL , `CardRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `IconLink` TEXT NOT NULL , `CardLink` TEXT NOT NULL , `ScrapAmount` INT NOT NULL , `BuyPrice` INT NOT NULL , `Coins` INT NOT NULL , `LevelRequirement` INT NOT NULL , `AuthorCredits` TEXT NOT NULL , `UnboxedAmount` INT NOT NULL , PRIMARY KEY (`CardID`));",
@@ -394,7 +406,11 @@ public class DatabaseManager
                 conn).ExecuteScalarAsync();
 
             _ = await new MySqlCommand(
-                $"CREATE TABLE IF NOT EXISTS `{PLAYERS_DEATHSTREAKS}` (`SteamID` BIGINT UNSIGNED NOT NULL , `DeathstreakID` INT NOT NULL , `DeathstreakKills` INT NOT NULL , `IsBought` BOOLEAN NOT NULL , `IsUnlocked` BOOLEAN NOT NULL DEFAULT False, CONSTRAINT `ub_steam_id_19` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_deathstreak_id` FOREIGN KEY (`DeathstreakID`) REFERENCES `{DEATHSTREAKS}` (`DeathstreakID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY(`SteamID` , `DeathstreakID`));",
+                $"CREATE TABLE IF NOT EXISTS `{PLAYERS_DEATHSTREAKS}` (`SteamID` BIGINT UNSIGNED NOT NULL , `DeathstreakID` INT NOT NULL , `IsBought` BOOLEAN NOT NULL , `IsUnlocked` BOOLEAN NOT NULL DEFAULT False, CONSTRAINT `ub_steam_id_19` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_deathstreak_id` FOREIGN KEY (`DeathstreakID`) REFERENCES `{DEATHSTREAKS}` (`DeathstreakID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY(`SteamID` , `DeathstreakID`));",
+                conn).ExecuteScalarAsync();
+
+            _ = await new MySqlCommand(
+                $"CREATE TABLE IF NOT EXISTS `{PLAYERS_ABILITIES}` (`SteamID` BIGINT UNSIGNED NOT NULL , `AbilityID` INT NOT NULL , `AbilityKills` INT NOT NULL , `IsBought` BOOLEAN NOT NULL , `IsUnlocked` BOOLEAN NOT NULL DEFAULT False , CONSTRAINT `ub_steam_id_20` FOREIGN KEY (`SteamID`) REFERENCES `{PLAYERS}` (`SteamID`) ON DELETE CASCADE ON UPDATE CASCADE , CONSTRAINT `ub_ability_id` FOREIGN KEY (`AbilityID`) REFERENCES `{ABILITIES}` (`AbilityID`) ON DELETE CASCADE ON UPDATE CASCADE , PRIMARY KEY (`SteamID` , `AbilityID`));",
                 conn).ExecuteScalarAsync();
             
             _ = await new MySqlCommand(
@@ -454,6 +470,7 @@ public class DatabaseManager
             List<Gadget> defaultGadgets = new();
             List<Killstreak> defaultKillstreaks = new();
             List<Deathstreak> defaultDeathstreaks = new();
+            List<Ability> defaultAbilities = new();
             List<Perk> defaultPerks = new();
             List<Glove> defaultGloves = new();
             List<Card> defaultCards = new();
@@ -1162,6 +1179,75 @@ public class DatabaseManager
                 rdr.Close();
             }
 
+            Logging.Debug($"Reading abilities from base data");
+            rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{ABILITIES}`;", conn).ExecuteScalarAsync();
+            try
+            {
+                Dictionary<int, Ability> abilities = new();
+                while (await rdr.ReadAsync())
+                {
+                    if (!int.TryParse(rdr[0].ToString(), out var abilityID))
+                        continue;
+
+                    var abilityName = rdr[1].ToString();
+                    var abilityDesc = rdr[2].ToString();
+                    if (!Enum.TryParse(rdr[3].ToString(), true, out ERarity rarity))
+                        continue;
+
+                    var iconLink = rdr[4].ToString();
+
+                    if (!int.TryParse(rdr[6].ToString(), out var buyPrice))
+                        continue;
+
+                    if (!int.TryParse(rdr[7].ToString(), out var coins))
+                        continue;
+
+                    if (!int.TryParse(rdr[8].ToString(), out var scrapAmount))
+                        continue;
+
+                    if (!int.TryParse(rdr[9].ToString(), out var levelRequirement))
+                        continue;
+                    
+                    var abilityInfo = Plugin.Instance.Config.Abilities.FileData.AbilitiesData.FirstOrDefault(k => k.AbilityID == abilityID);
+                    if (abilityInfo == null)
+                    {
+                        Logging.Debug($"Error finding ability info for ability with id {abilityID}, ignoring");
+                        continue;
+                    }
+
+                    Ability ability = new(abilityID, abilityName, abilityDesc, rarity, iconLink, buyPrice, coins, scrapAmount, levelRequirement, abilityInfo);
+                    if (!abilities.ContainsKey(abilityID))
+                        abilities.Add(abilityID, ability);
+                    else
+                    {
+                        Logging.Debug($"Found a duplicate ability with id {abilityID}, ignoring it");
+                        break;
+                    }
+
+                    if (levelRequirement == 0)
+                        defaultAbilities.Add(ability);
+                    else if (levelRequirement > 0)
+                    {
+                        if (!itemsSearchByLevel.ContainsKey(levelRequirement))
+                            itemsSearchByLevel.Add(levelRequirement, new());
+
+                        itemsSearchByLevel[levelRequirement].Add(new(ability.IconLink, "SPECIALIST ABILITY", ability.AbilityName));
+                    }
+                }
+                
+                Logging.Debug($"Successfully read {abilities.Count} abilities from the table");
+                Abilities = abilities;
+            }
+            catch (Exception ex)
+            {
+                Logger.Log("Error reading data from abilities table");
+                Logger.Log(ex);
+            }
+            finally
+            {
+                rdr.Close();
+            }
+
             Logging.Debug("Reading perks from base data");
             rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PERKS}`;", conn).ExecuteReaderAsync();
             try
@@ -1758,12 +1844,14 @@ public class DatabaseManager
 
                 Logging.Debug($"Found {defaultKillstreak.Count} default killstreaks");
                 var defaultDeathstreak = defaultDeathstreaks.FirstOrDefault();
+                Logging.Debug($"Found {defaultAbilities.Count} default abilities");
+                var defaultAbility = defaultAbilities.FirstOrDefault();
                 Logging.Debug($"Found default deathstreak with id {defaultDeathstreak?.DeathstreakID ?? 0}");
                 var defaultGlove = defaultGloves.FirstOrDefault();
                 Logging.Debug($"Found default glove with id {defaultGlove?.GloveID ?? 0}");
                 var defaultCard = defaultCards.FirstOrDefault();
                 Logging.Debug($"Found default card with id {defaultCard?.CardID ?? 0}");
-                DefaultLoadout = new("DEFAULT LOADOUT", defaultPrimary?.GunID ?? 0, 0, 0, defaultPrimaryAttachments, defaultSecondary?.GunID ?? 0, 0, 0, defaultSecondaryAttachments, defaultKnife?.KnifeID ?? 0, defaultTactical?.GadgetID ?? 0, defaultLethal?.GadgetID ?? 0, defaultKillstreak, defaultDeathstreak?.DeathstreakID ?? 0,
+                DefaultLoadout = new("DEFAULT LOADOUT", defaultPrimary?.GunID ?? 0, 0, 0, defaultPrimaryAttachments, defaultSecondary?.GunID ?? 0, 0, 0, defaultSecondaryAttachments, defaultKnife?.KnifeID ?? 0, defaultTactical?.GadgetID ?? 0, defaultLethal?.GadgetID ?? 0, defaultKillstreak, defaultDeathstreak?.DeathstreakID ?? 0, defaultAbility?.AbilityID ?? 0,
                     defaultPerk, defaultGlove?.GloveID ?? 0, defaultCard?.CardID ?? 0);
 
                 Logging.Debug("Built a default loadout to give to the players when they join");
@@ -1780,6 +1868,7 @@ public class DatabaseManager
                 DefaultGadgets = defaultGadgets;
                 DefaultKillstreaks = defaultKillstreaks;
                 DefaultDeathstreaks = defaultDeathstreaks;
+                DefaultAbilities = defaultAbilities;
                 DefaultPerks = defaultPerks;
                 DefaultGloves = defaultGloves;
                 DefaultCards = defaultCards;
@@ -1903,7 +1992,17 @@ public class DatabaseManager
                 if (deathstreak.LevelRequirement < 0)
                     continue;
 
-                _ = await new MySqlCommand($"INSERT IGNORE INTO `{PLAYERS_DEATHSTREAKS}` (`SteamID` , `DeathstreakID` , `DeathstreakKills` , `IsBought`) VALUES ({player.CSteamID}, {deathstreak.DeathstreakID}, 0, {deathstreak.LevelRequirement == 0});", conn).ExecuteScalarAsync();
+                _ = await new MySqlCommand($"INSERT IGNORE INTO `{PLAYERS_DEATHSTREAKS}` (`SteamID` , `DeathstreakID` , `IsBought`) VALUES ({player.CSteamID}, {deathstreak.DeathstreakID}, {deathstreak.LevelRequirement == 0});", conn).ExecuteScalarAsync();
+            }
+            
+            Logging.Debug($"Giving {steamName} the abilities");
+            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new(' ', (int)(LOADING_SPACES * 0.3f)), "LOADING ABILITIES..."));
+            foreach (var ability in Abilities.Values)
+            {
+                if (ability.LevelRequirement < 0)
+                    continue;
+
+                _ = await new MySqlCommand($"INSERT IGNORE INTO `{ABILITIES}` (`SteamID` , `AbilityID` , `AbilityKills` , `IsBought`) VALUES ({player.CSteamID}, {ability.AbilityID} , 0 , {ability.LevelRequirement == 0});", conn).ExecuteScalarAsync();
             }
             
             Logging.Debug($"Giving {steamName} the perks");
@@ -2403,6 +2502,7 @@ public class DatabaseManager
             Dictionary<ushort, LoadoutGadget> gadgets = new();
             Dictionary<int, LoadoutKillstreak> killstreaks = new();
             Dictionary<int, LoadoutDeathstreak> deathstreaks = new();
+            Dictionary<int, LoadoutAbility> abilities = new();
             Dictionary<int, LoadoutCard> cards = new();
             Dictionary<int, LoadoutGlove> gloves = new();
             Dictionary<int, Loadout> loadouts = new();
@@ -2737,17 +2837,14 @@ public class DatabaseManager
                         continue;
                     }
 
-                    if (!int.TryParse(rdr[2].ToString(), out var deathstreakKills))
+                    if (!bool.TryParse(rdr[2].ToString(), out var isBought))
                         continue;
 
-                    if (!bool.TryParse(rdr[3].ToString(), out var isBought))
-                        continue;
-
-                    if (!bool.TryParse(rdr[4].ToString(), out var isUnlocked))
+                    if (!bool.TryParse(rdr[3].ToString(), out var isUnlocked))
                         continue;
 
                     if (!deathstreaks.ContainsKey(deathstreakID))
-                        deathstreaks.Add(deathstreakID, new(deathstreak, deathstreakKills, isBought, isUnlocked));
+                        deathstreaks.Add(deathstreakID, new(deathstreak, isBought, isUnlocked));
                     else
                         Logging.Debug($"Found a duplicate deathstreak with id {deathstreakID} for {player.CharacterName}, ignoring it");
                 }
@@ -2757,6 +2854,49 @@ public class DatabaseManager
             catch (Exception ex)
             {
                 Logger.Log($"Error reading deathstreaks data for {player.CharacterName}");
+                Logger.Log(ex);
+            }
+            finally
+            {
+                rdr.Close();
+            }
+            
+            Logging.Debug($"Getting abilities for {player.CharacterName}");
+            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(LOADING_SPACES * 0.94f)), "PREPARING ABILITIES..."));
+            rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS_ABILITIES}` WHERE `SteamID` = {player.CSteamID};", conn).ExecuteReaderAsync();
+            try
+            {
+                while (await rdr.ReadAsync())
+                {
+                    if (!int.TryParse(rdr[1].ToString(), out var abilityID))
+                        continue;
+
+                    if (!Abilities.TryGetValue(abilityID, out var ability))
+                    {
+                        Logging.Debug($"Error finding ability with id {abilityID} for {player.CharacterName}, ignoring it");
+                        continue;
+                    }
+
+                    if (!int.TryParse(rdr[3].ToString(), out var abilityKills))
+                        continue;
+                    
+                    if (!bool.TryParse(rdr[2].ToString(), out var isBought))
+                        continue;
+
+                    if (!bool.TryParse(rdr[3].ToString(), out var isUnlocked))
+                        continue;
+
+                    if (!abilities.ContainsKey(abilityID))
+                        abilities.Add(abilityID, new(ability, abilityKills, isBought, isUnlocked));
+                    else
+                        Logging.Debug($"Found a duplicate ability with id {abilityID} for {player.CharacterName}, ignoring it");
+                }
+
+                Logging.Debug($"Successfully got {abilities.Count} for {player.CharacterName}");
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"Error reading abilities data for {player.CharacterName}");
                 Logger.Log(ex);
             }
             finally
@@ -2965,7 +3105,13 @@ public class DatabaseManager
                         if (!updateLoadouts.Contains(loadoutID))
                             updateLoadouts.Add(loadoutID);
                     }
-                    
+
+                    if (!abilities.TryGetValue(loadoutData.Ability, out var ability) && loadoutData.Ability != 0)
+                    {
+                        Logging.Debug($"Loadout with id {loadoutID} for {player.CharacterName} has a abilitiy with id {loadoutData.Ability} which is not owned by the player, not counting it");
+                        if (!updateLoadouts.Contains(loadoutID))
+                            updateLoadouts.Add(loadoutID);
+                    }
                     Dictionary<int, LoadoutPerk> loadoutPerks = new();
                     foreach (var perkID in loadoutData.Perks)
                     {
@@ -3003,7 +3149,7 @@ public class DatabaseManager
                     }
 
                     loadouts.Add(loadoutID,
-                        new(loadoutID, loadoutData.LoadoutName, isActive, primary, primarySkin, primaryGunCharm, primaryAttachments, secondary, secondarySkin, secondaryGunCharm, secondaryAttachments, knife, tactical, lethal, loadoutKillstreaks, deathstreak, loadoutPerks, perksSearchByType, glove, card));
+                        new(loadoutID, loadoutData.LoadoutName, isActive, primary, primarySkin, primaryGunCharm, primaryAttachments, secondary, secondarySkin, secondaryGunCharm, secondaryAttachments, knife, tactical, lethal, loadoutKillstreaks, deathstreak, ability, loadoutPerks, perksSearchByType, glove, card));
                 }
 
                 Logging.Debug($"Successfully got {loadouts.Count} loadouts for {player.CharacterName}");
@@ -3156,7 +3302,7 @@ public class DatabaseManager
             if (PlayerLoadouts.ContainsKey(player.CSteamID))
                 _ = PlayerLoadouts.Remove(player.CSteamID);
 
-            PlayerLoadouts.Add(player.CSteamID, new(player.CSteamID, guns, gunCharms, knives, gunSkinsSearchByID, gunSkinsSearchByGunID, gunSkinsSearchBySkinID, perks, gadgets, killstreaks, deathstreaks, cards, gloves, loadouts));
+            PlayerLoadouts.Add(player.CSteamID, new(player.CSteamID, guns, gunCharms, knives, gunSkinsSearchByID, gunSkinsSearchByGunID, gunSkinsSearchBySkinID, perks, gadgets, killstreaks, deathstreaks, abilities, cards, gloves, loadouts));
         }
         catch (Exception ex)
         {
@@ -5263,7 +5409,7 @@ public class DatabaseManager
         if (!Deathstreaks.TryGetValue(deathstreakID, out var deathstreak))
             throw new ArgumentNullException("id", $"Deathstreak with id {deathstreakID} doesn't exist in the database, while adding to {steamID}");
 
-        AddQuery($"INSERT INTO `{PLAYERS_DEATHSTREAKS}` (`SteamID` , `DeathstreakID` , `DeathstreakKills` , `IsBought`) VALUES ({steamID} , {deathstreakID} , 0 , true) ON DUPLICATE KEY UPDATE `IsBought` = true;");
+        AddQuery($"INSERT INTO `{PLAYERS_DEATHSTREAKS}` (`SteamID` , `DeathstreakID` , `IsBought`) VALUES ({steamID} , {deathstreakID} , true) ON DUPLICATE KEY UPDATE `IsBought` = true;");
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
             return;
 
@@ -5273,23 +5419,8 @@ public class DatabaseManager
             return;
         }
 
-        loadout.Deathstreaks.Add(deathstreakID, new(deathstreak, 0, true, false));
+        loadout.Deathstreaks.Add(deathstreakID, new(deathstreak, true, false));
         Plugin.Instance.UI.OnUIUpdated(steamID, EUIPage.DEATHSTREAK);
-    }
-
-    public void IncreasePlayerDeathstreakKills(CSteamID steamID, int deathstreakID, int amount)
-    {
-        if (!Killstreaks.ContainsKey(deathstreakID))
-            throw new ArgumentNullException("id", $"Deathstreak with id {deathstreakID} doesn't exist in the database, while increasing kills for {steamID}");
-
-        AddQuery($"UPDATE `{PLAYERS_DEATHSTREAKS}` SET `DeathstreakKills` = `DeathstreakKills` + {amount} WHERE `SteamID` = {steamID} AND `DeathstreakID` = {deathstreakID};");
-        if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
-            return;
-
-        if (!loadout.Deathstreaks.TryGetValue(deathstreakID, out var playerDeathstreak))
-            return;
-
-        playerDeathstreak.DeathstreakKills += amount;
     }
 
     public bool UpdatePlayerDeathstreakBought(CSteamID steamID, int deathstreakID, bool isBought)

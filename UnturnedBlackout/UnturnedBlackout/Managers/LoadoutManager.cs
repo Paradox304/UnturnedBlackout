@@ -606,7 +606,7 @@ public class LoadoutManager
                 }
 
                 var newLoadout = new Loadout(-1, "Temporary Loadout", true, overridePrimary, null, activeLoadout.PrimaryGunCharm, overridePrimaryAttachments, activeLoadout.Secondary, activeLoadout.SecondarySkin, activeLoadout.SecondaryGunCharm, activeLoadout.SecondaryAttachments, activeLoadout.Knife,
-                    activeLoadout.Tactical, activeLoadout.Lethal, activeLoadout.Killstreaks, activeLoadout.Deathstreak, activeLoadout.Perks, activeLoadout.PerksSearchByType, activeLoadout.Glove, activeLoadout.Card);
+                    activeLoadout.Tactical, activeLoadout.Lethal, activeLoadout.Killstreaks, activeLoadout.Deathstreak, activeLoadout.Ability, activeLoadout.Perks, activeLoadout.PerksSearchByType, activeLoadout.Glove, activeLoadout.Card);
                 
                 Logging.Debug($"Created a replica loadout with the same values as before just different gun, assigning it as active loadout");
                 activeLoadout = newLoadout;

@@ -1,5 +1,8 @@
-﻿namespace UnturnedBlackout.Models.Data;
+﻿using System;
 
+namespace UnturnedBlackout.Models.Data;
+
+[Serializable]
 public class KillstreakData
 {
     public int KillstreakID { get; set; }

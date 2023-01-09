@@ -233,6 +233,7 @@
         <Compile Include="Commands\UnmuteCommand.cs" />
         <Compile Include="Commands\WipeSpawnsCommand.cs" />
         <Compile Include="Config.cs" />
+        <Compile Include="Database\Base\Ability.cs" />
         <Compile Include="Database\Base\Achievement.cs" />
         <Compile Include="Database\Base\AchievementTier.cs" />
         <Compile Include="Database\Base\BattlepassTier.cs" />
@@ -256,6 +257,7 @@
         <Compile Include="Database\Base\Server.cs" />
         <Compile Include="Database\Base\XPLevel.cs" />
         <Compile Include="Database\Data\Loadout.cs" />
+        <Compile Include="Database\Data\LoadoutAbility.cs" />
         <Compile Include="Database\Data\LoadoutAttachment.cs" />
         <Compile Include="Database\Data\LoadoutCard.cs" />
         <Compile Include="Database\Data\LoadoutDeathstreak.cs" />
@@ -323,6 +325,7 @@
         <Compile Include="Models\Animation\AnimationItemUnlock.cs" />
         <Compile Include="Models\Bot\BotLeaderboardReward.cs" />
         <Compile Include="Models\Bot\BotPrime.cs" />
+        <Compile Include="Models\Configuration\AbilityConfig.cs" />
         <Compile Include="Models\Configuration\BaseValuesConfig.cs" />
         <Compile Include="Models\Configuration\DeathstreakConfig.cs" />
         <Compile Include="Models\Configuration\DefaultSkillsConfig.cs" />
@@ -339,6 +342,7 @@
         <Compile Include="Models\Configuration\TeamsConfig.cs" />
         <Compile Include="Models\Configuration\WebhooksConfig.cs" />
         <Compile Include="Models\Configuration\WinningValuesConfig.cs" />
+        <Compile Include="Models\Data\AbilityData.cs" />
         <Compile Include="Models\Data\DeathstreakData.cs" />
         <Compile Include="Models\Data\KillstreakData.cs" />
         <Compile Include="Models\Data\LoadoutData.cs" />
