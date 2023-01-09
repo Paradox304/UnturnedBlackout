@@ -192,7 +192,7 @@ public class Plugin : RocketPlugin<Config>
 
     private void OnDamageObject(CSteamID instigatorSteamID, Transform objectTransform, byte section, ref ushort pendingTotalDamage, ref bool shouldAllow, EDamageOrigin damageOrigin)
     {
-        var ids = new List<ushort> { 2, 30, 71, 286 };
+        var ids = new List<ushort> { 16367 };
         if (!ObjectManager.tryGetRegion(objectTransform, out var x, out var y, out var index))
         {
             shouldAllow = false;
@@ -206,7 +206,7 @@ public class Plugin : RocketPlugin<Config>
             return;
         }
 
-        pendingTotalDamage = 50;
+        pendingTotalDamage = 20;
     }
 
     private void OnVoice(PlayerVoice speaker, bool wantsToUseWalkieTalkie, ref bool shouldAllow, ref bool shouldBroadcastOverRadio, ref PlayerVoice.RelayVoiceCullingHandler cullingHandler)

@@ -1457,11 +1457,11 @@ public class UIHandler : IDisposable
 
         // Lethal
         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Loadout Lethal IMAGE", loadout.Lethal?.Gadget?.IconLink ?? "");
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Loadout Lethal TEXT", loadout.Lethal?.Gadget?.IconLink ?? "");
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Loadout Lethal TEXT", loadout.Lethal?.Gadget?.GadgetName ?? "");
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout Lethal {loadout.Lethal?.Gadget?.GadgetRarity.ToString() ?? "DEFAULT"}", true);
 
         // Perk
-        for (var i = 1; i <= 3; i++)
+        for (var i = 1; i <= 4; i++)
         {
             var gotPerk = loadout.Perks.TryGetValue(i, out var perk);
             EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout Perk IMAGE {i}", gotPerk ? perk.Perk.IconLink : "");
@@ -1475,9 +1475,13 @@ public class UIHandler : IDisposable
         {
             EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout Killstreak IMAGE {i}", loadout.Killstreaks.Count < i + 1 ? "" : loadout.Killstreaks[i].Killstreak.IconLink);
             EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout Killstreak TEXT {i}", loadout.Killstreaks.Count < i + 1 ? "" : loadout.Killstreaks[i].Killstreak.KillstreakRequired.ToString());
-
         }
 
+        // Deathstreak
+        EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Loadout Deathstreak IMAGE", loadout.Deathstreak?.Deathstreak?.IconLink ?? "");
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Loadout Deathstreak TEXT", loadout.Deathstreak?.Deathstreak?.DeathstreakName ?? "");
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout Deathstreak {loadout.Deathstreak?.Deathstreak?.DeathstreakRarity.ToString() ?? "DEFAULT"}", true);
+        
         // Card
         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout Card IMAGE", loadout.Card?.Card?.IconLink ?? "");
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout Card TEXT", loadout.Card?.Card?.IconLink ?? "");
@@ -4054,7 +4058,7 @@ public class UIHandler : IDisposable
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Rarity TEXT", $"<color={Utility.GetRarityColor(ERarity.YELLOW)}>PERK 3</color>");
                 break;
             case 4:
-                // TODO: Send perk rarity here
+                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Rarity TEXT", $"<color={Utility.GetRarityColor(ERarity.GREEN)}>PERK 3</color>");
                 break;
         }
 

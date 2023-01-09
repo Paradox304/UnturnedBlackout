@@ -461,7 +461,7 @@ public static class Utility
     public static string ToFriendlyName(this ELoadoutPage page) => page switch
     {
         ELoadoutPage.PRIMARY_SKIN or ELoadoutPage.SECONDARY_SKIN => "Skin",
-        ELoadoutPage.PERK1 or ELoadoutPage.PERK2 or ELoadoutPage.PERK3 => "Perk",
+        ELoadoutPage.PERK1 or ELoadoutPage.PERK2 or ELoadoutPage.PERK3 or ELoadoutPage.PERK4 => "Perk",
         ELoadoutPage.ATTACHMENT_PRIMARY_GRIP => "Grip",
         ELoadoutPage.ATTACHMENT_PRIMARY_CHARM or ELoadoutPage.ATTACHMENT_SECONDARY_CHARM => "Charm",
         ELoadoutPage.ATTACHMENT_PRIMARY_BARREL or ELoadoutPage.ATTACHMENT_SECONDARY_BARREL => "Barrel",
@@ -475,6 +475,7 @@ public static class Utility
         ELoadoutPage.PRIMARY => "Primary",
         ELoadoutPage.SECONDARY => "Secondary",
         ELoadoutPage.KILLSTREAK => "Killstreak",
+        ELoadoutPage.DEATHSTREAK => "Deathstreak",
         var _ => page.ToString()
     };
 

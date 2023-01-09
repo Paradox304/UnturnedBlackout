@@ -301,7 +301,7 @@ public class DatabaseManager
                 conn).ExecuteScalarAsync();
 
             _ = await new MySqlCommand(
-                $"CREATE TABLE IF NOT EXISTS `{PERKS}` ( `PerkID` INT NOT NULL , `PerkName` VARCHAR(255) NOT NULL , `PerkDesc` TEXT NOT NULL , `PerkType` ENUM('1','2','3') NOT NULL , `PerkRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `IconLink` TEXT NOT NULL , `SkillType` TEXT NOT NULL , `SkillLevel` INT NOT NULL , `Coins` INT NOT NULL , `BuyPrice` INT NOT NULL , `ScrapAmount` INT  NOT NULL , `LevelRequirement` INT NOT NULL , `OverrideStats` TEXT NOT NULL , PRIMARY KEY (`PerkID`));",
+                $"CREATE TABLE IF NOT EXISTS `{PERKS}` ( `PerkID` INT NOT NULL , `PerkName` VARCHAR(255) NOT NULL , `PerkDesc` TEXT NOT NULL , `PerkType` ENUM('1','2','3','4') NOT NULL , `PerkRarity` ENUM('NONE','COMMON','UNCOMMON','RARE','EPIC','LEGENDARY','MYTHICAL','YELLOW','ORANGE','CYAN','GREEN') NOT NULL , `IconLink` TEXT NOT NULL , `SkillType` TEXT NOT NULL , `SkillLevel` INT NOT NULL , `Coins` INT NOT NULL , `BuyPrice` INT NOT NULL , `ScrapAmount` INT  NOT NULL , `LevelRequirement` INT NOT NULL , `OverrideStats` TEXT NOT NULL , PRIMARY KEY (`PerkID`));",
                 conn).ExecuteScalarAsync();
 
             _ = await new MySqlCommand(
