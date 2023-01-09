@@ -4058,10 +4058,11 @@ public class UIHandler : IDisposable
                 EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Rarity TEXT", $"<color={Utility.GetRarityColor(ERarity.YELLOW)}>PERK 3</color>");
                 break;
             case 4:
-                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Rarity TEXT", $"<color={Utility.GetRarityColor(ERarity.GREEN)}>PERK 3</color>");
+                EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Rarity TEXT", $"<color={Utility.GetRarityColor(ERarity.GREEN)}>PERK 4</color>");
                 break;
         }
 
+        /*
         if (ShowingStats)
         {
             Logging.Debug("Stat shower already doing it's work, returning");
@@ -4072,6 +4073,7 @@ public class UIHandler : IDisposable
         ShowingStats = true;
         
         StatsShower = Plugin.Instance.StartCoroutine(isEquipped ? ShowEquippedPerkStats(loadout, perk) : ShowComparisonPerkStats(loadout, perk));
+        */
     }
 
     public IEnumerator ShowEquippedPerkStats(Loadout loadout, LoadoutPerk perk)
@@ -4512,6 +4514,7 @@ public class UIHandler : IDisposable
             case ELoadoutPage.PERK1:
             case ELoadoutPage.PERK2:
             case ELoadoutPage.PERK3:
+            case ELoadoutPage.PERK4:
             {
                 if (!PlayerLoadout.Perks.TryGetValue((int)SelectedItemID, out var perk))
                 {
@@ -4812,6 +4815,7 @@ public class UIHandler : IDisposable
             case ELoadoutPage.PERK1:
             case ELoadoutPage.PERK2:
             case ELoadoutPage.PERK3:
+            case ELoadoutPage.PERK4:
             {
                 if (!PlayerLoadout.Perks.TryGetValue((int)SelectedItemID, out var perk))
                 {
@@ -5116,6 +5120,7 @@ public class UIHandler : IDisposable
             case ELoadoutPage.PERK1:
             case ELoadoutPage.PERK2:
             case ELoadoutPage.PERK3:
+            case ELoadoutPage.PERK4:
             {
                 if (!PlayerLoadout.Perks.TryGetValue((int)SelectedItemID, out var perk))
                 {
@@ -5334,6 +5339,7 @@ public class UIHandler : IDisposable
             case ELoadoutPage.PERK1:
             case ELoadoutPage.PERK2:
             case ELoadoutPage.PERK3:
+            case ELoadoutPage.PERK4:
             {
                 if (!PlayerLoadout.Perks.TryGetValue((int)SelectedItemID, out var perk))
                 {
