@@ -712,6 +712,7 @@ public class UIManager
             return;
         
         EffectManager.sendUIEffectVisibility(HUD_KEY, player.TransportConnection, true, "AbilityIcon", true);
+        EffectManager.sendUIEffectImageURL(HUD_KEY, player.TransportConnection, true, "AbilityIcon", ability.Ability.AbilityInfo.AbilityHUDIconURL);
         EffectManager.sendUIEffectVisibility(HUD_KEY, player.TransportConnection, true, "AbilityReady", player.HasAbilityAvailable);
         EffectManager.sendUIEffectText(HUD_KEY, player.TransportConnection, true, "AbilityStatus", player.HasAbilityAvailable ? "READY" : ability.Ability.AbilityInfo.CooldownSeconds.ToString());
     }

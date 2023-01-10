@@ -1266,7 +1266,7 @@ public class UIHandler : IDisposable
     // Options Page
     public void ShowOptions()
     {
-        for (var i = 0; i <= 4; i++)
+        for (var i = 0; i <= 5; i++)
             SetHotkeyInput((EHotkey)i);
     }
 

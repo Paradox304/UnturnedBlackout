@@ -1922,7 +1922,7 @@ public class DatabaseManager
 
             MySqlCommand cmd =
                 new(
-                    $"INSERT INTO `{PLAYERS}` ( `SteamID` , `SteamName` , `AvatarLink` , `CountryCode` , `MuteExpiry`, `MuteReason`, `Coins` , `Credits`, `Hotkeys` ) VALUES ({player.CSteamID}, @name, '{avatarLink}' , '{countryCode}' , {DateTimeOffset.UtcNow.ToUnixTimeSeconds()} , ' ', {(Config.UnlockAllItems ? 10000000 : 0)} , {(Config.UnlockAllItems ? 10000000 : 0)}, '4,3,5,6,7' ) ON DUPLICATE KEY UPDATE `AvatarLink` = '{avatarLink}', `SteamName` = @name" + (countryCode != "NNN" ? $", `CountryCode` = '{countryCode}';" : ";"),
+                    $"INSERT INTO `{PLAYERS}` ( `SteamID` , `SteamName` , `AvatarLink` , `CountryCode` , `MuteExpiry`, `MuteReason`, `Coins` , `Credits`, `Hotkeys` ) VALUES ({player.CSteamID}, @name, '{avatarLink}' , '{countryCode}' , {DateTimeOffset.UtcNow.ToUnixTimeSeconds()} , ' ', {(Config.UnlockAllItems ? 10000000 : 0)} , {(Config.UnlockAllItems ? 10000000 : 0)}, '4,3,5,6,7,8' ) ON DUPLICATE KEY UPDATE `AvatarLink` = '{avatarLink}', `SteamName` = @name" + (countryCode != "NNN" ? $", `CountryCode` = '{countryCode}';" : ";"),
                     conn);
             
             _ = cmd.Parameters.AddWithValue("@name", steamName.ToUnrich());
