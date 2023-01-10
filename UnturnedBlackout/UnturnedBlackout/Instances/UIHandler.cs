@@ -1508,6 +1508,11 @@ public class UIHandler : IDisposable
         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Loadout Deathstreak IMAGE", loadout.Deathstreak?.Deathstreak?.IconLink ?? "");
         EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Loadout Deathstreak TEXT", loadout.Deathstreak?.Deathstreak?.DeathstreakName ?? "");
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout Deathstreak {loadout.Deathstreak?.Deathstreak?.DeathstreakRarity.ToString() ?? "DEFAULT"}", true);
+       
+        // Ability
+        EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Loadout Ability IMAGE", loadout.Ability?.Ability?.IconLink ?? "");
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Loadout Ability TEXT", loadout.Ability?.Ability?.AbilityName ?? "");
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout Ability {loadout.Ability?.Ability?.AbilityRarity.ToString() ?? "DEFAULT"}", true);
         
         // Card
         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout Card IMAGE", loadout.Card?.Card?.IconLink ?? "");
@@ -5378,6 +5383,23 @@ public class UIHandler : IDisposable
                 break;
             }
             
+            case ELoadoutPage.ABILITY:
+            {
+                if (!PlayerLoadout.Abilities.TryGetValue((int)SelectedItemID, out var ability))
+                {
+                    Logging.Debug($"Error finding ability with id {SelectedItemID} for {Player.CharacterName}");
+                    return;
+                }
+
+                if (ability.IsBought)
+                {
+                    loadoutManager.EquipAbility(Player, LoadoutID, ability.Ability.AbilityID);
+                    BackToLoadout();
+                }
+
+                break;
+            }
+            
             case ELoadoutPage.GLOVE:
             {
                 if (!PlayerLoadout.Gloves.TryGetValue((int)SelectedItemID, out var glove))
@@ -5567,6 +5589,14 @@ public class UIHandler : IDisposable
             case ELoadoutPage.DEATHSTREAK:
             {
                 loadoutManager.EquipDeathstreak(Player, LoadoutID, 0);
+                ReloadLoadoutTab();
+                ReloadSelectedItem();
+                break;
+            }
+            
+            case ELoadoutPage.ABILITY:
+            {
+                loadoutManager.EquipAbility(Player, LoadoutID, 0);
                 ReloadLoadoutTab();
                 ReloadSelectedItem();
                 break;

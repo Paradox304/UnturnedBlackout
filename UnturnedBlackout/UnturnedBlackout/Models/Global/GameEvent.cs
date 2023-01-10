@@ -28,6 +28,7 @@ public class GameEvent
     public bool KnifeDoesDamage { get; set; }
     public bool AllowKillstreaks { get; set; }
     public bool AllowDeathstreaks { get; set; }
+    public bool AllowAbility { get; set; }
     public bool AllowTactical { get; set; }
     public bool AllowLethal { get; set; }
     public bool AllowPerks { get; set; }

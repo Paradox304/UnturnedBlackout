@@ -476,6 +476,7 @@ public static class Utility
         ELoadoutPage.SECONDARY => "Secondary",
         ELoadoutPage.KILLSTREAK => "Killstreak",
         ELoadoutPage.DEATHSTREAK => "Deathstreak",
+        ELoadoutPage.ABILITY => "Specialist Ability",
         var _ => page.ToString()
     };
 
@@ -496,6 +497,7 @@ public static class Utility
         EHotkey.KILLSTREAK_1 => "Killstreak 1",
         EHotkey.KILLSTREAK_2 => "Killstreak 2",
         EHotkey.KILLSTREAK_3 => "Killstreak 3",
+        EHotkey.ABILITY => "Ability",
         var _ => throw new ArgumentOutOfRangeException(nameof(hotkey), hotkey, "Hotkey is not as expected")
     };
 

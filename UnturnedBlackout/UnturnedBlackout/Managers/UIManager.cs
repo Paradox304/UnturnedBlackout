@@ -1778,6 +1778,9 @@ public class UIManager
             case "SERVER Loadout Deathstreak BUTTON":
                 handler.ShowLoadoutSubPage(ELoadoutPage.DEATHSTREAK);
                 return;
+            case "SERVER Loadout Ability BUTTON":
+                handler.ShowLoadoutSubPage(ELoadoutPage.ABILITY);
+                return;
             case "SERVER Loadout Perk BUTTON 1":
                 handler.ShowLoadoutSubPage(ELoadoutPage.PERK1);
                 return;
@@ -2095,6 +2098,9 @@ public class UIManager
                 return;
             case "Killstreak 3 Hotkey INPUT":
                 handler.SetHotkey(EHotkey.KILLSTREAK_3, text);
+                return;
+            case "Ability Hotkey INPUT":
+                handler.SetHotkey(EHotkey.ABILITY, text);
                 return;
             case "SERVER Unbox Buy Amount INPUT":
                 handler.SetUnboxingStoreBuyAmount(text);

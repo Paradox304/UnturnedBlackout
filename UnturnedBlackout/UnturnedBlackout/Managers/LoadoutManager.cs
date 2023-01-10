@@ -455,7 +455,7 @@ public class LoadoutManager
 
         if (!loadout.Deathstreaks.TryGetValue(newDeathstreak, out var deathstreak) && newDeathstreak != 0)
         {
-            Logging.Debug($"Error finding loadout card with id {newDeathstreak} for {player.CharacterName}");
+            Logging.Debug($"Error finding loadout deathstreak with id {newDeathstreak} for {player.CharacterName}");
             return;
         }
 
@@ -466,6 +466,31 @@ public class LoadoutManager
         }
 
         playerLoadout.Deathstreak = deathstreak;
+        DB.UpdatePlayerLoadout(player.CSteamID, loadoutID);
+    }
+
+    public void EquipAbility(UnturnedPlayer player, int loadoutID, int newAbility)
+    {
+        Logging.Debug($"{player.CharacterName} is trying to switch ability to {newAbility} for loadout with id {loadoutID}");
+        if (!DB.PlayerLoadouts.TryGetValue(player.CSteamID, out var loadout))
+        {
+            Logging.Debug($"Error finding loadout for {player.CharacterName}");
+            return;
+        }
+
+        if (!loadout.Abilities.TryGetValue(newAbility, out var ability) && newAbility != 0)
+        {
+            Logging.Debug($"Error finding loadout ability with id {newAbility} for {player.CharacterName}");
+            return;
+        }
+
+        if (!loadout.Loadouts.TryGetValue(loadoutID, out var playerLoadout))
+        {
+            Logging.Debug($"Error finding loadout with id {loadoutID} for {player.CharacterName}");
+            return;
+        }
+
+        playerLoadout.Ability = ability;
         DB.UpdatePlayerLoadout(player.CSteamID, loadoutID);
     }
     
@@ -753,18 +778,16 @@ public class LoadoutManager
         {
             var lethalID = activeLoadout.Lethal.Gadget.GadgetID;
             inv.forceAddItem(new(lethalID, false), false);
-            inv.TryGetItemIndex(lethalID, out var lethalX, out var lethalY, out var lethalPage, out var _);
-            if (Assets.find(EAssetType.ITEM, lethalID) is ItemAsset lethalAsset)
-                player.Player.Player.equipment.ServerBindItemHotkey(player.Data.GetHotkey(EHotkey.LETHAL), lethalAsset, lethalPage, lethalX, lethalY);
+            inv.TryGetItemIndex(lethalID, out var lethalX, out var lethalY, out var lethalPage, out var lethalJar);
+            player.Player.Player.equipment.ServerBindItemHotkey(player.Data.GetHotkey(EHotkey.LETHAL), lethalJar.GetAsset(), lethalPage, lethalX, lethalY);
         }
 
         if (activeLoadout.Tactical != null && (game.GameEvent?.AllowTactical ?? true))
         {
             var tacticalID = activeLoadout.Tactical.Gadget.GadgetID;
             inv.forceAddItem(new(tacticalID, false), false);
-            inv.TryGetItemIndex(tacticalID, out var tacticalX, out var tacticalY, out var tacticalPage, out var _);
-            if (Assets.find(EAssetType.ITEM, tacticalID) is ItemAsset tacticalAsset)
-                player.Player.Player.equipment.ServerBindItemHotkey(player.Data.GetHotkey(EHotkey.TACTICAL), tacticalAsset, tacticalPage, tacticalX, tacticalY);
+            inv.TryGetItemIndex(tacticalID, out var tacticalX, out var tacticalY, out var tacticalPage, out var tacticalJar);
+            player.Player.Player.equipment.ServerBindItemHotkey(player.Data.GetHotkey(EHotkey.TACTICAL), tacticalJar.GetAsset(), tacticalPage, tacticalX, tacticalY);
         }
 
         // Giving killstreaks to player
@@ -774,12 +797,20 @@ public class LoadoutManager
             foreach (var killstreakID in activeLoadout.Killstreaks.Select(killstreak => killstreak.Killstreak.KillstreakInfo.TriggerItemID))
             {
                 inv.forceAddItem(new(killstreakID, true), false);
-                inv.TryGetItemIndex(killstreakID, out var killstreakX, out var killstreakY, out var killstreakPage, out var _);
-                if (Assets.find(EAssetType.ITEM, killstreakID) is ItemAsset killstreakAsset)
-                    player.Player.Player.equipment.ServerBindItemHotkey(player.Data.GetHotkey((EHotkey)killstreakHotkey), killstreakAsset, killstreakPage, killstreakX, killstreakY);
+                inv.TryGetItemIndex(killstreakID, out var killstreakX, out var killstreakY, out var killstreakPage, out var killstreakJar);
+                player.Player.Player.equipment.ServerBindItemHotkey(player.Data.GetHotkey((EHotkey)killstreakHotkey), killstreakJar.GetAsset(), killstreakPage, killstreakX, killstreakY);
 
                 killstreakHotkey++;
             }
+        }
+        
+        // Giving ability to player
+        if (activeLoadout.Ability != null && (game.GameEvent?.AllowAbility ?? true))
+        {
+            var abilityID = activeLoadout.Ability.Ability.AbilityInfo.TriggerItemID;
+            inv.forceAddItem(new(abilityID, false), false);
+            inv.TryGetItemIndex(abilityID, out var abilityX, out var abilityY, out var abilityPage, out var abilityJar);
+            player.Player.Player.equipment.ServerBindItemHotkey(player.Data.GetHotkey(EHotkey.ABILITY), abilityJar.GetAsset(), abilityPage, abilityX, abilityY);
         }
         
         player.SetActiveLoadout(activeLoadout, knifePage, knifeX, knifeY);
