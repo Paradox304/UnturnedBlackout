@@ -702,6 +702,30 @@ public class UIManager
     public void UpdateDeathstreakTimer(GamePlayer player, int seconds) => EffectManager.sendUIEffectText(DEATHSTREAK_ACTIVE_KEY, player.TransportConnection, true, "DeathstreakTimerNum", seconds.ToString());
     
     public void RemoveActiveDeathstreakUI(GamePlayer player) => EffectManager.askEffectClearByID(DEATHSTREAK_ACTIVE_ID, player.TransportConnection);
+    
+    // ABILITIES
+
+    public void SendAbilityUI(GamePlayer player)
+    {
+        var ability = player.ActiveLoadout.Ability;
+        if (ability == null)
+            return;
+        
+        EffectManager.sendUIEffectVisibility(HUD_KEY, player.TransportConnection, true, "AbilityIcon", true);
+        EffectManager.sendUIEffectVisibility(HUD_KEY, player.TransportConnection, true, "AbilityReady", player.HasAbilityAvailable);
+        EffectManager.sendUIEffectText(HUD_KEY, player.TransportConnection, true, "AbilityStatus", player.HasAbilityAvailable ? "READY" : ability.Ability.AbilityInfo.CooldownSeconds.ToString());
+    }
+
+    public void UpdateAbilityTimer(GamePlayer player, int seconds, bool isBeingUsed = false) => EffectManager.sendUIEffectText(HUD_KEY, player.TransportConnection, true, "AbilityStatus", isBeingUsed ? $"<color=orange>{seconds}</color>" : seconds.ToString());
+
+    public void UpdateAbilityReady(GamePlayer player)
+    {
+        EffectManager.sendUIEffectVisibility(HUD_KEY, player.TransportConnection, true, "AbilityReady", player.HasAbilityAvailable);
+        EffectManager.sendUIEffectText(HUD_KEY, player.TransportConnection, true, "AbilityStatus", player.HasAbilityAvailable ? "READY" : player.ActiveLoadout.Ability.Ability.AbilityInfo.CooldownSeconds.ToString());
+    }
+    
+    public void RemoveAbilityUI(GamePlayer player) => EffectManager.sendUIEffectVisibility(HUD_KEY, player.TransportConnection, true, "AbilityIcon", false);
+
     // HUD RELATED UI
 
     private void OnConnected(UnturnedPlayer player)
@@ -798,12 +822,21 @@ public class UIManager
         if (player.KillstreakTriggers.TryGetValue(jar.item.id, out var activateKillstreak))
         {
             shouldAllow = false;
-            if (game.GamePhase == EGamePhase.STARTED && player.AvailableKillstreaks[activateKillstreak] && !isCarryingFlag && !player.HasKillstreakActive)
+            if (game.GamePhase == EGamePhase.STARTED && player.AvailableKillstreaks[activateKillstreak] && !isCarryingFlag && !player.HasKillstreakActive && !player.HasAbilityActive)
                 player.ActivateKillstreak(activateKillstreak);
 
             return;
         }
 
+        if (jar.item.id == (player.ActiveLoadout.Ability?.Ability.AbilityInfo.TriggerItemID ?? 0))
+        {
+            shouldAllow = false;
+            if (game.GamePhase == EGamePhase.STARTED && player.HasAbilityAvailable && !isCarryingFlag && !player.HasKillstreakActive && !player.HasAbilityActive)
+                player.ActivateAbility();
+
+            return;
+        }
+        
         TaskDispatcher.QueueOnMainThread(() =>
         {
             var connection = player.TransportConnection;
@@ -812,6 +845,9 @@ public class UIManager
 
             if (player.HasKillstreakActive && player.ActiveKillstreak.Killstreak.KillstreakInfo.IsItem && asset.id != player.ActiveKillstreak.Killstreak.KillstreakInfo.ItemID)
                 player.RemoveActiveKillstreak();
+
+            if (player.HasAbilityActive && asset.id != player.ActiveLoadout.Ability.Ability.AbilityInfo.ItemID)
+                player.RemoveActiveAbility();
 
             EffectManager.sendUIEffectText(HUD_KEY, connection, true, "WeaponName", asset.itemName);
             var isPrimarySecondaryMelee = asset.id == (player.ActiveLoadout.PrimarySkin?.SkinID ?? 0) || asset.id == (player.ActiveLoadout.Primary?.Gun?.GunID ?? 0) || asset.id == (player.ActiveLoadout.SecondarySkin?.SkinID ?? 0) || asset.id == (player.ActiveLoadout.Secondary?.Gun?.GunID ?? 0) ||
@@ -849,6 +885,9 @@ public class UIManager
         var player = Plugin.Instance.Game.GetGamePlayer(equipment.player);
         if (player.HasKillstreakActive && player.ActiveKillstreak.Killstreak.KillstreakInfo.IsItem)
             TaskDispatcher.QueueOnMainThread(() => player.RemoveActiveKillstreak());
+        
+        if (player.HasAbilityActive)
+            TaskDispatcher.QueueOnMainThread(() => player.RemoveActiveAbility());
     }
 
     public void OnUseableChanged(PlayerEquipment obj)
@@ -919,23 +958,44 @@ public class UIManager
         var player = Plugin.Instance.Game.GetGamePlayer(gun.player);
         EffectManager.sendUIEffectText(HUD_KEY, player.TransportConnection, true, "AmmoNum", ammo.ToString());
 
-        var info = player.ActiveKillstreak?.Killstreak?.KillstreakInfo;
-        if (ammo != 0 || !player.HasKillstreakActive || !player.ActiveKillstreak.Killstreak.KillstreakInfo.IsItem || !info.RemoveWhenAmmoEmpty)
+        if (ammo != 0)
             return;
-
-        if (info.MagAmount > 0)
+        
+        var killstreakInfo = player.ActiveKillstreak?.Killstreak?.KillstreakInfo; 
+        if (player.HasKillstreakActive && killstreakInfo is { IsItem: true, RemoveWhenAmmoEmpty: true })
         {
-            var inv = gun.player.inventory;
-            var itemCount = inv.items[2].items.Count;
-            for (var i = itemCount - 1; i >= 0; i--)
+            if (killstreakInfo.MagAmount > 0)
             {
-                var item = inv.getItem(2, (byte)i);
-                if ((item?.item?.id ?? 0) == info.MagID)
-                    return;
+                var inv = gun.player.inventory;
+                var itemCount = inv.items[2].items.Count;
+                for (var i = itemCount - 1; i >= 0; i--)
+                {
+                    var item = inv.getItem(2, (byte)i);
+                    if ((item?.item?.id ?? 0) == killstreakInfo.MagID)
+                        return;
+                }
             }
+
+            _ = Plugin.Instance.StartCoroutine(DelayedRemoveActiveKillstreak(player));
         }
 
-        _ = Plugin.Instance.StartCoroutine(DelayedRemoveActiveKillstreak(player));
+        var abilityInfo = player.ActiveLoadout.Ability?.Ability.AbilityInfo;
+        if (player.HasAbilityActive && abilityInfo is { RemoveWhenAmmoEmpty: true })
+        {
+            if (abilityInfo.MagAmount > 0)
+            {
+                var inv = gun.player.inventory;
+                var itemCount = inv.items[2].items.Count;
+                for (var i = itemCount - 1; i >= 0; i--)
+                {
+                    var item = inv.getItem(2, (byte)i);
+                    if ((item?.item?.id ?? 0) == abilityInfo.MagID)
+                        return;
+                }
+            }
+
+            _ = Plugin.Instance.StartCoroutine(DelayedRemoveActiveAbility(player));
+        }
     }
 
     private void OnProjectileShot(UseableGun sender, GameObject projectile)
@@ -944,22 +1004,43 @@ public class UIManager
         var player = Plugin.Instance.Game.GetGamePlayer(sender.player);
         EffectManager.sendUIEffectText(HUD_KEY, player.TransportConnection, true, "AmmoNum", ammo.ToString());
 
-        var info = player.ActiveKillstreak?.Killstreak?.KillstreakInfo;
-        if (ammo == 0 && player.HasKillstreakActive && info.IsItem && info.RemoveWhenAmmoEmpty)
+        if (ammo != 0)
+            return;
+        
+        var killstreakInfo = player.ActiveKillstreak?.Killstreak?.KillstreakInfo; 
+        if (player.HasKillstreakActive && killstreakInfo is { IsItem: true, RemoveWhenAmmoEmpty: true })
         {
-            if (info.MagAmount > 0)
+            if (killstreakInfo.MagAmount > 0)
             {
                 var inv = sender.player.inventory;
                 var itemCount = inv.items[2].items.Count;
                 for (var i = itemCount - 1; i >= 0; i--)
                 {
                     var item = inv.getItem(2, (byte)i);
-                    if ((item?.item?.id ?? 0) == info.MagID)
+                    if ((item?.item?.id ?? 0) == killstreakInfo.MagID)
                         return;
                 }
             }
 
             _ = Plugin.Instance.StartCoroutine(DelayedRemoveActiveKillstreak(player));
+        }
+
+        var abilityInfo = player.ActiveLoadout.Ability?.Ability.AbilityInfo;
+        if (player.HasAbilityActive && abilityInfo is { RemoveWhenAmmoEmpty: true })
+        {
+            if (abilityInfo.MagAmount > 0)
+            {
+                var inv = sender.player.inventory;
+                var itemCount = inv.items[2].items.Count;
+                for (var i = itemCount - 1; i >= 0; i--)
+                {
+                    var item = inv.getItem(2, (byte)i);
+                    if ((item?.item?.id ?? 0) == abilityInfo.MagID)
+                        return;
+                }
+            }
+
+            _ = Plugin.Instance.StartCoroutine(DelayedRemoveActiveAbility(player));
         }
     }
 
@@ -968,6 +1049,13 @@ public class UIManager
         yield return new WaitForSeconds(0.5f);
 
         player.RemoveActiveKillstreak();
+    }
+
+    public IEnumerator DelayedRemoveActiveAbility(GamePlayer player)
+    {
+        yield return new WaitForSeconds(0.5f);
+        
+        player.RemoveActiveAbility();
     }
 
     // FFA RELATED UI

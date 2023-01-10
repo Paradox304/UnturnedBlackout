@@ -80,6 +80,13 @@ public class GamePlayer : IDisposable
     public int CurrentDeathstreak { get; set; }
     public int ExtraDeathstreak { get; set; }
     
+    public byte AbilityPage { get; set; }
+    public byte AbilityX { get; set; }
+    public byte AbilityY { get; set; }
+    
+    public bool HasAbilityActive { get; set; }
+    public bool HasAbilityAvailable { get; set; }
+    
     public bool HasTactical { get; set; }
     public bool HasLethal { get; set; }
 
@@ -97,15 +104,16 @@ public class GamePlayer : IDisposable
     public Coroutine RespawnTimer { get; set; }
     public Coroutine VoiceChatChecker { get; set; }
     public Coroutine AnimationChecker { get; set; }
-    public Coroutine KillstreakItemRemover { get; set; }
-    public Coroutine KillstreakClothingRemover { get; set; }
     public Coroutine GadgetGiver { get; set; }
     public Coroutine SpawnProtectionRemover { get; set; }
     public Coroutine DamageChecker { get; set; }
     public Coroutine TacticalChecker { get; set; }
     public Coroutine LethalChecker { get; set; }
     public Coroutine KillstreakChecker { get; set; }
+    public Coroutine ItemRemover { get; set; }
+    public Coroutine ClothingRemover { get; set; }
     public Coroutine DeathstreakChecker { get; set; }
+    public Coroutine AbilityChecker { get; set; }
     public Coroutine EquipmentChecker { get; set; }
     
     public GamePlayer(UnturnedPlayer player, ITransportConnection transportConnection)
@@ -132,15 +140,6 @@ public class GamePlayer : IDisposable
         KillstreakTriggers = new();
         OrderedKillstreaks = new();
     }
-
-    /*public void Destroy()
-    {
-        Player = null;
-        Data = null;
-        CurrentGame = null;
-        ActiveLoadout = null;
-        TransportConnection = null;
-    }*/
 
     public void Dispose()
     {
@@ -175,16 +174,18 @@ public class GamePlayer : IDisposable
         AnimationChecker = null;
         GadgetGiver.Stop();
         GadgetGiver = null;
-        KillstreakItemRemover.Stop();
-        KillstreakItemRemover = null;
-        KillstreakClothingRemover.Stop();
-        KillstreakClothingRemover = null;
+        ItemRemover.Stop();
+        ItemRemover = null;
+        ClothingRemover.Stop();
+        ClothingRemover = null;
         EquipmentChecker.Stop();
         EquipmentChecker = null;
         KillstreakChecker.Stop();
         KillstreakChecker = null;
         DeathstreakChecker.Stop();
         DeathstreakChecker = null;
+        AbilityChecker.Stop();
+        AbilityChecker = null;
     }
     
     ~GamePlayer()
@@ -249,6 +250,7 @@ public class GamePlayer : IDisposable
 
         SetupKillstreaks();
         SetupDeathstreaks();
+        SetupAbilities();
     }
 
     // Tactical and Lethal
@@ -384,6 +386,9 @@ public class GamePlayer : IDisposable
         LastXPPopup = LastXPPopup.Subtract(TimeSpan.FromSeconds(30));
         if (HasKillstreakActive)
             RemoveActiveKillstreak();
+        
+        if (HasAbilityActive)
+            RemoveActiveAbility();
 
         if (!Plugin.Instance.DB.PlayerData.TryGetValue(killer, out var killerData))
         {
@@ -676,9 +681,6 @@ public class GamePlayer : IDisposable
 
         Plugin.Instance.UI.UpdateKillstreakReady(this, killstreak);
 
-        /*MovementChanger.Stop();
-        MovementChanger = Plugin.Instance.StartCoroutine(ChangeMovement(info.MovementMultiplier));*/
-
         if (info.KillstreakStaySeconds == 0)
             return;
 
@@ -697,21 +699,21 @@ public class GamePlayer : IDisposable
 
         var info = ActiveKillstreak.Killstreak.KillstreakInfo;
         KillstreakChecker.Stop();
-        KillstreakItemRemover.Stop();
-        KillstreakClothingRemover.Stop();
+        ItemRemover.Stop();
+        ClothingRemover.Stop();
 
         if (info.IsItem)
-            KillstreakItemRemover = Plugin.Instance.StartCoroutine(RemoveItemKillstreak(KillstreakPage, KillstreakX, KillstreakY, info.MagID));
+            ItemRemover = Plugin.Instance.StartCoroutine(RemoveItems(KillstreakPage, KillstreakX, KillstreakY, info.MagID));
 
         if (info.IsClothing)
-            KillstreakClothingRemover = Plugin.Instance.StartCoroutine(RemoveClothingKillstreak(KillstreakPreviousShirtID, KillstreakPreviousPantsID, KillstreakPreviousHatID, KillstreakPreviousVestID));
+            ClothingRemover = Plugin.Instance.StartCoroutine(RemoveClothing(KillstreakPreviousShirtID, KillstreakPreviousPantsID, KillstreakPreviousHatID, KillstreakPreviousVestID));
 
         Plugin.Instance.UI.ClearKillstreakTimer(this);
         HasKillstreakActive = false;
         ActiveKillstreak = null;
     }
 
-    public IEnumerator RemoveItemKillstreak(byte page, byte x, byte y, ushort magID)
+    public IEnumerator RemoveItems(byte page, byte x, byte y, ushort magID)
     {
         while (true)
         {
@@ -740,7 +742,7 @@ public class GamePlayer : IDisposable
         }
     }
 
-    public IEnumerator RemoveClothingKillstreak(ushort shirt, ushort pants, ushort hat, ushort vest)
+    public IEnumerator RemoveClothing(ushort shirt, ushort pants, ushort hat, ushort vest)
     {
         while (true)
         {
@@ -849,6 +851,109 @@ public class GamePlayer : IDisposable
         RemoveActiveDeathstreak();
     }
     
+    // Ability
+    
+    public void SetupAbilities()
+    {
+        HasAbilityActive = false;
+        HasAbilityAvailable = false;
+
+        if (ActiveLoadout.Ability == null)
+        {
+            Plugin.Instance.UI.RemoveAbilityUI(this);
+            return;
+        }
+        
+        Plugin.Instance.UI.SendAbilityUI(this);
+        if (CurrentGame.GamePhase != EGamePhase.STARTED)
+            return;
+
+        AbilityChecker.Stop();
+        AbilityChecker = Plugin.Instance.StartCoroutine(CheckAbility(ActiveLoadout.Ability.Ability.AbilityInfo.CooldownSeconds, false));
+    }
+
+    public void StartAbilityTimer()
+    {
+        if (ActiveLoadout.Ability == null || CurrentGame.GamePhase != EGamePhase.STARTED)
+            return;
+        
+        AbilityChecker.Stop();
+        AbilityChecker = Plugin.Instance.StartCoroutine(CheckAbility(ActiveLoadout.Ability.Ability.AbilityInfo.CooldownSeconds, false));
+    }
+    
+    public void SetAbilityAvailable()
+    {
+        HasAbilityAvailable = true;
+        Plugin.Instance.UI.UpdateAbilityReady(this);
+    }
+
+    public void ActivateAbility()
+    {
+        var info = ActiveLoadout.Ability.Ability.AbilityInfo;
+        var inv = Player.Player.inventory;
+        
+        if (info.MagAmount > 0)
+        {
+            for (var i = 1; i <= info.MagAmount; i++)
+                inv.forceAddItem(new(info.MagID, true), false);
+        }
+
+        inv.forceAddItem(new(info.ItemID, true), false);
+        if (!inv.TryGetItemIndex(info.ItemID, out var x, out var y, out var page, out var _))
+        {
+            Logging.Debug($"Failed to add ability to inventory, no space probably?");
+            return;
+        }
+
+        AbilityPage = page;
+        AbilityX = x;
+        AbilityY = y;
+
+        Player.Player.equipment.ServerEquip(AbilityPage, AbilityX, AbilityY);
+
+        AbilityChecker.Stop();
+        HasAbilityActive = true;
+        HasAbilityAvailable = false;
+        AbilityChecker = Plugin.Instance.StartCoroutine(CheckAbility(info.AbilityStaySeconds, true));
+    }
+
+    public void RemoveActiveAbility()
+    {
+        Logging.Debug($"Removing ability for {Player.CharacterName} with id {ActiveLoadout.Ability.Ability.AbilityID}");
+        if (!HasAbilityActive)
+        {
+            Logging.Debug($"{Player.CharacterName} has no active ability, what we tryna remove");
+            return;
+        }
+
+        var info = ActiveLoadout.Ability.Ability.AbilityInfo;
+        AbilityChecker.Stop();
+        ItemRemover.Stop();
+
+        if (info.IsItem)
+            ItemRemover = Plugin.Instance.StartCoroutine(RemoveItems(AbilityPage, AbilityX, AbilityY, info.MagID));
+
+        Plugin.Instance.UI.UpdateAbilityReady(this);
+        HasAbilityActive = false;
+        AbilityChecker = Plugin.Instance.StartCoroutine(CheckAbility(ActiveLoadout.Ability.Ability.AbilityInfo.CooldownSeconds, false));
+    }
+    
+    public IEnumerator CheckAbility(int seconds, bool isBeingUsed)
+    {
+        for (var i = seconds; i >= 0; i--)
+        {
+            Plugin.Instance.UI.UpdateAbilityTimer(this, seconds, isBeingUsed);
+            yield return new WaitForSeconds(1);
+        }
+
+        if (isBeingUsed)
+        {
+            RemoveActiveAbility();
+        }
+        else
+            SetAbilityAvailable();
+    }
+    
     // Checkers
     public IEnumerator CheckEquipment()
     {
@@ -900,19 +1005,21 @@ public class GamePlayer : IDisposable
         CurrentLifeKills = 0;
         CurrentDeathstreak = 0;
         
-        TacticalChecker.Stop();
-        LethalChecker.Stop();
-        SpawnProtectionRemover.Stop();
         Healer.Stop();
-        DamageChecker.Stop();
         RespawnTimer.Stop();
         VoiceChatChecker.Stop();
         AnimationChecker.Stop();
         GadgetGiver.Stop();
-        KillstreakItemRemover.Stop();
-        KillstreakClothingRemover.Stop();
-        EquipmentChecker.Stop();
+        SpawnProtectionRemover.Stop();
+        DamageChecker.Stop();
+        TacticalChecker.Stop();
+        LethalChecker.Stop();
+        KillstreakChecker.Stop();
+        ItemRemover.Stop();
+        ClothingRemover.Stop();
         DeathstreakChecker.Stop();
+        AbilityChecker.Stop();
+        EquipmentChecker.Stop();
 
         HasScoreboard = false;
         HasAnimationGoingOn = false;

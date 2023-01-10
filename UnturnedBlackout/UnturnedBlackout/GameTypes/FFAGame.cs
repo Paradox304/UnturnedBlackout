@@ -119,6 +119,7 @@ public class FFAGame : Game
             if (player.IsDisposed)
                 continue;
             
+            player.GamePlayer.StartAbilityTimer();
             player.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1);
 
             UI.SendFFAHUD(player.GamePlayer);
@@ -404,6 +405,7 @@ public class FFAGame : Game
         UI.ClearPreEndingUI(player);
         UI.ClearFFAHUD(player);
         UI.ClearVoiceChatUI(player);
+        UI.ClearKillstreakUI(player);
         UI.ClearKillstreakUI(player);
         OnStoppedTalking(player);
         UI.ClearCountdownUI(player);

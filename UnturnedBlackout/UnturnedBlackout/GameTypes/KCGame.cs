@@ -142,6 +142,7 @@ public class KCGame : Game
             if (player.IsDisposed)
                 continue;
             
+            player.GamePlayer.StartAbilityTimer();
             player.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1);
             player.StartTime = DateTime.UtcNow;
             UI.SendKCHUD(player, BlueTeam, RedTeam);
@@ -441,6 +442,7 @@ public class KCGame : Game
         UI.ClearKCHUD(player);
         UI.ClearPreEndingUI(player);
         UI.ClearVoiceChatUI(player);
+        UI.ClearKillstreakUI(player);
         UI.ClearKillstreakUI(player);
         OnStoppedTalking(player);
         UI.ClearCountdownUI(player);

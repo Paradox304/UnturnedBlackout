@@ -153,6 +153,7 @@ public class CTFGame : Game
             if (player.IsDisposed)
                 continue;
             
+            player.GamePlayer.StartAbilityTimer();
             player.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1);
             player.StartTime = DateTime.UtcNow;
             UI.ClearCountdownUI(player.GamePlayer);
@@ -472,6 +473,7 @@ public class CTFGame : Game
         UI.ClearPreEndingUI(player);
         UI.ClearVoiceChatUI(player);
         UI.ClearKillstreakUI(player);
+        UI.RemoveActiveDeathstreakUI(player);
         UI.ClearCountdownUI(player);
         cPlayer.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1);
         UI.ClearWaitingForPlayersUI(player);
@@ -1044,6 +1046,8 @@ public class CTFGame : Game
                 var ply = cPlayer.GamePlayer.Player.Player;
                 if (cPlayer.GamePlayer.HasKillstreakActive)
                     cPlayer.GamePlayer.RemoveActiveKillstreak();
+                else if (cPlayer.GamePlayer.HasAbilityActive)
+                    cPlayer.GamePlayer.RemoveActiveAbility();
                 else if (ply.equipment.equippedPage == 0)
                 {
                     var secondary = ply.inventory.getItem(1, 0);

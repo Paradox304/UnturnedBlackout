@@ -8,6 +8,7 @@ public class AbilityData
     public int AbilityID { get; set; }
     public ushort TriggerItemID { get; set; }
 
+    public int CooldownSeconds { get; set; }
     public bool IsItem { get; set; }
     public ushort ItemID { get; set; }
     public bool RemoveWhenAmmoEmpty { get; set; }

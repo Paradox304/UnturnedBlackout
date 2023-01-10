@@ -142,6 +142,7 @@ public class TDMGame : Game
             if (player.IsDisposed)
                 continue;
             
+            player.GamePlayer.StartAbilityTimer();
             player.GamePlayer.Player.Player.movement.sendPluginSpeedMultiplier(1);
             player.StartTime = DateTime.UtcNow;
             UI.SendTDMHUD(player, BlueTeam, RedTeam);
@@ -435,6 +436,7 @@ public class TDMGame : Game
         UI.ClearTDMHUD(player);
         UI.ClearPreEndingUI(player);
         UI.ClearVoiceChatUI(player);
+        UI.ClearKillstreakUI(player);
         UI.ClearKillstreakUI(player);
         OnStoppedTalking(player);
         UI.ClearCountdownUI(player);
