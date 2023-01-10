@@ -143,6 +143,7 @@ public class UIHandler : IDisposable
     public Dictionary<int, PageGlove> GlovePages { get; set; }
     public Dictionary<int, PageKillstreak> KillstreakPages { get; set; }
     public Dictionary<int, PageDeathstreak> DeathstreakPages { get; set; }
+    public Dictionary<int, PageAbility> AbilityPages { get; set; }
     public Dictionary<int, Dictionary<int, PageAchievement>> AchievementPages { get; set; }
     public Dictionary<int, PageBattlepass> BattlepassPages { get; set; }
     public Dictionary<int, PageBattlepass> BattlepassPagesInverse { get; set; } // Get the page the tier of the battlepass is on
@@ -748,7 +749,7 @@ public class UIHandler : IDisposable
         foreach (var killstreak in PlayerLoadout.Killstreaks.Values.OrderBy(k => k.Killstreak.BuyPrice))
         {
             killstreaks.Add(index, killstreak);
-            if (index == MAX_ITEMS_PER_GRID)
+            if (index == MAX_ITEMS_PER_PAGE)
             {
                 KillstreakPages.Add(page, new(page, killstreaks));
                 killstreaks = new();
@@ -788,6 +789,32 @@ public class UIHandler : IDisposable
 
         if (deathstreaks.Count != 0)
             DeathstreakPages.Add(page, new(page, deathstreaks));
+    }
+
+    public void BuildAbilityPages()
+    {
+        AbilityPages = new();
+        var index = 0;
+        var page = 1;
+        Dictionary<int, LoadoutAbility> abilities = new();
+
+        foreach (var ability in PlayerLoadout.Abilities.Values.OrderBy(k => k.Ability.BuyPrice))
+        {
+            abilities.Add(index, ability);
+            if (index == MAX_ITEMS_PER_PAGE)
+            {
+                AbilityPages.Add(page, new(page, abilities));
+                abilities = new();
+                index = 0;
+                page++;
+                continue;
+            }
+
+            index++;
+        }
+
+        if (abilities.Count != 0)
+            AbilityPages.Add(page, new(page, abilities));
     }
 
     public void BuildAchievementPages()
@@ -1969,6 +1996,18 @@ public class UIHandler : IDisposable
                         break;
                     }
 
+                    case ELoadoutPage.ABILITY:
+                    {
+                        if (!AbilityPages.TryGetValue(1, out var firstPage))
+                        {
+                            Logging.Debug($"Error finding the first page for abilities for {Player.CharacterName}");
+                            return;
+                        }
+
+                        ShowAbilityPage(firstPage);
+                        break;
+                    }
+
                     case ELoadoutPage.GLOVE:
                     {
                         if (!GlovePages.TryGetValue(1, out var firstPage))
@@ -2531,6 +2570,18 @@ public class UIHandler : IDisposable
                         ShowDeathstreakPage(page);
                         break;
                     }
+                    
+                    case ELoadoutPage.ABILITY:
+                    {
+                        if (!AbilityPages.TryGetValue(LoadoutTabPageID, out var page))
+                        {
+                            Logging.Debug($"Error finding current page for abilities for {Player.CharacterName}");
+                            return;
+                        }
+
+                        ShowAbilityPage(page);
+                        break;
+                    }
 
                     case ELoadoutPage.GLOVE:
                     {
@@ -2970,6 +3021,38 @@ public class UIHandler : IDisposable
         }
     }
 
+    public void ShowAbilityPage(PageAbility page)
+    {
+        LoadoutTabPageID = page.PageID;
+
+        if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out var currentLoadout))
+        {
+            Logging.Debug($"Error finding current loadout for {Player.CharacterName} with id {LoadoutID}");
+            return;
+        }
+
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Page TEXT", $"Page {page.PageID}");
+        for (var i = 0; i <= MAX_ITEMS_PER_PAGE; i++)
+        {
+            if (!page.Abilities.TryGetValue(i, out var ability))
+            {
+                EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item BUTTON {i}", false);
+                continue;
+            }
+
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item BUTTON {i}", true);
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Equipped {i}", currentLoadout.Ability == ability);
+            EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item IMAGE {i}", ability.Ability.IconLink);
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item TEXT {i}", ability.Ability.AbilityName);
+            EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay {i}", !ability.IsBought);
+            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Item Lock Overlay TEXT {i}",
+                ability.Ability.LevelRequirement > PlayerData.Level && !ability.IsUnlocked ? Plugin.Instance.Translate("Unlock_Level", ability.Ability.LevelRequirement) :
+                    $"{Utility.GetCurrencySymbol(ECurrency.CREDIT)} <color={(PlayerData.Credits >= ability.Ability.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{ability.Ability.BuyPrice}</color>");
+            
+            SendRarity("SERVER Item", ability.Ability.AbilityRarity, i);
+        } 
+    }
+
     public void ReloadSelectedItem()
     {
         if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out var loadout))
@@ -3132,6 +3215,18 @@ public class UIHandler : IDisposable
                 break;
             }
 
+            case ELoadoutPage.ABILITY:
+            {
+                if (!PlayerLoadout.Abilities.TryGetValue((int)SelectedItemID, out var ability))
+                {
+                    Logging.Debug($"Error finding ability with id {SelectedItemID} for {Player.CharacterName}");
+                    return;
+                }
+                
+                ShowAbility(ability);
+                break;
+            }
+            
             case ELoadoutPage.GLOVE:
             {
                 if (!PlayerLoadout.Gloves.TryGetValue((int)SelectedItemID, out var glove))
@@ -3442,6 +3537,24 @@ public class UIHandler : IDisposable
                         }
 
                         ShowDeathstreak(deathstreak);
+                        break;
+                    }
+                    
+                    case ELoadoutPage.ABILITY:
+                    {
+                        if (!AbilityPages.TryGetValue(LoadoutTabPageID, out var page))
+                        {
+                            Logging.Debug($"Error finding ability page with id {LoadoutTabPageID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        if (!page.Abilities.TryGetValue(selected, out var ability))
+                        {
+                            Logging.Debug($"Error finding ability at {selected} at page {LoadoutTabPageID} for {Player.CharacterName}");
+                            return;
+                        }
+
+                        ShowAbility(ability);
                         break;
                     }
 
@@ -4327,6 +4440,34 @@ public class UIHandler : IDisposable
         SendRarityName("SERVER Item Rarity TEXT", deathstreak.Deathstreak.DeathstreakRarity);
     }
 
+    public void ShowAbility(LoadoutAbility ability)
+    {
+        SelectedItemID = ability.Ability.AbilityID;
+        if (!PlayerLoadout.Loadouts.TryGetValue(LoadoutID, out var loadout))
+        {
+            Logging.Debug($"Error finding loadout with id {LoadoutID} for {Player.CharacterName}");
+            return;
+        }
+
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy BUTTON", !ability.IsBought);
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy Locked", !ability.IsUnlocked && ability.Ability.LevelRequirement > PlayerData.Level);
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Buy TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.CREDIT)} <color={(PlayerData.Credits >= ability.Ability.BuyPrice ? "#9CFF84" : "#FF6E6E")}>{ability.Ability.BuyPrice}</color>");
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock BUTTON", !ability.IsBought && !ability.IsUnlocked /*&& killstreak.Killstreak.LevelRequirement > PlayerData.Level*/);
+        var coins = ability.Ability.GetCoins(PlayerData.Level);
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Unlock TEXT", $"BUY {Utility.GetCurrencySymbol(ECurrency.COIN)} <color={(PlayerData.Coins >= coins ? "#9CFF84" : "#FF6E6E")}>{coins}</color>");
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Equip BUTTON", ability.IsBought && loadout.Ability != ability);
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Dequip BUTTON", ability.IsBought && loadout.Ability == ability);
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Description TEXT", ability.Ability.AbilityDesc);
+        EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item IMAGE", ability.Ability.IconLink);
+        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item TEXT", ability.Ability.AbilityName);
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item ProsCons", false);
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Description TEXT", true);
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Credits", false);
+        EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, "SERVER Item Owned", false);
+        
+        SendRarityName("SERVER Item Rarity TEXT", ability.Ability.AbilityRarity);
+    }
+    
     public void SendRarity(string objectName, ERarity rarity, int selected) => EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"{objectName} {rarity} {selected}", true);
 
     public void SendRarityName(string objectName, ERarity rarity)
@@ -4574,6 +4715,29 @@ public class UIHandler : IDisposable
                     if (DB.UpdatePlayerDeathstreakBought(Player.CSteamID, deathstreak.Deathstreak.DeathstreakID, true))
                     {
                         DB.DecreasePlayerCredits(Player.CSteamID, deathstreak.Deathstreak.BuyPrice);
+                        EquipSelectedItem();
+                        BackToLoadout();
+                    }
+                }
+                else
+                    SendNotEnoughCurrencyModal(ECurrency.CREDIT);
+
+                break;
+            }
+            
+            case ELoadoutPage.ABILITY:
+            {
+                if (!PlayerLoadout.Abilities.TryGetValue((int)SelectedItemID, out var ability))
+                {
+                    Logging.Debug($"Error finding ability with id {SelectedItemID} for {Player.CharacterName}");
+                    return;
+                }
+
+                if (PlayerData.Credits >= ability.Ability.BuyPrice && !ability.IsBought)
+                {
+                    if (DB.UpdatePlayerAbilityBought(Player.CSteamID, ability.Ability.AbilityID, true))
+                    {
+                        DB.DecreasePlayerCredits(Player.CSteamID, ability.Ability.BuyPrice);
                         EquipSelectedItem();
                         BackToLoadout();
                     }
@@ -4880,6 +5044,31 @@ public class UIHandler : IDisposable
                     if (DB.UpdatePlayerDeathstreakUnlocked(Player.CSteamID, deathstreak.Deathstreak.DeathstreakID, true) && DB.UpdatePlayerDeathstreakBought(Player.CSteamID, deathstreak.Deathstreak.DeathstreakID, true))
                     {
                         SendUnlockEmbed(deathstreak.Deathstreak.DeathstreakName, deathstreak.Deathstreak.IconLink, cost);
+                        DB.DecreasePlayerCoins(Player.CSteamID, cost);
+                        EquipSelectedItem();
+                        BackToLoadout();
+                    }
+                }
+                else
+                    SendNotEnoughCurrencyModal(ECurrency.COIN);
+
+                break;
+            }
+            
+            case ELoadoutPage.ABILITY:
+            {
+                if (!PlayerLoadout.Abilities.TryGetValue((int)SelectedItemID, out var ability))
+                {
+                    Logging.Debug($"Error finding deathstreak with id {SelectedItemID} for {Player.CharacterName}");
+                    return;
+                }
+
+                var cost = ability.Ability.GetCoins(PlayerData.Level);
+                if (PlayerData.Coins >= cost && !ability.IsBought && !ability.IsUnlocked /*&& killstreak.Killstreak.LevelRequirement > PlayerData.Level*/)
+                {
+                    if (DB.UpdatePlayerAbilityUnlocked(Player.CSteamID, ability.Ability.AbilityID, true) && DB.UpdatePlayerAbilityBought(Player.CSteamID, ability.Ability.AbilityID, true))
+                    {
+                        SendUnlockEmbed(ability.Ability.AbilityName, ability.Ability.IconLink, cost);
                         DB.DecreasePlayerCoins(Player.CSteamID, cost);
                         EquipSelectedItem();
                         BackToLoadout();

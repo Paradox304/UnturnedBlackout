@@ -19,6 +19,7 @@ public enum EUIPage
     GLOVE,
     KILLSTREAK,
     DEATHSTREAK,
+    ABILITY,
     CASE,
     ACHIEVEMENT
 }

@@ -1580,6 +1580,9 @@ public class UIManager
             case EUIPage.DEATHSTREAK:
                 handler.BuildDeathstreakPages();
                 return;
+            case EUIPage.ABILITY:
+                handler.BuildAbilityPages();
+                return;
             case EUIPage.ACHIEVEMENT:
                 handler.BuildAchievementPages();
                 return;

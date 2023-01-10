@@ -1180,7 +1180,7 @@ public class DatabaseManager
             }
 
             Logging.Debug($"Reading abilities from base data");
-            rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{ABILITIES}`;", conn).ExecuteScalarAsync();
+            rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{ABILITIES}`;", conn).ExecuteReaderAsync();
             try
             {
                 Dictionary<int, Ability> abilities = new();
@@ -1196,16 +1196,16 @@ public class DatabaseManager
 
                     var iconLink = rdr[4].ToString();
 
-                    if (!int.TryParse(rdr[6].ToString(), out var buyPrice))
+                    if (!int.TryParse(rdr[5].ToString(), out var buyPrice))
                         continue;
 
-                    if (!int.TryParse(rdr[7].ToString(), out var coins))
+                    if (!int.TryParse(rdr[6].ToString(), out var coins))
                         continue;
 
-                    if (!int.TryParse(rdr[8].ToString(), out var scrapAmount))
+                    if (!int.TryParse(rdr[7].ToString(), out var scrapAmount))
                         continue;
 
-                    if (!int.TryParse(rdr[9].ToString(), out var levelRequirement))
+                    if (!int.TryParse(rdr[8].ToString(), out var levelRequirement))
                         continue;
                     
                     var abilityInfo = Plugin.Instance.Config.Abilities.FileData.AbilitiesData.FirstOrDefault(k => k.AbilityID == abilityID);
@@ -5425,7 +5425,7 @@ public class DatabaseManager
 
     public bool UpdatePlayerDeathstreakBought(CSteamID steamID, int deathstreakID, bool isBought)
     {
-        if (!Killstreaks.ContainsKey(deathstreakID))
+        if (!Deathstreaks.ContainsKey(deathstreakID))
             throw new ArgumentNullException("id", $"Deathstreak with id {deathstreakID} doesn't exist in the database, while updating bought for {steamID}");
 
         AddQuery($"UPDATE `{PLAYERS_DEATHSTREAKS}` SET `IsBought` = {isBought} WHERE `SteamID` = {steamID} AND `DeathstreakID` = {deathstreakID};");
@@ -5439,19 +5439,71 @@ public class DatabaseManager
         return true;
     }
 
-    public bool UpdatePlayerDeathstreakUnlocked(CSteamID steamID, int deathstreakID, bool isUnlocked)
+    public bool UpdatePlayerDeathstreakUnlocked(CSteamID steamID, int abilityID, bool isUnlocked)
     {
-        if (!Killstreaks.ContainsKey(deathstreakID))
-            throw new ArgumentNullException("id", $"Deathstreak with id {deathstreakID} doesn't exist in the database, while updating unlocked for {steamID}");
+        if (!Deathstreaks.ContainsKey(abilityID))
+            throw new ArgumentNullException("id", $"Deathstreak with id {abilityID} doesn't exist in the database, while updating unlocked for {steamID}");
 
-        AddQuery($"UPDATE `{PLAYERS_DEATHSTREAKS}` SET `IsUnlocked` = {isUnlocked} WHERE `SteamID` = {steamID} AND `DeathstreakID` = {deathstreakID};");
+        AddQuery($"UPDATE `{PLAYERS_DEATHSTREAKS}` SET `IsUnlocked` = {isUnlocked} WHERE `SteamID` = {steamID} AND `DeathstreakID` = {abilityID};");
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
             return false;
 
-        if (!loadout.Deathstreaks.TryGetValue(deathstreakID, out var playerDeathstreak))
+        if (!loadout.Deathstreaks.TryGetValue(abilityID, out var playerDeathstreak))
             return false;
 
         playerDeathstreak.IsUnlocked = isUnlocked;
+        return true;
+    }
+    
+    // Player Abilities
+    public void AddPlayerAbilityBought(CSteamID steamID, int abilityID)
+    {
+        if (!Abilities.TryGetValue(abilityID, out var ability))
+            throw new ArgumentNullException("id", $"Ability with id {abilityID} doesn't exist in the database, while adding to {steamID}");
+
+        AddQuery($"INSERT INTO `{PLAYERS_ABILITIES}` (`SteamID` , `AbilityID` , `AbilityKills` , `IsBought`) VALUES ({steamID} , {abilityID} , 0 , true) ON DUPLICATE KEY UPDATE `IsBought` = true;");
+        if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
+            return;
+
+        if (loadout.Abilities.TryGetValue(abilityID, out var playerAbility))
+        {
+            playerAbility.IsBought = true;
+            return;
+        }
+
+        loadout.Abilities.Add(abilityID, new(ability, 0, true, false));
+        Plugin.Instance.UI.OnUIUpdated(steamID, EUIPage.ABILITY);
+    }
+    
+    public bool UpdatePlayerAbilityBought(CSteamID steamID, int abilityID, bool isBought)
+    {
+        if (!Abilities.ContainsKey(abilityID))
+            throw new ArgumentNullException("id", $"Ability with id {abilityID} doesn't exist in the database, while updating bought for {steamID}");
+
+        AddQuery($"UPDATE `{PLAYERS_ABILITIES}` SET `IsBought` = {isBought} WHERE `SteamID` = {steamID} AND `AbilityID` = {abilityID};");
+        if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
+            return false;
+
+        if (!loadout.Abilities.TryGetValue(abilityID, out var playerAbility))
+            return false;
+
+        playerAbility.IsBought = isBought;
+        return true;
+    }
+
+    public bool UpdatePlayerAbilityUnlocked(CSteamID steamID, int abilityID, bool isUnlocked)
+    {
+        if (!Abilities.ContainsKey(abilityID))
+            throw new ArgumentNullException("id", $"Deathstreak with id {abilityID} doesn't exist in the database, while updating unlocked for {steamID}");
+
+        AddQuery($"UPDATE `{PLAYERS_ABILITIES}` SET `IsUnlocked` = {isUnlocked} WHERE `SteamID` = {steamID} AND `AbilityID` = {abilityID};");
+        if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
+            return false;
+
+        if (!loadout.Abilities.TryGetValue(abilityID, out var playerAbility))
+            return false;
+
+        playerAbility.IsUnlocked = isUnlocked;
         return true;
     }
     
