@@ -9,6 +9,7 @@ public enum ERewardType
     GADGET,
     KILLSTREAK,
     DEATHSTREAK,
+    ABILITY,
     PERK,
     GLOVE,
     CARD,

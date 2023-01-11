@@ -622,6 +622,9 @@ public class CTFGame : Game
             var usedKillstreak = kPlayer.GamePlayer.HasKillstreakActive && (kPlayer.GamePlayer.ActiveKillstreak?.Killstreak?.KillstreakInfo?.IsItem ?? false) && cause != EDeathCause.SENTRY && cause != EDeathCause.SHRED;
             var killstreakID = kPlayer.GamePlayer.ActiveKillstreak?.Killstreak?.KillstreakID ?? 0;
 
+            var usedAbility = kPlayer.GamePlayer.HasAbilityActive && cause != EDeathCause.SENTRY && cause != EDeathCause.SHRED;
+            var abilityID = kPlayer.GamePlayer.ActiveLoadout.Ability?.Ability.AbilityID ?? 0;
+            
             string overrideSymbol = null;
             if (usedKillstreak)
             {
@@ -630,6 +633,14 @@ public class CTFGame : Game
                 xpText += info.MedalName;
                 equipmentUsed += info.ItemID;
                 questConditions.Add(EQuestCondition.KILLSTREAK, killstreakID);
+            }
+            else if (usedAbility)
+            {
+                var info = kPlayer.GamePlayer.ActiveLoadout.Ability.Ability.AbilityInfo;
+                xpGained += info.MedalXP;
+                xpText += info.MedalName;
+                equipmentUsed += info.ItemID;
+                questConditions.Add(EQuestCondition.ABILITY, abilityID);
             }
             else
             {
@@ -802,6 +813,8 @@ public class CTFGame : Game
 
             if (usedKillstreak)
                 DB.IncreasePlayerKillstreakKills(kPlayer.GamePlayer.SteamID, killstreakID, 1);
+            else if (usedAbility)
+                DB.IncreasePlayerAbilityKills(kPlayer.GamePlayer.SteamID, abilityID, 1);
             else if ((kPlayer.GamePlayer.ActiveLoadout.Primary != null && kPlayer.GamePlayer.ActiveLoadout.Primary.Gun.GunID == equipmentUsed) || (kPlayer.GamePlayer.ActiveLoadout.Secondary != null && kPlayer.GamePlayer.ActiveLoadout.Secondary.Gun.GunID == equipmentUsed))
             {
                 DB.IncreasePlayerGunXP(kPlayer.GamePlayer.SteamID, equipmentUsed, Mathf.RoundToInt(xpGained * (1f + kPlayer.GamePlayer.Data.GunXPBooster + DB.ServerOptions.GunXPBooster + (GameEvent?.GunXPMultiplier ?? 0f) + (kPlayer.GamePlayer.Data.HasPrime ? Config.WinningValues.FileData.PrimeGunXPBooster : 0f))));

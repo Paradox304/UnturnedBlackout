@@ -7,6 +7,7 @@ public enum EQuestCondition
     GADGET, // Gadget you are using
     KNIFE, // Knife you are using
     KILLSTREAK, // Killstreak you are using [TURRET/RPG/AGM/CHOPPER GUNNER ETC]
+    ABILITY, // Ability you are using [XBOW, RPG ETC]
     MAP, // Map you are playing on
     GAMEMODE, // Gamemode you are playing on
     TARGET_MK, // Amount of multi kill you need to get

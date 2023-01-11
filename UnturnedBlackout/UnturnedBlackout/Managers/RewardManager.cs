@@ -35,6 +35,12 @@ public class RewardManager
                 case ERewardType.KILLSTREAK:
                     db.AddPlayerKillstreakBought(steamID, Convert.ToInt32(reward.RewardValue));
                     break;
+                case ERewardType.DEATHSTREAK:
+                    db.AddPlayerDeathstreakBought(steamID, Convert.ToInt32(reward.RewardValue));
+                    break;
+                case ERewardType.ABILITY:
+                    db.AddPlayerAbilityBought(steamID, Convert.ToInt32(reward.RewardValue));
+                    break;
                 case ERewardType.PERK:
                     db.AddPlayerPerkBought(steamID, Convert.ToInt32(reward.RewardValue));
                     break;
@@ -130,6 +136,12 @@ public class RewardManager
                         break;
                     case ERewardType.KILLSTREAK:
                         db.AddPlayerKillstreakBought(bulkReward.Item1, Convert.ToInt32(reward.RewardValue));
+                        break;
+                    case ERewardType.DEATHSTREAK:
+                        db.AddPlayerDeathstreakBought(bulkReward.Item1, Convert.ToInt32(reward.RewardValue));
+                        break;
+                    case ERewardType.ABILITY:
+                        db.AddPlayerAbilityBought(bulkReward.Item1, Convert.ToInt32(reward.RewardValue));
                         break;
                     case ERewardType.PERK:
                         db.AddPlayerPerkBought(bulkReward.Item1, Convert.ToInt32(reward.RewardValue));
