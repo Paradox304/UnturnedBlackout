@@ -267,6 +267,7 @@ public class UIHandler : IDisposable
         BuildGlovePages();
         BuildKillstreakPages();
         BuildDeathstreakPages();
+        BuildAbilityPages();
         BuildUnboxingCasesPages();
         BuildUnboxingStorePages();
         BuildUnboxingInventoryPages();
@@ -1474,17 +1475,14 @@ public class UIHandler : IDisposable
         
         // Knife
         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Loadout Knife IMAGE", loadout.Knife?.Knife?.IconLink ?? "");
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Loadout Knife TEXT", loadout.Knife?.Knife?.KnifeName ?? "");
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout Knife {loadout.Knife?.Knife?.KnifeRarity.ToString() ?? "DEFAULT"}", true);
 
         // Tactical
         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Loadout Tactical IMAGE", loadout.Tactical?.Gadget?.IconLink ?? "");
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Loadout Tactical TEXT", loadout.Tactical?.Gadget?.GadgetName ?? "");
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout Tactical {loadout.Tactical?.Gadget?.GadgetRarity.ToString() ?? "DEFAULT"}", true);
 
         // Lethal
         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Loadout Lethal IMAGE", loadout.Lethal?.Gadget?.IconLink ?? "");
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Loadout Lethal TEXT", loadout.Lethal?.Gadget?.GadgetName ?? "");
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout Lethal {loadout.Lethal?.Gadget?.GadgetRarity.ToString() ?? "DEFAULT"}", true);
 
         // Perk
@@ -1492,7 +1490,6 @@ public class UIHandler : IDisposable
         {
             var gotPerk = loadout.Perks.TryGetValue(i, out var perk);
             EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout Perk IMAGE {i}", gotPerk ? perk.Perk.IconLink : "");
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout Perk TEXT {i}", gotPerk ? perk.Perk.PerkName : "");
             EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout Perk {i} {(gotPerk ? perk.Perk.PerkRarity.ToString() : "DEFAULT")}", true);
         }
 
@@ -1501,27 +1498,22 @@ public class UIHandler : IDisposable
         for (var i = 0; i <= 2; i++)
         {
             EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout Killstreak IMAGE {i}", loadout.Killstreaks.Count < i + 1 ? "" : loadout.Killstreaks[i].Killstreak.IconLink);
-            EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout Killstreak TEXT {i}", loadout.Killstreaks.Count < i + 1 ? "" : loadout.Killstreaks[i].Killstreak.KillstreakRequired.ToString());
         }
 
         // Deathstreak
         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Loadout Deathstreak IMAGE", loadout.Deathstreak?.Deathstreak?.IconLink ?? "");
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Loadout Deathstreak TEXT", loadout.Deathstreak?.Deathstreak?.DeathstreakName ?? "");
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout Deathstreak {loadout.Deathstreak?.Deathstreak?.DeathstreakRarity.ToString() ?? "DEFAULT"}", true);
        
         // Ability
         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, "SERVER Loadout Ability IMAGE", loadout.Ability?.Ability?.IconLink ?? "");
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, "SERVER Loadout Ability TEXT", loadout.Ability?.Ability?.AbilityName ?? "");
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout Ability {loadout.Ability?.Ability?.AbilityRarity.ToString() ?? "DEFAULT"}", true);
         
         // Card
         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout Card IMAGE", loadout.Card?.Card?.IconLink ?? "");
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout Card TEXT", loadout.Card?.Card?.IconLink ?? "");
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout Card {loadout.Card?.Card?.CardRarity.ToString() ?? "DEFAULT"}", true);
 
         // Glove
         EffectManager.sendUIEffectImageURL(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout Glove IMAGE", loadout.Glove?.Glove?.IconLink ?? "");
-        EffectManager.sendUIEffectText(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout Glove TEXT", loadout.Glove?.Glove?.GloveName ?? "");
         EffectManager.sendUIEffectVisibility(MAIN_MENU_KEY, TransportConnection, true, $"SERVER Loadout Glove {loadout.Glove?.Glove?.GloveRarity.ToString() ?? "DEFAULT"}", true);
     }
 
@@ -1614,7 +1606,7 @@ public class UIHandler : IDisposable
     {
         LoadoutPageID = page.PageID;
 
-        for (var i = 0; i <= 9; i++)
+        for (var i = 0; i <= MAX_LOADOUTS_PER_PAGE; i++)
         {
             if (!page.Loadouts.TryGetValue(i, out var loadout))
             {
@@ -1651,67 +1643,83 @@ public class UIHandler : IDisposable
 
         EffectManager.sendUIEffectVisibility(MIDGAME_LOADOUT_KEY, TransportConnection, true, "SERVER Loadout Equip BUTTON", !loadout.IsActive);
         // Primary
-        EffectManager.sendUIEffectImageURL(MIDGAME_LOADOUT_KEY, TransportConnection, true, "SERVER Loadout Primary IMAGE", loadout.PrimarySkin == null ? loadout.Primary == null ? "" : loadout.Primary.Gun.IconLink : loadout.PrimarySkin.IconLink);
-        EffectManager.sendUIEffectText(MIDGAME_LOADOUT_KEY, TransportConnection, true, "SERVER Loadout Primary TEXT", loadout.Primary == null ? "" : loadout.Primary.Gun.GunName);
-        EffectManager.sendUIEffectText(MIDGAME_LOADOUT_KEY, TransportConnection, true, "SERVER Loadout Primary Level TEXT", loadout.Primary == null ? "" : loadout.Primary.Level.ToString());
+        EffectManager.sendUIEffectImageURL(MIDGAME_LOADOUT_KEY, TransportConnection, true, "SERVER Loadout Primary IMAGE", loadout.PrimarySkin?.IconLink ?? loadout.Primary?.Gun?.IconLink ?? "");
+        EffectManager.sendUIEffectText(MIDGAME_LOADOUT_KEY, TransportConnection, true, "SERVER Loadout Primary TEXT", loadout.Primary?.Gun?.GunName ?? "");
+        EffectManager.sendUIEffectText(MIDGAME_LOADOUT_KEY, TransportConnection, true, "SERVER Loadout Primary Level TEXT", loadout.Primary?.Level.ToString() ?? "");
+        EffectManager.sendUIEffectVisibility(MIDGAME_LOADOUT_KEY, TransportConnection, true, $"SERVER Loadout Primary {loadout.Primary?.Gun?.GunRarity.ToString() ?? "DEFAULT"}", true);
         for (var i = 0; i <= 3; i++)
         {
             var attachmentType = (EAttachment)i;
             _ = loadout.PrimaryAttachments.TryGetValue(attachmentType, out var attachment);
-            EffectManager.sendUIEffectImageURL(MIDGAME_LOADOUT_KEY, TransportConnection, true, $"SERVER Loadout Primary {attachmentType.ToUIName()} IMAGE", attachment == null ? Utility.GetDefaultAttachmentImage(attachmentType.ToString()) : attachment.Attachment.IconLink);
+            EffectManager.sendUIEffectImageURL(MIDGAME_LOADOUT_KEY, TransportConnection, true, $"SERVER Loadout Primary {attachmentType.ToUIName()} IMAGE", attachment?.Attachment?.IconLink ?? Utility.GetDefaultAttachmentImage(attachmentType.ToString()));
+            EffectManager.sendUIEffectVisibility(MIDGAME_LOADOUT_KEY, TransportConnection, true, $"SERVER Loadout Primary {attachmentType.ToUIName()} {attachment?.Attachment?.AttachmentRarity.ToString() ?? "COMMON"}", true);
         }
 
-        EffectManager.sendUIEffectImageURL(MIDGAME_LOADOUT_KEY, TransportConnection, true, "SERVER Loadout Primary Charm IMAGE", loadout.PrimaryGunCharm == null ? Utility.GetDefaultAttachmentImage("charm") : loadout.PrimaryGunCharm.GunCharm.IconLink);
-        EffectManager.sendUIEffectImageURL(MIDGAME_LOADOUT_KEY, TransportConnection, true, "SERVER Loadout Primary Skin IMAGE", loadout.PrimarySkin == null ? Utility.GetDefaultAttachmentImage("skin") : loadout.PrimarySkin.PatternLink);
-
+        EffectManager.sendUIEffectImageURL(MIDGAME_LOADOUT_KEY, TransportConnection, true, "SERVER Loadout Primary Charm IMAGE", loadout.PrimaryGunCharm?.GunCharm?.IconLink ?? Utility.GetDefaultAttachmentImage("charm"));
+        EffectManager.sendUIEffectVisibility(MIDGAME_LOADOUT_KEY, TransportConnection, true, $"SERVER Loadout Primary Charm {loadout.PrimaryGunCharm?.GunCharm?.CharmRarity.ToString() ?? "COMMON"}", true);
+        EffectManager.sendUIEffectImageURL(MIDGAME_LOADOUT_KEY, TransportConnection, true, "SERVER Loadout Primary Skin IMAGE", loadout.PrimarySkin?.PatternLink ?? Utility.GetDefaultAttachmentImage("skin"));
+        EffectManager.sendUIEffectVisibility(MIDGAME_LOADOUT_KEY, TransportConnection, true, $"SERVER Loadout Primary Skin {loadout.PrimarySkin?.SkinRarity.ToString() ?? "COMMON"}", true);
+        
         // Secondary
-        EffectManager.sendUIEffectImageURL(MIDGAME_LOADOUT_KEY, TransportConnection, true, "SERVER Loadout Secondary IMAGE", loadout.SecondarySkin == null ? loadout.Secondary == null ? "" : loadout.Secondary.Gun.IconLink : loadout.SecondarySkin.IconLink);
-        EffectManager.sendUIEffectText(MIDGAME_LOADOUT_KEY, TransportConnection, true, "SERVER Loadout Secondary TEXT", loadout.Secondary == null ? "" : loadout.Secondary.Gun.GunName);
-        EffectManager.sendUIEffectText(MIDGAME_LOADOUT_KEY, TransportConnection, true, "SERVER Loadout Secondary Level TEXT", loadout.Secondary == null ? "" : loadout.Secondary.Level.ToString());
+        EffectManager.sendUIEffectImageURL(MIDGAME_LOADOUT_KEY, TransportConnection, true, "SERVER Loadout Secondary IMAGE", loadout.SecondarySkin?.IconLink ?? loadout.Secondary?.Gun?.IconLink ?? "");
+        EffectManager.sendUIEffectText(MIDGAME_LOADOUT_KEY, TransportConnection, true, "SERVER Loadout Secondary TEXT", loadout.Secondary?.Gun?.GunName ?? "");
+        EffectManager.sendUIEffectText(MIDGAME_LOADOUT_KEY, TransportConnection, true, "SERVER Loadout Secondary Level TEXT", loadout.Secondary?.Level.ToString() ?? "");
+        EffectManager.sendUIEffectVisibility(MIDGAME_LOADOUT_KEY, TransportConnection, true, $"SERVER Loadout Secondary {loadout.Secondary?.Gun?.GunRarity.ToString() ?? "DEFAULT"}", true);
         for (var i = 0; i <= 3; i++)
         {
             var attachmentType = (EAttachment)i;
             _ = loadout.SecondaryAttachments.TryGetValue(attachmentType, out var attachment);
-            EffectManager.sendUIEffectImageURL(MIDGAME_LOADOUT_KEY, TransportConnection, true, $"SERVER Loadout Secondary {attachmentType.ToUIName()} IMAGE", attachment == null ? Utility.GetDefaultAttachmentImage(attachmentType.ToString()) : attachment.Attachment.IconLink);
+            EffectManager.sendUIEffectImageURL(MIDGAME_LOADOUT_KEY, TransportConnection, true, $"SERVER Loadout Secondary {attachmentType.ToUIName()} IMAGE", attachment?.Attachment?.IconLink ?? Utility.GetDefaultAttachmentImage(attachmentType.ToString()));
+            EffectManager.sendUIEffectVisibility(MIDGAME_LOADOUT_KEY, TransportConnection, true, $"SERVER Loadout Secondary {attachmentType.ToUIName()} {attachment?.Attachment?.AttachmentRarity.ToString() ?? "COMMON"}", true);
         }
 
-        EffectManager.sendUIEffectImageURL(MIDGAME_LOADOUT_KEY, TransportConnection, true, "SERVER Loadout Secondary Charm IMAGE", loadout.SecondaryGunCharm == null ? Utility.GetDefaultAttachmentImage("charm") : loadout.SecondaryGunCharm.GunCharm.IconLink);
-        EffectManager.sendUIEffectImageURL(MIDGAME_LOADOUT_KEY, TransportConnection, true, "SERVER Loadout Secondary Skin IMAGE", loadout.SecondarySkin == null ? Utility.GetDefaultAttachmentImage("skin") : loadout.SecondarySkin.PatternLink);
-
+        EffectManager.sendUIEffectImageURL(MIDGAME_LOADOUT_KEY, TransportConnection, true, "SERVER Loadout Secondary Charm IMAGE", loadout.SecondaryGunCharm?.GunCharm?.IconLink ?? Utility.GetDefaultAttachmentImage("charm"));
+        EffectManager.sendUIEffectVisibility(MIDGAME_LOADOUT_KEY, TransportConnection, true, $"SERVER Loadout Secondary Charm {loadout.SecondaryGunCharm?.GunCharm?.CharmRarity.ToString() ?? "COMMON"}", true);
+        EffectManager.sendUIEffectImageURL(MIDGAME_LOADOUT_KEY, TransportConnection, true, "SERVER Loadout Secondary Skin IMAGE", loadout.SecondarySkin?.PatternLink ?? Utility.GetDefaultAttachmentImage("skin"));
+        EffectManager.sendUIEffectVisibility(MIDGAME_LOADOUT_KEY, TransportConnection, true, $"SERVER Loadout Secondary Skin {loadout.SecondarySkin?.SkinRarity.ToString() ?? "COMMON"}", true);
+        
         // Knife
-        EffectManager.sendUIEffectImageURL(MIDGAME_LOADOUT_KEY, TransportConnection, true, "SERVER Loadout Knife IMAGE", loadout.Knife == null ? "" : loadout.Knife.Knife.IconLink);
-        EffectManager.sendUIEffectText(MIDGAME_LOADOUT_KEY, TransportConnection, true, "SERVER Loadout Knife TEXT", loadout.Knife == null ? "" : loadout.Knife.Knife.KnifeName);
+        EffectManager.sendUIEffectImageURL(MIDGAME_LOADOUT_KEY, TransportConnection, true, "SERVER Loadout Knife IMAGE", loadout.Knife?.Knife?.IconLink ?? "");
+        EffectManager.sendUIEffectVisibility(MIDGAME_LOADOUT_KEY, TransportConnection, true, $"SERVER Loadout Knife {loadout.Knife?.Knife?.KnifeRarity.ToString() ?? "DEFAULT"}", true);
 
         // Tactical
-        EffectManager.sendUIEffectImageURL(MIDGAME_LOADOUT_KEY, TransportConnection, true, "SERVER Loadout Tactical IMAGE", loadout.Tactical == null ? "" : loadout.Tactical.Gadget.IconLink);
-        EffectManager.sendUIEffectText(MIDGAME_LOADOUT_KEY, TransportConnection, true, "SERVER Loadout Tactical TEXT", loadout.Tactical == null ? "" : loadout.Tactical.Gadget.GadgetName);
+        EffectManager.sendUIEffectImageURL(MIDGAME_LOADOUT_KEY, TransportConnection, true, "SERVER Loadout Tactical IMAGE", loadout.Tactical?.Gadget?.IconLink ?? "");
+        EffectManager.sendUIEffectVisibility(MIDGAME_LOADOUT_KEY, TransportConnection, true, $"SERVER Loadout Tactical {loadout.Tactical?.Gadget?.GadgetRarity.ToString() ?? "DEFAULT"}", true);
 
         // Lethal
-        EffectManager.sendUIEffectImageURL(MIDGAME_LOADOUT_KEY, TransportConnection, true, "SERVER Loadout Lethal IMAGE", loadout.Lethal == null ? "" : loadout.Lethal.Gadget.IconLink);
-        EffectManager.sendUIEffectText(MIDGAME_LOADOUT_KEY, TransportConnection, true, "SERVER Loadout Lethal TEXT", loadout.Lethal == null ? "" : loadout.Lethal.Gadget.GadgetName);
+        EffectManager.sendUIEffectImageURL(MIDGAME_LOADOUT_KEY, TransportConnection, true, "SERVER Loadout Lethal IMAGE", loadout.Lethal?.Gadget?.IconLink ?? "");
+        EffectManager.sendUIEffectVisibility(MIDGAME_LOADOUT_KEY, TransportConnection, true, $"SERVER Loadout Lethal {loadout.Lethal?.Gadget?.GadgetRarity.ToString() ?? "DEFAULT"}", true);
 
         // Perk
-        for (var i = 1; i <= 3; i++)
+        for (var i = 1; i <= 4; i++)
         {
-            _ = loadout.Perks.TryGetValue(i, out var perk);
-            EffectManager.sendUIEffectImageURL(MIDGAME_LOADOUT_KEY, TransportConnection, true, $"SERVER Loadout Perk IMAGE {i}", perk == null ? "" : loadout.Perks[i].Perk.IconLink);
-            EffectManager.sendUIEffectText(MIDGAME_LOADOUT_KEY, TransportConnection, true, $"SERVER Loadout Perk TEXT {i}", perk == null ? "" : loadout.Perks[i].Perk.PerkName);
+            var gotPerk = loadout.Perks.TryGetValue(i, out var perk);
+            EffectManager.sendUIEffectImageURL(MIDGAME_LOADOUT_KEY, TransportConnection, true, $"SERVER Loadout Perk IMAGE {i}", gotPerk ? perk.Perk.IconLink : "");
+            EffectManager.sendUIEffectVisibility(MIDGAME_LOADOUT_KEY, TransportConnection, true, $"SERVER Loadout Perk {i} {(gotPerk ? perk.Perk.PerkRarity.ToString() : "DEFAULT")}", true);
         }
 
         // Killstreak
+        EffectManager.sendUIEffectVisibility(MIDGAME_LOADOUT_KEY, TransportConnection, true, "SERVER Loadout Killstreak DEFAULT", true);
         for (var i = 0; i <= 2; i++)
         {
             EffectManager.sendUIEffectImageURL(MIDGAME_LOADOUT_KEY, TransportConnection, true, $"SERVER Loadout Killstreak IMAGE {i}", loadout.Killstreaks.Count < i + 1 ? "" : loadout.Killstreaks[i].Killstreak.IconLink);
-            EffectManager.sendUIEffectText(MIDGAME_LOADOUT_KEY, TransportConnection, true, $"SERVER Loadout Killstreak TEXT {i}", loadout.Killstreaks.Count < i + 1 ? "" : loadout.Killstreaks[i].Killstreak.KillstreakRequired.ToString());
         }
 
+        // Deathstreak
+        EffectManager.sendUIEffectImageURL(MIDGAME_LOADOUT_KEY, TransportConnection, true, "SERVER Loadout Deathstreak IMAGE", loadout.Deathstreak?.Deathstreak?.IconLink ?? "");
+        EffectManager.sendUIEffectVisibility(MIDGAME_LOADOUT_KEY, TransportConnection, true, $"SERVER Loadout Deathstreak {loadout.Deathstreak?.Deathstreak?.DeathstreakRarity.ToString() ?? "DEFAULT"}", true);
+       
+        // Ability
+        EffectManager.sendUIEffectImageURL(MIDGAME_LOADOUT_KEY, TransportConnection, true, "SERVER Loadout Ability IMAGE", loadout.Ability?.Ability?.IconLink ?? "");
+        EffectManager.sendUIEffectVisibility(MIDGAME_LOADOUT_KEY, TransportConnection, true, $"SERVER Loadout Ability {loadout.Ability?.Ability?.AbilityRarity.ToString() ?? "DEFAULT"}", true);
+        
         // Card
-        EffectManager.sendUIEffectImageURL(MIDGAME_LOADOUT_KEY, TransportConnection, true, $"SERVER Loadout Card IMAGE", loadout.Card == null ? "" : loadout.Card.Card.IconLink);
-        EffectManager.sendUIEffectText(MIDGAME_LOADOUT_KEY, TransportConnection, true, $"SERVER Loadout Card TEXT", loadout.Card == null ? "" : loadout.Card.Card.CardName);
+        EffectManager.sendUIEffectImageURL(MIDGAME_LOADOUT_KEY, TransportConnection, true, $"SERVER Loadout Card IMAGE", loadout.Card?.Card?.IconLink ?? "");
+        EffectManager.sendUIEffectVisibility(MIDGAME_LOADOUT_KEY, TransportConnection, true, $"SERVER Loadout Card {loadout.Card?.Card?.CardRarity.ToString() ?? "DEFAULT"}", true);
 
         // Glove
-        EffectManager.sendUIEffectImageURL(MIDGAME_LOADOUT_KEY, TransportConnection, true, $"SERVER Loadout Glove IMAGE", loadout.Glove == null ? "" : loadout.Glove.Glove.IconLink);
-        EffectManager.sendUIEffectText(MIDGAME_LOADOUT_KEY, TransportConnection, true, $"SERVER Loadout Glove TEXT", loadout.Glove == null ? "" : loadout.Glove.Glove.GloveName);
+        EffectManager.sendUIEffectImageURL(MIDGAME_LOADOUT_KEY, TransportConnection, true, $"SERVER Loadout Glove IMAGE", loadout.Glove?.Glove?.IconLink ?? "");
+        EffectManager.sendUIEffectVisibility(MIDGAME_LOADOUT_KEY, TransportConnection, true, $"SERVER Loadout Glove {loadout.Glove?.Glove?.GloveRarity.ToString() ?? "DEFAULT"}", true);
     }
 
     public void EquipMidgameLoadout()
@@ -4514,7 +4522,6 @@ public class UIHandler : IDisposable
                     {
                         DB.DecreasePlayerCredits(Player.CSteamID, gun.Gun.BuyPrice);
                         EquipSelectedItem();
-                        BackToLoadout();
                     }
                 }
                 else
@@ -4546,7 +4553,6 @@ public class UIHandler : IDisposable
                     {
                         DB.DecreasePlayerCredits(Player.CSteamID, attachment.Attachment.BuyPrice);
                         EquipSelectedItem();
-                        BackToLoadout();
                     }
                 }
                 else
@@ -4577,7 +4583,6 @@ public class UIHandler : IDisposable
                     {
                         DB.DecreasePlayerCredits(Player.CSteamID, attachment.Attachment.BuyPrice);
                         EquipSelectedItem();
-                        BackToLoadout();
                     }
                 }
                 else
@@ -4601,7 +4606,6 @@ public class UIHandler : IDisposable
                     {
                         DB.DecreasePlayerCredits(Player.CSteamID, gunCharm.GunCharm.BuyPrice);
                         EquipSelectedItem();
-                        BackToLoadout();
                     }
                 }
                 else
@@ -4624,7 +4628,6 @@ public class UIHandler : IDisposable
                     {
                         DB.DecreasePlayerCredits(Player.CSteamID, knife.Knife.BuyPrice);
                         EquipSelectedItem();
-                        BackToLoadout();
                     }
                 }
                 else
@@ -4648,7 +4651,6 @@ public class UIHandler : IDisposable
                     {
                         DB.DecreasePlayerCredits(Player.CSteamID, gadget.Gadget.BuyPrice);
                         EquipSelectedItem();
-                        BackToLoadout();
                     }
                 }
                 else
@@ -4674,7 +4676,6 @@ public class UIHandler : IDisposable
                     {
                         DB.DecreasePlayerCredits(Player.CSteamID, perk.Perk.BuyPrice);
                         EquipSelectedItem();
-                        BackToLoadout();
                     }
                 }
                 else
@@ -4696,8 +4697,6 @@ public class UIHandler : IDisposable
                     if (DB.UpdatePlayerKillstreakBought(Player.CSteamID, killstreak.Killstreak.KillstreakID, true))
                     {
                         DB.DecreasePlayerCredits(Player.CSteamID, killstreak.Killstreak.BuyPrice);
-                        ReloadSelectedItem();
-                        ReloadLoadoutTab();
                         EquipSelectedItem();
                     }
                 }
@@ -4721,7 +4720,6 @@ public class UIHandler : IDisposable
                     {
                         DB.DecreasePlayerCredits(Player.CSteamID, deathstreak.Deathstreak.BuyPrice);
                         EquipSelectedItem();
-                        BackToLoadout();
                     }
                 }
                 else
@@ -4744,7 +4742,6 @@ public class UIHandler : IDisposable
                     {
                         DB.DecreasePlayerCredits(Player.CSteamID, ability.Ability.BuyPrice);
                         EquipSelectedItem();
-                        BackToLoadout();
                     }
                 }
                 else
@@ -4767,7 +4764,6 @@ public class UIHandler : IDisposable
                     {
                         DB.DecreasePlayerCredits(Player.CSteamID, card.Card.BuyPrice);
                         EquipSelectedItem();
-                        BackToLoadout();
                     }
                 }
                 else
@@ -4790,7 +4786,6 @@ public class UIHandler : IDisposable
                     {
                         DB.DecreasePlayerCredits(Player.CSteamID, glove.Glove.BuyPrice);
                         EquipSelectedItem();
-                        BackToLoadout();
                     }
                 }
                 else
@@ -4828,7 +4823,6 @@ public class UIHandler : IDisposable
                         SendUnlockEmbed(gun.Gun.GunName, gun.Gun.IconLink, cost);
                         DB.DecreasePlayerCoins(Player.CSteamID, cost);
                         EquipSelectedItem();
-                        BackToLoadout();
                     }
                 }
                 else
@@ -4862,7 +4856,6 @@ public class UIHandler : IDisposable
                         SendUnlockEmbed($"{attachment.Attachment.AttachmentName} | {gun.Gun.GunName}", attachment.Attachment.IconLink, cost);
                         DB.DecreasePlayerCoins(Player.CSteamID, cost);
                         EquipSelectedItem();
-                        BackToLoadout();
                     }
                 }
                 else
@@ -4895,7 +4888,6 @@ public class UIHandler : IDisposable
                         SendUnlockEmbed($"{attachment.Attachment.AttachmentName} | {gun.Gun.GunName}", attachment.Attachment.IconLink, cost);
                         DB.DecreasePlayerCoins(Player.CSteamID, cost);
                         EquipSelectedItem();
-                        BackToLoadout();
                     }
                 }
                 else
@@ -4921,7 +4913,6 @@ public class UIHandler : IDisposable
                         SendUnlockEmbed(gunCharm.GunCharm.CharmName, gunCharm.GunCharm.IconLink, cost);
                         DB.DecreasePlayerCoins(Player.CSteamID, cost);
                         EquipSelectedItem();
-                        BackToLoadout();
                     }
                 }
                 else
@@ -4946,7 +4937,6 @@ public class UIHandler : IDisposable
                         SendUnlockEmbed(knife.Knife.KnifeName, knife.Knife.IconLink, cost);
                         DB.DecreasePlayerCoins(Player.CSteamID, cost);
                         EquipSelectedItem();
-                        BackToLoadout();
                     }
                 }
                 else
@@ -4972,7 +4962,6 @@ public class UIHandler : IDisposable
                         SendUnlockEmbed(gadget.Gadget.GadgetName, gadget.Gadget.IconLink, cost);
                         DB.DecreasePlayerCoins(Player.CSteamID, cost);
                         EquipSelectedItem();
-                        BackToLoadout();
                     }
                 }
                 else
@@ -5000,7 +4989,6 @@ public class UIHandler : IDisposable
                         SendUnlockEmbed(perk.Perk.PerkName, perk.Perk.IconLink, cost);
                         DB.DecreasePlayerCoins(Player.CSteamID, cost);
                         EquipSelectedItem();
-                        BackToLoadout();
                     }
                 }
                 else
@@ -5024,8 +5012,6 @@ public class UIHandler : IDisposable
                     {
                         SendUnlockEmbed(killstreak.Killstreak.KillstreakName, killstreak.Killstreak.IconLink, cost);
                         DB.DecreasePlayerCoins(Player.CSteamID, cost);
-                        ReloadSelectedItem();
-                        ReloadLoadoutTab();
                         EquipSelectedItem();
                     }
                 }
@@ -5051,7 +5037,6 @@ public class UIHandler : IDisposable
                         SendUnlockEmbed(deathstreak.Deathstreak.DeathstreakName, deathstreak.Deathstreak.IconLink, cost);
                         DB.DecreasePlayerCoins(Player.CSteamID, cost);
                         EquipSelectedItem();
-                        BackToLoadout();
                     }
                 }
                 else
@@ -5076,7 +5061,6 @@ public class UIHandler : IDisposable
                         SendUnlockEmbed(ability.Ability.AbilityName, ability.Ability.IconLink, cost);
                         DB.DecreasePlayerCoins(Player.CSteamID, cost);
                         EquipSelectedItem();
-                        BackToLoadout();
                     }
                 }
                 else
@@ -5101,7 +5085,6 @@ public class UIHandler : IDisposable
                         SendUnlockEmbed(card.Card.CardName, card.Card.IconLink, cost);
                         DB.DecreasePlayerCoins(Player.CSteamID, cost);
                         EquipSelectedItem();
-                        BackToLoadout();
                     }
                 }
                 else
@@ -5126,7 +5109,6 @@ public class UIHandler : IDisposable
                         SendUnlockEmbed(glove.Glove.GloveName, glove.Glove.IconLink, cost);
                         DB.DecreasePlayerCoins(Player.CSteamID, cost);
                         EquipSelectedItem();
-                        BackToLoadout();
                     }
                 }
                 else

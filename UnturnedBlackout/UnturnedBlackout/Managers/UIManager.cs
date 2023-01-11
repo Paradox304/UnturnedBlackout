@@ -10,6 +10,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using SDG.NetTransport.Loopback;
 using UnityEngine;
 using UnturnedBlackout.Database.Base;
 using UnturnedBlackout.Database.Data;
@@ -717,7 +718,10 @@ public class UIManager
         EffectManager.sendUIEffectText(HUD_KEY, player.TransportConnection, true, "AbilityStatus", player.HasAbilityAvailable ? "READY" : ability.Ability.AbilityInfo.CooldownSeconds.ToString());
     }
 
-    public void UpdateAbilityTimer(GamePlayer player, int seconds, bool isBeingUsed = false) => EffectManager.sendUIEffectText(HUD_KEY, player.TransportConnection, true, "AbilityStatus", isBeingUsed ? $"<color=orange>{seconds}</color>" : seconds.ToString());
+    public void UpdateAbilityTimer(GamePlayer player, int seconds, bool isBeingUsed = false)
+    {
+        EffectManager.sendUIEffectText(HUD_KEY, player.TransportConnection, true, "AbilityStatus", isBeingUsed ? $"<color=orange>{seconds}</color>" : seconds.ToString());
+    }
 
     public void UpdateAbilityReady(GamePlayer player)
     {
@@ -850,7 +854,6 @@ public class UIManager
             if (player.HasAbilityActive && asset.id != player.ActiveLoadout.Ability.Ability.AbilityInfo.ItemID)
                 player.RemoveActiveAbility();
 
-            EffectManager.sendUIEffectText(HUD_KEY, connection, true, "WeaponName", asset.itemName);
             var isPrimarySecondaryMelee = asset.id == (player.ActiveLoadout.PrimarySkin?.SkinID ?? 0) || asset.id == (player.ActiveLoadout.Primary?.Gun?.GunID ?? 0) || asset.id == (player.ActiveLoadout.SecondarySkin?.SkinID ?? 0) || asset.id == (player.ActiveLoadout.Secondary?.Gun?.GunID ?? 0) ||
                                           asset.id == (player.ActiveLoadout.Knife?.Knife?.KnifeID ?? 0);
 
@@ -927,20 +930,13 @@ public class UIManager
             equipment.ServerEquip(page, x, y);
     }
 
-    public void ClearGunUI(ITransportConnection transportConnection)
-    {
-        EffectManager.sendUIEffectText(HUD_KEY, transportConnection, true, "WeaponName", "");
-        EffectManager.sendUIEffectText(HUD_KEY, transportConnection, true, "AmmoNum", " ");
-        EffectManager.sendUIEffectText(HUD_KEY, transportConnection, true, "ReserveNum", " ");
-    }
-
     public void RemoveGunUI(ITransportConnection transportConnection)
     {
-        EffectManager.sendUIEffectText(HUD_KEY, transportConnection, true, "WeaponName", "");
         EffectManager.sendUIEffectText(HUD_KEY, transportConnection, true, "AmmoNum", " ");
         EffectManager.sendUIEffectText(HUD_KEY, transportConnection, true, "ReserveNum", " ");
         EffectManager.sendUIEffectImageURL(HUD_KEY, transportConnection, true, "TacticalIcon", "");
         EffectManager.sendUIEffectImageURL(HUD_KEY, transportConnection, true, "LethalIcon", "");
+        EffectManager.sendUIEffectVisibility(HUD_KEY, transportConnection, true, "AbilityIcon", false);
     }
 
     private void OnMagazineChanged(PlayerEquipment equipment, UseableGun gun, Item oldItem, ItemJar newItem, ref bool shouldAllow)

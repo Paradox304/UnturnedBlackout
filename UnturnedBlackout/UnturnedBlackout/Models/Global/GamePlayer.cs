@@ -942,14 +942,12 @@ public class GamePlayer : IDisposable
     {
         for (var i = seconds; i >= 0; i--)
         {
-            Plugin.Instance.UI.UpdateAbilityTimer(this, seconds, isBeingUsed);
+            Plugin.Instance.UI.UpdateAbilityTimer(this, i, isBeingUsed);
             yield return new WaitForSeconds(1);
         }
 
         if (isBeingUsed)
-        {
             RemoveActiveAbility();
-        }
         else
             SetAbilityAvailable();
     }

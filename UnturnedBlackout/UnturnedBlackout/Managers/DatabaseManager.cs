@@ -2002,7 +2002,7 @@ public class DatabaseManager
                 if (ability.LevelRequirement < 0)
                     continue;
 
-                _ = await new MySqlCommand($"INSERT IGNORE INTO `{ABILITIES}` (`SteamID` , `AbilityID` , `AbilityKills` , `IsBought`) VALUES ({player.CSteamID}, {ability.AbilityID} , 0 , {ability.LevelRequirement == 0});", conn).ExecuteScalarAsync();
+                _ = await new MySqlCommand($"INSERT IGNORE INTO `{PLAYERS_ABILITIES}` (`SteamID` , `AbilityID` , `AbilityKills` , `IsBought`) VALUES ({player.CSteamID}, {ability.AbilityID} , 0 , {ability.LevelRequirement == 0});", conn).ExecuteScalarAsync();
             }
             
             Logging.Debug($"Giving {steamName} the perks");
@@ -2196,127 +2196,6 @@ public class DatabaseManager
                 Logging.Debug($"Player {player.CharacterName} does not exist in the main table after getting the data, don't know what happened here");
                 return;
             }
-            
-            /*Logging.Debug($"Getting all time data for {player.CharacterName} from the all time table");
-            if (PlayerData.TryGetValue(player.CSteamID, out var playerData))
-            {
-                LeaderboardData leaderboardData = new(player.CSteamID, playerData.SteamName, playerData.CountryCode, playerData.HideFlag, playerData.Level, playerData.HasPrime, playerData.Kills, playerData.HeadshotKills, playerData.Deaths);
-                if (!PlayerAllTimeLeaderboardLookup.ContainsKey(player.CSteamID))
-                {
-                    PlayerAllTimeLeaderboardLookup.Add(player.CSteamID, leaderboardData);
-                    PlayerAllTimeKill.Add(leaderboardData);
-                    PlayerAllTimeLevel.Add(leaderboardData);
-                }
-            }
-
-            Logging.Debug($"Getting leaderboard daily data for {player.CharacterName} from the daily table");
-            TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(LOADING_SPACES * 0.65f)), "PREPARING LEADERBOARD DATA..."));
-            rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS_LEADERBOARD_DAILY}` WHERE `SteamID` = {player.CSteamID};", conn).ExecuteReaderAsync();
-            try
-            {
-                while (await rdr.ReadAsync())
-                {
-                    if (!PlayerData.TryGetValue(player.CSteamID, out var data))
-                        continue;
-
-                    if (!int.TryParse(rdr[1].ToString(), out var kills))
-                        continue;
-
-                    if (!int.TryParse(rdr[2].ToString(), out var headshotKills))
-                        continue;
-
-                    if (!int.TryParse(rdr[3].ToString(), out var deaths))
-                        continue;
-
-                    LeaderboardData leaderboardData = new(player.CSteamID, data.SteamName, data.CountryCode, data.HideFlag, data.Level, data.HasPrime, kills, headshotKills, deaths);
-                    if (!PlayerDailyLeaderboardLookup.ContainsKey(player.CSteamID))
-                    {
-                        PlayerDailyLeaderboardLookup.Add(player.CSteamID, leaderboardData);
-                        PlayerDailyLeaderboard.Add(leaderboardData);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Logging.Debug($"Error reading player daily data for {player.CharacterName}");
-                Logger.Log(ex);
-            }
-            finally
-            {
-                rdr.Close();
-            }
-
-            Logging.Debug($"Getting leaderboard weekly data for {player.CharacterName} from the weekly table");
-            rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS_LEADERBOARD_WEEKLY}` WHERE `SteamID` = {player.CSteamID};", conn).ExecuteReaderAsync();
-            try
-            {
-                while (await rdr.ReadAsync())
-                {
-                    if (!PlayerData.TryGetValue(player.CSteamID, out var data))
-                        continue;
-
-                    if (!int.TryParse(rdr[1].ToString(), out var kills))
-                        continue;
-
-                    if (!int.TryParse(rdr[2].ToString(), out var headshotKills))
-                        continue;
-
-                    if (!int.TryParse(rdr[3].ToString(), out var deaths))
-                        continue;
-
-                    LeaderboardData leaderboardData = new(player.CSteamID, data.SteamName, data.CountryCode, data.HideFlag, data.Level, data.HasPrime, kills, headshotKills, deaths);
-                    if (!PlayerWeeklyLeaderboardLookup.ContainsKey(player.CSteamID))
-                    {
-                        PlayerWeeklyLeaderboardLookup.Add(player.CSteamID, leaderboardData);
-                        PlayerWeeklyLeaderboard.Add(leaderboardData);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Logging.Debug($"Error reading player weekly data for {player.CharacterName}");
-                Logger.Log(ex);
-            }
-            finally
-            {
-                rdr.Close();
-            }
-
-            Logging.Debug($"Getting leaderboard seasonal data for {player.CharacterName} from the seasonal table");
-            rdr = (MySqlDataReader)await new MySqlCommand($"SELECT * FROM `{PLAYERS_LEADERBOARD_SEASONAL}` WHERE `SteamID` = {player.CSteamID};", conn).ExecuteReaderAsync();
-            try
-            {
-                while (await rdr.ReadAsync())
-                {
-                    if (!PlayerData.TryGetValue(player.CSteamID, out var data))
-                        continue;
-
-                    if (!int.TryParse(rdr[1].ToString(), out var kills))
-                        continue;
-
-                    if (!int.TryParse(rdr[2].ToString(), out var headshotKills))
-                        continue;
-
-                    if (!int.TryParse(rdr[3].ToString(), out var deaths))
-                        continue;
-
-                    LeaderboardData leaderboardData = new(player.CSteamID, data.SteamName, data.CountryCode, data.HideFlag, data.Level, data.HasPrime, kills, headshotKills, deaths);
-                    if (!PlayerSeasonalLeaderboardLookup.ContainsKey(player.CSteamID))
-                    {
-                        PlayerSeasonalLeaderboardLookup.Add(player.CSteamID, leaderboardData);
-                        PlayerSeasonalLeaderboard.Add(leaderboardData);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Logging.Debug($"Error reading player seasonal data for {player.CharacterName}");
-                Logger.Log(ex);
-            }
-            finally
-            {
-                rdr.Close();
-            }*/
 
             Logging.Debug($"Getting quests for {player.CharacterName}");
             TaskDispatcher.QueueOnMainThread(() => Plugin.Instance.UI.UpdateLoadingBar(player, new('　', (int)(LOADING_SPACES * 0.7f)), "PREPARING QUESTS..."));
@@ -2877,13 +2756,13 @@ public class DatabaseManager
                         continue;
                     }
 
-                    if (!int.TryParse(rdr[3].ToString(), out var abilityKills))
+                    if (!int.TryParse(rdr[2].ToString(), out var abilityKills))
                         continue;
                     
-                    if (!bool.TryParse(rdr[2].ToString(), out var isBought))
+                    if (!bool.TryParse(rdr[3].ToString(), out var isBought))
                         continue;
 
-                    if (!bool.TryParse(rdr[3].ToString(), out var isUnlocked))
+                    if (!bool.TryParse(rdr[4].ToString(), out var isUnlocked))
                         continue;
 
                     if (!abilities.ContainsKey(abilityID))
@@ -5439,16 +5318,16 @@ public class DatabaseManager
         return true;
     }
 
-    public bool UpdatePlayerDeathstreakUnlocked(CSteamID steamID, int abilityID, bool isUnlocked)
+    public bool UpdatePlayerDeathstreakUnlocked(CSteamID steamID, int deathstreakID, bool isUnlocked)
     {
-        if (!Deathstreaks.ContainsKey(abilityID))
-            throw new ArgumentNullException("id", $"Deathstreak with id {abilityID} doesn't exist in the database, while updating unlocked for {steamID}");
+        if (!Deathstreaks.ContainsKey(deathstreakID))
+            throw new ArgumentNullException("id", $"Deathstreak with id {deathstreakID} doesn't exist in the database, while updating unlocked for {steamID}");
 
-        AddQuery($"UPDATE `{PLAYERS_DEATHSTREAKS}` SET `IsUnlocked` = {isUnlocked} WHERE `SteamID` = {steamID} AND `DeathstreakID` = {abilityID};");
+        AddQuery($"UPDATE `{PLAYERS_DEATHSTREAKS}` SET `IsUnlocked` = {isUnlocked} WHERE `SteamID` = {steamID} AND `DeathstreakID` = {deathstreakID};");
         if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
             return false;
 
-        if (!loadout.Deathstreaks.TryGetValue(abilityID, out var playerDeathstreak))
+        if (!loadout.Deathstreaks.TryGetValue(deathstreakID, out var playerDeathstreak))
             return false;
 
         playerDeathstreak.IsUnlocked = isUnlocked;
@@ -5473,6 +5352,21 @@ public class DatabaseManager
 
         loadout.Abilities.Add(abilityID, new(ability, 0, true, false));
         Plugin.Instance.UI.OnUIUpdated(steamID, EUIPage.ABILITY);
+    }
+
+    public void IncreasePlayerAbilityKills(CSteamID steamID, int abilityID, int amount)
+    {
+        if (!Abilities.ContainsKey(abilityID))
+            throw new ArgumentNullException("id", $"Ability with id {abilityID} doesn't exist in the database, while increasing kills for {steamID}");
+
+        AddQuery($"UPDATE `{PLAYERS_ABILITIES}` SET `AbilityKills` = `AbilityKills` + {amount} WHERE `SteamID` = {steamID} AND `AbilityID` = {abilityID};");
+        if (!PlayerLoadouts.TryGetValue(steamID, out var loadout))
+            return;
+
+        if (!loadout.Abilities.TryGetValue(abilityID, out var playerAbility))
+            return;
+
+        playerAbility.AbilityKills += amount;
     }
     
     public bool UpdatePlayerAbilityBought(CSteamID steamID, int abilityID, bool isBought)
