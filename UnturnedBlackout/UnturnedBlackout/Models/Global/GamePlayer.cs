@@ -940,7 +940,7 @@ public class GamePlayer : IDisposable
     
     public IEnumerator CheckAbility(int seconds, bool isBeingUsed)
     {
-        for (var i = seconds; i >= 0; i--)
+        for (var i = seconds; i > 0; i--)
         {
             Plugin.Instance.UI.UpdateAbilityTimer(this, i, isBeingUsed);
             yield return new WaitForSeconds(1);

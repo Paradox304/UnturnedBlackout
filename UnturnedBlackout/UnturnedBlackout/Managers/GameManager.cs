@@ -200,7 +200,7 @@ public class GameManager
         Plugin.Instance.UI.SendLoadingUI(player, false, null, "Syncing Data... (30 seconds)");
         if (!player.IsAdmin)
         {
-            for (var i = 30; i >= 0; i--)
+            for (var i = 30; i > 0; i--)
             {
                 yield return new WaitForSeconds(1f);
             
