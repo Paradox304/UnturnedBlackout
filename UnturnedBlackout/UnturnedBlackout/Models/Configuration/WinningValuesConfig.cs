@@ -19,6 +19,7 @@ public class WinningValuesConfig
     public float PrimeXPBooster { get; set; }
     public float PrimeGunXPBooster { get; set; }
     public float PrimeBPXPBooster { get; set; }
+    public float PrimePointsBooster { get; set; }
 
     public float PremiumBattlepassBooster { get; set; }
     
@@ -38,7 +39,7 @@ public class WinningValuesConfig
         PrimeXPBooster = 0.25f;
         PrimeGunXPBooster = 0.25f;
         PrimeBPXPBooster = 0;
-
+        PrimePointsBooster = 0.2f;
         PremiumBattlepassBooster = 0.2f;
     }
 }

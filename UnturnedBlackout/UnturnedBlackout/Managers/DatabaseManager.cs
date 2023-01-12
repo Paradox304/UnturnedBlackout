@@ -533,6 +533,9 @@ public class DatabaseManager
                     if (overrideStats.ContainsKey(EStat.MOBILITY) || caliberAsset.equipableMovementSpeedMultiplier != 1f)
                         stats.Add(EStat.MOBILITY, overrideStats.TryGetValue(EStat.MOBILITY, out var mobility) ? mobility : caliberAsset.equipableMovementSpeedMultiplier - 1f);
 
+                    if (overrideStats.ContainsKey(EStat.ADS) || caliberAsset.aimDurationMultiplier != 1f)
+                        stats.Add(EStat.ADS, overrideStats.TryGetValue(EStat.ADS, out var ads) ? ads : 1f - caliberAsset.aimDurationMultiplier);
+                    
                     if (attachmentType == EAttachment.MAGAZINE && caliberAsset is ItemMagazineAsset magAsset)
                     {
                         Logging.Debug($"speed: {magAsset.speed}, ammo: {magAsset.amount}");
@@ -670,7 +673,8 @@ public class DatabaseManager
                         { EStat.MOBILITY, overrideStats.TryGetValue(EStat.MOBILITY, out var mobility) ? mobility : Mathf.RoundToInt(gunAsset.equipableMovementSpeedMultiplier * 50) },
                         { EStat.HIPFIRE_ACCURACY, overrideStats.TryGetValue(EStat.HIPFIRE_ACCURACY, out var accuracy) ? accuracy : Mathf.RoundToInt(75f - gunAsset.spreadHip * 100f) },
                         { EStat.FIRE_RATE, overrideStats.TryGetValue(EStat.FIRE_RATE, out var fireRate) ? fireRate : 200 / (gunAsset.firerate == 0 ? 200 : gunAsset.firerate) },
-                        { EStat.RELOAD_SPEED, (100 - overrideStats[EStat.RELOAD_SPEED]) / 2 }
+                        { EStat.RELOAD_SPEED, (100 - overrideStats[EStat.RELOAD_SPEED]) / 2 },
+                        { EStat.HIPFIRE_ACCURACY, overrideStats.TryGetValue(EStat.ADS, out var ads) ? ads : Mathf.RoundToInt(75f - gunAsset.aimInDuration) }
                     };
                     
                     switch (gunType)

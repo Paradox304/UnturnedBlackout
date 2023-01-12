@@ -108,7 +108,7 @@ public class LoadoutGun
         perksCompare = new();
         finalStats = new();
         var attachments = (loadout.Primary == this ? loadout.PrimaryAttachments : loadout.SecondaryAttachments).Select(k => k.Value.Attachment).Where(k => !Gun.DefaultAttachments.Contains(k)).ToList();
-        for (var i = 0; i <= 7; i++)
+        for (var i = 0; i <= 8; i++)
         {
             var stat = (EStat)i;
             switch (stat)
@@ -192,7 +192,7 @@ public class LoadoutGun
         stats = new();
         
         var attachments = (loadout.Primary == this ? loadout.PrimaryAttachments : loadout.SecondaryAttachments).Select(k => k.Value.Attachment).Where(k => !Gun.DefaultAttachments.Contains(k) && k.AttachmentType != attachmentTypeIgnore).ToList();
-        for (var i = 0; i <= 7; i++)
+        for (var i = 0; i <= 8; i++)
         {
             var stat = (EStat)i;
             switch (stat)
@@ -255,7 +255,7 @@ public class LoadoutGun
         
         var attachments = (loadout.Primary == this ? loadout.PrimaryAttachments : loadout.SecondaryAttachments).Select(k => k.Value.Attachment).Where(k => !Gun.DefaultAttachments.Contains(k)).ToList();
         var perks = loadout.Perks.Select(k => k.Value).Where(k => k.Perk.PerkType != perkTypeIgnore).ToList();
-        for (var i = 0; i <= 7; i++)
+        for (var i = 0; i <= 8; i++)
         {
             var stat = (EStat)i;
             switch (stat)

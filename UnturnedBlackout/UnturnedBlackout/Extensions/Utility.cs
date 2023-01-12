@@ -611,6 +611,7 @@ public static class Utility
         EStat.RECOIL_CONTROL => "Recoil",
         EStat.HIPFIRE_ACCURACY => "Accuracy",
         EStat.AMMO => "Ammo",
+        EStat.ADS => "ADS",
         var _ => throw new ArgumentOutOfRangeException(nameof(stat), stat, "EStat not as expected")
     };
 

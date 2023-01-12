@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using UnityEngine;
 using UnturnedBlackout.Enums;
 using UnturnedBlackout.Managers;
 
@@ -63,15 +64,16 @@ public class MatchEndSummary
         var global = Plugin.Instance.DB.ServerOptions;
 
         PendingCredits = MatchXP == 0 ? 0 : MatchXP / data.PointsDivisible + minutesPlayed * data.PointsPerMinutePlayed;
+        PendingCredits = player.Data.HasPrime ? Mathf.FloorToInt(PendingCredits * (1f + data.PrimePointsBooster)) : PendingCredits;
         MatchXPBonus = (int)((Kills > 0 ? MatchXP / (HasWon ? data.BonusXPVictoryDivisible : data.BonusXPDefeatDivisible) : 0) * (1f + player.Data.XPBooster + global.XPBooster + (@event?.XPMultiplier ?? 0f) + (Plugin.Instance.DB.Servers.FirstOrDefault(k => k.IsCurrentServer)?.SurgeMultiplier ?? 0f)));
         if (MatchXPBonus != 0)
             MatchXPBonus += minutesPlayed * data.BonusXPPerMinutePlayed;
 
-        AchievementXPBonus = (int)Math.Floor(MatchXP * player.Data.AchievementXPBooster);
+        AchievementXPBonus = Mathf.FloorToInt(MatchXP * player.Data.AchievementXPBooster);
         OtherXPBonus = (int)(MatchXPBonus * (player.Data.HasPrime ? data.PrimeXPBooster : 0f));
 
         BattlepassXP = (int)(Kills > 0 ? data.BPXPPerMinutePlayed * minutesPlayed * (1f + (HasWon ? data.BPXPVictoryBonus : data.BPXPDefeatBonus)) : 0);
-        BattlepassBonusXP = (int)Math.Floor(BattlepassXP * (player.Data.BPBooster + global.BPBooster + (player.Data.HasPrime ? data.PrimeBPXPBooster : 0f) + (player.Data.HasBattlepass ? data.PremiumBattlepassBooster : 0f)));
+        BattlepassBonusXP = Mathf.FloorToInt(BattlepassXP * (player.Data.BPBooster + global.BPBooster + (player.Data.HasPrime ? data.PrimeBPXPBooster : 0f) + (player.Data.HasBattlepass ? data.PremiumBattlepassBooster : 0f)));
 
         KD = Deaths == 0 ? 0f : Kills / (float)Deaths;
 

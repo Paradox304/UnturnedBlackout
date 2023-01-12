@@ -206,6 +206,13 @@ public class Plugin : RocketPlugin<Config>
             return;
         }
 
+        var gPlayer = Game.GetGamePlayer(instigatorSteamID);
+        if (gPlayer?.CurrentGame == null || gPlayer.CurrentGame.GamePhase != EGamePhase.STARTED)
+        {
+            shouldAllow = false;
+            return;
+        }
+        
         pendingTotalDamage = 20;
     }
 
