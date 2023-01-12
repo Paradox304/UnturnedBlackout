@@ -400,7 +400,7 @@ public abstract class Game : IDisposable
             .Select(k => BarricadeManager.tryGetRegion(k.model.transform, out var x, out var y, out var plant, out var _) ? (k, x, y, plant) : (k, byte.MaxValue, byte.MaxValue, ushort.MaxValue)).ToList()
             .ForEach(k => BarricadeManager.destroyBarricade(k.k, k.Item2, k.Item3, k.Item4));
         
-        foreach (var obj in LevelObjects.objects.Cast<List<LevelObject>>().SelectMany(k => k).Where(k => LevelNavigation.tryGetNavigation(k.transform.position, out var nav) && nav == Location.NavMesh))
+        foreach (var obj in LevelObjects.objects.Cast<List<LevelObject>>().SelectMany(k => k).Where(k => k.transform != null && LevelNavigation.tryGetNavigation(k.transform.position, out var nav) && nav == Location.NavMesh))
         {
             obj.state = obj.asset.getState();
             if (obj.interactable != null)
