@@ -666,7 +666,7 @@ public class DatabaseManager
                     var overrideStats = Utility.GetStatsFromString(rdr[17].ToString());
                     
                     Logging.Debug($"Gun: {gunName}");
-                    Logging.Debug($"Damage Fallof: {gunAsset.damageFalloffRange}, mobility: {gunAsset.equipableMovementSpeedMultiplier}, spread hip: {gunAsset.spreadHip}, fire rate: {gunAsset.firerate}, recoil max x: {gunAsset.recoilMax_x}, recoil max y: {gunAsset.recoilMax_y}");
+                    Logging.Debug($"Damage Fallof: {gunAsset.damageFalloffRange}, mobility: {gunAsset.equipableMovementSpeedMultiplier}, spread hip: {gunAsset.spreadHip}, fire rate: {gunAsset.firerate}, recoil max x: {gunAsset.recoilMax_x}, recoil max y: {gunAsset.recoilMax_y}, aimInDuration: {gunAsset.aimInDuration}");
                     var stats = new Dictionary<EStat, int>
                     {
                         { EStat.RANGE, overrideStats.TryGetValue(EStat.RANGE, out var range) ? range : Mathf.RoundToInt(gunAsset.damageFalloffRange * 100) },
@@ -674,7 +674,7 @@ public class DatabaseManager
                         { EStat.HIPFIRE_ACCURACY, overrideStats.TryGetValue(EStat.HIPFIRE_ACCURACY, out var accuracy) ? accuracy : Mathf.RoundToInt(75f - gunAsset.spreadHip * 100f) },
                         { EStat.FIRE_RATE, overrideStats.TryGetValue(EStat.FIRE_RATE, out var fireRate) ? fireRate : 200 / (gunAsset.firerate == 0 ? 200 : gunAsset.firerate) },
                         { EStat.RELOAD_SPEED, (100 - overrideStats[EStat.RELOAD_SPEED]) / 2 },
-                        { EStat.ADS, overrideStats.TryGetValue(EStat.ADS, out var ads) ? ads : Mathf.RoundToInt(75f - gunAsset.aimInDuration) }
+                        { EStat.ADS, overrideStats.TryGetValue(EStat.ADS, out var ads) ? ads : Mathf.RoundToInt(100f - (gunAsset.aimInDuration * 200f)) }
                     };
                     
                     switch (gunType)
@@ -1926,7 +1926,7 @@ public class DatabaseManager
 
             MySqlCommand cmd =
                 new(
-                    $"INSERT INTO `{PLAYERS}` ( `SteamID` , `SteamName` , `AvatarLink` , `CountryCode` , `MuteExpiry`, `MuteReason`, `Coins` , `Credits`, `Hotkeys` ) VALUES ({player.CSteamID}, @name, '{avatarLink}' , '{countryCode}' , {DateTimeOffset.UtcNow.ToUnixTimeSeconds()} , ' ', {(Config.UnlockAllItems ? 10000000 : 0)} , {(Config.UnlockAllItems ? 10000000 : 0)}, '3,4,5,6,7,8' ) ON DUPLICATE KEY UPDATE `AvatarLink` = '{avatarLink}', `SteamName` = @name" + (countryCode != "NNN" ? $", `CountryCode` = '{countryCode}';" : ";"),
+                    $"INSERT INTO `{PLAYERS}` ( `SteamID` , `SteamName` , `AvatarLink` , `CountryCode` , `MuteExpiry`, `MuteReason`, `Coins` , `Credits`, `Hotkeys` ) VALUES ({player.CSteamID}, @name, '{avatarLink}' , '{countryCode}' , {DateTimeOffset.UtcNow.ToUnixTimeSeconds()} , ' ', {(Config.UnlockAllItems ? 10000000 : 0)} , {(Config.UnlockAllItems ? 10000000 : 1000)}, '3,4,5,6,7,8' ) ON DUPLICATE KEY UPDATE `AvatarLink` = '{avatarLink}', `SteamName` = @name" + (countryCode != "NNN" ? $", `CountryCode` = '{countryCode}';" : ";"),
                     conn);
             
             _ = cmd.Parameters.AddWithValue("@name", steamName.ToUnrich());
@@ -3818,7 +3818,7 @@ public class DatabaseManager
                 var botRewards = new List<BotReward>();
                 
                 // Give all ranked rewards
-                Embed embed = new(null, $"Last Playtest Rankings ({PlayerSeasonalLeaderboard.Count} Players)", null, "15105570", DateTime.UtcNow.ToString("s"), new(Provider.serverName, Provider.configData.Browser.Icon), new(Provider.serverName, "", Provider.configData.Browser.Icon),
+                Embed embed = new(null, $"Seasonal Rankings ({PlayerSeasonalLeaderboard.Count} Players)", null, "15105570", DateTime.UtcNow.ToString("s"), new(Provider.serverName, Provider.configData.Browser.Icon), new(Provider.serverName, "", Provider.configData.Browser.Icon),
                     new Field[] { new($"Ranked:", "", false), new("Percentile:", "", false) }, null, null);
 
                 foreach (var rankedReward in ServerOptions.SeasonalRankedRewards)

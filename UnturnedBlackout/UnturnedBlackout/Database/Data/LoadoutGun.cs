@@ -41,7 +41,7 @@ public class LoadoutGun
     public Dictionary<EStat, int> GetDefaultStats()
     {
         Dictionary<EStat, int> defaultStats = new();
-        for (var i = 0; i <= 7; i++)
+        for (var i = 0; i <= 8; i++)
         {
             var stat = (EStat)i;
             switch (stat)
@@ -120,7 +120,7 @@ public class LoadoutGun
                     if (magazine == null)
                     {
                         finalStats.Add(EStat.AMMO, startingAmmoStat);
-                        return;
+                        break;
                     }
 
                     var finalAmmoStat = magazine.StatMultipliers.TryGetValue(EStat.AMMO, out var ammoValue) ? Mathf.RoundToInt(ammoValue) : startingAmmoStat;
@@ -205,7 +205,7 @@ public class LoadoutGun
                         if (magazine == null)
                         {
                             stats.Add(EStat.AMMO, defaultStats[EStat.AMMO]);
-                            return;
+                            break;
                         }
 
                         var ammoCount = magazine.StatMultipliers.TryGetValue(EStat.AMMO, out var ammoCountValue) ? Mathf.RoundToInt(ammoCountValue) : defaultStats[EStat.AMMO];

@@ -858,7 +858,7 @@ public class GamePlayer : IDisposable
         HasAbilityActive = false;
         HasAbilityAvailable = false;
 
-        if (ActiveLoadout.Ability == null)
+        if (ActiveLoadout.Ability == null || !(CurrentGame.GameEvent?.AllowAbility ?? true))
         {
             Plugin.Instance.UI.RemoveAbilityUI(this);
             return;
@@ -874,7 +874,7 @@ public class GamePlayer : IDisposable
 
     public void StartAbilityTimer()
     {
-        if (ActiveLoadout.Ability == null || CurrentGame.GamePhase != EGamePhase.STARTED)
+        if (ActiveLoadout.Ability == null || CurrentGame.GamePhase != EGamePhase.STARTED || !(CurrentGame.GameEvent?.AllowAbility ?? true))
             return;
         
         AbilityChecker.Stop();
