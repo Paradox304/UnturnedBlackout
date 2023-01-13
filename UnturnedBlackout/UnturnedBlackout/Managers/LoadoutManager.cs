@@ -791,7 +791,7 @@ public class LoadoutManager
         }
 
         // Giving killstreaks to player
-        byte killstreakHotkey = 2;
+        byte killstreakHotkey = 3;
         if (game.GameEvent?.AllowKillstreaks ?? true)
         {
             foreach (var killstreakID in activeLoadout.Killstreaks.Select(killstreak => killstreak.Killstreak.KillstreakInfo.TriggerItemID))

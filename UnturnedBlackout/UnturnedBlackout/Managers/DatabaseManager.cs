@@ -3518,7 +3518,7 @@ public class DatabaseManager
                 rdr.Close();
             }
 
-            Logging.Debug("Adding any players that are not added in daily or weekly leaderboards");
+            Logging.Debug($"Adding any players that are not added in daily or weekly leaderboards, All time: {PlayerAllTimeLeaderboardLookup == null}, Daily Leaderboard: {PlayerDailyLeaderboardLookup == null}, Weekly Leaderboard: {PlayerWeeklyLeaderboard == null}");
             foreach (var data in PlayerData.Values.ToList())
             {
                 if (!PlayerAllTimeLeaderboardLookup.TryGetValue(data.SteamID, out var allTimeData))
