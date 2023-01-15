@@ -70,7 +70,7 @@ public class MatchEndSummary
             MatchXPBonus += minutesPlayed * data.BonusXPPerMinutePlayed;
 
         AchievementXPBonus = Mathf.FloorToInt(MatchXP * player.Data.AchievementXPBooster);
-        OtherXPBonus = Mathf.RoundToInt(MatchXP * (1f + player.Data.XPBooster + global.XPBooster + (@event?.XPMultiplier ?? 0f) + (Plugin.Instance.DB.Servers.FirstOrDefault(k => k.IsCurrentServer)?.SurgeMultiplier ?? 0f)));
+        OtherXPBonus = Mathf.RoundToInt(MatchXP * (player.Data.XPBooster + (player.Data.HasPrime ? data.PrimeXPBooster : 0f) + global.XPBooster + (@event?.XPMultiplier ?? 0f) + (Plugin.Instance.DB.Servers.FirstOrDefault(k => k.IsCurrentServer)?.SurgeMultiplier ?? 0f)));
 
         BattlepassXP = (int)(Kills > 0 ? data.BPXPPerMinutePlayed * minutesPlayed * (1f + (HasWon ? data.BPXPVictoryBonus : data.BPXPDefeatBonus)) : 0);
         BattlepassBonusXP = Mathf.FloorToInt(BattlepassXP * (player.Data.BPBooster + global.BPBooster + (player.Data.HasPrime ? data.PrimeBPXPBooster : 0f) + (player.Data.HasBattlepass ? data.PremiumBattlepassBooster : 0f)));

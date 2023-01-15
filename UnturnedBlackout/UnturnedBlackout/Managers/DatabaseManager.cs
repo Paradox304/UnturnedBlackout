@@ -224,6 +224,9 @@ public class DatabaseManager
    
     public const int LOADING_SPACES = 96;
 
+    
+    // BOT
+    public const string BOT_LINK = "http://213.170.135.137:25510/";
     public DatabaseManager()
     {
         Config = Plugin.Instance.Configuration.Instance;
@@ -3521,22 +3524,32 @@ public class DatabaseManager
             Logging.Debug($"Adding any players that are not added in daily or weekly leaderboards, All time: {PlayerAllTimeLeaderboardLookup == null}, Daily Leaderboard: {PlayerDailyLeaderboardLookup == null}, Weekly Leaderboard: {PlayerWeeklyLeaderboard == null}");
             foreach (var data in PlayerData.Values.ToList())
             {
+                Logging.Debug($"1 {data.SteamName}");
                 if (!PlayerAllTimeLeaderboardLookup.TryGetValue(data.SteamID, out var allTimeData))
                     continue;
                 
+                Logging.Debug("2");
                 if (!PlayerDailyLeaderboardLookup.ContainsKey(data.SteamID))
                 {
+                    Logging.Debug("3");
                     LeaderboardData dailyLeaderboardData = new(data.SteamID, 0, 0, 0, allTimeData);
+                    Logging.Debug("4");
                     PlayerDailyLeaderboard.Add(dailyLeaderboardData);
+                    Logging.Debug("5");
                     PlayerDailyLeaderboardLookup.Add(data.SteamID, dailyLeaderboardData);
+                    Logging.Debug("6");
                     _ = new MySqlCommand($"INSERT INTO `{PLAYERS_LEADERBOARD_DAILY}` ( `SteamID` ) VALUES ( {data.SteamID} );", conn).ExecuteScalar();
                 }
 
                 if (!PlayerWeeklyLeaderboardLookup.ContainsKey(data.SteamID))
                 {
+                    Logging.Debug("7");
                     LeaderboardData weeklyLeaderboardData = new(data.SteamID, 0, 0, 0, allTimeData);
+                    Logging.Debug("8");
                     PlayerWeeklyLeaderboard.Add(weeklyLeaderboardData);
+                    Logging.Debug("9");
                     PlayerWeeklyLeaderboardLookup.Add(data.SteamID, weeklyLeaderboardData);
+                    Logging.Debug("10");
                     _ = new MySqlCommand($"INSERT INTO `{PLAYERS_LEADERBOARD_WEEKLY}` ( `SteamID` ) VALUES ( {data.SteamID} );", conn).ExecuteScalar();
                 }
             }
@@ -3667,7 +3680,7 @@ public class DatabaseManager
                     using WebClient webClient = new();
                     var headers = webClient.Headers;
                     headers.Set(HttpRequestHeader.ContentType, "application/json");
-                    _ = webClient.UploadData($"http://213.32.6.3:27116/leaderboard", bytes);
+                    _ = webClient.UploadData($"{BOT_LINK}leaderboard", bytes);
                 }
                 catch (Exception ex)
                 {
@@ -3774,7 +3787,7 @@ public class DatabaseManager
                     using WebClient webClient = new();
                     var headers = webClient.Headers;
                     headers.Set(HttpRequestHeader.ContentType, "application/json");
-                    _ = webClient.UploadData($"http://213.32.6.3:27116/leaderboard", bytes);
+                    _ = webClient.UploadData($"{BOT_LINK}leaderboard", bytes);
                 }
                 catch (Exception ex)
                 {
@@ -3866,7 +3879,7 @@ public class DatabaseManager
                     using WebClient webClient = new();
                     var headers = webClient.Headers;
                     headers.Set(HttpRequestHeader.ContentType, "application/json");
-                    _ = webClient.UploadData($"http://213.32.6.3:27116/leaderboard", bytes);
+                    _ = webClient.UploadData($"{BOT_LINK}leaderboard", bytes);
                 }
                 catch (Exception ex)
                 {
@@ -4688,7 +4701,7 @@ public class DatabaseManager
                 using WebClient webClient = new();
                 var headers = webClient.Headers;
                 headers.Set(HttpRequestHeader.ContentType, "application/json");
-                _ = webClient.UploadData($"http://213.32.6.3:27116/prime", bytes);
+                _ = webClient.UploadData($"{BOT_LINK}prime", bytes);
             });
         }
 
