@@ -100,6 +100,8 @@ public class GamePlayer : IDisposable
     
     public EPlayerStance PreviousStance { get; set; }
 
+    public bool IsDisposed { get; set; }
+    
     public Coroutine Healer { get; set; }
     public Coroutine RespawnTimer { get; set; }
     public Coroutine VoiceChatChecker { get; set; }
@@ -144,6 +146,7 @@ public class GamePlayer : IDisposable
     public void Dispose()
     {
         Logging.Debug($"Game player for {Data.SteamName} is being disposed. Generation: {GC.GetGeneration(this)}", ConsoleColor.Blue);
+        IsDisposed = true;
         CurrentGame = null;
         Player = null;
         Data = null;
@@ -874,7 +877,7 @@ public class GamePlayer : IDisposable
 
     public void StartAbilityTimer()
     {
-        if (ActiveLoadout.Ability == null || CurrentGame.GamePhase != EGamePhase.STARTED || !(CurrentGame.GameEvent?.AllowAbility ?? true))
+        if (ActiveLoadout.Ability == null || CurrentGame.GamePhase != EGamePhase.STARTED || !(CurrentGame.GameEvent?.AllowAbility ?? true) || IsDisposed)
             return;
         
         AbilityChecker.Stop();

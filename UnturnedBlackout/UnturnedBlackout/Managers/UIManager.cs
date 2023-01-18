@@ -1466,11 +1466,13 @@ public class UIManager
     public void UpdateCTFHUD(List<CTFPlayer> players, CTFTeam changeTeam)
     {
         var team = (ETeam)changeTeam.TeamID == ETeam.BLUE ? "Blue" : "Red";
-        var otherTeamPlayers = players.Where(k => k.Team.TeamID != changeTeam.TeamID);
-        var teamFlagTaker = otherTeamPlayers.FirstOrDefault(k => k.IsCarryingFlag);
+        var teamFlagTaker = players.FirstOrDefault(k => !k.IsDisposed && k.Team.TeamID != changeTeam.TeamID && k.IsCarryingFlag);
 
         foreach (var player in players)
         {
+            if (player.IsDisposed)
+                continue;
+            
             var index = (ETeam)player.Team.TeamID == ETeam.BLUE ? 1 : 0;
 
             EffectManager.sendUIEffectText(CTF_KEY, player.GamePlayer.TransportConnection, true, $"{team}Num{index}", changeTeam.Score.ToString());

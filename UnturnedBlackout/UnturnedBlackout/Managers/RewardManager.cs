@@ -104,7 +104,7 @@ public class RewardManager
                     db.RemovePlayerGunCharm(steamID, Convert.ToUInt16(reward.RewardValue));
                     break;
                 case ERewardType.CARD:
-                    db.RemovePlayerCard(steamID, (int)reward.RewardValue);
+                    db.RemovePlayerCard(steamID, Convert.ToInt32(reward.RewardValue));
                     break;
             }
         }
