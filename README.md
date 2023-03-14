@@ -16,3 +16,6 @@ Everything file related is here:
 https://github.com/Paradox304/UnturnedBlackout/releases/tag/1.0.0
 
 The files have an example DB in which I removed most of the rows, just kept a few to give an example as to how to set it up. The configurations are also there.
+
+Link to the UI files:
+https://github.com/Paradox304/Unturned-Blackout-UI
