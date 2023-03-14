@@ -396,7 +396,10 @@ public abstract class Game : IDisposable
         foreach (var region in ItemManager.regions)
             _ = region.items.RemoveAll(k => LevelNavigation.tryGetNavigation(k.point, out var nav) && nav == Location.NavMesh);
 
-        BarricadeManager.BarricadeRegions.Cast<BarricadeRegion>().SelectMany(k => k.drops).Where(k => LevelNavigation.tryGetNavigation(k.model.transform.position, out var nav) && nav == Location.NavMesh)
+        BarricadeManager.BarricadeRegions
+            .Cast<BarricadeRegion>()
+            .SelectMany(k => k.drops)
+            .Where(k => LevelNavigation.tryGetNavigation(k.model.transform.position, out var nav) && nav == Location.NavMesh)
             .Select(k => BarricadeManager.tryGetRegion(k.model.transform, out var x, out var y, out var plant, out var _) ? (k, x, y, plant) : (k, byte.MaxValue, byte.MaxValue, ushort.MaxValue)).ToList()
             .ForEach(k => BarricadeManager.destroyBarricade(k.k, k.Item2, k.Item3, k.Item4));
         

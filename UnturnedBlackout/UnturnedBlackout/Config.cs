@@ -23,12 +23,12 @@ public class Config : IRocketPluginConfiguration
     
     public void LoadDefaults()
     {
-        DatabaseHost = "136.243.135.46";
-        DatabaseUsername = "u476_0TqwYpW0Pe";
-        DatabaseName = "s476_deathmatch";
-        DatabasePassword = "k8gxtTbytcA5DXlqbn86e@+1";
+        DatabaseHost = "localhost";
+        DatabaseUsername = "username";
+        DatabaseName = "name";
+        DatabasePassword = "pass";
         DatabasePort = "3306";
-        URL = "http://213.32.6.3:27090/";
+        URL = "http://127.0.0.1:27015/"; // Example
         UnlockAllItems = true;
         AllowedToWipeDailyWeekly = true;
         ServerID = 0;
